@@ -1,6 +1,4 @@
-﻿//Given mmd, representing the mmd of this page.
-
-var currentMMDField;
+﻿var currentMMDField;
 //var xpathResult = document.evaluate( xpathExpression, contextNode, namespaceResolver, resultType, result );  
 //More info at: https://developer.mozilla.org/en/Introduction_to_using_XPath_in_JavaScript
 //Mozilla has better documentation, but we're using chromium.
@@ -9,25 +7,26 @@ var currentMMDField;
 
 var defVars = {};
 
-function extractMetadata(mmd) {
-    simplDeserialize(mmd);
-    mmd = mmd.meta_metadata;
-
-    if (mmd.hasOwnProperty('def_var')) {
-        for (var i = mmd.def_var.length - 1; i >= 0; i--) {
-            var thisvar = mmd.def_var[i];
-//            console.log("Setting def_var: " + thisvar.name);
-            if (thisvar.hasOwnProperty('type')) {
-                if(thisvar.type == "node") {
-                    var result = getNodeWithXPath(document, thisvar.xpath);
-                    if(result) {
-                        defVars[thisvar.name] = result;
-//                        console.log("def_var Value: ");
-//                        console.info(result);
-                    }   
-                }
-            }
-        }
+function extractMetadata(url) {	
+	//get the mmd for this page
+	mmd = getDocumentMMD(url);
+	if(mmd != null) {	
+	    simplDeserialize(mmd);
+	    mmd = mmd.meta_metadata;
+	
+	    if (mmd.hasOwnProperty('def_var')) {
+	        for (var i = mmd.def_var.length - 1; i >= 0; i--) {
+	            var thisvar = mmd.def_var[i];
+	            if (thisvar.hasOwnProperty('type')) {
+	                if(thisvar.type == "node") {
+	                    var result = getNodeWithXPath(document, thisvar.xpath);
+	                    if(result) {
+	                        defVars[thisvar.name] = result;
+	                    }   
+	                }
+	            }
+	        }
+       }
     }
 
     var metadata = recursivelyExtractMetadata(mmd, document, null, null);
@@ -38,11 +37,7 @@ function extractMetadata(mmd) {
     var returnVal = {};
     var metadataTag = mmd.hasOwnProperty('type') ? mmd.type : mmd.name;
     returnVal[metadataTag] = metadata;
-
-    //return returnVal;
-    var returnValueString = JSON.stringify(returnVal);
-    //Special use for callbacks into the C# application
-    CallBack.MetadataExtracted(returnValueString);
+    return returnVal;
 }
 
 function recursivelyExtractMetadata(mmd, contextNode, metadata, fieldParserContext) {
