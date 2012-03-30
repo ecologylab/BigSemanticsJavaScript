@@ -6,10 +6,17 @@
 // http://www.w3.org/TR/2004/NOTE-DOM-Level-3-XPath-20040226/DOM3-XPath.html
 
 var defVars = {};
+var extractedMetadata = null;
 
-function extractMetadata(url) {	
-	//get the mmd for this page
-	mmd = getDocumentMMD(url);
+
+function extractMetadataFromUrl(url, callback) {
+
+	chrome.extension.sendRequest({greeting: "mmd", url: url}, function(response) {
+  		callback(extractMetadata(response.mmd)); 
+	});
+}
+
+function extractMetadata(mmd) {	
 	if(mmd != null) {	
 	    simplDeserialize(mmd);
 	    mmd = mmd.meta_metadata;
