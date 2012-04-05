@@ -7,20 +7,34 @@
 
 var defVars = {};
 var extractedMetadata = null;
+var serviceURL = "http://localhost:2107/";
 
+function extractMetadataFromUrl(purl, callback) {
 
-function extractMetadataFromUrl(url, callback) {
-
-	chrome.extension.sendRequest({greeting: "mmd", url: url}, function(response) {
-  		callback(extractMetadata(response.mmd)); 
-	});
+	var request = {lookup_mmd_request: {url: purl}};
+	
+	var xmlhttp = new XMLHttpRequest();
+	xmlhttp.open("POST", serviceURL, true);
+	xmlhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+	//xmlhttp.setRequestHeader("Access-Control-Allow-Origin", "*");
+	
+	xmlhttp.onreadystatechange = function() {//Call a function when the state changes.
+		if(xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+			var response = eval('(' + xmlhttp.responseText + ')');
+			console.log(response['lookup_mmd_response']);
+			callback(extractMetadata(response['lookup_mmd_response']));
+		}
+	}
+	var msg = JSON.stringify(request);
+	//msg.replace('=', "/=");
+	console.log(msg);
+	xmlhttp.send(msg);
 }
 
 function extractMetadata(mmd) {	
 	if(mmd != null) {	
 	    simplDeserialize(mmd);
 	    mmd = mmd.meta_metadata;
-	
 	    if (mmd.hasOwnProperty('def_var')) {
 	        for (var i = mmd.def_var.length - 1; i >= 0; i--) {
 	            var thisvar = mmd.def_var[i];
@@ -38,7 +52,8 @@ function extractMetadata(mmd) {
 
     var metadata = recursivelyExtractMetadata(mmd, document, null, null);
     console.info(metadata);
-    metadata['location'] = window.location.href;
+    metadata['title'] = document.title;
+    metadata['location'] = window.location.href;    
     if (mmd.hasOwnProperty('mm_name'))
         metadata['mm_name'] = mmd.mm_name;
     var returnVal = {};
