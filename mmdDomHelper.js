@@ -22,12 +22,12 @@ function extractMetadataFromUrl(purl, callback) {
 		if(xmlhttp.readyState == 4 && xmlhttp.status == 200) {
 			var response = eval('(' + xmlhttp.responseText + ')');
 			console.log(response['lookup_mmd_response']);
-			callback(extractMetadata(response['lookup_mmd_response']));
+			callback(extractMetadata(response['lookup_mmd_response']), response['lookup_mmd_response']);
 		}
 	}
 	var msg = JSON.stringify(request);
 	//msg.replace('=', "/=");
-	console.log(msg);
+	//console.log(msg);
 	xmlhttp.send(msg);
 }
 
@@ -48,18 +48,21 @@ function extractMetadata(mmd) {
 	            }
 	        }
        }
-    }
+    
 
     var metadata = recursivelyExtractMetadata(mmd, document, null, null);
-    console.info(metadata);
+    //console.info(metadata);
+    
     metadata['title'] = document.title;
-    metadata['location'] = window.location.href;    
+    metadata['location'] = window.location.href;  
+      
     if (mmd.hasOwnProperty('mm_name'))
         metadata['mm_name'] = mmd.mm_name;
     var returnVal = {};
     var metadataTag = mmd.hasOwnProperty('type') ? mmd.type : mmd.name;
-    returnVal[metadataTag] = metadata;
+    returnVal[metadataTag] = metadata;    
     return returnVal;
+   }
 }
 
 function recursivelyExtractMetadata(mmd, contextNode, metadata, fieldParserContext) {
