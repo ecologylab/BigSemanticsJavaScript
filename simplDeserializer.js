@@ -12,7 +12,13 @@ var refCount = 0;
 
 		////console.info("recursing[" + level + "] Parent and currentObj:"); //Too detailed prints.
 		//console.log(parentObj);
-		//console.log(currentObj);
+		console.log(currentObj);
+		
+		if(currentObj != "Object")
+		{
+			return;
+		}
+		
 		if(simplId in currentObj)
 		{
 			//console.info(parentFieldName + " ------------ Adding ref: " + currentObj[simplId] + " [" + ++idCount +"]");
