@@ -1,8 +1,13 @@
 ﻿var currentMMDField;
+//var xpathResult = document.evaluate( xpathExpression, contextNode, namespaceResolver, resultType, result );  
+//More info at: https://developer.mozilla.org/en/Introduction_to_using_XPath_in_JavaScript
+//Mozilla has better documentation, but we're using chromium.
+//Not to worry, we're working with standards here. Both browsers implement the XPath defined in
+// http://www.w3.org/TR/2004/NOTE-DOM-Level-3-XPath-20040226/DOM3-XPath.html
 
 var defVars = {};
 var extractedMetadata = null;
-
+var rawExtraction = true;
 
 /** extractMetadataFromUrl
  * Request the meta-metadata from the MetadataService.
@@ -11,6 +16,8 @@ var extractedMetadata = null;
  * @param callback, callback function(metadata)   
  */
 function extractMetadataFromUrl(purl, callback) {
+	
+	rawExtraction = false;
 	
 	var serviceURL = settings.serviceUrl;
 	
@@ -47,43 +54,53 @@ function extractMetadataFromUrl(purl, callback) {
 	}
 }
 
-function extractMetadata(mmd) {	
+function extractMetadata(mmd) {
 	if(mmd != null) {	
-	    simplDeserialize(mmd);
-	    mmd = mmd.meta_metadata;
-	    if (mmd.hasOwnProperty('def_var')) {
-	        for (var i = mmd.def_var.length - 1; i >= 0; i--) {
-	            var thisvar = mmd.def_var[i];
-	            if (thisvar.hasOwnProperty('type')) {
-	                if(thisvar.type == "node") {
-	                    var result = getNodeWithXPath(document, thisvar.xpath);
-	                    if(result) {
-	                        defVars[thisvar.name] = result;
-	                    }   
+		simplDeserialize(mmd);
+		mmd = mmd.meta_metadata;
+
+		if (mmd.hasOwnProperty('def_var')) {
+			for (var i = mmd.def_var.length - 1; i >= 0; i--) {
+				var thisvar = mmd.def_var[i];
+				//console.log("Setting def_var: " + thisvar.name);
+				if (thisvar.hasOwnProperty('type')) {
+					if(thisvar.type == "node") {
+						var result = getNodeWithXPath(document, thisvar.xpath);
+						if(result) {
+							defVars[thisvar.name] = result;
+							//console.log("def_var Value: ");
+							//console.info(result);
+	                    }
 	                }
 	            }
 	        }
        }
-    
 
-    var metadata = recursivelyExtractMetadata(mmd, document, null, null);
-    
-    var titleField = getMMDField(mmd, "title");
-    titleField.value = document.title;
-    metadata['title'] = titleField;
-    
-    var locationField = getMMDField(mmd, "location");
-    locationField.value = window.location.href;
-    metadata['location'] = locationField;  
-      
-    if (mmd.hasOwnProperty('mm_name'))
-        metadata['mm_name'] = mmd.mm_name;
-
-    var metadataTag = mmd.hasOwnProperty('type') ? mmd.type : mmd.name;
-    metadata['mm_name'] = metadataTag;
-    
-    return metadata;
+	    var metadata = recursivelyExtractMetadata(mmd, document, null, null);
+	    //console.info(metadata);
+	    
+	    if(rawExtraction) {    	
+	    	metadata['location'] = window.location.href;
+	    }
+	    else {
+	    	var titleField = getMMDField(mmd, "title");
+	    	titleField.value = document.title;
+	    	metadata['title'] = titleField;
+	    
+	    	var locationField = getMMDField(mmd, "location");
+	    	locationField.value = window.location.href;
+	    	metadata['location'] = locationField;  
+	    }
+	    
+	    if (mmd.hasOwnProperty('mm_name'))
+			metadata['mm_name'] = mmd.mm_name;
+	
+		var metadataTag = mmd.hasOwnProperty('type') ? mmd.type : mmd.name;
+	    metadata['mm_name'] = metadataTag;
+	    
+	    return metadata;
    }
+   return null;
 }
 
 function recursivelyExtractMetadata(mmd, contextNode, metadata, fieldParserContext) {
@@ -174,13 +191,21 @@ function extractScalar(mmdScalarField, contextNode, metadata, fieldParserContext
                     stringValue = grps[grps.length - 1];
             }
         }
-        
-    	mmdScalarField.value = stringValue;
+
+        if(rawExtraction) {  
+        	if (mmdScalarField.tag != null && mmdScalarField.tag != mmdScalarField.name)
+            	metadata[mmdScalarField.tag] = stringValue;
+       		else
+            	metadata[mmdScalarField.name] = stringValue;
+        }
+        else {        
+    		mmdScalarField.value = stringValue;
     	
-        if (mmdScalarField.tag != null && mmdScalarField.tag != mmdScalarField.name)
-            metadata[mmdScalarField.tag] = mmdScalarField;
-        else
-            metadata[mmdScalarField.name] = mmdScalarField;
+       		if (mmdScalarField.tag != null && mmdScalarField.tag != mmdScalarField.name)
+            	metadata[mmdScalarField.tag] = mmdScalarField;
+       		else
+           		metadata[mmdScalarField.name] = mmdScalarField;
+       }
     }
 }
 
@@ -224,10 +249,10 @@ function extractCollection(mmdCollectionField, contextNode, metadata, fieldParse
         } else { // collection of elements
             var kids = mmdCollectionField.kids;
             if (kids == undefined || kids == null || kids.length == 0) {
+				//console.log("Oops, collection fields do not exist.");
             }
             else {
                 var element = { };
-                                             
                 element = recursivelyExtractMetadata(mmdCollectionField.kids[0].composite, thisNode, element, thisFieldParserContext);
 
                 var newElement = clone(element);
@@ -238,20 +263,25 @@ function extractCollection(mmdCollectionField, contextNode, metadata, fieldParse
         }
     }
 
-
     if (elements.length > 0) 
     {
         var extractedCollection = {};
         //console.log("Metadata Collection: ");
         //console.info(elements);
         
-        
         extractedCollection[mmdCollectionField.child_type] = elements;
         
-        mmdCollectionField.value = extractedCollection;
-        metadata[mmdCollectionField.name] = mmdCollectionField;
-    } else {
-//        console.info("empty collection, not adding the object");
+		if(rawExtraction) {
+        	metadata[mmdCollectionField.name] = extractedCollection;
+        }
+        else {
+        	mmdCollectionField.value = extractedCollection;
+        	metadata[mmdCollectionField.name] = mmdCollectionField;
+        }
+        
+    }
+    else {
+		//console.info("empty collection, not adding the object");
     }
 
     return true;
@@ -279,8 +309,13 @@ function extractComposite(mmdCompositeField, contextNode, metadata, fieldParserC
         var paraNode = getNodeWithXPath(contextNode, mmdCompositeField.xpath);
         var parsedPara = parseHypertextParaFromNode(paraNode);
         
-        mmdCompositeField.value = parsedPara;
-        metadata[mmdCompositeField.name] = mmdCompositeField;
+        if(rawExtraction) {
+        	metadata[mmdCompositeField.name] = parsedPara;
+        }
+        else {
+        	mmdCompositeField.value = parsedPara;
+        	metadata[mmdCompositeField.name] = mmdCompositeField;
+        }
         return true;
     }
     
@@ -296,8 +331,13 @@ function extractComposite(mmdCompositeField, contextNode, metadata, fieldParserC
 //        console.log("Composite Recursive Result ---------- : ");
 //        console.info(compositeMetadata);
 
-		mmdCompositeField.value = compositeMetadata
-        metadata[mmdCompositeField.name] = mmdCompositeField;
+		if(rawExtraction) {
+        	metadata[mmdCompositeField.name] = compositeMetadata;
+        }
+        else {
+        	mmdCompositeField.value = compositeMetadata
+        	metadata[mmdCompositeField.name] = mmdCompositeField;
+        }
     } else {
 //        console.log("Composite Extraction is empty");
     }
@@ -528,4 +568,3 @@ function getMMDField(mmd, fieldName) {
         }		
 	}
 }
-

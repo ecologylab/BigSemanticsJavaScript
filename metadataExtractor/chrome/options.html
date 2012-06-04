@@ -27,6 +27,30 @@
 		
 		var urlBox = document.getElementById("serviceUrl");
 		   	//urlBox.value = options.serviceUrl;
+		   	
+		/*
+		if (options.metadataInjection == "raw") {
+	   		var radio = document.getElementById("rawMetadata");
+		   	radio.checked = true;
+		}
+		else if (options.metadataInjection == "fields") {
+	   		var radio = document.getElementById("metadataFields");
+		   	radio.checked = true;
+		}
+		*/
+		
+		var checkbox = document.getElementById("injectAttribute");	
+		if (options.attributeInjection == "true")		   	
+		   	checkbox.checked = true;
+		else
+			checkbox.checked = false;
+			
+		var checkbox = document.getElementById("injectSelection");	
+		if (options.selectionInjection == "true")		   	
+		   	checkbox.checked = true;
+		else
+			checkbox.checked = false;
+		   
 		
 		var checkbox = document.getElementById("debugMmd");	
 		if (options.debugMmd == "true")		   	
@@ -72,6 +96,33 @@
 		}		
 	}
 	
+	function updateInjection() {
+		/*
+		var fields = document.getElementById("metadataFields").checked;
+		var raw = document.getElementById("rawMetadata").checked;
+
+		
+		if (fields) {
+		   	localStorage["metadataInjection"] = "fields";
+		}
+		else if(raw) {
+			localStorage["metadataInjection"] = "raw";
+		}
+		*/
+			
+		var attribute = document.getElementById("injectAttribute").checked;
+		if (attribute)
+		   	localStorage["attributeInjection"] = "true";
+		else
+			localStorage["attributeInjection"] = "false";			
+		
+		var selection = document.getElementById("injectSelection").checked;
+		if (selection)
+		   	localStorage["selectionInjection"] = "true";
+		else
+			localStorage["selectionInjection"] = "false";
+	}
+	
 	function updateDebug() {				
 		var debugMmd = document.getElementById("debugMmd").checked;
 		var debugMetadata = document.getElementById("debugMetadata").checked;
@@ -107,9 +158,16 @@
 		
 		localStorage["service"] = "ecologyLab";	
 	   	localStorage["serviceUrl"] = "http://localhost:2107/";	
+	   	
+	   	localStorage["metadataInjection"] = "raw";
+	   	localStorage["attributeInjection"] = "true";
+	   	localStorage["selectionInjection"] = "true";
+	   	
 	   	localStorage["debugMmd"] = "false";
 	   	localStorage["debugMetadata"] = "false";
-	   	localStorage["metadataInjection"] = "raw";
+	   	
+	   	setOptions();
+	   	
 	}	
 	</script>
 	
@@ -141,7 +199,7 @@
 		h3 {
 			color: black;
 			font-size: 1.2em;
-			margin-bottom: 0.5em;
+			margin-bottom: 0.7em;
 		}
 		
 		.checkbox label, .radio label {
@@ -249,6 +307,10 @@ input[type='radio']:enabled:hover {
 	padding-left: 12px;
 }
 
+.subOption {
+	padding-left: 16px;
+}
+
 .sideBar {
 	
 	width: 120px;
@@ -258,7 +320,7 @@ input[type='radio']:enabled:hover {
 }
 
 .center {
-	width: 600px;
+	width: 400px;
 	float:left;
 	margin-left: 16px;
 }
@@ -289,7 +351,7 @@ label {
 
 	<h1> Metadata Extractor Options</h1>
 	
-	<div id="serviceOption" class="option">
+	<div id="serviceOptions" class="option">
 		<h2>Meta-Metadata Repository Service</h2>
 			
 		<label>
@@ -314,17 +376,54 @@ label {
 			</div>
 	</div>
 	
+	<div id="injectionOptions" class="option">
+		<h2>Metadata Injection for Drag and Drop</h2>
+		
+		<!--
+		<div class="subOption">
+			
+			<h3>What to Inject</h3>
+			
+				<label>
+			       	<input id="metadataFields" type="radio" name="injection" onchange="updateInjection();">
+			    	<span>Inject metadata as MetadataFields</span>
+			    </label>
+				<div class="spacer"></div>
+				
+				<label>
+			       	<input id="rawMetadata" type="radio" name="injection" onchange="updateInjection();">
+			    	<span>Inject metadata as a simple key/value object</span>
+			    </label>
+			
+			<h3>Where to Inject</h3>
+		-->
+				<label>
+			        <input id="injectAttribute" type="checkbox" onchange="updateInjection();">
+			       	<span>Inject 'metadata' attribute into DOM tags</span>
+			   	</label>
+			   	<div class="spacer"></div>
+			   	
+			   	<label>
+			        <input id="injectSelection" type="checkbox" onchange="updateInjection();">
+			       	<span>Inject 'metadata' into selected ranges</span>
+			   	</label>
+		<!--	   	
+		</div>
+		-->
+	   	
+	</div>
+	
 	<div id="debugOptions" class="option">
 		<h2>Debug Statements</h2>
 		
 		<label>
-	        <input id="debugMmd" type="checkbox" value="mmd" onchange="updateDebug();">
+	        <input id="debugMmd" type="checkbox" onchange="updateDebug();">
 	       	<span>Recieved meta-metadata object from repository service</span>
 	   	</label>
 	   	<div class="spacer"></div>
 	   	
 	   	<label>
-	        <input id="debugMetadata" type="checkbox" value="md" onchange="updateDebug();">
+	        <input id="debugMetadata" type="checkbox" onchange="updateDebug();">
 	       	<span>Extracted metadata object</span>
 	   	</label>
 	</div>

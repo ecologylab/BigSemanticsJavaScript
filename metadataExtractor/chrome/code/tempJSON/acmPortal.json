@@ -1,0 +1,179 @@
+{
+    "acm_portal": {
+        "location": "ft_gateway.cfm?id=1871580&ftid=842670&dwn=1&CFID=62345601&CFTOKEN=75803258",
+        "authors": {
+            "author": [
+                {
+                    "location": "author_page.cfm?id=81100203284&coll=DL&dl=ACM&trk=0&cfid=62345601&cftoken=75803258",
+                    "title": "Andruid Kerne",
+                    "affiliation": "Texas A&M University, College Station, TX, USA"
+                },
+                {
+                    "location": "author_page.cfm?id=81472648061&coll=DL&dl=ACM&trk=0&cfid=62345601&cftoken=75803258",
+                    "title": "Yin Qu",
+                    "affiliation": "Texas A&M University, College Station, TX, USA"
+                },
+                {
+                    "location": "author_page.cfm?id=81472640485&coll=DL&dl=ACM&trk=0&cfid=62345601&cftoken=75803258",
+                    "title": "Andrew M. Webb",
+                    "affiliation": "Texas A&M University, College Station, TX, USA"
+                },
+                {
+                    "location": "author_page.cfm?id=81337488741&coll=DL&dl=ACM&trk=0&cfid=62345601&cftoken=75803258",
+                    "title": "Sashikanth Damaraju",
+                    "affiliation": "Texas A&M University, College Station, TX, USA"
+                },
+                {
+                    "location": "author_page.cfm?id=81472654798&coll=DL&dl=ACM&trk=0&cfid=62345601&cftoken=75803258",
+                    "title": "Nic Lupfer",
+                    "affiliation": "Texas A&M University, College Station, TX, USA"
+                },
+                {
+                    "location": "author_page.cfm?id=81472647047&coll=DL&dl=ACM&trk=0&cfid=62345601&cftoken=75803258",
+                    "title": "Abhinav Mathur",
+                    "affiliation": "Texas A&M University, College Station, TX, USA"
+                }
+            ]
+        },
+        "source": {
+            "location": "table of contents",
+            "title": "CIKM '10 Proceedings of the 19th ACM international conference on Information and knowledge management           \t\t           table of contents",
+            "authors": {
+                "undefined": [
+                    {
+                        "location": "author_page.cfm?id=81100080207&CFID=62345601&CFTOKEN=75803258",
+                        "title": "Jimmy Huang"
+                    },
+                    {
+                        "location": "inst_page.cfm?id=1028656&CFID=62345601&CFTOKEN=75803258",
+                        "title": "York University, Canada"
+                    },
+                    {
+                        "location": "author_page.cfm?id=81351604903&CFID=62345601&CFTOKEN=75803258",
+                        "title": "Nick Koudas"
+                    },
+                    {
+                        "location": "inst_page.cfm?id=1026626&CFID=62345601&CFTOKEN=75803258",
+                        "title": "University of Toronto, Canada"
+                    }
+                ]
+            },
+            "year": "2010",
+            "isbn": "ISBN: 978-1-4503-0099-5 Order Number: 605100 doi>10.1145/1871437.1871580"
+        },
+        "abstract": "Collecting, organizing, and thinking about diverse information resources is the keystone of meaningful digital information experiences, from research to education to leisure. Metadata semantics are crucial for organizing collections, yet their structural diversity exacerbates problems of obtaining and manipulating them, strewing end users and application developers amidst the shadows of a proverbial tower of Babel. We introduce meta-metadata, a language and software architecture addressing a metadata semantics lifecycle: (1) data structures for representation of metadata in programs; (2) metadata extraction from information resources; (3) semantic actions that connect metadata to collection representation applications; and (4) rules for presentation to users. The language enables power users to author metadata semantics wrappers that generalize template-based information sources. The architecture supports development of independent collection representation applications that reuse wrappers. The initial meta-metadata repository of information source wrappers includes Google, Flickr, Yahoo, IMDb, Wikipedia, and the ACM Portal. Case studies validate the approach.",
+        "references": {
+            "scholarly_article": [
+                {
+                    "title": "",
+                    "location": ""
+                },
+                {
+                    "title": "",
+                    "location": "citation.cfm?id=900077&CFID=62345601&CFTOKEN=75803258"
+                },
+                {
+                    "title": "",
+                    "location": "citation.cfm?id=1376746&CFID=62345601&CFTOKEN=75803258"
+                },
+                {
+                    "title": "",
+                    "location": ""
+                },
+                {
+                    "title": "",
+                    "location": "citation.cfm?id=1255219&CFID=62345601&CFTOKEN=75803258"
+                },
+                {
+                    "title": "",
+                    "location": "citation.cfm?id=1378894&CFID=62345601&CFTOKEN=75803258"
+                },
+                {
+                    "title": "",
+                    "location": "citation.cfm?id=671854&CFID=62345601&CFTOKEN=75803258"
+                },
+                {
+                    "title": "",
+                    "location": "citation.cfm?id=1166273&CFID=62345601&CFTOKEN=75803258"
+                },
+                {
+                    "title": "",
+                    "location": ""
+                },
+                {
+                    "title": "",
+                    "location": "citation.cfm?id=1378937&CFID=62345601&CFTOKEN=75803258"
+                },
+                {
+                    "title": "",
+                    "location": "citation.cfm?id=1242672&CFID=62345601&CFTOKEN=75803258"
+                },
+                {
+                    "title": "",
+                    "location": ""
+                },
+                {
+                    "title": "",
+                    "location": ""
+                },
+                {
+                    "title": "",
+                    "location": "citation.cfm?id=1416955&CFID=62345601&CFTOKEN=75803258"
+                },
+                {
+                    "title": "",
+                    "location": ""
+                },
+                {
+                    "title": "",
+                    "location": "citation.cfm?id=1410152&CFID=62345601&CFTOKEN=75803258"
+                },
+                {
+                    "title": "",
+                    "location": "citation.cfm?id=1600212&CFID=62345601&CFTOKEN=75803258"
+                },
+                {
+                    "title": "",
+                    "location": "citation.cfm?id=1321475&CFID=62345601&CFTOKEN=75803258"
+                },
+                {
+                    "title": "",
+                    "location": "citation.cfm?id=1458150&CFID=62345601&CFTOKEN=75803258"
+                },
+                {
+                    "title": "",
+                    "location": "citation.cfm?id=504245&CFID=62345601&CFTOKEN=75803258"
+                },
+                {
+                    "title": "",
+                    "location": ""
+                },
+                {
+                    "title": "",
+                    "location": ""
+                },
+                {
+                    "title": "",
+                    "location": ""
+                },
+                {
+                    "title": "",
+                    "location": ""
+                }
+            ]
+        },
+        "citations": {
+            "scholarly_article": []
+        },
+        "classifications": {
+            "tag": []
+        },
+        "keywords": {
+            "tag": []
+        },
+        "mixins": {
+            "metadata": []
+        }
+    }
+}
+

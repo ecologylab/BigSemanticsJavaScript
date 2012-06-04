@@ -9,9 +9,12 @@ function getOptions() {
 	var options = 	{
       					service: localStorage["service"],
       					serviceUrl: localStorage["serviceUrl"],
+      					metadataInjection: localStorage["metadataInjection"],
+      					attributeInjection: localStorage["attributeInjection"],
+      					selectionInjection: localStorage["selectionInjection"],
       					debugMmd: localStorage["debugMmd"],
-      					debugMetadata: localStorage["debugMetadata"],
-      					metadataInjection: localStorage["metadataInjection"]
+      					debugMetadata: localStorage["debugMetadata"]
+      					
       				};
      return options;
 }
@@ -28,6 +31,22 @@ function loadOptions() {
 	   	localStorage["serviceUrl"] = "http://localhost:2107/";
 	}
 	
+	
+	
+	if (!options.metadataInjection) {
+	   	localStorage["metadataInjection"] = "raw";
+	}	
+	
+	if (!options.attributeInjection) {
+	   	localStorage["attributeInjection"] = "true";
+	}
+	
+	if (!options.selectionInjection) {
+	   	localStorage["selectionInjection"] = "true";
+	}
+	
+	
+	
 	if (!options.debugMmd) {
 	   	localStorage["debugMmd"] = "false";
 	}
@@ -36,9 +55,7 @@ function loadOptions() {
 	   	localStorage["debugMetadata"] = "false";
 	}
 	
-	if (!options.metadataInjection) {
-	   	localStorage["metadataInjection"] = "raw";
-	}	  	
+	  	
 }
 
 loadOptions();

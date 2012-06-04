@@ -1,0 +1,4 @@
+content  helloworld   jar:chrome/ helloworld.jar!/content/
+overlay  chrome://browser/content/browser.xul  chrome://helloworld/content/overlay.xul
+style  chrome://global/content/customizeToolbar.xul chrome:// helloworld/skin/style.css 
+ (used when toolbars and toolbarbuttons are applied)

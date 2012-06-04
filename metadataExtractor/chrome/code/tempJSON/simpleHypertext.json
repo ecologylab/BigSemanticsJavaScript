@@ -1,0 +1,17 @@
+﻿{
+    "hypertext_para": {
+        "runs": [
+            {
+                "text_run": {
+                    "text": "This is the first part of the string. We will end this sentence with a link "
+                }
+            },
+            {
+                "link_run": {
+                    "text": "like so",
+                    "location": "http://www.google.com/"
+                }
+            }
+        ]
+    }
+}

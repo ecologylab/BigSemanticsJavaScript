@@ -2,6 +2,7 @@
 var hasMetadata = false;
 var metadata = {};
 var settings = {};
+var selectionListener = false;
 
 // Retrieve the extension settings from the the background page.
 chrome.extension.sendRequest({loadOptions: "all"}, function(response) {
@@ -10,15 +11,20 @@ chrome.extension.sendRequest({loadOptions: "all"}, function(response) {
 
 setTimeout(window.onload, 1000);
 
-window.addEventListener("mouseup", function(event) { 
-   injectContainer();
-});
-
 /** extractMetadata
  *  extract the metadata for this webpage and respond with the metadata and tabId
  */
 window.onload = function() {
 	if(!hasMetadata && settings != null) {
+		
+		if(settings.selectionInjection == "true" && !selectionListener) {
+			window.addEventListener("mouseup", function(event) { 
+			   injectContainer();
+			});
+			selectionListener = true;
+		}
+		
+		
 		hasMetadata = true;
 		extractMetadataFromUrl(document.URL, function(data){
 		    metadata = data;
@@ -27,8 +33,9 @@ window.onload = function() {
 				console.log("Extracted metadata object:");
 				console.log(metadata);
 			}
-					
-			tagEachElementWithContainer();
+			
+			if(settings.attributeInjection == "true")
+				tagEachElementWithContainer();
 			
 		    if(metadata == null) {
 		    	hasMetadata = false;

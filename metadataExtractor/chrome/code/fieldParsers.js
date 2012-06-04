@@ -1,4 +1,3 @@
-
 function regex_split(regex, input, limit) {
     var rst = [];
     if (input != undefined && input != null && input.length > 0) {

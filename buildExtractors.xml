@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<project name="metadataExtractor" basedir="." >
+
+	<!-- Chrome Plugin Extraction -->
+	<copy  todir="./metadataExtractor/chrome/code/">
+		<fileset dir="./simpl"/>
+	</copy>
+	
+	<copy  todir="./metadataExtractor/chrome/code/">
+		<fileset dir="./semantics"/>
+	</copy>
+	
+	
+	<!-- C# Extraction -->
+	<copy  todir="./metadataExtractor/cSharp/">
+		<fileset dir="./simpl"/>
+	</copy>
+	
+	<copy  todir="./metadataExtractor/cSharp/">
+		<fileset dir="./semantics"/>
+	</copy>
+
+</project>
