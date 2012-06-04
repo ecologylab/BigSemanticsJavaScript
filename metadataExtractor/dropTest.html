@@ -1,0 +1,40 @@
+<html>
+	<head>
+		<script>
+			function handleDrop(event) {
+				console.log(event);
+				
+				var
+				text         = "text/",
+				textType     = text+"plain",
+				htmlType     = text+"html",
+				uriType      = text+"uri-list",
+				mozUrlType   = text+"x-moz-url";
+				
+				var dt = event.dataTransfer;
+
+				var
+				textData = dt.getData(textType),
+				htmlData = dt.getData(htmlType),
+				uriList  = dt.getData(uriType),
+				mozUrl   = dt.getData(mozUrlType);
+				
+				console.log(textData);
+				console.log(htmlData);
+				console.log(uriList);
+				console.log(mozUrl);
+			}
+			
+			document.ondragover = function(event) { 
+				event.preventDefault();
+			};
+			
+			document.ondrop = function(event) { 
+			   handleDrop(event);
+			};
+		</script>
+	</head>
+	<body>
+		
+	</body>
+</html>
