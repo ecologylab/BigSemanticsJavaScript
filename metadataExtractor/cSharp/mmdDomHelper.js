@@ -8,16 +8,19 @@
 var defVars = {};
 var extractedMetadata = null;
 var rawExtraction = true;
+var doc = null;
 
 /** extractMetadataFromUrl
  * Request the meta-metadata from the MetadataService.
  * Once the meta-metadata is received perform the extraction on the document.
  * @param purl, URL of the target document
+ * @param targetDoc, the target DOM on which to extract the metadata
  * @param callback, callback function(metadata)   
  */
-function extractMetadataFromUrl(purl, callback) {
+function extractMetadataFromUrl(purl, targetDoc, callback) {
 	
 	rawExtraction = false;
+	doc = targetDoc;
 	
 	var serviceURL = settings.serviceUrl;
 	
@@ -43,7 +46,7 @@ function extractMetadataFromUrl(purl, callback) {
 					console.log(response['lookup_mmd_response']);
 				}
 				
-				callback(extractMetadata(response['lookup_mmd_response']));
+				callback(extractMetadata(doc, response['lookup_mmd_response']));
 			}
 		}
 		var msg = JSON.stringify(request);
@@ -54,7 +57,9 @@ function extractMetadataFromUrl(purl, callback) {
 	}
 }
 
-function extractMetadata(mmd) {
+function extractMetadata(targetDoc, mmd) {
+	doc = targetDoc;
+	
 	if(mmd != null) {	
 		simplDeserialize(mmd);
 		mmd = mmd.meta_metadata;
@@ -65,7 +70,7 @@ function extractMetadata(mmd) {
 				//console.log("Setting def_var: " + thisvar.name);
 				if (thisvar.hasOwnProperty('type')) {
 					if(thisvar.type == "node") {
-						var result = getNodeWithXPath(document, thisvar.xpath);
+						var result = getNodeWithXPath(doc, thisvar.xpath);
 						if(result) {
 							defVars[thisvar.name] = result;
 							//console.log("def_var Value: ");
@@ -76,19 +81,19 @@ function extractMetadata(mmd) {
 	        }
        }
 
-	    var metadata = recursivelyExtractMetadata(mmd, document, null, null);
+	    var metadata = recursivelyExtractMetadata(mmd, doc, null, null);
 	    //console.info(metadata);
 	    
 	    if(rawExtraction) {    	
-	    	metadata['location'] = window.location.href;
+	    	metadata['location'] = doc.location.href;
 	    }
 	    else {
 	    	var titleField = getMMDField(mmd, "title");
-	    	titleField.value = document.title;
+	    	titleField.value = doc.title;
 	    	metadata['title'] = titleField;
 	    
 	    	var locationField = getMMDField(mmd, "location");
-	    	locationField.value = window.location.href;
+	    	locationField.value = doc.location.href;
 	    	metadata['location'] = locationField;  
 	    }
 	    
@@ -113,17 +118,17 @@ function recursivelyExtractMetadata(mmd, contextNode, metadata, fieldParserConte
     }
 
     if (contextNode == undefined || contextNode == null)
-        contextNode = document;
+        contextNode = doc;
 
     for (var mmdFieldIndex = 0; mmdFieldIndex < mmd.kids.length; mmdFieldIndex++) {
         var mmdField = mmd.kids[mmdFieldIndex];
         currentMMDField = mmdField;
-//        console.log("Iterating to Next mmdField");
-//        console.log(mmdField);
+		//console.log("Iterating to Next mmdField");
+		//console.log(mmdField);
 
         var defVarNode;
         if (mmdField.scalar != null) {
-//            console.log("recursivelyExtractMetadata(): Setting scalar: " + mmdField.scalar.name);
+			//console.log("recursivelyExtractMetadata(): Setting scalar: " + mmdField.scalar.name);
             if (mmdField.scalar.hasOwnProperty('context_node')) {
                 defVarNode = defVars[mmdField.scalar.context_node];
                 if (defVarNode)
@@ -133,7 +138,7 @@ function recursivelyExtractMetadata(mmd, contextNode, metadata, fieldParserConte
         }
 
         if (mmdField.collection != null) {
-//            console.log("recursivelyExtractMetadata(): Setting Collection: " + mmdField.collection.name);
+			//console.log("recursivelyExtractMetadata(): Setting Collection: " + mmdField.collection.name);
             if (mmdField.collection.hasOwnProperty('context_node')) {
                 defVarNode = defVars[mmdField.collection.context_node];
                 if (defVarNode)
@@ -143,7 +148,7 @@ function recursivelyExtractMetadata(mmd, contextNode, metadata, fieldParserConte
         }
 
         if (mmdField.composite != null) {
-//            console.log("recursivelyExtractMetadata(): Setting Composite: " + mmdField.composite.name);
+			//console.log("recursivelyExtractMetadata(): Setting Composite: " + mmdField.composite.name);
             if (mmdField.composite.hasOwnProperty('context_node')) {
                 defVarNode = defVars[mmdField.composite.context_node];
                 if (defVarNode)
@@ -152,12 +157,12 @@ function recursivelyExtractMetadata(mmd, contextNode, metadata, fieldParserConte
             extractComposite(mmdField.composite, contextNode, metadata, fieldParserContext);
         }
 
-//        console.log("Recursive extraction result: ");
-//        console.info(metadata);
+		//console.log("Recursive extraction result: ");
+		//console.info(metadata);
     }
 
-//    console.log("Returning Metadata: ");
-//    console.info(metadata);
+	//console.log("Returning Metadata: ");
+	//console.info(metadata);
     return metadata;
 }
 
@@ -527,7 +532,7 @@ function isEmpty(obj) {
 */
 function getScalarWithXPath(contextNode, xpath)
 {
-    return document.evaluate(xpath, contextNode, null, XPathResult.STRING_TYPE, null).stringValue;
+    return doc.evaluate(xpath, contextNode, null, XPathResult.STRING_TYPE, null).stringValue;
 }
 
 /**
@@ -544,7 +549,7 @@ function getNodeWithXPath(contextNode, xpath)
 }
 
 function getNodeListWithXPath(contextNode, xpath) {
-    return document.evaluate(xpath, contextNode, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
+    return doc.evaluate(xpath, contextNode, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
 
 }
 

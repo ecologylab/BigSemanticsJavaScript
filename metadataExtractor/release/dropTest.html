@@ -2,6 +2,7 @@
 	<head>
 		<script>
 			function handleDrop(event) {
+				event.preventDefault();
 				console.log(event);
 				
 				var
@@ -9,6 +10,7 @@
 				textType     = text+"plain",
 				htmlType     = text+"html",
 				uriType      = text+"uri-list",
+				jsonType	 = "application/json",
 				mozUrlType   = text+"x-moz-url";
 				
 				var dt = event.dataTransfer;
@@ -17,12 +19,14 @@
 				textData = dt.getData(textType),
 				htmlData = dt.getData(htmlType),
 				uriList  = dt.getData(uriType),
+				jsonData = dt.getData(jsonType),
 				mozUrl   = dt.getData(mozUrlType);
 				
-				console.log(textData);
-				console.log(htmlData);
-				console.log(uriList);
-				console.log(mozUrl);
+				console.log("text = " + textData);
+				console.log("html = " + htmlData);
+				console.log("uris = " + uriList);
+				console.log("mozu = " + mozUrl);
+				console.log("json = " + jsonData);
 			}
 			
 			document.ondragover = function(event) { 
@@ -30,6 +34,7 @@
 			};
 			
 			document.ondrop = function(event) { 
+			event.preventDefault();
 			   handleDrop(event);
 			};
 		</script>

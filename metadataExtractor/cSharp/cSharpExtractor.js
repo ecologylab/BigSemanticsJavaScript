@@ -3,7 +3,7 @@ function extractMetadataWithCallback(mmd) {
 	
 	var returnVal = {};
 	   
-	var extractedMetadata = extractMetadata(mmd);
+	var extractedMetadata = extractMetadata(document, mmd);
 	returnVal[extractedMetadata['mm_name']] = extractedMetadata;	
 	
 	var returnValueString = JSON.stringify(returnVal);

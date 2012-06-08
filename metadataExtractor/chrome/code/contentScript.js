@@ -26,7 +26,7 @@ window.onload = function() {
 		
 		
 		hasMetadata = true;
-		extractMetadataFromUrl(document.URL, function(data){
+		extractMetadataFromUrl(document.URL, document, function(data){
 		    metadata = data;
 
 		    if(settings.debugMetadata == "true") {
