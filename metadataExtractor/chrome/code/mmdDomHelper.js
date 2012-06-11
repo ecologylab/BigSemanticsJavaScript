@@ -52,8 +52,30 @@ function extractMetadataFromUrl(purl, targetDoc, callback) {
 		var msg = JSON.stringify(request);
 		xmlhttp.send(msg);
 	}
-	else if(settings.service == "ecologylab") {
+	else if(settings.service == "ecologyLab") {
+		serviceURL += purl;
 		
+		var xmlhttp = new XMLHttpRequest();
+		xmlhttp.open("GET", serviceURL, true);
+		xmlhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+		
+		xmlhttp.onreadystatechange = function() {
+			
+			//Call a function when the state changes.
+			if(xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+				
+				var response = jQuery.parseJSON(xmlhttp.responseText);
+				
+				if(settings.debugMmd == "true") {
+					console.log("Meta-metadata object:");
+					console.log(response);
+				}
+				
+				callback(extractMetadata(doc, response));
+			}
+		}
+		var msg = JSON.stringify(request);
+		xmlhttp.send(msg);		
 	}
 }
 

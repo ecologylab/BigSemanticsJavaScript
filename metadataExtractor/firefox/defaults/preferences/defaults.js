@@ -1,4 +1,4 @@
-pref("extractor.service", "infoComp");
-pref("extractor.serviceUrl", "http://localhost:2107/");
-pref("extractor.metadataInjection", "raw");
-pref("extractor.dragInjection", "true");
+pref("extensions.extractor.service", "infoComp");
+pref("extensions.extractor.serviceUrl", "http://localhost:2107/");
+pref("extensions.extractor.metadataInjection", "raw");
+pref("extensions.extractor.dragInjection", true);

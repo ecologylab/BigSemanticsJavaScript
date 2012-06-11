@@ -6,7 +6,7 @@
 	<Description about="urn:mozilla:install-manifest">  
       
         <em:id>{09cf1f8a-8b28-4886-a1ab-ea6a4822bb5a}</em:id>  
-        <em:version>0.1</em:version>  
+        <em:version>0.1.0</em:version>  
         <em:type>2</em:type>  
       
         <em:targetApplication>  
@@ -18,7 +18,7 @@
         </em:targetApplication>  
       
         <em:name>Metadata Extractor</em:name>  
-        <em:description>Extract metadata for webpages as you browse. Metadata is accessible via drag and drop from the webpage.</em:description>  
+        <em:description>Extract metadata for webpages as you browse.</em:description>
         <em:creator>Nic Lupfer</em:creator>  
     	<em:homepageURL>http://ecologylab.net/</em:homepageURL>  
     	

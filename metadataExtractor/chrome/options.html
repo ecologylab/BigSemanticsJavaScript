@@ -4,8 +4,13 @@
 	
 	<script type="text/javascript">
 	
+	/** Options Page Management **/
+	
 	var backgroundPage = chrome.extension.getBackgroundPage();
 	
+	/** setOptions
+	 * Loads the current options and updates the UI selections
+	 */
 	function setOptions() {
 		var options = backgroundPage.getOptions();
 		
@@ -26,18 +31,6 @@
 		}
 		
 		var urlBox = document.getElementById("serviceUrl");
-		   	//urlBox.value = options.serviceUrl;
-		   	
-		/*
-		if (options.metadataInjection == "raw") {
-	   		var radio = document.getElementById("rawMetadata");
-		   	radio.checked = true;
-		}
-		else if (options.metadataInjection == "fields") {
-	   		var radio = document.getElementById("metadataFields");
-		   	radio.checked = true;
-		}
-		*/
 		
 		var checkbox = document.getElementById("injectAttribute");	
 		if (options.attributeInjection == "true")		   	
@@ -50,8 +43,7 @@
 		   	checkbox.checked = true;
 		else
 			checkbox.checked = false;
-		   
-		
+		   		
 		var checkbox = document.getElementById("debugMmd");	
 		if (options.debugMmd == "true")		   	
 		   	checkbox.checked = true;
@@ -65,6 +57,9 @@
 			checkbox.checked = false;
 	}
 	
+	/** updateService
+	 * Updates the service related option values.
+	 */
 	function updateService() {
 		var ecologyLab = document.getElementById("serviceEcologyLab").checked;
 		var infoComp = document.getElementById("serviceInfoComp").checked;
@@ -76,14 +71,14 @@
 		   	localStorage["service"] = "ecologyLab";
 		   	hideUrl();
 		   	
-		   	//insert service url here
-		   	localStorage["serviceUrl"] = "http://service.ecologylab.net/";
+		   	//EcologyLab MMD Service URL
+		   	localStorage["serviceUrl"] = "http://128.194.143.75:8080/ecologylabSemanticService/mmd?url=";
 		}
 		else if(infoComp) {
 			localStorage["service"] = "infoComp";
 			hideUrl();
 		   	
-		   	//insert infoComposer url here
+		   	//Local InfoComposer MMD Service URL
 		   	localStorage["serviceUrl"] = "http://localhost:2107/";
 		}
 		else if(custom) {
@@ -96,20 +91,10 @@
 		}		
 	}
 	
-	function updateInjection() {
-		/*
-		var fields = document.getElementById("metadataFields").checked;
-		var raw = document.getElementById("rawMetadata").checked;
-
-		
-		if (fields) {
-		   	localStorage["metadataInjection"] = "fields";
-		}
-		else if(raw) {
-			localStorage["metadataInjection"] = "raw";
-		}
-		*/
-			
+	/** updateInjection
+	 * Updates the injection related option values.
+	 */
+	function updateInjection() {			
 		var attribute = document.getElementById("injectAttribute").checked;
 		if (attribute)
 		   	localStorage["attributeInjection"] = "true";
@@ -123,6 +108,9 @@
 			localStorage["selectionInjection"] = "false";
 	}
 	
+	/** updateDebug
+	 * Updates the debug printing related option values.
+	 */
 	function updateDebug() {				
 		var debugMmd = document.getElementById("debugMmd").checked;
 		var debugMetadata = document.getElementById("debugMetadata").checked;
@@ -142,18 +130,27 @@
 		}
 	}
 	
+	/** showUrl
+	 * Shows the custom URL input box.
+	 */
 	function showUrl() {
 		var urlDiv = document.getElementById("url");
 		urlDiv.style.visibility = "visible";
 		urlDiv.style.display = "block";
 	}
 	
+	/** hideUrl
+	 * Hides the custom URL input box.
+	 */
 	function hideUrl() {
 		var urlDiv = document.getElementById("url");
 		urlDiv.style.visibility = "hidden";
 		urlDiv.style.display = "none";
 	}
 	
+	/** restore
+	 * Restores the optiosn to there default values.
+	 */
 	function restore() {
 		
 		localStorage["service"] = "ecologyLab";	

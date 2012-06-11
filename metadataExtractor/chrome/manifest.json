@@ -1,7 +1,7 @@
 {
   "name": "Extractor",
-  "description": "Extract metadata for webpages as you browse. Metadata is accessible via drag and drop from the webpage.",
-  "version": "0.0.0.1",
+  "description": "Extract metadata for webpages as you browse.",
+  "version": "0.1.0",
   "icons": {
     "16": "images/icon_16.png",
     "128": "images/icon_128.png"

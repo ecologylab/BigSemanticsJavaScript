@@ -10,13 +10,50 @@
     <preference id="pref_service" name="extensions.extractor.service" type="string"/>
     <preference id="pref_serviceUrl" name="extensions.extractor.serviceUrl" type="string"/>
     <preference id="pref_metadataInjection" name="extensions.extractor.metadataInjection" type="string"/>
-    <preference id="pref_dragInjection" name="extensions.extractor.dragInjection" type="string"/>
+    <preference id="pref_dragInjection" name="extensions.extractor.dragInjection" type="bool"/>
   </preferences>
  
-  <hbox align="center">
-    <label control="service" value="Meta-Metadata Repository Service: "/>
-    <textbox preference="pref_service" id="service" maxlength="12"/>
-  </hbox>
+  <vbox align="left">
+    
+    <radiogroup id="radio_service"
+        preference="pref_service">  
+        <vbox>
+          <radio id="ecolabService" 
+            label="Use the Inferface Ecology Lab's Meta-Metadata service"
+            value="ecologyLab"/>
+            
+          <radio id="infoCompService"
+            label="Use InfoComposer as the Meta-Metadata service"
+            value="infoComp"/> 
+ 
+        </vbox>
+    </radiogroup>
+    
+    <br/>
+    
+    <!--
+               
+          <radio id="customService"
+            label="Use a custom Meta-Metadata OODSS service"
+            value="custom"
+            />    
+    
+    <hbox>
+   	 	<label control="service" value="Meta-Metadata Repository Service URL: "/>
+    	<textbox preference="pref_serviceUrl" id="service" maxlength="48"/>
+    </hbox>
+    
+    <br/>
+    
+    -->
+    
+    <checkbox id="injectCheckbox" preference="pref_dragInjection"
+        label="Inject 'metadata' into drag-and-drop event" />
+            
+    
+  </vbox>
+    
+
   
 </prefpane>
  

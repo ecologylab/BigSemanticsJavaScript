@@ -1,3 +1,11 @@
+/** extractMetadataWithCallback
+ * Extracts the metadata from the current document using the given
+ * meta-metadata object and then calls a callback function.
+ * 
+ * This method is designed for use with an Awesomium WebView object.
+ * 
+ * @param mmd, the meta-metadata of the target document
+ */
 function extractMetadataWithCallback(mmd) {
 	rawExtraction = true;
 	
