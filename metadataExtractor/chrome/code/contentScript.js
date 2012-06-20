@@ -40,6 +40,7 @@ window.onload = function() {
 		    if(settings.debugMetadata == "true") {
 				console.log("Extracted metadata object:");
 				console.log(metadata);
+				console.log(JSON.stringify(metadata));
 			}					
 			
 			// Check if the metadata was extracted.

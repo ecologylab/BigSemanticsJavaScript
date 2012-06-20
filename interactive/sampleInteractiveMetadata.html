@@ -1,0 +1,45 @@
+<html>
+	<head>
+		<title>Sample InteractiveMetadata</title>
+		
+		<!-- Styles -->
+		<link href="styles/metadata.css" rel="stylesheet" type="text/css">
+		
+		<!-- Code -->
+		<script type="text/javascript" src="interactiveMetadata.js"></script>
+		<script type="text/javascript" src="testJSON/imdbMovie.js"></script>
+		
+		<script>
+			function addMetadataTable(container, metadata) {
+				metadataDisplay = createMetadataDisplay(metadata);
+				container.appendChild(metadataDisplay);
+			}
+		</script>
+	</head>
+	<body>
+		<div style="background-color: red; width: 100%; height: 50%;">
+			<div id="movieDisplay" style="background-color: lightgray; width: 50%; height: 100%; float: left;">
+			
+				
+				<script type="text/javascript">
+					addMetadataTable(document.getElementById('movieDisplay'), imdbMovie);
+				</script>
+			
+			</div>
+			
+			<div style="background-color: #303942; width: 50%; height: 100%; float: left;">
+			
+			</div>
+		</div>
+		
+		<div style="background-color: blue; width: 100%; height: 50%;">
+			<div style="background-color: pink; width: 50%; height: 100%; float: left;">
+			
+			</div>
+			
+			<div style="background-color: tan; width: 50%; height: 100%; float: left;">
+			
+			</div>
+		</div>		
+	</body>
+</html>
