@@ -430,7 +430,7 @@ imdbMovie = {
 			"replace": "",
 			"normalize_text": "true"
 		},
-		"value": " Girls like me don't make invitations like this to just anyone! »"
+		"value": " Girls like me don't make invitations like this to just anyone!"
 	},
 	"title_photos": {
 		"name": "title_photos",

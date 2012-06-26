@@ -18,15 +18,34 @@ function buildMetadataTable(metadata) {
 		var nameCol = document.createElement('td');
 		var valueCol = document.createElement('td');
 		
-		if(metadata[key].name != null)
-			nameCol.innerHTML = toDisplayCase(metadata[key].name);
+		if(metadata[key].scalar_type != null) {
+			
+			if(metadata[key].scalar_type == "String") {
+				if(metadata[key].name != null)
+					nameCol.innerHTML = metadata[key].name;//toDisplayCase(metadata[key].name);				
+				
+				valueCol.innerHTML = metadata[key].value;
+			}
+				
+			else if(metadata[key].scalar_type == "ParsedURL") {
+				var aTag = document.createElement('a');
+					aTag.innerText = metadata[key].name;
+					aTag.href = metadata[key].value;
+					
+				valueCol.appendChild(aTag);
+			}			
+		}
+		else if(metadata[key].child_type != null){
+			if(metadata[key].name != null)
+				nameCol.innerHTML = metadata[key].name;//toDisplayCase(metadata[key].name);	
+			
+			var childList = metadata[key].value[metadata[key].child_type]
+			
+			for(i in childList)
+				valueCol.appendChild(buildMetadataTable(childList[i]));
+			
+		}
 		
-		if(typeof(metadata[key].value) == "object") {
-			valueCol.appendChild(buildMetadataTable(metadata[key].value));
-		}
-		else {
-			valueCol.innerHTML = metadata[key].value;
-		}
 		row.appendChild(nameCol);
 		row.appendChild(valueCol);
 		table.appendChild(row)
