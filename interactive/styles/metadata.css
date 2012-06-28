@@ -1,8 +1,52 @@
 .metadataContainer {
+	color: #222;
+	font-family: 'Segoe UI', Tahoma, sans-serif;
+    font-size: 10px;
+    font-weight: 100;
+    
+    background-color: #EEE;
+    
+    border: 1px solid #CCC;
+    
+    border-left: 3px solid #CCC;
+    
+    padding: 4px;
+    padding-left: 8px;
+    padding-right: 8px;
+    
+    white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.metadataContainer table{
+	color: #222;
+	font-size: 14px;
+	
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	
+	table-layout: fixed;
 	
 }
 
-.metadataContainer tr{
-	border-bottom: 1px solid red;
-	padding: 10px;
+.metadataContainer table .metadata_h1{
+	font-size: 20px;
+}
+
+.metadataContainer .documentSnip .metadata_h1{
+	font-size: 14px;
+}
+
+.metadataContainer .fieldLabel{
+	color: #555;
+	font-size: 12px;
+}
+
+.metadataContainer .fieldValue{
+	color: #111;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
 }
