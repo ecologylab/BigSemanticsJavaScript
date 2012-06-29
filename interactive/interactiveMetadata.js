@@ -166,23 +166,25 @@ function createChildList(parent, children) {
 	
 	for(var i = 0; i < children.length; i++) {
 		var docSpan = document.createElement('span');
-			docSpan.className = "documentSnip";
+			docSpan.className = "childSnip";
 
 		var titleValue = document.createElement('a');
 			titleValue.className = "inlink";
 			titleValue.innerText = children[i].title.value;	
 			
-			titleValue.onclick = function() { enterChild(parent, children, i) };
+			var index = i.toString()
+			titleValue.onclick = function() { enterChild(parent, children, index) };
 		
 		docSpan.appendChild(titleValue);		
 	
+	/*
 		var index = parseInt(i);
 		if((index + 1) < children.length) {
 			var commaSpan = document.createElement('span');
 				commaSpan.innerText = ", ";
 			docSpan.appendChild(commaSpan);
 		}
-			
+	*/	
 		childList.appendChild(docSpan);		
 	}	
 	
@@ -190,9 +192,9 @@ function createChildList(parent, children) {
 }
 
 function enterChild(parent, children, i) {
-	var index = i.toString();
+	console.log(i + " | ");
 	clearChildren(parent.rootVisual);
-	parent.rootVisual.appendChild(parent.buildMetadataTable(children[index]));
+	parent.rootVisual.appendChild(parent.buildMetadataTable(children[i]));
 }
 
 function clearChildren(node) {;

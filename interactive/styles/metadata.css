@@ -59,12 +59,18 @@
 	background-color: #CCC;
 }
 .metadataContainer .imgList img{
-	margin-right: 12px;
+	margin-right: 0px;
+}
+
+.childSnip{
+	padding-right: 8px;
 }
 
 .inlink {
 	color: green;
 	font-style: italic;
+	background-color: lightgray;
+	padding: 2px 6px 2px 6px;
 }
 
 .inlink:hover {

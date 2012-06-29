@@ -18,7 +18,7 @@ imdbMovie = {
 		"xpath": "//div/table[@id='title-overview-widget-layout']/tbody/tr[1]/td[@id='overview-top']/p[2]",
 		"schema_org_itemprop": "description",
 		"layer": "9.0",
-		"label": "description",
+		"label": "Description",
 		"scalar_type": "String",
 		"hint": "XML_LEAF",
 		"kids": [],

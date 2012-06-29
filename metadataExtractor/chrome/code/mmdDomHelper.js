@@ -106,8 +106,10 @@ function extractMetadata(targetDoc, mmd) {
 	    var metadata = recursivelyExtractMetadata(mmd, doc, null, null);
 	    //console.info(metadata);
 	    
-	    if(rawExtraction) {    	
+	    if(rawExtraction) {
+	    	metadata['title'] = doc.title;	
 	    	metadata['location'] = doc.location.href;
+	    	metadata['favicon'] = 
 	    }
 	    else {
 	    	var titleField = getMMDField(mmd, "title");
