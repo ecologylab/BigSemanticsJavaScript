@@ -12,14 +12,14 @@
 		
 		<script>
 			function addMetadataTable(container, metadata) {
-				metadataDisplay = createMetadataDisplay(metadata);
-				container.appendChild(metadataDisplay);
+				metadataDisplay = createMetadataDisplay(container, metadata);
+				container.appendChild(metadataDisplay.rootVisual);
 			}
 		</script>
 	</head>
 	<body>
 		<div style="width: 100%; height: 100%;">
-			<div id="movieDisplay" style="float: left; width: 100%; height: 100%;" onresize="metadataContainerResize();">
+			<div id="movieDisplay" >
 			
 				
 				<script type="text/javascript">
@@ -28,11 +28,15 @@
 			
 			</div>
 			
-			<!--
-			<div style="background-color: #303942; width: 50%; height: 100%; float: left;">
 			
+			<div id="nestingDisplay" >
+			
+				<script type="text/javascript">
+					addMetadataTable(document.getElementById('nestingDisplay'), testParent);
+				</script>
+				
 			</div>
-			-->
+			
 		</div>
 		
 		<!--

@@ -1,18 +1,24 @@
 var container = null;
 
-function createMetadataDisplay(metadata) {
+function createMetadataDisplay(continer, metadata) {
 	console.log("creating metadata display");
-	container = document.createElement('div');
-	container.className = "metadataContainer";
-		
-	//container.onresize = metadataContainerResize;
-
-	container.appendChild(buildMetadataTable(metadata));
 	
-	return container;
+	var metadataDisplay = new MetadataDisplay(container, metadata);
+	
+	return metadataDisplay;
 }
 
-function buildMetadataTable(metadata) {
+function MetadataDisplay(contain, md) {
+	this.metadata = md;
+	this.container = contain;
+	
+	this.rootVisual = document.createElement('div');
+	this.rootVisual.className = "metadataContainer";
+	
+	this.rootVisual.appendChild(this.buildMetadataTable(this.metadata));
+}
+
+MetadataDisplay.prototype.buildMetadataTable = function(metadata) {
 	var table = document.createElement('table');
 	
 	for(var key in metadata) {
@@ -78,6 +84,9 @@ function buildMetadataTable(metadata) {
 									
 				case 'document': 	valueCol.appendChild(createDocumentList(childList));
 									break;
+								
+				case 'child': 		valueCol.appendChild(createChildList(this, childList));
+									break;
 									
 				default: 			for(i in childList) {
 										valueCol.appendChild(buildCondensedMetadataTable(childList[i]));
@@ -108,10 +117,14 @@ function buildCondensedMetadataTable(metadata) {
 
 function createImageList(imageList) {
 	var imgList = document.createElement('div');
+		imgList.className = "imgList";
 	
 	for(i in imageList) {
 		var img = document.createElement('img');
 			img.src = imageList[i].location.value;
+
+		if( parseInt(i) == (imageList.length - 1) )
+			img.style.marginRight = "0px"; 
 	
 		imgList.appendChild(img);
 	}
@@ -129,7 +142,7 @@ function createDocumentList(documentList) {
 			titleValue.className = documentList[i].title.style;
 			titleValue.innerText = documentList[i].title.value;	
 						
-		if(documentList[i].location.value != null)
+		if(documentList[i].location != null)
 			titleValue.href = documentList[i].location.value;
 		
 		docSpan.appendChild(titleValue);		
@@ -143,10 +156,49 @@ function createDocumentList(documentList) {
 		}
 			
 		docList.appendChild(docSpan);		
-	}
-	
+	}	
 	
 	return docList;
+}
+
+function createChildList(parent, children) {
+	var childList = document.createElement('div');
+	
+	for(var i = 0; i < children.length; i++) {
+		var docSpan = document.createElement('span');
+			docSpan.className = "documentSnip";
+
+		var titleValue = document.createElement('a');
+			titleValue.className = "inlink";
+			titleValue.innerText = children[i].title.value;	
+			
+			titleValue.onclick = function() { enterChild(parent, children, i) };
+		
+		docSpan.appendChild(titleValue);		
+	
+		var index = parseInt(i);
+		if((index + 1) < children.length) {
+			var commaSpan = document.createElement('span');
+				commaSpan.innerText = ", ";
+			docSpan.appendChild(commaSpan);
+		}
+			
+		childList.appendChild(docSpan);		
+	}	
+	
+	return childList;
+}
+
+function enterChild(parent, children, i) {
+	var index = i.toString();
+	clearChildren(parent.rootVisual);
+	parent.rootVisual.appendChild(parent.buildMetadataTable(children[index]));
+}
+
+function clearChildren(node) {;
+	while (node.hasChildNodes()) {
+	    node.removeChild(node.lastChild);
+	}
 }
 
 function metadataContainerResize() {
@@ -158,7 +210,7 @@ function createTitleColumn(metadata) {
 		titleValue.className = metadata.title.style;
 		titleValue.innerText = metadata.title.value;	
 						
-	if(metadata.location.value != null)
+	if(metadata.location != null)
 		titleValue.href = metadata.location.value;
 				
 	var titleCol = document.createElement('td');	

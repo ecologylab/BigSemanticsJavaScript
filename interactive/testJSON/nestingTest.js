@@ -2,6 +2,7 @@ childA = {
 	"title": {
 		"name": "Title",
 		"scalar_type": "String",
+		"style": "metadata_h1",
 		"value": "Child A"
 	}	
 };
@@ -10,6 +11,7 @@ childB = {
 	"title": {
 		"name": "Title",
 		"scalar_type": "String",
+		"style": "metadata_h1",
 		"value": "Child B"
 	},
 	"children": {
@@ -28,6 +30,7 @@ childC = {
 	"title": {
 		"name": "Title",
 		"scalar_type": "String",
+		"style": "metadata_h1",
 		"value": "Child C"
 	},
 	"children": {
@@ -46,6 +49,7 @@ childD = {
 	"title": {
 		"name": "Title",
 		"scalar_type": "String",
+		"style": "metadata_h1",
 		"value": "Child D"
 	},
 	"children": {
@@ -65,6 +69,7 @@ childE = {
 	"title": {
 		"name": "Title",
 		"scalar_type": "String",
+		"style": "metadata_h1",
 		"value": "Child E"
 	},
 	"children": {
@@ -86,6 +91,7 @@ testParent = {
 	"title": {
 		"name": "Title",
 		"scalar_type": "String",
+		"style": "metadata_h1",
 		"value": "Parent"
 	},
 	"children": {

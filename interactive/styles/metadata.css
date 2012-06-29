@@ -8,11 +8,13 @@
     
     border: 1px solid #CCC;
     
-    border-left: 3px solid #CCC;
+    border-left: 6px solid #CCC;
     
     padding: 4px;
     padding-left: 8px;
     padding-right: 8px;
+    
+    margin: 4px;
     
     white-space: nowrap;
 	overflow: hidden;
@@ -23,7 +25,7 @@
 	color: #222;
 	font-size: 14px;
 	
-	white-space: nowrap;
+	white-space: normal;
 	overflow: hidden;
 	text-overflow: ellipsis;
 	
@@ -46,7 +48,26 @@
 
 .metadataContainer .fieldValue{
 	color: #111;
-	white-space: nowrap;
+	white-space: normal;
 	overflow: hidden;
 	text-overflow: ellipsis;
+}
+
+.metadataContainer .imgList {
+	display: table;
+	padding: 4px;
+	background-color: #CCC;
+}
+.metadataContainer .imgList img{
+	margin-right: 12px;
+}
+
+.inlink {
+	color: green;
+	font-style: italic;
+}
+
+.inlink:hover {
+	color: darkgreen;
+	cursor: hand;
 }
