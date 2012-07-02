@@ -6,29 +6,30 @@
 		<link href="styles/metadata.css" rel="stylesheet" type="text/css">
 		
 		<!-- Code -->
-		<script type="text/javascript" src="interactiveMetadata.js"></script>
+		<script type="text/javascript" src="interactiveMetadata_v2.js"></script>
 		<script type="text/javascript" src="testJSON/imdbMovie.js"></script>
 		<script type="text/javascript" src="testJSON/nestingTest.js"></script>
 		
 		<script>
 			function addMetadataTable(container, metadata) {
-				metadataDisplay = createMetadataDisplay(container, metadata);
-				container.appendChild(metadataDisplay.rootVisual);
+				metadataBrowser = createMetadataBrowser(container, metadata);
+				container.appendChild(metadataBrowser.rootVisual);
 			}
 		</script>
 	</head>
 	<body>
 		<div style="width: 100%; height: 100%;">
-			<div id="movieDisplay" >
 			
+			<!--
+			<div id="movieDisplay" >	
 				
 				<script type="text/javascript">
 					addMetadataTable(document.getElementById('movieDisplay'), imdbMovie);
 				</script>
 			
 			</div>
-			
-			
+			-->
+					
 			<div id="nestingDisplay" >
 			
 				<script type="text/javascript">

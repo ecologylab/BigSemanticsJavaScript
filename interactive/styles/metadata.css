@@ -29,8 +29,15 @@
 	overflow: hidden;
 	text-overflow: ellipsis;
 	
-	table-layout: fixed;
-	
+	table-layout: fixed;	
+}
+
+.metadataContainer ul{
+	list-style: none;
+}
+
+.metadataContainer li{
+	margin-bottom: 8px;
 }
 
 .metadataContainer table .metadata_h1{

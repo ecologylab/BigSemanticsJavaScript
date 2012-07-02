@@ -172,8 +172,8 @@ function createChildList(parent, children) {
 			titleValue.className = "inlink";
 			titleValue.innerText = children[i].title.value;	
 			
-			var index = i.toString()
-			titleValue.onclick = function() { enterChild(parent, children, index) };
+			docSpan.onclick = function() { enterChild(parent, i) };
+			//docSpan.onmouseover = function() { showChild(parent, children[i])};
 		
 		docSpan.appendChild(titleValue);		
 	
@@ -191,10 +191,10 @@ function createChildList(parent, children) {
 	return childList;
 }
 
-function enterChild(parent, children, i) {
-	console.log(i + " | ");
+function enterChild(parent, child) {
+	console.log(child);
 	clearChildren(parent.rootVisual);
-	parent.rootVisual.appendChild(parent.buildMetadataTable(children[i]));
+	parent.rootVisual.appendChild(parent.buildMetadataTable(child));
 }
 
 function clearChildren(node) {;
