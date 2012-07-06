@@ -1,0 +1,183 @@
+<html>
+	<head>
+		<title>InteractiveMetadata Prototype</title>
+		
+		<!-- Styles -->
+		<link href="styles/metadataV2.css" rel="stylesheet" type="text/css">
+		
+		<!-- Code -->
+		<script type="text/javascript" src="interactiveMetadata_v3.js"></script>
+		
+		<script>
+			function toggleImageSize(img) {
+				maxHeight = img.style.maxHeight
+				if(maxHeight == "600px")
+					img.style.maxHeight = "120px";
+				else {
+					img.style.maxHeight = "600px";
+				}
+			}
+			
+			function toggleSnippet(id) {
+				children = document.getElementById(id).childNodes;
+				console.log(children);
+				snippet = children[1];
+				expandsese = children[3];
+				complete = children[5];
+				collapses = children[7];
+				if(snippet.style.display == "none") {
+					snippet.style.display = "inline";
+					complete.style.display = "none";
+					expandsese.style.display = "inline";
+					collapses.style.display = "none";
+				}
+				else {					
+					snippet.style.display = "none";
+					complete.style.display = "inline";
+					expandsese.style.display = "none";
+					collapses.style.display = "inline";
+				}
+			}
+		</script>
+	</head>
+	<body>
+		<div style="width: 100%; height: auto">
+			
+			<div id="metadataPrototype" class="metadataContainer">
+
+			<div id="movie_pulpFiction_sliver" class="sliver" style="display: block; border-color: #dcd7bd;" >
+				<div>
+					<img class="favicon" src="http://i.media-imdb.com/images/SFff39adb4d259f3c3fd166853a6714a32/favicon.ico"/>
+				</div>
+				<div style="min-height: 200px; top: 156px; position:relative">
+				<div class="metadata_h1"  >Pulp Fiction (1994) - IMDb</div>
+				</div>	
+			</div>
+				
+			<div id="movie_pulpFiction_full" class="full" style="display: block; border-color: #dcd7bd;" >
+				<table>
+					<tr class="titleRow">
+						<td colspan="2">
+							<img class="favicon" src="http://i.media-imdb.com/images/SFff39adb4d259f3c3fd166853a6714a32/favicon.ico"/>
+							<a class="metadata_h1" href="http://www.imdb.com/title/tt0110912/">Pulp Fiction (1994) - IMDb</a>
+							<span class="domainSpan">imdb.com</span>
+						</td>
+					</tr>
+					
+					<tr>
+						<td class="fieldLabelCol">
+							<span class="fieldLabel">Poster</span>
+						</td>						
+						<td>
+							<a class="fieldValue" >
+							<img onclick="toggleImageSize(this);" src="http://ia.media-imdb.com/images/M/MV5BMjE0ODk2NjczOV5BMl5BanBnXkFtZTYwNDQ0NDg4._V1._SY317_CR4,0,214,317_.jpg"/>
+							</a>
+						</td>
+					</tr>
+										
+					<tr>
+						<td class="fieldLabelCol">
+							<span class="fieldLabel">Description</span>
+						</td>						
+						<td>
+							<span class="fieldView">
+								The lives of two mob hit men, a boxer, a gangster's wife, and a pair of diner bandits intertwine in four tales of violence and redemption.
+							</span>
+						</td>
+					</tr>
+					
+					<tr>
+						<td class="fieldLabelCol">
+							<span class="fieldLabel">Storyline</span>
+						</td>						
+						<td>
+							<span class="fieldValue" id="storyline_mdfield">	
+								<span class="snippet">Jules Winnfield and Vincent Vega are two hitmen who are out to retrieve a suitcase stolen from their employer, mob boss Marsellus Wallace. Wallace has also asked Vincent to take his wife Mia</span>							
+								<a class="expandsese" onclick="toggleSnippet('storyline_mdfield');">...</a>
+								<span class="complete">
+									Jules Winnfield and Vincent Vega are two hitmen who are out to retrieve a suitcase stolen from their employer, mob boss Marsellus Wallace. Wallace has also asked Vincent to take his wife Mia out a few days later when Wallace himself will be out of town. Butch Coolidge is an aging boxer who is paid by Wallace to lose his next fight. The lives of these seemingly unrelated people are woven together comprising of a series of funny, bizarre and uncalled-for incidents.Written by Soumitra
+								</span>
+								<a class="expandsese" style="display:none;"onclick="toggleSnippet('storyline_mdfield');">shrink</a>
+								
+							</span>
+						</td>
+					</tr>
+					
+					<tr>
+						<td class="fieldLabelCol">
+							<span class="fieldLabel">Directors</span>
+						</td>						
+						<td>
+							<ul class="fieldValue">	
+								<li>								
+									<a class="inlink" onclick="enterMetadata('director_Tarantino');"
+										onmouseover="showPeek('director_Tarantino');">
+										Quentin Tarantino
+									</a>
+								</li>
+							</ul>
+						</td>
+					</tr>
+					
+					<tr>
+						<td class="fieldLabelCol">
+							<span class="fieldLabel">Title Photos</span>
+						</td>						
+						<td>
+							<div class="imgList">	
+								<img src="http://ia.media-imdb.com/images/M/MV5BMTUwNTE0NjU2Ml5BMl5BanBnXkFtZTcwMDE0MzU5Ng@@._V1._CR353,0,1341,1341_SS99_.jpg" />
+								<img src="http://ia.media-imdb.com/images/M/MV5BMTUzNjMxNjUwN15BMl5BanBnXkFtZTcwNDgxMjIyNw@@._V1._CR343,0,1362,1362_SS99_.jpg" />
+								<img src="http://ia.media-imdb.com/images/M/MV5BMTM3MzA5MDQxMF5BMl5BanBnXkFtZTcwMjE0MzU5Ng@@._V1._CR339,0,1369,1369_SS99_.jpg" />
+								<img src="http://ia.media-imdb.com/images/M/MV5BMTU2Mjc0MTg4MF5BMl5BanBnXkFtZTcwOTA0MzU5Ng@@._V1._CR0,0,1310,1310_SS99_.jpg" />
+								<img src="http://ia.media-imdb.com/images/M/MV5BMTQ1Mzc5NjU5NF5BMl5BanBnXkFtZTcwMzAzNDY3Mw@@._V1._CR136,0,387,387_SS99_.jpg" style="margin-right: 0px;"/>
+							</div>
+						</td>
+					</tr>						
+					
+				</table>
+			</div>
+			
+					
+			
+			<div id="movie_pulpFiction_peek" class="peek" style="display: none; border-color: #dcd7bd;" >
+				<table>
+					<tr class="titleRow">
+						<td colspan="2">
+							<img class="favicon" src="http://i.media-imdb.com/images/SFff39adb4d259f3c3fd166853a6714a32/favicon.ico"/>
+							<a class="metadata_h1" href="http://www.imdb.com/title/tt0110912/">Pulp Fiction (1994) - IMDb</a>
+							<span class="domainSpan">imdb.com</span>
+						</td>
+					</tr>
+					
+					<tr>
+						<td class="fieldLabelCol">
+							<span class="fieldLabel">Poster</span>
+						</td>						
+						<td>
+							<a class="fieldValue" >
+							<img onclick="toggleImageSize(this);" src="http://ia.media-imdb.com/images/M/MV5BMjE0ODk2NjczOV5BMl5BanBnXkFtZTYwNDQ0NDg4._V1._SY317_CR4,0,214,317_.jpg"/>
+							</a>
+						</td>
+					</tr>
+										
+					<tr>
+						<td class="fieldLabelCol">
+							<span class="fieldLabel">Description</span>
+						</td>						
+						<td>
+							<span class="fieldView">
+								The lives of two mob hit men, a boxer, a gangster's wife, and a pair of diner bandits intertwine in four tales of violence and redemption.
+							</span>
+						</td>
+					</tr>
+				</table>
+			</div>
+			
+			
+			
+			
+			</div>
+				
+		</div>		
+	</body>
+</html>

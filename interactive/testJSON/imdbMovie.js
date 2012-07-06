@@ -690,7 +690,7 @@ imdbMovie = {
 					}
 				}, {
 					"location": {
-						"name": "location",
+						"name": "location", 
 						"xpath": ".",
 						"schema_org_itemprop": "url",
 						"hide": "true",
