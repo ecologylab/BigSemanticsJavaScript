@@ -6,6 +6,9 @@
     white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
+	
+	min-width: 700px;
+	min-height: 240px;
 }
 
 .metadataContainer .full{
@@ -15,16 +18,19 @@
     
     padding: 4px;
     padding-left: 8px;
-    padding-right: 8px;    
-    height: 100%;
+    padding-right: 8px;
     min-width: 240px;
     
-    box-shadow: 5px 5px 5px black;
+    box-shadow: -2px 0px 10px 0px darkgray;
     z-index: 10;
+    float:left;
+    
+    width: 600px;
+    min-height: 450px;
 }
 
 .metadataContainer .peek{
-    background-color: #DEDEDE;    
+    background-color: white;    
     border: 2px solid #CCC;    
     border-left: 10px solid #CCC;
     
@@ -33,12 +39,22 @@
     padding-right: 8px;    
     margin: 4px;
     float:right;
-    height: 100%;
     z-index: 20;
+    height: 440px;
+    min-width: 200px;
+    max-width: 400px;
+    position: absolute;
+    top: 0px;
+    right: 0px;
+}
+
+.metadataContainer .sliver:hover {
+	cursor: hand;
+	background: white;
 }
 
 .metadataContainer .sliver{
-    background-color: #DEDEDE;    
+    background-color: lightsteelblue;    
     border: 2px solid #CCC;    
     border-left: 10px solid #CCC;
     
@@ -46,11 +62,21 @@
     padding-left: 8px;
     padding-right: 8px;    
     width: 24px;
+    height: 450px;
     float:left;
-
+	min-height: 240px;
     z-index: 4;
 }
 
+.metadataContainer .pulltab {
+	position: absolute;
+	border: 2px solid lightsteelblue;
+	width: 100px;
+	height: 34px;
+	border-radius: 4px;
+	left: 48px;
+	z-index: 0;
+}
 
 
 .metadataContainer table{
@@ -66,7 +92,7 @@
 
 .metadataContainer ul{
 	list-style: none;
-	//margin-top: 6px;
+	z-index: 1;
 }
 
 .metadataContainer li{

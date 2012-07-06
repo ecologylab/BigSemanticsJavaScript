@@ -38,14 +38,102 @@
 					collapses.style.display = "inline";
 				}
 			}
+			
+			var movie_PulpFiction_full = null;
+			var movie_PulpFiction_sliver = null;
+			var movie_PulpFiction_pulltab = null;
+				
+			var director_Tarantino_full = null;
+			var director_Tarantino_sliver = null;
+			var director_Tarantino_pulltab = null;
+			
+			var currentMetadata = null;
+				
+			var staging = null;
+				
+			var container = null;
+			
+			function setup() {
+					
+				movie_PulpFiction_full = document.getElementById("movie_PulpFiction_full");
+				movie_PulpFiction_sliver = document.getElementById("movie_PulpFiction_sliver");
+				//movie_PulpFiction_pulltab = document.getElementById("movie_PulpFiction_pulltab");
+				
+				director_Tarantino_full = document.getElementById("director_Tarantino_full");
+				director_Tarantino_sliver = document.getElementById("director_Tarantino_sliver");
+				//director_Tarantino_pulltab = document.getElementById("director_Tarantino_pulltab");
+							
+				staging = document.getElementById('staging');
+				
+				while (staging.hasChildNodes()) {
+				    staging.removeChild(staging.lastChild);
+				}
+				
+				container = document.getElementById("metadataPrototype");
+				
+				enterMetadata('movie_PulpFiction');			
+			}
+			
+			function enterMetadata(metadataName) {
+				clearContainer();
+				
+				var childFull = null;
+				
+				if(metadataName == "movie_PulpFiction") {
+					childFull = movie_PulpFiction_full;
+				}
+				else {
+					childFull = director_Tarantino_full;
+				}
+				
+				
+				if(currentMetadata == "movie_PulpFiction") {
+					childSliver = movie_PulpFiction_sliver;
+					container.appendChild(childSliver);
+					
+					//movie_PulpFiction_pulltab.style.display = "block";
+					//director_Tarantino_pulltab.style.display = "none";
+					
+				}
+				else if(currentMetadata == "director_Tarantino") {
+					childSliver = director_Tarantino_sliver;
+					container.appendChild(childSliver);
+					
+					//director_Tarantino_pulltab.style.display = "block";
+					//movie_PulpFiction_pulltab.style.display = "none";
+				}
+				
+				currentMetadata = metadataName;		
+				
+				container.appendChild(childFull);				
+			}
+			
+			function clearContainer() {
+				while (container.hasChildNodes()) {
+			    	container.removeChild(container.lastChild);
+				}			
+			}
+			
+			function toggleTabColor(pulltab) {
+				alert("mouseEnter");
+				if(pulltab.style.borderColor == "white")
+					 pulltab.style.borderColor = "lightsteelblue";
+				else
+					pulltab.style.borderColor = "white";
+			}
+			
 		</script>
 	</head>
-	<body>
-		<div style="width: 100%; height: auto">
-			
-			<div id="metadataPrototype" class="metadataContainer">
-
-			<div id="movie_pulpFiction_sliver" class="sliver" style="display: block; border-color: #dcd7bd;" >
+	<body onload="setup();">
+		
+		<div id="metadataPrototype" class="metadataContainer">
+				
+		</div>
+	
+		<div id="staging" style="">			
+				
+			<div id="movie_PulpFiction_sliver" class="sliver" onclick="enterMetadata('movie_PulpFiction');"
+				style="display: block; border-color: #dcd7bd;" >
 				<div>
 					<img class="favicon" src="http://i.media-imdb.com/images/SFff39adb4d259f3c3fd166853a6714a32/favicon.ico"/>
 				</div>
@@ -53,8 +141,14 @@
 				<div class="metadata_h1"  >Pulp Fiction (1994) - IMDb</div>
 				</div>	
 			</div>
-				
-			<div id="movie_pulpFiction_full" class="full" style="display: block; border-color: #dcd7bd;" >
+		
+							
+			<div id="movie_PulpFiction_full" class="full" style="display: block; border-color: #dcd7bd;" >
+				<!--
+					<div id="director_Tarantino_pulltab" class="pulltab"
+					style="top: 290px; width: 274px; display: none;" >
+				</div>
+				-->				
 				<table>
 					<tr class="titleRow">
 						<td colspan="2">
@@ -91,13 +185,13 @@
 							<span class="fieldLabel">Storyline</span>
 						</td>						
 						<td>
-							<span class="fieldValue" id="storyline_mdfield">	
+							<span class="fieldValue" id="1_storyline_mdfield">	
 								<span class="snippet">Jules Winnfield and Vincent Vega are two hitmen who are out to retrieve a suitcase stolen from their employer, mob boss Marsellus Wallace. Wallace has also asked Vincent to take his wife Mia</span>							
-								<a class="expandsese" onclick="toggleSnippet('storyline_mdfield');">...</a>
+								<a class="expandsese" onclick="toggleSnippet('1_storyline_mdfield');">...</a>
 								<span class="complete">
 									Jules Winnfield and Vincent Vega are two hitmen who are out to retrieve a suitcase stolen from their employer, mob boss Marsellus Wallace. Wallace has also asked Vincent to take his wife Mia out a few days later when Wallace himself will be out of town. Butch Coolidge is an aging boxer who is paid by Wallace to lose his next fight. The lives of these seemingly unrelated people are woven together comprising of a series of funny, bizarre and uncalled-for incidents.Written by Soumitra
 								</span>
-								<a class="expandsese" style="display:none;"onclick="toggleSnippet('storyline_mdfield');">shrink</a>
+								<a class="expandsese" style="display:none;"onclick="toggleSnippet('1_storyline_mdfield');">shrink</a>
 								
 							</span>
 						</td>
@@ -136,9 +230,82 @@
 					
 				</table>
 			</div>
+								
+			<!-- Tarantino -->
 			
+			<div id="director_Tarantino_sliver" class="sliver" onclick="enterMetadata('director_Tarantino');" style="display: block; border-color: #dcd7bd;" >
+				<div>
+					<img class="favicon" src="http://i.media-imdb.com/images/SFff39adb4d259f3c3fd166853a6714a32/favicon.ico"/>
+				</div>
+				<div style="min-height: 200px; top: 156px; position:relative">
+				<div class="metadata_h1"  >Quentin Tarantino - IMDb</div>
+				</div>	
+			</div>
+		
+							
+			<div id="director_Tarantino_full" class="full" style="display: block; border-color: #dcd7bd;" >
+				<!--
+				<div id="movie_PulpFiction_pulltab" class="pulltab"
+					style="top: 224px; width: 216px; display: none;" >
+				</div>
+			-->
+				<table>
+					<tr class="titleRow">
+						<td colspan="2">
+							<img class="favicon" src="http://i.media-imdb.com/images/SFff39adb4d259f3c3fd166853a6714a32/favicon.ico"/>
+							<a class="metadata_h1" href="http://www.imdb.com/name/nm0000233/">Quentin Tarantino - IMDb</a>
+							<span class="domainSpan">imdb.com</span>
+						</td>
+					</tr>
 					
+					<tr>
+						<td class="fieldLabelCol">
+							<span class="fieldLabel">Photo</span>
+						</td>						
+						<td>
+							<a class="fieldValue" >
+							<img onclick="toggleImageSize(this);" src="http://ia.media-imdb.com/images/M/MV5BMjIwOTY5NDgzNV5BMl5BanBnXkFtZTcwNjE3NjQxMw@@._V1._SY314_CR5,0,214,314_.jpg"/>
+							</a>
+						</td>
+					</tr>
+								
+					<tr>
+						<td class="fieldLabelCol">
+							<span class="fieldLabel">Bio</span>
+						</td>						
+						<td>
+							<span class="fieldValue" id="1_bio_mdfield">	
+								<span class="snippet">In January of 1992, Reservoir Dogs appeared at the Sundance Film Festival, by first-time writer-director Quentin Tarantino. The film</span>							
+								<a class="expandsese" onclick="toggleSnippet('1_bio_mdfield');">...</a>
+								<span class="complete">
+									In January of 1992, Reservoir Dogs appeared at the Sundance Film Festival, by first-time writer-director Quentin Tarantino. The film garnered critical acclaim and the director became a legend immediately. Two years later, he followed up Dogs success with Pulp Fiction which premiered at the Cannes film festival...	
+								</span>
+								<a class="expandsese" style="display:none;"onclick="toggleSnippet('1_bio_mdfield');">shrink</a>
+								
+							</span>
+						</td>
+					</tr>
+					
+					<tr>
+						<td class="fieldLabelCol">
+							<span class="fieldLabel">Directed</span>
+						</td>						
+						<td>
+							<ul class="fieldValue">	
+								<li>								
+									<a class="inlink" onclick="enterMetadata('movie_PulpFiction');"
+										onmouseover="showPeek('movie_PulpFiction');">
+										Pulp Fiction
+									</a>
+								</li>
+							</ul>
+						</td>
+					</tr>				
+					
+				</table>
+			</div>
 			
+			<!--
 			<div id="movie_pulpFiction_peek" class="peek" style="display: none; border-color: #dcd7bd;" >
 				<table>
 					<tr class="titleRow">
@@ -172,12 +339,7 @@
 					</tr>
 				</table>
 			</div>
-			
-			
-			
-			
-			</div>
-				
+			-->
 		</div>		
 	</body>
 </html>
