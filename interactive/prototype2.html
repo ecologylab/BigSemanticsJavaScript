@@ -61,14 +61,17 @@
 				
 				director_Tarantino_full = document.getElementById("director_Tarantino_full");
 				director_Tarantino_sliver = document.getElementById("director_Tarantino_sliver");
+				
+				console.log(movie_PulpFiction_sliver);
 				//director_Tarantino_pulltab = document.getElementById("director_Tarantino_pulltab");
 							
 				staging = document.getElementById('staging');
 				
+				/*
 				while (staging.hasChildNodes()) {
 				    staging.removeChild(staging.lastChild);
 				}
-				
+				*/
 				container = document.getElementById("metadataPrototype");
 				
 				enterMetadata('movie_PulpFiction');			
@@ -137,18 +140,20 @@
 				<div>
 					<img class="favicon" src="http://i.media-imdb.com/images/SFff39adb4d259f3c3fd166853a6714a32/favicon.ico"/>
 				</div>
+				
 				<div style="min-height: 200px; top: 156px; position:relative">
+				
 				<div class="metadata_h1"  >Pulp Fiction (1994) - IMDb</div>
 				</div>	
 			</div>
 		
 							
 			<div id="movie_PulpFiction_full" class="full" style="display: block; border-color: #dcd7bd;" >
-				<!--
-					<div id="director_Tarantino_pulltab" class="pulltab"
-					style="top: 290px; width: 274px; display: none;" >
-				</div>
-				-->				
+				
+				<div id="director_Tarantino_pulltab" class="pulltab"
+								style="top: 287px; width: 275px; display: block;" >
+							</div>
+						
 				<table>
 					<tr class="titleRow">
 						<td colspan="2">
@@ -201,8 +206,10 @@
 						<td class="fieldLabelCol">
 							<span class="fieldLabel">Directors</span>
 						</td>						
-						<td>
-							<ul class="fieldValue">	
+						<td>				
+							
+							
+							<ul class="fieldValue" style="z-index: 10;">	
 								<li>								
 									<a class="inlink" onclick="enterMetadata('director_Tarantino');"
 										onmouseover="showPeek('director_Tarantino');">
@@ -218,13 +225,13 @@
 							<span class="fieldLabel">Title Photos</span>
 						</td>						
 						<td>
-							<div class="imgList">	
+							<span class="imgList">	
 								<img src="http://ia.media-imdb.com/images/M/MV5BMTUwNTE0NjU2Ml5BMl5BanBnXkFtZTcwMDE0MzU5Ng@@._V1._CR353,0,1341,1341_SS99_.jpg" />
 								<img src="http://ia.media-imdb.com/images/M/MV5BMTUzNjMxNjUwN15BMl5BanBnXkFtZTcwNDgxMjIyNw@@._V1._CR343,0,1362,1362_SS99_.jpg" />
 								<img src="http://ia.media-imdb.com/images/M/MV5BMTM3MzA5MDQxMF5BMl5BanBnXkFtZTcwMjE0MzU5Ng@@._V1._CR339,0,1369,1369_SS99_.jpg" />
 								<img src="http://ia.media-imdb.com/images/M/MV5BMTU2Mjc0MTg4MF5BMl5BanBnXkFtZTcwOTA0MzU5Ng@@._V1._CR0,0,1310,1310_SS99_.jpg" />
 								<img src="http://ia.media-imdb.com/images/M/MV5BMTQ1Mzc5NjU5NF5BMl5BanBnXkFtZTcwMzAzNDY3Mw@@._V1._CR136,0,387,387_SS99_.jpg" style="margin-right: 0px;"/>
-							</div>
+							</span>
 						</td>
 					</tr>						
 					

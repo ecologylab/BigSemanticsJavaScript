@@ -196,8 +196,9 @@ MetadataBrowser.prototype.buildMetadataMainView = function(metadata) {
 			}
 				
 			else if(metadata[key].scalar_type == "ParsedURL") {
-				var aTag = document.createElement('span');
+				var aTag = document.createElement('a');
 					aTag.innerText = metadata[key].name;
+					aTag.href = metadata[key].value;
 					
 				var domainSpan = document.createElement('span');
 					domainSpan.className = "domainSpan";

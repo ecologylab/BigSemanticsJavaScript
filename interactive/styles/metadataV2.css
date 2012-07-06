@@ -27,6 +27,7 @@
     
     width: 600px;
     min-height: 450px;
+    border-radius: 12px;
 }
 
 .metadataContainer .peek{
@@ -66,16 +67,19 @@
     float:left;
 	min-height: 240px;
     z-index: 4;
+     border-radius: 12px 0px 0px 12px;
 }
 
 .metadataContainer .pulltab {
 	position: absolute;
+	background: lightsteelblue;
 	border: 2px solid lightsteelblue;
 	width: 100px;
 	height: 34px;
-	border-radius: 4px;
-	left: 48px;
+	border-radius: 0px 4px 4px 0px;
+	left: 52px;
 	z-index: 0;
+	box-shadow: 4px 4px 10px -3px darkgray;
 }
 
 
@@ -88,6 +92,10 @@
 	text-overflow: ellipsis;
 	
 	table-layout: fixed;
+	border-spacing: 0px;
+	z-index: 2;
+	position: relative;
+	
 }
 
 .metadataContainer ul{
@@ -126,6 +134,8 @@
 .metadataContainer td{
 	padding-bottom: 6px;
 	display: inline;
+	padding: 4px;
+	border: 0px;
 }
 
 .metadataContainer .favicon{
@@ -208,9 +218,11 @@
 }
 
 .metadataContainer .imgList {
-	display: inline;
+	display: block;
 	border-spacing: 0px;
 	border-collapse: collapse;
+	padding: 0px;
+	text-align: left;
 }
 
 .metadataContainer .imgList li{
@@ -219,6 +231,8 @@
 .metadataContainer .imgList img{
 	margin-right: 0px;
 	padding: 0px;
+	margin: 0px;
+	float: left;
 }
 
 .childSnip{
