@@ -235,8 +235,7 @@ MetadataBrowser.prototype.buildMetadataMainView = function(metadata) {
 			}
 			
 			
-			
-			row.appendChild(nameCol);
+						row.appendChild(nameCol);
 			row.appendChild(valueCol);
 		}		
 		

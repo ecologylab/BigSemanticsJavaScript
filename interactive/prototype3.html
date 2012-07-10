@@ -1,0 +1,135 @@
+<html>
+	<head>
+		<title>InteractiveMetadata Prototype 3</title>
+		
+		<!-- Styles -->
+		<link href="styles/metadataV3.css" rel="stylesheet" type="text/css">
+		
+		<!-- Code -->
+		<script type="text/javascript" src="interactiveMetadata_v3.js"></script>
+		<script type="text/javascript" src="bluths.js"></script>
+		
+		<script>
+			var level = 1;
+			
+			function setup() {
+				goldenTest = createGolden(0, level);
+				document.body.appendChild(goldenTest);
+			}
+		
+			function goDeeper() {
+				level++;
+				
+				while (document.body.hasChildNodes()) {
+				    document.body.removeChild(document.body.lastChild);
+				}
+				
+				for(i = 0; i < level; i++) {
+					goldenTest = createGolden(i, level);
+					document.body.appendChild(goldenTest);
+				}
+			}
+			
+			function createGolden(index, depth) {
+				div = document.createElement('div');
+				div.className = "goldenTest";
+				
+				div.onclick = goDeeper;
+				
+				switch(level)
+				{
+					case 1: div.style.width = "100%";
+							div.style.background = "red";
+							break;
+					case 2: switch(index)
+							{
+								case 0: div.style.width = "62%";
+										div.style.background = "yellow";
+										break;
+								case 1: div.style.width = "38%";
+										div.style.background = "red";
+										break;
+							}
+							break;
+					case 3: switch(index)
+							{
+								case 0: div.style.width = "50%";
+										div.style.background = "green";
+										break;
+								case 1: div.style.width = "31%";
+										div.style.background = "yellow";
+										break;
+								case 2: div.style.width = "19%";
+										div.style.background = "red";
+										break;
+							}
+							break;
+					case 4: switch(index)
+							{
+								case 0: div.style.width = "45%";
+										div.style.background = "blue";
+										break;
+								case 1: div.style.width = "28%";
+										div.style.background = "green";
+										break;
+								case 2: div.style.width = "17%";
+										div.style.background = "yellow";
+										break;
+								case 3: div.style.width = "10%";
+										div.style.background = "red";
+										break;
+							}
+							break;
+					case 5: switch(index)
+							{
+								case 0: div.style.width = "42%";
+										div.style.background = "purple";
+										break;
+								case 1: div.style.width = "26%";
+										div.style.background = "blue";
+										break;
+								case 2: div.style.width = "16%";
+										div.style.background = "green";
+										break;
+								case 3: div.style.width = "10%";
+										div.style.background = "yellow";
+										break;
+								case 4: div.style.width = "6%";
+										div.style.background = "red";
+										break;
+							}
+							break;
+					case 6: switch(index)
+							{
+								case 0: div.style.width = "40%";
+										div.style.background = "black";
+										break;
+								case 1: div.style.width = "25%";
+										div.style.background = "purple";
+										break;
+								case 2: div.style.width = "15%";
+										div.style.background = "blue";
+										break;
+								case 3: div.style.width = "10%";
+										div.style.background = "green";
+										break;
+								case 4: div.style.width = "6%";
+										div.style.background = "yellow";
+										break;
+								case 5: div.style.width = "4%";
+										div.style.background = "red";
+										break;
+							}
+							break;
+									
+				}
+				
+				return div;
+			}
+		</script>
+	</head>
+	
+	<body onload="setup();">
+		
+	</body>
+</html>
