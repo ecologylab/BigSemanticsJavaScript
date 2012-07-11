@@ -22,7 +22,7 @@ function extractMetadataFromUrl(purl, targetDoc, callback) {
 	rawExtraction = false;
 	doc = targetDoc;
 	
-	var serviceURL = settings.serviceUrl;
+	var serviceURL = "http://ecoarray0:2080/ecologylabSemanticService/mmd.json?url=";//settings.serviceUrl;
 	
 	if(settings.service == "infoComp") {
 		
@@ -71,7 +71,7 @@ function extractMetadataFromUrl(purl, targetDoc, callback) {
 					console.log(response);
 				}
 				
-				callback(extractMetadata(doc, response));
+				callback(extractMetadata(doc, response['meta_metadata']));
 			}
 		}
 		var msg = JSON.stringify(request);
@@ -83,8 +83,12 @@ function extractMetadata(targetDoc, mmd) {
 	doc = targetDoc;
 	
 	if(mmd != null) {	
-		simplDeserialize(mmd);
-		mmd = mmd.meta_metadata;
+		//simplDeserialize(mmd);
+
+		console.log("\n\nDeserialized MMD\n");
+
+		console.log(mmd);
+		//console.log(JSON.stringify(mmd));
 
 		if (mmd.hasOwnProperty('def_var')) {
 			for (var i = mmd.def_var.length - 1; i >= 0; i--) {
@@ -109,7 +113,7 @@ function extractMetadata(targetDoc, mmd) {
 	    if(rawExtraction) {
 	    	metadata['title'] = doc.title;	
 	    	metadata['location'] = doc.location.href;
-	    	metadata['favicon'] = 
+	    	//metadata['favicon'] = 
 	    }
 	    else {
 	    	var titleField = getMMDField(mmd, "title");

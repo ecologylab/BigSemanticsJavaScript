@@ -22,7 +22,7 @@ function extractMetadataFromUrl(purl, targetDoc, callback) {
 	rawExtraction = false;
 	doc = targetDoc;
 	
-	var serviceURL = settings.serviceUrl;
+	var serviceURL = "http://ecoarray0:2080/ecologylabSemanticService/mmd.json?name=";//settings.serviceUrl;
 	
 	if(settings.service == "infoComp") {
 		

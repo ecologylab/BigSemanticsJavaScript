@@ -284,7 +284,7 @@ var lindsay = {
 					"name": "Title",
 					"scalar_type": "String",
 					"style": "metadata_h1",
-					"value": "Lindsay Bluth Fünke"
+					"value": "Lindsay Bluth Funke"
 				},
 				"photo": {
 					"name": "Photo",
@@ -345,7 +345,7 @@ var tobias = {
 					"name": "Title",
 					"scalar_type": "String",
 					"style": "metadata_h1",
-					"value": "Tobias Fünke"
+					"value": "Tobias Funke"
 				},
 				"photo": {
 					"name": "Photo",
@@ -471,7 +471,7 @@ var maeybe = {
 					"name": "Title",
 					"scalar_type": "String",
 					"style": "metadata_h1",
-					"value": "Maeby Fünke"
+					"value": "Maeby Funke"
 				},
 				"photo": {
 					"name": "Photo",

@@ -14,7 +14,7 @@ var refCount = 0;
 		//console.log(parentObj);
 		//console.log(currentObj);
 		
-		if(currentObj != "Object")
+		if((typeof currentObj) != 'object' || currentObj == null)
 		{
 			return;
 		}
@@ -25,6 +25,7 @@ var refCount = 0;
 			simplReferences[currentObj[simplId]] = currentObj;
 			delete currentObj[simplId];
 		}
+		
 		else if(simplRef in currentObj)
 		{
 			var ref = currentObj[simplRef];
@@ -44,8 +45,7 @@ var refCount = 0;
 					{
 						//console.info("Replacing item at index: " + index);
 						parentObj[index] = simplReferences[ref];
-					}
-					
+					}					
 				}
 				else
 				{
@@ -55,6 +55,7 @@ var refCount = 0;
 			}
 			else 
 				//console.info("No Such Reference: " + ref);
+				
 			skipRecursion = true;
 		}
 

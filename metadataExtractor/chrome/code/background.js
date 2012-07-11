@@ -45,7 +45,7 @@ function loadOptions() {
 	if (!options.serviceUrl) {
 	   	
 	   	// Default MMD service URL
-	   	localStorage["serviceUrl"] = "http://localhost:2107/";
+	   	localStorage["serviceUrl"] = "http://ecoarray0:2080/ecologylabSemanticService/mmd.json?name=";
 	}
 	
 	/** Metadata Injection **/

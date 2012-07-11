@@ -12,19 +12,20 @@ var refCount = 0;
 
 		////console.info("recursing[" + level + "] Parent and currentObj:"); //Too detailed prints.
 		//console.log(parentObj);
-		//console.log(currentObj);
+		console.log(currentObj);
 		
-		if(currentObj != "Object")
+		if(type(currentObj) === '[object Object]')
 		{
 			return;
 		}
 		
 		if(simplId in currentObj)
 		{
-			//console.info(parentFieldName + " ------------ Adding ref: " + currentObj[simplId] + " [" + ++idCount +"]");
+			console.info(parentFieldName + " ------------ Adding ref: " + currentObj[simplId] + " [" + ++idCount +"]");
 			simplReferences[currentObj[simplId]] = currentObj;
 			delete currentObj[simplId];
 		}
+		
 		else if(simplRef in currentObj)
 		{
 			var ref = currentObj[simplRef];
@@ -44,8 +45,7 @@ var refCount = 0;
 					{
 						//console.info("Replacing item at index: " + index);
 						parentObj[index] = simplReferences[ref];
-					}
-					
+					}					
 				}
 				else
 				{
@@ -55,6 +55,7 @@ var refCount = 0;
 			}
 			else 
 				//console.info("No Such Reference: " + ref);
+				
 			skipRecursion = true;
 		}
 
