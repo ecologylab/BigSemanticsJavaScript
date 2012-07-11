@@ -1,6 +1,11 @@
 .goldenTest {
-	height: 400px;
+	height: 100%;
 	width: 100%;
 	background: tan;
-	float: right;
+	float: left;
+	-webkit-transition:width 500ms ease-in-out;
+	box-shadow: -3px 0px 8px -1px black;
+}
+body {
+	background: black;
 }

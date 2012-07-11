@@ -7,36 +7,53 @@
 		
 		<!-- Code -->
 		<script type="text/javascript" src="interactiveMetadata_v3.js"></script>
-		<script type="text/javascript" src="bluths.js"></script>
+		<script type="text/javascript" src="testJSON/bluths.js"></script>
 		
 		<script>
-			var level = 1;
+			var levels = [];
 			
 			function setup() {
-				goldenTest = createGolden(0, level);
-				document.body.appendChild(goldenTest);
+				levels["container1"] = 1;
+				levels["container2"] = 1;
+				
+				goldenTest1 = createGolden(0, levels["container1"], "container1");
+				cont1 = document.getElementById("container1");
+				console.log(cont1);
+				cont1.appendChild(goldenTest1);
+				
+				goldenTest2 = createGolden(0, levels["container2"], "container2");
+				document.getElementById("container2").appendChild(goldenTest2);
+				
+				
 			}
 		
-			function goDeeper() {
-				level++;
+			function goDeeper(containerId) {
+				console.log("going deeper");
+				if(levels[containerId] < 5)
+					levels[containerId]++;
+			
+				container = document.getElementById(containerId)
 				
-				while (document.body.hasChildNodes()) {
-				    document.body.removeChild(document.body.lastChild);
+				console.log(containerId);
+				console.log(container);
+				
+				while (container.hasChildNodes()) {
+				    container.removeChild(container.lastChild);
 				}
 				
-				for(i = 0; i < level; i++) {
-					goldenTest = createGolden(i, level);
-					document.body.appendChild(goldenTest);
+				for(i = levels[containerId] - 1; i >= 0; i--) {
+					goldenTest = createGolden(i, levels[containerId], containerId);
+					container.appendChild(goldenTest);
 				}
 			}
 			
-			function createGolden(index, depth) {
+			function createGolden(index, depth, containerId) {
 				div = document.createElement('div');
 				div.className = "goldenTest";
 				
-				div.onclick = goDeeper;
+				div.onclick = function() { goDeeper(containerId) };
 				
-				switch(level)
+				switch(depth)
 				{
 					case 1: div.style.width = "100%";
 							div.style.background = "red";
@@ -98,30 +115,7 @@
 										div.style.background = "red";
 										break;
 							}
-							break;
-					case 6: switch(index)
-							{
-								case 0: div.style.width = "40%";
-										div.style.background = "black";
-										break;
-								case 1: div.style.width = "25%";
-										div.style.background = "purple";
-										break;
-								case 2: div.style.width = "15%";
-										div.style.background = "blue";
-										break;
-								case 3: div.style.width = "10%";
-										div.style.background = "green";
-										break;
-								case 4: div.style.width = "6%";
-										div.style.background = "yellow";
-										break;
-								case 5: div.style.width = "4%";
-										div.style.background = "red";
-										break;
-							}
-							break;
-									
+							break;									
 				}
 				
 				return div;
@@ -129,7 +123,17 @@
 		</script>
 	</head>
 	
-	<body onload="setup();">
+	<body >
+		<div id="container1" style="width: 80%; height: 40%; padding: 0px; background: teal;">
+			
+		</div>
 		
+		<div id="container2" style="width: 80%; height: 40%; padding: 0px; background: aqua;">
+			
+		</div>
+		
+		<script>
+			setup();
+		</script>
 	</body>
 </html>
