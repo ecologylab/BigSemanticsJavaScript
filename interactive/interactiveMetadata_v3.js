@@ -122,14 +122,22 @@ function getAllOpenChildren(parents) {
 	return children;
 }
 
+function getEqualDimension(count) {
+	var w = 100 / count;
+	return w.toString() + '%';
+}
+
 function createColumnForParents(parents) {
 	var hadChildren = false;
 	var col = createGoldenColumn();
 	
+	var count = getAllOpenChildren(parents).length;
+	
 	for(var p in parents) {		
 		if(parents[p].hasOpenChildren()) {			
-			if(hadChildren) 
+			if(hadChildren) {
 				col.appendChild(createRowDivider());
+			}
 		
 			hadChildren = false;
 			
@@ -137,6 +145,7 @@ function createColumnForParents(parents) {
 				hadChildren = true;
 				
 				parents[p].openChildren[c].view = parents[p].openChildren[c].buildMetadataMainView(parents[p].openChildren[c].metadata);
+				parents[p].openChildren[c].view.style.height = getEqualDimension(count);
 				col.appendChild(parents[p].openChildren[c].view);
 			}
 		}
