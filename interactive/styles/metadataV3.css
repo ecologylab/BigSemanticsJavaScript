@@ -17,14 +17,25 @@
    	box-shadow: -3px 0px 8px -1px yellow;
 }
 
-.metadataContainer{
+.goldenColumn{
 	height: 100%;
 	width: 100%;
 	background: lightgray;
 	float: left;
 	-webkit-transition:width 500ms ease-in-out;
 	box-shadow: -3px 0px 8px -1px black;
-	
+}
+
+.rowDivider{
+	height: auto;
+	width: 100%;
+	border-top: 2px solid red;
+}
+
+.metadataContainer{
+	height: auto;
+	width: 100%;
+		
 	color: #222;
 	font-family: 'Segoe UI', Tahoma, sans-serif;
     font-size: 10px;
@@ -32,66 +43,8 @@
     white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
-}
-}
-
-.metadataContainer .full{
-    background-color: #DEDEDE;    
-    border: 2px solid #CCC;    
-    border-left: 10px solid #CCC;
-    
-    padding: 4px;
-    padding-left: 8px;
-    padding-right: 8px;
-    min-width: 240px;
-    
-    box-shadow: -2px 0px 10px 0px darkgray;
-    z-index: 10;
-    float:left;
-    
-    width: 600px;
-    min-height: 450px;
-    border-radius: 12px;
-}
-
-.metadataContainer .peek{
-    background-color: white;    
-    border: 2px solid #CCC;    
-    border-left: 10px solid #CCC;
-    
-    padding: 4px;
-    padding-left: 8px;
-    padding-right: 8px;    
-    margin: 4px;
-    float:right;
-    z-index: 20;
-    height: 440px;
-    min-width: 200px;
-    max-width: 400px;
-    position: absolute;
-    top: 0px;
-    right: 0px;
-}
-
-.metadataContainer .sliver:hover {
-	cursor: hand;
-	background: white;
-}
-
-.metadataContainer .sliver{
-    background-color: lightsteelblue;    
-    border: 2px solid #CCC;    
-    border-left: 10px solid #CCC;
-    
-    padding: 4px;
-    padding-left: 8px;
-    padding-right: 8px;    
-    width: 24px;
-    height: 450px;
-    float:left;
-	min-height: 240px;
-    z-index: 4;
-     border-radius: 12px 0px 0px 12px;
+	
+	border-bottom: 1px solid gray;
 }
 
 .metadataContainer .pulltab {
@@ -214,7 +167,7 @@
 
 .metadataContainer .fieldLabel{
 	color: #888;
-	font-size: 12px;
+	font-size: 11px;
 	text-align: right;
 }
 

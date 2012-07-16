@@ -2,6 +2,17 @@ function createMetadataBrowser(metadata) {
 	return new MetadataBrowser(metadata);
 }
 
+function createGoldenColumn() {
+	var column = document.createElement('div');
+	column.className = "goldenColumn";
+	return column;
+}
+
+function createRowDivider() {
+	var column = document.createElement('div');
+	column.className = "rowDivider";
+	return column;
+}
 
 function MetadataBrowser(metadata) {
 	this.metadata = metadata;
@@ -16,8 +27,13 @@ function MetadataBrowser(metadata) {
 	this.rootDisplay.view = this.rootDisplay.buildMetadataMainView(this.rootDisplay.metadata);
 	
 	this.history.push(this.rootDisplay);
-		
-	this.rootVisual.appendChild(this.rootDisplay.view);
+	
+	this.columns = [];
+	this.columns.push(createGoldenColumn());
+	
+	this.columns[0].appendChild(this.rootDisplay.view);
+	
+	this.rebuildVisual();
 }
 
 function MetadataDisplay(b, p, md, i) {
@@ -26,6 +42,7 @@ function MetadataDisplay(b, p, md, i) {
 	this.metadata = md;
 	this.index = i;
 	
+	this.openChildren = [];
 	this.children = [];
 
 	this.listView = this.buildListView();
@@ -52,32 +69,94 @@ MetadataDisplay.prototype.buildListView = function() {
 	return listItem;
 };
 
+MetadataDisplay.prototype.hasOpenChildren = function() {
+	return this.openChildren.length > 0;
+}
+
 function openChild(browser, parent, i) {
-	console.log(browser);
-	console.log(parent);
-	console.log(i);
+	parent.openChildren.push(parent.children[i]);
+	
+	browser.history.push(parent.children[i]);
 	
 	while (browser.rootVisual.hasChildNodes()) {
 	    browser.rootVisual.removeChild(browser.rootVisual.lastChild);
 	}
 	
-	browser.depth++;
+	browser.rebuildVisual();	
+}
+
+MetadataBrowser.prototype.buildColumns = function() {
+	var columns = [];
 	
-	browser.history.push(parent.children[i]);
+	columns.push(createGoldenColumn());	
+	columns[0].appendChild(this.rootDisplay.view);
 	
-	console.log(browser.history);
-	
-	for(var d = 0; d < browser.depth; d++) {
+	var parents = [];
+	parents.push(this.rootDisplay);
+
+	while(hasOpenChildren(parents)) {
+		columns.push(createColumnForParents(parents));	
 		
-		browser.history[d].view = browser.history[d].buildMetadataMainView(browser.history[d].metadata);
-		var div = browser.history[d].view;
+		parents = getAllOpenChildren(parents);
+	}
+	return columns;
+}
+
+function hasOpenChildren(parents) {
+	for(var p in parents)
+		if(parents[p].hasOpenChildren())
+			return true;
 			
-		switch(browser.depth)
+	return false;
+}
+
+function getAllOpenChildren(parents) {
+	var children = [];
+	for(var p in parents) {
+		if(parents[p].hasOpenChildren()){
+			for(var c in parents[p].openChildren) {
+				children.push(parents[p].openChildren[c]);
+			}				
+		}
+	}	
+	return children;
+}
+
+function createColumnForParents(parents) {
+	var hadChildren = false;
+	var col = createGoldenColumn();
+	
+	for(var p in parents) {		
+		if(parents[p].hasOpenChildren()) {			
+			if(hadChildren) 
+				col.appendChild(createRowDivider());
+		
+			hadChildren = false;
+			
+			for(var c in parents[p].openChildren) {
+				hadChildren = true;
+				
+				parents[p].openChildren[c].view = parents[p].openChildren[c].buildMetadataMainView(parents[p].openChildren[c].metadata);
+				col.appendChild(parents[p].openChildren[c].view);
+			}
+		}
+	}
+	return col;
+}
+
+MetadataBrowser.prototype.rebuildVisual = function() {
+	this.columns = this.buildColumns();
+	
+	
+	for(var c = 0; c < this.columns.length; c++) {
+		var div = this.columns[c];
+			
+		switch(this.columns.length)
 		{
 			case 1: div.style.width = "100%";
 					break;
 					
-			case 2: switch(d)
+			case 2: switch(c)
 					{
 						case 0: div.style.width = "38%";
 								break;
@@ -86,7 +165,7 @@ function openChild(browser, parent, i) {
 					}
 					break;
 					
-			case 3: switch(d)
+			case 3: switch(c)
 					{
 						case 0: div.style.width = "19%";
 								break;
@@ -96,7 +175,7 @@ function openChild(browser, parent, i) {
 								break;
 					}
 					break;
-			case 4: switch(d)
+			case 4: switch(c)
 					{
 						case 0: div.style.width = "10%";
 								break;
@@ -108,7 +187,7 @@ function openChild(browser, parent, i) {
 								break;
 					}
 					break;
-			case 5: switch(d)
+			case 5: switch(c)
 					{
 						case 0: div.style.width = "6%";
 								break;
@@ -123,10 +202,8 @@ function openChild(browser, parent, i) {
 					}
 					break;									
 		}
-		
-		browser.rootVisual.appendChild(div);
+		this.rootVisual.appendChild(div);
 	}
-	
 }
 
 MetadataDisplay.prototype.buildMetadataMainView = function(metadata) {
