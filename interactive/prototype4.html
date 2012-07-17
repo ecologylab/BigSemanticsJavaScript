@@ -6,6 +6,8 @@
 		<link href="styles/metadataV3.css" rel="stylesheet" type="text/css">
 		
 		<!-- Code -->
+		<script type="text/javascript" src="http://code.jquery.com/jquery-1.7.2.js"></script>
+		
 		<script type="text/javascript" src="interactiveMetadata_v3.js"></script>
 		<script type="text/javascript" src="testJSON/bluths.js"></script>
 		
@@ -13,12 +15,13 @@
 			function setup() {
 				var metadataBrowser = new MetadataBrowser(michael);
 				document.body.appendChild(metadataBrowser.rootVisual);
+				attachInlinkHovers();
 			}
 		</script>
 			
 	</head>
 	
-	<body >		
+	<body id="body">		
 		<script>
 			setup();
 		</script>

@@ -14,6 +14,13 @@ function createRowDivider() {
 	return column;
 }
 
+function spaceRemove(string) {
+	string =  string.replace(/ /g, "");
+	string =  string.replace(/\./g, "");
+	string =  string.replace(/\'/g, "");
+	return string;
+}
+
 function MetadataBrowser(metadata) {
 	this.metadata = metadata;
 	this.depth = 1;
@@ -34,6 +41,8 @@ function MetadataBrowser(metadata) {
 	this.columns[0].appendChild(this.rootDisplay.view);
 	
 	this.rebuildVisual();
+	
+	attachInlinkHovers();
 }
 
 function MetadataDisplay(b, p, md, i) {
@@ -53,6 +62,7 @@ MetadataDisplay.prototype.buildListView = function() {
 		listItem.className = "childListItem";
 
 	var titleValue = document.createElement('a');
+		titleValue.id = "li_"+spaceRemove(this.metadata.title.value);	
 		titleValue.className = "inlink";
 		titleValue.innerText = this.metadata.title.value;	
 		
@@ -60,8 +70,9 @@ MetadataDisplay.prototype.buildListView = function() {
 	var p = this.parent;
 	var b = this.browser
 		
-	listItem.onclick = function() { 
-		openChild(b, p, index)
+		
+	titleValue.onclick = function() { 
+		openChild(b, p, index);
 	};
 		
 	listItem.appendChild(titleValue);
@@ -215,6 +226,38 @@ MetadataBrowser.prototype.rebuildVisual = function() {
 	}
 }
 
+function attachInlinkHovers() {
+	inlinks = document.getElementsByClassName("inlink");
+	
+	for(i in inlinks) {
+		console.log($("#" + inlinks[i].id).hover);
+		
+		$("#" + inlinks[i].id).hover(
+			function() {
+				highlightAll(this);
+			},
+			function() {
+				returnAll(this);
+			});
+	}
+}
+
+function highlightAll(obj) {
+	inlinks = document.getElementsByClassName("inlink");	
+	for(i in inlinks) {
+		if(inlinks[i].id == obj.id)
+			inlinks[i].style.backgroundColor = "yellow";
+	}
+}
+
+function returnAll(obj) {
+	inlinks = document.getElementsByClassName("inlink");	
+	for(i in inlinks) {
+		if(inlinks[i].id == obj.id)
+			inlinks[i].style.backgroundColor = "lightgray";
+	}
+}
+
 MetadataDisplay.prototype.buildMetadataMainView = function(metadata) {
 	var rootVisual = document.createElement('div');
 		rootVisual.className = "metadataContainer";
@@ -307,8 +350,7 @@ MetadataDisplay.prototype.buildMetadataMainView = function(metadata) {
 									break;
 			}
 			
-			
-						row.appendChild(nameCol);
+			row.appendChild(nameCol);
 			row.appendChild(valueCol);
 		}		
 		
