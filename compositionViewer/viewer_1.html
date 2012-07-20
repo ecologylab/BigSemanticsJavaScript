@@ -1,0 +1,29 @@
+<html>
+	<head>
+		<title>InfoComposer Lite</title>
+		
+		<!-- Styles -->
+		<link href="styles/composer_1.css" rel="stylesheet" type="text/css">
+		
+		<!-- Code -->
+		<script type="text/javascript" src="http://code.jquery.com/jquery-1.7.2.js"></script>
+		<script type="text/javascript" src="code/composer_1.js"></script>
+		
+		<script>
+			function loadIcom() {
+				var filePath = document.getElementById("fileUploader").value;
+				console.log(filePath);
+			}
+		</script>
+			
+	</head>
+	
+	<body>		
+		
+		Load Composition (.icom)
+		<br/>
+		<input id="fileUploader" type="file" accept=".icom" onchange="loadIcom();"></input>
+		
+	</body>
+	
+</html>
