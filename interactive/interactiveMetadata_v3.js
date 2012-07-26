@@ -248,6 +248,13 @@ function highlightAll(obj) {
 		if(inlinks[i].id == obj.id)
 			inlinks[i].style.backgroundColor = "yellow";
 	}
+	
+	containers = document.getElementsByClassName("metadataContainer");	
+	for(i in containers) {
+		targetId = "div_" + obj.id.substring(3);
+		if(containers[i].id == targetId)
+			containers[i].style.backgroundColor = "white";
+	}
 }
 
 function returnAll(obj) {
@@ -256,12 +263,20 @@ function returnAll(obj) {
 		if(inlinks[i].id == obj.id)
 			inlinks[i].style.backgroundColor = "lightgray";
 	}
+	
+	containers = document.getElementsByClassName("metadataContainer");	
+	for(i in containers) {
+		targetId = "div_" + obj.id.substring(3);
+		if(containers[i].id == targetId)
+			containers[i].style.backgroundColor = "lightgray";
+	}
 }
 
 MetadataDisplay.prototype.buildMetadataMainView = function(metadata) {
 	var rootVisual = document.createElement('div');
 		rootVisual.className = "metadataContainer";
-	
+		rootVisual.id = "div_"+spaceRemove(metadata.title.value);
+		
 	var table = document.createElement('table');
 		table.className = "metadataView";
 	
