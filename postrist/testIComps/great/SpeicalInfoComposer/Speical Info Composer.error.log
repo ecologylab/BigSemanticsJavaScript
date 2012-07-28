@@ -1,0 +1,21 @@
+Excepution during saving composition XML file:
+java.util.ConcurrentModificationException
+	at java.util.AbstractList$Itr.checkForComodification(Unknown Source)
+	at java.util.AbstractList$Itr.next(Unknown Source)
+	at ecologylab.serialization.serializers.stringformats.XMLSerializer.serializeFields(XMLSerializer.java:222)
+	at ecologylab.serialization.serializers.stringformats.XMLSerializer.serialize(XMLSerializer.java:109)
+	at ecologylab.serialization.serializers.stringformats.XMLSerializer.serializeFields(XMLSerializer.java:227)
+	at ecologylab.serialization.serializers.stringformats.XMLSerializer.serialize(XMLSerializer.java:109)
+	at ecologylab.serialization.serializers.stringformats.XMLSerializer.serializeFields(XMLSerializer.java:196)
+	at ecologylab.serialization.serializers.stringformats.XMLSerializer.serialize(XMLSerializer.java:109)
+	at ecologylab.serialization.serializers.stringformats.XMLSerializer.serialize(XMLSerializer.java:47)
+	at ecologylab.serialization.serializers.stringformats.StringSerializer.serialize(StringSerializer.java:109)
+	at ecologylab.serialization.SimplTypesScope.serialize(SimplTypesScope.java:1744)
+	at ecologylab.composition.CompositionSpace.saveZippedCompositionHelper(CompositionSpace.java:2504)
+	at ecologylab.composition.CompositionSpace.access$3(CompositionSpace.java:2476)
+	at ecologylab.composition.CompositionSpace$SaveProgressDialog$2$1.run(CompositionSpace.java:3286)
+	at java.lang.Thread.run(Unknown Source)
+
+
+
+

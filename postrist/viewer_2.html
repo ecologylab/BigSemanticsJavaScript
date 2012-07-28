@@ -1,0 +1,103 @@
+<!DOCTYPE html 
+      PUBLIC "-//W3C//DTD HTML 4.01//EN"
+      "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+	<head>
+		<title>postrist</title>
+		
+		<link rel="icon" type="image/png" href="images/favicon_32.png">
+		
+		<!-- Styles -->
+		<link href="styles/composer_1.css" rel="stylesheet" type="text/css">
+		
+		<!-- Code -->
+		<script type="text/javascript" src="http://code.jquery.com/jquery-1.7.2.js"></script>
+		<script type="text/javascript" src="code/composer_1.js"></script>
+		<script type="text/javascript" src="code/visual/gridiron.js"></script>
+		<script type="text/javascript" src="code/camera.js"></script>
+		<script type="text/javascript" src="code/bigun.js"></script>
+		
+		<script type="text/javascript" src="testIComps/sample.js"></script>
+		
+		<script>
+			// dev options
+			var DEBUGIES = true;
+		
+		
+			// visual dudes
+			var headband;
+			var cakeMenu;
+			var woodgies;
+			var plane;
+			var gridiron;
+				
+			// aides
+			var camera = new Camera();	
+				
+			function setup() {
+				var composition = constructComposition(sample1);
+				console.log(composition);
+				
+				var rootVisual = createCompositionVisual(composition);
+				
+				
+				gridiron = createGridIron();
+				var compSpace = document.getElementById("compositionSpace");
+				compSpace.appendChild(gridiron);
+				
+				if(DEBUGIES) {
+					var debugDiv = buildDebugies();
+					compSpace.appendChild(debugDiv);
+				}
+				
+				compSpace.appendChild(rootVisual);
+				
+				camera.setup();
+			}
+			
+		</script>
+			
+	</head>
+	
+	<body>
+		<div id="haedband">
+			
+		</div>
+		
+		<div id="compositionSpace">
+			
+			<!-- cake menu -->
+			
+			<div id="cakeMenu">
+			
+			</div>
+			
+			
+			<!-- woodgies -->
+			
+			<div id="woodgies">
+			
+			</div>
+			
+			
+			<!-- plane of elementince -->
+			
+			<div id="plane">
+			
+			</div>
+			
+			
+			<!-- gridiron -->
+			
+			<!-- debugies -->
+				
+			
+		</div>
+		
+		<script>
+			setup();
+		</script>	
+				
+	</body>
+	
+</html>
