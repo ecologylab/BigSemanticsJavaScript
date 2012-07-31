@@ -7,6 +7,7 @@
 	padding: 10px;
 	text-align: center;
 	text-align: middle;
+	overflow: hidden;
 }
 
 .compositionElement {
@@ -28,6 +29,13 @@ body {
 	padding: 0px;
 	margin: 0px;
 	background: lightgray;
+}
+
+.footer {
+	text-align: center;
+	margin-left: auto;
+	margin-right: auto;
+	padding: 10px;
 }
 
 #gridiron .beam {

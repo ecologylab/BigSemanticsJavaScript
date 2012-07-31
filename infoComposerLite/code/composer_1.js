@@ -85,8 +85,8 @@ function Extent(string) {
 	var tokens = string.split(' ');
 	this.x = tokens[0]; 
 	this.y = tokens[1]; 
-	this.height = tokens[2]; 
-	this.width = tokens[3]; 
+	this.width = tokens[2]; 
+	this.height = tokens[3]; 
 }
 
 function createCompositionVisual(composition) {
