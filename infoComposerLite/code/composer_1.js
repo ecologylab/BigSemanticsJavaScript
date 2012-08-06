@@ -1,12 +1,6 @@
 var clippingMap = [];
 var mediaMap = [];
 
-function constructComposition(file) {
-	var composition = new InformationComposition(file.information_composition);
-	return composition
-}
-
-
 function InformationComposition(obj) {
 	this.version = obj["-version"];
 	this.metadataVersion = obj["-metadata_version"];
@@ -89,8 +83,10 @@ function Extent(string) {
 	this.height = tokens[3]; 
 }
 
-function createCompositionVisual(composition) {
-	var rootVisual = document.getElementById("compositionSpace");
+function createCompositionVisual(file) {
+	var composition = new InformationComposition(file);
+	console.log(composition);
+	var rootVisual = document.createElement('div');
 		rootVisual.className = "compositionContainer";
 		rootVisual.style.height = composition.height + "px";
 		rootVisual.style.width = composition.width + "px";
@@ -112,15 +108,11 @@ function createElementVisual(element) {
 		rootVisual.style.width = element.extent.width + "px";
 		rootVisual.style.top = element.extent.y + "px";
 		rootVisual.style.left = element.extent.x + "px";
-	
-	//console.log(element.clipping);
-	//console.log(typeof element.clipping);
-	//if(element.clipping === "ImageClipping") {
-		var imgVisual = document.createElement('img');
-			imgVisual.src = element.clipping.media.location;
-		//console.log("ASGSDFASDFSDF");
-		rootVisual.appendChild(imgVisual);
-	//}
+
+	var imgVisual = document.createElement('img');
+		imgVisual.src = element.clipping.media.location;
+
+	rootVisual.appendChild(imgVisual);
 	
 	return rootVisual;
 }
