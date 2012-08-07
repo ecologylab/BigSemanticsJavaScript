@@ -8,14 +8,16 @@
 	text-align: center;
 	text-align: middle;
 	overflow: hidden;
-}
-
-.compositionElement {
 	position: relative;
 }
 
+.compositionElement {
+	position: absolute;
+	background: lightblue;
+}
+
 .compositionElement:hover {
-	box-shadow: 0px 0px 8px gray;
+	box-shadow: 0px 0px 12px darkblue;
 }
 
 img {

@@ -4,16 +4,20 @@
 		
 		<!-- Styles -->
 		<link href="styles/composer_1.css" rel="stylesheet" type="text/css">
+		<link href="styles/metadataV3.css" rel="stylesheet" type="text/css">
 		
 		<!-- Code -->
 		<script type="text/javascript" src="http://code.jquery.com/jquery-1.7.2.js"></script>
-		<script type="text/javascript" src="code/composer_1.js"></script>
+		<script type="text/javascript" src="code/composer_2.js"></script>
+		<script type="text/javascript" src="code/interactiveMetadata_v3.js"></script>
+		<script type="text/javascript" src="code/simplDeserializer.js"></script>
 		<script type="text/javascript" src="testData/sample.js"></script>
 		<script type="text/javascript" src="testData/testComp.js"></script>
 		
 		<script>
 			function setup() {
 				var rootVisual = createCompositionVisual(data1);
+				console.log(rootVisual);
 				document.getElementById("compositionSpace").appendChild(rootVisual);
 			}
 		</script>
