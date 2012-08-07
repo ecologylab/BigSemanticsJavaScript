@@ -37,21 +37,6 @@
 	left: 0px;
 }
 
-body {
-	width: 100%;
-	height: 100%;
-	padding: 0px;
-	margin: 0px;
-	background: lightgray;
-}
-
-.footer {
-	text-align: center;
-	margin-left: auto;
-	margin-right: auto;
-	padding: 10px;
-}
-
 .compositionElement:hover .incontextMetadata{
 	visibility: visible;	
 	display: block;	
@@ -111,23 +96,11 @@ body {
 	text-decoration: none;
 }
 
-.expandsese{
-	background: lightblue;
-	border: 1px solid gray;
-	padding: 0px 8px 0px 8px;
-	border-radius: 4px;
-	display: inline;
-}
-.expandsese:hover{
-	cursor: hand;
-	background: slateblue;
-}
-
-.fieldValue .snippet {
+.incontextMetadata .fieldValue .snippet {
 	display: inline;
 }
 
-.fieldValue .complete {
+.incontextMetadata .fieldValue .complete {
 	display: none;
 }
 
@@ -138,23 +111,15 @@ body {
 	border: 0px;
 }
 
-.incontextMetadata .favicon{
-	width: 24px;
-	height: 24px;
-	text-align:center;
-	padding: 0px 6px 0px 0px;
-	vertical-align: text-bottom;
-}
-
 .incontextMetadata .titleRow{
 	border-top: none;
 }
 
-.metadata_h1{
+.incontextMetadata .metadata_h1{
 	font-size: 20px;	
 }
 
-.domainSpan{
+.incontextMetadata .domainSpan{
 	color: #888;
 	font-size: 10px;
 	padding-left: 6px;
@@ -163,16 +128,6 @@ body {
 
 .incontextMetadata .documentSnip .metadata_h1{
 	font-size: 14px;
-}
-
-.incontextMetadata .sliver .metadata_h1{
-	font-size: 14px;
-    filter: fliph, flipv;
-    -webkit-transform:rotate(270deg);
-    -moz-transform:rotate(270deg);
-    -o-transform: rotate(270deg);
-    width:20px;
-    height:20px;
 }
 
 .incontextMetadata .fieldLabelCol{
@@ -192,57 +147,4 @@ body {
 	overflow: hidden;
 	text-overflow: ellipsis;
 	text-align: left;
-}
-
-.incontextMetadata .fieldValue_img {
-	position: relative;
-	z-index: 0;
-}
-
-.incontextMetadata .fieldValue img {
-	max-height: 120px;
-	height:auto;
-	-webkit-transition:max-height 500ms ease-in-out;
-}
-
-.incontextMetadata .fieldValue img:hover{
-	cursor: hand;
-}
-
-.incontextMetadata .imgList {
-	display: block;
-	border-spacing: 0px;
-	border-collapse: collapse;
-	padding: 0px;
-	text-align: left;
-}
-
-.incontextMetadata .imgList li{
-	padding: 0px;
-}
-.incontextMetadata .imgList img{
-	margin-right: 0px;
-	padding: 0px;
-	margin: 0px;
-	float: left;
-}
-
-.childSnip{
-	padding-right: 8px;
-}
-
-.inlink {
-	color: green;
-	font-style: italic;
-	background-color: lightgray;
-	padding: 2px 6px 2px 6px;
-	border-radius: 4px;
-	border: 1px solid gray;
-	white-space: nowrap;
-}
-
-.inlink:hover {
-	color: darkgreen;
-	cursor: hand;
-	background-color: yellow;
 }

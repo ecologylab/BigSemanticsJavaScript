@@ -1,18 +1,18 @@
 <html>
 	<head>
-		<title>InfoComposer Lite</title>
+		<title>HTML 5 InfoComposer TEST</title>
 		
 		<!-- Styles -->
-		<link href="styles/composer_1.css" rel="stylesheet" type="text/css">
+		<link href="../composer.css" rel="stylesheet" type="text/css">
 		
 		<!-- Code -->
-		<script type="text/javascript" src="code/composer_2.js"></script>
+		<script type="text/javascript" src="../composer.js"></script>
 		
-		<script type="text/javascript" src="testData/testComp.js"></script>
+		<script type="text/javascript" src="testComp.js"></script>
 		
 		<script>
 			function setup() {
-				var rootVisual = createCompositionVisual(data1);
+				var rootVisual = createCompositionVisual(compositionJSON);
 				document.getElementById("compositionSpace").appendChild(rootVisual);
 			}
 		</script>
@@ -39,10 +39,6 @@
 	<body>		
 			<div id="compositionSpace">
 				
-			</div>
-			
-			<div id="footer">
-				Interface Ecology Lab 2012
 			</div>
 			
 			<script>
