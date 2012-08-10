@@ -55,14 +55,20 @@ function createElementVisual(element) {
 		
 	if(element.image_clipping != null) {
 		var metadata = element.image_clipping.compound_document;
-		rootVisual.href = metadata.location;
+		
+		if(metadata != null && metadata.location != null)
+			rootVisual.href = metadata.location;
+		
 		rootVisual.target = "_blank";
 		
 		rootVisual.appendChild(createInContextMetadata(extent, metadata));
 	}
 	else if(element.annotation != null) {
 		var metadata = element.annotation;
-		rootVisual.href = metadata.location;
+		
+		if(metadata != null && metadata.location != null)
+			rootVisual.href = metadata.location;
+		
 		rootVisual.target = "_blank";
 		
 		rootVisual.appendChild(createInContextMetadata(extent, metadata));
