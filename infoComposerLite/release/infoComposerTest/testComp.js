@@ -1188,3 +1188,100 @@ var compositionJSON = {
 		}
 	}
 };
+
+var testData = {"information_composition":{"version":"5.1","metadata_version":"2.86","window_size":"NEAR_FULL","width":"1360","height":"667","metadata":[{"image_clipping":{"simpl.id":"16179619","caption":"Google Images","compound_document":{"location":"http:\/\/images.google.com\/","title":"Google Images","clippings":[{"clipping":{"mm_name":"clippings"}}],"root_document":{"mm_name":"root_document"}},"image":{"simpl.id":"5751023","location":"http:\/\/images.google.com\/intl\/en_ALL\/images\/logos\/images_logo_lg.gif","local_location":"images-images\/-949075883.png","width":"276","height":"110","clippings_this_is_in":[{"image_clipping":{"simpl.ref":"16179619"}}]}}}],"named_styles_map":{"named_style":[]},"composition_space":{"extent":"0 0 1360 667","is_active":"true","is_interactive":"true","z_index":"-1","kids":[{"composition_element":{"extent":"490 249 276 110","is_active":"true","is_interactive":"true","z_index":"-1","kids":[{"img_visual":{"extent":"490 249 276 110","is_active":"true","is_interactive":"true","z_index":"-1","kids":[],"pixel_based":{"simpl.id":"12261069","width":"276","height":"110","rendering":{"is_active":"true","width":"276","height":"110","pixel_based":{"simpl.ref":"12261069"}},"rendering":{"is_active":"true","width":"276","height":"110","pixel_based":{"simpl.ref":"12261069"}}},"image":{"simpl.ref":"5751023"}}}],"image_clipping":{"simpl.ref":"16179619"}}}]}}};
+
+var compositionJSON1 = {
+    "information_composition": {
+    	"metadata": [
+            {
+                "image_clipping": {
+                	"simpl.id": "16179619",
+                    "caption": "Google Images",
+                    "compound_document": {
+                    	"clippings": [
+                            {
+                                "clipping": {
+                                    "mm_name": "clippings"
+                                }
+                            }
+                        ],
+                        "location": "http://images.google.com/",
+                        "root_document": {
+                            "mm_name": "root_document"
+                        },
+                        "title": "Google Images"
+                    },
+                    "image": {
+                        "clippings_this_is_in": [
+                            {
+                                "image_clipping": {
+                                    "simpl.ref": "16179619"
+                                }
+                            }
+                        ],
+                        "height": "110",
+                        "local_location": "images-images/-949075883.png",
+                        "location": "http://images.google.com/intl/en_ALL/images/logos/images_logo_lg.gif",
+                        "simpl.id": "5751023",
+                        "width": "276"
+                    }
+                }
+            }
+        ],
+        "composition_space": {
+            "extent": "0 0 1360 667",
+            "is_active": "true",
+            "is_interactive": "true",
+            "kids": [
+                {
+                    "composition_element": {
+                        "extent": "490 249 276 110",
+                        "image_clipping": {
+                            "simpl.ref": "16179619"
+                        },
+                        "is_active": "true",
+                        "is_interactive": "true",
+                        "kids": [
+                            {
+                                "img_visual": {
+                                    "extent": "490 249 276 110",
+                                    "image": {
+                                        "simpl.ref": "5751023"
+                                    },
+                                    "is_active": "true",
+                                    "is_interactive": "true",
+                                    "kids": [],
+                                    "pixel_based": {
+                                        "height": "110",
+                                        "rendering": {
+                                            "height": "110",
+                                            "is_active": "true",
+                                            "pixel_based": {
+                                                "simpl.ref": "12261069"
+                                            },
+                                            "width": "276"
+                                        },
+                                        "simpl.id": "12261069",
+                                        "width": "276"
+                                    },
+                                    "z_index": "-1"
+                                }
+                            }
+                        ],
+                        "z_index": "-1"
+                    }
+                }
+            ],
+            "z_index": "-1"
+        },
+        "height": "667",        
+        "metadata_version": "2.86",
+        "named_styles_map": {
+            "named_style": []
+        },
+        "version": "5.1",
+        "width": "1360",
+        "window_size": "NEAR_FULL"
+    }
+}; 

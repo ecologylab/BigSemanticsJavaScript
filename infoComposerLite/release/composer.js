@@ -56,7 +56,7 @@ function createElementVisual(element) {
 	if(element.image_clipping != null) {
 		var metadata = element.image_clipping.compound_document;
 		
-		if(metadata != null && metadata.location != null)
+		//if(metadata != null && metadata.location != null)
 			rootVisual.href = metadata.location;
 		
 		rootVisual.target = "_blank";
@@ -66,7 +66,7 @@ function createElementVisual(element) {
 	else if(element.annotation != null) {
 		var metadata = element.annotation;
 		
-		if(metadata != null && metadata.location != null)
+		//if(metadata != null && metadata.location != null)
 			rootVisual.href = metadata.location;
 		
 		rootVisual.target = "_blank";
