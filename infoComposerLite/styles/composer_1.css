@@ -9,6 +9,13 @@
 	text-align: middle;
 	overflow: hidden;
 	position: relative;
+	
+	-webkit-touch-callout: none;
+-webkit-user-select: none;
+-khtml-user-select: none;
+-moz-user-select: none;
+-ms-user-select: none;
+user-select: none;
 }
 
 .compositionElement {
@@ -52,8 +59,7 @@ body {
 	padding: 10px;
 }
 
-.compositionElement:hover .incontextMetadata{
-	visibility: visible;	
+.compositionElement:hover .incontextMetadata{	
 	display: block;	
 }
 
@@ -72,9 +78,8 @@ body {
 	background: lightgray;
 	
 	border: 2px solid darkgray;
-	visibility: hidden;
 	position: relative;
-	display: block;
+	display: none;
 	z-index: 10;
 	
 	-webkit-transition: all 0.0s ease-in-out;
@@ -246,3 +251,40 @@ body {
 	cursor: hand;
 	background-color: yellow;
 }
+
+
+.overlay {
+	width: 100%;
+	height: 100%;
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	z-index: 2;
+	display: none;
+}
+
+.overlay .button {
+	background: white;
+	opacity: 0.5;
+	width: 30px;
+	height: 30px;
+	border-radius: 15px;
+	position: absolute;
+}
+
+.overlay .button:hover {
+	opacity: 1.0;
+}
+
+.compositionElement:hover .overlay{	
+	display: block;
+}
+
+
+
+
+
+
+
+
+
