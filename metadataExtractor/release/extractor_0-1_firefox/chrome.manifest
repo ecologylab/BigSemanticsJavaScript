@@ -1,0 +1,2 @@
+content extractor chrome/content/  
+overlay chrome://browser/content/browser.xul chrome://extractor/content/extractorOverlay.xul  

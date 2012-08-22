@@ -12,14 +12,26 @@ chrome.extension.sendRequest({loadOptions: "all"}, function(response) {
 
 
 // Calls the windw.onload function after 1 second, this is to ensure that the onload function is called on the page.
-setTimeout(window.onload, 1000);
+// setTimeout(window.onload, 1000);
 
 /** window.onload
  *  Extracts the metadata from the current document.
  */
-window.onload = function() {
-	if(!hasMetadata && settings != null) {
-		
+window.addEventListener('load', getMetadataWhenSettingsAreHere);
+
+function getMetadataWhenSettingsAreHere() 
+{
+	if (settings != null) 
+	{	
+		getMetadataIfNeeded();
+	}
+	else
+		setTimeout(getMetadataWhenSettingsAreHere, 500);	// wait some more for the settings to show up
+}
+function getMetadataIfNeeded()
+{
+	if (!hasMetadata) 
+	{	
 		if(settings.selectionInjection == "true" && !selectionListener) {
 			
 			// Add the selection range metadata injection handler
@@ -34,7 +46,8 @@ window.onload = function() {
 		hasMetadata = true;
 		
 		// Call textractMetadataFromUrl() from mmdDomHelper.js
-		extractMetadataFromUrl(document.URL, document, function(data){
+		extractMetadataFromUrl(document.URL, document, function(data)
+		{
 		    metadata = data;
 
 		    if(settings.debugMetadata == "true") {
@@ -54,6 +67,7 @@ window.onload = function() {
 				tagEachElementWithContainer();
 	    });
 	}
+
 }
 
 /** tagEachElementWithContainer
