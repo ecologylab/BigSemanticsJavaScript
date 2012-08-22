@@ -61,29 +61,32 @@ function extractMetadata(targetDoc, mmd) {
 	doc = targetDoc;
 	
 	if(mmd != null) {	
-		simplDeserialize(mmd);
+		//simplDeserialize(mmd);
 		mmd = mmd.meta_metadata;
+		
+		if(mmd.parser == "xpath")
+		{
 
-		if (mmd.hasOwnProperty('def_var')) {
-			for (var i = mmd.def_var.length - 1; i >= 0; i--) {
-				var thisvar = mmd.def_var[i];
-				//console.log("Setting def_var: " + thisvar.name);
-				if (thisvar.hasOwnProperty('type')) {
-					if(thisvar.type == "node") {
-						var result = getNodeWithXPath(doc, thisvar.xpath);
-						if(result) {
-							defVars[thisvar.name] = result;
-							//console.log("def_var Value: ");
-							//console.info(result);
-	                    }
-	                }
-	            }
-	        }
-       }
-
-	    var metadata = recursivelyExtractMetadata(mmd, doc, null, null);
-	    //console.info(metadata);
-	    
+			if (mmd.hasOwnProperty('def_var')) {
+				for (var i = mmd.def_var.length - 1; i >= 0; i--) {
+					var thisvar = mmd.def_var[i];
+					//console.log("Setting def_var: " + thisvar.name);
+					if (thisvar.hasOwnProperty('type')) {
+						if(thisvar.type == "node") {
+							var result = getNodeWithXPath(doc, thisvar.xpath);
+							if(result) {
+								defVars[thisvar.name] = result;
+								//console.log("def_var Value: ");
+								//console.info(result);
+		                    }
+		                }
+		            }
+		        }
+	       }
+	
+		    var metadata = recursivelyExtractMetadata(mmd, doc, null, null);
+		    //console.info(metadata);
+	   }
 	    if(rawExtraction) {    	
 	    	metadata['location'] = doc.location.href;
 	    }

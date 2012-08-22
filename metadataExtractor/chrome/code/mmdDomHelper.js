@@ -25,7 +25,7 @@ function extractMetadataFromUrl(purl, targetDoc, callback) {
 	var serviceURL = "http://ecoarray0:2080/ecologylabSemanticService/mmd.json?url=";//settings.serviceUrl;
 	
 	if(settings.service == "infoComp") {
-		
+		serviceURL = "http://localhost:2107";
 		var request = {lookup_mmd_request: {url: purl}};
 	
 		var xmlhttp = new XMLHttpRequest();
@@ -46,7 +46,7 @@ function extractMetadataFromUrl(purl, targetDoc, callback) {
 					console.log(response['lookup_mmd_response']);
 				}
 				
-				callback(extractMetadata(doc, response['lookup_mmd_response']));
+				callback(extractMetadata(doc, response['lookup_mmd_response']['meta_metadata']));
 			}
 		}
 		var msg = JSON.stringify(request);
@@ -85,30 +85,34 @@ function extractMetadata(targetDoc, mmd) {
 	if(mmd != null) {	
 		//simplDeserialize(mmd);
 
-		console.log("\n\nDeserialized MMD\n");
+		//console.log("\n\nDeserialized MMD\n");
 
-		console.log(mmd);
+		//console.log(mmd);
 		//console.log(JSON.stringify(mmd));
+		
+		if(mmd.parser == "xpath")
+		{
 
-		if (mmd.hasOwnProperty('def_var')) {
-			for (var i = mmd.def_var.length - 1; i >= 0; i--) {
-				var thisvar = mmd.def_var[i];
-				//console.log("Setting def_var: " + thisvar.name);
-				if (thisvar.hasOwnProperty('type')) {
-					if(thisvar.type == "node") {
-						var result = getNodeWithXPath(doc, thisvar.xpath);
-						if(result) {
-							defVars[thisvar.name] = result;
-							//console.log("def_var Value: ");
-							//console.info(result);
-	                    }
-	                }
-	            }
-	        }
-       }
-
-	    var metadata = recursivelyExtractMetadata(mmd, doc, null, null);
-	    //console.info(metadata);
+			if (mmd.hasOwnProperty('def_var')) {
+				for (var i = mmd.def_var.length - 1; i >= 0; i--) {
+					var thisvar = mmd.def_var[i];
+					//console.log("Setting def_var: " + thisvar.name);
+					if (thisvar.hasOwnProperty('type')) {
+						if(thisvar.type == "node") {
+							var result = getNodeWithXPath(doc, thisvar.xpath);
+							if(result) {
+								defVars[thisvar.name] = result;
+								//console.log("def_var Value: ");
+								//console.info(result);
+		                    }
+		                }
+		            }
+		        }
+	       }
+	
+		    var metadata = recursivelyExtractMetadata(mmd, doc, null, null);
+		    //console.info(metadata);
+		}
 	    
 	    if(rawExtraction) {
 	    	metadata['title'] = doc.title;	
