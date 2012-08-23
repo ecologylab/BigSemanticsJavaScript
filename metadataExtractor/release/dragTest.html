@@ -7,10 +7,13 @@
 			 * @param doc, the target DOM
 			 * @param data, the metadata JSON string
 			 */
+//				var FLAVOR	= "application/json";
+//				var FLAVOR	= "application/x-java-serialized-object";
+				var FLAVOR	= "text/xml";
 			function registerDragstart(doc, data) {
 				doc.addEventListener("dragstart", function(event) {			    
-				    event.dataTransfer.setData("application/json", data);
-				    console.log("changeing data transfer");
+				    event.dataTransfer.setData(FLAVOR, "<stuff>aaa</stuff>");
+				    console.log(event.dataTransfer.getData(FLAVOR));
 				});
 			}
 			
