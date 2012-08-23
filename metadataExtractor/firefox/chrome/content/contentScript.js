@@ -75,7 +75,10 @@ function initDocumentMetadata(doc) {
  */
 function registerDragstart(doc, data) {
 	doc.addEventListener("dragstart", function(event) {			    
-	    event.dataTransfer.setData("application/json", data);
+	    var currentHTML = event.dataTransfer.getData("text/html");
+		var newHTML = "<div simpl:metadata=\"" + data + "\" simpl:location=\"" + document.URL + "\">"
+					+ currentHTML + "</div>"; 
+		event.dataTransfer.setData("text/html", newHTML);
 	});
 }
 
