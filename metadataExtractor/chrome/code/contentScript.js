@@ -102,7 +102,7 @@ function injectMetadata() {
 	
 	if(t.type == "Range") {
 		var injected = document.createElement('img');//span is a no go
-		injected.setAttribute("metadata", getMetadataString());
+		injected.setAttribute("simpl:metadata", getMetadataString());
 		injected.setAttribute("class","injectedMetadata");
 		
 		var range = t.getRangeAt();
