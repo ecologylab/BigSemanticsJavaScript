@@ -79,7 +79,7 @@ function tagEachElementWithContainer() {
 	for(i in items) {
 		var item = items[i];
     	if(typeof(item) == "object")
-        	item.setAttribute("metadata", getMetadataString());
+        	item.setAttribute("simpl:metadata", getMetadataString());
 	}
 }
 
