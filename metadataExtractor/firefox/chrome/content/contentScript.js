@@ -89,7 +89,7 @@ function registerDragstart(doc, data) {
 function getMetadataString() {	
 	var data = {};
 	data[metadata["mm_name"]] = getRawMetadata(metadata);
-	return JSON.stringify(data);	
+	return JSON.stringify(data).replace(new RegExp("\"", "gm"), "&quot;");	
 }
 
 /** getRawMetadata

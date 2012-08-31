@@ -89,6 +89,7 @@ function extractMetadata(targetDoc, mmd) {
 
 		//console.log(mmd);
 		//console.log(JSON.stringify(mmd));
+		var metadata = {};
 		
 		if(mmd.parser == "xpath")
 		{
@@ -110,7 +111,7 @@ function extractMetadata(targetDoc, mmd) {
 		        }
 	       }
 	
-		    var metadata = recursivelyExtractMetadata(mmd, doc, null, null);
+		    metadata = recursivelyExtractMetadata(mmd, doc, null, null);
 		    //console.info(metadata);
 		}
 	    

@@ -63,7 +63,7 @@ function extractMetadata(targetDoc, mmd) {
 	if(mmd != null) {	
 		//simplDeserialize(mmd);
 		mmd = mmd.meta_metadata;
-		
+		var metadata = {};
 		if(mmd.parser == "xpath")
 		{
 
@@ -84,7 +84,7 @@ function extractMetadata(targetDoc, mmd) {
 		        }
 	       }
 	
-		    var metadata = recursivelyExtractMetadata(mmd, doc, null, null);
+		    metadata = recursivelyExtractMetadata(mmd, doc, null, null);
 		    //console.info(metadata);
 	   }
 	    if(rawExtraction) {    	
