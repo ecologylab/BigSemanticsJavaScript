@@ -7,17 +7,18 @@
 			 * @param doc, the target DOM
 			 * @param data, the metadata JSON string
 			 */
-//				var FLAVOR	= "application/json";
-//				var FLAVOR	= "application/x-java-serialized-object";
-				var FLAVOR	= "text/xml";
+			//var FLAVOR = "application/json";
+			var FLAVOR = "application/x-java-serialized-object";
 			function registerDragstart(doc, data) {
-				doc.addEventListener("dragstart", function(event) {
+				doc.addEventListener("dragstart", function(event) { 
 					var currentHTML = event.dataTransfer.getData("text/html");
 					var newHTML = "<div simpl:metadata=\"" + data + "\" simpl:location=\"" + document.URL + "\">"
 						+ currentHTML + "</div>"; 
-				    event.dataTransfer.setData("text/html", newHTML);
+					event.dataTransfer.setData("text/html", newHTML);
+					/*
+				    event.dataTransfer.setData(FLAVOR, data);
 				    console.log("changeing data transfer");
-
+				    */
 				});
 			}
 			

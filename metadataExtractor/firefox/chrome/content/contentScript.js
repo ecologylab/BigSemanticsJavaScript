@@ -26,9 +26,10 @@ function onWindowLoad() {
  * @param aEvent, the DOM loaded event
  */
 function onPageLoad(aEvent) {
-	var doc = aEvent.originalTarget;    
-    
+	var doc = aEvent.originalTarget;        
     if(doc.location != null && !endsWith(doc.location.href, ".js") && !endsWith(doc.location.href, ".css")) {
+    	registerLocationDragstart(doc);
+    	
     	initDocumentMetadata(doc);
     }
 }
@@ -37,14 +38,16 @@ function onPageLoad(aEvent) {
  * Loads the app settings and calls extractMetadataFromURL in mmdDomHelper.js
  * @param doc, the target DOM
  */
-function initDocumentMetadata(doc) {
-	
+function initDocumentMetadata(doc) {	
+
 	// load add-on preferences
 	var prefs = Components.classes["@mozilla.org/preferences-service;1"]  
          			.getService(Components.interfaces.nsIPrefService)  
          			.getBranch("extensions.extractor."); 
          				
-	settings = 	{
+	
+	
+	settings = {
       				service: prefs.getCharPref("service"),
       				serviceUrl: prefs.getCharPref("serviceUrl"),
       				metadataInjection: prefs.getCharPref("metadataInjection"),
@@ -59,13 +62,30 @@ function initDocumentMetadata(doc) {
      	settings.serviceUrl = "http://localhost:2107/";
      else if(settings.service == "ecologyLab") // needs changing
      	settings.serviceUrl = "http://128.194.143.75:8080/ecologylabSemanticService/mmd?url=";
-      				
+    
+    
+    alert("init metadata");
+     
 	extractMetadataFromUrl(doc.URL, doc, function(data){
 		metadata = data;
-		console.log(metadata);
-		if(settings.dragInjection)
-			registerDragstart(doc, getMetadataString(metadata));
+		registerMetadataDragstart(doc, getMetadataString(metadata));
 	});	
+}
+
+var dragHandler = {};
+
+function registerLocationDragstart(doc) {
+	
+	dragHandler = function(event){
+		var currentHTML = event.dataTransfer.getData("text/html");
+		var newHTML = "<div simpl:location=\"" + doc.URL + "\">"
+						+ currentHTML + "</div>"; 
+		event.dataTransfer.setData("text/html", newHTML);
+		
+		//alert(event.dataTransfer.getData("text/html"));
+	};
+	
+	doc.addEventListener("dragstart", dragHandler);
 }
 
 /** registerDragstart
@@ -73,14 +93,22 @@ function initDocumentMetadata(doc) {
  * @param doc, the target DOM
  * @param data, the metadata JSON string
  */
-function registerDragstart(doc, data) {
-	doc.addEventListener("dragstart", function(event) {			    
+function registerMetadataDragstart(doc, data) {
+	alert("registering metadata dragstart");
+	
+	doc.removeEventListener("dragstart", dragHandler);
+	
+	dragHandler = function(event) {			    
 	    var currentHTML = event.dataTransfer.getData("text/html");
-		var newHTML = "<div simpl:metadata=\"" + data + "\" simpl:location=\"" + document.URL + "\">"
+		var newHTML = "<div simpl:metadata=\"" + data + "\" simpl:location=\"" + doc.URL + "\">"
 					+ currentHTML + "</div>"; 
 		event.dataTransfer.setData("text/html", newHTML);
-	});
+	};
+	
+	doc.addEventListener("dragstart", dragHandler);
 }
+
+
 
 /** getMetadataString
  * Converts the metadata object into a JSON string.

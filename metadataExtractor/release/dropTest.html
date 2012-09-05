@@ -11,6 +11,7 @@
 				htmlType     = text+"html",
 				uriType      = text+"uri-list",
 				jsonType	 = "application/json",
+				javaType	 = "application/x-java-serialized-object",
 				mozUrlType   = text+"x-moz-url";
 				
 				var dt = event.dataTransfer;
@@ -20,13 +21,15 @@
 				htmlData = dt.getData(htmlType),
 				uriList  = dt.getData(uriType),
 				jsonData = dt.getData(jsonType),
-				mozUrl   = dt.getData(mozUrlType);
+				mozUrl   = dt.getData(mozUrlType),
+				javaData   = dt.getData(javaType);
 				
 				console.log("text = " + textData);
 				console.log("html = " + htmlData);
 				console.log("uris = " + uriList);
 				console.log("mozu = " + mozUrl);
 				console.log("json = " + jsonData);
+				console.log("java = " + javaData);
 			}
 			
 			document.ondragover = function(event) { 

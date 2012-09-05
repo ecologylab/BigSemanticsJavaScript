@@ -19,6 +19,8 @@ var doc = null;
  */
 function extractMetadataFromUrl(purl, targetDoc, callback) {
 	
+	
+	
 	rawExtraction = false;
 	doc = targetDoc;
 	
@@ -80,6 +82,8 @@ function extractMetadataFromUrl(purl, targetDoc, callback) {
 }
 
 function extractMetadata(targetDoc, mmd) {
+	
+	
 	doc = targetDoc;
 	
 	if(mmd != null) {	
@@ -135,6 +139,8 @@ function extractMetadata(targetDoc, mmd) {
 	
 		var metadataTag = mmd.hasOwnProperty('type') ? mmd.type : mmd.name;
 	    metadata['mm_name'] = metadataTag;
+	    
+	    
 	    
 	    return metadata;
    }
