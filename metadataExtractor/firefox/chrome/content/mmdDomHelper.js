@@ -105,7 +105,7 @@ function extractMetadata(targetDoc, mmd) {
 		var metadataTag = mmd.hasOwnProperty('type') ? mmd.type : mmd.name;
 	    metadata['mm_name'] = metadataTag;
 	   
-	    alert(metadata);
+	   // alert(metadata);
 	    
 	    return metadata;
    }

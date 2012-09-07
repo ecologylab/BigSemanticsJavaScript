@@ -64,7 +64,7 @@ function initDocumentMetadata(doc) {
      	settings.serviceUrl = "http://128.194.143.75:8080/ecologylabSemanticService/mmd?url=";
     
     
-    alert("init metadata");
+    //alert("init metadata");
      
 	extractMetadataFromUrl(doc.URL, doc, function(data){
 		metadata = data;
@@ -78,7 +78,7 @@ function registerLocationDragstart(doc) {
 	
 	dragHandler = function(event){
 		var currentHTML = event.dataTransfer.getData("text/html");
-		var newHTML = "<div simpl:location=\"" + doc.URL + "\">"
+		var newHTML = "<div simpl:source_location=\"" + doc.URL + "\">"
 						+ currentHTML + "</div>"; 
 		event.dataTransfer.setData("text/html", newHTML);
 		
@@ -94,13 +94,13 @@ function registerLocationDragstart(doc) {
  * @param data, the metadata JSON string
  */
 function registerMetadataDragstart(doc, data) {
-	alert("registering metadata dragstart");
+	//alert("registering metadata dragstart");
 	
 	doc.removeEventListener("dragstart", dragHandler);
 	
 	dragHandler = function(event) {			    
 	    var currentHTML = event.dataTransfer.getData("text/html");
-		var newHTML = "<div simpl:metadata=\"" + data + "\" simpl:location=\"" + doc.URL + "\">"
+		var newHTML = "<div simpl:metadata=\"" + data + "\" simpl:source_location=\"" + doc.URL + "\">"
 					+ currentHTML + "</div>"; 
 		event.dataTransfer.setData("text/html", newHTML);
 	};
