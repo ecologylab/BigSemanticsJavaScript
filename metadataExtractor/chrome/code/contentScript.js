@@ -2,8 +2,7 @@
 var hasMetadata = false;
 var metadata = {};
 var settings = {};
-var selectionListener = false;
-
+var selectionListener = {};
 
 // Retrieve the extension settings from the the background page.
 chrome.extension.sendRequest({loadOptions: "all"}, function(response) {
@@ -22,7 +21,10 @@ window.addEventListener('load', getMetadataWhenSettingsAreHere);
 function getMetadataWhenSettingsAreHere() 
 {
 	if (settings != null) 
-	{	
+	{
+		tagEachElementWithLocation();
+		registerLocationSelectionInject();
+		
 		getMetadataIfNeeded();
 	}
 	else
@@ -31,17 +33,7 @@ function getMetadataWhenSettingsAreHere()
 function getMetadataIfNeeded()
 {
 	if (!hasMetadata) 
-	{	
-		if(settings.selectionInjection == "true" && !selectionListener) {
-			
-			// Add the selection range metadata injection handler
-			window.addEventListener("mouseup", function(event) { 
-			   injectMetadata();
-			});
-			
-			selectionListener = true;
-		}
-		
+	{		
 		// Assume that the metadata will be retrieved and lock this function from a race condition		
 		hasMetadata = true;
 		
@@ -50,21 +42,33 @@ function getMetadataIfNeeded()
 		{
 		    metadata = data;
 
-		    if(settings.debugMetadata == "true") {
+		    if(settings.debugMetadata == "true")
+		    {
 				console.log("Extracted metadata object:");
 				console.log(metadata);
 				console.log(JSON.stringify(metadata));
 			}					
 			
 			// Check if the metadata was extracted.
-		    if(metadata == null) {
-		    	
+		    if(metadata == null)
+		    {		    	
 		    	// If the metadata was not found then try again in 1 second.
 		    	hasMetadata = false;
-		    	setTimeout(window.onload, 1000);		    	
+		    	setTimeout(getMetadataIfNeeded, 1000);    	
 		    }
+		    
 		    else if(settings.attributeInjection == "true")
-				tagEachElementWithContainer();
+				tagEachElementWithMetadata();
+				
+			if(settings.selectionInjection == "true")
+			{			
+				// Add the selection range metadata injection handler
+				window.addEventListener("mouseup", function(event) { 
+				   injectMetadata();
+				});
+				
+				selectionListener = true;
+			}
 	    });
 	}
 
@@ -74,7 +78,7 @@ function getMetadataIfNeeded()
  * Adds the 'metadata' attribute to every HTML tag in the document.
  * The 'metadata' attribute value is set to the metadata as an escaped JSON string
  */
-function tagEachElementWithContainer() {
+function tagEachElementWithMetadata() {
 	var items = document.getElementsByTagName("*");
 	for(i in items) {
 		var item = items[i];
@@ -110,6 +114,49 @@ function injectMetadata() {
 		document.getSelection().addRange(range);
 	}
 }
+
+
+function tagEachElementWithLocation() {
+	var items = document.getElementsByTagName("*");
+	for(i in items) {
+		var item = items[i];
+    	if(typeof(item) == "object")
+        	item.setAttribute("simpl:location", document.URL);
+	}
+}
+
+function registerLocationSelectionInject() {
+	
+	selectionListener = function(event)
+	{
+		var oldFixtures = document.getElementsByClassName('injectedMetadata');
+	
+		for(var i = 0; i < oldFixtures.length; i++)
+		{
+		   var f = oldFixtures[i];
+		   f.parentElement.removeChild(f);
+		}
+		
+		var t = document.getSelection();
+		
+		if(t.type == "Range")
+		{
+			console.log(t);
+			var injected = document.createElement('img');//span is a no go
+			injected.setAttribute("simpl:location", document.URL);
+			injected.setAttribute("class","injectedMetadata");
+			
+			var range = t.getRangeAt();
+			range.insertNode(injected);
+			document.getSelection().addRange(range);
+		}
+	};
+	
+	document.addEventListener("mouseup", selectionListener);
+}
+
+
+
 
 /** GetMetadataString
  * Converts the metadata object into a JSON string.
