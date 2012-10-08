@@ -1,0 +1,45 @@
+<html>
+	<head>
+		<title>Metadata Render Test</title>
+		
+		<!-- Styles -->
+		<link href="metadataReef.css" rel="stylesheet" type="text/css">
+		
+		<!-- Code -->
+		<script type="text/javascript" src="metadataReef.js"></script>
+		
+		<style>
+			#controls {
+				background: teal;
+				padding: 8px;
+			}
+			
+			#content {
+				background: lightgray;
+				padding: 8px;
+			}
+		</style>
+		
+		<script>
+			function showMetadata()
+			{
+				var url = document.getElementById("targetURL").value;
+				var content = document.getElementById("content");
+				addMetadataRender(content, url);
+			}
+		</script>
+		
+	</head>
+	<body>
+		<div id="controls">
+			<input id="targetURL" type="text" size="120" placeholder="Enter URL"/>
+			<input type="button" value="Render Metadata" onclick="showMetadata();"/>
+		</div>
+		
+		<div id="content">
+			
+			
+			
+		</div>
+	</body>
+</html>

@@ -42,12 +42,12 @@ function getMetadataIfNeeded()
 		{
 		    metadata = data;
 
-		    if(settings.debugMetadata == "true")
-		    {
+		   // if(settings.debugMetadata == "true")
+		    //{
 				console.log("Extracted metadata object:");
 				console.log(metadata);
 				console.log(JSON.stringify(metadata));
-			}					
+			//}					
 			
 			// Check if the metadata was extracted.
 		    if(metadata == null)

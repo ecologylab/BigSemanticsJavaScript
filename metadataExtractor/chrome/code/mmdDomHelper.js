@@ -43,10 +43,10 @@ function extractMetadataFromUrl(purl, targetDoc, callback) {
 				//var response = JSON.parse(xmlhttp.responseText);
 				//var response = eval('(' + xmlhttp.responseText + ')');
 				
-				if(settings.debugMmd == "true") {
+				//if(settings.debugMmd == "true") {
 					console.log("Meta-metadata object:");
 					console.log(response['lookup_mmd_response']);
-				}
+				//}
 				
 				callback(extractMetadata(doc, response['lookup_mmd_response']['meta_metadata']));
 			}
@@ -68,10 +68,10 @@ function extractMetadataFromUrl(purl, targetDoc, callback) {
 				
 				var response = jQuery.parseJSON(xmlhttp.responseText);
 				
-				if(settings.debugMmd == "true") {
+				//if(settings.debugMmd == "true") {
 					console.log("Meta-metadata object:");
 					console.log(response);
-				}
+				//}
 				
 				callback(extractMetadata(doc, response['meta_metadata']));
 			}
@@ -90,9 +90,8 @@ function extractMetadata(targetDoc, mmd) {
 		//simplDeserialize(mmd);
 
 		//console.log("\n\nDeserialized MMD\n");
+		console.log(mmd);
 
-		//console.log(mmd);
-		//console.log(JSON.stringify(mmd));
 		var metadata = {};
 		
 		if(mmd.parser == "xpath")
