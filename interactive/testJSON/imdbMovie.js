@@ -733,3 +733,5 @@ imdbMovie = {
 	},
 	"mm_name": "imdb_title"
 };
+
+var compoundDoc = {"compound_document":{"location":"http:\/\/json-p.org\/","local_location":"file:\/\/\/home\/ecologylab\/Downloads\/LocalDocumentCache\/2480-127-8105-53-84111-101001155774100-38-4786109105-51-532-122-25104-73-76-22-2770-21","page_structure":"content_page","title":"JSON-P: Safer cross-domain Ajax with JSON-P\/JSONP","clippings":[{"clipping":{"mm_name":"clippings"}}],"root_document":{"mm_name":"root_document"}}};

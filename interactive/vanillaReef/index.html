@@ -7,6 +7,11 @@
 		
 		<!-- Code -->
 		<script type="text/javascript" src="metadataReef.js"></script>
+		<script type="text/javascript" src="metadataField.js"></script>
+		
+		<!-- Testing -->
+		<script type="text/javascript" src="../testJSON/imdbMovie.js"></script>
+		<script type="text/javascript" src="../testJSON/amazonProduct.js"></script>
 		
 		<style>
 			#controls {
@@ -25,7 +30,8 @@
 			{
 				var url = document.getElementById("targetURL").value;
 				var content = document.getElementById("content");
-				addMetadataRender(content, url);
+				console.log(content);
+				MetadataRenderer.addMetadataDisplay(content, url);
 			}
 		</script>
 		
@@ -37,8 +43,6 @@
 		</div>
 		
 		<div id="content">
-			
-			
 			
 		</div>
 	</body>
