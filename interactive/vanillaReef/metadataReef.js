@@ -5,48 +5,54 @@ MetadataRenderer.container = null;
 MetadataRenderer.addMetadataDisplay = function(parent, url)
 {
 	MetadataRenderer.container = parent;
-	MetadataRenderer.getMetadata(url, "MetadataRenderer.createAndAddMetadataDisplay");
+	MetadataRenderer.getMetadata(url, "MetadataRenderer.getMMDThenCreate");
 	
 }
 
 MetadataRenderer.getMetadata = function(url, callback)
-{
-	/*
-	var serviceURL = "http://ecology-service/ecologylabSemanticService/metadata.json?callback=" + callback + "url=" + url;
+{	
+	var serviceURL = "http://ecology-service/ecologylabSemanticService/metadata.jsonp?callback=" + callback + "&url=" + url;
 	
 	var metadataScript = document.createElement('script');
 	metadataScript.src = serviceURL;
 	document.head.appendChild(metadataScript);
-	*/
-	var rawMetadata = book;
-	
+}
+
+MetadataRenderer.getMMDThenCreate = function(rawMetadata)
+{	
 	var type = "";
 	var metadata = {};
 	for(i in rawMetadata)
 	{
 		type = i;
-		console.log("type = " + i);
+		//console.log("type = " + i);
 		metadata = rawMetadata[i];
 	}
 	
-	var mmd = MetadataRenderer.getMMD(type);
+	simplDeserialize(metadata);
+	MetadataRenderer.metadata = metadata;
 	
-	MetadataRenderer.createAndAddMetadataDisplay(mmd, metadata);
+	MetadataRenderer.getMMD(type, "MetadataRenderer.createAndAddMetadataDisplay");
 }
 
-MetadataRenderer.getMMD = function(type)
+MetadataRenderer.getMMD = function(type, callback)
 {
-	return amazonProductMMD;
+	var serviceURL = "http://ecology-service/ecologylabSemanticService/mmd.jsonp?callback=" + callback + "&name=" + type;
+	
+	var metadataScript = document.createElement('script');
+	metadataScript.src = serviceURL;
+	document.head.appendChild(metadataScript);
 }
 
-MetadataRenderer.createAndAddMetadataDisplay = function(mmd, metadata) {
-	console.log("creating metadata display");
+MetadataRenderer.createAndAddMetadataDisplay = function(mmd) {
+	//console.log("creating metadata display");
 	
-	console.log(metadata);
-	console.log(mmd);
+	simplDeserialize(mmd);
 	
 	MetadataRenderer.mmd = mmd;
-	MetadataRenderer.metadata = metadata;
+	
+	console.log(MetadataRenderer.metadata);
+	console.log(MetadataRenderer.mmd);
 	
 	MetadataRenderer.visual = document.createElement('div');
 	MetadataRenderer.visual.className = "metadataContainer";
@@ -86,6 +92,10 @@ MetadataRenderer.buildMetadataTable = function(metadata)
 		var row = document.createElement('tr');
 		var nameCol = document.createElement('td');
 		var valueCol = document.createElement('td');
+		
+		if(metadata[key].value == null || metadata[key].value.length == 0 )
+		{
+		} else {
 		
 		if(metadata[key].scalar_type != null)
 		{
@@ -147,8 +157,7 @@ MetadataRenderer.buildMetadataTable = function(metadata)
 					
 				nameCol.appendChild(fieldLabel);
 			}
-				
-				console.log("composite: "+metadata[key]);
+			
 			valueCol.appendChild( MetadataRenderer.buildMetadataTable(metadata[key].value) );
 				
 			row.appendChild(nameCol);
@@ -156,8 +165,7 @@ MetadataRenderer.buildMetadataTable = function(metadata)
 		}
 		
 		else if(metadata[key].child_type != null)
-		{
-			/*
+		{			
 			if(metadata[key].name != null)
 			{
 				var fieldLabel = document.createElement('span');
@@ -166,32 +174,15 @@ MetadataRenderer.buildMetadataTable = function(metadata)
 					
 				nameCol.appendChild(fieldLabel);
 			}
-			
-			var childList = metadata[key].value[metadata[key].child_type]
-			
-			switch(metadata[key].child_type)
-			{
-				case 'image': 		valueCol.appendChild(MetadataRenderer.createImageList(childList));
-									break;
-									
-				case 'document': 	valueCol.appendChild(MetadataRenderer.createDocumentList(childList));
-									break;
-								
-				case 'child': 		valueCol.appendChild(MetadataRenderer.createChildList(childList));
-									break;
-									
-				default: 			for(i in childList) {
-										valueCol.appendChild(MetadataRenderer.buildCondensedMetadataTable(childList[i]));
-									}
-									break;
-			}		
-			
+				
+			valueCol.appendChild( MetadataRenderer.buildMetadataTable(metadata[key].value) );
+				
 			row.appendChild(nameCol);
 			row.appendChild(valueCol);
-			*/
 		}		
 		
 		table.appendChild(row);
+		}
 	}
 	
 	return table;

@@ -8,6 +8,7 @@
 		<!-- Code -->
 		<script type="text/javascript" src="metadataReef.js"></script>
 		<script type="text/javascript" src="metadataField.js"></script>
+		<script type="text/javascript" src="simplDeserializer.js"></script>
 		
 		<!-- Testing -->
 		<script type="text/javascript" src="../testJSON/imdbMovie.js"></script>
@@ -30,7 +31,11 @@
 			{
 				var url = document.getElementById("targetURL").value;
 				var content = document.getElementById("content");
-				console.log(content);
+				//console.log(content);
+				
+				while (content.hasChildNodes())
+	    			content.removeChild(content.lastChild);
+				
 				MetadataRenderer.addMetadataDisplay(content, url);
 			}
 		</script>

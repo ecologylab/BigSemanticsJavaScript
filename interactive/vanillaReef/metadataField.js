@@ -18,7 +18,7 @@ MetadataRenderer.getMetadataFields = function(mmdKids, metadata)
 	
 	for(var key in mmdKids)
 	{		
-		var mmdField = mmdKids[key];
+		var mmdField = mmdKids[key];		
 		
 		if(mmdField.scalar != null)
 		{
@@ -28,7 +28,9 @@ MetadataRenderer.getMetadataFields = function(mmdKids, metadata)
 			if(mmdField.hide == null || mmdField.hide == false)
 			{				
 				// is there data for the field?
-				var value = metadata[mmdField.name];
+				var valueName = (mmdField.tag != null) ? mmdField.tag : mmdField.name;				
+				var value = metadata[valueName];
+				
 				if(value != null)
 				{
 					//console.log(mmdField.name + ": " + value);
@@ -62,12 +64,77 @@ MetadataRenderer.getMetadataFields = function(mmdKids, metadata)
 		else if(mmdField.composite != null)
 		{
 			mmdField = mmdField.composite;
+			//console.log(mmdField.name + ": ");
 			
 			// is field hidden?
 			if(mmdField.hide == null || mmdField.hide == false)
 			{				
 				// is there data for the field?
-				var value = metadata[mmdField.name];
+				
+				var valueName = (mmdField.tag != null) ? mmdField.tag : mmdField.name;
+				
+				var value = metadata[valueName];
+	
+	
+	
+				if(value != null)
+				{
+					
+					//console.log(typeof value);
+					//console.log(mmdField["kids"]);
+					
+					if(value.length != null)
+					{
+						console.log(mmdField.name + ": ");
+						console.log(mmdField["kids"]);
+						console.log(value);
+						
+						for(var i = 0; i < value.length; i++)
+						{
+							var field = new MetadataField();
+						
+							field.name = (mmdField.label != null) ? mmdField.label : mmdField.name;
+							
+							field.layer = (mmdField.layer != null) ? mmdField.layer : 0.0;
+							field.style = (mmdField.style != null) ? mmdField.style : "";
+							
+							field.composite_type = mmdField.type;
+							
+							field.value = MetadataRenderer.getMetadataFields(mmdField["kids"], value[i]);
+							console.log(value[i]);
+							console.log(field);
+							metadataFields.push(field);
+						}
+					}
+					else
+					{
+						var field = new MetadataField();
+						
+						field.name = (mmdField.label != null) ? mmdField.label : mmdField.name;
+						
+						field.layer = (mmdField.layer != null) ? mmdField.layer : 0.0;
+						field.style = (mmdField.style != null) ? mmdField.style : "";
+						
+						field.composite_type = mmdField.type;
+						
+						field.value = MetadataRenderer.getMetadataFields(mmdField["kids"], value);
+						
+						metadataFields.push(field);
+					}
+				}
+			}
+		}
+		
+		else if(mmdField.collection != null)
+		{
+			mmdField = mmdField.collection;	
+			// is field hidden?
+			if(mmdField.hide == null || mmdField.hide == false)
+			{					
+				// is there data for the field?
+				var valueName = (mmdField.tag != null) ? mmdField.tag : mmdField.name;				
+				var value = metadata[valueName];
+				
 				if(value != null)
 				{
 					//console.log(mmdField.name + ": ");
@@ -81,41 +148,31 @@ MetadataRenderer.getMetadataFields = function(mmdKids, metadata)
 					field.layer = (mmdField.layer != null) ? mmdField.layer : 0.0;
 					field.style = (mmdField.style != null) ? mmdField.style : "";
 					
-					field.composite_type = mmdField.type;
+					field.child_type = (mmdField.child_tag != null) ? mmdField.child_tag : mmdField.child_type;
 					
 					field.value = MetadataRenderer.getMetadataFields(mmdField["kids"], value);
 					
-					metadataFields.push(field);
-				}
-			}
-		}
-		
-		else if(mmdField.collection != null)
-		{
-			mmdField = mmdField.collection;
-			console.log(mmdField.name);		
-			// is field hidden?
-			if(mmdField.hide == null || mmdField.hide == false)
-			{	
+					/*
+					value = value[field.child_type];
 					
-				// is there data for the field?
-				var value = metadata[mmdField.name];
-				if(value != null)
-				{
-					console.log(mmdField.name + ": ");
-					console.log(mmdField);
-					console.log(value);
+					console.log(value.length);
 					
-					var field = new MetadataField();
+					var childFields = [];
+										
+					for(var i = 0; i < value.length; i++)
+					{
+						//console.log({ child_type: value[i] });
+						var childMetadata = { field.child_type: value[i] }; 
+						
+						childFields = childFields.concat( MetadataRenderer.getMetadataFields( mmdField["kids"], childMetadata));
+					}
 					
-					field.name = (mmdField.label != null) ? mmdField.label : mmdField.name;
+					childFields.sort(function(a,b){return b.layer - a.layer});					
 					
-					field.layer = (mmdField.layer != null) ? mmdField.layer : 0.0;
-					field.style = (mmdField.style != null) ? mmdField.style : "";
+					field.value = childFields;
+					*/
 					
-					//field.composite_type = mmdField.type;
-					
-					//field.value = MetadataRenderer.getMetadataFields(mmdField["kids"], value);
+					//console.log(field);
 					
 					metadataFields.push(field);
 				}
