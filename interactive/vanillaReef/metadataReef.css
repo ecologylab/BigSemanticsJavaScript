@@ -3,13 +3,7 @@
 	font-family: 'Segoe UI', Tahoma, sans-serif;
     font-size: 10px;
     font-weight: 100;
-    
-    background-color: #EEE;
-    
-    border: 1px solid #CCC;
-    
-    border-left: 6px solid #CCC;
-    
+        
     padding: 4px;
     padding-left: 8px;
     padding-right: 8px;
@@ -29,21 +23,14 @@
 	overflow: hidden;
 	text-overflow: ellipsis;
 	
-	table-layout: fixed;	
-	
-	border: 1px solid lightgray;	
-}
-
-.metadataContainer ul{
-	list-style: none;
-}
-
-.metadataContainer li{
-	margin-bottom: 8px;
+	table-layout: fixed;
+	border-spacing: 0px;
+  	border-collapse:collapse;
+		
 }
 
 .metadataContainer table .metadata_h1{
-	font-size: 20px;
+	font-size: 18px;
 }
 
 .metadataContainer .documentSnip .metadata_h1{
@@ -52,14 +39,32 @@
 
 .metadataContainer .fieldLabel{
 	color: #555;
-	font-size: 12px;
+	font-size: 11px;
+	
+	white-space: nowrap;
+	vertical-align: top;
+	text-align: right;
+	
+	height: 20px;	
 }
 
 .metadataContainer .fieldValue{
 	color: #111;
+	
 	white-space: normal;
-	overflow: hidden;
+	overflow: hidden;	
 	text-overflow: ellipsis;
+	vertical-align: top;
+	text-align: left;
+	
+	font-size: 12px;
+	
+	background: #1a5d77;
+	
+	border-top-right-radius: 8px;
+	border-bottom-right-radius: 8px;
+	
+	width: 100%;
 }
 
 .metadataContainer .imgList {
@@ -85,4 +90,37 @@
 .inlink:hover {
 	color: darkgreen;
 	cursor: hand;
+}
+
+.metadataContainer .favicon{
+	width: 14px;
+	height: 14px;
+}
+
+.metadataContainer .labelCol{
+	vertical-align: top;
+	text-align: right;
+	padding: 0px;
+	margin: 0px;
+}
+
+.metadataContainer .valueCol{
+	vertical-align: top;
+	text-align: left;
+	padding: 0px;
+	margin: 0px;
+}
+
+.metadataContainer .fieldLabelContainer{
+	color: #555;
+	font-size: 11px;
+	
+	background: #8aa615;
+	
+	
+	
+	border-top-left-radius: 8px;
+	border-bottom-left-radius: 8px;
+	
+	width: 100%;
 }

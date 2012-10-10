@@ -38,12 +38,18 @@
 				
 				MetadataRenderer.addMetadataDisplay(content, url);
 			}
+			
+			function onEnterShowMetadata(event)
+			{
+				if(event.keyCode == 13)
+					showMetadata();	
+			}
 		</script>
 		
 	</head>
 	<body>
 		<div id="controls">
-			<input id="targetURL" type="text" size="120" placeholder="Enter URL"/>
+			<input id="targetURL" type="text" size="120" placeholder="Enter URL"onkeydown="onEnterShowMetadata(event);"/>
 			<input type="button" value="Render Metadata" onclick="showMetadata();"/>
 		</div>
 		

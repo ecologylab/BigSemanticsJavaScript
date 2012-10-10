@@ -78,8 +78,7 @@ MetadataRenderer.getMetadataFields = function(mmdKids, metadata)
 	
 	
 				if(value != null)
-				{
-					
+				{					
 					//console.log(typeof value);
 					//console.log(mmdField["kids"]);
 					
