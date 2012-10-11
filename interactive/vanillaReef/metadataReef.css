@@ -1,23 +1,27 @@
 .metadataContainer {
-	color: #222;
 	font-family: 'Segoe UI', Tahoma, sans-serif;
     font-size: 10px;
     font-weight: 100;
-        
-    padding: 4px;
-    padding-left: 8px;
-    padding-right: 8px;
-    
-    margin: 4px;
-    
-    white-space: nowrap;
-	overflow: hidden;
-	text-overflow: ellipsis;
+    	
+	border-top-right-radius: 8px;
+	border-bottom-right-radius: 8px;
+	border-bottom-left-radius: 8px;
+}
+
+.metadataTable {
+	margin: 0px 4px 0px 6px;
+	width: 100%;
+	
+}
+
+.metadataContainer p{
+	padding: 0px;
+	margin: 0px;
 }
 
 .metadataContainer table{
-	color: #222;
-	font-size: 14px;
+	color: #111;
+	font-size: 12px;
 	
 	white-space: normal;
 	overflow: hidden;
@@ -33,94 +37,155 @@
 	font-size: 18px;
 }
 
-.metadataContainer .documentSnip .metadata_h1{
-	font-size: 14px;
-}
-
-.metadataContainer .fieldLabel{
-	color: #555;
-	font-size: 11px;
-	
+.metadataContainer .fieldLabel{	
 	white-space: nowrap;
 	vertical-align: top;
 	text-align: right;
-	
-	height: 20px;	
+
+	padding: 2px;	
+	padding-left: 4px;
+	padding-right: 4px;
+	margin-left: 8px;
+	margin-right: 8px;
 }
 
-.metadataContainer .fieldValue{
-	color: #111;
-	
+.metadataContainer .fieldValue{	
 	white-space: normal;
-	overflow: hidden;	
-	text-overflow: ellipsis;
 	vertical-align: top;
 	text-align: left;
 	
-	font-size: 12px;
+	text-overflow: ellipsis;
 	
-	background: #1a5d77;
 	
-	border-top-right-radius: 8px;
-	border-bottom-right-radius: 8px;
-	
-	width: 100%;
-}
-
-.metadataContainer .imgList {
-	display: table;
-	padding: 4px;
-	background-color: #CCC;
-}
-.metadataContainer .imgList img{
-	margin-right: 0px;
-}
-
-.childSnip{
-	padding-right: 8px;
-}
-
-.inlink {
-	color: green;
-	font-style: italic;
-	background-color: lightgray;
-	padding: 2px 6px 2px 6px;
-}
-
-.inlink:hover {
-	color: darkgreen;
-	cursor: hand;
+	padding: 2px 8px 2px 8px;
 }
 
 .metadataContainer .favicon{
-	width: 14px;
-	height: 14px;
+	width: 16px;
+	height: 16px;
+	padding: 2px 0px 1px 8px;
 }
 
 .metadataContainer .labelCol{
 	vertical-align: top;
 	text-align: right;
-	padding: 0px;
-	margin: 0px;
+	
+	padding: 3px 0px 3px 0px;
+	
 }
 
 .metadataContainer .valueCol{
 	vertical-align: top;
 	text-align: left;
-	padding: 0px;
+	padding: 3px 0px 3px 0px;
 	margin: 0px;
+	
+	width: 100%
+}
+
+.metadataContainer a{
+	color: black;
+	font-size: 13px;
+}
+
+.metadataContainer a:hover{
+	color: gray;
 }
 
 .metadataContainer .fieldLabelContainer{
-	color: #555;
-	font-size: 11px;
+	color: #ccc;
 	
-	background: #8aa615;
-	
-	
+	background: #666;	
 	
 	border-top-left-radius: 8px;
 	border-bottom-left-radius: 8px;
 	
 	width: 100%;
+	min-height: 19px;
 }
+
+.metadataContainer .fieldValueContainer{
+	
+	background: #ccc;
+	
+	border-top-right-radius: 8px;
+	border-bottom-right-radius: 8px;
+	
+	width: 100%;
+	min-height: 19px;
+	height: 19px;
+	text-overflow: ellipsis;
+	overflow: hidden;
+}
+
+.metadataContainer .fieldValueContainer:hover{
+	height: auto;
+}
+
+
+.metadataContainer .fieldChildContainer{
+	
+	background: #ccc;
+	
+	border-top-right-radius: 8px;
+	border-bottom-right-radius: 8px;
+	border-bottom-left-radius: 8px;
+	
+	width: 100%;
+	min-height: 19px;
+	text-overflow: ellipsis;
+}
+
+.metadataContainer .fieldCompositeContainer{
+	
+	background: #C82C04;
+	
+	border-top-right-radius: 8px;
+	border-bottom-right-radius: 8px;
+	border-bottom-left-radius: 8px;
+	
+	width: 100%;
+	min-height: 19px;
+	text-overflow: ellipsis;	
+}
+
+.metadataContainer .expandButton{
+	background: white;
+	width: 16px;
+	height: 16px;
+	border-radius: 8px;
+	float: left;
+	margin: 1px 4px 1px 1px;
+}
+
+.metadataContainer .expandButton:hover{
+	background: gray;
+	cursor: pointer;
+}
+
+.metadataContainer .expandSymbol{
+	position: absolute;
+	background: darkgray;
+	width: 2px;
+	height: 12px;
+	margin: 2px 7px 2px 7px;
+}
+
+.metadataContainer .collapseSymbol{
+	position: absolute;
+	background: darkgray;
+	width: 12px;
+	height: 2px;
+	margin: 7px 2px 7px 2px;
+}
+
+.metadataContainer .loadingRow{
+	background: #1a5d77;
+	border-radius: 8px;
+	height: 15px;
+	margin-bottom: 4px;
+	padding: 2px 16px 2px 8px; 
+	
+}
+
+

@@ -21,8 +21,9 @@
 			}
 			
 			#content {
-				background: lightgray;
+				background: white;
 				padding: 8px;
+				border: 1px solid black;
 			}
 		</style>
 		
@@ -31,10 +32,6 @@
 			{
 				var url = document.getElementById("targetURL").value;
 				var content = document.getElementById("content");
-				//console.log(content);
-				
-				while (content.hasChildNodes())
-	    			content.removeChild(content.lastChild);
 				
 				MetadataRenderer.addMetadataDisplay(content, url);
 			}
