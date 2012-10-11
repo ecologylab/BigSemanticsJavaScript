@@ -24,6 +24,7 @@
 				background: white;
 				padding: 8px;
 				border: 1px solid black;
+				overflow: auto;
 			}
 		</style>
 		
@@ -33,7 +34,7 @@
 				var url = document.getElementById("targetURL").value;
 				var content = document.getElementById("content");
 				
-				MetadataRenderer.addMetadataDisplay(content, url);
+				MetadataRenderer.addFirstMetadataDisplay(content, url);
 			}
 			
 			function onEnterShowMetadata(event)
@@ -50,8 +51,8 @@
 			<input type="button" value="Render Metadata" onclick="showMetadata();"/>
 		</div>
 		
-		<div id="content">
-			
+		<div id="content" class="metadataRendering">
+			<a href="http://www.flickr.com/photos/wanntr/8074187647/in/pool-flickrcat"> </a>			
 		</div>
 	</body>
 </html>

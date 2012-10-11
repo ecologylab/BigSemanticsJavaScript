@@ -1,3 +1,5 @@
+var MAX_DEPTH = 4;
+
 function MetadataField()
 {
 	this.name = "field label";
@@ -8,10 +10,13 @@ function MetadataField()
 	this.style = "";	
 }
 
-MetadataRenderer.getMetadataFields = function(mmdKids, metadata)
+MetadataRenderer.getMetadataFields = function(mmdKids, metadata, depth)
 {
 	var metadataFields = [];
 	
+	if(depth >= MAX_DEPTH)
+		return metadataFields;
+		
 	for(var key in mmdKids)
 	{		
 		var mmdField = mmdKids[key];		
@@ -50,8 +55,7 @@ MetadataRenderer.getMetadataFields = function(mmdKids, metadata)
 						{
 							field.navigatesTo = navigationLink;
 						}
-					}
-					
+					}					
 					metadataFields.push(field);
 				}
 			}
@@ -83,8 +87,9 @@ MetadataRenderer.getMetadataFields = function(mmdKids, metadata)
 							
 							field.composite_type = mmdField.type;
 							
-							console.log("getting metadata fields  multi-composite: "+i+ " - " + mmdField.name);
-							field.value = MetadataRenderer.getMetadataFields(mmdField["kids"], value[i]);
+							//console.log("depth: "+depth+" | reading  fields  multi-composite: "+i+ " - " + mmdField.name);
+							
+							field.value = MetadataRenderer.getMetadataFields(mmdField["kids"], value[i], depth + 1);
 							
 							metadataFields.push(field);
 						}
@@ -100,8 +105,9 @@ MetadataRenderer.getMetadataFields = function(mmdKids, metadata)
 						
 						field.composite_type = mmdField.type;
 						
-						console.log("getting metadata fields single-composite : "+ mmdField.name);
-						field.value = MetadataRenderer.getMetadataFields(mmdField["kids"], value);
+						//console.log("depth: "+depth+" | reading fields single-composite : "+ mmdField.name);
+						
+						field.value = MetadataRenderer.getMetadataFields(mmdField["kids"], value, depth + 1);
 						
 						metadataFields.push(field);
 					}
@@ -135,8 +141,8 @@ MetadataRenderer.getMetadataFields = function(mmdKids, metadata)
 					
 					field.child_type = (mmdField.child_tag != null) ? mmdField.child_tag : mmdField.child_type;
 					
-					console.log("getting metadata fields collection : "+mmdField.name);
-					field.value = MetadataRenderer.getMetadataFields(mmdField["kids"], value);
+					//console.log("getting metadata fields collection : "+mmdField.name);
+					field.value = MetadataRenderer.getMetadataFields(mmdField["kids"], value, depth + 1);
 										
 					metadataFields.push(field);
 				}
@@ -146,4 +152,13 @@ MetadataRenderer.getMetadataFields = function(mmdKids, metadata)
 	}
 	metadataFields.sort(function(a,b){return b.layer - a.layer});	
 	return metadataFields;
+}
+
+function MetadataQueueTask(url, container, isFirst)
+{
+	this.isFirst = isFirst;
+	this.metadata = null;
+	this.url = url;
+	this.mmd = null;
+	this.container = container;
 }
