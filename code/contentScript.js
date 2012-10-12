@@ -76,6 +76,20 @@ function onInitFs(fs) {
 }
 
 window.onload = function() {
+	console.log("On load version 1.00004");
+	
+	/*
+	chrome.extension.sendRequest({test: "something"}, function(response) {
+  		got_back = response;
+  		console.log(got_back*2);
+	});
+	*/
+	
+	chrome.extension.sendRequest({append_to_log: ""+window.location.href}, function(response) {
+  		got_back = response;
+  		console.log("What does the log have???");
+  		console.log("LOG HAS"+got_back);
+	});
 	
 	console.log("Window was called :)!!!");
 	console.log(""+window.location.href);

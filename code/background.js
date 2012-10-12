@@ -7,8 +7,39 @@ chrome.extension.onRequest.addListener(
 	function(request, sender, sendResponse) {
     	if (request.loadOptions != null)
       		sendResponse(getOptions());
+      	if (request.test != null)
+      		sendResponse(test());
+	  	if (request.append_to_log != null)
+      		sendResponse(append_to_log(request.append_to_log));
 	}
 );
+
+
+
+function test()
+{
+	console.log("I am returning the number 15");
+	return 15;
+}
+
+function append_to_log(tt)
+{
+	/*
+	if (! log in localStorage) {
+		localStorage['logg'] = "SOMETHING";
+	}
+	
+	localStorage['logg'] += "Entry: "+tt;
+
+	return localStorage.logg;
+	*/
+	if(!localStorage["log_file"])
+	{
+		localStorage["log_file"] = "START...";
+	}
+	localStorage["log_file"] = localStorage["log_file"] + tt+"\n";
+	return localStorage["log_file"];
+}
 
 /** getOptions
  * Builds a simple object representing the user preferences for the extension.

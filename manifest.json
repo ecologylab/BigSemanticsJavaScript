@@ -11,7 +11,8 @@
     "webNavigation",
     "chrome://favicon/",
     "<all_urls>",
-    "unlimitedStorage"
+    "unlimitedStorage",
+    "history"
   ],
   "options_page": "options.html",
   "content_scripts": [
