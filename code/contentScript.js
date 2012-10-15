@@ -85,6 +85,7 @@ window.onload = function() {
 	});
 	*/
 	
+	/*
 	chrome.extension.sendRequest({append_to_log: ""+window.location.href}, function(response) {
   		got_back = response;
   		console.log("What does the log have???");
@@ -94,7 +95,7 @@ window.onload = function() {
 	console.log("Window was called :)!!!");
 	console.log(""+window.location.href);
 	console.log("yep")
-	
+	*/
 
     window.webkitRequestFileSystem(window.TEMPORARY, 1024*1024, onInitFs, errorHandler);
 

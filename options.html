@@ -1,6 +1,6 @@
 <html>
 <head>
-	<title>Metadata Extractor | Options</title>
+	<title>Study Tracker | Options</title>
 	
 	<script type="text/javascript">
 	
@@ -13,6 +13,10 @@
 	 */
 	function setOptions() {
 		var options = backgroundPage.getOptions();
+		if (options.hist) {
+	   		document.getElementById("logarea").value = options.logs;
+		}
+		/*
 		
 	  	if (options.service == "ecologyLab") {
 	   		var radio = document.getElementById("serviceEcologyLab");
@@ -55,117 +59,121 @@
 		   	checkbox.checked = true;
 		else
 			checkbox.checked = false;
-	}
-	
-	/** updateService
-	 * Updates the service related option values.
-	 */
-	function updateService() {
-		var ecologyLab = document.getElementById("serviceEcologyLab").checked;
-		var infoComp = document.getElementById("serviceInfoComp").checked;
-		var custom = document.getElementById("serviceCustom").checked;
-		var url = document.getElementById("serviceUrl").value;
-
-		
-		if (ecologyLab) {
-		   	localStorage["service"] = "ecologyLab";
-		   	hideUrl();
-		   	
-		   	//EcologyLab MMD Service URL
-		   	localStorage["serviceUrl"] = "http://128.194.143.75:8080/ecologylabSemanticService/mmd?url=";
-		}
-		else if(infoComp) {
-			localStorage["service"] = "infoComp";
-			hideUrl();
-		   	
-		   	//Local InfoComposer MMD Service URL
-		   	localStorage["serviceUrl"] = "http://localhost:2107/";
-		}
-		else if(custom) {
-			localStorage["service"] = "custom";
-			showUrl();
 			
-			if (!url) {
-			   	localStorage["serviceUrl"] = url;
-			}
-		}		
+			*/
 	}
-	
-	/** updateInjection
-	 * Updates the injection related option values.
-	 */
-	function updateInjection() {			
-		var attribute = document.getElementById("injectAttribute").checked;
-		if (attribute)
-		   	localStorage["attributeInjection"] = "true";
-		else
-			localStorage["attributeInjection"] = "false";			
-		
-		var selection = document.getElementById("injectSelection").checked;
-		if (selection)
-		   	localStorage["selectionInjection"] = "true";
-		else
-			localStorage["selectionInjection"] = "false";
-	}
-	
-	/** updateDebug
-	 * Updates the debug printing related option values.
-	 */
-	function updateDebug() {				
-		var debugMmd = document.getElementById("debugMmd").checked;
-		var debugMetadata = document.getElementById("debugMetadata").checked;
-		
-		if (debugMmd) {
-		   	localStorage["debugMmd"] = "true";
-		}
-		else {
-		   	localStorage["debugMmd"] = "false";
-		}
-		
-		if (debugMetadata) {
-		   	localStorage["debugMetadata"] = "true";
-		}
-		else {
-		   	localStorage["debugMetadata"] = "false";
-		}
-	}
-	
-	/** showUrl
-	 * Shows the custom URL input box.
-	 */
-	function showUrl() {
-		var urlDiv = document.getElementById("url");
-		urlDiv.style.visibility = "visible";
-		urlDiv.style.display = "block";
-	}
-	
-	/** hideUrl
-	 * Hides the custom URL input box.
-	 */
-	function hideUrl() {
-		var urlDiv = document.getElementById("url");
-		urlDiv.style.visibility = "hidden";
-		urlDiv.style.display = "none";
-	}
-	
-	/** restore
-	 * Restores the optiosn to there default values.
-	 */
-	function restore() {
-		
-		localStorage["service"] = "ecologyLab";	
-	   	localStorage["serviceUrl"] = "http://localhost:2107/";	
-	   	
-	   	localStorage["metadataInjection"] = "raw";
-	   	localStorage["attributeInjection"] = "true";
-	   	localStorage["selectionInjection"] = "true";
-	   	
-	   	localStorage["debugMmd"] = "false";
-	   	localStorage["debugMetadata"] = "false";
-	   	
-	   	setOptions();
-	   	
-	}	
+// 	
+	// /** updateService
+	 // * Updates the service related option values.
+	 // */
+	// function updateService() {
+		// var ecologyLab = document.getElementById("serviceEcologyLab").checked;
+		// var infoComp = document.getElementById("serviceInfoComp").checked;
+		// var custom = document.getElementById("serviceCustom").checked;
+		// var url = document.getElementById("serviceUrl").value;
+// 
+// 		
+		// if (ecologyLab) {
+		   	// localStorage["service"] = "ecologyLab";
+		   	// hideUrl();
+// 		   	
+		   	// //EcologyLab MMD Service URL
+		   	// localStorage["serviceUrl"] = "http://128.194.143.75:8080/ecologylabSemanticService/mmd?url=";
+		// }
+		// else if(infoComp) {
+			// localStorage["service"] = "infoComp";
+			// hideUrl();
+// 		   	
+		   	// //Local InfoComposer MMD Service URL
+		   	// localStorage["serviceUrl"] = "http://localhost:2107/";
+		// }
+		// else if(custom) {
+			// localStorage["service"] = "custom";
+			// showUrl();
+// 			
+			// if (!url) {
+			   	// localStorage["serviceUrl"] = url;
+			// }
+		// }		
+	// }
+// 	
+	// /** updateInjection
+	 // * Updates the injection related option values.
+	 // */
+	// function updateInjection() {			
+		// var attribute = document.getElementById("injectAttribute").checked;
+		// if (attribute)
+		   	// localStorage["attributeInjection"] = "true";
+		// else
+			// localStorage["attributeInjection"] = "false";			
+// 		
+		// var selection = document.getElementById("injectSelection").checked;
+		// if (selection)
+		   	// localStorage["selectionInjection"] = "true";
+		// else
+			// localStorage["selectionInjection"] = "false";
+	// }
+// 	
+	// /** updateDebug
+	 // * Updates the debug printing related option values.
+	 // */
+	// function updateDebug() {				
+		// var debugMmd = document.getElementById("debugMmd").checked;
+		// var debugMetadata = document.getElementById("debugMetadata").checked;
+// 		
+		// if (debugMmd) {
+		   	// localStorage["debugMmd"] = "true";
+		// }
+		// else {
+		   	// localStorage["debugMmd"] = "false";
+		// }
+// 		
+		// if (debugMetadata) {
+		   	// localStorage["debugMetadata"] = "true";
+		// }
+		// else {
+		   	// localStorage["debugMetadata"] = "false";
+		// }
+	// }
+// 	
+	// /** showUrl
+	 // * Shows the custom URL input box.
+	 // */
+	// function showUrl() {
+		// var urlDiv = document.getElementById("url");
+		// urlDiv.style.visibility = "visible";
+		// urlDiv.style.display = "block";
+	// }
+// 	
+	// /** hideUrl
+	 // * Hides the custom URL input box.
+	 // */
+	// function hideUrl() {
+		// var urlDiv = document.getElementById("url");
+		// urlDiv.style.visibility = "hidden";
+		// urlDiv.style.display = "none";
+	// }
+// 	
+	// /** restore
+	 // * Restores the optiosn to there default values.
+	 // */
+	// function restore() {
+// 		
+		// localStorage["service"] = "ecologyLab";	
+	   	// localStorage["serviceUrl"] = "http://localhost:2107/";	
+// 	   	
+	   	// localStorage["metadataInjection"] = "raw";
+	   	// localStorage["attributeInjection"] = "true";
+	   	// localStorage["selectionInjection"] = "true";
+// 	   	
+	   	// localStorage["debugMmd"] = "false";
+	   	// localStorage["debugMetadata"] = "false";
+// 	   	
+	   	// setOptions();
+// 	   	
+	// }	
+// 	
+
 	</script>
 	
 	<style>
@@ -348,6 +356,11 @@ label {
 
 	<h1> Metadata Extractor Options</h1>
 	
+	<div id="logView" class="option">
+		<h2>Current Log</h2>
+		<textarea id="logarea"  wrap="off" cols="100" rows="30"></textarea>
+	</div>
+	<!--
 	<div id="serviceOptions" class="option">
 		<h2>Meta-Metadata Repository Service</h2>
 			
@@ -375,25 +388,7 @@ label {
 	
 	<div id="injectionOptions" class="option">
 		<h2>Metadata Injection for Drag and Drop</h2>
-		
-		<!--
-		<div class="subOption">
-			
-			<h3>What to Inject</h3>
-			
-				<label>
-			       	<input id="metadataFields" type="radio" name="injection" onchange="updateInjection();">
-			    	<span>Inject metadata as MetadataFields</span>
-			    </label>
-				<div class="spacer"></div>
-				
-				<label>
-			       	<input id="rawMetadata" type="radio" name="injection" onchange="updateInjection();">
-			    	<span>Inject metadata as a simple key/value object</span>
-			    </label>
-			
-			<h3>Where to Inject</h3>
-		-->
+	
 				<label>
 			        <input id="injectAttribute" type="checkbox" onchange="updateInjection();">
 			       	<span>Inject 'metadata' attribute into DOM tags</span>
@@ -404,9 +399,6 @@ label {
 			        <input id="injectSelection" type="checkbox" onchange="updateInjection();">
 			       	<span>Inject 'metadata' into selected ranges</span>
 			   	</label>
-		<!--	   	
-		</div>
-		-->
 	   	
 	</div>
 	
@@ -431,6 +423,8 @@ label {
 	        <input id="restoreButton" type="button" value="Restore Defaults" onclick="restore();">
 	   	</label>
 	</div>
+	
+    -->
 </div>
 </body>
 </html>

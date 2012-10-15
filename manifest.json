@@ -1,7 +1,7 @@
 {
-  "name": "Extractor",
-  "description": "Track...",
-  "version": "0.1.0",
+  "name": "Study Tracker",
+  "description": "Tracks browser use for user studies...",
+  "version": "0.0.1",
   "icons": {
     "16": "images/icon_16.png",
     "128": "images/icon_128.png"

@@ -7,8 +7,8 @@ chrome.extension.onRequest.addListener(
 	function(request, sender, sendResponse) {
     	if (request.loadOptions != null)
       		sendResponse(getOptions());
-      	if (request.test != null)
-      		sendResponse(test());
+//      	if (request.test != null)
+//      		sendResponse(test());
 	  	if (request.append_to_log != null)
       		sendResponse(append_to_log(request.append_to_log));
 	}
@@ -65,6 +65,7 @@ function addVisitAction(visit_item, history_item)
 	var hist = getHist();
 	hist[combined.id] = combined;
 	setHist(hist);
+	append_to_log(combined, "page_loaded");
 }
 
 
@@ -105,22 +106,17 @@ function test()
 	return 15;
 }
 
-function append_to_log(tt)
+function append_to_log(item, type)
 {
-	/*
-	if (! log in localStorage) {
-		localStorage['logg'] = "SOMETHING";
-	}
-	
-	localStorage['logg'] += "Entry: "+tt;
-
-	return localStorage.logg;
-	*/
 	if(!localStorage.hasOwnProperty("log_file"))
 	{
-		localStorage["log_file"] = "START...";
+		localStorage["log_file"] = "";
 	}
-	localStorage["log_file"] = localStorage["log_file"] + tt+"\n";
+	var uid = "user21";
+	var note = "This is a note about the study and conditions."
+	var logstamp = new Date().getTime();
+	var log_me = JSON.stringify( {uid:uid, note:note, timestamp: logstamp, type:type, item:item} );
+	localStorage["log_file"] = localStorage["log_file"] + log_me+"\n";
 	return localStorage["log_file"];
 }
 
@@ -130,13 +126,15 @@ function append_to_log(tt)
  */
 function getOptions() {
 	var options = 	{
-      					service: localStorage["service"],
-      					serviceUrl: localStorage["serviceUrl"],
-      					metadataInjection: localStorage["metadataInjection"],
-      					attributeInjection: localStorage["attributeInjection"],
-      					selectionInjection: localStorage["selectionInjection"],
-      					debugMmd: localStorage["debugMmd"],
-      					debugMetadata: localStorage["debugMetadata"]      					
+						logs: localStorage['log_file'],
+						hist: localStorage[HIST]
+      					// service: localStorage["service"],
+      					// serviceUrl: localStorage["serviceUrl"],
+      					// metadataInjection: localStorage["metadataInjection"],
+      					// attributeInjection: localStorage["attributeInjection"],
+      					// selectionInjection: localStorage["selectionInjection"],
+      					// debugMmd: localStorage["debugMmd"],
+      					// debugMetadata: localStorage["debugMetadata"]      					
       				};
      return options;
 }
@@ -147,23 +145,18 @@ function getOptions() {
  */
 function loadOptions() {
 	var options = getOptions();
-	
 	/** Meta-Metadata Service **/
-	
 	if (!options.service) {
 		
 		// Default MMD service 
 	   	localStorage["service"] = "infoComp";
 	}
-	
 	if (!options.serviceUrl) {
 	   	
 	   	// Default MMD service URL
 	   	localStorage["serviceUrl"] = "http://localhost:2107/";
 	}
-	
 	/** Metadata Injection **/
-	
 	if (!options.metadataInjection) {
 		
 		// Default Metadata injection format
@@ -171,7 +164,6 @@ function loadOptions() {
 		// all - all metadata field information 
 	   	localStorage["metadataInjection"] = "raw";
 	}	
-	
 	if (!options.attributeInjection) {
 		
 		// Default Metadata attribute injection
