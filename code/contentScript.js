@@ -76,7 +76,7 @@ function onInitFs(fs) {
 }
 
 window.onload = function() {
-	console.log("On load version 1.00004");
+	console.log("On load version 1.00005");
 	
 	/*
 	chrome.extension.sendRequest({test: "something"}, function(response) {

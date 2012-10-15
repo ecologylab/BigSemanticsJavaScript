@@ -14,6 +14,17 @@ chrome.extension.onRequest.addListener(
 	}
 );
 
+chrome.history.onVisited.addListener(
+	function(history_item) {
+		append_to_log("FROM history item:"+history_item.title+" at "+history_item.url);
+		chrome.history.getVisits(history_item, function(visitItems){
+        append_to_log("FROM the refer id" + visitItems[0].referringVisitId); // here you can access it.
+});
+
+	}
+);
+
+
 
 
 function test()
@@ -33,7 +44,7 @@ function append_to_log(tt)
 
 	return localStorage.logg;
 	*/
-	if(!localStorage["log_file"])
+	if(!localStorage.hasOwnProperty("log_file"))
 	{
 		localStorage["log_file"] = "START...";
 	}
