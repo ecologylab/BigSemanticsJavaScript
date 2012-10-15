@@ -14,13 +14,85 @@ chrome.extension.onRequest.addListener(
 	}
 );
 
-chrome.history.onVisited.addListener(
-	function(history_item) {
-		append_to_log("FROM history item:"+history_item.title+" at "+history_item.url);
-		chrome.history.getVisits(history_item, function(visitItems){
-        append_to_log("FROM the refer id" + visitItems[0].referringVisitId); // here you can access it.
-});
 
+var HIST = "hister";
+
+function getHist()
+{
+	if(!localStorage.hasOwnProperty(HIST))
+	{
+		localStorage[HIST] = JSON.stringify({});
+	}
+	return JSON.parse(localStorage[HIST]);
+}
+
+function setHist(hist)
+{
+	localStorage[HIST] = JSON.stringify(hist);
+}
+
+function visitIdToString(id)
+{
+	var hist = getHist();
+	var retString = "";
+	var item = hist[id+""];
+	while(item)
+	{
+		retString = item.title+"->"+retString;
+		
+		item = hist[item.parent_id];
+	}
+	return retString;
+}
+
+function addVisitAction(visit_item, history_item)
+{
+	
+
+	//localStorage[HIST] = localStorage[HIST] + tt+"\n";
+	//return localStorage["HIST"];
+	//*/
+	var combined = Object();
+	combined.id = history_item.visitId;
+	combined.timestamp = visit_item.visitTime;
+	combined.url = visit_item.url;
+	combined.title = visit_item.url;
+	combined.transition = history_item.transition;
+	combined.parent_id = history_item.referringVisitId;
+
+	//console.log("adding visit item...");
+	//console.log(combined);
+	var hist = getHist();
+	hist[combined.id] = combined;
+	setHist(hist);
+}
+
+
+chrome.history.onVisited.addListener(
+	function(visit_item) {
+		//addVisitAction(visit_item);
+//		append_to_log("FROM history item:"+visit_item.title+" at "+visit_item.url);
+//			chrome.history.getVisits(visit_item);
+//	     append_to_log("END"); // here you can access it.	
+//console.log ("In the log...");
+//console.log (visit_item.url);
+chrome.history.getVisits({url:visit_item.url}, function(dddd)
+{
+	//console.log("results?");
+	//console.log(dddd);
+	////console.log("most recent");
+	var last = "";
+	for(i in dddd)
+	    last = dddd[i]; 
+	//console.log("start ..");
+	//console.log(visit_item);
+	//console.log(last);
+	addVisitAction(visit_item,last);
+	console.log(visitIdToString(last.visitId));
+	//console.log("end ..");
+	
+});
+      //console.log(visit_item);
 	}
 );
 
