@@ -22,7 +22,7 @@ function logSelectedTabWindowUrl()
 {
 	chrome.windows.getLastFocused({populate:true}, function(with_tabs)
 	{
-		console.log("With tabs:");
+		//console.log("With tabs:");
 		//console.log(with_tabs);
 		for(var tab in with_tabs.tabs)
 		{
@@ -55,18 +55,18 @@ function logSelectedTabWindowUrl()
 }
 
 chrome.tabs.onActivated.addListener(function(activeInfo) {
-	console.log("Activated...");
+	//console.log("Activated...");
 	//console.log(activeInfo);
 });
 
 chrome.tabs.onHighlighted.addListener(function(activeInfo) {
-	console.log("Highlighted...");
+	//console.log("Highlighted...");
 	logSelectedTabWindowUrl();
 	//console.log(activeInfo);
 });
 
 chrome.windows.onFocusChanged.addListener(function(windowId) {
-	console.log("focus of window changed...");
+	//console.log("focus of window changed...");
 	logSelectedTabWindowUrl();
 	//console.log(windowId);
 });
@@ -274,6 +274,16 @@ function clearLogFile()
 {
 	localStorage['log_file'] = "";
 }
+
+function clearAll()
+{
+	delete localStorage['log_file'];
+	delete localStorage['is_on'];
+	delete localStorage['uid'];
+	delete localStorage['note'];
+	delete localStorage[HIST];
+}
+
 function setOptions(opts)
 {
 	for(i in opts)

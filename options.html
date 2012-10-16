@@ -56,6 +56,18 @@
 	      window.location.reload();
 	  }
 	}
+
+	function clearAllConfirm()
+	{
+	  var r=confirm("This deletes everyting, including uid,note, log, and the breadcrums needed to construct a visit trail.  Are you REALLY REALLY SURE?");
+	  if (r==true)
+	  {
+	      backgroundPage.clearAll();
+	      window.location.reload();
+	  }
+	}
+	
+	
 // 	
 	// /** updateService
 	 // * Updates the service related option values.
@@ -372,6 +384,10 @@ label {
 		<input type="button" value="Clear" onclick="clearLog();">
 	</div>
 	
+	<div id="hard_reset" class="option">
+		<h2>Hard Reset</h2>
+		<input type="button" value="Hard Reset Everything" onclick="clearAllConfirm();">
+	</div>
 	
 
 	<!--
