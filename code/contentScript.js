@@ -75,6 +75,24 @@ function onInitFs(fs) {
 
 }
 
+
+
+window.addEventListener("message", function(event) {
+    // We only accept messages from ourselves
+    if (event.source != window)
+      return;
+
+    if (event.data.type && (event.data.type == "EXPANSION_EVENT")) {
+    //  console.log("Content script received: " + event.data.text);
+      
+      
+      chrome.extension.sendRequest({append_to_log: "yes", type:"incontext_expand_crumb", item: event.data.text}, function(response) {
+	  });
+      
+      //port.postMessage(event.data.text);
+    }
+}, false);
+
 window.onload = function() {
 	console.log("On load version 1.00005");
 	

@@ -10,7 +10,7 @@ chrome.extension.onRequest.addListener(
 //      	if (request.test != null)
 //      		sendResponse(test());
 	  	if (request.append_to_log != null)
-      		sendResponse(append_to_log(request.append_to_log));
+      		sendResponse(append_to_log(JSON.parse(request.item), request.type));
 	}
 );
 
