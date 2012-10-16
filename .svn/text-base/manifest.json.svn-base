@@ -1,0 +1,33 @@
+{
+  "name": "Extractor",
+  "description": "Extract metadata for webpages as you browse.",
+  "version": "0.1.0",
+  "icons": {
+    "16": "images/icon_16.png",
+    "128": "images/icon_128.png"
+  },
+  "permissions": [
+    "tabs",
+    "webNavigation",
+    "chrome://favicon/",
+    "<all_urls>"
+  ],
+  "options_page": "options.html",
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": [
+      	"code/simplDeserializer.js",
+      	"code/fieldParsers.js",
+      	"code/mmdDomHelper.js",
+      	"code/contentScript.js",
+      	"code/jquery.min.js"
+      ]
+    }
+  ],
+  "background": {
+    "scripts": [
+      "code/background.js"
+    ]
+  }
+}

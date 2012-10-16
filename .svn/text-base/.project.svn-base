@@ -1,19 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-<<<<<<< HEAD
-	<name>ecologylabSemanticsJavascript</name>
-=======
 	<name>Extractor</name>
->>>>>>> tracker
 	<comment></comment>
 	<projects>
 	</projects>
 	<buildSpec>
 	</buildSpec>
 	<natures>
-<<<<<<< HEAD
-		<nature>com.aptana.projects.webnature</nature>
-=======
->>>>>>> tracker
 	</natures>
 </projectDescription>

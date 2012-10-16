@@ -1,0 +1,32 @@
+{
+  "name": "Study Tracker",
+  "description": "Tracks browser use for user studies...",
+  "version": "0.0.1",
+  "icons": {
+    "16": "images/icon_16.png",
+    "128": "images/icon_128.png"
+  },
+  "permissions": [
+    "tabs",
+    "webNavigation",
+    "chrome://favicon/",
+    "<all_urls>",
+    "unlimitedStorage",
+    "history"
+  ],
+  "options_page": "options.html",
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": [
+      	"code/contentScript.js",
+      	"code/jquery.min.js"
+      ]
+    }
+  ],
+  "background": {
+    "scripts": [
+      "code/background.js"
+    ]
+  }
+}
