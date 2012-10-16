@@ -45,6 +45,47 @@ function visitIdToString(id)
 	return retString;
 }
 
+function combinedToHistoryCrumb(combined)
+{
+	//
+	/*
+	{
+  "timestamp": universal time,
+  "source": {
+    "title": title or name of the document,
+    "url": url of the document
+  },
+  "parents": [
+    { // parent document
+      "title": document title,
+      "url": document location
+    },
+   { // grand parent document
+      "title": document title,
+      "url": document location
+    }
+  ]
+	
+	*/
+	var history_crumb = Object();
+	history_crumb.timestamp = new Date().getTime();
+	history_crumb.source = {title:combined.title , url:combined.title}
+	history_crumb.parents = [];
+	//add parents
+	
+	
+	var hist = getHist();
+	var retString = "";
+	var item = hist[combined.parent_id];
+	while(item)
+	{
+		//retString = item.title+"->"+retString;
+		history_crumb.parents.push({title:item.title, url: item.url});
+		item = hist[item.parent_id];
+	}
+	return history_crumb;
+}
+
 function addVisitAction(visit_item, history_item)
 {
 	
@@ -65,7 +106,8 @@ function addVisitAction(visit_item, history_item)
 	var hist = getHist();
 	hist[combined.id] = combined;
 	setHist(hist);
-	append_to_log(combined, "page_loaded");
+	append_to_log(combined, "page_load_raw");
+	append_to_log(combinedToHistoryCrumb(combined),"page_load_crumb");
 }
 
 
@@ -112,8 +154,11 @@ function append_to_log(item, type)
 	{
 		localStorage["log_file"] = "";
 	}
-	var uid = "user21";
-	var note = "This is a note about the study and conditions."
+	options = getOptions();
+	if(options.is_on=='no')
+	    return "";
+	var uid = options.uid;
+	var note = options.note;
 	var logstamp = new Date().getTime();
 	var log_me = JSON.stringify( {uid:uid, note:note, timestamp: logstamp, type:type, item:item} );
 	localStorage["log_file"] = localStorage["log_file"] + log_me+"\n";
@@ -124,10 +169,27 @@ function append_to_log(item, type)
  * Builds a simple object representing the user preferences for the extension.
  * @return an object holding the preference values
  */
+function initOptionsIfNull()
+{
+	if(!localStorage['log_file'])
+		localStorage['log_file'] = "";
+	if(!localStorage[HIST])
+		getHist();
+	if(!localStorage['is_on'])
+		localStorage['is_on'] ='yes';
+	if(!localStorage['uid'])
+		localStorage['uid'] = "";
+	if(!localStorage['note'])
+		localStorage['note'] = ""; 
+	
+}
 function getOptions() {
+	initOptionsIfNull();
 	var options = 	{
 						logs: localStorage['log_file'],
-						hist: localStorage[HIST]
+						is_on: localStorage['is_on'],
+						uid: localStorage['uid'],
+						note: localStorage['note'],
       					// service: localStorage["service"],
       					// serviceUrl: localStorage["serviceUrl"],
       					// metadataInjection: localStorage["metadataInjection"],
@@ -138,6 +200,20 @@ function getOptions() {
       				};
      return options;
 }
+
+function clearLogFile()
+{
+	localStorage['log_file'] = "";
+}
+function setOptions(opts)
+{
+	for(i in opts)
+	{
+		//console.log("set "+i+" to "+opts[i])
+		localStorage[i] = opts[i];
+	}
+	getOptions();
+}
   
 /** loadOptions
  * Loads the current preferences,
@@ -145,60 +221,6 @@ function getOptions() {
  */
 function loadOptions() {
 	var options = getOptions();
-	/** Meta-Metadata Service **/
-	if (!options.service) {
-		
-		// Default MMD service 
-	   	localStorage["service"] = "infoComp";
-	}
-	if (!options.serviceUrl) {
-	   	
-	   	// Default MMD service URL
-	   	localStorage["serviceUrl"] = "http://localhost:2107/";
-	}
-	/** Metadata Injection **/
-	if (!options.metadataInjection) {
-		
-		// Default Metadata injection format
-		// raw - just the metadata values
-		// all - all metadata field information 
-	   	localStorage["metadataInjection"] = "raw";
-	}	
-	if (!options.attributeInjection) {
-		
-		// Default Metadata attribute injection
-		// attribute injections causes the extracted metadata to be
-		// added to every HTML tag in the target DOM
-		// as a new attribute "metadata=<value>"
-		// where the value is the escaped JSON string of the metadata		
-	   	localStorage["attributeInjection"] = "true";
-	}
-	
-	if (!options.selectionInjection) {
-		
-		// Default Metadata selection injection
-		// selection injections causes the extracted metadata to be
-		// injected into an html selection range as an <img> tag with
-		//  n attribute "metadata=<value>"
-		// where the value is the escaped JSON string of the metadata
-	   	localStorage["selectionInjection"] = "true";
-	}
-	
-	/** Debug Statements **/
-	
-	if (!options.debugMmd) {
-		
-		// Default debug print option
-		// debugMmd - prints the received MMD from the MMD service
-	   	localStorage["debugMmd"] = "false";
-	}
-	
-	if (!options.debugMetadata) {
-		
-		// Default debug print option
-		// debugMetadata - prints the extracted metadata
-	   	localStorage["debugMetadata"] = "false";
-	}	  	
 }
 
 // loadOptions should be called whenever Chrome is started.

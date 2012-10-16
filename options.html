@@ -11,56 +11,50 @@
 	/** setOptions
 	 * Loads the current options and updates the UI selections
 	 */
-	function setOptions() {
+	function showOptions() {	
 		var options = backgroundPage.getOptions();
-		if (options.hist) {
+		if (options.logs) {
 	   		document.getElementById("logarea").value = options.logs;
 		}
-		/*
-		
-	  	if (options.service == "ecologyLab") {
-	   		var radio = document.getElementById("serviceEcologyLab");
-		   	radio.checked = true;
-		   	hideUrl();
-		}
-		else if (options.service == "infoComp") {
-	   		var radio = document.getElementById("serviceInfoComp");
-		   	radio.checked = true;
-		   	hideUrl();
-		}
-		else if (options.service == "custom") {
-	   		var radio = document.getElementById("serviceCustom");
-		   	radio.checked = true;
-		   	showUrl();
+		if (options.is_on) {
+			if(options.is_on == 'yes')
+			{
+				document.getElementById("is_on").checked = true;
+			}
+			else
+			{
+				document.getElementById("is_on").checked = false;
+			}
 		}
 		
-		var urlBox = document.getElementById("serviceUrl");
-		
-		var checkbox = document.getElementById("injectAttribute");	
-		if (options.attributeInjection == "true")		   	
-		   	checkbox.checked = true;
+		if (options.uid) {
+	   		document.getElementById("uid").value=options.uid;
+		}
+		if (options.note) {
+	   		document.getElementById("note").value=options.note;
+		}
+	}
+	
+	function updateOptions()
+	{
+		var options = {};
+		if(document.getElementById("is_on").checked)
+			options['is_on'] = "yes";
 		else
-			checkbox.checked = false;
-			
-		var checkbox = document.getElementById("injectSelection");	
-		if (options.selectionInjection == "true")		   	
-		   	checkbox.checked = true;
-		else
-			checkbox.checked = false;
-		   		
-		var checkbox = document.getElementById("debugMmd");	
-		if (options.debugMmd == "true")		   	
-		   	checkbox.checked = true;
-		else
-			checkbox.checked = false;
-				
-		checkbox = document.getElementById("debugMetadata");
-		if (options.debugMetadata == "true")		   	
-		   	checkbox.checked = true;
-		else
-			checkbox.checked = false;
-			
-			*/
+			options['is_on'] = "no"
+		options['uid'] = document.getElementById("uid").value;
+		options['note'] = document.getElementById("note").value;
+		backgroundPage.setOptions(options);
+	}
+	
+	function clearLog()
+	{
+	  var r=confirm("Delete all log information? There is no backup.");
+	  if (r==true)
+	  {
+	      backgroundPage.clearLogFile();
+	      window.location.reload();
+	  }
 	}
 // 	
 	// /** updateService
@@ -346,7 +340,7 @@ label {
 	
 </head>
 
-<body onload="setOptions()">
+<body onload="showOptions()">
 
 <div class="sideBar">
 	<img src="images/icon_128.png" />
@@ -354,12 +348,32 @@ label {
 
 <div class="center">
 
-	<h1> Metadata Extractor Options</h1>
+	<h1> Study Tracker Options</h1>
+	
+	<div id="dorecord" class="option">
+		<h2>Record Data</h2>
+		<label>
+	       	<input id="is_on" type="checkbox" value="local" onchange="updateOptions();">
+	    	<span>Enable Study Tracker Logs</span>
+	    </label>	
+	</div>
+	
+	<div id="User ID" class="option">
+		<h2>User ID</h2>
+		<input id="uid"  onchange="updateOptions();"  type="test"/>
+		<h2>Note on study or condition...</h2>
+		<textarea id="note"  onchange="updateOptions();"  wrap="off" cols="40" rows="6"></textarea>
+	</div>
 	
 	<div id="logView" class="option">
 		<h2>Current Log</h2>
+		<input type="button" value="Refresh" onclick="window.location.reload()"/>
 		<textarea id="logarea"  wrap="off" cols="100" rows="30"></textarea>
+		<input type="button" value="Clear" onclick="clearLog();">
 	</div>
+	
+	
+
 	<!--
 	<div id="serviceOptions" class="option">
 		<h2>Meta-Metadata Repository Service</h2>
