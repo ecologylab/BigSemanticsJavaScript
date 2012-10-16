@@ -15,6 +15,22 @@ chrome.extension.onRequest.addListener(
 );
 
 
+chrome.tabs.onActivated.addListener(function(activeInfo) {
+	console.log("Activated...");
+	console.log(activeInfo);
+});
+
+chrome.tabs.onHighlighted.addListener(function(activeInfo) {
+	console.log("Highlighted...");
+	console.log(activeInfo);
+});
+
+chrome.windows.onFocusChanged.addListener(function(windowId) {
+	console.log("focus of window changed...");
+	console.log(windowId);
+});
+
+
 var HIST = "hister";
 
 function getHist()
@@ -131,7 +147,7 @@ chrome.history.getVisits({url:visit_item.url}, function(dddd)
 	//console.log(visit_item);
 	//console.log(last);
 	addVisitAction(visit_item,last);
-	console.log(visitIdToString(last.visitId));
+//	console.log(visitIdToString(last.visitId));
 	//console.log("end ..");
 	
 });
