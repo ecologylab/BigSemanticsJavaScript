@@ -14,20 +14,61 @@ chrome.extension.onRequest.addListener(
 	}
 );
 
+var last_updated = new Date().getTime();
+var last_url = "";
+var last_title = "";
+
+function logSelectedTabWindowUrl()
+{
+	chrome.windows.getLastFocused({populate:true}, function(with_tabs)
+	{
+		console.log("With tabs:");
+		//console.log(with_tabs);
+		for(var tab in with_tabs.tabs)
+		{
+			tab = with_tabs.tabs[tab];
+			//console.log(tab);
+			if(tab.active && tab.selected)
+			{
+				
+				if(last_url != tab.url)
+				{
+					var new_updated = new Date().getTime();
+					var duration_seconds = (new_updated-last_updated) / 1000;
+					if(last_url != "")
+					{
+						//console.log(last_url + " from "+last_updated + " to " + new_updated + " a totla of " + duration_seconds + " seconds");
+						append_to_log({url:last_url, title:last_title, start:last_updated, end:new_updated, duration_seconds: duration_seconds},"tab_focus_event");
+					}
+					
+					last_url = tab.url;
+					last_updated = new_updated;
+					last_title = tab.title;
+				}
+				
+				
+			}
+		}
+	}
+		
+	);
+}
 
 chrome.tabs.onActivated.addListener(function(activeInfo) {
 	console.log("Activated...");
-	console.log(activeInfo);
+	//console.log(activeInfo);
 });
 
 chrome.tabs.onHighlighted.addListener(function(activeInfo) {
 	console.log("Highlighted...");
-	console.log(activeInfo);
+	logSelectedTabWindowUrl();
+	//console.log(activeInfo);
 });
 
 chrome.windows.onFocusChanged.addListener(function(windowId) {
 	console.log("focus of window changed...");
-	console.log(windowId);
+	logSelectedTabWindowUrl();
+	//console.log(windowId);
 });
 
 
@@ -152,10 +193,22 @@ chrome.history.getVisits({url:visit_item.url}, function(dddd)
 	
 });
       //console.log(visit_item);
+      logSelectedTabWindowUrl();
 	}
 );
 
 
+//from http://www.mediacollege.com/internet/javascript/number/random.html
+function randomString() {
+	var chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXTZabcdefghiklmnopqrstuvwxyz";
+	var string_length = 8;
+	var randomstring = '';
+	for (var i=0; i<string_length; i++) {
+		var rnum = Math.floor(Math.random() * chars.length);
+		randomstring += chars.substring(rnum,rnum+1);
+	}
+	return randomstring;
+}
 
 
 function test()
@@ -176,7 +229,8 @@ function append_to_log(item, type)
 	var uid = options.uid;
 	var note = options.note;
 	var logstamp = new Date().getTime();
-	var log_me = JSON.stringify( {uid:uid, note:note, timestamp: logstamp, type:type, item:item} );
+	var hash = randomString();
+	var log_me = JSON.stringify( {uid:uid, note:note, timestamp: logstamp, hash:hash, type:type, item:item} );
 	localStorage["log_file"] = localStorage["log_file"] + log_me+"\n";
 	return localStorage["log_file"];
 }
@@ -197,7 +251,6 @@ function initOptionsIfNull()
 		localStorage['uid'] = "";
 	if(!localStorage['note'])
 		localStorage['note'] = ""; 
-	
 }
 function getOptions() {
 	initOptionsIfNull();
