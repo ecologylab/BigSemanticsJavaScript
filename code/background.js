@@ -9,6 +9,8 @@ chrome.extension.onRequest.addListener(
       		sendResponse(getOptions());
 //      	if (request.test != null)
 //      		sendResponse(test());
+		if (request.updateVisitWithTitle != null)
+		      updateVisitWithTitle(request.url,request.title);
 	  	if (request.append_to_log != null)
       		sendResponse(append_to_log(JSON.parse(request.item), request.type));
 	}
@@ -17,6 +19,9 @@ chrome.extension.onRequest.addListener(
 var last_updated = new Date().getTime();
 var last_url = "";
 var last_title = "";
+
+var waitingCombinedItems = {};
+
 
 function logSelectedTabWindowUrl()
 {
@@ -60,6 +65,21 @@ chrome.windows.onFocusChanged.addListener(function(windowId) {
 	logSelectedTabWindowUrl();
 });
 
+chrome.tabs.onUpdated.addListener(function( tabId , info ) {
+    if ( info.status == "complete" ) {
+      // console.log("Updated!!!");
+       //console.log(info);
+       chrome.tabs.get(tabId,
+       	function(tab)
+   		{
+   			//console.log("tab is");
+   			//console.log(tab);
+   			updateVisitWithTitle(tab.url,tab.title);
+   		}
+       );
+    }
+});
+
 
 var HIST = "hister";
 
@@ -95,7 +115,7 @@ function combinedToHistoryCrumb(combined)
 {
 	var history_crumb = Object();
 	history_crumb.timestamp = new Date().getTime();
-	history_crumb.source = {title:combined.title , url:combined.title}
+	history_crumb.source = {title:combined.title , url:combined.url}
 	history_crumb.parents = [];
 	
 	//add parents
@@ -116,15 +136,30 @@ function addVisitAction(visit_item, history_item)
 	combined.id = history_item.visitId;
 	combined.timestamp = visit_item.visitTime;
 	combined.url = visit_item.url;
-	combined.title = visit_item.url;
+	combined.title = visit_item.title;
 	combined.transition = history_item.transition;
 	combined.parent_id = history_item.referringVisitId;
 
 	var hist = getHist();
 	hist[combined.id] = combined;
 	setHist(hist);
-	append_to_log(combined, "page_load_raw");
-	append_to_log(combinedToHistoryCrumb(combined),"page_load_crumb");
+	waitingCombinedItems[combined.url] = combined;
+	//append_to_log(combined, "page_load_raw");
+	//append_to_log(combinedToHistoryCrumb(combined),"page_load_crumb");
+}
+
+function updateVisitWithTitle(url, title)
+{
+	if(waitingCombinedItems[url])
+	{
+		waitingCombinedItems[url].title = title;
+		var combined = waitingCombinedItems[url];
+		var hist = getHist();
+		hist[combined.id] = combined;
+		setHist(hist);
+		append_to_log(combined, "page_load_raw");
+		append_to_log(combinedToHistoryCrumb(combined),"page_load_crumb");
+	}
 }
 
 
