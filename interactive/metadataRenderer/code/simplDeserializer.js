@@ -1,18 +1,18 @@
+/**
+ * Iterates through the simpl Object to match up the simpl IDs and simpl references
+ * @param simplObj, object to deserialize
+ */
 function simplDeserialize(simplObj)
 {
-var simplReferences = [];
-var simplId = "simpl.id";
-var simplRef = "simpl.ref";
-var idCount = 0;
-var refCount = 0;
+	var simplReferences = [];
+	var simplId = "simpl.id";
+	var simplRef = "simpl.ref";
+	var idCount = 0;
+	var refCount = 0;
 
 	function recurse(currentObj, parentObj, parentFieldName, level)
 	{
 		var skipRecursion = false;
-
-		////console.info("recursing[" + level + "] Parent and currentObj:"); //Too detailed prints.
-		//console.log(parentObj);
-		//console.log(currentObj);
 		
 		if((typeof currentObj) != 'object' || currentObj == null)
 		{
@@ -82,9 +82,6 @@ var refCount = 0;
 				}
 			}
 		}
-	}
-	
+	}	
     recurse(simplObj, null, null, 0);
 }
-
-//End of SimplDeserialize
