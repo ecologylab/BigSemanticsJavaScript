@@ -51,7 +51,8 @@ MetadataRenderer.addMetadataDisplay = function(container, url, isRoot)
  */
 MetadataRenderer.getMetadata = function(url, callback)
 {
-	MetadataRenderer.doJSONPCall("http://ecology-service/ecologylabSemanticService/metadata.jsonp?callback=" + callback + "&url=" + encodeURIComponent(url));
+	var serviceURL = "http://ecology-service/ecologylabSemanticService/metadata.jsonp?callback=" + callback + "&url=" + encodeURIComponent(url)
+	MetadataRenderer.doJSONPCall(serviceURL);
 	console.log("requesting semantics service for metadata: " + serviceURL);
 }
 
@@ -104,6 +105,9 @@ MetadataRenderer.setMetadata = function(rawMetadata)
 	// If no task found then check additional locations
 	if(queueTask && metadata["additional_locations"])
 	{
+		//console.log("checking additional locations");
+		//console.log(MetadataRenderer.queue);
+		//console.log(metadata["additional_locations"]);
 		for(var i = 0; i < metadata["additional_locations"]["location"].length; i++)
 		{
 			var additional_location = metadata["additional_locations"]["location"][i]
@@ -149,7 +153,7 @@ MetadataRenderer.setMetaMetadata = function(mmd)
 		}
 	}
 	else
-		console.error("Retreived meta-metadata: " + mmd["meta_metadata"]["mm_name"] + "  but it doesn't match a document from the queue.");
+		console.error("Retreived meta-metadata: " + mmd["meta_metadata"].name + "  but it doesn't match a document from the queue.");
 }
 
 /**
@@ -209,7 +213,7 @@ MetadataRenderer.createAndRenderMetadata = function(task)
  */
 MetadataRenderer.getTaskFromQueueByUrl = function(url)
 {
-	url = url.toLowerCase();
+	url = encodeURI(url);
 	for(var i = 0; i < MetadataRenderer.queue.length; i++)
 		if(MetadataRenderer.queue[i].matches(url))
 			return MetadataRenderer.queue[i];
