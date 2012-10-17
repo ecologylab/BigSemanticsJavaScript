@@ -103,7 +103,7 @@ MetadataRenderer.setMetadata = function(rawMetadata)
 		queueTask = MetadataRenderer.getTaskFromQueueByUrl(metadata.location);
 
 	// If no task found then check additional locations
-	if(queueTask && metadata["additional_locations"])
+	if(!queueTask && metadata["additional_locations"])
 	{
 		//console.log("checking additional locations");
 		//console.log(MetadataRenderer.queue);
@@ -125,8 +125,11 @@ MetadataRenderer.setMetadata = function(rawMetadata)
 		
 		MetadataRenderer.getMMD(queueTask.mmdType, "MetadataRenderer.setMetaMetadata");
 	}
-	else 
+	else
+	{
 		console.error("Retreived metadata: "+metadata.location+"  but it doesn't match a document from the queue.");
+		console.log(MetadataRenderer.queue);
+	}
 }
 
 /**
@@ -213,7 +216,7 @@ MetadataRenderer.createAndRenderMetadata = function(task)
  */
 MetadataRenderer.getTaskFromQueueByUrl = function(url)
 {
-	//url = encodeURI(url);
+	url = encodeURI(url);
 	for(var i = 0; i < MetadataRenderer.queue.length; i++)
 		if(MetadataRenderer.queue[i].matches(url))
 			return MetadataRenderer.queue[i];

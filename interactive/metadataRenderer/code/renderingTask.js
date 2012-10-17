@@ -24,12 +24,10 @@ RenderingTask.prototype.matches = function(url)
 {
 	url = url.toLowerCase();
 	if(this.url.indexOf(url) == 0)
-	{
 		return true;
-	}
+		
 	else if(url.indexOf(this.url) == 0)
-	{
 		return true;
-	}
+
 	return false;
 }
