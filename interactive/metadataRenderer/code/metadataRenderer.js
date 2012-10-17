@@ -51,7 +51,8 @@ MetadataRenderer.addMetadataDisplay = function(container, url, isRoot)
  */
 MetadataRenderer.getMetadata = function(url, callback)
 {
-	MetadataRenderer.doJSONPCall("http://ecology-service/ecologylabSemanticService/metadata.jsonp?callback=" + callback + "&url=" + url);
+	MetadataRenderer.doJSONPCall("http://ecology-service/ecologylabSemanticService/metadata.jsonp?callback=" + callback + "&url=" + encodeURIComponent(url));
+	console.log("requesting semantics service for metadata: " + serviceURL);
 }
 
 /**
