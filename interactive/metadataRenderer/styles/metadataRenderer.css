@@ -140,6 +140,11 @@
 	height: 19px;
 	text-overflow: ellipsis;
 	overflow: hidden;
+	
+	transition: height 0.3s;
+	-moz-transition: height 0.3s; /* Firefox 4 */
+	-webkit-transition: height 0.3s; /* Safari and Chrome */
+	-o-transition: height 0.3s; /* Opera */
 }
 
 .metadataContainer .fieldValueContainer:hover{

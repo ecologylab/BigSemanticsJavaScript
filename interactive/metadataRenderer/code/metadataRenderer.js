@@ -213,7 +213,7 @@ MetadataRenderer.createAndRenderMetadata = function(task)
  */
 MetadataRenderer.getTaskFromQueueByUrl = function(url)
 {
-	url = encodeURI(url);
+	//url = encodeURI(url);
 	for(var i = 0; i < MetadataRenderer.queue.length; i++)
 		if(MetadataRenderer.queue[i].matches(url))
 			return MetadataRenderer.queue[i];
