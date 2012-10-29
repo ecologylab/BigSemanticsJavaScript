@@ -175,10 +175,7 @@ MetadataRenderer.highlightDocuments = function(event)
 			MetadataRenderer.clearAllCanvases();		
 						
 			// Find matches in the DocumentMap
-			var matches = [];
-			for(var i = 0; i < MetadataRenderer.documentMap.length; i++)
-				if(MetadataRenderer.documentMap[i].matches(location))
-					matches.push(MetadataRenderer.documentMap[i].container);			
+			var matches = MetadataRenderer.getMatchingDocumentSet(location);	
 			
 			// Draw the lines to each match
 			for(var i = 0; i < matches.length; i++)			
@@ -197,7 +194,9 @@ MetadataRenderer.highlightLabel = function(label)
 	label.style.background = "white";
 	label.style.border = "1px solid #555";
 	label.style.minHeight = "15px";
-	label.style.height = "17px";	
+	label.style.height = "17px";
+	
+	MetadataRenderer.highlights.push(label);
 }
 
 /**
@@ -227,7 +226,7 @@ MetadataRenderer.drawConnectionLine = function(target, source)
 	
 	// Highlight the target label
 	MetadataRenderer.highlightLabel(label.parentElement);
-
+	
 	// Get the canvas
 	var canvas = null;
 	
@@ -237,16 +236,6 @@ MetadataRenderer.drawConnectionLine = function(target, source)
 	else
 	{
 		var canvases = document.getElementsByClassName("lineCanvas");
-		
-		// TODO - fix canvas finding, needs to find the least common canvas,
-		// the smallest canvas that contains both target and source
-		/*
-		for(var i = canvases.length - 1; i >= 0; i--)
-		{	
-			canvases[i];	
-		}
-		*/
-		// for the moment just use the biggest canvas
 		canvas = canvases[canvases.length - 1];		
 	}
 		
@@ -302,17 +291,16 @@ MetadataRenderer.unhighlightDocuments = function(event)
 			MetadataRenderer.unhighlightLabel(labels[k].parentElement);
 	}
 	
-	labels = document.getElementsByClassName("fieldLabelContainerOpened");
-	for(var i = 0; i < labels.length; i++)
+	
+	for(var i = 0; i < MetadataRenderer.highlights.length; i++)
 	{
-		MetadataRenderer.unhighlightLabel(labels[i]);
-		labels[i].style.background = "white";
+		MetadataRenderer.unhighlightLabel(MetadataRenderer.highlights[i]);
+		
+		if(MetadataRenderer.highlights[i].className == "fieldLabelContainerOpened")
+			MetadataRenderer.highlights[i].style.background = "white";
 	}
 	
-	labels = document.getElementsByClassName("fieldLabelContainer");
-	for(var i = 0; i < labels.length; i++)
-		MetadataRenderer.unhighlightLabel(labels[i]);
-	
+	MetadataRenderer.highlights = [];	
 	MetadataRenderer.clearAllCanvases();
 }
 

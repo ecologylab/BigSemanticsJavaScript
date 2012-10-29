@@ -216,7 +216,7 @@ MetadataRenderer.buildMetadataTable = function(isChildTable, isRoot, metadataFie
 				valueCol.appendChild(fieldValueDiv);
 				
 				// Add the unrendered document to the documentMap
-				MetadataRenderer.documentMap.push(new DocumentContainer(childUrl, row, false));
+				MetadataRenderer.addDocumentToMap(new DocumentContainer(childUrl, row, false));
 				
 				// Add event handling to highlight document connections		
 				nameCol.onmouseover = MetadataRenderer.highlightDocuments;

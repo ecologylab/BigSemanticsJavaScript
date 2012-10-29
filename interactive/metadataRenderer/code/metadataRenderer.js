@@ -8,7 +8,7 @@ var MetadataRenderer = {};
 MetadataRenderer.queue = [];
 
 // The documentMap contains a list of DocumentContainers for each found metadata object, both retrieved and not.
-MetadataRenderer.documentMap = [];
+MetadataRenderer.documentMap = {};
 
 // Needed to differentiate between standard MetadataRenderer and the WWW study version
 var WWWStudy;
@@ -190,8 +190,8 @@ MetadataRenderer.createAndRenderMetadata = function(task)
 		task.container.appendChild(task.visual);
 		
 		// Create and add a new DocumentContainer to the list
-		MetadataRenderer.documentMap.push( new DocumentContainer(task.url, task.container, true));
-	
+		MetadataRenderer.addDocumentToMap(new DocumentContainer(task.url, task.container, true));
+			
 		// Remove any highlighting of documents as the addition of the new table will cause the connection-lines to be out of place
 		MetadataRenderer.unhighlightDocuments(null);
 		
@@ -247,9 +247,44 @@ MetadataRenderer.getTasksFromQueueByType = function(type)
 MetadataRenderer.isRenderedDocument = function(url)
 {
 	url = encodeURI(url);
-	for(var i = 0; i < MetadataRenderer.documentMap.length; i++)
-		if(MetadataRenderer.documentMap[i].matches(url) && MetadataRenderer.documentMap[i].rendered)
+	
+	var documentList = MetadataRender.getMatchingDocumentSet(url);	
+	for(var i = 0; i < documentList.length; i++)
+		if(documentList[i].rendered)
 			return true;
 			
 	return false;
+}
+
+/**
+ * Searches the document map for the set of documents matching the given url
+ * @param url, url to search for in the document map
+ * @return the set of matching documents, empty set if no match is found
+ */
+MetadataRenderer.getMatchingDocumentSet = function(url)
+{
+	for(var location in MetadataRenderer.documentMap)
+	{
+		if(MetadataRenderer.checkMatchingLocation(location, url))
+			return MetadataRenderer.documentMap[location];
+	}
+	return [];
+}
+
+/**
+ * Adds the given document container to the documentMap
+ * @param documentContainer to add to the map
+ */
+MetadataRenderer.addDocumentToMap = function(documentContainer)
+{
+	var matchingDocumentSet = MetadataRenderer.getMatchingDocumentSet(task.url);
+	
+	// add the new list to the map
+	if(matchingDocumentSet.length == 0)
+	{
+		MetadataRenderer.documentMap[documentContainer.url] = matchingDocumentSet;
+	}
+	
+	// add the document to the lost
+	matchingDocumentSet.push(documentContainer);
 }
