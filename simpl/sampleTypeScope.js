@@ -12,6 +12,19 @@ var simplTypeScope = {
 					type: "int"
 				}
 			]		
+		},
+		{
+			name: "dog",
+			fields: [
+				{
+					name: "color",
+					type: "string"
+				},
+				{
+					name: "whiskers",
+					type: "int"
+				}
+			]		
 		}
 	]
 };
@@ -36,10 +49,10 @@ function addFunctionToTypeBeforeInit(typeName, func, name)
 
 var typeScope = [];
 
-function initType(typeName, obj)
+function initType(obj)
 {
 	// search typeScope for type
-	var type = getType(typeName, simplTypeScope);
+	var type = getType(obj["simpl_type"], simplTypeScope);
 		
 	if( !(type.name in typeScope) )
 	{
@@ -54,9 +67,7 @@ function initType(typeName, obj)
 			{
 				this[indexOfFunctions[type.name].name] = indexOfFunctions[type.name].func;
 			}
-		};
-		
-		
+		};		
 	}
 
 	var newObj = new typeScope[type.name](type, obj);
@@ -66,6 +77,8 @@ function initType(typeName, obj)
 
 var rawCat = { color: "steve", whiskers: 7, simpl_type: "cat" };
 
+var rawDog = { color: "doggie", whiskers: 3, simpl_type: "dog" };
+
 function meow()
 {
 	console.log("meow");
@@ -74,10 +87,10 @@ function meow()
 addFunctionToTypeBeforeInit("cat", meow, "meow");
 
 
-function poonitType(typeName, obj)
+function poonitType(obj)
 {
 	// search typeScope for type
-	var type = getType(typeName, simplTypeScope);
+	var type = getType(obj["simpl_type"], simplTypeScope);
 	
 	
 	var newObj = {};
