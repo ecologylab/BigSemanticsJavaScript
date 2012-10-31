@@ -8,13 +8,19 @@ var METADATA_FIELD_MAX_DEPTH = 4;
  * meta-metadata with the metadata value
  * @param mmdField, meta-metadata field object
  */
-function MetadataField(mmdField)
+function MetadataField(mmdField, value, parentMDType, type, dataType)
 {
 	this.name = (mmdField.label != null) ? mmdField.label : mmdField.name;
 	this.value = "";
 					
 	this.layer = (mmdField.layer != null) ? mmdField.layer : 0.0;
 	this.style = (mmdField.style != null) ? mmdField.style : "";
+	
+	this.value = value;
+					
+	this.parentMDType = parentMDType;										
+	this.type = type;
+	this.dataType = dataType;
 }
 
 /**
@@ -60,7 +66,7 @@ MetadataRenderer.guessDocumentLocation = function(metadata)
  * @param metadata, metadata object from the service
  * @param depth, current depth level
  */
-MetadataRenderer.getMetadataFields = function(mmdKids, metadata, depth)
+MetadataRenderer.getMetadataFields = function(mmdFields, metadata, depth)
 {
 	var metadataFields = [];
 	
@@ -68,28 +74,23 @@ MetadataRenderer.getMetadataFields = function(mmdKids, metadata, depth)
 	if(depth >= METADATA_FIELD_MAX_DEPTH)
 		return metadataFields;
 		
-	for(var key in mmdKids)
+	for(var key in mmdFields)
 	{		
-		var mmdField = mmdKids[key];
-		
+		var mmdField = mmdFields[key];
+						
 		if(mmdField.scalar)
 		{
 			mmdField = mmdField.scalar;
 			
 			// Is this a visible field?
-			if(MetadataRenderer.isFieldVisible(mmdField))
-			{				
+			if(!MetadataRenderer.isFieldVisible(mmdField))
+			{		
 				// Is there a metadata value for this field?		
 				var value = MetadataRenderer.getFieldValue(mmdField, metadata);				
 				if(value)
 				{		
-					var field = new MetadataField(mmdField);
-					
-					field.value = value; 
-										
-					field.scalar_type = mmdField.scalar_type;
-					field.parentMDType = metadata.mm_name;	
-								
+					var field = new MetadataField(mmdField, value,  metadata.mm_name, "scalar", mmdField.scalar_type);
+																	
 					// Does the field have a navigation link?
 					if(mmdField.navigates_to != null)
 					{
@@ -98,8 +99,7 @@ MetadataRenderer.getMetadataFields = function(mmdKids, metadata, depth)
 						// Is there a value for the navigation link
 						if(navigationLink != null)
 							field.navigatesTo = navigationLink;
-					}
-								
+					}								
 					metadataFields.push(field);
 				}
 			}
@@ -120,32 +120,26 @@ MetadataRenderer.getMetadataFields = function(mmdKids, metadata, depth)
 					{						
 						for(var i = 0; i < value.length; i++)
 						{
-							var field = new MetadataField(mmdField);
-							
-							field.value = MetadataRenderer.getMetadataFields(mmdField["kids"], value[i], depth + 1);
-							
-							field.composite_type = mmdField.type;
-							field.parentMDType = metadata.mm_name;							
-							
-							metadataFields.push(field);
+							metadataFields.push(new MetadataField(mmdField, 
+								MetadataRenderer.getMetadataFields(mmdField["kids"], value[i], depth + 1),
+								metadata.mm_name,
+								"composite",
+								mmdField.type));
 						}
 					}
 					else
-					{
-						var field = new MetadataField(mmdField);
-						
-						field.value = MetadataRenderer.getMetadataFields(mmdField["kids"], value, depth + 1);
-						
-						field.composite_type = mmdField.type;
-						field.parentMDType = metadata.mm_name;						
-						
-						metadataFields.push(field);
+					{						
+						metadataFields.push(new MetadataField(mmdField, 
+								MetadataRenderer.getMetadataFields(mmdField["kids"], value, depth + 1),
+								metadata.mm_name,
+								"composite",
+								mmdField.type));
 					}
 				}
 			}
 		}
 		
-		else if(mmdField.collection != null)
+		else if(mmdField.collection)
 		{
 			mmdField = mmdField.collection;	
 			
@@ -171,12 +165,11 @@ MetadataRenderer.getMetadataFields = function(mmdKids, metadata, depth)
 						value = newObject;
 					}
 					
-					field.value = MetadataRenderer.getMetadataFields(mmdField["kids"], value, depth + 1);
-					
-					field.child_type = (mmdField.child_tag != null) ? mmdField.child_tag : mmdField.child_type;
-					field.parentMDType = metadata.mm_name;
-									
-					metadataFields.push(field);
+					metadataFields.push(new MetadataField(mmdField, 
+								MetadataRenderer.getMetadataFields(mmdField["kids"], value, depth + 1),
+								metadata.mm_name,
+								"collection",
+								(mmdField.child_tag != null) ? mmdField.child_tag : mmdField.child_type));
 				}
 			}
 		}		

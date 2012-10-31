@@ -11,6 +11,7 @@ MetadataRenderer.queue = [];
 MetadataRenderer.documentMap = {};
 
 // Needed to differentiate between standard MetadataRenderer and the WWW study version
+// Object WWWStudyObject
 var WWWStudy;
 
 /**
@@ -29,15 +30,15 @@ MetadataRenderer.initMetadataRenderings = function()
 
 /**
  * Retrieves the target metadata and meta-metadata, constructs the metadata table, and appends it to the container.
- * @param container, the HTML object which the final metadata rendering will be appened into
+ * @param containerDiv, the HTML div which the final metadata rendering will be appened into
  * @param url, url of the target document
  * @param isRoot, true if this is the root metadata for the rendering,
  * 		needed because styling is slightly different for the root metadata rendering
  */
-MetadataRenderer.addMetadataDisplay = function(container, url, isRoot)
+MetadataRenderer.addMetadataDisplay = function(containerDiv, url, isRoot)
 {	
 	// Add the rendering task to the queue
-	MetadataRenderer.queue.push(new RenderingTask(url, container, isRoot));	
+	MetadataRenderer.queue.push(new RenderingTask(url, containerDiv, isRoot));	
 	
 	// Fetch the metadata from the service
 	MetadataRenderer.getMetadata(url, "MetadataRenderer.setMetadata");	
@@ -86,13 +87,15 @@ MetadataRenderer.doJSONPCall = function(jsonpURL)
 MetadataRenderer.setMetadata = function(rawMetadata)
 {	
 	var metadata = {};
+	
+	// TODO - simpl hack >=( 
 	for(i in rawMetadata)
 	{
 		metadata = rawMetadata[i];		
-		metadata.mm_name = i;
+		metadata.mm_name = rawMetadata[i]["mm_name"];
 	}
 	
-	simplDeserialize(metadata);
+	simplGraphResolve(metadata);
 	
 	//console.log("Retreived metadata: "+metadata.location);
 	
@@ -101,23 +104,25 @@ MetadataRenderer.setMetadata = function(rawMetadata)
 	
 	if(metadata.location)
 		queueTask = MetadataRenderer.getTaskFromQueueByUrl(metadata.location);
-
+	
 	// If no task found then check additional locations
-	if(!queueTask && metadata["additional_locations"])
+	var additionalLocations = metadata["additional_locations"];
+	if(!queueTask && additionalLocations)
 	{
 		//console.log("checking additional locations");
 		//console.log(MetadataRenderer.queue);
 		//console.log(metadata["additional_locations"]);
-		for(var i = 0; i < metadata["additional_locations"]["location"].length; i++)
+		
+		for(var i = 0; i < additionalLocations["location"].length; i++)
 		{
-			var additional_location = metadata["additional_locations"]["location"][i]
+			var additional_location = additionalLocations["location"][i];
 			queueTask = MetadataRenderer.getTaskFromQueueByUrl(additional_location);
 			
 			if(queueTask)
 				break;
 		}
 	}
-	
+		
 	if(queueTask)
 	{
 		queueTask.metadata = metadata;
@@ -139,7 +144,7 @@ MetadataRenderer.setMetadata = function(rawMetadata)
  */
 MetadataRenderer.setMetaMetadata = function(mmd)
 {
-	simplDeserialize(mmd);
+	simplGraphResolve(mmd);
 	
 	//console.log("Retrieved meta-metadata: " + mmd["meta_metadata"].name);
 	var tasks = MetadataRenderer.getTasksFromQueueByType(mmd["meta_metadata"].name);
@@ -150,13 +155,20 @@ MetadataRenderer.setMetaMetadata = function(mmd)
 		{
 			tasks[i].mmd = mmd;
 			
-			// if the task has both metadata and meta-metadata then create and display the rendering
-			if(tasks[i].metadata && tasks[i].mmd)	
+			if(tasks[i].metadata)
+			{
 				MetadataRenderer.createAndRenderMetadata(tasks[i]);
+			}
+			else
+			{
+				console.error("Retreived meta-metadata but there is no metadata: url = " + task.url);
+			}
 		}
 	}
 	else
+	{
 		console.error("Retreived meta-metadata: " + mmd["meta_metadata"].name + "  but it doesn't match a document from the queue.");
+	}
 }
 
 /**
@@ -248,7 +260,7 @@ MetadataRenderer.isRenderedDocument = function(url)
 {
 	url = encodeURI(url);
 	
-	var documentList = MetadataRender.getMatchingDocumentSet(url);	
+	var documentList = MetadataRenderer.getMatchingDocumentSet(url);	
 	for(var i = 0; i < documentList.length; i++)
 		if(documentList[i].rendered)
 			return true;
@@ -277,7 +289,7 @@ MetadataRenderer.getMatchingDocumentSet = function(url)
  */
 MetadataRenderer.addDocumentToMap = function(documentContainer)
 {
-	var matchingDocumentSet = MetadataRenderer.getMatchingDocumentSet(task.url);
+	var matchingDocumentSet = MetadataRenderer.getMatchingDocumentSet(documentContainer.url);
 	
 	// add the new list to the map
 	if(matchingDocumentSet.length == 0)
@@ -287,4 +299,15 @@ MetadataRenderer.addDocumentToMap = function(documentContainer)
 	
 	// add the document to the lost
 	matchingDocumentSet.push(documentContainer);
+}
+
+/**
+ * Gets the host from a URL
+ * @param url, string of the target URL
+ * @return host as a string
+ */
+MetadataRenderer.getHost = function(url)
+{
+	return url.match(/:\/\/(www\.)?(.[^/:]+)/)[2];
+
 }

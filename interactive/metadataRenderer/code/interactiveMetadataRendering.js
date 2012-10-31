@@ -214,6 +214,8 @@ MetadataRenderer.unhighlightLabel = function(label)
 var METADATA_LINE_X_OFFSET = 6;
 var METADATA_LINE_Y_OFFSET = 9;
 
+MetadataRenderer.highlights = [];
+
 /**
  * Draw a line connecting the target to the source
  * @param target HTML object

@@ -4,11 +4,11 @@
  * @param container, HTML container which will hold the rendering
  * @param isRoot, true if this is the root document for a metadataRendering
  */
-function RenderingTask(url, container, isRoot)
+function RenderingTask(url, containerDiv, isRoot)
 {
 	this.url = url.toLowerCase();
 	
-	this.container = container;
+	this.containerDiv = containerDiv;
 	
 	this.metadata = null;	
 	this.mmd = null;

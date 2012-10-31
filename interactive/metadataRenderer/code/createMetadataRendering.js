@@ -55,10 +55,10 @@ MetadataRenderer.buildMetadataTable = function(isChildTable, isRoot, metadataFie
 			if(	metadataField.value.length != null && metadataField.value.length == 0)
 				break;
 			
-			if(metadataField.scalar_type)
+			if(metadataField.type == "scalar")
 			{				
 				// Currently it only rendered Strings, Dates, Integers, and ParsedURLs
-				if(metadataField.scalar_type == "String" || metadataField.scalar_type == "Date" ||metadataField.scalar_type == "Integer" || metadataField.scalar_type == "ParsedURL")
+				if(metadataField.dataType == "String" || metadataField.dataType == "Date" ||metadataField.dataType == "Integer" || metadataField.dataType == "ParsedURL")
 				{	
 					if(metadataField.name)
 					{
@@ -74,12 +74,12 @@ MetadataRenderer.buildMetadataTable = function(isChildTable, isRoot, metadataFie
 					}
 					
 					// If the field is a URL then it should show the favicon and an A tag
-					if(metadataField.scalar_type == "ParsedURL")
+					if(metadataField.dataType == "ParsedURL")
 					{
 						// Uses http://getfavicon.appspot.com/ to resolve the favicon
 						var favicon = document.createElement('img');
 							favicon.className = "favicon";
-							favicon.src = "http://g.etfv.co/" + metadataField.navigatesTo;
+							favicon.src = "http://g.etfv.co/http://" + MetadataRenderer.getHost(metadataField.navigatesTo);
 						
 						var aTag = document.createElement('a');
 						aTag.innerText = MetadataRenderer.removeLineBreaksAndCrazies(metadataField.value);
@@ -100,7 +100,7 @@ MetadataRenderer.buildMetadataTable = function(isChildTable, isRoot, metadataFie
 						// Uses http://getfavicon.appspot.com/ to resolve the favicon
 						var favicon = document.createElement('img');
 							favicon.className = "favicon";
-							favicon.src = "http://g.etfv.co/" + metadataField.navigatesTo;
+							favicon.src = "http://g.etfv.co/http://" + MetadataRenderer.getHost(metadataField.navigatesTo);
 						
 						var aTag = document.createElement('a');
 							aTag.className = "fieldValue";
@@ -139,7 +139,7 @@ MetadataRenderer.buildMetadataTable = function(isChildTable, isRoot, metadataFie
 				}		
 			}
 			
-			else if(metadataField.composite_type != null)
+			else if(metadataField.type == "composite")
 			{
 				/** Label Column **/
 				var childUrl = MetadataRenderer.guessDocumentLocation(metadataField.value);
@@ -226,7 +226,7 @@ MetadataRenderer.buildMetadataTable = function(isChildTable, isRoot, metadataFie
 				row.appendChild(valueCol);
 			}
 			
-			else if(metadataField.child_type != null)
+			else if(metadataField.type == "collection")
 			{		
 				if(metadataField.name != null)
 				{

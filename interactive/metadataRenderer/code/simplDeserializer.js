@@ -2,7 +2,7 @@
  * Iterates through the simpl Object to match up the simpl IDs and simpl references
  * @param simplObj, object to deserialize
  */
-function simplDeserialize(simplObj)
+function simplGraphResolve(simplObj)
 {
 	var simplReferences = [];
 	var simplId = "simpl.id";
@@ -53,10 +53,11 @@ function simplDeserialize(simplObj)
 					parentObj[parentFieldName] = simplReferences[ref];
 				}
 			}
-			else 
+			else
+			{
 				//console.info("No Such Reference: " + ref);
-				
-			skipRecursion = true;
+				skipRecursion = true;
+			}			
 		}
 
 		if(!skipRecursion)
@@ -82,6 +83,7 @@ function simplDeserialize(simplObj)
 				}
 			}
 		}
-	}	
+	}
+	
     recurse(simplObj, null, null, 0);
 }

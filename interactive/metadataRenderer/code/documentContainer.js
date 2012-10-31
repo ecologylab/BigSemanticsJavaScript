@@ -4,10 +4,10 @@
  * @param container, HTML object which contains the rendering of this document
  * @param rendered, true if the document has been downloaded and displayed, false otherwise
  */
-function DocumentContainer(url, container, rendered)
+function DocumentContainer(url, containerDiv, rendered)
 {
 	this.url = url.toLowerCase();
-	this.container = container;
+	this.containerDiv = containerDiv;
 	this.rendered = rendered;
 }
 
