@@ -47,6 +47,7 @@ function createClassPrint(classDescriptor)
 	// fields
 		
 	var fieldsLabel = document.createElement('p');
+		fieldsLabel.className = "label";
 		fieldsLabel.innerText = "Fields";
 		div.appendChild(fieldsLabel);
 	
@@ -64,7 +65,7 @@ function createFieldPrint(fieldDescriptor)
 	var div = document.createElement('div');
 		div.className = "fieldDisplay";
 	
-	var name = document.createElement('h3');
+	var name = document.createElement('span');
 		name.className = "fieldName";
 		name.innerText = fieldDescriptor["name"];
 		div.appendChild(name);
