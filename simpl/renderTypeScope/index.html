@@ -1,0 +1,90 @@
+<html>
+	<head>
+		<title>Type Scopes | simpl.JS</title>
+		
+		<!-- Styles -->
+		<link href="../styles/simplMain.css" rel="stylesheet" type="text/css">
+		<link href="../styles/renderTypeScope.css" rel="stylesheet" type="text/css">
+		<link href="../styles/json.css" rel="stylesheet" type="text/css">
+		
+		<!-- Code -->
+		<script type="text/javascript" src="../helpers/syntaxHighlighting.js"></script>
+		
+		<script type="text/javascript" src="renderTypeScope.js"></script>
+		
+			<!-- Test Data -->
+			<script type="text/javascript" src="../tests/circleTest/circleScope.js"></script>
+			<script type="text/javascript" src="../tests/circleTest/circle.js"></script>
+			<script type="text/javascript" src="../tests/circleTest/collectionOfCircles.js"></script>
+			<script type="text/javascript" src="../tests/circleTest/collectionOfCircles_scope.js"></script>
+			<script type="text/javascript" src="../tests/circleTest/collectionWrapScalar.js"></script>
+			<script type="text/javascript" src="../tests/circleTest/collectionWrapScalar_scope.js"></script>
+			<script type="text/javascript" src="../tests/circleTest/point.js"></script>
+			
+			<script type="text/javascript" src="../tests/testCases.js"></script>
+	</head>
+	<body>
+		<div id="topbar">
+			
+			<!-- lab logo -->
+			<a href="http://ecologylab.net">
+				<img src="http://ecologylab.net/images/interfaceEcologyLabLogos7-2004-2WhiteMatte.png">
+			</a>
+			
+			<!-- simpl javascript -->
+			<a href="../index.html" class="homeLink">
+				<span>simpl.JS</span>
+			</a>
+			
+			<div class="vertDivider"></div>
+			
+			<!-- list of simplJS Apps -->
+			<div id="appList">				
+				<a href="index.html" class="selectedLink">
+					<span>Type Scope Renderer</span>
+				</a>
+				
+				<a href="index.html" class="appLink">
+					<span>Another App</span>
+				</a>
+			</div>
+			
+		</div>
+		
+		<div id="sidebar">
+			<h3>Type Scope Display</h3>
+			
+			
+			<label class="suiteLabel">Test Suite</label>
+			<br/>
+			<span id="selectedTestSuite">Selected Test Suite</span>
+			
+			<div class="listHolder" style="margin-top: 16px;">
+				<h3>Simpl Type Scopes</h3>
+				<ul id="typeScopeList">
+				</ul>
+			</div>
+			
+			<div class="listHolder">
+				<h3>Simpl Objects</h3>
+				<ul id="testDataList">
+				</ul>
+			</div>
+		</div>
+		
+		<div id="content">
+			
+			<script>
+			var str = JSON.stringify(circle_data, undefined, 2);
+			var pre = document.createElement('pre');
+			pre.innerHTML = syntaxHighlight(str);
+			document.getElementById('content').appendChild(pre); 
+		</script>
+			
+		</div>
+
+		<script>
+			setup();
+		</script>
+	</body>
+</html>

@@ -1,0 +1,146 @@
+* {
+	padding: 0px;
+	margin: 0px;
+}
+
+#topbar {
+	height: 36px;
+	width: 100%;
+	background: #404040;
+	color: white;
+	top: 0;
+	left: 0;
+	position: absolute;
+	box-shadow: 0px -2px 8px 2px #404040;
+	overflow: hidden;
+	font-family: Monaco, monospace;
+	z-index: 10;
+	float:top;
+}
+
+#topbar img {
+	height: 30px;
+	margin: 3px 8px;
+}
+
+#topbar a {
+	text-decoration: none;
+	color: white;
+	float: left;
+	font-size: 14px;
+}
+
+#topbar .homeLink {
+	height: 16px;
+	padding: 10px 8px;
+	font-size: 18px;
+}
+
+#topbar .homeLink:hover {
+	background: rgb(120, 120, 120);
+}
+
+#topbar .selectedLink {
+	height: 16px;
+	padding: 10px 8px;
+	background: rgb(100, 100, 100);
+}
+
+#topbar .selectedLink:hover {
+	background: rgb(120, 120, 120);
+}
+
+#topbar .appLink {
+	height: 16px;
+	padding: 10px 8px;
+}
+
+#topbar .appLink:hover {
+	background: rgb(120, 120, 120);
+}
+
+#topbar .vertDivider {
+	border-left: 1px solid gray;
+	margin: 6px 8px;
+	height: 24px;
+	float: left;
+}
+
+#content {
+	background: white;
+	position:absolute;
+	top: 36px;
+	left: 300px;
+	right: 0px;
+	bottom: 0px;
+}
+
+#sidebar {
+	background: rgb(220, 220, 220);
+	position:absolute;
+	top: 36px;
+	width: 300px;
+	left: 0px;
+	bottom: 0px;
+	z-index: 5;
+	box-shadow: -2px 0px 8px 2px #404040;
+	font-family: Monaco, monospace;
+	color: #404040;
+	float: left;
+}
+
+#sidebar h3 {
+	font-size: 18px;
+	text-align: center;
+	padding: 16px 8px;
+}
+
+#sidebar .listHolder {
+	border-top: 1px solid gray;
+	background: rgb(200, 200, 200);
+}
+
+#sidebar .listHolder h3 {
+	font-size: 14px;
+	text-align: left;
+	padding: 6px 8px;
+}
+
+#sidebar .listHolder li {
+	font-size: 12px;
+	padding: 4px 22px;
+	background:#808080;
+}
+
+#sidebar .listHolder li:hover {
+	cursor: pointer;
+	background: white;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+}
