@@ -1,6 +1,6 @@
 <html>
 	<head>
-		<title>Type Scopes | simpl.JS</title>
+		<title>Test Suites | simpl.JS</title>
 		
 		<!-- Styles -->
 		<link href="../styles/simplMain.css" rel="stylesheet" type="text/css">
@@ -9,8 +9,11 @@
 		
 		<!-- Code -->
 		<script type="text/javascript" src="../helpers/syntaxHighlighting.js"></script>
+		<script type="text/javascript" src="../simplGraphResolve.js"></script>
 		
-		<script type="text/javascript" src="renderTypeScope.js"></script>
+		<script type="text/javascript" src="displayTypeScope.js"></script>
+		<script type="text/javascript" src="testSuiteViewer.js"></script>
+		<script type="text/javascript" src="sampleTypeScope.js"></script>
 		
 			<!-- Test Data -->
 			<script type="text/javascript" src="../tests/circleTest/circleScope.js"></script>
@@ -41,7 +44,7 @@
 			<!-- list of simplJS Apps -->
 			<div id="appList">				
 				<a href="index.html" class="selectedLink">
-					<span>Type Scope Renderer</span>
+					<span>Test Suites</span>
 				</a>
 				
 				<a href="index.html" class="appLink">
@@ -52,8 +55,6 @@
 		</div>
 		
 		<div id="sidebar">
-			<h3>Type Scope Display</h3>
-			
 			
 			<label class="suiteLabel">Test Suite</label>
 			<br/>
@@ -73,13 +74,6 @@
 		</div>
 		
 		<div id="content">
-			
-			<script>
-			var str = JSON.stringify(circle_data, undefined, 2);
-			var pre = document.createElement('pre');
-			pre.innerHTML = syntaxHighlight(str);
-			document.getElementById('content').appendChild(pre); 
-		</script>
 			
 		</div>
 
