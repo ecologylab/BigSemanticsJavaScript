@@ -3,7 +3,9 @@
 	padding: 12px;
 	margin: 12px;
 	font-family: Monaco, monospace;
-	overflow: scroll;
+	overflow-y: scroll;
+	overflow-x: hidden;
+	
 	position: absolute;
 	top: 36px;
 	bottom: 0px;
@@ -60,10 +62,16 @@
 	outline: 1px solid #ccc;
 	padding: 8px;
 	margin: 12px;
-	overflow: scroll;
+	overflow-y: scroll;
+	overflow-x: hidden;
 	position: absolute;
 	top: 36px;
 	bottom: 0px;
 	right: 0px;
 	left: 0px;
+	
+}
+
+.unwrappedRawDisplay {
+	padding: 8px;
 }

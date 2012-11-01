@@ -1,12 +1,9 @@
 pre {
-	outline: 1px solid #ccc;
-	padding: 8px;
-	margin: 12px;
-	overflow: scroll;
+	
 }
 .string { color: green; }
 .number { color: darkorange; }
-.boolean { color: blue; }
+.boolean { color: darkblue; }
 .null { color: magenta; }
-.key { color: red; }
+.key { color: #808080; }
 ​

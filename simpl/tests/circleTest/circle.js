@@ -1,1 +1,1 @@
-var circle_data = {"circle":{"radius":"3","center":{"x":"2","y":"1"}}};
+var circle_data = {"circle":{"radius":"3","center":{"x":"2","y":"1","simpl.type":"point"},"simpl.type":"circle"}};

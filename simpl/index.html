@@ -4,8 +4,32 @@
 		
 		<!-- Styles -->
 		<link href="styles/simplMain.css" rel="stylesheet" type="text/css">
+		<link href="styles/renderTypeScope.css" rel="stylesheet" type="text/css">
+		<link href="styles/json.css" rel="stylesheet" type="text/css">
+		<link href="styles/de_serialize.css" rel="stylesheet" type="text/css">
 		
 		<!-- Code -->
+		<script type="text/javascript" src="helpers/syntaxHighlighting.js"></script>
+		<script type="text/javascript" src="simplGraphResolve.js"></script>
+		<script type="text/javascript" src="simpleDeserialize.js"></script>
+		
+		<script type="text/javascript" src="displayTypeScope.js"></script>	
+		<script type="text/javascript" src="sampleTypeScope.js"></script>
+		
+		<script type="text/javascript" src="ui/pages.js"></script>
+		<script type="text/javascript" src="ui/testSuiteViewer.js"></script>
+		<script type="text/javascript" src="ui/de_serializeTest.js"></script>
+		
+			<!-- Test Data -->
+			<script type="text/javascript" src="tests/circleTest/circleScope.js"></script>
+			<script type="text/javascript" src="tests/circleTest/circle.js"></script>
+			<script type="text/javascript" src="tests/circleTest/collectionOfCircles.js"></script>
+			<script type="text/javascript" src="tests/circleTest/collectionOfCircles_scope.js"></script>
+			<script type="text/javascript" src="tests/circleTest/collectionWrapScalar.js"></script>
+			<script type="text/javascript" src="tests/circleTest/collectionWrapScalar_scope.js"></script>
+			<script type="text/javascript" src="tests/circleTest/point.js"></script>
+			
+			<script type="text/javascript" src="tests/testCases.js"></script>
 		
 		
 		
@@ -28,19 +52,25 @@
 			<!-- list of simplJS Apps -->
 			<div id="appList">
 				
-				<a href="deserializeTest/index.html" class="appLink">
+				<a id="deserializeLink" href="#deserialize" class="appLink" onclick="openPage('deserialize');">
 					<span>De-Serialize</span>
 				</a>
 				
 				<div class="vertDivider"></div>
 				
-				<a href="serializeTest/index.html" class="appLink">
+				<a id="serializeLink" href="#serialize" class="appLink" onclick="openPage('serialize');">
 					<span>Serialize</span>
 				</a>
 				
 				<div class="vertDivider"></div>
+				
+				<a id="de_serializeLink" href="#de_serialize" class="appLink" onclick="openPage('de_serialize');">
+					<span>De/Serialize</span>
+				</a>
+				
+				<div class="vertDivider"></div>
 									
-				<a href="renderTypeScope/index.html" class="appLink">
+				<a id="testSuitesLink" href="#testSuites" class="appLink" onclick="openPage('testSuites');">
 					<span>Test Suites</span>
 				</a>
 
@@ -48,11 +78,19 @@
 			
 		</div>
 		
+		<div id="sidebar">
+		
+		</div>
+		
 		<div id="content">
 			
 			
 			
 		</div>
+		
+		<script>
+			setup();
+		</script>
 
 	</body>
 </html>

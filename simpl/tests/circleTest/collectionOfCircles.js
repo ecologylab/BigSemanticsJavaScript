@@ -5,38 +5,49 @@ var collectionOfCircles_data = {
             "radius":"1",
             "center":{
                "x":"2",
-               "y":"3"
-            }
+               "y":"3",
+               "simpl.type":"point"
+            },
+            "simpl.type":"circle"
          },
          {
             "radius":"1",
             "center":{
                "x":"2",
-               "y":"4"
-            }
+               "y":"4",
+               "simpl.type":"point"
+            },
+            "simpl.type":"circle"
          },
          {
             "radius":"1",
             "center":{
                "x":"2",
-               "y":"5"
-            }
+               "y":"5",
+               "simpl.type":"point"
+            },
+            "simpl.type":"circle"
          },
          {
             "radius":"1",
             "center":{
                "x":"2",
-               "y":"6"
-            }
+               "y":"6",
+               "simpl.type":"point"
+            },
+            "simpl.type":"circle"
          },
          {
             "radius":"1",
             "center":{
                "x":"2",
-               "y":"7"
-            }
+               "y":"7",
+               "simpl.type":"point"
+            },
+         "simpl.type":"circle"
          }
       ],
-      "yo":"1"
+      "yo":"1",
+      "simpl.type":"collection_of_circles"
    }
 };

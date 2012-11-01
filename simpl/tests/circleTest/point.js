@@ -1,1 +1,1 @@
-var point_data = {"point":{"x":"1","y":"2"}};
+var point_data = {"point":{"x":"1","y":"2","simpl.type":"point"}};
