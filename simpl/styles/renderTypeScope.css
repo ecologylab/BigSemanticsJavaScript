@@ -3,6 +3,12 @@
 	padding: 12px;
 	margin: 12px;
 	font-family: Monaco, monospace;
+	overflow: scroll;
+	position: absolute;
+	top: 36px;
+	bottom: 0px;
+	right: 0px;
+	left: 0px;
 }
 
 #prettyDisplay h3 {
@@ -30,8 +36,7 @@
 }
 
 #prettyDisplay .className {
-	font-size: 16px;
-	
+	font-size: 16px;	
 }
 
 #prettyDisplay .tagName {
@@ -49,4 +54,16 @@
 
 #prettyDisplay .fieldDisplay {
 	margin: 6px 24px;
+}
+
+#rawDisplay {
+	outline: 1px solid #ccc;
+	padding: 8px;
+	margin: 12px;
+	overflow: scroll;
+	position: absolute;
+	top: 36px;
+	bottom: 0px;
+	right: 0px;
+	left: 0px;
 }

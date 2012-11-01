@@ -3,6 +3,10 @@
 	margin: 0px;
 }
 
+body {
+	overflow: hidden;
+}
+
 #topbar {
 	height: 36px;
 	width: 100%;
@@ -27,7 +31,7 @@
 	text-decoration: none;
 	color: white;
 	float: left;
-	font-size: 14px;
+	font-size: 12px;
 }
 
 #topbar .homeLink {
@@ -59,10 +63,17 @@
 	background: rgb(120, 120, 120);
 }
 
+#topbar .bigVertDivider {
+	border-left: 1px solid lightgray;
+	margin: 4px 8px;
+	height: 26px;
+	float: left;
+}
+
 #topbar .vertDivider {
 	border-left: 1px solid gray;
-	margin: 6px 8px;
-	height: 24px;
+	margin: 8px 8px;
+	height: 20px;
 	float: left;
 }
 
@@ -116,6 +127,7 @@
 	cursor: pointer;
 	background: white;
 }
+
 
 .button {
    border-top: 1px solid #afccde;
