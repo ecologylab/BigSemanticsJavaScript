@@ -1,42 +1,91 @@
 
-
 function initTestSuites(scopeHandler, objHandler)
 {
-	testSuite = simplTestSuites[0];
+	var suiteNameFromUrl = getUrlVars()["suite"].substring(0, getUrlVars()["suite"].indexOf("#"));
+	var suiteFromUrl = getSuite(suiteNameFromUrl);
+	
+	if(suiteFromUrl)
+	{
+		testSuite = suiteFromUrl;
+	}
+	else
+	{
+		testSuite = simplTestSuites[0];
+	}
+		
 	if(testSuite)
 	{
-		// init label
-		document.getElementById("selectedTestSuite").innerText = testSuite.name;
+		setTestSuite(testSuite, scopeHandler, objHandler);
+	}
+	
+	suiteList = document.getElementById("suiteList");
+	suiteList.killChildren();
+	
+	for(var i in simplTestSuites)
+	{
+		var obj = simplTestSuites[i];
+		var li = document.createElement('li');
+			li.innerText = obj.name;
+			li.onclick = selectTestSuite;
 		
-		// init type list
-		var scopeList = document.getElementById("typeScopeList");
-		scopeList.killChildren();
+		suiteList.appendChild(li);
+	}
+}
+
+function setTestSuite(testSuite, scopeHandler, objHandler)
+{
+	if(getUrlVars()["suite"] != testSuite.name)
+	{
+		var baseUrl = document.location.href.substring(0, document.location.href.indexOf("?", 0));
+		var hash = document.location.hash;
+		document.location = baseUrl + "?suite=" + testSuite.name + hash;
+	}
+	// init label
+	document.getElementById("selectedTestSuite").innerText = testSuite.name;
+	
+	// init type list
+	var scopeList = document.getElementById("typeScopeList");
+	scopeList.killChildren();
+	
+	for(var i in testSuite.typeScopes)
+	{
+		var scope = testSuite.typeScopes[i];
+		var li = document.createElement('li');
+		li.onclick = scopeHandler;
+		li.innerText = scope["simpl_types_scope"]["name"];
 		
-		for(var i in testSuite.typeScopes)
-		{
-			var scope = testSuite.typeScopes[i];
-			var li = document.createElement('li');
-			li.onclick = scopeHandler;
-			li.innerText = scope["simpl_types_scope"]["name"];
-			
-			scopeList.appendChild(li);
-		}
+		scopeList.appendChild(li);
+	}
+	
+	// init test object list
+	var objList = document.getElementById("testDataList");
+	objList.killChildren();
+	
+	for(var i in testSuite.testSimplObjects)
+	{
+		var obj = testSuite.testSimplObjects[i];
+		var li = document.createElement('li');
+			li.onclick = objHandler;
 		
-		// init test object list
-		var objList = document.getElementById("testDataList");
-		objList.killChildren();
+		for(var property in obj)
+			li.innerText = property;
 		
-		for(var i in testSuite.testObjects)
-		{
-			var obj = testSuite.testObjects[i];
-			var li = document.createElement('li');
-				li.onclick = objHandler;
-			
-			for(var property in obj)
-				li.innerText = property;
-			
-			objList.appendChild(li);
-		}
+		objList.appendChild(li);
+	}
+	
+	objList = document.getElementById("testAppDataList");
+	objList.killChildren();
+	
+	for(var i in testSuite.testUserObjects)
+	{
+		var obj = testSuite.testUserObjects[i];
+		var li = document.createElement('li');
+			li.onclick = objHandler;
+		
+		for(var property in obj)
+			li.innerText = property;
+		
+		objList.appendChild(li);
 	}
 }
 
@@ -99,6 +148,31 @@ function showObject(obj, containerDiv)
 	}
 }
 
+function selectTestSuite(event)
+{
+	var suiteName = event.target.innerText;
+	testSuite = getSuite(suiteName);
+	
+	if(testSuite)
+		setTestSuite(testSuite, selectScope, selectObject);
+	document.getElementById("suiteDropDown").style.display = "none";
+}
+
+function getSuite(name)
+{
+	for(i in simplTestSuites)
+	{
+		if(simplTestSuites[i].name == name)
+			return simplTestSuites[i];
+	}
+	return null;
+}
+
+function openSuiteDropDown()
+{
+	 document.getElementById("suiteDropDown").style.display = "block";
+}
+
 function createControls(obj)
 {	
 	var div = document.createElement('div');
@@ -155,9 +229,18 @@ function getScope(name)
 
 function getTestObject(name)
 {
-	for(var i in testSuite.testObjects)
+	for(var i in testSuite.testSimplObjects)
 	{
-		var obj = testSuite.testObjects[i];		
+		var obj = testSuite.testSimplObjects[i];		
+		for(var property in obj)
+		{
+			if(name == property)
+				return obj;
+		}
+	}
+	for(var i in testSuite.testUserObjects)
+	{
+		var obj = testSuite.testUserObjects[i];		
 		for(var property in obj)
 		{
 			if(name == property)
@@ -202,7 +285,14 @@ function showRaw()
 	document.getElementById("rawButton").className = "selected";
 }
 
-
+function getUrlVars()
+{
+    var vars = {};
+    var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(m,key,value) {
+        vars[key] = value;
+    });
+    return vars;
+}
 
 
 

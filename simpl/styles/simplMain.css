@@ -98,6 +98,62 @@ body {
 	font-family: Monaco, monospace;
 	color: #404040;
 	float: left;
+	padding-top: 10px;
+}
+
+
+#sidebar #selectTestSuite {
+	color: black;
+	background: white;
+	border: 1px solid gray;
+	border-radius: 6px;
+	font-size: 16px;
+	padding: 8px;
+	margin: 16px;
+}
+
+#sidebar #selectTestSuite:hover {
+	cursor: pointer;
+	background: lightgray;
+	border: 1px solid white;
+}
+
+#sidebar #selectTestSuite:hover .downArrow {
+	border-top: 10px solid white;
+}
+
+#sidebar .downArrow {
+	border-left: 12px solid transparent;
+    border-right: 12px solid transparent;
+    border-top: 10px solid darkgray;
+    display: inline;
+    top: 16px;
+    left: 4px;
+    position: relative;
+}
+
+#sidebar #suiteDropDown {
+	position: absolute;
+	width: 283px;
+	background: white;
+	top: 54px;
+	left: 16px;
+	border-radius: 8px;
+	border: 1px solid darkgray;
+	display: none;
+}
+
+#sidebar #suiteDropDown ul {
+	list-style: none;
+}
+
+#sidebar #suiteDropDown ul li {
+	padding: 4px 12px;
+}
+
+#sidebar #suiteDropDown ul li:hover {
+	background: lightgray;
+	cursor: pointer;
 }
 
 #sidebar h3 {

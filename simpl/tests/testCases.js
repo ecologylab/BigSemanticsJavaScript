@@ -1,8 +1,9 @@
-function SimplTestSuite(name, typeScopes, testObjects)
+function SimplTestSuite(name, typeScopes, testSimplObjects, testUserObjects)
 {
 	this.name = name;
 	this.typeScopes = typeScopes;
-	this.testObjects = testObjects;
+	this.testSimplObjects = testSimplObjects;
+	this.testUserObjects = testUserObjects;
 }
 
 var simplTestSuites = [];
@@ -18,5 +19,47 @@ simplTestSuites.push(new SimplTestSuite("Circle",
 			circle_data,
 			collectionOfCircles_data,
 			collectionWrapScalar_data
+		],
+		[			
+			circle_user_data,
+			nic
 		]));
 
+simplTestSuites.push(new SimplTestSuite("Graph",
+		[
+			classAclassB_scope,
+			diamond_scope,
+			graph_collection_scope
+		],
+		[
+			classA_classB_data,
+			diamond_data,
+			graph_collection_data
+		],
+		[			
+			
+		]));
+		
+simplTestSuites.push(new SimplTestSuite("Maps",
+		[
+			maps_within_maps_scope
+		],
+		[
+			maps_data
+		],
+		[			
+			
+		]));
+		
+simplTestSuites.push(new SimplTestSuite("Person",
+		[
+			person_directory_scope,
+			student_scope
+		],
+		[
+			person_directory_data,
+			student_data
+		],
+		[			
+			
+		]));

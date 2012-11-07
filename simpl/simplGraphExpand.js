@@ -1,4 +1,4 @@
-function simplGraphResolve(simplObj)
+function simplGraphExpand(simplObj)
 {
 var simplReferences = [];
 var simplId = "simpl.id";
@@ -14,7 +14,10 @@ var refCount = 0;
 		//console.log(parentObj);
 		//console.log(currentObj);
 		
-
+		if(typeof currentObj != 'object')
+		{
+			return;
+		}
 		
 		if(simplId in currentObj)
 		{
@@ -83,5 +86,3 @@ var refCount = 0;
 	
     recurse(simplObj, null, null, 0);
 }
-
-//End of SimplDeserialize

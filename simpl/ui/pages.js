@@ -9,6 +9,9 @@ var deserializedObj = null;
 
 function setup()
 {
+	buildTestSuiteSidebar();	
+	initTestSuites(selectScope, selectObject);
+	
 	var hash = self.document.location.hash.substring(1);
 	openPage(hash);
 }
@@ -37,12 +40,6 @@ function openTestSuites()
 	
 	// highlight link
 	document.getElementById('testSuitesLink').className = "selectedLink";
-	
-	//build sidebar
-	
-	buildTestSuiteSidebar("Test Suite Browser");
-	
-	initTestSuites(viewScope, viewObject);
 }
 
 function openDeserialize()
@@ -52,11 +49,6 @@ function openDeserialize()
 	
 	// highlight link
 	document.getElementById('deserializeLink').className = "selectedLink";
-	
-	//build sidebar	
-	buildTestSuiteSidebar("Deserialize Test");
-	
-	initTestSuites(selectScope, selectObject);
 	
 	var content = document.getElementById("content");
 	
@@ -126,29 +118,68 @@ function openSerialize()
 	// highlight link
 	document.getElementById('serializeLink').className = "selectedLink";
 	
-	//build sidebar	
-	buildTestSuiteSidebar("Serialize Test");
+	var content = document.getElementById("content");
 	
-	initTestSuites(selectScope, selectObject);
-}
-
-function openDe_Serialize()
-{
-	removeCurrentPage();
-	unhighlightLinks();
+	var scopeLabel = document.createElement('span');
+		scopeLabel.className = "typeScopeLabel";
+		scopeLabel.innerText = "Simpl Type Scope:";
+	content.appendChild(scopeLabel);
 	
-	// highlight link
-	document.getElementById('de_serializeLink').className = "selectedLink";
+	var scopeName = document.createElement('span');
+		scopeName.id = "selectedScope";
+		scopeName.innerText = "none";
+	content.appendChild(scopeName);
 	
-	//build sidebar	
-	buildTestSuiteSidebar("De/Serialize Test");
+	var table = document.createElement('table');
+	content.appendChild(table);
 	
-	initTestSuites(selectScope, selectObject);
+		var fromCol = document.createElement('td');
+			fromCol.className = "testCol";
+		table.appendChild(fromCol);
+			
+			var fromH3 = document.createElement('span');
+				fromH3.innerText = "Deserialized Object";
+			fromCol.appendChild(fromH3);
+			
+			var fromVarName = document.createElement('span');
+				fromVarName.className = "varName";
+				fromVarName.innerText = "deserializedObj";
+			fromCol.appendChild(fromVarName);
+			
+			var fromDiv = document.createElement('div');
+				fromDiv.id = "fromDiv";
+			fromCol.appendChild(fromDiv);			
+		
+		
+		var arrowCol = document.createElement('td');
+			arrowCol.className = "arrowCol";
+		table.appendChild(arrowCol);
+					
+			var arrow = document.createElement('div');
+				arrow.className = "rightArrow";
+			arrowCol.appendChild(arrow);
+		
+		
+		var toCol = document.createElement('td');
+			toCol.className = "testCol";
+		table.appendChild(toCol);
+		
+			var toH3 = document.createElement('span');
+				toH3.innerText = "Serialized Object";
+			toCol.appendChild(toH3);
+			
+			var toVarName = document.createElement('span');
+				toVarName.className = "varName";
+				toVarName.innerText = "serializedObj";
+			toCol.appendChild(toVarName);			
+			
+			var toDiv = document.createElement('div');
+				toDiv.id = "toDiv";
+			toCol.appendChild(toDiv);	
 }
 
 function removeCurrentPage()
 {
-	document.getElementById('sidebar').killChildren();
 	document.getElementById('content').killChildren();
 }
 
@@ -162,21 +193,36 @@ function unhighlightLinks()
 	}
 }
 
-function buildTestSuiteSidebar(title)
+function buildTestSuiteSidebar()
 {
 	var sidebar = document.getElementById('sidebar');
-	
-	var label = document.createElement('label');
-		label.className = "suiteLabel";
-		label.innerText = title;
-	sidebar.appendChild(label);
-	
+		
 	sidebar.appendChild(document.createElement('br'));
 	
-	var suiteName = document.createElement('span');
-		suiteName.id = "selectedTestSuite";
-		suiteName.innerText = "Selected Test Suite";
-	sidebar.appendChild(suiteName);
+	var suiteButton = document.createElement('span');
+		suiteButton.id = "selectTestSuite";
+		
+		var suiteName = document.createElement('span');
+			suiteName.id = "selectedTestSuite";
+			suiteName.innerText = "Selected Test Suite";
+		suiteButton.appendChild(suiteName);
+			
+		var downArrow = document.createElement('div');
+			downArrow.className = "downArrow";			
+		suiteButton.appendChild(downArrow);
+		
+		suiteButton.onclick = openSuiteDropDown;
+		
+	sidebar.appendChild(suiteButton);
+	
+	var suiteDropDown = document.createElement('div');
+		suiteDropDown.id = "suiteDropDown";
+		
+		var suiteList = document.createElement('ul');
+			suiteList.id = "suiteList";
+		suiteDropDown.appendChild(suiteList);
+		
+	sidebar.appendChild(suiteDropDown);
 	
 	var typeScopeListDiv = document.createElement('div');
 		typeScopeListDiv.className = "listHolder";

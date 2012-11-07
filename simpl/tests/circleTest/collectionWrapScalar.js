@@ -44,6 +44,7 @@ var collectionWrapScalar_data = {
          "10",
          "23"
       ],
-      "yo":"1"
+      "yo":"1",
+      "simpl.type":"tests.circle.CollectionOfCircles"
    }
 };

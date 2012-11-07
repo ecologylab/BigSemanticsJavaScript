@@ -4,6 +4,12 @@ var selectedObjectLI = null;
 
 function selectScope(event)
 {
+	if(currentPage == "testSuites")
+	{
+		viewScope(event);
+		return;
+	}
+	
 	if(selectedScopeLI != null)
 	{
 		selectedScopeLI.style.background = "#808080";
@@ -17,11 +23,17 @@ function selectScope(event)
 	
 	document.getElementById("selectedScope").innerText = scopeName;
 	
-	attemptToDeserialize();
+	attemptToDe_Serialize();
 }
 
 function selectObject(event)
 {
+	if(currentPage == "testSuites")
+	{
+		viewObject(event);
+		return;
+	}
+	
 	if(selectedObjectLI != null)
 	{
 		selectedObjectLI.style.background = "#808080";
@@ -38,12 +50,20 @@ function selectObject(event)
 	document.getElementById("fromDiv").killChildren();
 	document.getElementById("fromDiv").appendChild(createUnwrappedRawPrint(selectedObject));
 	
-	attemptToDeserialize();
+	attemptToDe_Serialize();
 }
 
 function createUnwrappedRawPrint(obj)
 {
-	var str = JSON.stringify(obj, undefined, 2);
+	var str = "Could not stringify due to graph structure";
+	try
+	{
+		str = JSON.stringify(obj, undefined, 2);
+	}
+	catch(e)
+	{
+		
+	}
 	var pre = document.createElement('pre');
 		pre.className = "unwrappedRawDisplay";
 		pre.innerHTML = syntaxHighlight(str);
@@ -51,29 +71,65 @@ function createUnwrappedRawPrint(obj)
 	return pre;
 }
 
-function attemptToDeserialize()
+function attemptToDe_Serialize()
 {
 	if(selectedScope && selectedObject)
 	{
-		var scope = clone(selectedScope["simpl_types_scope"]);
-		simplGraphResolve(scope);
-		
-		var obj = selectedObject;
-		for(var property in obj)
+		switch(currentPage)
 		{
-			obj = clone(obj[property]);
+			case "deserialize" : 	attemptToDeserialize();
+									break;
+			case "serialize" : 		attemptToSerialize();
+									break;
 		}
-		serializedObj = obj;
-		deserializedObj = simplDeserialize(scope, obj);
+	}
+}
+
+var scope = null;
+function attemptToSerialize()
+{
+	scope = new SimplTypeScope(selectedScope);
 		
-		document.getElementById("toDiv").killChildren();
-		
-		try {
-			document.getElementById("toDiv").appendChild(createUnwrappedRawPrint(deserializedObj));
-		}
-		catch(e)
-		{
-			document.getElementById("toDiv").write("Can't display object because of graph structure");
-		}
+	var obj = selectedObject;
+	for(var property in obj)
+	{
+		obj = obj[property];
+	}
+	
+	deserializedObj = obj;
+	serializedObj = scope.serialize(obj);
+	
+	document.getElementById("toDiv").killChildren();
+	
+	try {
+		document.getElementById("toDiv").appendChild(createUnwrappedRawPrint(serializedObj));
+	}
+	catch(e)
+	{
+		document.getElementById("toDiv").write("Can't display object because of graph structure");
+	}
+}
+
+function attemptToDeserialize()
+{
+	scope = new SimplTypeScope(selectedScope);
+	
+	var obj = selectedObject;
+	for(var property in obj)
+	{
+		obj = clone(obj[property]);
+	}
+	
+	serializedObj = obj;
+	deserializedObj = scope.deserialize(obj);
+	
+	document.getElementById("toDiv").killChildren();
+	
+	try {
+		document.getElementById("toDiv").appendChild(createUnwrappedRawPrint(deserializedObj));
+	}
+	catch(e)
+	{
+		document.getElementById("toDiv").write("Can't display object because of graph structure");
 	}
 }
