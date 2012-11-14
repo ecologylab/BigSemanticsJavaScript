@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Metadata -- Director's Cut</title>
+    <!-- CSS! -->
+    <link href="css/bootstrap.min.css" rel="stylesheet" media="screen">
+    <link href="css/prettify.css" type="text/css" rel="stylesheet" />
+    <link href="css/mdc.css" rel="stylesheet" media="screen">
+    <link href="../interactive/metadataRenderer/styles/metadataRenderer.css" rel="stylesheet" type="text/css">
+
+    <!-- Scripts! -->
+    <script src="http://code.jquery.com/jquery-latest.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="js/prettify.js"></script>
+
+    <script type="text/javascript" src="../interactive/metadataRenderer/code/metadataRenderer.js"></script>
+    <script type="text/javascript" src="../interactive/metadataRenderer/code/metadataField.js"></script>
+    <script type="text/javascript" src="../interactive/metadataRenderer/code/documentContainer.js"></script>
+    <script type="text/javascript" src="../interactive/metadataRenderer/code/renderingTask.js"></script>
+    <script type="text/javascript" src="../interactive/metadataRenderer/code/createMetadataRendering.js"></script>
+    <script type="text/javascript" src="../interactive/metadataRenderer/code/interactiveMetadataRendering.js"></script>
+    <script type="text/javascript" src="../interactive/metadataRenderer/code/simplDeserializer.js"></script>
+
+    <script>
+
+      //add the "getQueryParams" function to look for the "?" and then pull out the query URL
+      //then show that. Also, add a "Link" button for them to get a link or whatevah
+
+      function updateJSON(rawMetadata)
+      {
+        var content = document.getElementById("mdcJsonPP");
+        var output = JSON.stringify(rawMetadata, undefined, 4);
+
+        content.innerHTML = output;
+
+        prettyPrint();
+      }
+
+      function showMetadata()
+      {
+        console.log("Kicking this off...");
+        var url = document.getElementById("targetURL").value;
+        var content = document.getElementById("mdcIce");
+        
+        MetadataRenderer.addMetadataDisplay(content, url, true);
+        MetadataRenderer.getMetadata(url, "updateJSON");
+      }
+      
+      function onEnterShowMetadata(event)
+      {
+        if(event.keyCode == 13)
+          showMetadata(); 
+      }
+    </script>
+
+  </head>
+  <body onload="showMetadata()">
+
+    <div class="navbar navbar-inverse navbar-fixed-top">
+
+      <!-- Navbar -->
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand"> Metadata Director's Cut</a>
+            <form class="navbar-form pull-right">
+              <input type="text" size="500" class="span5" id="targetURL" onkeydown="onEnterShowMetadata(event);" value="http://en.wikipedia.org/wiki/Supernatural_fiction"/>
+              <button type="button" class="btn" onclick="showMetadata();">Go!</button>
+            </form>
+        </div>
+      </div>
+
+      <!-- Content -->
+      <div class ="container">
+        <div class="row">
+          <div class="span6 title">ICE</div>
+          <div class="span6 title">JSON</div>
+        </div>
+
+        <div class="row">
+          <div class="span6 content" id="mdcIce"></div>
+          <div class="span6 content" id="mdcJson">
+            <!-- http://jsfiddle.net/KJQ9K/ -->
+            <pre class="prettyprint languague-css" id="mdcJsonPP"></pre>
+          </div>
+        </div>
+      </div>
+
+
+    </div>
+
+    <script>
+      MetadataRenderer.initMetadataRenderings();
+    </script>
+
+  </body>
+</html>

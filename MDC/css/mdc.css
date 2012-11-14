@@ -1,0 +1,26 @@
+div.span6.content {
+	/*text-align: center;*/
+	-webkit-border-radius: 4px;
+	-moz-border-radius: 4px;
+	border-radius: 4px;
+
+    height: 600px !important;
+    overflow: auto;
+}
+
+.prettyprint {
+	border: 0px;
+}
+
+div#mdcIce.span6 {
+	/*border: 1px solid #E1E1E8;*/
+	background-color: #F7F7F9;
+}
+
+div.span6.title {
+	margin-top: 20px;
+}
+
+div#mdcJson.span6 {
+	font-family: "Courier New", Courier, mono;
+}
