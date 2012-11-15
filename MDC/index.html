@@ -36,6 +36,13 @@
         prettyPrint();
       }
 
+      function setLinkValue()
+      {
+        console.log("B-baka");
+        var linkInput = document.getElementById("modalLinkValue");
+        linkInput.defaultValue="antabaka.com";
+      }
+
       function showMetadata()
       {
         console.log("Kicking this off...");
@@ -56,6 +63,21 @@
   </head>
   <body onload="showMetadata()">
 
+    <!-- Modal -->
+    <div id="linkModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+      <div class="modal-header">
+        <h3 id="myModalLabel">Link to this Metadata</h3>
+      </div>
+      <div class="modal-body">
+        <p>One fine body</p>
+        <input type="text" id="modalLinkValue" placeholder="Type something…">
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" data-dismiss="modal" aria-hidden="true">Close</button>
+      </div>
+    </div>
+
+
     <div class="navbar navbar-inverse navbar-fixed-top">
 
       <!-- Navbar -->
@@ -65,6 +87,7 @@
             <form class="navbar-form pull-right">
               <input type="text" size="500" class="span5" id="targetURL" onkeydown="onEnterShowMetadata(event);" value="http://en.wikipedia.org/wiki/Supernatural_fiction"/>
               <button type="button" class="btn" onclick="showMetadata();">Go!</button>
+              <button type="button" class="btn" data-toggle="modal" data-target="#linkModal" onclick="setLinkValue();"><i class="icon-bookmark"></i></button>
             </form>
         </div>
       </div>
@@ -73,19 +96,32 @@
       <div class ="container">
         <div class="row">
           <div class="span6 title">ICE</div>
+        </div>
+        <!-- http://jsfiddle.net/KJQ9K/ -->
+
+      <!-- old layout
+        <div class="row">
+          <div class="span6 content" id="mdcIce"></div>
+          <div class="span6 content" id="mdcJson">
+            <pre class="prettyprint languague-css" id="mdcJsonPP"></pre>
+          </div>
+        </div> 
+      -->
+        <div class="row">
+          <div class="span9 content" id="mdcIce"></div>
+        </div> 
+
+        <div class="row">
           <div class="span6 title">JSON</div>
         </div>
 
         <div class="row">
-          <div class="span6 content" id="mdcIce"></div>
-          <div class="span6 content" id="mdcJson">
-            <!-- http://jsfiddle.net/KJQ9K/ -->
+          <div class="span9 content" id="mdcJson">
             <pre class="prettyprint languague-css" id="mdcJsonPP"></pre>
           </div>
-        </div>
+        </div> 
+        
       </div>
-
-
     </div>
 
     <script>

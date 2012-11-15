@@ -8,17 +8,28 @@ div.span6.content {
     overflow: auto;
 }
 
+div.span9.content {
+	height: 300px !important;
+	width: 870px !important;
+	overflow: auto;
+
+	-webkit-border-radius: 4px;
+	-moz-border-radius: 4px;
+	border-radius: 4px;
+	border: 1px solid #E1E1E8;
+}
+
 .prettyprint {
 	border: 0px;
 }
 
-div#mdcIce.span6 {
+div#mdcIce.span9 {
 	/*border: 1px solid #E1E1E8;*/
 	background-color: #F7F7F9;
 }
 
 div.span6.title {
-	margin-top: 20px;
+	margin-top: 10px;
 }
 
 div#mdcJson.span6 {
