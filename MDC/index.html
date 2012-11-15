@@ -22,9 +22,23 @@
     <script type="text/javascript" src="../interactive/metadataRenderer/code/simplDeserializer.js"></script>
 
     <script>
-
       //add the "getQueryParams" function to look for the "?" and then pull out the query URL
       //then show that. Also, add a "Link" button for them to get a link or whatevah
+
+      //Thanks to http://bloggerplugnplay.blogspot.in/2012/08/how-to-get-url-parameter-in-javascript.html
+      function getParameter(param) {
+        var val = document.URL;
+
+        var loc = val.indexOf(param);
+
+        if(loc === -1) {
+          return -1;
+        } else {
+          var url = val.substr(loc);
+          var n=url.replace(param+"=","");
+          return n;
+        }
+      }
 
       function updateJSON(rawMetadata)
       {
@@ -40,12 +54,21 @@
       {
         console.log("B-baka");
         var linkInput = document.getElementById("modalLinkValue");
-        linkInput.defaultValue="antabaka.com";
+        var targetURL = document.getElementById("targetURL").value;
+        var linkURL = document.URL;
+
+        if(getParameter("url") != -1) {
+          var loc = linkURL.indexOf("?url=");
+          linkURL = linkURL.substr(0, loc);
+        }
+
+        linkInput.defaultValue=linkURL + "?url=" + encodeURIComponent(targetURL);
       }
 
       function showMetadata()
       {
         console.log("Kicking this off...");
+
         var url = document.getElementById("targetURL").value;
         var content = document.getElementById("mdcIce");
         
@@ -58,19 +81,31 @@
         if(event.keyCode == 13)
           showMetadata(); 
       }
+
+      //Decide whether to show default or if there's a parameter passed in
+      function onBodyLoad() {
+        var n = getParameter("url");
+        if(n == -1) {
+          showMetadata();
+        } else {
+          var linkInput = document.getElementById("targetURL");
+          linkInput.value=decodeURIComponent(n);
+          showMetadata();
+        }
+      }
     </script>
 
   </head>
-  <body onload="showMetadata()">
+  <body onload="onBodyLoad()">
 
-    <!-- Modal -->
+    <!-- Link Modal -->
     <div id="linkModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
       <div class="modal-header">
         <h3 id="myModalLabel">Link to this Metadata</h3>
       </div>
       <div class="modal-body">
-        <p>One fine body</p>
-        <input type="text" id="modalLinkValue" placeholder="Type something…">
+        <p>Copy this bad boy to your clipboard for easy sharing</p>
+        <input type="text" class="span5" id="modalLinkValue" placeholder="Type something…">
       </div>
       <div class="modal-footer">
         <button class="btn btn-primary" data-dismiss="modal" aria-hidden="true">Close</button>
@@ -84,8 +119,8 @@
       <div class="navbar-inner">
         <div class="container">
           <a class="brand"> Metadata Director's Cut</a>
-            <form class="navbar-form pull-right">
-              <input type="text" size="500" class="span5" id="targetURL" onkeydown="onEnterShowMetadata(event);" value="http://en.wikipedia.org/wiki/Supernatural_fiction"/>
+            <form class="navbar-form pull-right" action="" onsubmit="return false;">
+              <input type="text" size="500" class="span5" id="targetURL" onkeydown="onEnterShowMetadata(event);" value="http://en.wikipedia.org/wiki/Red_panda"/>
               <button type="button" class="btn" onclick="showMetadata();">Go!</button>
               <button type="button" class="btn" data-toggle="modal" data-target="#linkModal" onclick="setLinkValue();"><i class="icon-bookmark"></i></button>
             </form>
@@ -95,7 +130,7 @@
       <!-- Content -->
       <div class ="container">
         <div class="row">
-          <div class="span6 title">ICE</div>
+          <div class="span9 title">ICE</div>
         </div>
         <!-- http://jsfiddle.net/KJQ9K/ -->
 
@@ -112,7 +147,7 @@
         </div> 
 
         <div class="row">
-          <div class="span6 title">JSON</div>
+          <div class="span9 title">JSON</div>
         </div>
 
         <div class="row">
