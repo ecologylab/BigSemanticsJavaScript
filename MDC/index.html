@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <title>Metadata -- Director's Cut</title>
+    <title>Metadata Director's Cut</title>
     <!-- CSS! -->
     <link href="css/bootstrap.min.css" rel="stylesheet" media="screen">
     <link href="css/prettify.css" type="text/css" rel="stylesheet" />
@@ -40,6 +40,7 @@
         }
       }
 
+      //Stringify the JSON and make it pretty looking
       function updateJSON(rawMetadata)
       {
         var content = document.getElementById("mdcJsonPP");
@@ -50,18 +51,20 @@
         prettyPrint();
       }
 
+      //Sets the value of the link text box in the linking modal view
       function setLinkValue()
       {
-        console.log("B-baka");
         var linkInput = document.getElementById("modalLinkValue");
         var targetURL = document.getElementById("targetURL").value;
         var linkURL = document.URL;
 
+        //If a target URL is already included in the document.URL, strip it out
         if(getParameter("url") != -1) {
           var loc = linkURL.indexOf("?url=");
           linkURL = linkURL.substr(0, loc);
         }
 
+        //Append the targetURL for the new link
         linkInput.defaultValue=linkURL + "?url=" + encodeURIComponent(targetURL);
       }
 
@@ -104,7 +107,7 @@
         <h3 id="myModalLabel">Link to this Metadata</h3>
       </div>
       <div class="modal-body">
-        <p>Copy this bad boy to your clipboard for easy sharing</p>
+        <p>Copy this link to your clipboard for easy sharing</p>
         <input type="text" class="span5" id="modalLinkValue" placeholder="Type something…">
       </div>
       <div class="modal-footer">
@@ -112,10 +115,8 @@
       </div>
     </div>
 
-
+    <!-- Navbar -->
     <div class="navbar navbar-inverse navbar-fixed-top">
-
-      <!-- Navbar -->
       <div class="navbar-inner">
         <div class="container">
           <a class="brand"> Metadata Director's Cut</a>
@@ -126,13 +127,15 @@
             </form>
         </div>
       </div>
+    </div>
 
-      <!-- Content -->
-      <div class ="container">
-        <div class="row">
-          <div class="span9 title">ICE</div>
-        </div>
-        <!-- http://jsfiddle.net/KJQ9K/ -->
+
+    <!-- Content -->
+    <div class ="container">
+      <div class="row">
+        <div class="span9 title">ICE</div>
+      </div>
+      <!-- http://jsfiddle.net/KJQ9K/ -->
 
       <!-- old layout
         <div class="row">
@@ -142,21 +145,20 @@
           </div>
         </div> 
       -->
-        <div class="row">
-          <div class="span9 content" id="mdcIce"></div>
-        </div> 
+      <div class="row">
+        <div class="span9 content" id="mdcIce"></div>
+      </div> 
 
-        <div class="row">
-          <div class="span9 title">JSON</div>
-        </div>
-
-        <div class="row">
-          <div class="span9 content" id="mdcJson">
-            <pre class="prettyprint languague-css" id="mdcJsonPP"></pre>
-          </div>
-        </div> 
-        
+      <div class="row">
+        <div class="span9 title">JSON</div>
       </div>
+
+      <div class="row">
+        <div class="span9 content" id="mdcJson">
+          <pre class="prettyprint languague-css" id="mdcJsonPP"></pre>
+        </div>
+      </div> 
+      
     </div>
 
     <script>

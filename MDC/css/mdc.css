@@ -35,3 +35,7 @@ div.span9.title {
 div#mdcJson.span6 {
 	font-family: "Courier New", Courier, mono;
 }
+
+body { 
+    padding-top: 40px; 
+}
