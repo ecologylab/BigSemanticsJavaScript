@@ -94,9 +94,15 @@
 		      	background: white;
 		      }
 		      
-		      #popup a {
+		      #popup #imgurLink {
 		      	line-height: 60px;
 		      	font-size: 22px;
+		      	-webkit-touch-callout: text;
+				-webkit-user-select: text;
+				-khtml-user-select: text;
+				-moz-user-select: text;
+				-ms-user-select: text;
+				user-select: text;
 		      }
 		</style>
 		
@@ -163,7 +169,7 @@
 		<div id="popup" style="display: none">
 			<span id="instructionText">Please wait while your drawing is being uploaded...</span>
 			<br/>
-			<a href="" id="imgurLink" target="_blank"></a>
+			<span id="imgurLink"></span>
 		</div>
 		
 		<script type="text/javascript">
