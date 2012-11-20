@@ -21,85 +21,17 @@
     <script type="text/javascript" src="../interactive/metadataRenderer/code/interactiveMetadataRendering.js"></script>
     <script type="text/javascript" src="../interactive/metadataRenderer/code/simplDeserializer.js"></script>
 
-    <script>
-      //add the "getQueryParams" function to look for the "?" and then pull out the query URL
-      //then show that. Also, add a "Link" button for them to get a link or whatevah
-
-      //Thanks to http://bloggerplugnplay.blogspot.in/2012/08/how-to-get-url-parameter-in-javascript.html
-      function getParameter(param) {
-        var val = document.URL;
-
-        var loc = val.indexOf(param);
-
-        if(loc === -1) {
-          return -1;
-        } else {
-          var url = val.substr(loc);
-          var n=url.replace(param+"=","");
-          return n;
-        }
-      }
-
-      //Stringify the JSON and make it pretty looking
-      function updateJSON(rawMetadata)
-      {
-        var content = document.getElementById("mdcJsonPP");
-        var output = JSON.stringify(rawMetadata, undefined, 4);
-
-        content.innerHTML = output;
-
-        prettyPrint();
-      }
-
-      //Sets the value of the link text box in the linking modal view
-      function setLinkValue()
-      {
-        var linkInput = document.getElementById("modalLinkValue");
-        var targetURL = document.getElementById("targetURL").value;
-        var linkURL = document.URL;
-
-        //If a target URL is already included in the document.URL, strip it out
-        if(getParameter("url") != -1) {
-          var loc = linkURL.indexOf("?url=");
-          linkURL = linkURL.substr(0, loc);
-        }
-
-        //Append the targetURL for the new link
-        linkInput.defaultValue=linkURL + "?url=" + encodeURIComponent(targetURL);
-      }
-
-      function showMetadata()
-      {
-        console.log("Kicking this off...");
-
-        var url = document.getElementById("targetURL").value;
-        var content = document.getElementById("mdcIce");
-        
-        MetadataRenderer.addMetadataDisplay(content, url, true);
-        MetadataRenderer.getMetadata(url, "updateJSON");
-      }
-      
-      function onEnterShowMetadata(event)
-      {
-        if(event.keyCode == 13)
-          showMetadata(); 
-      }
-
-      //Decide whether to show default or if there's a parameter passed in
-      function onBodyLoad() {
-        var n = getParameter("url");
-        if(n == -1) {
-          showMetadata();
-        } else {
-          var linkInput = document.getElementById("targetURL");
-          linkInput.value=decodeURIComponent(n);
-          showMetadata();
-        }
-      }
-    </script>
+    <script type="text/javascript" src="js/mdc.js"></script>
 
   </head>
   <body onload="onBodyLoad()">
+
+    <!-- Loading Modal - Doesn't work yet -->
+    <div id="loadingModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+      <div class="modal-body">
+        <p>Loading</p>
+      </div>
+    </div>
 
     <!-- Link Modal -->
     <div id="linkModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
@@ -150,7 +82,13 @@
       </div> 
 
       <div class="row">
-        <div class="span9 title">JSON</div>
+        <div class="span9 title">
+          JSON
+          <div class="btn-group" data-toggle="buttons-radio">
+            <button type="button" id="mdJsonButton" class="btn btn-mini btn-primary active">Metadata</button>
+            <button type="button" id="mmdJsonButton" class="btn btn-mini">MMD</button>
+          </div>
+        </div>
       </div>
 
       <div class="row">

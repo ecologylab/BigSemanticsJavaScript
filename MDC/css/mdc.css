@@ -1,5 +1,6 @@
+
+/* Old layout
 div.span6.content {
-	/*text-align: center;*/
 	-webkit-border-radius: 4px;
 	-moz-border-radius: 4px;
 	border-radius: 4px;
@@ -7,9 +8,19 @@ div.span6.content {
     height: 600px !important;
     overflow: auto;
 }
+*/
+
+div#loadingModal {
+	margin-right: auto;
+	margin-left: auto;
+	width: 100px;
+}
+
+div#mdcJson.span9 {
+	height: 300px !important;
+}
 
 div.span9.content {
-	height: 300px !important;
 	width: 870px !important;
 	overflow: auto;
 
@@ -17,10 +28,6 @@ div.span9.content {
 	-moz-border-radius: 4px;
 	border-radius: 4px;
 	border: 1px solid #E1E1E8;
-}
-
-.prettyprint {
-	border: 0px;
 }
 
 div#mdcIce.span9 {
@@ -32,10 +39,14 @@ div.span9.title {
 	margin-top: 10px;
 }
 
-div#mdcJson.span6 {
-	font-family: "Courier New", Courier, mono;
-}
-
 body { 
     padding-top: 40px; 
 }
+
+/* CSS for Syntax Highlighting */
+.string { color: #859900; }
+.number { color: #cb4b16; }
+.boolean { color: #268bd2; }
+.null { color: #d33682; }
+.key { color: #dc322f; }
+​
