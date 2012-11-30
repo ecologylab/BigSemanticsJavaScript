@@ -16,3 +16,22 @@ var classA_classB_data = {
       "simpl.type": "tests.graph.ClassA"
    }
 };
+
+var classA = {
+	"x":11,
+    "y":22,
+    "simpl.type": "tests.graph.ClassA"
+};
+
+var classB = {
+	"a":33,
+     "b":44,
+     "class_a": classA
+};
+
+classA["class_a"] = classA;
+classA["class_b"] = classB;
+
+var classA_classB_app_data = {
+   "my_class_a":classA
+};

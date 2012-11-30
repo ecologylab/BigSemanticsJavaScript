@@ -1,88 +1,52 @@
-function simplGraphExpand(simplObj)
+function simplGraphExpand(targetObj)
 {
-var simplReferences = [];
-var simplId = "simpl.id";
-var simplRef = "simpl.ref";
-var idCount = 0;
-var refCount = 0;
-
-	function recurse(currentObj, parentObj, parentFieldName, level)
-	{
-		var skipRecursion = false;
-
-		////console.info("recursing[" + level + "] Parent and currentObj:"); //Too detailed prints.
-		//console.log(parentObj);
-		//console.log(currentObj);
-		
-		if(typeof currentObj != 'object')
+	var simplReferences = [];
+	var simplId = "simpl.id";
+	var simplRef = "simpl.ref";
+	
+	function findIds(currentValue)
+	{		
+		if(typeof currentValue != 'object')
 		{
 			return;
 		}
 		
-		if(simplId in currentObj)
+		if(simplId in currentValue)
 		{
-			//console.info(parentFieldName + " ------------ Adding ref: " + currentObj[simplId] + " [" + ++idCount +"]");
-			simplReferences[currentObj[simplId]] = currentObj;
-			delete currentObj[simplId];
+			simplReferences[currentValue[simplId]] = currentValue;
 		}
 		
-		else if(simplRef in currentObj)
+		for(i in currentValue)
 		{
-			var ref = currentObj[simplRef];
+			findIds(currentValue[i]);
+		}		
+	}
+	
+	function expandRefs(currentKey, currentValue, parentValue)
+	{		
+		if(typeof currentValue != 'object')
+		{
+			return;
+		}
+		
+		if(simplRef in currentValue)
+		{
+			var ref = currentValue[simplRef];
 			if(ref in simplReferences)
 			{
-				//console.info(parentFieldName + "---------- Resolving Ref: " + ref + " [" + ++refCount +"]");
-				//Replace field in the parent with the simplRef
-				if(parentObj instanceof Array) //Never happens?
-				{
-					//console.info("parentObj is an Array!");
-					var index = parentObj.indexOf(currentObj)
-					if(index == -1)
-					{
-						//console.info("Item not found in parent!");
-					}
-					else
-					{
-						//console.info("Replacing item at index: " + index);
-						parentObj[index] = simplReferences[ref];
-					}					
-				}
-				else
-				{
-					//console.info("Replacing item with name: " + parentFieldName + " with reference" + ref);
-					parentObj[parentFieldName] = simplReferences[ref];
-				}
+				parentValue[currentKey] = simplReferences[ref];
 			}
-			else 
-				//console.info("No Such Reference: " + ref);
-				
-			skipRecursion = true;
 		}
-
-		if(!skipRecursion)
+		else
 		{
-			for(var fieldName in currentObj)
+			for(i in currentValue)
 			{
-				if(!currentObj.hasOwnProperty(fieldName))
-				{
-					//console.info("Found shitty props");
-					continue;
-				}
-				var field = currentObj[fieldName];
-				if(field instanceof Array)
-				{
-					for(var i = 0; i < field.length; i++)// arrayItem in field)
-					{
-						recurse(field[i], field, fieldName, level + 1);
-					}
-				}
-				else if(field instanceof Object)
-				{
-					recurse(field, currentObj, fieldName, level + 1);
-				}
+				expandRefs(i, currentValue[i], currentValue);
 			}
 		}
 	}
-	
-    recurse(simplObj, null, null, 0);
+	   
+    findIds(targetObj);
+    
+    expandRefs(null, targetObj, null);  
 }

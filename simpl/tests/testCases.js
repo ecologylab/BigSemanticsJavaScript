@@ -21,7 +21,8 @@ simplTestSuites.push(new SimplTestSuite("Circle",
 			collectionWrapScalar_data
 		],
 		[			
-			circle_user_data,
+			circle_app_data,
+			collectionOfCircles_app_data,
 			nic
 		]));
 
@@ -37,6 +38,7 @@ simplTestSuites.push(new SimplTestSuite("Graph",
 			graph_collection_data
 		],
 		[			
+			classA_classB_app_data
 			
 		]));
 		

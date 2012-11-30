@@ -1,16 +1,19 @@
 
 function initTestSuites(scopeHandler, objHandler)
 {
-	var suiteNameFromUrl = getUrlVars()["suite"].substring(0, getUrlVars()["suite"].indexOf("#"));
-	var suiteFromUrl = getSuite(suiteNameFromUrl);
-	
-	if(suiteFromUrl)
+	if(getUrlVars()["suite"])
 	{
-		testSuite = suiteFromUrl;
-	}
-	else
-	{
-		testSuite = simplTestSuites[0];
+		var suiteNameFromUrl = getUrlVars()["suite"].substring(0, getUrlVars()["suite"].indexOf("#"));
+		var suiteFromUrl = getSuite(suiteNameFromUrl);
+		
+		if(suiteFromUrl)
+		{
+			testSuite = suiteFromUrl;
+		}
+		else
+		{
+			testSuite = simplTestSuites[0];
+		}
 	}
 		
 	if(testSuite)

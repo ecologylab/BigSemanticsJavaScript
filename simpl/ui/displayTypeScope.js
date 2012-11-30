@@ -6,7 +6,7 @@ function createPrettyPrint(obj)
 	if(isSimplTypeScope(obj))
 	{				
 		var scope = clone(obj["simpl_types_scope"]);
-		simplGraphResolve(scope);
+		simplGraphExpand(scope);
 		
 		// scope name
 		var name = document.createElement('h3');

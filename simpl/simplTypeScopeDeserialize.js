@@ -8,7 +8,7 @@ SimplTypeScope.prototype.deserialize = function(simplObj)
 		{
 			try
 			{
-				return this.typeResolve(simplType, simplObj);
+				simplObj = this.typeResolve(simplType, simplObj);
 			}
 			catch(e)
 			{
@@ -16,7 +16,7 @@ SimplTypeScope.prototype.deserialize = function(simplObj)
 				console.error(e);
 			}
 		}	
-	}
+	}	
 	
 	simplGraphExpand(simplObj);
 	
@@ -30,11 +30,21 @@ SimplTypeScope.prototype.typeResolve = function(simplType, simplObj)
 		var simplTypeScope = this;
 		this.types[simplType["name"]] = function (type, obj)
 		{		
-			for(var i in type["field_descriptor"])
+			for(var i in obj)
 			{
-				var fieldDescriptor = type["field_descriptor"][i];				
+				var fieldDescriptor = simplTypeScope.findFieldDescriptor(i, type);
 				
-				this[fieldDescriptor["name"]] = simplTypeScope.parseField(simplObj, fieldDescriptor);
+				if(fieldDescriptor)
+				{
+					var value = simplTypeScope.parseField(simplObj, fieldDescriptor);
+					
+					this[fieldDescriptor["name"]] = value;
+					//console.log(this[fieldDescriptor["name"]]);
+				}				
+				else if(i.indexOf("simpl") == 0)
+				{
+					this[i] = obj[i];
+				}
 			}
 		};
 	}
@@ -43,8 +53,18 @@ SimplTypeScope.prototype.typeResolve = function(simplType, simplObj)
 	return deserializedObj;
 }
 
+SimplTypeScope.prototype.findFieldDescriptor = function(fieldName, type)
+{
+	for(var i  in type["field_descriptor"])
+	{
+		if(type["field_descriptor"][i]["tag_name"] == fieldName)
+			return type["field_descriptor"][i];
+	}
+	return null;
+}
+
 SimplTypeScope.prototype.parseField = function(simplObj, fieldDescriptor)
-{				
+{	
 	var fieldType = fieldDescriptor["type"];
 	
 	switch(parseInt(fieldType))
@@ -125,9 +145,11 @@ SimplTypeScope.prototype.parseField = function(simplObj, fieldDescriptor)
 SimplTypeScope.prototype.translateScalar = function(field, fieldValue)
 {
 	if(field["scalar_type"])
-	{
+	{		
 		if(field["scalar_type"] == "int" || field["scalar_type"] == "Integer")
+		{
 			return parseInt(fieldValue);
+		}
 	}
 	return fieldValue;
 }
