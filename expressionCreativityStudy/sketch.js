@@ -62,18 +62,16 @@ var __slice = Array.prototype.slice;
 						}
 					}
 					if ($(this).attr('data-download')) {
-						console.log("downloading");
+						//console.log("downloading");
 						sketch.share();
 					} else if ($(this).attr('data-clear')) {
-						console.log("clear button");
+						//console.log("clear button");
 						sketch.clear();
 					}
 					return false;
 				});
 			}
 		}
-
-
 		Sketch.prototype.clear = function() {
 			console.log("clearing");
 			var ctx = this.el.getContext('2d');
@@ -186,8 +184,8 @@ var __slice = Array.prototype.slice;
 			sketch = this;
 			$.each(this.actions, function() {
 				if (this.tool) {
-					console.log(this.tool);
-					console.log($.sketch.tools);
+					//console.log(this.tool);
+					//console.log($.sketch.tools);
 					return $.sketch.tools[this.tool].draw.call(sketch, this);
 				}
 			});
@@ -242,7 +240,7 @@ var __slice = Array.prototype.slice;
 	};
 	$.sketch.tools.text = {
 		draw : function(action) {		
-			console.log("text drawing");
+			//console.log("text drawing");
 			this.context.lineWidth=1;
 			this.context.fillStyle="#000";
 			this.context.lineStyle="#000";
@@ -305,7 +303,7 @@ function dragLabel(event)
 			
 			label.style.top = event.pageY - 24 + "px";
 			label.style.left = event.pageX - 8 + "px";
-			console.log(label.style.top);
+			//console.log(label.style.top);
 	}
 	else
 	{
