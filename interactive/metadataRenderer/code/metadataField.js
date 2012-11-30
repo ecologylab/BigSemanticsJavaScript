@@ -157,7 +157,10 @@ MetadataRenderer.getMetadataFields = function(mmdKids, metadata, depth)
 				if(value)
 				{					
 					var field = new MetadataField(mmdField);
-											
+					
+					field.child_type = (mmdField.child_tag != null) ? mmdField.child_tag : mmdField.child_type;
+					field.parentMDType = metadata.mm_name;
+								
 					// If its a poly-morphic collection, then the value array needs to be restructured
 					if(value.length != null)
 					{
@@ -172,9 +175,6 @@ MetadataRenderer.getMetadataFields = function(mmdKids, metadata, depth)
 					}
 					
 					field.value = MetadataRenderer.getMetadataFields(mmdField["kids"], value, depth + 1);
-					
-					field.child_type = (mmdField.child_tag != null) ? mmdField.child_tag : mmdField.child_type;
-					field.parentMDType = metadata.mm_name;
 									
 					metadataFields.push(field);
 				}

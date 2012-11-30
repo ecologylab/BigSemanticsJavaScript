@@ -94,6 +94,7 @@ MetadataRenderer.setMetadata = function(rawMetadata)
 	
 	simplDeserialize(metadata);
 	
+	console.log(metadata);
 	//console.log("Retreived metadata: "+metadata.location);
 	
 	// Match the metadata with a task from the queue
