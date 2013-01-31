@@ -480,7 +480,8 @@ MetadataRenderer.getMetadataFields = function(mmdKids, metadata, depth)
 						var navigationLink = metadata[mmdField.navigates_to];
 						
 						// Is there a value for the navigation link
-						if(navigationLink != null && navigationLink.toLowerCase() != MetadataRenderer.currentDocumentLocation)
+						console.log(navigationLink);
+						if(navigationLink != null && (navigationLink.toLowerCase() != MetadataRenderer.currentDocumentLocation || depth == 0))
 							field.navigatesTo = navigationLink;
 					}
 								
