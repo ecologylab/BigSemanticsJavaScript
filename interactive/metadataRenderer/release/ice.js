@@ -429,13 +429,16 @@ MetadataRenderer.hasVisibleMetadata = function(metadata)
  */
 MetadataRenderer.guessDocumentLocation = function(metadata)
 {
+	var location = "";
+	
 	for(var i = 0; i < metadata.length; i++)
 		// the document's location is typically the navigation target of the 'title' or 'name' field
 		if(metadata[i].name == "title" || metadata[i].name == "name")
 			if(metadata[i].navigatesTo != null)
-				return metadata[i].navigatesTo;
+				location = metadata[i].navigatesTo;
 	
-	return "";
+	//console.log("guessing document location: " + location);
+	return location;
 }
 
 /**
@@ -480,7 +483,6 @@ MetadataRenderer.getMetadataFields = function(mmdKids, metadata, depth)
 						var navigationLink = metadata[mmdField.navigates_to];
 						
 						// Is there a value for the navigation link
-						console.log(navigationLink);
 						if(navigationLink != null && (navigationLink.toLowerCase() != MetadataRenderer.currentDocumentLocation || depth == 0))
 							field.navigatesTo = navigationLink;
 					}
@@ -1148,8 +1150,12 @@ MetadataRenderer.buildMetadataTable = function(isChildTable, isRoot, metadataFie
 						expandButton.className = "expandButton";
 						
 					expandButton.onclick = MetadataRenderer.downloadAndDisplayDocument;
-					expandButton.onmouseover = MetadataRenderer.highlightDocuments;
-					expandButton.onmouseout = MetadataRenderer.unhighlightDocuments;
+					
+					if(childUrl != "")
+					{
+						expandButton.onmouseover = MetadataRenderer.highlightDocuments;
+						expandButton.onmouseout = MetadataRenderer.unhighlightDocuments;
+					}
 							
 					var expandSymbol = document.createElement('div');
 						expandSymbol.className = "expandSymbol";
@@ -1172,11 +1178,11 @@ MetadataRenderer.buildMetadataTable = function(isChildTable, isRoot, metadataFie
 						var fieldLabel = document.createElement('p');
 							fieldLabel.className = "fieldLabel";
 							fieldLabel.innerText = MetadataRenderer.toDisplayCase(metadataField.name);
-						
+		
 						fieldLabelDiv.appendChild(fieldLabel);
 					}
 				}
-				
+
 				nameCol.appendChild(fieldLabelDiv);
 				
 				/** Value Column **/
@@ -1206,9 +1212,12 @@ MetadataRenderer.buildMetadataTable = function(isChildTable, isRoot, metadataFie
 				if(childUrl != "")
 					MetadataRenderer.documentMap.push(new DocumentContainer(childUrl, null, row, false));
 				
-				// Add event handling to highlight document connections		
-				nameCol.onmouseover = MetadataRenderer.highlightDocuments;
-				nameCol.onmouseout = MetadataRenderer.unhighlightDocuments;
+				// Add event handling to highlight document connections	
+				if(childUrl != "")
+				{	
+					nameCol.onmouseover = MetadataRenderer.highlightDocuments;
+					nameCol.onmouseout = MetadataRenderer.unhighlightDocuments;
+				}
 				
 				row.appendChild(nameCol);
 				row.appendChild(valueCol);
