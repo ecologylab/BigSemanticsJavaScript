@@ -24,7 +24,7 @@ function extractMetadataFromUrl(purl, targetDoc, callback) {
 	rawExtraction = false;
 	doc = targetDoc;
 	
-	var serviceURL = "http://ecoarray0:2080/ecologylabSemanticService/mmd.json?url=";//settings.serviceUrl;
+	var serviceURL = "http://ecology-service.cse.tamu.edu/BigSemanticsService/mmd.json?url=";//settings.serviceUrl;
 	
 	if(settings.service == "infoComp") {
 		serviceURL = "http://localhost:2107";

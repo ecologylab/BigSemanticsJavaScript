@@ -51,7 +51,7 @@ MetadataRenderer.addMetadataDisplay = function(container, url, isRoot)
  */
 MetadataRenderer.getMetadata = function(url, callback)
 {
-	var serviceURL = "http://ecology-service/ecologylabSemanticService/metadata.jsonp?callback=" + callback + "&url=" + encodeURIComponent(url)
+	var serviceURL = "http://ecology-service.cse.tamu.edu/BigSemanticsService/metadata.jsonp?callback=" + callback + "&url=" + encodeURIComponent(url)
 	MetadataRenderer.doJSONPCall(serviceURL);
 	console.log("requesting semantics service for metadata: " + serviceURL);
 }
@@ -64,7 +64,7 @@ MetadataRenderer.getMetadata = function(url, callback)
  */
 MetadataRenderer.getMMD = function(type, callback)
 {
-	MetadataRenderer.doJSONPCall("http://ecology-service/ecologylabSemanticService/mmd.jsonp?callback=" + callback + "&name=" + type);
+	MetadataRenderer.doJSONPCall("http://ecology-service.cse.tamu.edu/BigSemanticsService/mmd.jsonp?callback=" + callback + "&name=" + type);
 }
 
 /**
