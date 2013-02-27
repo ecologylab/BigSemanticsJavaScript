@@ -901,16 +901,7 @@ MetadataRenderer.clearAllCanvases = function()
  */
 MetadataRenderer.unhighlightDocuments = function(event)
 {
-	var labels = [];
-	for(var i = 0; i < MetadataRenderer.documentMap.length; i++)
-	{
-		labels = MetadataRenderer.documentMap[i].container.getElementsByClassName("fieldLabel");
-					
-		for(var k = 0; k < labels.length; k++)
-			MetadataRenderer.unhighlightLabel(labels[k].parentElement);
-	}
-	
-	labels = document.getElementsByClassName("fieldLabelContainerOpened");
+	var labels = document.getElementsByClassName("fieldLabelContainerOpened");
 	for(var i = 0; i < labels.length; i++)
 	{
 		MetadataRenderer.unhighlightLabel(labels[i]);
