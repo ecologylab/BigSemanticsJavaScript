@@ -88,7 +88,7 @@ function onNewMetadata(metadata) {
     break;
 
   $.ajax({
-    url: 'http://ecology-service.cs.tamu.edu/ecologylabSemanticService/mmd.jsonp',
+    url: 'http://ecology-service.cse.tamu.edu/BigSemanticsService/mmd.jsonp',
     jsonp: 'callback',
     dataType: 'jsonp',
     data: { name: first},
@@ -99,7 +99,7 @@ function onNewMetadata(metadata) {
 
 function getJSONData (targeturl) {
   $.ajax({
-    url: 'http://ecology-service.cs.tamu.edu/ecologylabSemanticService/metadata.jsonp',
+    url: 'http://ecology-service.cse.tamu.edu/BigSemanticsService/metadata.jsonp',
     jsonp: 'callback',
     dataType: 'jsonp',
     data: { url: targeturl},
