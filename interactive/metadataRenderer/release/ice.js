@@ -763,11 +763,13 @@ MetadataRenderer.highlightDocuments = function(event)
 		
 		var aTags = table.getElementsByTagName("a");
 		for (var i = 0; i < aTags.length; i++)
+		{
 			if(aTags[i].className == "fieldValue")
 			{
 				location = aTags[i].href;
 				break;
 			}
+		}
 		
 		// Did the table have a document location?
 		if(location != null)
@@ -1033,7 +1035,7 @@ MetadataRenderer.buildMetadataTable = function(isChildTable, isRoot, metadataFie
 		{
 			// If the field is an empty array then move on to the next field
 			if(	metadataField.value.length != null && metadataField.value.length == 0)
-				break;
+				continue;
 			
 			if(metadataField.scalar_type)
 			{				
