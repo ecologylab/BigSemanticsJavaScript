@@ -97,7 +97,8 @@ function onNewMetadata(metadata) {
 
 }
 
-function getJSONData (targeturl) {
+function getJSONData (targeturl)
+{
   $.ajax({
     url: 'http://ecology-service.cse.tamu.edu/BigSemanticsService/metadata.jsonp',
     jsonp: 'callback',
@@ -113,6 +114,11 @@ function showMetadata()
   var url = document.getElementById("targetURL").value;
   var content = document.getElementById("mdcIce");
   
+  if(window.history.pushState)
+  {
+    window.history.pushState("state", "MICE Demo", "index.html?url="+url)
+  }
+
   MetadataRenderer.addMetadataDisplay(content, url, true);
 
   getJSONData(url);
