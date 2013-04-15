@@ -132,6 +132,7 @@ function onEnterShowMetadata(event)
 
 //Decide whether to show default or if there's a parameter passed in
 function onBodyLoad() {
+  $(".collapse").collapse();
 
   //Register button call backs
   $('#mmdJsonButton').on('click', function (e) {

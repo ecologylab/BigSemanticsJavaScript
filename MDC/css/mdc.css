@@ -16,12 +16,35 @@ div#loadingModal {
 	width: 100px;
 }
 
+div#scenesTitle {
+	padding-top: 15px;
+}
+
 div#mdcJson.span9 {
-	height: 300px !important;
+	height: 300px;
+	resize: both;
+	border-radius: 4px;
+	/*padding-bottom: 100px;*/
+	margin-bottom: 100px;
+
+}
+
+div.collapse {
+	min-width: 870px !important;
+
+	background-color: #F7F7F9;
+	-webkit-border-radius: 4px;
+	-moz-border-radius: 4px;
+	border-radius: 4px;
+	/*border: 1px solid #E1E1E8;*/
+}
+
+div.collapse > p {
+	margin-bottom: 0px;
 }
 
 div.span9.content {
-	width: 870px !important;
+	min-width: 870px !important;
 	overflow: auto;
 
 	-webkit-border-radius: 4px;
@@ -30,12 +53,17 @@ div.span9.content {
 	border: 1px solid #E1E1E8;
 }
 
+img.nav-img {
+	margin-top: -10px;
+}
+
 div#mdcIce.span9 {
 	/*border: 1px solid #E1E1E8;*/
 	background-color: #F7F7F9;
 }
 
 div.span9.title {
+	/*padding-bottom: 5px;*/
 	margin-top: 10px;
 }
 
