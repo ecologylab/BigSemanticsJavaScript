@@ -75,6 +75,10 @@ body {
     padding-top: 40px; 
 }
 
+p.left{
+	text-align:right;
+}
+
 /* CSS for Syntax Highlighting */
 .string { color: #859900; }
 .number { color: #cb4b16; }
