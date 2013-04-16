@@ -1,7 +1,7 @@
 /** MetadataField and related functions **/
 
 // Constant for how deep to recurse through the metadata
-var METADATA_FIELD_MAX_DEPTH = ;
+var METADATA_FIELD_MAX_DEPTH = 7;
 
 /**
  * MetadataField represents a parsed metadata field combining presentation/interaction rules from

@@ -43,4 +43,4 @@ DocumentContainer.prototype.matches = function(url)
 		}
 	}
 	return false;
-}}
+}
