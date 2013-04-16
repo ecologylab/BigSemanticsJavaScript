@@ -217,7 +217,6 @@ MetadataRenderer.createAndRenderMetadata = function(task)
  */
 MetadataRenderer.getTaskFromQueueByUrl = function(url)
 {
-	url = encodeURI(url);
 	for(var i = 0; i < MetadataRenderer.queue.length; i++)
 		if(MetadataRenderer.queue[i].matches(url))
 			return MetadataRenderer.queue[i];
@@ -247,7 +246,6 @@ MetadataRenderer.getTasksFromQueueByType = function(type)
  */
 MetadataRenderer.isRenderedDocument = function(url)
 {
-	url = encodeURI(url);
 	for(var i = 0; i < MetadataRenderer.documentMap.length; i++)
 		if(MetadataRenderer.documentMap[i].matches(url) && MetadataRenderer.documentMap[i].rendered)
 			return true;
