@@ -1,5 +1,14 @@
+.metadataRendering {
+	background: #EEE;
+	border-radius: 8px;
+	border: 1px solid gray;
+	margin: 8px;
+	padding: 8px;
+	min-width: 640px;
+}
+
 .metadataContainer {
-	font-family: 'Segoe UI', Tahoma, sans-serif;
+
     font-size: 10px;
     font-weight: 100;
     	
@@ -7,6 +16,8 @@
 	border-bottom-right-radius: 8px;
 	border-bottom-left-radius: 8px;
 	width: 640px;
+	
+	line-height: 15px;
 	
 	position: relative;
 }
@@ -62,13 +73,12 @@
 
 .metadataContainer .fieldValue{	
 	white-space: normal;
-	vertical-align: top;
 	text-align: left;
-	
+	vertical-align: middle;
 	text-overflow: ellipsis;
 	
 	
-	padding: 2px 8px 2px 8px;
+	padding: 3px 8px;
 }
 
 .metadataContainer .favicon{
@@ -280,4 +290,3 @@
 	pointer-events: none;
 	background: rgba(0, 0, 100, 0.0);
 }
-

@@ -8,7 +8,7 @@
 }
 
 .metadataContainer {
-	font-family: 'Segoe UI', Tahoma, sans-serif;
+
     font-size: 10px;
     font-weight: 100;
     	
@@ -73,13 +73,12 @@
 
 .metadataContainer .fieldValue{	
 	white-space: normal;
-	vertical-align: top;
 	text-align: left;
-	
+	vertical-align: middle;
 	text-overflow: ellipsis;
 	
 	
-	padding: 2px 8px 2px 8px;
+	padding: 3px 8px;
 }
 
 .metadataContainer .favicon{

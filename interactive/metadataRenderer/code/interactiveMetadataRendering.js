@@ -327,6 +327,7 @@ MetadataRenderer.createLoadingRow = function()
 	var loadingRow = document.createElement('div');
 		loadingRow.className = "loadingRow";
 		loadingRow.innerText = "Loading document...";
+		loadingRow.textContent = "Loading document...";
 		
 	row.appendChild(loadingRow);
 	return row;

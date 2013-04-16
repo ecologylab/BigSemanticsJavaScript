@@ -928,6 +928,7 @@ MetadataRenderer.createLoadingRow = function()
 	var loadingRow = document.createElement('div');
 		loadingRow.className = "loadingRow";
 		loadingRow.innerText = "Loading document...";
+		loadingRow.textContent = "Loading document...";
 		
 	row.appendChild(loadingRow);
 	return row;
@@ -1047,6 +1048,7 @@ MetadataRenderer.buildMetadataTable = function(isChildTable, isRoot, metadataFie
 						var fieldLabel = document.createElement('p');
 							fieldLabel.className = "fieldLabel";
 							fieldLabel.innerText = MetadataRenderer.toDisplayCase(metadataField.name);
+							fieldLabel.textContent = MetadataRenderer.toDisplayCase(metadataField.name);
 						
 						var fieldLabelDiv = document.createElement('div');
 							fieldLabelDiv.className = "fieldLabelContainer";
@@ -1065,6 +1067,8 @@ MetadataRenderer.buildMetadataTable = function(isChildTable, isRoot, metadataFie
 						
 						var aTag = document.createElement('a');
 						aTag.innerText = MetadataRenderer.removeLineBreaksAndCrazies(metadataField.value);
+						aTag.textContent = MetadataRenderer.removeLineBreaksAndCrazies(metadataField.value);
+						
 						aTag.href = metadataField.value;
 						aTag.className = "fieldValue";
 					
@@ -1088,6 +1092,7 @@ MetadataRenderer.buildMetadataTable = function(isChildTable, isRoot, metadataFie
 							aTag.className = "fieldValue";
 							aTag.target = "_blank";
 							aTag.innerText = MetadataRenderer.removeLineBreaksAndCrazies(metadataField.value);
+							aTag.textContent = MetadataRenderer.removeLineBreaksAndCrazies(metadataField.value);
 							aTag.href = metadataField.navigatesTo;
 						
 						var fieldValueDiv = document.createElement('div');
@@ -1107,7 +1112,8 @@ MetadataRenderer.buildMetadataTable = function(isChildTable, isRoot, metadataFie
 					{
 						var fieldValue = document.createElement('p');
 							fieldValue.className = "fieldValue";
-							fieldValue.innerText = MetadataRenderer.removeLineBreaksAndCrazies(metadataField.value);										
+							fieldValue.innerText = MetadataRenderer.removeLineBreaksAndCrazies(metadataField.value);	
+							fieldValue.textContent = MetadataRenderer.removeLineBreaksAndCrazies(metadataField.value);										
 							
 						var fieldValueDiv = document.createElement('div');
 							fieldValueDiv.className = "fieldValueContainer";
@@ -1171,6 +1177,7 @@ MetadataRenderer.buildMetadataTable = function(isChildTable, isRoot, metadataFie
 						var fieldLabel = document.createElement('p');
 							fieldLabel.className = "fieldLabel";
 							fieldLabel.innerText = MetadataRenderer.toDisplayCase(metadataField.name);
+							fieldLabel.textContent = MetadataRenderer.toDisplayCase(metadataField.name);
 		
 						fieldLabelDiv.appendChild(fieldLabel);
 					}
@@ -1223,8 +1230,10 @@ MetadataRenderer.buildMetadataTable = function(isChildTable, isRoot, metadataFie
 					var fieldLabel = document.createElement('p');
 						fieldLabel.className = "fieldLabel";
 						fieldLabel.innerText = MetadataRenderer.toDisplayCase(metadataField.name);
+						fieldLabel.textContent = MetadataRenderer.toDisplayCase(metadataField.name);
 						
 						fieldLabel.innerText += "(" + metadataField.value.length + ")";
+						fieldLabel.textContent += "(" + metadataField.value.length + ")";
 						
 					var fieldLabelDiv = document.createElement('div');
 							fieldLabelDiv.className = "fieldLabelContainer";
