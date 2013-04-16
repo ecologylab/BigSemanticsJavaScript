@@ -534,7 +534,6 @@ MetadataRenderer.getMetadataFields = function(mmdKids, metadata, depth)
 		{
 			mmdField = mmdField.collection;	
 			
-			
 			// Is this a visible field?
 			if(MetadataRenderer.isFieldVisible(mmdField))
 			{		
@@ -544,7 +543,7 @@ MetadataRenderer.getMetadataFields = function(mmdKids, metadata, depth)
 				if(value)
 				{				
 					var field = new MetadataField(mmdField);
-											
+					
 					field.child_type = (mmdField.child_tag != null) ? mmdField.child_tag : mmdField.child_type;
 					field.parentMDType = metadata.mm_name;
 											
@@ -571,8 +570,6 @@ MetadataRenderer.getMetadataFields = function(mmdKids, metadata, depth)
 					
 					field.value = MetadataRenderer.getMetadataFields(mmdField["kids"], value, depth + 1);
 					
-					
-									
 					metadataFields.push(field);
 				}
 			}
@@ -581,7 +578,7 @@ MetadataRenderer.getMetadataFields = function(mmdKids, metadata, depth)
 		
 	//Sort the fields by layer, higher layers first
 	metadataFields.sort(function(a,b){return b.layer - a.layer});
-	//console.log(metadataFields);
+	
 	return metadataFields;
 }
 
@@ -785,7 +782,7 @@ MetadataRenderer.highlightDocuments = function(event)
 				}	
 			}
 			
-			console.log(location);
+			//console.log(location);
 			// Draw the lines to each match
 			for(var i = 0; i < matches.length; i++)			
 			{
@@ -1091,6 +1088,7 @@ MetadataRenderer.buildMetadataTable = function(isChildTable, isRoot, metadataFie
 							aTag.target = "_blank";
 							aTag.innerText = MetadataRenderer.removeLineBreaksAndCrazies(metadataField.value);
 							aTag.textContent = MetadataRenderer.removeLineBreaksAndCrazies(metadataField.value);
+							
 							aTag.href = metadataField.navigatesTo;
 						
 						var fieldValueDiv = document.createElement('div');

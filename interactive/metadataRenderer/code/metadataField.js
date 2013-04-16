@@ -1,7 +1,7 @@
 /** MetadataField and related functions **/
 
 // Constant for how deep to recurse through the metadata
-var METADATA_FIELD_MAX_DEPTH = 4;
+var METADATA_FIELD_MAX_DEPTH = ;
 
 /**
  * MetadataField represents a parsed metadata field combining presentation/interaction rules from
@@ -45,13 +45,16 @@ MetadataRenderer.hasVisibleMetadata = function(metadata)
  */
 MetadataRenderer.guessDocumentLocation = function(metadata)
 {
+	var location = "";
+	
 	for(var i = 0; i < metadata.length; i++)
 		// the document's location is typically the navigation target of the 'title' or 'name' field
 		if(metadata[i].name == "title" || metadata[i].name == "name")
 			if(metadata[i].navigatesTo != null)
-				return metadata[i].navigatesTo;
+				location = metadata[i].navigatesTo;
 	
-	return "";
+	//console.log("guessing document location: " + location);
+	return location;
 }
 
 /**
@@ -96,7 +99,7 @@ MetadataRenderer.getMetadataFields = function(mmdKids, metadata, depth)
 						var navigationLink = metadata[mmdField.navigates_to];
 						
 						// Is there a value for the navigation link
-						if(navigationLink != null)
+						if(navigationLink != null && (navigationLink.toLowerCase() != MetadataRenderer.currentDocumentLocation || depth == 0))
 							field.navigatesTo = navigationLink;
 					}
 								
@@ -114,7 +117,7 @@ MetadataRenderer.getMetadataFields = function(mmdKids, metadata, depth)
 				// Is there a metadata value for this field?		
 				var value = MetadataRenderer.getFieldValue(mmdField, metadata);	
 				if(value)
-				{			
+				{		
 					// If there is an array of values						
 					if(value.length != null)
 					{						
@@ -151,31 +154,40 @@ MetadataRenderer.getMetadataFields = function(mmdKids, metadata, depth)
 			
 			// Is this a visible field?
 			if(MetadataRenderer.isFieldVisible(mmdField))
-			{				
+			{		
+				//console.log(mmdField);			
 				// Is there a metadata value for this field?		
 				var value = MetadataRenderer.getFieldValue(mmdField, metadata);	
 				if(value)
-				{					
+				{				
 					var field = new MetadataField(mmdField);
 					
 					field.child_type = (mmdField.child_tag != null) ? mmdField.child_tag : mmdField.child_type;
 					field.parentMDType = metadata.mm_name;
-								
+											
 					// If its a poly-morphic collection, then the value array needs to be restructured
 					if(value.length != null)
 					{
 						var newArray = [];						
 						for(var i = 0; i < value.length; i++)
-							for(k in value[i])
-								newArray.push(value[i][k]);								
+						{
+							var polyType = value[i];
+							for(k in polyType)
+							{
+								newArray.push(polyType[k]);								
+							}
+						}
 						
 						var newObject = {};
-						newObject[field.child_type]	= newArray;						
+						newObject[field.child_type]	= newArray;
+						
 						value = newObject;
+						
+						console.log(value);
 					}
 					
-					field.value = MetadataRenderer.getMetadataFields(mmdField["kids"], value, depth + 1);
-									
+					field.value = MetadataRenderer.getMetadataFields(mmdField["kids"], value, depth + 1);		
+					
 					metadataFields.push(field);
 				}
 			}

@@ -163,12 +163,13 @@ MetadataRenderer.highlightDocuments = function(event)
 		
 		var aTags = table.getElementsByTagName("a");
 		for (var i = 0; i < aTags.length; i++)
+		{
 			if(aTags[i].className == "fieldValue")
 			{
 				location = aTags[i].href;
 				break;
 			}
-		
+		}
 		// Did the table have a document location?
 		if(location != null)
 		{	
@@ -177,12 +178,20 @@ MetadataRenderer.highlightDocuments = function(event)
 			// Find matches in the DocumentMap
 			var matches = [];
 			for(var i = 0; i < MetadataRenderer.documentMap.length; i++)
+			{
 				if(MetadataRenderer.documentMap[i].matches(location))
-					matches.push(MetadataRenderer.documentMap[i].container);			
+				{
+					if(MetadataRenderer.documentMap[i].container.style.display != "none")
+						matches.push(MetadataRenderer.documentMap[i].container);
+				}	
+			}
 			
+			//console.log(location);
 			// Draw the lines to each match
 			for(var i = 0; i < matches.length; i++)			
-				MetadataRenderer.drawConnectionLine(matches[i], row);			
+			{
+				MetadataRenderer.drawConnectionLine(matches[i], row);		
+			}			
 		}
 	}
 	return false;
@@ -293,16 +302,7 @@ MetadataRenderer.clearAllCanvases = function()
  */
 MetadataRenderer.unhighlightDocuments = function(event)
 {
-	var labels = [];
-	for(var i = 0; i < MetadataRenderer.documentMap.length; i++)
-	{
-		labels = MetadataRenderer.documentMap[i].container.getElementsByClassName("fieldLabel");
-					
-		for(var k = 0; k < labels.length; k++)
-			MetadataRenderer.unhighlightLabel(labels[k].parentElement);
-	}
-	
-	labels = document.getElementsByClassName("fieldLabelContainerOpened");
+	var labels = document.getElementsByClassName("fieldLabelContainerOpened");
 	for(var i = 0; i < labels.length; i++)
 	{
 		MetadataRenderer.unhighlightLabel(labels[i]);

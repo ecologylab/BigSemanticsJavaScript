@@ -4,9 +4,19 @@
  * @param container, HTML object which contains the rendering of this document
  * @param rendered, true if the document has been downloaded and displayed, false otherwise
  */
-function DocumentContainer(url, container, rendered)
+function DocumentContainer(url, additionalUrls, container, rendered)
 {
-	this.url = url.toLowerCase();
+	this.urls = [];
+	this.urls.push(url.toLowerCase());
+	
+	if(additionalUrls)
+	{
+		for(var i = 0; i < additionalUrls.length; i++)
+		{
+			this.urls.push(additionalUrls[i].toLowerCase());
+		}
+	}
+		
 	this.container = container;
 	this.rendered = rendered;
 }
@@ -18,13 +28,19 @@ function DocumentContainer(url, container, rendered)
 DocumentContainer.prototype.matches = function(url)
 {
 	url = url.toLowerCase();
-	if(this.url.indexOf(url) == 0)
+	for(var i = 0; i < this.urls.length; i++)
 	{
-		return true;
-	}
-	else if(url.indexOf(this.url) == 0)
-	{
-		return true;
+		if(this.urls[i].length > 1)
+		{		
+			if(this.urls[i].indexOf(url) == 0)
+			{
+				return true;
+			}
+			else if(url.indexOf(this.urls[i]) == 0)
+			{
+				return true;
+			}
+		}
 	}
 	return false;
-}
+}}

@@ -10,6 +10,8 @@ MetadataRenderer.queue = [];
 // The documentMap contains a list of DocumentContainers for each found metadata object, both retrieved and not.
 MetadataRenderer.documentMap = [];
 
+MetadataRenderer.currentDocumentLocation = "";
+
 // Needed to differentiate between standard MetadataRenderer and the WWW study version
 var WWWStudy;
 
@@ -93,8 +95,7 @@ MetadataRenderer.setMetadata = function(rawMetadata)
 	}
 	
 	simplDeserialize(metadata);
-	
-	console.log(metadata);
+
 	//console.log("Retreived metadata: "+metadata.location);
 	
 	// Match the metadata with a task from the queue
@@ -121,6 +122,9 @@ MetadataRenderer.setMetadata = function(rawMetadata)
 	
 	if(queueTask)
 	{
+		if(metadata["additional_locations"] && metadata["additional_locations"]["location"])
+			queueTask.additionalUrls = metadata["additional_locations"]["location"];
+		
 		queueTask.metadata = metadata;
 		queueTask.mmdType = metadata.mm_name;
 		
@@ -171,6 +175,7 @@ MetadataRenderer.createAndRenderMetadata = function(task)
 	task.visual.className = "metadataContainer";
 	
 	// Build the HTML table for the metadata
+	MetadataRenderer.currentDocumentLocation = task.url;
 	var metadataTable = MetadataRenderer.buildMetadataDisplay(task.isRoot, task.mmd, task.metadata)
 	
 	if(metadataTable)
@@ -191,7 +196,7 @@ MetadataRenderer.createAndRenderMetadata = function(task)
 		task.container.appendChild(task.visual);
 		
 		// Create and add a new DocumentContainer to the list
-		MetadataRenderer.documentMap.push( new DocumentContainer(task.url, task.container, true));
+		MetadataRenderer.documentMap.push( new DocumentContainer(task.url, task.additionalUrls, task.container, true));
 	
 		// Remove any highlighting of documents as the addition of the new table will cause the connection-lines to be out of place
 		MetadataRenderer.unhighlightDocuments(null);

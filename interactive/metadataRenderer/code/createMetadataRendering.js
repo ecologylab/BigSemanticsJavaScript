@@ -53,7 +53,7 @@ MetadataRenderer.buildMetadataTable = function(isChildTable, isRoot, metadataFie
 		{
 			// If the field is an empty array then move on to the next field
 			if(	metadataField.value.length != null && metadataField.value.length == 0)
-				break;
+				continue;
 			
 			if(metadataField.scalar_type)
 			{				
@@ -80,11 +80,12 @@ MetadataRenderer.buildMetadataTable = function(isChildTable, isRoot, metadataFie
 						// Uses http://getfavicon.appspot.com/ to resolve the favicon
 						var favicon = document.createElement('img');
 							favicon.className = "favicon";
-							favicon.src = "http://g.etfv.co/" + metadataField.navigatesTo;
+							favicon.src = "http://g.etfv.co/" + MetadataRenderer.getHost(metadataField.navigatesTo);
 						
 						var aTag = document.createElement('a');
 						aTag.innerText = MetadataRenderer.removeLineBreaksAndCrazies(metadataField.value);
 						aTag.textContent = MetadataRenderer.removeLineBreaksAndCrazies(metadataField.value);
+						
 						aTag.href = metadataField.value;
 						aTag.className = "fieldValue";
 					
@@ -102,7 +103,7 @@ MetadataRenderer.buildMetadataTable = function(isChildTable, isRoot, metadataFie
 						// Uses http://getfavicon.appspot.com/ to resolve the favicon
 						var favicon = document.createElement('img');
 							favicon.className = "favicon";
-							favicon.src = "http://g.etfv.co/" + metadataField.navigatesTo;
+							favicon.src = "http://g.etfv.co/" + MetadataRenderer.getHost(metadataField.navigatesTo);
 						
 						var aTag = document.createElement('a');
 							aTag.className = "fieldValue";
@@ -166,8 +167,12 @@ MetadataRenderer.buildMetadataTable = function(isChildTable, isRoot, metadataFie
 						expandButton.className = "expandButton";
 						
 					expandButton.onclick = MetadataRenderer.downloadAndDisplayDocument;
-					expandButton.onmouseover = MetadataRenderer.highlightDocuments;
-					expandButton.onmouseout = MetadataRenderer.unhighlightDocuments;
+					
+					if(childUrl != "")
+					{
+						expandButton.onmouseover = MetadataRenderer.highlightDocuments;
+						expandButton.onmouseout = MetadataRenderer.unhighlightDocuments;
+					}
 							
 					var expandSymbol = document.createElement('div');
 						expandSymbol.className = "expandSymbol";
@@ -222,11 +227,15 @@ MetadataRenderer.buildMetadataTable = function(isChildTable, isRoot, metadataFie
 				valueCol.appendChild(fieldValueDiv);
 				
 				// Add the unrendered document to the documentMap
-				MetadataRenderer.documentMap.push(new DocumentContainer(childUrl, row, false));
+				if(childUrl != "")
+					MetadataRenderer.documentMap.push(new DocumentContainer(childUrl, null, row, false));
 				
-				// Add event handling to highlight document connections		
-				nameCol.onmouseover = MetadataRenderer.highlightDocuments;
-				nameCol.onmouseout = MetadataRenderer.unhighlightDocuments;
+				// Add event handling to highlight document connections	
+				if(childUrl != "")
+				{	
+					nameCol.onmouseover = MetadataRenderer.highlightDocuments;
+					nameCol.onmouseout = MetadataRenderer.unhighlightDocuments;
+				}
 				
 				row.appendChild(nameCol);
 				row.appendChild(valueCol);
@@ -325,4 +334,15 @@ MetadataRenderer.removeLineBreaksAndCrazies = function(string)
             result += string.charAt(i);
  
 	return result;
+}
+
+/**
+ * Gets the host from a URL
+ * @param url, string of the target URL
+ * @return host as a string
+ */
+MetadataRenderer.getHost = function(url)
+{
+	var host = url.match(/:\/\/(www\.)?(.[^/:]+)/)[2];
+	return "http://" + host;
 }
