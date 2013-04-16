@@ -76,7 +76,14 @@ body {
 }
 
 p.left{
-	text-align:right;
+	text-align:left;
+	padding: 5px;
+	padding-top: 8px;
+}
+
+div.right {
+	width: 870px;
+	text-align: right;
 }
 
 /* CSS for Syntax Highlighting */
