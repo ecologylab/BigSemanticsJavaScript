@@ -86,6 +86,9 @@ div.right {
 	text-align: right;
 }
 
+.row {
+	margin: 0;
+}
 /* CSS for Syntax Highlighting */
 .string { color: #859900; }
 .number { color: #cb4b16; }
