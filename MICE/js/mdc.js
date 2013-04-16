@@ -149,6 +149,36 @@ function onBodyLoad() {
 
   });
 
+  $('#moreMice').on('click', function (e) {
+    $icon = $('#moreMiceIcon')
+
+    if($icon.hasClass("icon-chevron-right"))
+    {
+      $icon.removeClass("icon-chevron-right");
+      $icon.addClass("icon-chevron-down");
+    }
+    else
+    {
+      $icon.removeClass("icon-chevron-down");
+      $icon.addClass("icon-chevron-right");
+    }
+  });
+
+  $('#moreData').on('click', function (e) {
+    $icon = $('#moreDataIcon')
+
+    if($icon.hasClass("icon-chevron-right"))
+    {
+      $icon.removeClass("icon-chevron-right");
+      $icon.addClass("icon-chevron-down");
+    }
+    else
+    {
+      $icon.removeClass("icon-chevron-down");
+      $icon.addClass("icon-chevron-right");
+    }
+  });
+
   $('#mdJsonButton').on('click', function (e) {
     $button = $('#mdJsonButton');
     $otherButton = $('#mmdJsonButton');

@@ -4,6 +4,7 @@
     <title>Metadata In-Context Expander</title>
     <!-- CSS! -->
     <link href="css/bootstrap.min.css" rel="stylesheet" media="screen">
+
     <link href="css/prettify.css" type="text/css" rel="stylesheet" />
     <link href="css/mdc.css" rel="stylesheet" media="screen">
     <link href="../interactive/metadataRenderer/release/ice.css" rel="stylesheet" type="text/css">
@@ -91,10 +92,15 @@
 
       <div class="row">
         <div class="span9 title">
-          <h4><a data-toggle="collapse" data-target="#miceDrop">Dynamic Metadata Visualization</a></h4>
+          <h4>
+            <a id="moreMice" data-toggle="collapse" data-target="#miceDrop">Dynamic Metadata Visualization 
+            </a> 
+            <i id="moreMiceIcon" class="icon-chevron-right"></i>
+
+          </h4>
 
           <div id="miceDrop" class="collapse in">
-            <p>View metadata. Use the plus sign to dynamically expand connected metadata extracted from <a href="https://github.com/ecologylab/BigSemantics/wiki/Use-BigSemantics-Service" target="_blank">the BigSemantics Service</a>, Navigate to the source page by clicking on anchored title.</p>
+            <p>View metadata. Click on the plus sign to dynamically extract connected metadata via an AJAX call to the underlying service, and visualize as expanded fields within the context. Browse the source page by clicking on the anchored title.</p>
           </div>
 
         </div>
@@ -115,16 +121,20 @@
 
       <div class="row" id="scenesTitle">
         <div class="span9 title">
-          <h4><a data-toggle="collapse" data-target="#dataDrop">Behind-the-Scenes Data</a></h4>
+          <h4>
+            <a id="moreData" data-toggle="collapse" data-target="#dataDrop">
+              Behind-the-Scenes Data
+            </a>
+            <i id="moreDataIcon" class="icon-chevron-right"></i>
+          </h4>
 
           <div class="btn-group" data-toggle="buttons-radio">
             <button type="button" id="mdJsonButton" class="btn btn-mini btn-primary active">Metadata</button>
-            <button type="button" id="mmdJsonButton" class="btn btn-mini">Meta-metadata</button>
+            <button type="button" id="mmdJsonButton" class="btn btn-mini">Meta-Metadata</button>
           </div>
 
           <div id="dataDrop" class="collapse in">
-            <p>The Metadata tab shows metadata extracted from the given URL, returned from <a href="https://github.com/ecologylab/BigSemantics/wiki/Use-BigSemantics-Service" target="_blank">the BigSemantics Service</a>, visualized above.
-The Meta-Metadata tab shows the <a href="https://github.com/ecologylab/BigSemantics/wiki#meta-metadata" target="_blank">wrapper</a> selected from a <a href="https://github.com/ecologylab/BigSemantics/wiki#wrapper-repository" target="_blank">repository</a> and used for extracting and presenting metadata from the given URL.</p>
+            <p>The <strong>Metadata</strong> tab shows metadata extracted via <a href="https://github.com/ecologylab/BigSemantics/wiki/Use-BigSemantics-Service" target="_blank">the BigSemantics Service</a> from the given URL, using the <a href="https://github.com/ecologylab/BigSemantics/wiki#meta-metadata" target="_blank">wrapper</a> selected from a <a href="https://github.com/ecologylab/BigSemantics/wiki#wrapper-repository" target="_blank">repository</a>. The wrapper, shown in the <strong>Meta-Metadata</strong> tab, defines the structure, extraction rules, and presentation guidelines for the metadata.</p>
           </div>   
 
         </div>

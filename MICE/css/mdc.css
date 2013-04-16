@@ -39,6 +39,10 @@ div.collapse {
 	/*border: 1px solid #E1E1E8;*/
 }
 
+i#moreMiceIcon, i#moreDataIcon {
+	vertical-align: 0% !important;
+}
+
 div.collapse > p {
 	margin-bottom: 0px;
 }
