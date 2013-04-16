@@ -238,12 +238,9 @@ MetadataRenderer.buildMetadataTable = function(isChildTable, isRoot, metadataFie
 				{
 					var fieldLabel = document.createElement('p');
 						fieldLabel.className = "fieldLabel";
-						fieldLabel.innerText = MetadataRenderer.toDisplayCase(metadataField.name);
-						fieldLabel.textContent = MetadataRenderer.toDisplayCase(metadataField.name);
-						
-						fieldLabel.innerText += "(" + metadataField.value.length + ")";
-						fieldLabel.textContent += "(" + metadataField.value.length + ")";
-						
+						fieldLabel.innerText = MetadataRenderer.toDisplayCase(metadataField.name) + "(" + metadataField.value.length + ")";
+						fieldLabel.textContent = MetadataRenderer.toDisplayCase(metadataField.name) + "(" + metadataField.value.length + ")";
+												
 					var fieldLabelDiv = document.createElement('div');
 							fieldLabelDiv.className = "fieldLabelContainer";
 					

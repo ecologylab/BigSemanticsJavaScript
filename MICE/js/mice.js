@@ -606,7 +606,7 @@ MetadataRenderer.getFieldValue = function(mmdField, metadata)
  */
 MetadataRenderer.expandCollapseTable = function(event)
 {
-	var button = event.srcElement;
+	var button = event.target;
 	
 	if(button.className == "collapseSymbol" || button.className == "expandSymbol")
 		button = button.parentElement;
@@ -698,7 +698,7 @@ MetadataRenderer.clearLoadingRows = function(container)
  */
 MetadataRenderer.downloadAndDisplayDocument = function(event)
 {
-	var button = event.srcElement;
+	var button = event.target;
 	
 	if(button.className == "collapseSymbol" || button.className == "expandSymbol")
 		button = button.parentElement;
@@ -1229,12 +1229,9 @@ MetadataRenderer.buildMetadataTable = function(isChildTable, isRoot, metadataFie
 				{
 					var fieldLabel = document.createElement('p');
 						fieldLabel.className = "fieldLabel";
-						fieldLabel.innerText = MetadataRenderer.toDisplayCase(metadataField.name);
-						fieldLabel.textContent = MetadataRenderer.toDisplayCase(metadataField.name);
-						
-						fieldLabel.innerText += "(" + metadataField.value.length + ")";
-						fieldLabel.textContent += "(" + metadataField.value.length + ")";
-						
+						fieldLabel.innerText = MetadataRenderer.toDisplayCase(metadataField.name) + "(" + metadataField.value.length + ")";
+						fieldLabel.textContent = MetadataRenderer.toDisplayCase(metadataField.name) + "(" + metadataField.value.length + ")";
+												
 					var fieldLabelDiv = document.createElement('div');
 							fieldLabelDiv.className = "fieldLabelContainer";
 					

@@ -6,7 +6,7 @@
  */
 MetadataRenderer.expandCollapseTable = function(event)
 {
-	var button = event.srcElement;
+	var button = event.target;
 	
 	if(button.className == "collapseSymbol" || button.className == "expandSymbol")
 		button = button.parentElement;
@@ -98,7 +98,7 @@ MetadataRenderer.clearLoadingRows = function(container)
  */
 MetadataRenderer.downloadAndDisplayDocument = function(event)
 {
-	var button = event.srcElement;
+	var button = event.target;
 	
 	if(button.className == "collapseSymbol" || button.className == "expandSymbol")
 		button = button.parentElement;
