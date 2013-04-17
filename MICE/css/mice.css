@@ -290,3 +290,18 @@
 	pointer-events: none;
 	background: rgba(0, 0, 100, 0.0);
 }
+
+.hidden {
+	display: none;
+}
+
+.moreButton {
+	border-radius: 4px;
+	background: #ccc;
+	padding: 2px 6px;
+}
+
+.moreButton:hover {
+	cursor: pointer;
+	background: #bbb;
+}

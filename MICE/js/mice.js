@@ -652,6 +652,10 @@ MetadataRenderer.expandTable = function(table)
 	
 	// Unlight the documents because the connection lines will be in the wrong place
 	MetadataRenderer.unhighlightDocuments(null);
+	
+	// Check for More and expand it
+	if(table.lastChild.lastChild.lastChild.className == "moreButton")
+		MetadataRenderer.morePlease({"target": table.lastChild.lastChild.lastChild});
 }
 
 /**
@@ -929,6 +933,20 @@ MetadataRenderer.createLoadingRow = function()
 	return row;
 }
 
+MetadataRenderer.morePlease = function(event)
+{
+	var moreData = JSON.parse(event.target.lastChild.textContent);
+	
+	var parentRow =  event.target.parentElement.parentElement;
+	var parentTable = parentRow.parentElement;
+	
+	//remove More Button	
+	parentTable.removeChild(parentRow);
+	
+	// Build and add extra rows
+	MetadataRenderer.buildMetadataTable(parentTable, moreData.isChild, false, moreData.data, moreData.fields);		
+}
+
 /**
  * DocumentContain represents a document that is part of a MetadataRendering
  * @param url, location of the document, serves as the document ID
@@ -976,6 +994,9 @@ DocumentContainer.prototype.matches = function(url)
 	return false;
 }
 
+var FIRST_LEVEL_FIELDS = 20;
+var FIELDS_TO_EXPAND = 10;
+
 /** Functions related to the creation of the metadata HTML **/
 
 /**
@@ -994,7 +1015,7 @@ MetadataRenderer.buildMetadataDisplay = function(isRoot, mmd, metadata)
 	// Is there any visable metadata?
 	if(MetadataRenderer.hasVisibleMetadata(metadataFields))
 		// If so, then build the HTML table	
-		return MetadataRenderer.buildMetadataTable(false, isRoot, metadataFields);		
+		return MetadataRenderer.buildMetadataTable(null, false, isRoot, metadataFields, FIRST_LEVEL_FIELDS);		
 		
 	else
 		// The metadata doesn't contain any visible fields so there is nothing to display
@@ -1008,16 +1029,20 @@ MetadataRenderer.buildMetadataDisplay = function(isRoot, mmd, metadata)
  * @param metadataFields, array of MetadataFields to be displayed
  * @return HTML table of the metadata display
  */
-MetadataRenderer.buildMetadataTable = function(isChildTable, isRoot, metadataFields)
+MetadataRenderer.buildMetadataTable = function(table, isChildTable, isRoot, metadataFields, fieldCount)
 {
-	var table = document.createElement('table');
-	
-	if(!isRoot)
-		table.className = "metadataTable";
+	if(!table)
+	{
+		table = document.createElement('table');
+		
+		if(!isRoot)
+			table.className = "metadataTable";
+	}
 	
 	// Iterate through the metadataFields which are already sorted into display order
-	for(var key in metadataFields)
-	{		
+	for(var i = 0; i < metadataFields.length; i++)
+	{			
+		
 		var row = document.createElement('tr');
 		var nameCol = document.createElement('td');
 			nameCol.className = "labelCol";
@@ -1025,7 +1050,43 @@ MetadataRenderer.buildMetadataTable = function(isChildTable, isRoot, metadataFie
 		var valueCol = document.createElement('td');
 			valueCol.className = "valueCol";
 			
-		var metadataField = metadataFields[key];
+			
+		// if the maximum number of fields have been rendered then stop rendering and add a "More" expander
+		if(fieldCount <= 0)
+		{
+			//TODO - add "more" expander
+			var moreCount = metadataFields.length - i;
+			
+			var fieldValueDiv = document.createElement('div');
+				fieldValueDiv.className = "moreButton";
+				fieldValueDiv.textContent = "More... ("+moreCount+")";
+				fieldValueDiv.onclick = MetadataRenderer.morePlease;
+						
+			var moreData = {
+				"fields": FIELDS_TO_EXPAND,
+				"isChild": isChildTable,
+				"data": metadataFields.slice(i, metadataFields.length)
+			};
+			
+			
+			
+			var detailsSpan = document.createElement('span');
+				detailsSpan.className = "hidden";
+				detailsSpan.textContent = JSON.stringify(moreData);
+			
+			fieldValueDiv.appendChild(detailsSpan);
+			
+			valueCol.appendChild(fieldValueDiv);
+								
+			row.appendChild(nameCol);
+			row.appendChild(valueCol);				
+			
+			table.appendChild(row);
+			
+			break;
+		} 
+			
+		var metadataField = metadataFields[i];
 		
 		if(metadataField.value)
 		{
@@ -1120,6 +1181,8 @@ MetadataRenderer.buildMetadataTable = function(isChildTable, isRoot, metadataFie
 															
 					row.appendChild(nameCol);
 					row.appendChild(valueCol);
+					
+					fieldCount--;
 				}		
 			}
 			
@@ -1174,11 +1237,11 @@ MetadataRenderer.buildMetadataTable = function(isChildTable, isRoot, metadataFie
 							fieldLabel.className = "fieldLabel";
 							fieldLabel.innerText = MetadataRenderer.toDisplayCase(metadataField.name);
 							fieldLabel.textContent = MetadataRenderer.toDisplayCase(metadataField.name);
-		
+						
 						fieldLabelDiv.appendChild(fieldLabel);
 					}
 				}
-
+				
 				nameCol.appendChild(fieldLabelDiv);
 				
 				/** Value Column **/
@@ -1186,8 +1249,11 @@ MetadataRenderer.buildMetadataTable = function(isChildTable, isRoot, metadataFie
 				var fieldValueDiv = document.createElement('div');
 					fieldValueDiv.className = "fieldCompositeContainer";
 				
+				// Build 1-row mini-table for the composite
+				//var childTable = MetadataRenderer.buildOneRowTable(metadataField.value); 
+				
 				// Build the child table for the composite
-				var childTable =  MetadataRenderer.buildMetadataTable(false, false, metadataField.value);
+				var childTable =  MetadataRenderer.buildMetadataTable(null, false, false, metadataField.value, 1);
 				
 				// If the childTable has more than 1 row, collapse table
 				if(metadataField.value.length > 1)
@@ -1217,6 +1283,8 @@ MetadataRenderer.buildMetadataTable = function(isChildTable, isRoot, metadataFie
 				
 				row.appendChild(nameCol);
 				row.appendChild(valueCol);
+				
+				fieldCount--;
 			}
 			
 			else if(metadataField.child_type != null)
@@ -1259,7 +1327,7 @@ MetadataRenderer.buildMetadataTable = function(isChildTable, isRoot, metadataFie
 				var fieldValueDiv = document.createElement('div');
 					fieldValueDiv.className = "fieldChildContainer";
 				
-				var childTable =  MetadataRenderer.buildMetadataTable(true, false, metadataField.value);
+				var childTable =  MetadataRenderer.buildMetadataTable(null, true, false, metadataField.value, 1);
 				if(metadataField.value.length > 1)
 				{
 					MetadataRenderer.collapseTable(childTable);			
@@ -1276,6 +1344,8 @@ MetadataRenderer.buildMetadataTable = function(isChildTable, isRoot, metadataFie
 								
 				row.appendChild(nameCol);
 				row.appendChild(valueCol);
+				
+				fieldCount--;
 			}		
 			table.appendChild(row);
 		}

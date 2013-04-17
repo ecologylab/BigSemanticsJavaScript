@@ -57,6 +57,10 @@ MetadataRenderer.expandTable = function(table)
 	
 	// Unlight the documents because the connection lines will be in the wrong place
 	MetadataRenderer.unhighlightDocuments(null);
+	
+	// Check for More and expand it
+	if(table.lastChild.lastChild.lastChild.className == "moreButton")
+		MetadataRenderer.morePlease({"target": table.lastChild.lastChild.lastChild});
 }
 
 /**
@@ -331,4 +335,18 @@ MetadataRenderer.createLoadingRow = function()
 		
 	row.appendChild(loadingRow);
 	return row;
+}
+
+MetadataRenderer.morePlease = function(event)
+{
+	var moreData = JSON.parse(event.target.lastChild.textContent);
+	
+	var parentRow =  event.target.parentElement.parentElement;
+	var parentTable = parentRow.parentElement;
+	
+	//remove More Button	
+	parentTable.removeChild(parentRow);
+	
+	// Build and add extra rows
+	MetadataRenderer.buildMetadataTable(parentTable, moreData.isChild, false, moreData.data, moreData.fields);		
 }
