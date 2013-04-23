@@ -183,10 +183,9 @@ MetadataRenderer.getMetadataFields = function(mmdKids, metadata, depth)
 						
 						value = newObject;
 						
-						console.log(value);
 					}
 					
-					field.value = MetadataRenderer.getMetadataFields(mmdField["kids"], value, depth + 1);		
+					field.value = MetadataRenderer.getMetadataFields(mmdField["kids"], value, depth + 1);
 					
 					metadataFields.push(field);
 				}
@@ -196,7 +195,6 @@ MetadataRenderer.getMetadataFields = function(mmdKids, metadata, depth)
 		
 	//Sort the fields by layer, higher layers first
 	metadataFields.sort(function(a,b){return b.layer - a.layer});
-	
 	return metadataFields;
 }
 

@@ -28,9 +28,11 @@ MetadataRenderer.buildMetadataDisplay = function(isRoot, mmd, metadata)
 
 /**
  * Build the HTML table for the list of MetadataFields
+ * @param table, the table that the metadata fields should be rendered to, null if the table should be created
  * @param isChildTable, true if the table belongs to a collection table, false otherwise
  * @param isRoot, true if table is the root table of the MetadataRendering
  * @param metadataFields, array of MetadataFields to be displayed
+ * @param fieldCount, the number of fields to render before cropping with a "More" button
  * @return HTML table of the metadata display
  */
 MetadataRenderer.buildMetadataTable = function(table, isChildTable, isRoot, metadataFields, fieldCount)
@@ -173,8 +175,8 @@ MetadataRenderer.buildMetadataTable = function(table, isChildTable, isRoot, meta
 					{
 						var fieldValue = document.createElement('p');
 							fieldValue.className = "fieldValue";
-							fieldValue.innerText = MetadataRenderer.removeLineBreaksAndCrazies(metadataField.value);	
-							fieldValue.textContent = MetadataRenderer.removeLineBreaksAndCrazies(metadataField.value);										
+							fieldValue.innerText = MetadataRenderer.removeLineBreaksAndCrazies(metadataField.value);
+							fieldValue.textContent = MetadataRenderer.removeLineBreaksAndCrazies(metadataField.value);
 							
 						var fieldValueDiv = document.createElement('div');
 							fieldValueDiv.className = "fieldValueContainer";
@@ -252,10 +254,7 @@ MetadataRenderer.buildMetadataTable = function(table, isChildTable, isRoot, meta
 				
 				var fieldValueDiv = document.createElement('div');
 					fieldValueDiv.className = "fieldCompositeContainer";
-				
-				// Build 1-row mini-table for the composite
-				//var childTable = MetadataRenderer.buildOneRowTable(metadataField.value); 
-				
+
 				// Build the child table for the composite
 				var childTable =  MetadataRenderer.buildMetadataTable(null, false, false, metadataField.value, 1);
 				

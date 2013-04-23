@@ -6,7 +6,8 @@
  */
 function RenderingTask(url, container, isRoot)
 {
-	this.url = url.toLowerCase();
+	if(url != null)
+		this.url = url.toLowerCase();
 	
 	this.container = container;
 	

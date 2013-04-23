@@ -87,6 +87,12 @@
 	padding: 2px 0px 1px 8px;
 }
 
+.metadataContainer .faviconICE{
+	width: 16px;
+	height: 16px;
+	padding: 2px 0px 1px 8px;
+}
+
 .metadataContainer .labelCol{
 	vertical-align: top;
 	text-align: right;
