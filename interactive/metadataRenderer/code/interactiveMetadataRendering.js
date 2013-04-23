@@ -294,8 +294,12 @@ MetadataRenderer.clearAllCanvases = function()
 		for(var i = 0; i < canvases.length; i++)
 		{
 			var containerRect =  canvases[i].parentElement.getClientRects()[0];
-			canvases[i].width = containerRect.width;
-			canvases[i].height = containerRect.height;
+			
+			if(containerRect != null)
+			{
+				canvases[i].width = containerRect.width;
+				canvases[i].height = containerRect.height;
+			}
 		}
 	}
 }
