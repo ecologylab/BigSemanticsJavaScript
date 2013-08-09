@@ -46,6 +46,23 @@ MetadataRenderer.addMetadataDisplay = function(container, url, isRoot)
 }
 
 /**
+ * Retrieves the meta-metadata for incoming metadata, constructs the metadata table, and appends it to the container.
+ * @param container, the HTML object which the final metadata rendering will be appended into
+ * @param url, original url of the document
+ * @param rawMetadata, metadata to be rendered
+ * @param isRoot, true if this is the root metadata for the rendering,
+ * 		needed because styling is slightly different for the root metadata rendering
+ */
+MetadataRenderer.addCachedMetadataDisplay = function(container, url, rawMetadata, isRoot)
+{	
+	// Add the rendering task to the queue
+	MetadataRenderer.queue.push(new RenderingTask(url, container, isRoot));	
+	
+	// Sends the metadata for deserialization, to be matched with rendering task, and for MMD retrieval
+	MetadataRenderer.setMetadata(rawMetadata);	
+}
+
+/**
  * Retrieves the metadata from the service using a JSON-p call.
  * When the service responds the callback function will be called.
  * @param url, url of the target document
