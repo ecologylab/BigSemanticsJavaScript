@@ -1,0 +1,175 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+<title>BigSemantics Cache Explorer</title>
+<link href="css/bootstrap.min.css" media="screen" rel="stylesheet">
+<link href="prettify.css" rel="stylesheet" type="text/css">
+<link href="css/mdc.css" media="screen" rel="stylesheet">
+<link href="css/mice.css" rel="stylesheet" type="text/css">
+<script src="http://code.jquery.com/jquery-latest.js"></script>
+<script src="js/bootstrap.min.js"></script>
+<script src="js/prettify.js" type="text/javascript"></script>
+<script src="js/mice.js" type="text/javascript"></script>
+<script src="js/mdc.js" type="text/javascript"></script>
+</head>
+
+<body onload="collapse()">
+
+<div class="navbar navbar-inverse navbar-fixed-top">
+	<div class="navbar-inner">
+		<div class="container">
+			<a class="brand">BigSemantics Cache Explorer</a> </div>
+	</div>
+</div>
+<div class="navbar navbar-inverse navbar-fixed-bottom">
+	<div class="navbar-inner">
+		<div class="container">
+			<ul class="nav pull-right">
+				<li><a href="http://ecologylab.net" target="_blank">Interface Ecology 
+				Lab</a></li>
+				<li><a href="http://ecologylab.net" target="_blank">
+				<img class="nav-img pull-right" src="img/ecologylab.png" /></a></li>
+			</ul>
+		</div>
+	</div>
+</div>
+<div class="container">
+	<div class="row">
+		<div class="span9 title right">
+			<p>Background at the
+			<a href="http://ecologylab.net/research/bigsemantics/" target="_blank">
+			BigSemantics research page</a> and
+			<a href="https://github.com/ecologylab/BigSemanticsService/wiki" target="_blank">
+			BigSemantics Wiki</a>.</p>
+		</div>
+	</div>
+	<div class="row">
+		<div class="span9 title">
+			<h3>
+			<a id="newSearch" data-target="#searchOptions" data-toggle="collapse">
+			SEARCH </a></h3>
+			<div id="searchOptions" class="collapse in">
+				<!-- Does not function correctly, also unsure of how to handle
+				<div class="row">
+					<div class="span9 title">
+						<h4>
+						<a id="fieldRetrieve" data-target="#searchCase0" data-toggle="collapse">
+						Retrieve All of the Data for a Specific Field </a></h4>
+						<div id="searchCase0" class="collapse in">
+							<form action="" class="navbar-form" onsubmit="return false;">
+								<h5>Field Name</h5>
+								<select id="fieldCase0" name="field">
+								<option value="location">Location</option>
+								<option value="title">Title</option>
+								</select> <br />
+								<h5>Document Type</h5>
+								<select id="documentTypeCase0" name="documentTypeCase0">
+								<option value="acm_portal">ACM Portal</option>
+								<option value="compound_document">Compound Document
+								</option>
+								</select>
+								<button class="btn" onclick="queryFieldValues();" type="button">
+								Go!</button>
+							</form>
+						</div>
+					</div>
+				</div>-->
+				<div class="row">
+					<div class="span9 title">
+						<h4>
+						<a id="valueQuery" data-target="#searchCase1" data-toggle="collapse">
+						Exact Match Query for a Specific Field </a></h4>
+						<div id="searchCase1" class="collapse in">
+							<form action="" class="navbar-form" onsubmit="return false;">
+								<h5>Field Name</h5>
+								<input id="fieldCase1" name="fieldCase1" type="text" /><br />
+								<h5>Document Type</h5>
+								<select id="documentTypeCase1" name="documentTypeCase1">
+								<option value="acm_portal">ACM Portal</option>
+								<option value="compound_document">Compound Document
+								</option>
+								<option value="youtube_video">YouTube Video
+								</option>
+								</select>
+								<h5>Value</h5>
+								<input id="valueCase1" name="valueCase1" type="text">
+								<button class="btn" onclick="queryMetadataValue();" type="button">
+								Go!</button>
+							</form>
+						</div>
+					</div>
+				</div>
+				<div class="row">
+					<div class="span9 title">
+						<h4>
+						<a id="rangeQuery" data-target="#searchCase2" data-toggle="collapse">
+						Range Query for a Specific Field </a></h4>
+						<div id="searchCase2" class="collapse in">
+							<form action="" class="navbar-form" onsubmit="return false;">
+								<h5>Field Name</h5>
+								<input id="fieldCase2" name="fieldCase2" type="text" />
+								<br />
+								<h5>Document Type</h5>
+								<select id="documentTypeCase2" name="documentTypeCase2">
+								<option value="acm_portal">ACM Portal</option>
+								<option value="compound_document">Compound Document
+								</option>
+								<option value="youtube_video">YouTube Video
+								</option>
+								</select>
+								<h5>Minimum / Starting Value</h5>
+								<input id="min" name="min" type="text" />
+								<h5>Maximum / Ending Value</h5>
+								<input id="max" name="max" type="text" />
+								<button class="btn" onclick="queryMetadataRange();" type="button">
+								Go!</button>
+							</form>
+						</div>
+					</div>
+				</div>
+				<div class="row">
+					<div class="span9 title">
+						<h4>
+						<a id="keywordQuery" data-target="#searchCase3" data-toggle="collapse">
+						Perform a Keyword Search </a></h4>
+						<div id="searchCase3" class="collapse in">
+							<form action="" class="navbar-form" onsubmit="return false;">
+								<input id="keyword" name="keyword" type="text" />
+								<button class="btn" onclick="queryMetadataKeyword();" type="button">
+								Go!</button>
+							</form>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="row">
+		<div id="queryResult0" class="span9 content">
+		</div>
+	</div>
+	<div class="row">
+		<div id="queryResult1" class="span9 content">
+		</div>
+	</div>
+	<div class="row">
+		<div id="queryResult2" class="span9 content">
+		</div>
+	</div>
+	<div class="row">
+		<div id="queryResult3" class="span9 content">
+		</div>
+	</div>
+	<div class="row">
+		<div id="queryResult4" class="span9 content">
+		</div>
+	</div>
+</div>
+<script>
+	MetadataRenderer.initMetadataRenderings();
+</script>
+
+</body>
+
+</html>
