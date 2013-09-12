@@ -6,7 +6,7 @@ function simplGraphExpand(targetObj)
 	
 	function findIds(currentValue)
 	{		
-		if(typeof currentValue != 'object')
+		if(typeof currentValue != 'object' || currentValue == null)
 		{
 			return;
 		}
@@ -24,7 +24,7 @@ function simplGraphExpand(targetObj)
 	
 	function expandRefs(currentKey, currentValue, parentValue)
 	{		
-		if(typeof currentValue != 'object')
+		if(typeof currentValue != 'object' || currentValue == null)
 		{
 			return;
 		}

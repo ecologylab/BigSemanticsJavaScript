@@ -20,7 +20,7 @@ function simplGraphCollapse(targetObj)
 
 	function addIdsAndRefs(currentKey, currentValue, parentValue)
 	{		
-		if(typeof currentValue != 'object')
+		if(typeof currentValue != 'object' || currentValue == null)
 		{
 			return;
 		}
@@ -43,7 +43,7 @@ function simplGraphCollapse(targetObj)
 	
 	function removeIds(currentKey, currentValue, parentValue)
 	{		
-		if(typeof currentValue != 'object')
+		if(typeof currentValue != 'object' || currentValue == null)
 		{
 			return;
 		}
