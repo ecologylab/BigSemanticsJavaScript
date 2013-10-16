@@ -15,6 +15,8 @@ MetadataRenderer.currentDocumentLocation = "";
 // Needed to differentiate between standard MetadataRenderer and the WWW study version
 var WWWStudy;
 
+var SEMANTIC_SERVICE_URL = "http://ecology-service.cse.tamu.edu/BigSemanticsService/";
+
 // Logging function
 MetadataRenderer.LoggingFunction = null;
 
@@ -65,7 +67,7 @@ MetadataRenderer.addMetadataDisplay = function(container, url, isRoot, clipping)
  */
 MetadataRenderer.getMetadata = function(url, callback)
 {
-	var serviceURL = "http://ecology-service.cse.tamu.edu/BigSemanticsService/metadata.jsonp?callback=" + callback + "&url=" + encodeURIComponent(url)
+	var serviceURL = SEMANTIC_SERVICE_URL + "metadata.jsonp?callback=" + callback + "&url=" + encodeURIComponent(url)
 	MetadataRenderer.doJSONPCall(serviceURL);
 	console.log("requesting semantics service for metadata: " + serviceURL);
 }
@@ -78,7 +80,7 @@ MetadataRenderer.getMetadata = function(url, callback)
  */
 MetadataRenderer.getMMD = function(type, callback)
 {
-	MetadataRenderer.doJSONPCall("http://ecology-service.cse.tamu.edu/BigSemanticsService/mmd.jsonp?callback=" + callback + "&name=" + type);
+	MetadataRenderer.doJSONPCall(SEMANTIC_SERVICE_URL + "mmd.jsonp?callback=" + callback + "&name=" + type);
 }
 
 /**
@@ -131,9 +133,9 @@ MetadataRenderer.setMetadata = function(rawMetadata)
 		//console.log("checking additional locations");
 		//console.log(MetadataRenderer.queue);
 		//console.log(metadata["additional_locations"]);
-		for(var i = 0; i < metadata["additional_locations"]["location"].length; i++)
+		for(var i = 0; i < metadata["additional_locations"].length; i++)
 		{
-			var additional_location = metadata["additional_locations"]["location"][i]
+			var additional_location = metadata["additional_locations"][i]
 			queueTasks = queueTasks.concat(MetadataRenderer.getTasksFromQueueByUrl(additional_location));			
 		}
 	}
@@ -142,8 +144,8 @@ MetadataRenderer.setMetadata = function(rawMetadata)
 	{
 		var queueTask = queueTasks[i];
 		
-		if(metadata["additional_locations"] && metadata["additional_locations"]["location"])
-			queueTask.additionalUrls = metadata["additional_locations"]["location"];
+		if(metadata["additional_locations"])
+			queueTask.additionalUrls = metadata["additional_locations"];
 		
 		queueTask.metadata = metadata;
 		queueTask.mmdType = metadata.mm_name;
@@ -496,27 +498,41 @@ MetadataRenderer.getMetadataFields = function(mmdKids, metadata, depth)
 					field.child_type = (mmdField.child_tag != null) ? mmdField.child_tag : mmdField.child_type;
 					field.parentMDType = metadata.mm_name;
 											
-					// If its a poly-morphic collection, then the value array needs to be restructured
-					if(value.length != null)
-					{
-						var newArray = [];						
+					// If scalar collection
+					if(mmdField.child_scalar_type != null)
+					{						
+						var newObject = {};
+						newObject[field.child_type] = value;
+						value = newObject;	
+					}		
+					// Else if it's a polymorphic collection
+					else if(mmdField.polymorphic_scope != null)
+					{						
+						var newObject = {};
+						var newArray = [];
+						
 						for(var i = 0; i < value.length; i++)
 						{
-							var polyType = value[i];
-							for(k in polyType)
+							for(k in value[i])
 							{
-								newArray.push(polyType[k]);								
+								newArray.push(value[i][k]);
+								continue;
 							}
 						}
 						
+						newObject[field.child_type] = newArray;
+						value = newObject;	
+					}
+					// Else, it must be a monomorphic collection
+					else
+					{
 						var newObject = {};
-						newObject[field.child_type]	= newArray;
-						
-						value = newObject;
-						
+						newObject[field.child_type] = value;
+						value = newObject;						
 					}
 					
 					field.value = MetadataRenderer.getMetadataFields(mmdField["kids"], value, depth + 1);
+					
 					
 					metadataFields.push(field);
 				}
@@ -1425,8 +1441,10 @@ MetadataRenderer.removeLineBreaksAndCrazies = function(string)
  */
 MetadataRenderer.getHost = function(url)
 {
+	if(url){
 	var host = url.match(/:\/\/(www\.)?(.[^/:]+)/)[2];
 	return "http://www." + host;
+	}
 }
 
 MetadataRenderer.logNavigate = function(event)
