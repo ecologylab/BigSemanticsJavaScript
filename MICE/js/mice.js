@@ -106,6 +106,9 @@ MetadataRenderer.doJSONPCall = function(jsonpURL)
  */
 MetadataRenderer.setMetadata = function(rawMetadata)
 {	
+	MDC_rawMetadata = JSON.parse(JSON.stringify(rawMetadata));
+	updateJSON(true);
+	
 	var metadata = {};
 	for(i in rawMetadata)
 	{
@@ -163,6 +166,9 @@ MetadataRenderer.setMetadata = function(rawMetadata)
  */
 MetadataRenderer.setMetaMetadata = function(mmd)
 {
+	MDC_rawMMD = JSON.parse(JSON.stringify(mmd));
+	//updateJSON(false);
+	
 	simplDeserialize(mmd);
 	
 	//console.log("Retrieved meta-metadata: " + mmd["meta_metadata"].name);

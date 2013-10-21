@@ -36,17 +36,17 @@ function getParameter(param) {
   }
 }
 
-var rawMetadata = "";
-var rawMMD = "";
+var MDC_rawMetadata = "";
+var MDC_rawMMD = "";
 
 //Stringify the JSON and make it pretty looking
 function updateJSON(isMetadata)
 { 
   var input = "";
   if(isMetadata) {
-    input = rawMetadata;
+    input = MDC_rawMetadata;
   } else {
-    input = rawMMD;
+    input = MDC_rawMMD;
   }
 
   var content = document.getElementById("mdcJsonPP");
@@ -80,6 +80,8 @@ function onNewMMD(metametadata) {
 function onNewMetadata(metadata) {
   rawMetadata = metadata;
   
+	console.error("Error: calling onNewMetadata()");
+  
   updateJSON(true);
 
   //Hate this but it's necessary for now... Service does funky redirect stuff when you request MMD with a URL
@@ -99,6 +101,8 @@ function onNewMetadata(metadata) {
 
 function getJSONData (targeturl)
 {
+	console.error("Error: calling getJSONData()");
+	
   $.ajax({
     url: 'http://ecology-service.cse.tamu.edu/BigSemanticsService/metadata.jsonp',
     jsonp: 'callback',
@@ -121,7 +125,7 @@ function showMetadata()
 
   MetadataRenderer.addMetadataDisplay(content, url, true);
 
-  getJSONData(url);
+ //getJSONData(url);
 }
 
 function onEnterShowMetadata(event)
