@@ -101,6 +101,13 @@ MetadataRenderer.doJSONPCall = function(jsonpURL)
  */
 MetadataRenderer.setMetadata = function(rawMetadata)
 {	
+	if(typeof MDC_rawMetadata != "undefined")
+	{
+		MDC_rawMetadata = JSON.parse(JSON.stringify(rawMetadata));
+		updateJSON(true);
+	}
+	
+	
 	var metadata = {};
 	
 	var deserialized = false;
@@ -170,6 +177,12 @@ MetadataRenderer.setMetadata = function(rawMetadata)
  */
 MetadataRenderer.setMetaMetadata = function(mmd)
 {
+	if(typeof MDC_rawMMD != "undefined")
+	{
+		MDC_rawMMD = JSON.parse(JSON.stringify(mmd));
+	}
+	
+	
 	simplDeserialize(mmd);
 	
 	//console.log("Retrieved meta-metadata: " + mmd["meta_metadata"].name);
@@ -866,7 +879,7 @@ var METADATA_LINE_Y_OFFSET = 9;
 MetadataRenderer.drawConnectionLine = function(target, source)
 {
 	// Don't draw connection lines in ideaMACHE
-	if(session != null)
+	if(typeof session != "undefined")
 	{
 		return;
 	}
