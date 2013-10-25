@@ -32,9 +32,7 @@ function simplGraphCollapse(targetObj)
 		}
 		else
 		{
-			// add exception to not add simpl.id to "wrapping" objects
-			if(currentKey != "source_doc")
-				currentValue[simplId] = getRandomSimplId();
+			currentValue[simplId] = getRandomSimplId();
 			
 			for(i in currentValue)
 			{
