@@ -475,7 +475,7 @@ MetadataRenderer.getMetadataFields = function(mmdKids, metadata, depth)
 							
 							field.composite_type = mmdField.type;
 							field.parentMDType = metadata.mm_name;							
-							MetadataRenderer.setShowExpandedInitially(field, mmdField);
+							MetadataRenderer.checkAndSetShowExpandedInitially(field, mmdField);
 							
 							metadataFields.push(field);
 						}
@@ -488,7 +488,7 @@ MetadataRenderer.getMetadataFields = function(mmdKids, metadata, depth)
 						
 						field.composite_type = mmdField.type;
 						field.parentMDType = metadata.mm_name;						
-						MetadataRenderer.setShowExpandedInitially(field, mmdField);
+						MetadataRenderer.checkAndSetShowExpandedInitially(field, mmdField);
 						
 						metadataFields.push(field);
 					}
@@ -546,7 +546,7 @@ MetadataRenderer.getMetadataFields = function(mmdKids, metadata, depth)
 						value = newObject;						
 					}
 					
-					MetadataRenderer.setShowExpandedInitially(field, mmdField);
+					MetadataRenderer.checkAndSetShowExpandedInitially(field, mmdField);
 					
 					field.value = MetadataRenderer.getMetadataFields(mmdField["kids"], value, depth + 1);
 					
@@ -562,7 +562,7 @@ MetadataRenderer.getMetadataFields = function(mmdKids, metadata, depth)
 	return metadataFields;
 }
 
-MetadataRenderer.setShowExpandedInitially = function(field, mmdField)
+MetadataRenderer.checkAndSetShowExpandedInitially = function(field, mmdField)
 {
 	if (mmdField.show_expanded_initially != null) {
 		field.show_expanded_initially = mmdField.show_expanded_initially;
