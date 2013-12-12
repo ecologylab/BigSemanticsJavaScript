@@ -850,10 +850,8 @@ MetadataRenderer.highlightDocuments = function(event)
  */
 MetadataRenderer.highlightLabel = function(label)
 {
-	label.style.background = "white";
-	label.style.border = "1px solid #555";
-	label.style.minHeight = "15px";
-	label.style.height = "17px";	
+	if (label.className.search("highlight") == -1)
+		label.className += " highlight";
 }
 
 /**
@@ -862,9 +860,8 @@ MetadataRenderer.highlightLabel = function(label)
  */
 MetadataRenderer.unhighlightLabel = function(label)
 {
-	label.style.background = "#666";
-	label.style.border = "";
-	label.style.minHeight = "19px";	
+	if (label.className.search("unhighlight") == -1)
+		label.className += " unhighlight";
 }
 
 // Constant offsets for the connection-lines

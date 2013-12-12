@@ -144,6 +144,32 @@
 	border: 1px solid #555;
 }
 
+.metadataContainer .fieldLabelContainer.highlight{
+	background: white;
+	border: 1px solid #555;
+	min-height: 15px;
+	height: 17px;
+}
+
+.metadataContainer .fieldLabelContainer.unhighlight{
+	background: #666;
+	border: none;
+	height: 19px;
+}
+
+.metadataContainer .fieldLabelContainerOpened.highlight{
+	background: white;
+	border: 1px solid #555;
+	min-height: 15px;
+	height: 17px;
+}
+
+.metadataContainer .fieldLabelContainerOpened.unhighlight{
+	background: #666;
+	border: none;
+	height: 19px;
+}
+
 .metadataContainer .fieldValueContainer{
 	
 	background: #ccc;
