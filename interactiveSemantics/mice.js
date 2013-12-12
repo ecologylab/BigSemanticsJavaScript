@@ -798,7 +798,7 @@ MetadataRenderer.highlightDocuments = function(event)
 		row = row.parentElement;
 	
 	// Only fieldLabelContainer or fieldLabelContainerOpened rows can be highlighted
-	if(row.className == "fieldLabelContainerOpened" || row.className == "fieldLabelContainer")
+	if(row.className.indexOf("fieldLabelContainerOpened") == 0 || row.className.indexOf("fieldLabelContainer") == 0)
 	{
 		// Highlight row
 		MetadataRenderer.highlightLabel(row);
@@ -850,8 +850,8 @@ MetadataRenderer.highlightDocuments = function(event)
  */
 MetadataRenderer.highlightLabel = function(label)
 {
-	if (label.className.search("highlight") == -1)
-		label.className += " highlight";
+	var labelClassName = label.className.split(" ", 1)[0];
+	label.className = labelClassName + " highlight";
 }
 
 /**
@@ -860,8 +860,8 @@ MetadataRenderer.highlightLabel = function(label)
  */
 MetadataRenderer.unhighlightLabel = function(label)
 {
-	if (label.className.search("unhighlight") == -1)
-		label.className += " unhighlight";
+	var labelClassName = label.className.split(" ", 1)[0];
+	label.className = labelClassName + " unhighlight";
 }
 
 // Constant offsets for the connection-lines
@@ -1167,7 +1167,7 @@ MetadataRenderer.buildMetadataTable = function(table, isChildTable, isRoot, meta
 							fieldLabel.textContent = MetadataRenderer.toDisplayCase(metadataField.name);
 						
 						var fieldLabelDiv = document.createElement('div');
-							fieldLabelDiv.className = "fieldLabelContainer";
+							fieldLabelDiv.className = "fieldLabelContainer unhighlight";
 						
 						fieldLabelDiv.appendChild(fieldLabel);
 						nameCol.appendChild(fieldLabelDiv);
@@ -1255,14 +1255,14 @@ MetadataRenderer.buildMetadataTable = function(table, isChildTable, isRoot, meta
 				var childUrl = MetadataRenderer.guessDocumentLocation(metadataField.value);
 				
 				var fieldLabelDiv = document.createElement('div');
-					fieldLabelDiv.className = "fieldLabelContainer";
+					fieldLabelDiv.className = "fieldLabelContainer unhighlight";
 					fieldLabelDiv.style.minWidth = "36px";					
 					
 				// Is the document already rendered?								
 				if(childUrl != "" && MetadataRenderer.isRenderedDocument(childUrl) )
 				{
 					// If so, then don't allow the document to be expaned, to prevent looping						
-					fieldLabelDiv.className = "fieldLabelContainerOpened";				
+					fieldLabelDiv.className = "fieldLabelContainerOpened unhighlight";				
 				}
 				else
 				{
@@ -1357,7 +1357,7 @@ MetadataRenderer.buildMetadataTable = function(table, isChildTable, isRoot, meta
 						fieldLabel.textContent = MetadataRenderer.toDisplayCase(metadataField.name) + "(" + metadataField.value.length + ")";
 												
 					var fieldLabelDiv = document.createElement('div');
-							fieldLabelDiv.className = "fieldLabelContainer";
+							fieldLabelDiv.className = "fieldLabelContainer unhighlight";
 					
 					// does it need to expand / collapse
 					if(metadataField.value.length > 1)
