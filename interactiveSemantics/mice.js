@@ -587,6 +587,8 @@ MetadataRenderer.expandCollapseTable = function(event)
 	if(expandSymbol.style.display == "block")
 	{
 		expandSymbol.style.display = "none";	
+		button.className = "collapseButton";
+		
 		var table = MetadataRenderer.getTableForButton(button);
 		MetadataRenderer.expandTable(table);
 		
@@ -616,6 +618,8 @@ MetadataRenderer.expandCollapseTable = function(event)
 	else if(expandSymbol.style.display == "none")
 	{
 		expandSymbol.style.display = "block";			
+		button.className = "expandButton";
+		
 		var table = MetadataRenderer.getTableForButton(button);
 		MetadataRenderer.collapseTable(table);
 		
@@ -730,6 +734,9 @@ MetadataRenderer.downloadAndDisplayDocument = function(event)
 	// Update button visuals
 	var expandSymbol = button.getElementsByTagName("div")[0];
 		expandSymbol.style.display = "none";
+		
+		button.className = "collapseButton";
+		
 	
 	// Change the onclick function of the button to expand/collapse the table
 	button.onclick = MetadataRenderer.expandCollapseTable;
@@ -1189,6 +1196,9 @@ MetadataRenderer.buildMetadataTable = function(table, isChildTable, isRoot, meta
 						aTag.onclick = MetadataRenderer.logNavigate;
 						
 						aTag.className = "fieldValue";
+						
+						if(metadataField.style != null)
+							aTag.className += " "+metadataField.style;
 					
 						var fieldValueDiv = document.createElement('div');
 							fieldValueDiv.className = "fieldValueContainer";
@@ -1215,6 +1225,9 @@ MetadataRenderer.buildMetadataTable = function(table, isChildTable, isRoot, meta
 							aTag.href = metadataField.navigatesTo;
 							aTag.onclick = MetadataRenderer.logNavigate;
 						
+						if(metadataField.style != null)
+							aTag.className += " "+metadataField.style;
+						
 						var fieldValueDiv = document.createElement('div');
 							fieldValueDiv.className = "fieldValueContainer";						
 						
@@ -1234,7 +1247,10 @@ MetadataRenderer.buildMetadataTable = function(table, isChildTable, isRoot, meta
 							fieldValue.className = "fieldValue";
 							fieldValue.innerText = MetadataRenderer.removeLineBreaksAndCrazies(metadataField.value);
 							fieldValue.textContent = MetadataRenderer.removeLineBreaksAndCrazies(metadataField.value);
-							
+						
+							if(metadataField.style != null)
+								fieldValue.className += " "+metadataField.style;
+						
 						var fieldValueDiv = document.createElement('div');
 							fieldValueDiv.className = "fieldValueContainer";
 						
@@ -1256,7 +1272,7 @@ MetadataRenderer.buildMetadataTable = function(table, isChildTable, isRoot, meta
 				
 				var fieldLabelDiv = document.createElement('div');
 					fieldLabelDiv.className = "fieldLabelContainer unhighlight";
-					fieldLabelDiv.style.minWidth = "36px";					
+					fieldLabelDiv.style.minWidth = "30px";					
 					
 				// Is the document already rendered?								
 				if(childUrl != "" && MetadataRenderer.isRenderedDocument(childUrl) )

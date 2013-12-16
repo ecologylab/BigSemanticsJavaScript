@@ -1,28 +1,42 @@
+.metadataRendering {
+	background: #EEE;
+	border-radius: 8px;
+	border: 1px solid gray;
+	margin: 8px;
+	padding: 8px;
+	min-width: 640px;
+}
+
 .metadataContainer {
-	font-family: 'Segoe UI', Tahoma, sans-serif;
+
     font-size: 10px;
-    font-weight: 100;
+    font-weight: 300;
     	
 	border-top-right-radius: 8px;
 	border-bottom-right-radius: 8px;
 	border-bottom-left-radius: 8px;
 	width: 640px;
 	
+	line-height: 15px;
+	
 	position: relative;
-	z-index:1000;
 }
 
 .metadataTable {
 	margin: 0px 4px 0px 6px;
 	width: 100%;
-	display: table;
 	table-layout: fixed;
 	
 }
 
 .metadataTable tr{
-	display: table;
 	width:100%;
+	display: table;
+}
+
+.metadataContainer tr{
+	border-bottom: 1px solid #ccc;
+	margin-bottom: 0px;
 }
 
 .metadataContainer p{
@@ -31,7 +45,6 @@
 }
 
 .metadataContainer table{
-	color: #111;
 	font-size: 12px;
 	
 	white-space: normal;
@@ -46,7 +59,7 @@
 }
 
 .metadataContainer table .metadata_h1{
-	font-size: 18px;
+	font-weight: 700;
 }
 
 .metadataContainer .fieldLabel{	
@@ -54,26 +67,21 @@
 	vertical-align: top;
 	text-align: right;
 	pointer-events: none;
+	padding: 2px;	
 	padding-left: 4px;
-	
 	padding-right: 4px;
 	margin-left: 8px;
 	margin-right: 8px;
 }
 
-.metadataContainer .fieldLabel p {	
-	color: pink;
-}
-
 .metadataContainer .fieldValue{	
 	white-space: normal;
-	vertical-align: top;
 	text-align: left;
-	
+	vertical-align: middle;
 	text-overflow: ellipsis;
 	
 	
-	padding: 2px 8px 2px 8px;
+	padding: 3px 8px;
 }
 
 .metadataContainer .favicon{
@@ -92,16 +100,14 @@
 	vertical-align: top;
 	text-align: right;
 	
-	padding: 3px 0px 3px 0px;
 	
 }
 
 .metadataContainer .valueCol{
 	vertical-align: top;
 	text-align: left;
-	padding: 3px 0px 3px 0px;
 	margin: 0px;
-	
+	padding: 0px;
 	width: 100%
 }
 
@@ -115,9 +121,7 @@
 }
 
 .metadataContainer .fieldLabelContainer{
-	color: #ccc;
-	
-	background: #666;	
+	color: #808080;
 	
 	border-top-left-radius: 8px;
 	border-bottom-left-radius: 8px;
@@ -128,20 +132,19 @@
 
 .metadataContainer .fieldLabelContainerOpened{
 	color: #888;
-	
-	background: white;
-	
+		
 	border-top-left-radius: 8px;
 	border-bottom-left-radius: 8px;
 	
 	width: 100%;
 	min-height: 17px;
-	border: 1px solid #555;
+	margin-right: -3px;
+	
+	border-left: 3px solid rgb(122, 122, 122);
 }
 
 .metadataContainer .fieldValueContainer{
 	
-	background: #ccc;
 	
 	border-top-right-radius: 8px;
 	border-bottom-right-radius: 8px;
@@ -164,9 +167,7 @@
 
 
 .metadataContainer .fieldChildContainer{
-	
-	background: #ccc;
-	
+		
 	border-top-right-radius: 8px;
 	border-bottom-right-radius: 8px;
 	border-bottom-left-radius: 8px;
@@ -174,13 +175,11 @@
 	width: 100%;
 	min-height: 19px;
 	text-overflow: ellipsis;
+	
+	padding-left: 8px;
 }
 
 .metadataContainer .fieldCompositeContainer{
-	
-	background: #999;
-	
-	border: 1px solid #777;
 	
 	border-top-right-radius: 8px;
 	border-bottom-right-radius: 8px;
@@ -189,37 +188,51 @@
 	width: 100%;
 	min-height: 19px;
 	text-overflow: ellipsis;	
+	
+	padding-left: 8px;
 }
 
 .metadataContainer .expandButton{
-	background: white;
-	width: 16px;
-	height: 16px;
+	width: 18px;
+	height: 18px;
 	border-radius: 8px;
 	float: left;
-	margin: 1px 4px 1px 1px;
+	margin: 1px 4px 1px 4px;
+	background: rgb(213, 228, 209);
+}
+.metadataContainer .expandButton:hover{
+	background: rgb(134, 155, 128);
+	cursor: pointer;
 }
 
-.metadataContainer .expandButton:hover{
-	background: gray;
+.metadataContainer .collapseButton{
+	width: 18px;
+	height: 18px;
+	border-radius: 8px;
+	float: left;
+	margin: 1px 4px 1px 4px;
+	background: rgb(230, 200, 200);
+}
+.metadataContainer .collapseButton:hover{
+	background: rgb(194, 152, 152);
 	cursor: pointer;
 }
 
 .metadataContainer .expandSymbol{
 	position: absolute;
-	background: darkgray;
+	background: #ACACAC;
 	width: 2px;
 	height: 12px;
-	margin: 2px 7px 2px 7px;
+	margin: 3px 7px 2px 8px;
 	pointer-events: none;
 }
 
 .metadataContainer .collapseSymbol{
 	position: absolute;
-	background: darkgray;
+	background: #ACACAC;
 	width: 12px;
 	height: 2px;
-	margin: 7px 2px 7px 2px;
+	margin: 8px 2px 7px 3px;
 	pointer-events: none;
 }
 
@@ -234,7 +247,6 @@
 }
 
 .metadataContainer .loadingRow{
-	background: white;
 	border-radius: 8px;
 	height: 15px;
 	margin-bottom: 4px;
@@ -243,9 +255,8 @@
 }
 
 .metadataContainer .nestedPad{
-	padding: 0px;
-	padding-left: 8px;
-	padding-right: 4px;	
+	padding: 0px;	
+	border-left: 1px solid #ccc;
 }
 
 .metadataContainer .citeULikeButton:hover {
@@ -292,74 +303,6 @@
 	background: rgba(0, 0, 100, 0.0);
 }
 
-.tabbedICEContainer {
-	
-}
-
-.tabMaster {
-	
-}
-
-.tabParent {
-	
-}
-
-.tabLabel {
-	position: absolute;
-	background: #282828;
-	left: -31px;
-	width: 64px;
-	height: 18px;
-	padding: 2px 4px 2px 10px;
-	border-bottom-left-radius: 12px;
-	border-top-left-radius: 12px;
-	border: 1px solid gray;
-	border-right-color: white;
-	color: white;
-}
-
-
-.tabLabel:hover {
-	cursor: pointer;
-	background: #ccc;
-	color: white;
-	font-weight: 800;
-}
-
-.tabLabel .hidden {
-	display: none;
-}
-
-.tabLabel span{
-	position: absolute;
-	left: 27px;
-}
-
-.tabLabel .refreshButton{
-	height: 16px;
-	width: 16px;
-	position: absolute;
-	background: #aaa;
-	border-radius: 10px;
-	padding: 2px;
-	margin: -1px;
-	left: 3px;
-	opacity: 0.8;
-}
-
-.tabLabel .refreshButton:hover{
-	background: #777;
-	opacity: 1.0	
-}
-
-.tabValue {
-	
-}
-
-.clippingFieldsTable {
-	
-}
-
 .hidden {
 	display: none;
 }
@@ -374,22 +317,3 @@
 	cursor: pointer;
 	background: #bbb;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
