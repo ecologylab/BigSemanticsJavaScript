@@ -674,7 +674,7 @@ MetadataRenderer.getTableForButton = function(button)
 MetadataRenderer.expandTable = function(table)
 {
 	for (var i = 0; i < table.rows.length; i++)
-		table.rows[i].style.display = "table";
+		table.rows[i].style.display = "";
 
 	// Remove any loading rows, just to be sure 	
 	MetadataRenderer.clearLoadingRows(table);
@@ -696,7 +696,7 @@ MetadataRenderer.collapseTable = function(table)
 	for (var i = 0; i < table.rows.length; i++)
 	{
 		if(i == 0)
-			table.rows[i].style.display = "table";
+			table.rows[i].style.display = "";
 		else
 			table.rows[i].style.display = "none";
 	}
@@ -1102,8 +1102,8 @@ MetadataRenderer.buildMetadataTable = function(table, isChildTable, isRoot, meta
 	{
 		table = document.createElement('table');
 		
-		if(!isRoot)
-			table.className = "metadataTable";
+		//if(!isRoot)
+		//	table.className = "metadataTable";
 	}
 	
 	// Iterate through the metadataFields which are already sorted into display order
