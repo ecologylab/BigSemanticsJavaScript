@@ -69,10 +69,9 @@
 	text-align: right;
 	pointer-events: none;
 	padding: 2px;	
-	padding-left: 4px;
-	padding-right: 4px;
-	margin-left: 8px;
+	margin-left: 6px;
 	margin-right: 8px;
+	width: 100%;
 }
 
 .metadataContainer .fieldValue{	
@@ -100,7 +99,7 @@
 .metadataContainer .labelCol{
 	vertical-align: top;
 	text-align: right;
-	
+	padding-right: 10px;
 	
 }
 
