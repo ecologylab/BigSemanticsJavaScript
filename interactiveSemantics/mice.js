@@ -832,12 +832,16 @@ MetadataRenderer.highlightDocuments = function(event)
 		var aTags = table.getElementsByTagName("a");
 		for (var i = 0; i < aTags.length; i++)
 		{
-			if(aTags[i].className == "fieldValue")
+			if(aTags[i].className.indexOf("fieldValue") != -1)
 			{
 				location = aTags[i].href;
 				break;
 			}
 		}
+		
+		//console.log("highlighting stuff");
+		
+		
 		// Did the table have a document location?
 		if(location != null)
 		{	
@@ -902,6 +906,7 @@ MetadataRenderer.drawConnectionLine = function(target, source)
 		return;
 	}
 	
+	//console.log("drawing line");
 	
 	// Get the first label of the target
 	var label = target.getElementsByClassName("fieldLabel")[0];
