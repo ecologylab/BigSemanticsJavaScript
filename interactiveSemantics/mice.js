@@ -475,6 +475,7 @@ MetadataRenderer.getMetadataFields = function(mmdKids, metadata, depth)
 							
 							field.composite_type = mmdField.type;
 							field.parentMDType = metadata.mm_name;							
+							MetadataRenderer.checkAndSetShowExpandedInitially(field, mmdField);
 							
 							metadataFields.push(field);
 						}
@@ -487,6 +488,7 @@ MetadataRenderer.getMetadataFields = function(mmdKids, metadata, depth)
 						
 						field.composite_type = mmdField.type;
 						field.parentMDType = metadata.mm_name;						
+						MetadataRenderer.checkAndSetShowExpandedInitially(field, mmdField);
 						
 						metadataFields.push(field);
 					}
@@ -544,6 +546,8 @@ MetadataRenderer.getMetadataFields = function(mmdKids, metadata, depth)
 						value = newObject;						
 					}
 					
+					MetadataRenderer.checkAndSetShowExpandedInitially(field, mmdField);
+					
 					field.value = MetadataRenderer.getMetadataFields(mmdField["kids"], value, depth + 1);
 					
 					
@@ -556,6 +560,16 @@ MetadataRenderer.getMetadataFields = function(mmdKids, metadata, depth)
 	//Sort the fields by layer, higher layers first
 	metadataFields.sort(function(a,b){return b.layer - a.layer});
 	return metadataFields;
+}
+
+MetadataRenderer.checkAndSetShowExpandedInitially = function(field, mmdField)
+{
+	if (mmdField.show_expanded_initially != null) {
+		field.show_expanded_initially = mmdField.show_expanded_initially;
+	} else if (mmdField.inherited_mmd != null
+			   && mmdField.inherited_mmd.show_expanded_initially != null) {
+		field.show_expanded_initially = mmdField.inherited_mmd.show_expanded_initially;
+	}
 }
 
 MetadataRenderer.isFieldVisible = function(mmdField)
@@ -1161,6 +1175,8 @@ MetadataRenderer.buildMetadataTable = function(table, isChildTable, isRoot, meta
 			if(	metadataField.value.length != null && metadataField.value.length == 0)
 				continue;
 			
+			var expandButton = null;
+			
 			if(metadataField.scalar_type)
 			{				
 				// Currently it only rendered Strings, Dates, Integers, and ParsedURLs
@@ -1283,7 +1299,7 @@ MetadataRenderer.buildMetadataTable = function(table, isChildTable, isRoot, meta
 				else
 				{
 					// If the document hasn't been download then display a button that will download it
-					var expandButton = document.createElement('div');
+					expandButton = document.createElement('div');
 						expandButton.className = "expandButton";
 						
 					expandButton.onclick = MetadataRenderer.downloadAndDisplayDocument;
@@ -1378,7 +1394,7 @@ MetadataRenderer.buildMetadataTable = function(table, isChildTable, isRoot, meta
 					// does it need to expand / collapse
 					if(metadataField.value.length > 1)
 					{
-						var expandButton = document.createElement('div');
+						expandButton = document.createElement('div');
 							expandButton.className = "expandButton";
 							
 							expandButton.onclick = MetadataRenderer.expandCollapseTable;
@@ -1398,6 +1414,7 @@ MetadataRenderer.buildMetadataTable = function(table, isChildTable, isRoot, meta
 					}						
 					fieldLabelDiv.appendChild(fieldLabel);
 					nameCol.appendChild(fieldLabelDiv);
+					
 				}
 					
 				var fieldValueDiv = document.createElement('div');
@@ -1424,6 +1441,13 @@ MetadataRenderer.buildMetadataTable = function(table, isChildTable, isRoot, meta
 				fieldCount--;
 			}		
 			table.appendChild(row);
+
+			if (expandButton != null && metadataField.show_expanded_initially == "true") {
+				var fakeEvent = {};
+				fakeEvent.target = expandButton;
+				console.log("fake event ready");
+				MetadataRenderer.expandCollapseTable(fakeEvent);
+			}
 		}
 	}	
 	return table;
