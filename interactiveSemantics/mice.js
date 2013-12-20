@@ -358,9 +358,21 @@ function MetadataField(mmdField)
 {
 	this.name = (mmdField.label != null) ? mmdField.label : mmdField.name;
 	this.value = "";
-					
+	this.value_as_label = "";
+	
 	this.layer = (mmdField.layer != null) ? mmdField.layer : 0.0;
 	this.style = (mmdField.style != null) ? mmdField.style : "";
+	
+	this.hide_label = (mmdField.hide_label != null) ? mmdField.hide_label : false;
+	this.label_at = mmdField.label_at;
+	
+	this.concatenates_to = mmdField.concatenates_to;
+	this.concatenates = [];
+	if (mmdField.concatenates != null)
+	{
+		for (var k = 0; k < mmdField.concatenates.length; k++)
+			this.concatenates.push(mmdField.concatenates[k]);
+	}
 }
 
 /**
@@ -409,7 +421,7 @@ MetadataRenderer.guessDocumentLocation = function(metadata)
  * @param metadata, metadata object from the service
  * @param depth, current depth level
  */
-MetadataRenderer.getMetadataFields = function(mmdKids, metadata, depth)
+MetadataRenderer.getMetadataFields = function(mmdKids, metadata, depth, child_value_as_label)
 {
 	var metadataFields = [];
 	
@@ -431,10 +443,15 @@ MetadataRenderer.getMetadataFields = function(mmdKids, metadata, depth)
 				// Is there a metadata value for this field?		
 				var value = MetadataRenderer.getFieldValue(mmdField, metadata);				
 				if(value)
-				{		
+				{	
+					if (child_value_as_label != null)
+						mmdField.use_value_as_label = child_value_as_label; 
+										
 					var field = new MetadataField(mmdField);
 					
-					field.value = value; 
+					field.value = value;
+					if (mmdField.use_value_as_label != null) 
+						field.value_as_label = MetadataRenderer.getValueForProperty(mmdField.use_value_as_label, metadata);
 										
 					field.scalar_type = mmdField.scalar_type;
 					field.parentMDType = metadata.mm_name;	
@@ -447,6 +464,11 @@ MetadataRenderer.getMetadataFields = function(mmdKids, metadata, depth)
 						// Is there a value for the navigation link
 						if(navigationLink != null && (navigationLink.toLowerCase() != MetadataRenderer.currentDocumentLocation || depth == 0))
 							field.navigatesTo = navigationLink;
+					}
+					
+					if(mmdField.concatenates_to)
+					{
+						MetadataRenderer.concatenateField(field, metadataFields, mmdKids);
 					}
 								
 					metadataFields.push(field);
@@ -463,7 +485,10 @@ MetadataRenderer.getMetadataFields = function(mmdKids, metadata, depth)
 				// Is there a metadata value for this field?		
 				var value = MetadataRenderer.getFieldValue(mmdField, metadata);	
 				if(value)
-				{		
+				{	
+					if (child_value_as_label != null)
+						mmdField.use_value_as_label = child_value_as_label;
+					
 					// If there is an array of values						
 					if(value.length != null)
 					{						
@@ -471,7 +496,9 @@ MetadataRenderer.getMetadataFields = function(mmdKids, metadata, depth)
 						{
 							var field = new MetadataField(mmdField);
 							
-							field.value = MetadataRenderer.getMetadataFields(mmdField["kids"], value[i], depth + 1);
+							field.value = MetadataRenderer.getMetadataFields(mmdField["kids"], value[i], depth + 1, null);
+							if (mmdField.use_value_as_label != null) 
+								field.value_as_label = MetadataRenderer.getValueForProperty(mmdField.use_value_as_label, value[i]);
 							
 							field.composite_type = mmdField.type;
 							field.parentMDType = metadata.mm_name;							
@@ -484,7 +511,9 @@ MetadataRenderer.getMetadataFields = function(mmdKids, metadata, depth)
 					{
 						var field = new MetadataField(mmdField);
 						
-						field.value = MetadataRenderer.getMetadataFields(mmdField["kids"], value, depth + 1);
+						field.value = MetadataRenderer.getMetadataFields(mmdField["kids"], value, depth + 1, null);
+						if (mmdField.use_value_as_label != null) 
+							field.value_as_label = MetadataRenderer.getValueForProperty(mmdField.use_value_as_label, metadata);
 						
 						field.composite_type = mmdField.type;
 						field.parentMDType = metadata.mm_name;						
@@ -507,7 +536,10 @@ MetadataRenderer.getMetadataFields = function(mmdKids, metadata, depth)
 				// Is there a metadata value for this field?		
 				var value = MetadataRenderer.getFieldValue(mmdField, metadata);	
 				if(value)
-				{				
+				{	
+					if (child_value_as_label != null)
+						mmdField.use_value_as_label = child_value_as_label;
+					
 					var field = new MetadataField(mmdField);
 					
 					field.child_type = (mmdField.child_tag != null) ? mmdField.child_tag : mmdField.child_type;
@@ -546,10 +578,13 @@ MetadataRenderer.getMetadataFields = function(mmdKids, metadata, depth)
 						value = newObject;						
 					}
 					
-					MetadataRenderer.checkAndSetShowExpandedInitially(field, mmdField);
+					if (mmdField.child_use_value_as_label != null)
+						field.value = MetadataRenderer.getMetadataFields(mmdField["kids"], value, depth + 1, mmdField.child_use_value_as_label);
+					else
+						field.value = MetadataRenderer.getMetadataFields(mmdField["kids"], value, depth + 1, null);
 					
-					field.value = MetadataRenderer.getMetadataFields(mmdField["kids"], value, depth + 1);
-					
+					if (mmdField.use_value_as_label != null) 
+						field.value_as_label = MetadataRenderer.getValueForProperty(mmdField.use_value_as_label, metadata);
 					
 					metadataFields.push(field);
 				}
@@ -582,6 +617,67 @@ MetadataRenderer.getFieldValue = function(mmdField, metadata)
 	var valueName = (mmdField.tag != null) ? mmdField.tag : mmdField.name;				
 	return metadata[valueName];
 }
+
+/**
+ * 
+ */
+MetadataRenderer.getValueForProperty = function(valueAsLabelStr, metadata)
+{
+	var nestedFields = valueAsLabelStr.split(".");
+	var fieldValue = metadata;
+	for (var i = 0; i < nestedFields.length; i++)
+		fieldValue = fieldValue[nestedFields[i]];
+	
+	return fieldValue;		
+}
+
+/**
+ * 
+ */
+MetadataRenderer.concatenateField = function(field, metadataFields, mmdKids)
+{
+	var metadataField = "";	
+	for(var i = 0; i < metadataFields.length; i++)
+	{
+		if (metadataFields[i].name == field.concatenates_to)
+		{
+			metadataField = metadataFields[i];
+			break;
+		}
+	}
+	
+	if (metadataField != "")
+	{
+		metadataField.concatenates.push(field);
+	}
+	else
+	{
+		for (var key in mmdKids)
+		{
+			var mmdField = mmdKids[key];
+			
+			if (mmdField.scalar)
+				mmdField = mmdField.scalar;
+			else if (mmdField.composite)
+				mmdField = mmdField.composite;
+			else if (mmdField.collection)
+				mmdField = mmdField.collection;
+			
+			var name = (mmdField.label != null) ? mmdField.label : mmdField.name;
+			
+			if (name == field.concatenates_to)
+			{
+				if (mmdField.concatenates == null)
+				{
+					mmdField.concatenates = [];					
+				}
+				mmdField.concatenates.push(field);
+			}
+		}
+	}
+}
+
+
 
 /** Functions related to the interactions of the metadata HTML **/
 
@@ -671,6 +767,14 @@ MetadataRenderer.expandCollapseTable = function(event)
 MetadataRenderer.getTableForButton = function(button)
 {
 	var table = button.parentElement.parentElement.parentElement.getElementsByTagName("td")[1];
+	
+	if (table == null)
+	{
+		var sibling = (button.parentElement.parentElement.parentElement.nextSibling == null) ?
+			button.parentElement.parentElement.parentElement.previousSibling : 
+			button.parentElement.parentElement.parentElement.nextSibling; 
+		table = sibling.getElementsByTagName("td")[0];
+	}
 		
 	while(table.rows == null)
 		table = table.firstChild;
@@ -838,10 +942,6 @@ MetadataRenderer.highlightDocuments = function(event)
 				break;
 			}
 		}
-		
-		//console.log("highlighting stuff");
-		
-		
 		// Did the table have a document location?
 		if(location != null)
 		{	
@@ -906,7 +1006,6 @@ MetadataRenderer.drawConnectionLine = function(target, source)
 		return;
 	}
 	
-	//console.log("drawing line");
 	
 	// Get the first label of the target
 	var label = target.getElementsByClassName("fieldLabel")[0];
@@ -1094,7 +1193,7 @@ var FIELDS_TO_EXPAND = 10;
 MetadataRenderer.buildMetadataDisplay = function(isRoot, mmd, metadata)
 {
 	// Convert the metadata into a list of MetadataFields using the meta-metadata.
-	var metadataFields = MetadataRenderer.getMetadataFields(mmd["meta_metadata"]["kids"], metadata, 0);
+	var metadataFields = MetadataRenderer.getMetadataFields(mmd["meta_metadata"]["kids"], metadata, 0, null);
 	
 	// Is there any visable metadata?
 	if(MetadataRenderer.hasVisibleMetadata(metadataFields))
@@ -1130,16 +1229,16 @@ MetadataRenderer.buildMetadataTable = function(table, isChildTable, isRoot, meta
 	{			
 		
 		var row = document.createElement('tr');
-		var nameCol = document.createElement('td');
-			nameCol.className = "labelCol";
-			
-		var valueCol = document.createElement('td');
-			valueCol.className = "valueCol";
-			
-			
+					
 		// if the maximum number of fields have been rendered then stop rendering and add a "More" expander
 		if(fieldCount <= 0)
 		{
+			var nameCol = document.createElement('td');
+				nameCol.className = "labelCol";
+			
+			var valueCol = document.createElement('td');
+				valueCol.className = "valueCol";
+			
 			//TODO - add "more" expander
 			var moreCount = metadataFields.length - i;
 			
@@ -1180,273 +1279,72 @@ MetadataRenderer.buildMetadataTable = function(table, isChildTable, isRoot, meta
 			if(	metadataField.value.length != null && metadataField.value.length == 0)
 				continue;
 			
-			var expandButton = null;
+			if (metadataField.concatenates_to != null)
+				continue;
 			
-			if(metadataField.scalar_type)
-			{				
-				// Currently it only rendered Strings, Dates, Integers, and ParsedURLs
-				if(metadataField.scalar_type == "String" || metadataField.scalar_type == "Date" ||metadataField.scalar_type == "Integer" || metadataField.scalar_type == "ParsedURL")
-				{	
-					if(metadataField.name)
-					{
-						var fieldLabel = document.createElement('p');
-							fieldLabel.className = "fieldLabel";
-							fieldLabel.innerText = MetadataRenderer.toDisplayCase(metadataField.name);
-							fieldLabel.textContent = MetadataRenderer.toDisplayCase(metadataField.name);
-						
-						var fieldLabelDiv = document.createElement('div');
-							fieldLabelDiv.className = "fieldLabelContainer unhighlight";
-						
-						fieldLabelDiv.appendChild(fieldLabel);
-						nameCol.appendChild(fieldLabelDiv);
-					}
-					
-					// If the field is a URL then it should show the favicon and an A tag
-					if(metadataField.scalar_type == "ParsedURL")
-					{
-						// Uses http://getfavicon.appspot.com/ to resolve the favicon
-						var favicon = document.createElement('img');
-							favicon.className = "faviconICE";
-							favicon.src = "http://g.etfv.co/" + MetadataRenderer.getHost(metadataField.navigatesTo);
-						
-						var aTag = document.createElement('a');
-						aTag.innerText = MetadataRenderer.removeLineBreaksAndCrazies(metadataField.value);
-						aTag.textContent = MetadataRenderer.removeLineBreaksAndCrazies(metadataField.value);
-						
-						aTag.href = metadataField.value;
-						aTag.onclick = MetadataRenderer.logNavigate;
-						
-						aTag.className = "fieldValue";
-						
-						if(metadataField.style != null)
-							aTag.className += " "+metadataField.style;
-					
-						var fieldValueDiv = document.createElement('div');
-							fieldValueDiv.className = "fieldValueContainer";
-						
-						fieldValueDiv.appendChild(favicon);
-						fieldValueDiv.appendChild(aTag);
-						valueCol.appendChild(fieldValueDiv);
-					}
-				
-					// If the field navigates to a link then it should show the favicon and an A tag
-					else if( metadataField.navigatesTo)
-					{				
-						// Uses http://getfavicon.appspot.com/ to resolve the favicon
-						var favicon = document.createElement('img');
-							favicon.className = "faviconICE";
-							favicon.src = "http://g.etfv.co/" + MetadataRenderer.getHost(metadataField.navigatesTo);
-						
-						var aTag = document.createElement('a');
-							aTag.className = "fieldValue";
-							aTag.target = "_blank";
-							aTag.innerText = MetadataRenderer.removeLineBreaksAndCrazies(metadataField.value);
-							aTag.textContent = MetadataRenderer.removeLineBreaksAndCrazies(metadataField.value);
-							
-							aTag.href = metadataField.navigatesTo;
-							aTag.onclick = MetadataRenderer.logNavigate;
-						
-						if(metadataField.style != null)
-							aTag.className += " "+metadataField.style;
-						
-						var fieldValueDiv = document.createElement('div');
-							fieldValueDiv.className = "fieldValueContainer";						
-						
-						// For the current WWW study the rendering should have incontext CiteULike bookmarklets for specific types of metadata
-						if(WWWStudy)				
-							WWWStudy.addCiteULikeButton(fieldValueDiv, metadataField.parentMDType, metadataField.navigatesTo)						
-						
-						fieldValueDiv.appendChild(favicon);
-						fieldValueDiv.appendChild(aTag);
-						valueCol.appendChild(fieldValueDiv);
-					}
-					
-					// If there is no navigation then just display the field value as text
-					else
-					{
-						var fieldValue = document.createElement('p');
-							fieldValue.className = "fieldValue";
-							fieldValue.innerText = MetadataRenderer.removeLineBreaksAndCrazies(metadataField.value);
-							fieldValue.textContent = MetadataRenderer.removeLineBreaksAndCrazies(metadataField.value);
-						
-							if(metadataField.style != null)
-								fieldValue.className += " "+metadataField.style;
-						
-						var fieldValueDiv = document.createElement('div');
-							fieldValueDiv.className = "fieldValueContainer";
-						
-						fieldValueDiv.appendChild(fieldValue);
-						valueCol.appendChild(fieldValueDiv);
-					}
-															
-					row.appendChild(nameCol);
-					row.appendChild(valueCol);
-					
-					fieldCount--;
-				}		
+			var expandButton = null;
+			var fieldObj = MetadataRenderer.buildMetadataField(metadataField, isChildTable, fieldCount, row);
+			expandButton = fieldObj.expand_button;
+
+			var fieldObjs = [];
+			fieldObjs.push(fieldObj);
+
+			for (var j = 0; j < metadataField.concatenates.length; j++)
+			{
+				fieldObj = MetadataRenderer.buildMetadataField(metadataField.concatenates[j], isChildTable, fieldCount, row);
+				fieldObjs.push(fieldObj);
 			}
 			
-			else if(metadataField.composite_type != null)
+			for (var j = 0; j < fieldObjs.length; j++)
 			{
-				/** Label Column **/
-				var childUrl = MetadataRenderer.guessDocumentLocation(metadataField.value);
+				var nameCol = fieldObjs[j].name_col;
+				var valueCol = fieldObjs[j].value_col;
+				fieldCount = fieldObjs[j].count;
 				
-				var fieldLabelDiv = document.createElement('div');
-					fieldLabelDiv.className = "fieldLabelContainer unhighlight";
-					fieldLabelDiv.style.minWidth = "30px";					
-					
-				// Is the document already rendered?								
-				if(childUrl != "" && MetadataRenderer.isRenderedDocument(childUrl) )
+				// append name and value in the needed order
+				if (metadataField.label_at != null)
 				{
-					// If so, then don't allow the document to be expaned, to prevent looping						
-					fieldLabelDiv.className = "fieldLabelContainerOpened unhighlight";				
+					if (metadataField.label_at == "top" || metadataField.label_at == "bottom")
+					{
+						var innerTable = document.createElement('table');
+						var row1 = document.createElement('tr');
+						var row2 = document.createElement('tr');
+						if (metadataField.label_at == "top")
+						{
+							row1.appendChild(nameCol);							
+							row2.appendChild(valueCol);
+						}
+						else
+						{
+							row1.appendChild(valueCol);							
+							row2.appendChild(nameCol);
+						}
+						innerTable.appendChild(row1);
+						innerTable.appendChild(row2);
+						
+						var td = document.createElement('td');
+						td.appendChild(innerTable);
+						row.appendChild(td);
+					}						
+					else if (metadataField.label_at == "right")
+					{
+						row.appendChild(valueCol);
+						row.appendChild(nameCol);
+					}
+					else
+					{
+						row.appendChild(nameCol);
+						row.appendChild(valueCol);
+					}
 				}
 				else
 				{
-					// If the document hasn't been download then display a button that will download it
-					expandButton = document.createElement('div');
-						expandButton.className = "expandButton";
-						
-					expandButton.onclick = MetadataRenderer.downloadAndDisplayDocument;
-					
-					if(childUrl != "")
-					{
-						expandButton.onmouseover = MetadataRenderer.highlightDocuments;
-						expandButton.onmouseout = MetadataRenderer.unhighlightDocuments;
-					}
-							
-					var expandSymbol = document.createElement('div');
-						expandSymbol.className = "expandSymbol";
-						expandSymbol.style.display = "block";
-						
-					var collapseSymbol = document.createElement('div');
-						collapseSymbol.className = "collapseSymbol";
-						collapseSymbol.style.display = "block";						
-										
-					expandButton.appendChild(expandSymbol);
-					expandButton.appendChild(collapseSymbol);
-					fieldLabelDiv.appendChild(expandButton);
-				}
-				
-				if(metadataField.name)
-				{													
-					//If the table isn't a child table then display the label for the composite
-					if(!isChildTable)
-					{
-						var fieldLabel = document.createElement('p');
-							fieldLabel.className = "fieldLabel";
-							fieldLabel.innerText = MetadataRenderer.toDisplayCase(metadataField.name);
-							fieldLabel.textContent = MetadataRenderer.toDisplayCase(metadataField.name);
-						
-						fieldLabelDiv.appendChild(fieldLabel);
-					}
-				}
-				
-				nameCol.appendChild(fieldLabelDiv);
-				
-				/** Value Column **/
-				
-				var fieldValueDiv = document.createElement('div');
-					fieldValueDiv.className = "fieldCompositeContainer";
-
-				// Build the child table for the composite
-				var childTable =  MetadataRenderer.buildMetadataTable(null, false, false, metadataField.value, 1);
-				
-				// If the childTable has more than 1 row, collapse table
-				if(metadataField.value.length > 1)
-					MetadataRenderer.collapseTable(childTable);			
-				
-				fieldValueDiv.appendChild(childTable);				
-				
-				var nestedPad = document.createElement('div');
-					nestedPad.className = "nestedPad";
-				
-				nestedPad.appendChild(childTable);
-				
-				fieldValueDiv.appendChild(nestedPad);
-				
-				valueCol.appendChild(fieldValueDiv);
-				
-				// Add the unrendered document to the documentMap
-				if(childUrl != "")
-					MetadataRenderer.documentMap.push(new DocumentContainer(childUrl, null, row, false));
-				
-				// Add event handling to highlight document connections	
-				if(childUrl != "")
-				{	
-					nameCol.onmouseover = MetadataRenderer.highlightDocuments;
-					nameCol.onmouseout = MetadataRenderer.unhighlightDocuments;
-				}
-				
-				row.appendChild(nameCol);
-				row.appendChild(valueCol);
-				
-				fieldCount--;
+					row.appendChild(nameCol);
+					row.appendChild(valueCol);
+				}				
 			}
-			
-			else if(metadataField.child_type != null)
-			{		
-				if(metadataField.name != null)
-				{
-					var fieldLabel = document.createElement('p');
-						fieldLabel.className = "fieldLabel";
-						fieldLabel.innerText = MetadataRenderer.toDisplayCase(metadataField.name) + "(" + metadataField.value.length + ")";
-						fieldLabel.textContent = MetadataRenderer.toDisplayCase(metadataField.name) + "(" + metadataField.value.length + ")";
-												
-					var fieldLabelDiv = document.createElement('div');
-							fieldLabelDiv.className = "fieldLabelContainer unhighlight";
-					
-					// does it need to expand / collapse
-					if(metadataField.value.length > 1)
-					{
-						expandButton = document.createElement('div');
-							expandButton.className = "expandButton";
-							
-							expandButton.onclick = MetadataRenderer.expandCollapseTable;
-							
-							var expandSymbol = document.createElement('div');
-								expandSymbol.className = "expandSymbol";
-								expandSymbol.style.display = "block";
-								
-							var collapseSymbol = document.createElement('div');
-								collapseSymbol.className = "collapseSymbol";
-								collapseSymbol.style.display = "block";						
-						
-							expandButton.appendChild(expandSymbol);
-							expandButton.appendChild(collapseSymbol);
-							
-						fieldLabelDiv.appendChild(expandButton);
-					}						
-					fieldLabelDiv.appendChild(fieldLabel);
-					nameCol.appendChild(fieldLabelDiv);
-					
-				}
-					
-				var fieldValueDiv = document.createElement('div');
-					fieldValueDiv.className = "fieldChildContainer";
-				
-				var childTable =  MetadataRenderer.buildMetadataTable(null, true, false, metadataField.value, 1);
-				if(metadataField.value.length > 1)
-				{
-					MetadataRenderer.collapseTable(childTable);			
-				}					
-					
-				var nestedPad = document.createElement('div');
-					nestedPad.className = "nestedPad";
-				
-				nestedPad.appendChild(childTable);
-				
-				fieldValueDiv.appendChild(nestedPad);
-				
-				valueCol.appendChild(fieldValueDiv);
-								
-				row.appendChild(nameCol);
-				row.appendChild(valueCol);
-				
-				fieldCount--;
-			}		
 			table.appendChild(row);
-
+			
 			if (expandButton != null && metadataField.show_expanded_initially == "true") {
 				var fakeEvent = {};
 				fakeEvent.target = expandButton;
@@ -1456,6 +1354,278 @@ MetadataRenderer.buildMetadataTable = function(table, isChildTable, isRoot, meta
 		}
 	}	
 	return table;
+}
+
+MetadataRenderer.buildMetadataField = function(metadataField, isChildTable, fieldCount, row)
+{
+	var nameCol = document.createElement('td');
+		nameCol.className = "labelCol";
+	
+	var valueCol = document.createElement('td');
+		valueCol.className = "valueCol";
+		
+	var expandButton = null;	
+	
+	if(metadataField.scalar_type)
+	{				
+		// Currently it only rendered Strings, Dates, Integers, and ParsedURLs
+		if(metadataField.scalar_type == "String" || metadataField.scalar_type == "Date" ||metadataField.scalar_type == "Integer" || metadataField.scalar_type == "ParsedURL")
+		{	
+			if(metadataField.name && !metadataField.hide_label)
+			{
+				var fieldLabel = document.createElement('p');
+					fieldLabel.className = "fieldLabel";
+					
+				var label = (metadataField.value_as_label == "") ? metadataField.name : metadataField.value_as_label;
+					fieldLabel.innerText = MetadataRenderer.toDisplayCase(label);
+					fieldLabel.textContent = MetadataRenderer.toDisplayCase(label);
+				
+				var fieldLabelDiv = document.createElement('div');
+					fieldLabelDiv.className = "fieldLabelContainer unhighlight";
+				
+				fieldLabelDiv.appendChild(fieldLabel);
+				nameCol.appendChild(fieldLabelDiv);
+			}
+			
+			// If the field is a URL then it should show the favicon and an A tag
+			if(metadataField.scalar_type == "ParsedURL")
+			{
+				// Uses http://getfavicon.appspot.com/ to resolve the favicon
+				var favicon = document.createElement('img');
+					favicon.className = "faviconICE";
+					favicon.src = "http://g.etfv.co/" + MetadataRenderer.getHost(metadataField.navigatesTo);
+				
+				var aTag = document.createElement('a');
+				aTag.innerText = MetadataRenderer.removeLineBreaksAndCrazies(metadataField.value);
+				aTag.textContent = MetadataRenderer.removeLineBreaksAndCrazies(metadataField.value);
+				
+				aTag.href = metadataField.value;
+				aTag.onclick = MetadataRenderer.logNavigate;
+				
+				aTag.className = "fieldValue";
+						
+				if(metadataField.style != null)
+					aTag.className += " "+metadataField.style;
+			
+				var fieldValueDiv = document.createElement('div');
+					fieldValueDiv.className = "fieldValueContainer";
+				
+				fieldValueDiv.appendChild(favicon);
+				fieldValueDiv.appendChild(aTag);
+				valueCol.appendChild(fieldValueDiv);
+			}
+		
+			// If the field navigates to a link then it should show the favicon and an A tag
+			else if( metadataField.navigatesTo)
+			{				
+				// Uses http://getfavicon.appspot.com/ to resolve the favicon
+				var favicon = document.createElement('img');
+					favicon.className = "faviconICE";
+					favicon.src = "http://g.etfv.co/" + MetadataRenderer.getHost(metadataField.navigatesTo);
+				
+				var aTag = document.createElement('a');
+					aTag.className = "fieldValue";
+					aTag.target = "_blank";
+					aTag.innerText = MetadataRenderer.removeLineBreaksAndCrazies(metadataField.value);
+					aTag.textContent = MetadataRenderer.removeLineBreaksAndCrazies(metadataField.value);
+					
+					aTag.href = metadataField.navigatesTo;
+					aTag.onclick = MetadataRenderer.logNavigate;
+										
+					if(metadataField.style != null)
+						aTag.className += " "+metadataField.style;
+				var fieldValueDiv = document.createElement('div');
+					fieldValueDiv.className = "fieldValueContainer";						
+				
+				// For the current WWW study the rendering should have incontext CiteULike bookmarklets for specific types of metadata
+				if(WWWStudy)				
+					WWWStudy.addCiteULikeButton(fieldValueDiv, metadataField.parentMDType, metadataField.navigatesTo)						
+				
+				fieldValueDiv.appendChild(favicon);
+				fieldValueDiv.appendChild(aTag);
+				valueCol.appendChild(fieldValueDiv);
+			}
+			
+			// If there is no navigation then just display the field value as text
+			else
+			{
+				var fieldValue = document.createElement('p');
+					fieldValue.className = "fieldValue";
+					fieldValue.innerText = MetadataRenderer.removeLineBreaksAndCrazies(metadataField.value);
+					fieldValue.textContent = MetadataRenderer.removeLineBreaksAndCrazies(metadataField.value);
+					
+					if(metadataField.style != null)
+						fieldValue.className += " "+metadataField.style;
+				var fieldValueDiv = document.createElement('div');
+					fieldValueDiv.className = "fieldValueContainer";
+				
+				fieldValueDiv.appendChild(fieldValue);
+				valueCol.appendChild(fieldValueDiv);
+			}
+			
+			fieldCount--;
+		}		
+	}
+	
+	else if(metadataField.composite_type != null)
+	{
+		/** Label Column **/
+		var childUrl = MetadataRenderer.guessDocumentLocation(metadataField.value);
+		
+		var fieldLabelDiv = document.createElement('div');
+			fieldLabelDiv.className = "fieldLabelContainer unhighlight";
+			fieldLabelDiv.style.minWidth = "30px";					
+			
+		// Is the document already rendered?								
+		if(childUrl != "" && MetadataRenderer.isRenderedDocument(childUrl) )
+		{
+			// If so, then don't allow the document to be expaned, to prevent looping						
+			fieldLabelDiv.className = "fieldLabelContainerOpened unhighlight";				
+		}
+		else
+		{
+			// If the document hasn't been download then display a button that will download it
+			expandButton = document.createElement('div');
+				expandButton.className = "expandButton";
+				
+			expandButton.onclick = MetadataRenderer.downloadAndDisplayDocument;
+			
+			if(childUrl != "")
+			{
+				expandButton.onmouseover = MetadataRenderer.highlightDocuments;
+				expandButton.onmouseout = MetadataRenderer.unhighlightDocuments;
+			}
+					
+			var expandSymbol = document.createElement('div');
+				expandSymbol.className = "expandSymbol";
+				expandSymbol.style.display = "block";
+				
+			var collapseSymbol = document.createElement('div');
+				collapseSymbol.className = "collapseSymbol";
+				collapseSymbol.style.display = "block";						
+								
+			expandButton.appendChild(expandSymbol);
+			expandButton.appendChild(collapseSymbol);
+			fieldLabelDiv.appendChild(expandButton);
+		}
+		
+		if(metadataField.name)
+		{													
+			//If the table isn't a child table then display the label for the composite
+			if(!isChildTable && !metadataField.hide_label)
+			{
+				var fieldLabel = document.createElement('p');
+					fieldLabel.className = "fieldLabel";
+					
+				var label = (metadataField.value_as_label == "") ? metadataField.name : metadataField.value_as_label;
+					fieldLabel.innerText = MetadataRenderer.toDisplayCase(label);
+					fieldLabel.textContent = MetadataRenderer.toDisplayCase(label);
+				
+				fieldLabelDiv.appendChild(fieldLabel);
+			}
+		}
+		
+		nameCol.appendChild(fieldLabelDiv);
+		
+		/** Value Column **/
+		
+		var fieldValueDiv = document.createElement('div');
+			fieldValueDiv.className = "fieldCompositeContainer";
+
+		// Build the child table for the composite
+		var childTable =  MetadataRenderer.buildMetadataTable(null, false, false, metadataField.value, 1);
+		
+		// If the childTable has more than 1 row, collapse table
+		if(metadataField.value.length > 1)
+			MetadataRenderer.collapseTable(childTable);			
+		
+		fieldValueDiv.appendChild(childTable);				
+		
+		var nestedPad = document.createElement('div');
+			nestedPad.className = "nestedPad";
+		
+		nestedPad.appendChild(childTable);
+		
+		fieldValueDiv.appendChild(nestedPad);
+		
+		valueCol.appendChild(fieldValueDiv);
+		
+		// Add the unrendered document to the documentMap
+		if(childUrl != "")
+			MetadataRenderer.documentMap.push(new DocumentContainer(childUrl, null, row, false));
+		
+		// Add event handling to highlight document connections	
+		if(childUrl != "")
+		{	
+			nameCol.onmouseover = MetadataRenderer.highlightDocuments;
+			nameCol.onmouseout = MetadataRenderer.unhighlightDocuments;
+		}
+		
+		fieldCount--;
+	}
+	
+	else if(metadataField.child_type != null)
+	{		
+		if(metadataField.name != null)
+		{
+			var fieldLabel = document.createElement('p');
+				fieldLabel.className = "fieldLabel";
+				
+			var label = (metadataField.value_as_label == "") ? metadataField.name : metadataField.value_as_label;
+				fieldLabel.innerText = MetadataRenderer.toDisplayCase(label) + "(" + metadataField.value.length + ")";
+				fieldLabel.textContent = MetadataRenderer.toDisplayCase(label) + "(" + metadataField.value.length + ")";
+										
+			var fieldLabelDiv = document.createElement('div');
+					fieldLabelDiv.className = "fieldLabelContainer unhighlight";
+			
+			// does it need to expand / collapse
+			if(metadataField.value.length > 1)
+			{
+				var expandButton = document.createElement('div');
+					expandButton.className = "expandButton";
+					
+					expandButton.onclick = MetadataRenderer.expandCollapseTable;
+					
+					var expandSymbol = document.createElement('div');
+						expandSymbol.className = "expandSymbol";
+						expandSymbol.style.display = "block";
+						
+					var collapseSymbol = document.createElement('div');
+						collapseSymbol.className = "collapseSymbol";
+						collapseSymbol.style.display = "block";						
+				
+					expandButton.appendChild(expandSymbol);
+					expandButton.appendChild(collapseSymbol);
+					
+				fieldLabelDiv.appendChild(expandButton);
+			}
+			if (!metadataField.hide_label)
+				fieldLabelDiv.appendChild(fieldLabel);
+			
+			nameCol.appendChild(fieldLabelDiv);
+		}
+			
+		var fieldValueDiv = document.createElement('div');
+			fieldValueDiv.className = "fieldChildContainer";
+		
+		var childTable =  MetadataRenderer.buildMetadataTable(null, true, false, metadataField.value, 1);
+		if(metadataField.value.length > 1)
+		{
+			MetadataRenderer.collapseTable(childTable);			
+		}					
+			
+		var nestedPad = document.createElement('div');
+			nestedPad.className = "nestedPad";
+		
+		nestedPad.appendChild(childTable);
+		
+		fieldValueDiv.appendChild(nestedPad);
+		
+		valueCol.appendChild(fieldValueDiv);
+						
+		fieldCount--;
+	}
+	return {name_col: nameCol, value_col: valueCol, count: fieldCount, expand_button: expandButton};
 }
 
 /** 
