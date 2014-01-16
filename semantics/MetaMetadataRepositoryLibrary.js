@@ -53,20 +53,20 @@ MetaMetadataRepositoryLibrary.isInstanceOf = function(name, parentInQuestion)
 		return false;
 	}
 	
-	return MetaMetadataRepositoryLibrary._isInstanceOf(name, parentInQuestion);
+	return MetaMetadataRepositoryLibrary._isInstanceOf(METAMETADATA_BY_NAME[name], parentInQuestion);
 }
 
-MetaMetadataRepositoryLibrary._isInstanceOf = function(name, parentInQuestion)
+MetaMetadataRepositoryLibrary._isInstanceOf = function(metaMetadata, parentInQuestion)
 {
 	// recursively upward crawl from name checking for target parent
-	if(METAMETADATA_BY_NAME[name]['extends'] == null)
+	if(metaMetadata['extends'] == null)
 		return false;
 		
-	else if(METAMETADATA_BY_NAME[name]['extends'] == parentInQuestion)
+	else if(metaMetadata['extends'] == parentInQuestion)
 		return true;
 	
 	else
-		return MetaMetadataRepositoryLibrary._isInstanceOf(METAMETADATA_BY_NAME[name]['extends'], parentInQuestion);
+		return MetaMetadataRepositoryLibrary._isInstanceOf(metaMetadata['inherited_mmd'], parentInQuestion);
 }
 
 MetaMetadataRepositoryLibrary.firstSharedParent = function(a, b)
@@ -75,51 +75,54 @@ MetaMetadataRepositoryLibrary.firstSharedParent = function(a, b)
 	if(METAMETADATA_BY_NAME == null)
 	{
 		console.error("Error: MetaMetadataRepository not initialized.");
-		return false;
+		return null;
 	}
 	if(METAMETADATA_BY_NAME[a] == null)
 	{
 		console.error("Error: No MetaMetadata found named: "+a);
-		return false;
+		return null;
 	}
 	if(METAMETADATA_BY_NAME[b] == null)
 	{
 		console.error("Error: No MetaMetadata found named: "+b);
-		return false;
+		return null;
 	}
-		
-	return MetaMetadataRepositoryLibrary._firstSharedParent(a, b);
+	
+	if(a == b)
+		return a;
+	
+	return MetaMetadataRepositoryLibrary._firstSharedParent(METAMETADATA_BY_NAME[a], METAMETADATA_BY_NAME[b]);
 }
 
 MetaMetadataRepositoryLibrary._firstSharedParent = function(a, b)
 {
-	// get arrays of the parents of each metametadata
-	var aAncestry = MetaMetadataRepositoryLibrary._getAncestry(a);
-	var bAncestry = MetaMetadataRepositoryLibrary._getAncestry(b);
-	
-	for(var aIndex = 0; aIndex < aAncestry.length; aIndex++)
-	{
-		for(var bIndex = 0; bIndex < bAncestry.length; bIndex++)
+	while(a['extends'])
+	{		
+		if(a['extends'] == b['name'])
+			return a['extends'];
+		
+		var bIterator = METAMETADATA_BY_NAME[b['name']];
+		while(bIterator['extends'])
 		{
-			if(aAncestry[aIndex] == bAncestry[bIndex])
-			{
-				return aAncestry[aIndex];
-			}
+			if(a['extends'] == bIterator['name'])
+				return a['extends'];
+				
+			bIterator = bIterator['inherited_mmd'];
 		}
-	}
-	
+		
+		a = a['inherited_mmd'];
+	}	
 	return null;
 }
 
-MetaMetadataRepositoryLibrary._getAncestry = function(name)
+MetaMetadataRepositoryLibrary.getAncestry = function(metaMetadata)
 {
 	var ancestry = [];
 	
-	var metaMetadata = METAMETADATA_BY_NAME[name];
 	while(metaMetadata['extends'])
 	{		
 		ancestry.push(metaMetadata['extends']);
-		metaMetadata = METAMETADATA_BY_NAME[metaMetadata['extends']];
+		metaMetadata = metaMetadata['inherited_mmd'];
 	}
 	
 	return ancestry;
