@@ -2,17 +2,11 @@ var MetaMetadataRepositoryLibrary = {};
 var METAMETADATA_REPOSITORY = null;
 var METAMETADATA_BY_NAME = null;
 
-MetaMetadataRepositoryLibrary.getRepository = function()
+MetaMetadataRepositoryLibrary.loadRepository = function()
 {
-	// open the repository
-	var xhr = new XMLHttpRequest();
-	xhr.open("GET", "http://ecology-service.cse.tamu.edu/BigSemanticsService/mmdrepository.json");
-	xhr.onload = function() {
-	 	//console.log(xhr.responseText);
-	    console.log(xhr.responseText);
-	    
-	}
-	xhr.send();
+	var script = document.createElement('script');
+	script.src = "http://ecology-service.cse.tamu.edu/BigSemanticsService/mmdrepository.jsonp?callback=MetaMetadataRepositoryLibrary.initializeRepository";
+	document.head.appendChild(script);
 }
 
 MetaMetadataRepositoryLibrary.initializeRepository = function(repository)
