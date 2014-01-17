@@ -1,0 +1,135 @@
+<link href='http://fonts.googleapis.com/css?family=Roboto:100,300'
+rel='stylesheet' type='text/css'>
+<script
+src="http://ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+<style type="text/css">
+.text {
+  font-family: "Roboto", sans-serif;
+  font-size: 11pt;
+  font-weight: 300;
+  pointer-events: none;
+}
+
+.link {
+  fill: none;
+  stroke: gray;
+  stroke-width: 1.5px;
+}
+</style>
+
+<script type="text/javascript">
+
+// The alignment-baseline property is SVG standard, but Firefox does not support
+// it yet. Thus this will work worse in Firefox.
+
+function SVG(element_name) {
+  return document.createElementNS("http://www.w3.org/2000/svg", element_name);
+}
+
+var OntoVis = {};
+OntoVis.width = 960;
+OntoVis.height = 800;
+OntoVis.marginX = 80;
+OntoVis.marginY = 20;
+OntoVis.nodePaddingX = 5;
+OntoVis.nodePaddingY = 3;
+
+OntoVis._diagonal = d3.svg.diagonal().projection(
+    function(d) { return [d.y, d.x]; });
+
+function createTextBox(text_element, paddings) {
+  var bbox = text_element.getBBox();
+
+  var box = SVG("rect");
+  $(text_element).parent().prepend(box);
+  $(box).attr("id", "box_" + text_element.id);
+  $(box).attr("fill", "#B0CD5A");
+  $(box).attr("rx", "5");
+  $(box).attr("ry", "5");
+  $(box).attr("x", bbox.x - paddings.x);
+  $(box).attr("y", bbox.y - paddings.y);
+  $(box).attr("width", bbox.width + paddings.x * 2);
+  $(box).attr("height", bbox.height + paddings.y * 2);
+}
+
+function createTextBoxes(paddings) {
+  var text_elements = $("#elements text");
+  for (var i = 0; i < text_elements.length; ++i) {
+    createTextBox(text_elements[i], paddings);
+  }
+}
+
+function createLayout() {
+  var svg = SVG("svg");
+  $("div#viz").append(svg);
+  $(svg).attr("width", OntoVis.width);
+  $(svg).attr("height", OntoVis.height);
+
+  var g_links = SVG("g");
+  $(g_links).attr("id", "links");
+  $(g_links).attr("transform",
+                  "translate(" + OntoVis.marginX + " " + OntoVis.marginY + ")");
+  $(svg).append(g_links);
+  var g_texts = SVG("g");
+  $(g_texts).attr("id", "elements");
+  $(svg).append(g_texts);
+
+  var visibleWidth = OntoVis.width - OntoVis.marginX * 2;
+  var visibleHeight = OntoVis.height - OntoVis.marginY * 2;
+  var layout = d3.layout.tree()
+    .size([visibleWidth, visibleHeight])
+    .children(function(d) { return d.subtypes; });
+  OntoVis.layout = layout;
+
+  d3.json("mmd_repo.json", function(error, root) {
+      OntoVis.root = root;
+      update(root);
+  });
+}
+
+function update(root) {
+  var nodes = OntoVis.layout.nodes(root);
+  var links = OntoVis.layout.links(nodes);
+  console.log(nodes);
+  console.log(links);
+
+  var elements = d3.select("div#viz > svg > g#elements").selectAll("g");
+  var node = elements.data(nodes);
+
+  node.enter()
+    .insert("g")
+      .attr("transform",
+            function(d) {
+              var x = d.y + OntoVis.marginX;
+              // var y = OntoVis.height - d.x + OntoVis.marginY;
+              var y = d.x + OntoVis.marginY;
+              return "translate(" + x + " " + y + ")";
+            })
+    .insert("text")
+      .attr("id", function(d) { return "text_" + d.name; })
+      .attr("class", "text")
+      .attr("text-anchor", "middle")
+      .attr("alignment-baseline", "middle")
+      .text(function(d) { return d.name; });
+
+  createTextBoxes({ "x": OntoVis.nodePaddingX, "y": OntoVis.nodePaddingY });
+
+  var connectors = d3.select("div#viz > svg > g#links").selectAll("path");
+  var link = connectors.data(links);
+
+  link.enter()
+    .insert("path")
+      .attr("class", "link")
+      .attr("d", OntoVis._diagonal);
+}
+
+$(document).ready(createLayout);
+</script>
+
+<body>
+
+<div id="viz">
+</div>
+
+</body>

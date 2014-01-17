@@ -1,0 +1,49 @@
+{
+  "name": "document",
+  "subtypes": [
+    {
+      "name": "creative_work",
+      "subtypes": [
+        {
+          "name": "scholarly_article",
+          "subtypes": [
+            {
+              "name": "acm",
+              "example_url": [
+                "http://dl.acm.org/citation.cfm?id=123456",
+                "http://dl.acm.org/citation.cfm?id=234567"
+              ]
+            },
+            {
+              "name": "jstor",
+              "example_url": [
+                "http://www.jstor.org/stable/3214773"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "book"
+        },
+        {
+          "name": "movie"
+        }
+      ]
+    },
+    {
+      "name": "product",
+      "subtypes": [
+        {
+          "name": "amazon_product",
+          "example_url": [
+            "http://www.amazon.com/gp/product/020161622X"
+          ]
+        },
+        {
+          "name": "gadget"
+        }
+      ]
+    }
+  ]
+}
+
