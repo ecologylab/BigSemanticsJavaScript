@@ -533,7 +533,7 @@ MetadataRenderer.getMetadataFields = function(mmdKids, metadata, depth, child_va
 			if(MetadataRenderer.isFieldVisible(mmdField))
 			{		
 				//console.log(mmdField);			
-				// Is there a metadata value for this field?		
+				// Is there a metadata value for this field?	
 				var value = MetadataRenderer.getFieldValue(mmdField, metadata);	
 				if(value)
 				{	
@@ -547,10 +547,19 @@ MetadataRenderer.getMetadataFields = function(mmdKids, metadata, depth, child_va
 											
 					// If scalar collection
 					if(mmdField.child_scalar_type != null)
-					{						
-						var newObject = {};
-						newObject[field.child_type] = value;
-						value = newObject;	
+					{		
+						field.child_type = mmdField.child_scalar_type;			
+												
+						var newList = [];
+						for(var k = 0; k < value.length; k++)
+						{
+							var scalarField = new MetadataField(mmdField);
+								scalarField.value = value[k]; 
+								scalarField.hide_label = true;
+								scalarField.scalar_type = mmdField.child_scalar_type;
+							newList.push(scalarField);
+						}
+						field.value = newList;
 					}		
 					// Else if it's a polymorphic collection
 					else if(mmdField.polymorphic_scope != null)
@@ -580,7 +589,7 @@ MetadataRenderer.getMetadataFields = function(mmdKids, metadata, depth, child_va
 					
 					if (mmdField.child_use_value_as_label != null)
 						field.value = MetadataRenderer.getMetadataFields(mmdField["kids"], value, depth + 1, mmdField.child_use_value_as_label);
-					else
+					else if(mmdField.child_scalar_type == null)
 						field.value = MetadataRenderer.getMetadataFields(mmdField["kids"], value, depth + 1, null);
 					
 					if (mmdField.use_value_as_label != null) 
@@ -1223,6 +1232,8 @@ MetadataRenderer.buildMetadataTable = function(table, isChildTable, isRoot, meta
 		//if(!isRoot)
 		//	table.className = "metadataTable";
 	}
+	
+	console.log(metadataFields);
 	
 	// Iterate through the metadataFields which are already sorted into display order
 	for(var i = 0; i < metadataFields.length; i++)
