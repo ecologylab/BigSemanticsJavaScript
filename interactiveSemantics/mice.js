@@ -1726,3 +1726,9 @@ MetadataRenderer.getLocationForChildTable = function(element)
 	}
 	return "none";
 }
+
+MetadataRenderer.clearDocumentCollection = function()
+{
+	MetadataRenderer.queue = [];
+	MetadataRenderer.documentMap = [];
+}

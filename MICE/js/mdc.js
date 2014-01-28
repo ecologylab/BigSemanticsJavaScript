@@ -122,6 +122,8 @@ function showMetadata()
   {
     window.history.pushState("state", "MICE Demo", "index.html?url="+url)
   }
+  
+  MetadataRenderer.clearDocumentCollection();
 
   MetadataRenderer.addMetadataDisplay(content, url, true);
 
