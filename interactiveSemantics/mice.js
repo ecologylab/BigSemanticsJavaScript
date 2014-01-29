@@ -373,6 +373,7 @@ function MetadataField(mmdField)
 		for (var k = 0; k < mmdField.concatenates.length; k++)
 			this.concatenates.push(mmdField.concatenates[k]);
 	}
+	this.extract_as_html = mmdField.extract_as_html;
 }
 
 /**
@@ -451,7 +452,7 @@ MetadataRenderer.getMetadataFields = function(mmdKids, metadata, depth, child_va
 					
 					field.value = value;
 					if (mmdField.use_value_as_label != null) 
-						field.value_as_label = MetadataRenderer.getValueForProperty(mmdField.use_value_as_label, metadata);
+						field.value_as_label = MetadataRenderer.getValueForProperty(mmdField.use_value_as_label, metadata, mmdKids, depth);
 										
 					field.scalar_type = mmdField.scalar_type;
 					field.parentMDType = metadata.mm_name;	
@@ -497,8 +498,8 @@ MetadataRenderer.getMetadataFields = function(mmdKids, metadata, depth, child_va
 							var field = new MetadataField(mmdField);
 							
 							field.value = MetadataRenderer.getMetadataFields(mmdField["kids"], value[i], depth + 1, null);
-							if (mmdField.use_value_as_label != null) 
-								field.value_as_label = MetadataRenderer.getValueForProperty(mmdField.use_value_as_label, value[i]);
+							if (mmdField.use_value_as_label != null)
+								field.value_as_label = MetadataRenderer.getValueForProperty(mmdField.use_value_as_label, value[i], mmdField["kids"], depth + 1);
 							
 							field.composite_type = mmdField.type;
 							field.parentMDType = metadata.mm_name;							
@@ -512,8 +513,13 @@ MetadataRenderer.getMetadataFields = function(mmdKids, metadata, depth, child_va
 						var field = new MetadataField(mmdField);
 						
 						field.value = MetadataRenderer.getMetadataFields(mmdField["kids"], value, depth + 1, null);
-						if (mmdField.use_value_as_label != null) 
-							field.value_as_label = MetadataRenderer.getValueForProperty(mmdField.use_value_as_label, metadata);
+						if (mmdField.use_value_as_label != null)
+						{
+							if (mmdField.child_value_as_label != null)
+								field.value_as_label = MetadataRenderer.getValueForProperty(mmdField.use_value_as_label, value, mmdField["kids"], depth + 1);
+							else
+								field.value_as_label = MetadataRenderer.getValueForProperty(mmdField.use_value_as_label, metadata, mmdKids, depth + 1);
+						}
 						
 						field.composite_type = mmdField.type;
 						field.parentMDType = metadata.mm_name;						
@@ -593,7 +599,7 @@ MetadataRenderer.getMetadataFields = function(mmdKids, metadata, depth, child_va
 						field.value = MetadataRenderer.getMetadataFields(mmdField["kids"], value, depth + 1, null);
 					
 					if (mmdField.use_value_as_label != null) 
-						field.value_as_label = MetadataRenderer.getValueForProperty(mmdField.use_value_as_label, metadata);
+						field.value_as_label = MetadataRenderer.getValueForProperty(mmdField.use_value_as_label, metadata, mmdKids);
 					
 					metadataFields.push(field);
 				}
@@ -630,14 +636,79 @@ MetadataRenderer.getFieldValue = function(mmdField, metadata)
 /**
  * 
  */
-MetadataRenderer.getValueForProperty = function(valueAsLabelStr, metadata)
+MetadataRenderer.getValueForProperty = function(valueAsLabelStr, metadata, mmdKids, depth)
 {
 	var nestedFields = valueAsLabelStr.split(".");
 	var fieldValue = metadata;
+	var fieldType = "";
 	for (var i = 0; i < nestedFields.length; i++)
+	{
 		fieldValue = fieldValue[nestedFields[i]];
+		// if value is to be read from a collection, then use first element
+		// TODO: define semantics for selection
+		if (fieldValue.length != null)
+			fieldValue = fieldValue[0];
+		
+		for (var key in mmdKids)
+		{
+			var mmdField = mmdKids[key];
+			if (mmdField.scalar)
+			{
+				mmdField = mmdField.scalar;
+				fieldType = "scalar";
+				if (mmdField.name == nestedFields[i])
+					break;				
+			}
+			else if (mmdField.composite)
+			{
+				mmdField = mmdField.composite;
+				fieldType = mmdField.type;
+				if (mmdField.name == nestedFields[i])
+				{
+					mmdKids = mmdField["kids"];
+					depth = depth + 1;
+					break;
+				}
+			}
+			else if (mmdField.collection)
+			{
+				mmdField = mmdField.collection;
+				fieldType = (mmdField.child_tag != null) ? mmdField.child_tag : mmdField.child_type;
+				if (mmdField.name == nestedFields[i])
+				{
+					mmdKids = mmdField["kids"];
+
+					// get the child type; as directly selecting the first child above
+					mmdField = mmdKids[0];
+					if (mmdField.scalar)
+						mmdField = mmdField.scalar;
+					else if (mmdField.composite)
+						mmdField = mmdField.composite;
+					
+					mmdKids = mmdField["kids"];
+					depth = depth + 1;
+					
+					break;
+				}
+			}			
+		}
+	}
 	
-	return fieldValue;		
+	// TODO: define caching structure
+	if (mmdField.metadataFields)
+		return {value: mmdField.metadataFields, type: fieldType};
+	else
+	{
+		if (fieldType == "scalar")
+		{
+			return {value: fieldValue, type: fieldType};
+		}
+		else	
+		{
+			var metadataFields = MetadataRenderer.getMetadataFields(mmdKids, fieldValue, depth, null);
+			return {value: metadataFields, type: fieldType};
+		}				
+	}	
 }
 
 /**
@@ -1367,6 +1438,14 @@ MetadataRenderer.buildMetadataTable = function(table, isChildTable, isRoot, meta
 	return table;
 }
 
+/**
+ * Build the HTML representation for MetadataField
+ * @param metadataField, MetadataField to be rendered
+ * @param isChildTable, true if the field is child of a collection table, false otherwise
+ * @param fieldCount, the number of fields that are rendered before cropping with a "More" button
+ * @param row, the containing element
+ * @return HTML representation of the metadata field, and related properties
+ */
 MetadataRenderer.buildMetadataField = function(metadataField, isChildTable, fieldCount, row)
 {
 	var nameCol = document.createElement('td');
@@ -1462,8 +1541,16 @@ MetadataRenderer.buildMetadataField = function(metadataField, isChildTable, fiel
 			{
 				var fieldValue = document.createElement('p');
 					fieldValue.className = "fieldValue";
+					
+				if (metadataField.extract_as_html)
+				{
+					fieldValue.innerHTML = MetadataRenderer.removeLineBreaksAndCrazies(metadataField.value);
+				}
+				else
+				{
 					fieldValue.innerText = MetadataRenderer.removeLineBreaksAndCrazies(metadataField.value);
 					fieldValue.textContent = MetadataRenderer.removeLineBreaksAndCrazies(metadataField.value);
+				}
 					
 					if(metadataField.style != null)
 						fieldValue.className += " "+metadataField.style;
