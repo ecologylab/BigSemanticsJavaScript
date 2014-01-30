@@ -1,0 +1,40 @@
+{
+  "manifest_version": 2,
+
+  "name": "SMICE",
+  "description": "This extension allows in-context expansion of Social Media hyperlinks e.g. Twitter #hashtags, @usernames",
+  "version": "1.0",
+
+  "permissions": [
+    "https://twitter.com/search?q=%23*",
+    "https://twitter.com/*",
+    "http://ecology-service.cs.tamu.edu/",
+    "http://localhost:8080/",
+    "http://ecoarray0:3080/"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+      	"https://twitter.com/search?q=%23*",
+    	"https://twitter.com/*"
+      ],
+      "run_at": "document_end",
+      "css": ["content_script/css/mice.css"],
+      "js": [
+        "content_script/js/simplDeserializer.js",
+        "content_script/js/mice.js",
+        "content_script/js/twitterMice.js",
+        "content_script/js/logger.js",
+      	"content_script/js/twitterICE.js",
+      	"content_script/js/ICE.js"
+      ]
+    }
+  ],
+  "background": {
+    "page": "background/background.html"
+  },
+  "web_accessible_resources": [
+    "content_script/img/expand_icon.png",
+    "content_script/img/collapse_icon.png"
+  ]
+}
