@@ -15,7 +15,7 @@
 	border-top-right-radius: 8px;
 	border-bottom-right-radius: 8px;
 	border-bottom-left-radius: 8px;
-	width: 640px;
+	min-width: 640px;
 	
 	line-height: 15px;
 	
@@ -108,7 +108,7 @@
 	text-align: left;
 	margin: 0px;
 	padding: 0px;
-	width: 100%
+	width: auto;
 }
 
 .metadataContainer a{
@@ -126,7 +126,7 @@
 	border-top-left-radius: 8px;
 	border-bottom-left-radius: 8px;
 	
-	width: 100%;
+	width: auto;
 	min-height: 19px;
 }
 
@@ -136,7 +136,7 @@
 	border-top-left-radius: 8px;
 	border-bottom-left-radius: 8px;
 	
-	width: 100%;
+	width: auto;
 	min-height: 17px;
 	margin-right: -3px;
 	
@@ -149,7 +149,8 @@
 	border-top-right-radius: 8px;
 	border-bottom-right-radius: 8px;
 	
-	width: 100%;
+	width: auto;
+	max-width: 540px;
 	min-height: 19px;
 	height: 19px;
 	text-overflow: ellipsis;
@@ -172,7 +173,7 @@
 	border-bottom-right-radius: 8px;
 	border-bottom-left-radius: 8px;
 	
-	width: 100%;
+	width: auto;
 	min-height: 19px;
 	text-overflow: ellipsis;
 	
@@ -185,7 +186,7 @@
 	border-bottom-right-radius: 8px;
 	border-bottom-left-radius: 8px;
 	
-	width: 100%;
+	width: auto;
 	min-height: 19px;
 	text-overflow: ellipsis;	
 	
@@ -317,3 +318,72 @@
 	cursor: pointer;
 	background: #bbb;
 }
+
+.tabbedICEContainer {
+	
+}
+
+.tabMaster {
+	
+}
+
+.tabParent {
+	
+}
+
+.tabLabel {
+	position: absolute;
+	background: #282828;
+	left: -31px;
+	width: 64px;
+	height: 18px;
+	padding: 2px 4px 2px 10px;
+	border-bottom-left-radius: 12px;
+	border-top-left-radius: 12px;
+	border: 1px solid gray;
+	border-right-color: white;
+	color: white;
+}
+
+
+.tabLabel:hover {
+	cursor: pointer;
+	background: #ccc;
+	color: white;
+	font-weight: 800;
+}
+
+.tabLabel .hidden {
+	display: none;
+}
+
+.tabLabel span{
+	position: absolute;
+	left: 27px;
+}
+
+.tabLabel .refreshButton{
+	height: 16px;
+	width: 16px;
+	position: absolute;
+	background: #aaa;
+	border-radius: 10px;
+	padding: 2px;
+	margin: -1px;
+	left: 3px;
+	opacity: 0.8;
+}
+
+.tabLabel .refreshButton:hover{
+	background: #777;
+	opacity: 1.0	
+}
+
+.tabValue {
+	
+}
+
+.clippingFieldsTable {
+	
+}
+
