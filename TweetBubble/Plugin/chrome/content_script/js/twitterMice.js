@@ -359,6 +359,10 @@ MetadataRenderer.buildMetadataTable = function(table, isChildTable, isRoot, meta
 				fakeEvent.target = expandButton;
 				console.log("fake event ready");
 				MetadataRenderer.expandCollapseTable(fakeEvent);
+				
+				//TODO: introduce semantics for hiding after expand
+				if (metadataField.composite_type == "tweet")
+					expandButton.style.visibility = "hidden";
 			}
 		}
 	}	
