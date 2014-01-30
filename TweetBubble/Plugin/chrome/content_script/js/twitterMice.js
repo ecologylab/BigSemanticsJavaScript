@@ -1281,19 +1281,26 @@ MetadataRenderer.makeTinge = function(color)
 
 MetadataRenderer.highlightTweet = function(event)
 {
-	var valueCol = event.currentTarget;
-	valueCol.className = "fieldCompositeContainer highlightTweet";
+	var fieldValueDiv = event.currentTarget;
+	fieldValueDiv.className = "fieldCompositeContainer highlightTweet";
 }
 
 MetadataRenderer.unhighlightTweet = function(event)
 {
-	var valueCol = event.currentTarget;
-	valueCol.className = "fieldCompositeContainer";
+	var fieldValueDiv = event.currentTarget;
+	fieldValueDiv.className = "fieldCompositeContainer";
 }
 
 MetadataRenderer.collapseOrScrollToExpandedItem = function(event)
 {
-	
+	var elt = event.currentTarget;
+	var y = 0;        
+    while (elt && (typeof elt.offsetTop !== "undefined") && !isNaN(elt.offsetTop))
+    {
+    	y += elt.offsetTop;
+    	elt = elt.offsetParent;
+    }
+    window.scrollTop = y;
 }
 
 MetadataRenderer.stopEventPropagation = function(event)
