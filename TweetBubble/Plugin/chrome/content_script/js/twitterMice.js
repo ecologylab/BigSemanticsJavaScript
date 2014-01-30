@@ -410,6 +410,7 @@ MetadataRenderer.buildMetadataField = function(metadataField, isChildTable, fiel
 				else if (metadataField.value_as_label.type == "image")
 				{
 					var img = document.createElement('img');
+						img.className = "fieldLabelImage";
 						img.src = MetadataRenderer.getImageSource(label);
 						
 					fieldLabelDiv.appendChild(img);	
@@ -539,6 +540,7 @@ MetadataRenderer.buildMetadataField = function(metadataField, isChildTable, fiel
 			else if (metadataField.value_as_label.type == "image")
 			{
 				var img = document.createElement('img');
+					img.className = "fieldLabelImage";
 					img.src = MetadataRenderer.getImageSource(label);
 
 				fieldLabelDiv.appendChild(img);
@@ -618,6 +620,7 @@ MetadataRenderer.buildMetadataField = function(metadataField, isChildTable, fiel
 				else if (metadataField.value_as_label.type == "image")
 				{
 					var img = document.createElement('img');
+						img.className = "fieldLabelImage";
 						img.src = MetadataRenderer.getImageSource(label);
 
 					fieldLabelDiv.appendChild(img);
@@ -715,6 +718,7 @@ MetadataRenderer.buildMetadataField = function(metadataField, isChildTable, fiel
 			else if (metadataField.value_as_label.type == "image")
 			{
 				var img = document.createElement('img');
+					img.className = "fieldLabelImage";
 					img.src = MetadataRenderer.getImageSource(label);
 
 				if (!metadataField.hide_label)
