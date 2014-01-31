@@ -28,6 +28,15 @@ function isExpanded(icon)
 	return (icon.src == collapseIconPath)? true : false;
 }
 
+function downloadRequester(expandableItemUrl)
+{
+	chrome.extension.sendRequest({load: expandableItemUrl}, function(response) {
+		  console.log(response);
+		  MetadataRenderer.setMetadata(response.doc);
+		  MetadataRenderer.setMetaMetadata(response.mmd);
+	});
+}
+
 function expandCollapseItem()
 {
 	console.log("event received");
@@ -56,11 +65,7 @@ function expandCollapseItem()
 		MetadataRenderer.addMetadataDisplay(parent, expandableItemUrl, true, null, this);
 		
 		//request loading of webpage
-		chrome.extension.sendRequest({load: expandableItemUrl}, function(response) {
-		  console.log(response);
-		  MetadataRenderer.setMetadata(response.doc);
-		  MetadataRenderer.setMetaMetadata(response.mmd);
-		});
+		downloadRequester(expandableItemUrl);
 	}	
 }
 
@@ -98,6 +103,9 @@ MetadataRenderer.initMetadataRenderings();
 
 if (MetadataRenderer.setMetadataProcessor)
 	MetadataRenderer.setMetadataProcessor(processMetadata);
+
+if (MetadataRenderer.setDocumentDownloader)
+	MetadataRenderer.setDocumentDownloader(downloadRequester);
 
 Logger.init();
 
