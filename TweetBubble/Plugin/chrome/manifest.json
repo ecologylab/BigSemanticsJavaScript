@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
 
-  "name": "SMICE",
+  "name": "TweetBubble",
   "description": "This extension allows in-context expansion of Social Media hyperlinks e.g. Twitter #hashtags, @usernames",
   "version": "1.0",
 

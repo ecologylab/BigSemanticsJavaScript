@@ -1,9 +1,11 @@
 /**
- * 
+ * custom rendering for Twitter Metadata expansion
  */
 //var CustomRenderer = {};
 
 var metadataProcessor = null;
+var requestDocumentDownload = null;
+
 //var colors = ['#FFFFCC', '#BBE2FA', '#FAE3C8', '#D8CAE8', '#FFD0C9', '#D4DEFF', '#D5EEF2']; // use hex values
 var colors = ['rgb(255, 255, 204)', 'rgb(187, 226, 250)', 'rgb(250, 227, 200)', 'rgb(216, 202, 232)',
               'rgb(255, 208, 201)', 'rgb(212, 222, 255)', 'rgb(213, 238, 242)']; // use rgb for direct comparison
@@ -129,8 +131,11 @@ MetadataRenderer.createAndRenderMetadata = function(task)
 	if(metadataTable)
 	{
 		// Clear out the container so that it will only contain the new metadata table
-		//while (task.container.hasChildNodes())
-		  //  task.container.removeChild(task.container.lastChild);
+		if(!task.isRoot)
+		{
+			while (task.container.hasChildNodes())
+				task.container.removeChild(task.container.lastChild);
+		}    
 		    
 		// Add the HTML5 canvas for the drawing of connection lines
 		var canvas = document.createElement("canvas");
@@ -142,7 +147,7 @@ MetadataRenderer.createAndRenderMetadata = function(task)
 		
 		// Add the interior container to the root contianer
 		task.container.appendChild(task.visual);
-		if (bgColor)
+		if (task.expandedItem && bgColor)
 			task.expandedItem.style.background = bgColor;
 		
 		if (metadataProcessor)
@@ -359,6 +364,10 @@ MetadataRenderer.buildMetadataTable = function(table, isChildTable, isRoot, meta
 				fakeEvent.target = expandButton;
 				console.log("fake event ready");
 				MetadataRenderer.expandCollapseTable(fakeEvent);
+				
+				//TODO: introduce semantics for hiding after expand
+				if (metadataField.composite_type == "tweet")
+					expandButton.style.visibility = "hidden";
 			}
 		}
 	}	
@@ -410,6 +419,7 @@ MetadataRenderer.buildMetadataField = function(metadataField, isChildTable, fiel
 				else if (metadataField.value_as_label.type == "image")
 				{
 					var img = document.createElement('img');
+						img.className = "fieldLabelImage";
 						img.src = MetadataRenderer.getImageSource(label);
 						
 					fieldLabelDiv.appendChild(img);	
@@ -539,6 +549,7 @@ MetadataRenderer.buildMetadataField = function(metadataField, isChildTable, fiel
 			else if (metadataField.value_as_label.type == "image")
 			{
 				var img = document.createElement('img');
+					img.className = "fieldLabelImage";
 					img.src = MetadataRenderer.getImageSource(label);
 
 				fieldLabelDiv.appendChild(img);
@@ -567,7 +578,8 @@ MetadataRenderer.buildMetadataField = function(metadataField, isChildTable, fiel
 			fieldLabelDiv.style.minWidth = "30px";					
 			
 		// Is the document already rendered?								
-		if(childUrl != "" && MetadataRenderer.isRenderedDocument(childUrl) )
+		if(childUrl != "" && MetadataRenderer.isRenderedDocument(childUrl)
+							&& childUrl.toLowerCase() != MetadataRenderer.currentDocumentLocation)
 		{
 			// If so, then don't allow the document to be expaned, to prevent looping						
 			fieldLabelDiv.className = "fieldLabelContainerOpened unhighlight";				
@@ -577,10 +589,10 @@ MetadataRenderer.buildMetadataField = function(metadataField, isChildTable, fiel
 			// If the document hasn't been download then display a button that will download it
 			expandButton = document.createElement('div');
 				expandButton.className = "expandButton";
-				
+			
 			expandButton.onclick = MetadataRenderer.downloadAndDisplayDocument;
 			
-			if(childUrl != "")
+			if(childUrl != "" && childUrl.toLowerCase() != MetadataRenderer.currentDocumentLocation)
 			{
 				expandButton.onmouseover = MetadataRenderer.highlightDocuments;
 				expandButton.onmouseout = MetadataRenderer.unhighlightDocuments;
@@ -618,6 +630,7 @@ MetadataRenderer.buildMetadataField = function(metadataField, isChildTable, fiel
 				else if (metadataField.value_as_label.type == "image")
 				{
 					var img = document.createElement('img');
+						img.className = "fieldLabelImage";
 						img.src = MetadataRenderer.getImageSource(label);
 
 					fieldLabelDiv.appendChild(img);
@@ -651,11 +664,11 @@ MetadataRenderer.buildMetadataField = function(metadataField, isChildTable, fiel
 		valueCol.appendChild(fieldValueDiv);
 		
 		// Add the unrendered document to the documentMap
-		if(childUrl != "")
+		if(childUrl != "" && childUrl.toLowerCase() != MetadataRenderer.currentDocumentLocation)
 			MetadataRenderer.documentMap.push(new DocumentContainer(childUrl, null, row, false, null, null));
 		
 		// Add event handling to highlight document connections	
-		if(childUrl != "")
+		if(childUrl != "" && childUrl.toLowerCase() != MetadataRenderer.currentDocumentLocation)
 		{	
 			nameCol.onmouseover = MetadataRenderer.highlightDocuments;
 			nameCol.onmouseout = MetadataRenderer.unhighlightDocuments;
@@ -715,6 +728,7 @@ MetadataRenderer.buildMetadataField = function(metadataField, isChildTable, fiel
 			else if (metadataField.value_as_label.type == "image")
 			{
 				var img = document.createElement('img');
+					img.className = "fieldLabelImage";
 					img.src = MetadataRenderer.getImageSource(label);
 
 				if (!metadataField.hide_label)
@@ -867,12 +881,14 @@ MetadataRenderer.downloadAndDisplayDocument = function(event)
 	}
 
 	// Did the table have a document location?
-	if(location)
+	if(location && location.toLowerCase() != MetadataRenderer.currentDocumentLocation)
 	{
 		// Add a loadingRow for visual feedback that the metadata is being downloaded / parsed
 		table.appendChild(MetadataRenderer.createLoadingRow());
 		
-		MetadataRenderer.addMetadataDisplay(table.parentElement, location, false);
+		MetadataRenderer.addMetadataDisplay(table.parentElement, location, false, null, button);
+		if (requestDocumentDownload)
+			requestDocumentDownload(location);
 	}
 	// If there was no document location then the table must be a non-document composite in which case just expand
 	else
@@ -1281,19 +1297,26 @@ MetadataRenderer.makeTinge = function(color)
 
 MetadataRenderer.highlightTweet = function(event)
 {
-	var valueCol = event.currentTarget;
-	valueCol.className = "fieldCompositeContainer highlightTweet";
+	var fieldValueDiv = event.currentTarget;
+	fieldValueDiv.className = "fieldCompositeContainer highlightTweet";
 }
 
 MetadataRenderer.unhighlightTweet = function(event)
 {
-	var valueCol = event.currentTarget;
-	valueCol.className = "fieldCompositeContainer";
+	var fieldValueDiv = event.currentTarget;
+	fieldValueDiv.className = "fieldCompositeContainer";
 }
 
 MetadataRenderer.collapseOrScrollToExpandedItem = function(event)
 {
-	
+	var elt = event.currentTarget;
+	var y = 0;        
+    while (elt && (typeof elt.offsetTop !== "undefined") && !isNaN(elt.offsetTop))
+    {
+    	y += elt.offsetTop;
+    	elt = elt.offsetParent;
+    }
+    window.scrollTop = y;
 }
 
 MetadataRenderer.stopEventPropagation = function(event)
@@ -1435,4 +1458,13 @@ MetadataRenderer.removeMetadataDisplay = function(expandedItem)
 MetadataRenderer.setMetadataProcessor = function(fnMetadataProcessor)
 {
 	metadataProcessor = fnMetadataProcessor;
+}
+
+/**
+* Sets the function for requesting document download
+* @param fnRequestDownload
+*/
+MetadataRenderer.setDocumentDownloader = function(fnDownloadRequester)
+{
+	requestDocumentDownload = fnDownloadRequester;
 }
