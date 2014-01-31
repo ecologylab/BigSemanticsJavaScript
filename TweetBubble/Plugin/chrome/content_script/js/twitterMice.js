@@ -578,7 +578,8 @@ MetadataRenderer.buildMetadataField = function(metadataField, isChildTable, fiel
 			fieldLabelDiv.style.minWidth = "30px";					
 			
 		// Is the document already rendered?								
-		if(childUrl != "" && MetadataRenderer.isRenderedDocument(childUrl) )
+		if(childUrl != "" && MetadataRenderer.isRenderedDocument(childUrl)
+							&& childUrl.toLowerCase() != MetadataRenderer.currentDocumentLocation)
 		{
 			// If so, then don't allow the document to be expaned, to prevent looping						
 			fieldLabelDiv.className = "fieldLabelContainerOpened unhighlight";				
@@ -591,7 +592,7 @@ MetadataRenderer.buildMetadataField = function(metadataField, isChildTable, fiel
 			
 			expandButton.onclick = MetadataRenderer.downloadAndDisplayDocument;
 			
-			if(childUrl != "")
+			if(childUrl != "" && childUrl.toLowerCase() != MetadataRenderer.currentDocumentLocation)
 			{
 				expandButton.onmouseover = MetadataRenderer.highlightDocuments;
 				expandButton.onmouseout = MetadataRenderer.unhighlightDocuments;
@@ -663,11 +664,11 @@ MetadataRenderer.buildMetadataField = function(metadataField, isChildTable, fiel
 		valueCol.appendChild(fieldValueDiv);
 		
 		// Add the unrendered document to the documentMap
-		if(childUrl != "")
+		if(childUrl != "" && childUrl.toLowerCase() != MetadataRenderer.currentDocumentLocation)
 			MetadataRenderer.documentMap.push(new DocumentContainer(childUrl, null, row, false, null, null));
 		
 		// Add event handling to highlight document connections	
-		if(childUrl != "")
+		if(childUrl != "" && childUrl.toLowerCase() != MetadataRenderer.currentDocumentLocation)
 		{	
 			nameCol.onmouseover = MetadataRenderer.highlightDocuments;
 			nameCol.onmouseout = MetadataRenderer.unhighlightDocuments;
@@ -880,7 +881,7 @@ MetadataRenderer.downloadAndDisplayDocument = function(event)
 	}
 
 	// Did the table have a document location?
-	if(location)
+	if(location && location.toLowerCase() != MetadataRenderer.currentDocumentLocation)
 	{
 		// Add a loadingRow for visual feedback that the metadata is being downloaded / parsed
 		table.appendChild(MetadataRenderer.createLoadingRow());
