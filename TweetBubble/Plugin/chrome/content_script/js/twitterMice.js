@@ -1,9 +1,11 @@
 /**
- * 
+ * custom rendering for Twitter Metadata expansion
  */
 //var CustomRenderer = {};
 
 var metadataProcessor = null;
+var requestDocumentDownload = null;
+
 //var colors = ['#FFFFCC', '#BBE2FA', '#FAE3C8', '#D8CAE8', '#FFD0C9', '#D4DEFF', '#D5EEF2']; // use hex values
 var colors = ['rgb(255, 255, 204)', 'rgb(187, 226, 250)', 'rgb(250, 227, 200)', 'rgb(216, 202, 232)',
               'rgb(255, 208, 201)', 'rgb(212, 222, 255)', 'rgb(213, 238, 242)']; // use rgb for direct comparison
@@ -129,8 +131,11 @@ MetadataRenderer.createAndRenderMetadata = function(task)
 	if(metadataTable)
 	{
 		// Clear out the container so that it will only contain the new metadata table
-		//while (task.container.hasChildNodes())
-		  //  task.container.removeChild(task.container.lastChild);
+		if(!task.isRoot)
+		{
+			while (task.container.hasChildNodes())
+				task.container.removeChild(task.container.lastChild);
+		}    
 		    
 		// Add the HTML5 canvas for the drawing of connection lines
 		var canvas = document.createElement("canvas");
@@ -142,7 +147,7 @@ MetadataRenderer.createAndRenderMetadata = function(task)
 		
 		// Add the interior container to the root contianer
 		task.container.appendChild(task.visual);
-		if (bgColor)
+		if (task.expandedItem && bgColor)
 			task.expandedItem.style.background = bgColor;
 		
 		if (metadataProcessor)
@@ -583,7 +588,7 @@ MetadataRenderer.buildMetadataField = function(metadataField, isChildTable, fiel
 			// If the document hasn't been download then display a button that will download it
 			expandButton = document.createElement('div');
 				expandButton.className = "expandButton";
-				
+			
 			expandButton.onclick = MetadataRenderer.downloadAndDisplayDocument;
 			
 			if(childUrl != "")
@@ -880,7 +885,9 @@ MetadataRenderer.downloadAndDisplayDocument = function(event)
 		// Add a loadingRow for visual feedback that the metadata is being downloaded / parsed
 		table.appendChild(MetadataRenderer.createLoadingRow());
 		
-		MetadataRenderer.addMetadataDisplay(table.parentElement, location, false);
+		MetadataRenderer.addMetadataDisplay(table.parentElement, location, false, null, button);
+		if (requestDocumentDownload)
+			requestDocumentDownload(location);
 	}
 	// If there was no document location then the table must be a non-document composite in which case just expand
 	else
@@ -1450,4 +1457,13 @@ MetadataRenderer.removeMetadataDisplay = function(expandedItem)
 MetadataRenderer.setMetadataProcessor = function(fnMetadataProcessor)
 {
 	metadataProcessor = fnMetadataProcessor;
+}
+
+/**
+* Sets the function for requesting document download
+* @param fnRequestDownload
+*/
+MetadataRenderer.setDocumentDownloader = function(fnDownloadRequester)
+{
+	requestDocumentDownload = fnDownloadRequester;
 }
