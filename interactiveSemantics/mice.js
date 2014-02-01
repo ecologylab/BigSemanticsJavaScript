@@ -1483,7 +1483,7 @@ MetadataRenderer.buildMetadataField = function(metadataField, isChildTable, fiel
 				// Uses http://getfavicon.appspot.com/ to resolve the favicon
 				var favicon = document.createElement('img');
 					favicon.className = "faviconICE";
-					favicon.src = "http://g.etfv.co/" + MetadataRenderer.getHost(metadataField.navigatesTo);
+					favicon.src = "https://plus.google.com/_/favicon?domain_url=" + MetadataRenderer.getHost(metadataField.navigatesTo);
 				
 				var aTag = document.createElement('a');
 				aTag.innerText = MetadataRenderer.removeLineBreaksAndCrazies(metadataField.value);
@@ -1511,7 +1511,7 @@ MetadataRenderer.buildMetadataField = function(metadataField, isChildTable, fiel
 				// Uses http://getfavicon.appspot.com/ to resolve the favicon
 				var favicon = document.createElement('img');
 					favicon.className = "faviconICE";
-					favicon.src = "http://g.etfv.co/" + MetadataRenderer.getHost(metadataField.navigatesTo);
+					favicon.src = "https://plus.google.com/_/favicon?domain_url=" + MetadataRenderer.getHost(metadataField.navigatesTo);
 				
 				var aTag = document.createElement('a');
 					aTag.className = "fieldValue";
