@@ -9,16 +9,11 @@
           "subtypes": [
             {
               "name": "acm",
-              "example_url": [
-                "http://dl.acm.org/citation.cfm?id=123456",
-                "http://dl.acm.org/citation.cfm?id=234567"
-              ]
+              "example_url": "http://dl.acm.org/citation.cfm?id=123456"
             },
             {
               "name": "jstor",
-              "example_url": [
-                "http://www.jstor.org/stable/3214773"
-              ]
+              "example_url": "http://www.jstor.org/stable/3214773"
             }
           ]
         },
@@ -35,9 +30,7 @@
       "subtypes": [
         {
           "name": "amazon_product",
-          "example_url": [
-            "http://www.amazon.com/gp/product/020161622X"
-          ]
+          "example_url": "http://www.amazon.com/gp/product/020161622X"
         },
         {
           "name": "gadget"

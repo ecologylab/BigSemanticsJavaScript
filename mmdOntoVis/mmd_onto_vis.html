@@ -8,7 +8,11 @@ src="http://ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
   font-family: "Roboto", sans-serif;
   font-size: 11pt;
   font-weight: 300;
-  pointer-events: none;
+  cursor: default;
+}
+
+.text:hover {
+  stroke: #100873;
 }
 
 .link {
@@ -16,6 +20,7 @@ src="http://ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
   stroke: gray;
   stroke-width: 1.5px;
 }
+
 </style>
 
 <script type="text/javascript">
@@ -23,11 +28,7 @@ src="http://ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
 // The alignment-baseline property is SVG standard, but Firefox does not support
 // it yet. Thus this will work worse in Firefox.
 
-function SVG(element_name) {
-  return document.createElementNS("http://www.w3.org/2000/svg", element_name);
-}
-
-// Global parameters.
+// Global object.
 var OntoVis = {};
 OntoVis.width = 960;
 OntoVis.height = 800;
@@ -38,7 +39,6 @@ OntoVis.nodePaddingY = 3;
 OntoVis.duration = 500;
 OntoVis.maxLevelDistance = 250;
 
-// Global utils.
 // projection() specifies a transform of coordinates for generated links.
 OntoVis._diagonal = d3.svg.diagonal().projection(
   function(d) {
@@ -46,56 +46,33 @@ OntoVis._diagonal = d3.svg.diagonal().projection(
   });
 OntoVis._colors = d3.scale.category20();
 
-// For a <text> element in <svg>, generate its bounding box, colored according
-// to its level.
-function createTextBox(text_element, paddings) {
-  var bbox = text_element.getBBox();
-
-  var depth = d3.select(text_element).datum().depth;
-  // We use this formula because in the default D3 20-color palette, color
-  // 0, 2, ..., 18 are dark colors, and color 1, 3, ..., 19 are light colors.
-  var color = depth % 10 * 2 + 1;
-
-  var box = SVG("rect");
-  $(text_element).parent().prepend(box);
-  $(box).attr("id", "box_" + text_element.id);
-  $(box).attr("fill", OntoVis._colors(color));
-  $(box).attr("rx", "5");
-  $(box).attr("ry", "5");
-  $(box).attr("x", bbox.x - paddings.x);
-  $(box).attr("y", bbox.y - paddings.y);
-  $(box).attr("width", bbox.width + paddings.x * 2);
-  $(box).attr("height", bbox.height + paddings.y * 2);
-}
-
-// Create bounding boxes with giving paddings for SVG text elements.
-// paddings: { x: <horizontal padding>, y: <vertical padding> }
-function createTextBoxes(paddings) {
-  var text_elements = $("#elements text");
-  for (var i = 0; i < text_elements.length; ++i) {
-    createTextBox(text_elements[i], paddings);
+OntoVis.SVG = function(element_name) {
+  var e = document.createElementNS("http://www.w3.org/2000/svg", element_name);
+  if (e.tagName == 'svg') {
+    $(e).attr("xmlns:xlink", "http://www.w3.org/1999/xlink");
   }
+  return e;
 }
 
 // Create and initialize the layout.
-function createLayout() {
+OntoVis.createLayout = function() {
   // Initialize color palette.
   for (var c = 0; c < 20; ++c) {
     console.log("color " + c + ": " + OntoVis._colors(c));
   }
 
   // Initialize the SVG canvas.
-  var svg = SVG("svg");
+  var svg = OntoVis.SVG("svg");
   $("div#viz").append(svg);
   $(svg).attr("width", OntoVis.width);
   $(svg).attr("height", OntoVis.height);
 
-  var g_links = SVG("g");
+  var g_links = OntoVis.SVG("g");
   $(g_links).attr("id", "links");
   $(g_links).attr("transform",
                   "translate(" + OntoVis.marginX + " " + OntoVis.marginY + ")");
   $(svg).append(g_links);
-  var g_texts = SVG("g");
+  var g_texts = OntoVis.SVG("g");
   $(g_texts).attr("id", "elements");
   $(svg).append(g_texts);
 
@@ -124,27 +101,35 @@ function createLayout() {
       // Collapse subtrees.
       root.subtypes.forEach(collapse);
 
-      update(root);
+      OntoVis.update(root);
   });
 }
 
 // Update the presentation when clicking events happen.
-function update(source) {
+OntoVis.update = function(source) {
   // Use D3 to generate the layout.
   // This will set the x-y coordinates for nodes.
   var nodes = OntoVis.layout.nodes(OntoVis.root);
   var links = OntoVis.layout.links(nodes);
 
-  // Set the max distance between two levels of nodes, for readability.
-  nodes.forEach(
-    function(d) {
-      if (d.y > d.depth * OntoVis.maxLevelDistance) {
-        d.y = d.depth * OntoVis.maxLevelDistance;
-      }
-    });
+  // Adjust margin and the max distance between two levels of nodes, for
+  // readability.
+  var minX = 1 << 30;
+  nodes.forEach(function(d) {
+    if (d.x < minX) {
+      minX = d.x;
+    }
+    if (d.y > d.depth * OntoVis.maxLevelDistance) {
+      d.y = d.depth * OntoVis.maxLevelDistance;
+    }
+  });
+  console.log("minX = " + minX);
+  nodes.forEach( function(d) {
+    d.x = d.x - minX;
+  });
 
   // Select nodes and bind data.
-  var elements = d3.select("div#viz > svg > g#elements").selectAll("g");
+  var elements = d3.select("div#viz > svg > g#elements").selectAll("g.g1");
   // The 2nd argument determines an ID, so that D3 can maintain correspondence
   // between data and generated visuals.
   var node = elements.data(nodes, function(d) { return d.name; });
@@ -160,21 +145,92 @@ function update(source) {
   // translated along with the text.
   var enteringNodes =
     node.enter()
-      .insert("g")
+      .insert("g", ":first-child")
+      .attr("class", "g1")
       .attr("transform",
             function(d) {
               var x = source.y0 + OntoVis.marginX;
               var y = source.x0 + OntoVis.marginY;
               return "translate(" + x + " " + y + ")";
             });
-  enteringNodes
-    .insert("text")
+  var g2s = enteringNodes.insert("g").attr("class", "g2");
+
+  g2s.insert("text")
     .attr("id", function(d) { return "text_" + d.name; })
     .attr("class", "text")
     .attr("text-anchor", "middle")
     .attr("alignment-baseline", "middle")
-    .text(function(d) { return d.name; });
-  createTextBoxes({ "x": OntoVis.nodePaddingX, "y": OntoVis.nodePaddingY });
+    .text(function(d) { return d.name; })
+    .on("click", OntoVis.click);
+
+  var bbox1 = function(shape) {
+    return $(shape.parentNode.parentNode).select("text.text")[0].getBBox();
+  }
+  var anchors =
+    g2s
+      .insert("a")
+      .attr("style", function(d) {
+        if (d.example_url) {
+          return "";
+        } else {
+          return "display: none";
+        }
+      })
+      .attr("class", "node_anchor")
+      .attr("xlink:href", function(d) {
+        if (d.example_url) {
+          return OntoVis.getMiceUrl(d.example_url);
+        } else {
+          return "#";
+        }
+      })
+      .attr("xlink:show", function(d) {
+        if (d.example_url) {
+          return "new";
+        } else {
+          return "none";
+        }
+      })
+      .insert("g")
+      .attr("class", "node_anchor_g")
+      .attr("stroke", "#444444")
+      .attr("stroke-linecap", "round")
+      .attr("fill", "white")
+      .attr("transform", function(d) {
+         var x = bbox1(this).width / 2 + 5;
+         return "translate(" + x + ", -8)";
+      });
+  anchors
+    .insert("path")
+    .attr("stroke-width", "0")
+    .attr("d", "M0 0 L0 12 L12 12 L12 0 Z");
+  anchors
+    .insert("path")
+    .attr("stroke-width", "1.5")
+    .attr("d", "M2 0 L0 0 L0 12 L12 12 L12 10");
+  anchors
+    .insert("path")
+    .attr("stroke-width", "3")
+    .attr("d", "M6 0 L12 0 L12 6 M12 0 L5 7");
+
+  // Add boxes.
+  var bbox2 = function(shape) {
+    return $(shape.parentNode).select("g.g2")[0].getBBox();
+  }
+  var px = OntoVis.nodePaddingX;
+  var py = OntoVis.nodePaddingY;
+  enteringNodes
+    .insert("rect", ":first-child")
+    .attr("id", function(d) { return "box_" + d.name; })
+    .attr("fill", function(d) { return OntoVis._colors(d.depth % 10 * 2 + 1); })
+    .attr("rx", "5")
+    .attr("ry", "5")
+    .attr("x", function(d) { return bbox2(this).x - px; })
+    .attr("y", function(d) { return bbox2(this).y - py; })
+    .attr("width", function(d) { return bbox2(this).width + px * 2; })
+    .attr("height", function(d) { return bbox2(this).height + py * 2; });
+
+  // enteringNodes.select("text").on("click", OntoVis.click);
 
   // Transit existing and entering nodes to their new locations (specified in
   // d.x and d.y).
@@ -188,21 +244,20 @@ function update(source) {
             return "translate(" + x + " " + y + ")";
           });
 
-  enteringNodes.on("click", click);
-
   // For exiting nodes, transit them to the clicked node (which is their
   // parent) before removing them.
-  var exitingNodes =
-    node.exit()
-      .transition()
-      .duration(OntoVis.duration)
-      .attr("transform",
-            function(d) {
-              var x = source.y + OntoVis.marginX;
-              var y = source.x + OntoVis.marginY;
-              return "translate(" + x + " " + y + ")";
-            })
-      .remove();
+  node.exit()
+    .transition()
+    .duration(OntoVis.duration)
+    .attr("transform",
+          function(d) {
+            var x = source.y + OntoVis.marginX;
+            var y = source.x + OntoVis.marginY;
+            console.log("exiting: ")
+            console.log(this);
+            return "translate(" + x + " " + y + ")";
+          })
+    .remove();
 
   // Bind links data.
   var connectors = d3.select("div#viz > svg > g#links").selectAll("path");
@@ -242,7 +297,13 @@ function update(source) {
   nodes.forEach(function(d) { d.x0 = d.x; d.y0 = d.y; });
 }
 
-function click(d) {
+OntoVis.getMiceUrl = function(url) {
+  var eurl = encodeURIComponent(url);
+  return "http://ecologylab.net/mice?url=" + eurl;
+}
+
+OntoVis.click = function(d) {
+  console.log(d);
   if (d.subtypes) {
     // Collapse
     d._subtypes = d.subtypes;
@@ -252,10 +313,10 @@ function click(d) {
     d.subtypes = d._subtypes;
     d._subtypes = null;
   }
-  update(d);
+  OntoVis.update(d);
 }
 
-$(document).ready(createLayout);
+$(document).ready(OntoVis.createLayout);
 </script>
 
 <body>
