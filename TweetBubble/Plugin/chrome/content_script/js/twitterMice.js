@@ -126,7 +126,7 @@ MetadataRenderer.createAndRenderMetadata = function(task)
 	// Build the HTML table for the metadata
 	MetadataRenderer.currentDocumentLocation = task.url;
 	var bgColor = MetadataRenderer.getNextColor(task.container);
-	var metadataTable = MetadataRenderer.buildMetadataDisplay(task.isRoot, task.mmd, task.metadata, bgColor)
+	var metadataTable = MetadataRenderer.buildMetadataDisplay(task.isRoot, task.mmd, task.metadata, bgColor, task.url)
 	
 	if(metadataTable)
 	{
@@ -191,7 +191,7 @@ MetadataRenderer.createAndRenderMetadata = function(task)
  * @param metadata, metadata to display
  * @return table, HTML table for the metadata or null if there is no metadata to display
  */
-MetadataRenderer.buildMetadataDisplay = function(isRoot, mmd, metadata, bgColor)
+MetadataRenderer.buildMetadataDisplay = function(isRoot, mmd, metadata, bgColor, taskUrl)
 {
 	// Convert the metadata into a list of MetadataFields using the meta-metadata.
 	var metadataFields = MetadataRenderer.getMetadataFields(mmd["meta_metadata"]["kids"], metadata, 0, null);
@@ -201,7 +201,7 @@ MetadataRenderer.buildMetadataDisplay = function(isRoot, mmd, metadata, bgColor)
 	{
 		// If so, then build the HTML table	
 		var bgColorObj = {color: bgColor, bFirstField: true};
-		return MetadataRenderer.buildMetadataTable(null, false, isRoot, metadataFields, FIRST_LEVEL_FIELDS, bgColorObj);
+		return MetadataRenderer.buildMetadataTable(null, false, isRoot, metadataFields, FIRST_LEVEL_FIELDS, bgColorObj, taskUrl);
 	}	
 	else
 		// The metadata doesn't contain any visible fields so there is nothing to display
@@ -217,7 +217,7 @@ MetadataRenderer.buildMetadataDisplay = function(isRoot, mmd, metadata, bgColor)
  * @param fieldCount, the number of fields to render before cropping with a "More" button
  * @return HTML table of the metadata display
  */
-MetadataRenderer.buildMetadataTable = function(table, isChildTable, isRoot, metadataFields, fieldCount, bgColorObj)
+MetadataRenderer.buildMetadataTable = function(table, isChildTable, isRoot, metadataFields, fieldCount, bgColorObj, taskUrl)
 {
 	if(!table)
 	{
@@ -256,6 +256,7 @@ MetadataRenderer.buildMetadataTable = function(table, isChildTable, isRoot, meta
 				fieldValueDiv.className = "moreButton";
 				fieldValueDiv.textContent = "More... ("+moreCount+")";
 				fieldValueDiv.onclick = MetadataRenderer.morePlease;
+				fieldValueDiv.task_url = taskUrl;
 						
 			var moreData = {
 				"fields": FIELDS_TO_EXPAND,
@@ -293,7 +294,7 @@ MetadataRenderer.buildMetadataTable = function(table, isChildTable, isRoot, meta
 				continue;
 			
 			var expandButton = null;
-			var fieldObj = MetadataRenderer.buildMetadataField(metadataField, isChildTable, fieldCount, row, bgColorObj);
+			var fieldObj = MetadataRenderer.buildMetadataField(metadataField, isChildTable, fieldCount, row, bgColorObj, taskUrl);
 			expandButton = fieldObj.expand_button;
 			
 			var fieldObjs = [];
@@ -301,7 +302,7 @@ MetadataRenderer.buildMetadataTable = function(table, isChildTable, isRoot, meta
 
 			for (var j = 0; j < metadataField.concatenates.length; j++)
 			{
-				fieldObj = MetadataRenderer.buildMetadataField(metadataField.concatenates[j], isChildTable, fieldCount, row, bgColorObj);
+				fieldObj = MetadataRenderer.buildMetadataField(metadataField.concatenates[j], isChildTable, fieldCount, row, bgColorObj, taskUrl);
 				fieldObjs.push(fieldObj);
 			}
 							
@@ -389,7 +390,7 @@ MetadataRenderer.buildMetadataTable = function(table, isChildTable, isRoot, meta
  * @param row, the containing element
  * @return HTML representation of the metadata field, expandButton, and fieldCount
  */
-MetadataRenderer.buildMetadataField = function(metadataField, isChildTable, fieldCount, row, bgColorObj)
+MetadataRenderer.buildMetadataField = function(metadataField, isChildTable, fieldCount, row, bgColorObj, taskUrl)
 {
 	var nameCol = document.createElement('div');
 		nameCol.className = "labelCol";
@@ -586,7 +587,7 @@ MetadataRenderer.buildMetadataField = function(metadataField, isChildTable, fiel
 			
 		// Is the document already rendered?								
 		if(childUrl != "" && MetadataRenderer.isRenderedDocument(childUrl)
-							&& childUrl.toLowerCase() != MetadataRenderer.currentDocumentLocation)
+							&& childUrl.toLowerCase() != taskUrl)
 		{
 			// If so, then don't allow the document to be expaned, to prevent looping						
 			fieldLabelDiv.className = "fieldLabelContainerOpened unhighlight";				
@@ -598,8 +599,9 @@ MetadataRenderer.buildMetadataField = function(metadataField, isChildTable, fiel
 				expandButton.className = "expandButton";
 			
 			expandButton.onclick = MetadataRenderer.downloadAndDisplayDocument;
+			expandButton.task_url = taskUrl;
 			
-			if(childUrl != "" && childUrl.toLowerCase() != MetadataRenderer.currentDocumentLocation)
+			if(childUrl != "" && childUrl.toLowerCase() != taskUrl)
 			{
 				expandButton.onmouseover = MetadataRenderer.highlightDocuments;
 				expandButton.onmouseout = MetadataRenderer.unhighlightDocuments;
@@ -653,7 +655,7 @@ MetadataRenderer.buildMetadataField = function(metadataField, isChildTable, fiel
 			fieldValueDiv.className = "fieldCompositeContainer";
 
 		// Build the child table for the composite
-		var childTable =  MetadataRenderer.buildMetadataTable(null, false, false, metadataField.value, 1, bgColorObj);
+		var childTable =  MetadataRenderer.buildMetadataTable(null, false, false, metadataField.value, 1, bgColorObj, taskUrl);
 		
 		// If the childTable has more than 1 row, collapse table
 		if(metadataField.value.length > 1)
@@ -671,11 +673,11 @@ MetadataRenderer.buildMetadataField = function(metadataField, isChildTable, fiel
 		valueCol.appendChild(fieldValueDiv);
 		
 		// Add the unrendered document to the documentMap
-		if(childUrl != "" && childUrl.toLowerCase() != MetadataRenderer.currentDocumentLocation)
+		if(childUrl != "" && childUrl.toLowerCase() != taskUrl)
 			MetadataRenderer.documentMap.push(new DocumentContainer(childUrl, null, row, false, null, null));
 		
 		// Add event handling to highlight document connections	
-		if(childUrl != "" && childUrl.toLowerCase() != MetadataRenderer.currentDocumentLocation)
+		if(childUrl != "" && childUrl.toLowerCase() != taskUrl)
 		{	
 			nameCol.onmouseover = MetadataRenderer.highlightDocuments;
 			nameCol.onmouseout = MetadataRenderer.unhighlightDocuments;
@@ -748,7 +750,7 @@ MetadataRenderer.buildMetadataField = function(metadataField, isChildTable, fiel
 		var fieldValueDiv = document.createElement('div');
 			fieldValueDiv.className = "fieldChildContainer";
 		
-		var childTable =  MetadataRenderer.buildMetadataTable(null, true, false, metadataField.value, 1, bgColorObj);
+		var childTable =  MetadataRenderer.buildMetadataTable(null, true, false, metadataField.value, 1, bgColorObj, taskUrl);
 		if(metadataField.value.length > 1)
 		{
 			MetadataRenderer.collapseTable(childTable);			
@@ -862,7 +864,8 @@ MetadataRenderer.downloadAndDisplayDocument = function(event)
 	
 	// Change the onclick function of the button to expand/collapse the table
 	button.onclick = MetadataRenderer.expandCollapseTable;
-	
+	var taskUrl = button.task_url;
+		
 	var table = MetadataRenderer.getTableForButton(button);
 		
 	// Search the table for the document location
@@ -876,7 +879,7 @@ MetadataRenderer.downloadAndDisplayDocument = function(event)
 	
 	for (var i = 0; i < rows.length; i++)
 	{
-		var valueCol = rows[i].getElementsByTagName("div")[1];
+		var valueCol = rows[i].childNodes[1];
 		if(valueCol)
 		{
 			var valueDiv = valueCol.getElementsByTagName("div")[0];
@@ -888,7 +891,7 @@ MetadataRenderer.downloadAndDisplayDocument = function(event)
 	}
 
 	// Did the table have a document location?
-	if(location && location.toLowerCase() != MetadataRenderer.currentDocumentLocation)
+	if(location && location.toLowerCase() != taskUrl)
 	{
 		// Add a loadingRow for visual feedback that the metadata is being downloaded / parsed
 		table.appendChild(MetadataRenderer.createLoadingRow());
@@ -1209,11 +1212,12 @@ MetadataRenderer.morePlease = function(event)
 	var parentRow =  event.target.parentElement.parentElement;
 	var parentTable = parentRow.parentElement;
 	
+	var taskUrl = event.target.task_url;
 	//remove More Button	
 	parentTable.removeChild(parentRow);
 	
 	// Build and add extra rows
-	MetadataRenderer.buildMetadataTable(parentTable, moreData.isChild, false, moreData.data, moreData.fields, null);
+	MetadataRenderer.buildMetadataTable(parentTable, moreData.isChild, false, moreData.data, moreData.fields, null, taskUrl);
 	
 	// TODO add logging for the 'More' button
 	
