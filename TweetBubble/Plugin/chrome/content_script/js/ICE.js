@@ -5,6 +5,11 @@
 var expandIconPath = chrome.extension.getURL("content_script/img/expand_icon.png");	// "https://abs.twimg.com/favicons/favicon.ico";
 var collapseIconPath = chrome.extension.getURL("content_script/img/collapse_icon.png");
 
+var mice_condition = "mice1";
+var experiment_condition = null;
+
+var currentUrl = null;
+
 var instance;
 
 //call to get and replace divs, queue w on-demand prioritizing
@@ -18,7 +23,7 @@ function processMetadata(node)
 	layoutExpandableItems(node, true); 	// re-layout items in expanded metadata
 }
 
-function onScrollHandler()
+function onUpdateHandler()
 {
 	processPage();
 }
@@ -98,19 +103,109 @@ function layoutExpandableItems(node, isMetadata)
 	}
 }
 
+function defaultConditionClickItem()
+{
+	if (MetadataRenderer.LoggingFunction)
+	{
+		//url_popped
+		var eventObj = {
+			url_popped: {
+				url: instance.getHrefAttribute(this)
+			}
+		}
+	}
+}
+
+function processDefaultConditionClicks(node)
+{
+	var expandableItemsXPath = instance.getDefaultConditionXPath();
+	var expandableItemsXPathResult = 
+			document.evaluate(expandableItemsXPath, node, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
+	
+	for (var i = 0; i < expandableItemsXPathResult.snapshotLength; i++) 
+	{
+		var expandableItem = expandableItemsXPathResult.snapshotItem(i);
+		if (!instance.checkDefaultConditionProcessed(expandableItem))
+		{
+			expandableItem.addEventListener('click', defaultConditionClickItem);
+			
+			// remove or add the identifying attribute to prevent re-processing
+			instance.setDefaultConditionProcessed(expandableItem);			
+		}
+	}
+}
+
+function defaultConditionOnUpdateHandler()
+{
+	processDefaultConditionClicks(document);
+}
+
+function processUrlChange(newUrl)
+{
+	if (MetadataRenderer.LoggingFunction)
+	{
+		//url_changed
+		var eventObj = {
+			url_changed: {
+				oldUrl: currentUrl,
+				url: newUrl
+			}
+		}
+	}
+	
+	currentUrl = newUrl;
+	
+	if(experiment_condition == mice_condition)
+		processPage();
+	else
+		processDefaultConditionClicks();
+}
+
+function run_script(userid)
+{
+	instance = getICEInstance();
+	
+	if(experiment_condition == mice_condition)
+	{
+		MetadataRenderer.initMetadataRenderings();
+
+		if (MetadataRenderer.setMetadataProcessor)
+			MetadataRenderer.setMetadataProcessor(processMetadata);
+
+		if (MetadataRenderer.setDocumentDownloader)
+			MetadataRenderer.setDocumentDownloader(downloadRequester);
+
+		Logger.init(userid);
+
+		processPage();
+
+		window.addEventListener("scroll", onUpdateHandler);
+	}
+	else
+	{
+		Logger.init(userid);
+		
+		processDefaultConditionClicks(document);
+		
+		window.addEventListener("scroll", defaultConditionOnUpdateHandler);
+	}
+	currentUrl = document.URL;
+}
+
 //run_at is document_end i.e. after DOM is complete but before images and frames are loaded
-MetadataRenderer.initMetadataRenderings();
+chrome.extension.sendRequest({loadOptions: document.URL}, function(response) {
+	  if (response)
+		  experiment_condition = response.condition;
+	  else
+		  experiment_condition = mice_condition;
+	  
+	  run_script(response.userid);
+});
 
-if (MetadataRenderer.setMetadataProcessor)
-	MetadataRenderer.setMetadataProcessor(processMetadata);
+chrome.runtime.onMessage.addListener(
+		function(request, sender, sendResponse) {
+			
+		if (request.url != null)
+			processUrlChange(request.url);
+});
 
-if (MetadataRenderer.setDocumentDownloader)
-	MetadataRenderer.setDocumentDownloader(downloadRequester);
-
-Logger.init();
-
-instance = getICEInstance();
-
-processPage();
-
-window.addEventListener("scroll", onScrollHandler);

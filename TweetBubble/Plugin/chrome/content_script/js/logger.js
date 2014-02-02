@@ -4,7 +4,7 @@ Logger.queue = [];
 
 var MILLIS_BETWEEN_LOG = 12000;
 
-var LOGGING_SERVICE = "http://ideamache.ecologylab.net/i/event_log/";//"http://ecoarray0:3080/i/event_log/";
+var LOGGING_SERVICE = "http://ideamache.ecologylab.net/i/event_log/"; //"http://ecoarray0:3080/i/event_log/";
 
 function Operation(name, eventObj, timestamp)
 {
@@ -22,9 +22,11 @@ function Operation(name, eventObj, timestamp)
 	}
 }
 
-Logger.init = function()
+Logger.init = function(userid)
 {
 	MetadataRenderer.LoggingFunction = Logger.recordMICEOperation;
+	
+	Logger.username = userid;
 	
 	setInterval(Logger.checkLogEvents, MILLIS_BETWEEN_LOG);
 }
@@ -47,12 +49,12 @@ Logger.emptyLogQueue = function()
 	var hashKey = "pcfndmfodhl";
 	
 	//var name = USER_NAME ? USER_NAME : "AnonymousUser";
-	var name = "AnonymousUser";
+	//var name = "AnonymousUser";
 	
 	var logMessage = {
 		log_post: {
 			hash_key: hashKey,
-			username: name,
+			username: Logger.username,
 			app: "TweetBubble",
 			events: this.translateQueue()
 		}

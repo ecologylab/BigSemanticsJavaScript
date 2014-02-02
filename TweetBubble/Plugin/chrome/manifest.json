@@ -3,7 +3,7 @@
 
   "name": "TweetBubble",
   "description": "Expand to explore @usernames, #hashtags on Twitter. See related content without switching back and forth between tabs and windows",
-  "version": "0.9.3",
+  "version": "0.9.4",
 
   "icons": {
     "16": "content_script/img/logo_16.png",
@@ -16,6 +16,7 @@
     "http://ideamache.ecologylab.net/",
     "http://ecoarray0:3080/",
     "cookies",
+    "tabs",
     "https://requestersandbox.mturk.com/*"
   ],
   "content_scripts": [

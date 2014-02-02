@@ -5,6 +5,8 @@ this.expandableItemsXPath = "//ol[@id='stream-items-id']/li//p[@class='js-tweet-
 
 this.expandableItemsXPath2 = ".//a[@class='twitter-atreply pretty-link']/b | .//a[@class='twitter-hashtag pretty-link js-nav']/b";
 
+this.defaultConditionXPath2 = ".//a[@class='twitter-atreply pretty-link']/b";
+
 this.urlPrefix = "https://twitter.com";
 
 this.getUrlPrefix = function() {
@@ -40,7 +42,7 @@ this.setProcessed = function(elt) {
 
 this.setMetadataBoolean = function(elt, isMetadata) {
 	elt.parentNode.setAttribute("isMetadata", isMetadata);
-}
+};
 
 this.setIcon = function(elt, icon) {
 	elt.appendChild(icon);
@@ -69,6 +71,25 @@ this.getContainer = function(elt) {
 	}
 	
 	return parent;
+};
+
+this.getDefaultConditionXPath = function(isMetadata) {
+	return this.defaultConditionXPath2;
+};
+
+this.setDefaultConditionProcessed = function(elt) {
+	elt.parentNode.setAttribute("setProcessed", "true");
+};
+
+this.checkDefaultConditionProcessed = function(elt) {
+	 var val = elt.parentNode.getAttribute("setProcessed");
+	 if (val && val == "true")
+		 return true;
+};
+
+this.getHrefAttribute = function(elt)
+{
+	return elt.parentNode.getAttribute("href");
 };
 
 }

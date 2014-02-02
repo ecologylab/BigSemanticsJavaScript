@@ -1,4 +1,12 @@
 
+chrome.tabs.onUpdated.addListener(
+		function(tabId, changeInfo, tab) {
+			if (changeInfo.url) {
+				chrome.tabs.sendMessage(tabId, {url: changeInfo.url});
+			}
+		}
+	);
+
 function getMetaMetadata(url, document, sendResponse)
 {
 	var serviceUrl = "http://ecology-service.cs.tamu.edu/BigSemanticsService/mmd.json?url=" + encodeURIComponent(url);
@@ -28,29 +36,14 @@ chrome.extension.onRequest.addListener(
 	function(request, sender, sendResponse) {
     	if (request.load != null)
       		loadWebpage(request.load, sendResponse);
-    		return true;	// async response    		
+    	else if (request.loadOptions != null)
+    		getOptions(sendResponse);
+    	return true;	// async response    		
 	}
 );
 
-function logCookie(cookie)
-{
-	console.log(cookie.value);
-	console.log(localStorage.getItem('condition'));
-}
-
 function loadWebpage(url, sendResponse)
 {
-//	var bgDocument = chrome.extension.getBackgroundPage().document;
-//	
-//	var iframe = bgDocument.createElement('iframe');
-//	iframe.src = url;
-//	bgDocument.body.appendChild(iframe);
-//	
-//	return bgDocument;
-	
-	chrome.cookies.get({url: "https://requestersandbox.mturk.com/hit_templates/921095354/preview", name: "condition"},
-							logCookie);
-		
 	var xhr = new XMLHttpRequest();
 	xhr.responseType = "document";
 	
@@ -61,13 +54,67 @@ function loadWebpage(url, sendResponse)
 			console.log(xhr.response);
 			
 			getMetaMetadata(url, xhr.response, sendResponse);
-			
-			//var doc = xhr.response;
-			//var result = doc.evaluate("//h1[@class='fullname editable-group']/span", doc, null, XPathResult.STRING_TYPE, null);
-			//console.log(result.stringValue);
 	    }
 	};
 	
 	xhr.open("GET", url, true);
 	xhr.send();
+}
+
+function generateUserId()
+{
+	var id = "";
+    var charSet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+    for( var i=0; i < 5; i++ )
+        id += charSet.charAt(Math.floor(Math.random() * charSet.length));
+
+    return id;
+}
+
+function getUserId(cookie)
+{
+	var userid = null;
+	if (cookie)
+		userid = cookie.value;
+	else
+		usedid = generateUserId();
+	
+	localStorage["tweetBubbleUserId"] = userid;
+	//console.log(localStorage.getItem('condition'));
+}
+
+function getStudyCondition(cookie)
+{
+	var studyCondition = null;
+	if (cookie)
+		studyCondition = cookie.value;
+	else
+		studyCondition = "mice";
+	
+	localStorage["tweetBubbleStudyCondition"] = studyCondition;
+}
+
+function getOptions(sendResponse)
+{
+	if (!localStorage["tweetBubbleUserId"])
+	{
+		chrome.cookies.get({url: "https://requestersandbox.mturk.com/hit_templates/921095354/preview",
+			name: "tweetBubbleUserId"},	getUserId);
+	}
+	
+	if (!localStorage["tweetBubbleStudyCondition"])
+	{
+		chrome.cookies.get({url: "https://requestersandbox.mturk.com/hit_templates/921095354/preview",
+			name: "tweetBubbleStudyCond"},	getStudyCondition);
+	}
+	
+	var checkAndSend = setInterval(function()
+		{
+			if (localStorage["tweetBubbleUserId"] && localStorage["tweetBubbleStudyCondition"])
+			{
+				clearInterval(checkAndSend);
+				sendResponse({userid: localStorage["tweetBubbleUserId"], condition: localStorage["tweetBubbleStudyCondition"]});
+			}
+		}, 1000);
 }
