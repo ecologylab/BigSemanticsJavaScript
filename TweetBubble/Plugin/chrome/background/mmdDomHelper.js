@@ -123,6 +123,9 @@ function extractMetadata(targetDoc, mmd) {
 	    	//metadata['location'] = doc.location.href;
 	    	metadata['location'] = doc.URL;
 	    	//metadata['favicon'] = 
+	    	//TODO: remove temporary fix
+	    	if (metadata['title'].search("Twitter / Search - ") == 0)
+	    		metadata['title'] = metadata['title'].substring(19);
 	    }
 	    else {
 	    	var titleField = getMMDField(mmd, "title");
