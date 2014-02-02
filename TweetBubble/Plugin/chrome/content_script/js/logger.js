@@ -4,7 +4,7 @@ Logger.queue = [];
 
 var MILLIS_BETWEEN_LOG = 12000;
 
-var LOGGING_SERVICE = "http://ecoarray0:3080/i/event_log/";
+var LOGGING_SERVICE = "http://ideamache.ecologylab.net/i/event_log/";//"http://ecoarray0:3080/i/event_log/";
 
 function Operation(name, eventObj, timestamp)
 {
@@ -53,7 +53,7 @@ Logger.emptyLogQueue = function()
 		log_post: {
 			hash_key: hashKey,
 			username: name,
-			app: "BubblingTweets",
+			app: "TweetBubble",
 			events: this.translateQueue()
 		}
 	};
