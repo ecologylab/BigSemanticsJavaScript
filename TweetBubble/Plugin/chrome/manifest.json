@@ -10,7 +10,9 @@
     "https://twitter.com/*",
     "http://ecology-service.cs.tamu.edu/",
     "http://localhost:8080/",
-    "http://ecoarray0:3080/"
+    "http://ecoarray0:3080/",
+    "cookies",
+    "https://requestersandbox.mturk.com/*"
   ],
   "content_scripts": [
     {
