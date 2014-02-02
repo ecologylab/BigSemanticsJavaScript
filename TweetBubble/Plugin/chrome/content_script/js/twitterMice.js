@@ -368,6 +368,7 @@ MetadataRenderer.buildMetadataTable = function(table, isChildTable, isRoot, meta
 			if (expandButton != null && metadataField.show_expanded_initially == "true") {
 				var fakeEvent = {};
 				fakeEvent.target = expandButton;
+				fakeEvent.name = "fakeEvent";
 				console.log("fake event ready");
 				MetadataRenderer.expandCollapseTable(fakeEvent);
 				
@@ -1081,7 +1082,7 @@ MetadataRenderer.expandCollapseTable = function(event)
 		var table = MetadataRenderer.getTableForButton(button);
 		MetadataRenderer.expandTable(table);
 		
-		if(MetadataRenderer.LoggingFunction)
+		if(MetadataRenderer.LoggingFunction && (event.name == null || event.name != "fakeEvent"))
 		{			
 			var eventObj = {};
 			if(button.parentElement.childNodes[1])
@@ -1447,7 +1448,7 @@ MetadataRenderer.removeMetadataDisplay = function(expandedItem)
 		{
 			var eventObj = {
 				hide_metadata: {
-					primary_doc: dc.url
+					primary_doc: dc.urls[0]
 				}
 			}
 			MetadataRenderer.LoggingFunction(eventObj);
