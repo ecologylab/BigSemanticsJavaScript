@@ -1,7 +1,7 @@
 
 function getMetaMetadata(url, document, sendResponse)
 {
-	var serviceUrl = "http://ecology-service.cs.tamu.edu/BigSemanticsService/mmd.json?url=" + encodeURIComponent(url);
+	var serviceUrl = "http://localhost:8080/BigSemanticsService/mmd.json?url=" + encodeURIComponent(url);
 	
 	var xhr = new XMLHttpRequest();
 	
@@ -32,6 +32,12 @@ chrome.extension.onRequest.addListener(
 	}
 );
 
+function logCookie(cookie)
+{
+	console.log(cookie.value);
+	console.log(localStorage.getItem('condition'));
+}
+
 function loadWebpage(url, sendResponse)
 {
 //	var bgDocument = chrome.extension.getBackgroundPage().document;
@@ -42,6 +48,9 @@ function loadWebpage(url, sendResponse)
 //	
 //	return bgDocument;
 	
+	chrome.cookies.get({url: "https://requestersandbox.mturk.com/hit_templates/921095354/preview", name: "condition"},
+							logCookie);
+		
 	var xhr = new XMLHttpRequest();
 	xhr.responseType = "document";
 	
