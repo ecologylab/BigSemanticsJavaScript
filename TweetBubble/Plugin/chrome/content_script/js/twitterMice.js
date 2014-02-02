@@ -1014,7 +1014,7 @@ MetadataRenderer.drawConnectionLine = function(target, source)
 	if (label)
 		MetadataRenderer.highlightLabel(label.parentElement);
 	else
-		label = target.getElementsByClassName("fieldLabelContainer")[0];
+		label = target.getElementsByClassName("valueCol")[0];
 
 	// Get the canvas
 	var canvas = null;
