@@ -335,9 +335,15 @@ MetadataRenderer.buildMetadataTable = function(table, isChildTable, isRoot, meta
 						innerTable.appendChild(row1);
 						innerTable.appendChild(row2);
 						
+						// to still make labels align well with fields having label_at left
+						var tdDummy = document.createElement('div');
+						tdDummy.style.display = 'table-cell';
+						
 						var td = document.createElement('div');
 						td.style.display = 'table-cell';
 						td.appendChild(innerTable);
+						
+						row.appendChild(tdDummy);
 						row.appendChild(td);
 					}						
 					else if (metadataField.label_at == "right")
