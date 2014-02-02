@@ -30,6 +30,7 @@
 }
 
 .rootMetadataTableDiv {
+	padding-top: 5px;
 	display: table;
 	background: white;
 	/*border: 2px solid #CCC;*/
