@@ -5,7 +5,7 @@
 var expandIconPath = chrome.extension.getURL("content_script/img/expand_icon.png");	// "https://abs.twimg.com/favicons/favicon.ico";
 var collapseIconPath = chrome.extension.getURL("content_script/img/collapse_icon.png");
 
-var mice_condition = "mice1";
+var mice_condition = "mice";
 var experiment_condition = null;
 
 var currentUrl = null;
@@ -108,11 +108,14 @@ function defaultConditionClickItem()
 	if (MetadataRenderer.LoggingFunction)
 	{
 		//url_popped
+		var url_p = instance.getUrlPrefix() + instance.getHrefAttribute(this);
+		
 		var eventObj = {
 			url_popped: {
-				url: instance.getHrefAttribute(this)
+				url: url_p
 			}
 		}
+		MetadataRenderer.LoggingFunction(eventObj);
 	}
 }
 
@@ -151,6 +154,7 @@ function processUrlChange(newUrl)
 				url: newUrl
 			}
 		}
+		MetadataRenderer.LoggingFunction(eventObj);
 	}
 	
 	currentUrl = newUrl;
@@ -158,10 +162,10 @@ function processUrlChange(newUrl)
 	if(experiment_condition == mice_condition)
 		processPage();
 	else
-		processDefaultConditionClicks();
+		processDefaultConditionClicks(document);
 }
 
-function run_script(userid)
+function run_script(userid, cond)
 {
 	instance = getICEInstance();
 	
@@ -175,7 +179,7 @@ function run_script(userid)
 		if (MetadataRenderer.setDocumentDownloader)
 			MetadataRenderer.setDocumentDownloader(downloadRequester);
 
-		Logger.init(userid);
+		Logger.init(userid, cond);
 
 		processPage();
 
@@ -183,7 +187,7 @@ function run_script(userid)
 	}
 	else
 	{
-		Logger.init(userid);
+		Logger.init(userid, cond);
 		
 		processDefaultConditionClicks(document);
 		
@@ -194,15 +198,15 @@ function run_script(userid)
 
 //run_at is document_end i.e. after DOM is complete but before images and frames are loaded
 chrome.extension.sendRequest({loadOptions: document.URL}, function(response) {
-	  if (response)
+	  if (response && response.condition != "none")
 		  experiment_condition = response.condition;
 	  else
 		  experiment_condition = mice_condition;
 	  
-	  run_script(response.userid);
+	  run_script(response.userid, response.condition);
 });
 
-chrome.runtime.onMessage.addListener(
+chrome.extension.onRequest.addListener(
 		function(request, sender, sendResponse) {
 			
 		if (request.url != null)

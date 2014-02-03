@@ -16,8 +16,7 @@
     "http://ideamache.ecologylab.net/",
     "http://ecoarray0:3080/",
     "cookies",
-    "tabs",
-    "https://requestersandbox.mturk.com/*"
+    "tabs"
   ],
   "content_scripts": [
     {

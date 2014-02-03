@@ -1,4 +1,14 @@
 
+chrome.extension.onRequest.addListener(
+	function(request, sender, sendResponse) {
+    	if (request.load != null)
+      		loadWebpage(request.load, sendResponse);
+    	else if (request.loadOptions != null)
+    		getOptions(request.loadOptions, sendResponse);
+    	return true;	// async response    		
+	}
+);
+
 chrome.tabs.onUpdated.addListener(
 		function(tabId, changeInfo, tab) {
 			if (changeInfo.url) {
@@ -32,16 +42,6 @@ function getMetaMetadata(url, document, sendResponse)
 	xhr.send();
 }
 
-chrome.extension.onRequest.addListener(
-	function(request, sender, sendResponse) {
-    	if (request.load != null)
-      		loadWebpage(request.load, sendResponse);
-    	else if (request.loadOptions != null)
-    		getOptions(sendResponse);
-    	return true;	// async response    		
-	}
-);
-
 function loadWebpage(url, sendResponse)
 {
 	var xhr = new XMLHttpRequest();
@@ -66,55 +66,33 @@ function generateUserId()
 	var id = "";
     var charSet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
-    for( var i=0; i < 5; i++ )
+    for (var i = 0; i < 5; i++)
         id += charSet.charAt(Math.floor(Math.random() * charSet.length));
 
     return id;
 }
 
-function getUserId(cookie)
+function getOptions(url, sendResponse)
 {
-	var userid = null;
-	if (cookie)
-		userid = cookie.value;
-	else
-		usedid = generateUserId();
+	//read params from url
+	var params = url.substring(url.indexOf("?")+1);
+	params = params.split("&");
 	
-	localStorage["tweetBubbleUserId"] = userid;
-	//console.log(localStorage.getItem('condition'));
-}
-
-function getStudyCondition(cookie)
-{
-	var studyCondition = null;
-	if (cookie)
-		studyCondition = cookie.value;
-	else
-		studyCondition = "mice";
-	
-	localStorage["tweetBubbleStudyCondition"] = studyCondition;
-}
-
-function getOptions(sendResponse)
-{
-	if (!localStorage["tweetBubbleUserId"])
+	for (var i = 0; i < params.length; i++)
 	{
-		chrome.cookies.get({url: "https://requestersandbox.mturk.com/hit_templates/921095354/preview",
-			name: "tweetBubbleUserId"},	getUserId);
+		if (params[i].indexOf("condition") == 0)
+			localStorage["tweetBubbleStudyCondition"] = params[i].substring(params[i].indexOf("=")+1);
+		
+		if (params[i].indexOf("userid") == 0)
+			localStorage["tweetBubbleUserId"] = params[i].substring(params[i].indexOf("=")+1);
 	}
+	
+	if (!localStorage["tweetBubbleUserId"])
+		localStorage["tweetBubbleUserId"] = generateUserId();
+
 	
 	if (!localStorage["tweetBubbleStudyCondition"])
-	{
-		chrome.cookies.get({url: "https://requestersandbox.mturk.com/hit_templates/921095354/preview",
-			name: "tweetBubbleStudyCond"},	getStudyCondition);
-	}
+		localStorage["tweetBubbleStudyCondition"] = "none";
 	
-	var checkAndSend = setInterval(function()
-		{
-			if (localStorage["tweetBubbleUserId"] && localStorage["tweetBubbleStudyCondition"])
-			{
-				clearInterval(checkAndSend);
-				sendResponse({userid: localStorage["tweetBubbleUserId"], condition: localStorage["tweetBubbleStudyCondition"]});
-			}
-		}, 1000);
+	sendResponse({userid: localStorage["tweetBubbleUserId"], condition: localStorage["tweetBubbleStudyCondition"]});
 }

@@ -4,7 +4,9 @@ Logger.queue = [];
 
 var MILLIS_BETWEEN_LOG = 12000;
 
-var LOGGING_SERVICE = "http://ideamache.ecologylab.net/i/event_log/"; //"http://ecoarray0:3080/i/event_log/";
+var LOGGING_SERVICE = "http://ideamache.ecologylab.net/i/event_log/";//"http://ecoarray0:3080/i/event_log/";
+
+var hashKey = "pcfndmfodhl";
 
 function Operation(name, eventObj, timestamp)
 {
@@ -22,11 +24,14 @@ function Operation(name, eventObj, timestamp)
 	}
 }
 
-Logger.init = function(userid)
+Logger.init = function(userid, cond)
 {
 	MetadataRenderer.LoggingFunction = Logger.recordMICEOperation;
 	
 	Logger.username = userid;
+	
+	if (cond != "none")
+		hashKey = cond + "_s14";
 	
 	setInterval(Logger.checkLogEvents, MILLIS_BETWEEN_LOG);
 }
@@ -46,8 +51,6 @@ Logger.recordMICEOperation = function(eventObj)
 
 Logger.emptyLogQueue = function()
 {
-	var hashKey = "pcfndmfodhl";
-	
 	//var name = USER_NAME ? USER_NAME : "AnonymousUser";
 	//var name = "AnonymousUser";
 	
