@@ -4,6 +4,10 @@ rel='stylesheet' type='text/css'>
 src="http://ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
 <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
 <style type="text/css">
+body {
+  width: 3000px;
+}
+
 .text {
   font-family: "Roboto", sans-serif;
   font-size: 11pt;
@@ -30,14 +34,14 @@ src="http://ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
 
 // Global object.
 var OntoVis = {};
-OntoVis.width = 960;
-OntoVis.height = 800;
+OntoVis.width = 3000;
+OntoVis.height = 3200;
 OntoVis.marginX = 80;
 OntoVis.marginY = 20;
 OntoVis.nodePaddingX = 5;
 OntoVis.nodePaddingY = 3;
 OntoVis.duration = 500;
-OntoVis.maxLevelDistance = 250;
+OntoVis.maxLevelDistance = 350;
 
 // projection() specifies a transform of coordinates for generated links.
 OntoVis._diagonal = d3.svg.diagonal().projection(
@@ -85,7 +89,8 @@ OntoVis.createLayout = function() {
   OntoVis.layout = layout;
 
   // Load JSON data and initialize.
-  d3.json("mmd_repo.json", function(error, root) {
+  d3.json("mmd_repo.json", function(error, json) {
+      var root = json.node;
       OntoVis.root = root;
       // See the later explanation of x0 and y0.
       root.x0 = 0;
