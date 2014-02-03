@@ -1327,7 +1327,7 @@ MetadataRenderer.collapseOrScrollToExpandedItem = function(event)
     	y += elt.offsetTop;
     	elt = elt.offsetParent;
     }
-    window.scrollTop = y;
+    window.scrollTo(window.scrollLeft, (y-40));
 }
 
 MetadataRenderer.stopEventPropagation = function(event)
