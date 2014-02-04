@@ -194,7 +194,7 @@ MetadataRenderer.createAndRenderMetadata = function(task)
 MetadataRenderer.buildMetadataDisplay = function(isRoot, mmd, metadata, bgColor, taskUrl)
 {
 	// Convert the metadata into a list of MetadataFields using the meta-metadata.
-	var metadataFields = MetadataRenderer.getMetadataFields(mmd["meta_metadata"]["kids"], metadata, 0, null);
+	var metadataFields = MetadataRenderer.getMetadataFields(mmd["meta_metadata"]["kids"], metadata, 0, null, taskUrl);
 	
 	// Is there any visable metadata?
 	if(MetadataRenderer.hasVisibleMetadata(metadataFields))
@@ -586,8 +586,8 @@ MetadataRenderer.buildMetadataField = function(metadataField, isChildTable, fiel
 			fieldLabelDiv.style.minWidth = "30px";					
 			
 		// Is the document already rendered?								
-		if(childUrl != "" && MetadataRenderer.isRenderedDocument(childUrl)
-							&& childUrl.toLowerCase() != taskUrl)
+		if(childUrl != "" && (MetadataRenderer.isRenderedDocument(childUrl)
+							|| childUrl.toLowerCase() == taskUrl))
 		{
 			// If so, then don't allow the document to be expaned, to prevent looping						
 			fieldLabelDiv.className = "fieldLabelContainerOpened unhighlight";				
@@ -601,7 +601,7 @@ MetadataRenderer.buildMetadataField = function(metadataField, isChildTable, fiel
 			expandButton.onclick = MetadataRenderer.downloadAndDisplayDocument;
 			expandButton.task_url = taskUrl;
 			
-			if(childUrl != "" && childUrl.toLowerCase() != taskUrl)
+			if(childUrl != ""/* && childUrl.toLowerCase() != taskUrl*/)
 			{
 				expandButton.onmouseover = MetadataRenderer.highlightDocuments;
 				expandButton.onmouseout = MetadataRenderer.unhighlightDocuments;
@@ -647,7 +647,8 @@ MetadataRenderer.buildMetadataField = function(metadataField, isChildTable, fiel
 			}
 		}
 		
-		nameCol.appendChild(fieldLabelDiv);
+		if (childUrl.toLowerCase() != taskUrl)
+			nameCol.appendChild(fieldLabelDiv);
 		
 		/** Value Column **/
 		
@@ -670,14 +671,15 @@ MetadataRenderer.buildMetadataField = function(metadataField, isChildTable, fiel
 		
 		fieldValueDiv.appendChild(nestedPad);
 		
-		valueCol.appendChild(fieldValueDiv);
+		if (childUrl.toLowerCase() != taskUrl)
+			valueCol.appendChild(fieldValueDiv);
 		
 		// Add the unrendered document to the documentMap
-		if(childUrl != "" && childUrl.toLowerCase() != taskUrl)
+		if(childUrl != "" /* && childUrl.toLowerCase() != taskUrl*/)
 			MetadataRenderer.documentMap.push(new DocumentContainer(childUrl, null, row, false, null, null));
 		
 		// Add event handling to highlight document connections	
-		if(childUrl != "" && childUrl.toLowerCase() != taskUrl)
+		if(childUrl != "" /* && childUrl.toLowerCase() != taskUrl*/)
 		{	
 			nameCol.onmouseover = MetadataRenderer.highlightDocuments;
 			nameCol.onmouseout = MetadataRenderer.unhighlightDocuments;
@@ -1223,10 +1225,17 @@ MetadataRenderer.morePlease = function(event)
 	
 }
 
-MetadataRenderer.isFieldVisible = function(mmdField)
+/*MetadataRenderer.isFieldVisible = function(mmdField)
 {
+	if (mmdField[styles] && metadata[location] && url)
+	{
+		var style = mmdField[styles][0];
+		if (style.is_child_metadata == "true" && metadata[location] == url && style.hide == "true")
+			return false;
+	}
+		
 	return mmdField.hide == null || mmdField.hide == false || mmdField.always_show == "true";	
-}
+}*/
 
 MetadataRenderer.getImageSource = function(mmdField)
 {
@@ -1238,14 +1247,16 @@ MetadataRenderer.getImageSource = function(mmdField)
 }
 
 /**
- * 
+ * Get a suitable color for the expansion
+ * @param container, element that contains expansion
  */
 MetadataRenderer.getNextColor= function(container)
 {
-	var index = -1;    
+	var index = -1;
 	if (container.colors && (container.colors.length < colors.length))
 	{
 		var i = 0;
+		// iterate to find unused color
 		while (i < container.colors.length - 1)
 		{
 			if (container.colors[i+1] != (container.colors[i] + 1))
@@ -1277,7 +1288,9 @@ MetadataRenderer.getNextColor= function(container)
 }
 
 /**
- * 
+ * Removes the color from list of used colors
+ * @param container, element that contained the expansion
+ * @param color, color used for the expansion
  */
 MetadataRenderer.removeColor = function(container, color)
 {
@@ -1340,6 +1353,7 @@ MetadataRenderer.stopEventPropagation = function(event)
  * @param url of the document
  * @param container, HTML container which will hold the rendering
  * @param isRoot, true if this is the root document for a metadataRendering
+ * @param expandedItem, a non-metadata item for which the display was constructed
  */
 function RenderingTask(url, container, isRoot, clipping, expandedItem)
 {
@@ -1377,6 +1391,7 @@ RenderingTask.prototype.matches = function(url)
  * @param url, location of the document, serves as the document ID
  * @param container, HTML object which contains the rendering of this document
  * @param rendered, true if the document has been downloaded and displayed, false otherwise
+ * @param expandedItem, a non-metadata item for which the display was constructed
  */
 function DocumentContainer(url, additionalUrls, container, rendered, expandedItem, visual)
 {
@@ -1436,13 +1451,15 @@ MetadataRenderer.getDocumentContainerByExpandedItem = function(item)
 }
 
 /**
- * 
+ * Remove the metadata display
+ * @param expandedItem, item for which display was constructed
  */
 MetadataRenderer.removeMetadataDisplay = function(expandedItem)
 {
 	var dc = MetadataRenderer.getDocumentContainerByExpandedItem(expandedItem);
 	if (dc)
 	{
+		// metadata display
 		dc.container.removeChild(dc.visual);
 		
 		MetadataRenderer.removeColor(dc.container, dc.expandedItem.style.background);
