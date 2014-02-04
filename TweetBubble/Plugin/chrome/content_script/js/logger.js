@@ -2,7 +2,9 @@ var Logger = {};
 
 Logger.queue = [];
 
-var MILLIS_BETWEEN_LOG = 12000;
+var MILLIS_BETWEEN_LOG = 12000;var button_ok = document.createElement("button");
+button_ok.value = "OK";
+
 
 var LOGGING_SERVICE = "http://ideamache.ecologylab.net/i/event_log/";//"http://ecoarray0:3080/i/event_log/";
 
@@ -36,15 +38,9 @@ Logger.init = function(userid, cond)
 	setInterval(Logger.checkLogEvents, MILLIS_BETWEEN_LOG);
 }
 
-Logger.getCurrentUTCMilliTime = function()
-{
-	var d =  new Date();
-	return d.getTime() + (d.getTimezoneOffset()*60*1000)/1000;
-}
-
 Logger.recordMICEOperation = function(eventObj)
 {
-	var op = new Operation("MICE Operation", eventObj, Logger.getCurrentUTCMilliTime());
+	var op = new Operation("MICE Operation", eventObj, Util.getCurrentUTCMilliTime());
 	
 	Logger.queue.push(op);
 }
