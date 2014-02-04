@@ -13,6 +13,7 @@
     "https://twitter.com/search?q=%23*",
     "https://twitter.com/*",
     "http://ecology-service.cs.tamu.edu/",
+    "http://localhost:8080/",
     "http://ideamache.ecologylab.net/",
     "http://ecoarray0:3080/",
     "cookies",
@@ -30,8 +31,9 @@
         "content_script/js/simplDeserializer.js",
         "content_script/js/mice.js",
         "content_script/js/twitterMice.js",
-        "content_script/js/logger.js",
-      	"content_script/js/twitterICE.js",
+        "content_script/js/util.js",
+      	"content_script/js/logger.js",
+        "content_script/js/twitterICE.js",
       	"content_script/js/ICE.js"
       ]
     }
