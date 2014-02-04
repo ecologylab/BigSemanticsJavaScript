@@ -627,8 +627,9 @@ MetadataRenderer.isFieldVisible = function(mmdField, metadata, url)
 	if (mmdField["styles"])
 	{
 		var style = mmdField["styles"][0];
+		var location = metadata[mmdField["name"]].location; 
 		if (style.is_child_metadata == "true" && style.hide == "true" 
-				&& metadata[mmdField["name"]].location && url && metadata[mmdField["name"]].location == url)
+				&& url && location && location.toLowerCase() == url)
 			return false;
 	}
 	

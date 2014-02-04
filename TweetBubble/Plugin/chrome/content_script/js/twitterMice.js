@@ -370,7 +370,7 @@ MetadataRenderer.buildMetadataTable = function(table, isChildTable, isRoot, meta
 				var fakeEvent = {};
 				fakeEvent.target = expandButton;
 				fakeEvent.name = "fakeEvent";
-				console.log("fake event ready");
+				//console.log("fake event ready");
 				MetadataRenderer.expandCollapseTable(fakeEvent);
 				
 				//TODO: introduce semantics for hiding after expand
@@ -586,8 +586,8 @@ MetadataRenderer.buildMetadataField = function(metadataField, isChildTable, fiel
 			fieldLabelDiv.style.minWidth = "30px";					
 			
 		// Is the document already rendered?								
-		if(childUrl != "" && (MetadataRenderer.isRenderedDocument(childUrl)
-							|| childUrl.toLowerCase() == taskUrl))
+		if(childUrl != "" && MetadataRenderer.isRenderedDocument(childUrl)
+							/*|| childUrl.toLowerCase() == taskUrl)*/)
 		{
 			// If so, then don't allow the document to be expaned, to prevent looping						
 			fieldLabelDiv.className = "fieldLabelContainerOpened unhighlight";				
@@ -647,7 +647,7 @@ MetadataRenderer.buildMetadataField = function(metadataField, isChildTable, fiel
 			}
 		}
 		
-		if (childUrl.toLowerCase() != taskUrl)
+		//if (childUrl.toLowerCase() != taskUrl)
 			nameCol.appendChild(fieldLabelDiv);
 		
 		/** Value Column **/
@@ -671,7 +671,7 @@ MetadataRenderer.buildMetadataField = function(metadataField, isChildTable, fiel
 		
 		fieldValueDiv.appendChild(nestedPad);
 		
-		if (childUrl.toLowerCase() != taskUrl)
+		//if (childUrl.toLowerCase() != taskUrl)
 			valueCol.appendChild(fieldValueDiv);
 		
 		// Add the unrendered document to the documentMap
@@ -1225,17 +1225,19 @@ MetadataRenderer.morePlease = function(event)
 	
 }
 
-/*MetadataRenderer.isFieldVisible = function(mmdField)
+MetadataRenderer.isFieldVisible = function(mmdField, metadata, url)
 {
-	if (mmdField[styles] && metadata[location] && url)
+	if (mmdField["styles"])
 	{
-		var style = mmdField[styles][0];
-		if (style.is_child_metadata == "true" && metadata[location] == url && style.hide == "true")
+		var style = mmdField["styles"][0];
+		var location = metadata[mmdField["name"]].location; 
+		if (style.is_child_metadata == "true" && style.hide == "true" 
+				&& url && location && location.toLowerCase() == url)
 			return false;
 	}
-		
-	return mmdField.hide == null || mmdField.hide == false || mmdField.always_show == "true";	
-}*/
+	
+	return mmdField.hide == null || mmdField.hide == false || mmdField.always_show == "true";
+}
 
 MetadataRenderer.getImageSource = function(mmdField)
 {
