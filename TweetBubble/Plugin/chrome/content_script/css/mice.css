@@ -392,3 +392,24 @@
 	cursor: pointer;
 	background: #bbb;
 }
+
+.infoSheetButton {
+	padding: 5px;
+	display: inline;
+}
+
+.infoSheetButtonDiv {
+	padding-left: 20%;
+	padding-right: 20%;
+}
+
+.infoSheetDiv {
+	padding-left:20%;
+	padding-right: 20%;
+	z-index: 100;
+	position: "fixed";
+	background: "#ccc";
+	opacity: "0.95";
+	left: 0;
+	top: "50px";
+}

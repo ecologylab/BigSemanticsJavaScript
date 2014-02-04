@@ -212,18 +212,18 @@ chrome.extension.sendRequest({loadOptions: document.URL}, function(response) {
 	else
 		experiment_condition = mice_condition;
 		  
-	if (response && response.agree == Util.YES)
+	if (response && response.agree == Util.NO)
 		run_script(response.userid, response.condition);
 	else
 	{
-		if (response)
+		if (response && response.agree != Util.NO)
 		{
 			response_condition = response.condition;
 			userid = response.userid;
+			Util.getInformationSheetResponse(processInfoSheetResponse);
 		}
-		//Util.getInformationSheetResponse(processInfoSheetResponse);
-		if (window.confirm(Util.info_sheet))
-			processInfoSheetResponse(Util.YES);
+		//if (window.confirm(Util.info_sheet))
+			//processInfoSheetResponse(Util.YES);
 	}
 });
 

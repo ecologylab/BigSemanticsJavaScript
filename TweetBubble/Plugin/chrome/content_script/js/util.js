@@ -35,9 +35,9 @@ Util.info_sheet = "TweetBubble Extension for Chrome\n\n" +
 
 Util.getInformationSheetResponse = function(callback)
 {
-	var outerDiv = document.createElement("div");
-	
-	var info_sheet = "<h3>INFORMATION SHEET</h3>" +
+	var info_sheet = 
+		"<h3>TweetBubble Extension for Chrome</h3><br>" +
+		"<h4>INFORMATION SHEET</h4>" +
 		"<h5>Interacting With Information</h5>" +
 		"<h5>Introduction</h5>" +
 		"<p>The purpose of this sheet is to provide you information that may affect your decision as to whether or not to participate in this research study.  If you decide to participate in this study, this form will also be used to " +
@@ -60,46 +60,50 @@ Util.getInformationSheetResponse = function(callback)
 		"This research study has been reviewed by the Human Subjects’ Protection Program and/or the Institutional Review Board at Texas A&M University.  For research-related problems or questions regarding your rights as a research participant, you can contact these offices at (979)458-4067 or irb@tamu.edu." +
 		"</p>";
 	
-	outerDiv.innerHTML = info_sheet;
-	
-	var removeDiv = function(resp) {
+	var removeDivAndReturnResp = function(event) {
 		document.body.removeChild(outerDiv);
+		if (event.target.value == "OK")
+			callback(Util.YES);
+		else
+			callback(Util.NO);
 	}
 	
-	var returnYes = function() {
-		callback(Util.YES);
-	}
+	//var handleScroll = function() {
+	//	outerDiv.style.top = window.scrollY;
+	//}
 	
-	var returnNo = function() {
-		callback(Util.NO);
-	}
-	
-	var button_ok = document.createElement("button");
+	var button_ok = document.createElement("input");
+	button_ok.type = "button";
 	button_ok.value = "OK";
-	button_ok.onclick = returnYes;
+	button_ok.className = "infoSheetButton";
+	button_ok.onclick = removeDivAndReturnResp;
 	
-	var button_cancel = document.createElement("button");
+	var button_cancel = document.createElement("input");
+	button_cancel.type = "button";
 	button_cancel.value = "Cancel";
-	button_cancel.onclick = returnNo;
+	button_cancel.className = "infoSheetButton";
+	button_cancel.onclick = removeDivAndReturnResp;
+			
+	var buttonDiv = document.createElement("div");
+	buttonDiv.appendChild(button_ok);
+	buttonDiv.appendChild(button_cancel);
+	buttonDiv.style.paddingLeft="20%";
+	buttonDiv.style.paddingRight="20%";
 	
-	outerDiv.appendChild(button_ok);
-	outerDiv.appendChild(button_cancel);
+	var outerDiv = document.createElement("div");
+	outerDiv.innerHTML = info_sheet;
+	outerDiv.style.zIndex = 100;
+	outerDiv.style.position = "fixed";
+	outerDiv.style.background = "#ccc";
+	outerDiv.style.opacity = "0.95";
+	outerDiv.style.left = 0;
+	outerDiv.style.top = "50px";
+	outerDiv.style.paddingLeft="20%";
+	outerDiv.style.paddingRight="20%";
 	
-	//set zIndex
-	var nodes = document.body.childNodes;
-	var node = null;
-	for (var i = 0; i < nodes.length; i++)
-	{
-		if (nodes[i].offsetWidth && nodes[i].offsetHeight 
-				&& nodes[i].offsetWidth > 0 && nodes[i].offsetHeight > 0)
-		{
-			node = nodes[i];
-			break;
-		}
-	}
-	if (node)
-	{
-		outerDiv.style.zIndex = node.style.zIndex + 1;
-		document.body.insertBefore(outerDiv, node);
-	}
+	//outerDiv.className = "infoSheetDiv";
+	outerDiv.appendChild(buttonDiv);
+	
+	document.body.appendChild(outerDiv);
+	//window.addEventListener("scroll", handleScroll);
 }
