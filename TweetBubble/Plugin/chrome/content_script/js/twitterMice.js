@@ -1335,14 +1335,15 @@ MetadataRenderer.unhighlightTweet = function(event)
 
 MetadataRenderer.collapseOrScrollToExpandedItem = function(event)
 {
-	var elt = event.currentTarget;
+	var elt = event.target;
 	var y = 0;        
     while (elt && (typeof elt.offsetTop !== "undefined") && !isNaN(elt.offsetTop))
     {
     	y += elt.offsetTop;
     	elt = elt.offsetParent;
     }
-    window.scrollTo(window.scrollLeft, (y-40));
+    if (window.pageYOffset > y)
+    	window.scrollTo(window.scrollLeft, (y-50));
 }
 
 MetadataRenderer.stopEventPropagation = function(event)
