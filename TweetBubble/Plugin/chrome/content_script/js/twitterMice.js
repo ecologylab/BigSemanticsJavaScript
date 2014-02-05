@@ -230,7 +230,12 @@ MetadataRenderer.buildMetadataTable = function(table, isChildTable, isRoot, meta
 			table.onclick = MetadataRenderer.stopEventPropagation;
 		}
 		else
+		{
 			table.className = "metadataTableDiv";
+			// TODO: differentiate between downloaded to use tinged
+			if (!isChildTable)
+				table.style.background = 'white';
+		}
 	}
 	
 	// Iterate through the metadataFields which are already sorted into display order
