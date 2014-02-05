@@ -212,7 +212,7 @@ chrome.extension.sendRequest({loadOptions: document.URL}, function(response) {
 	else
 		experiment_condition = mice_condition;
 		  
-	if (response && response.agree == Util.NO)
+	if (response && response.agree == Util.YES)
 		run_script(response.userid, response.condition);
 	else
 	{

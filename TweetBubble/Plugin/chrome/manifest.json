@@ -3,7 +3,7 @@
 
   "name": "TweetBubble",
   "description": "Expand to explore @usernames, #hashtags on Twitter. See related content without switching back and forth between tabs and windows",
-  "version": "0.9.4",
+  "version": "0.9.5",
 
   "icons": {
     "16": "content_script/img/logo_16.png",
@@ -13,7 +13,6 @@
     "https://twitter.com/search?q=%23*",
     "https://twitter.com/*",
     "http://ecology-service.cs.tamu.edu/",
-    "http://localhost:8080/",
     "http://ideamache.ecologylab.net/",
     "http://ecoarray0:3080/",
     "cookies",

@@ -2,8 +2,7 @@ var Logger = {};
 
 Logger.queue = [];
 
-var MILLIS_BETWEEN_LOG = 12000;var button_ok = document.createElement("button");
-button_ok.value = "OK";
+var MILLIS_BETWEEN_LOG = 12000;
 
 
 var LOGGING_SERVICE = "http://ideamache.ecologylab.net/i/event_log/";//"http://ecoarray0:3080/i/event_log/";
