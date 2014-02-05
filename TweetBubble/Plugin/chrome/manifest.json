@@ -26,7 +26,9 @@
     	"https://twitter.com/*"
       ],
       "run_at": "document_end",
-      "css": ["content_script/css/mice.css"],
+      "css": ["content_script/css/mice.css",
+      		  "content_script/css/infosheet.css"
+      ],
       "js": [
         "content_script/js/simplDeserializer.js",
         "content_script/js/mice.js",

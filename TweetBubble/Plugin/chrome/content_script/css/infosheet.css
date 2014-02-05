@@ -1,0 +1,32 @@
+
+.infoSheetButton {
+	padding: 5px;
+	display: inline;
+}
+
+.infoSheetButtonDiv {
+	padding-left: 20%;
+	padding-right: 20%;
+}
+
+.infoSheetBgDiv {
+	background: #999;
+	z-index: 99;
+	position: fixed;
+	top: 0;
+	bottom: 0;
+	opacity: 0.2;
+}
+
+.infoSheetDiv {
+	font-size: 13px;
+	margin-left: 15%;
+	margin-right: 15%;
+	z-index: 100;
+	position: fixed;
+	background: white;
+	left: 0;
+	top: 50px;
+	padding: 15px;
+	border-radius: 8px;
+}

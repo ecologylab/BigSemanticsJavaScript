@@ -89,7 +89,7 @@
 .metadataContainer .fieldLabelImage{	
 	width: 40px;
 	height: 40px;
-	right: 0px;
+	/*right: 0px;*/
 }
 
 .metadataContainer .fieldValue{	
@@ -130,7 +130,7 @@
 
 .metadataContainer .labelCol{
 	display: table-cell;
-	vertical-align: top;
+	/*vertical-align: top;*/
 	text-align: right;
 	
 	/*padding-right: 10px;*/
@@ -391,25 +391,4 @@
 .moreButton:hover {
 	cursor: pointer;
 	background: #bbb;
-}
-
-.infoSheetButton {
-	padding: 5px;
-	display: inline;
-}
-
-.infoSheetButtonDiv {
-	padding-left: 20%;
-	padding-right: 20%;
-}
-
-.infoSheetDiv {
-	padding-left:20%;
-	padding-right: 20%;
-	z-index: 100;
-	position: "fixed";
-	background: "#ccc";
-	opacity: "0.95";
-	left: 0;
-	top: "50px";
 }
