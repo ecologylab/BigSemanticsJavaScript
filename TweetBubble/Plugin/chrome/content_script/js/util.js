@@ -37,9 +37,8 @@ Util.getInformationSheetResponse = function(callback)
 {
 	var info_sheet = 
 		"<h3>TweetBubble Extension for Chrome</h3><br>" +
-		"<h4>INFORMATION SHEET</h4>" +
-		"<h4>Interacting With Information</h4>" +
-		"<h4>Introduction</h4>" +
+		"<h4>USER STUDY</h4>" +
+		"<p>So we can develop research on how people interact with information TweetBubble will collect anonymous data about how you use it.</p>" +
 		"<p>The purpose of this sheet is to provide you information that may affect your decision as to whether or not to participate in this research study.  If you decide to participate in this study, this form will also be used to " +
 		"record your consent.</p><br>" +
 		"<p>You have been asked to participate in a research project studying interactive systems that work with information.  The purpose of this study to investigate how the designs of interactive systems affect the way people interact with and understand information. You were selected to be a possible participant because you are interested in collecting and representing information.</p><br>" +
