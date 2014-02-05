@@ -375,7 +375,11 @@ MetadataRenderer.buildMetadataTable = function(table, isChildTable, isRoot, meta
 				
 				//TODO: introduce semantics for hiding after expand
 				if (metadataField.composite_type == "tweet")
-					expandButton.style.visibility = "hidden";
+				{
+					var buttonParent = expandButton.parentNode;
+					buttonParent.removeChild(expandButton);
+					//expandButton.style.visibility = "hidden";
+				}
 			}
 		}
 	}	
@@ -624,7 +628,7 @@ MetadataRenderer.buildMetadataField = function(metadataField, isChildTable, fiel
 		{													
 			//If the table isn't a child table then display the label for the composite
 			if((!isChildTable || (metadataField.composite_type == "tweet")) && !metadataField.hide_label)
-			{
+			{				
 				var label = (metadataField.value_as_label == "" || (metadataField.value_as_label.type != "scalar"
 					&& metadataField.value_as_label.type != "image"))? metadataField.name : metadataField.value_as_label.value;
 				if (metadataField.value_as_label == "" || metadataField.value_as_label.type != "image")
@@ -1343,7 +1347,19 @@ MetadataRenderer.collapseOrScrollToExpandedItem = function(event)
     	elt = elt.offsetParent;
     }
     if (window.pageYOffset > y)
-    	window.scrollTo(window.scrollLeft, (y-50));
+    {
+    	window.scrollTo(window.scrollLeft, (y - 50));
+    	/*var animateScroll = function() {
+    		if ((window.pageYOffset - (y-50)) > 0)
+    		{
+	    		var scroll = (window.pageYOffset - (y-50)) > 100?
+	    									100 : (window.pageYOffset - (y-50));    		
+	        	window.scrollTo(window.scrollLeft, (window.pageYOffset - scroll));
+	        	setTimeout(animateScroll, 10);
+    		}
+        };
+        animateScroll();*/
+    }
 }
 
 MetadataRenderer.stopEventPropagation = function(event)
