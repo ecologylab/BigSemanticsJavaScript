@@ -34,6 +34,7 @@ body {
 
 // Global object.
 var OntoVis = {};
+OntoVis.dataFile = "mmd_repo.json"
 OntoVis.width = 3000;
 OntoVis.height = 3200;
 OntoVis.marginX = 80;
@@ -50,8 +51,8 @@ OntoVis._diagonal = d3.svg.diagonal().projection(
   });
 OntoVis._colors = d3.scale.category20();
 
-OntoVis.SVG = function(element_name) {
-  var e = document.createElementNS("http://www.w3.org/2000/svg", element_name);
+OntoVis.SVG = function(elementName) {
+  var e = document.createElementNS("http://www.w3.org/2000/svg", elementName);
   if (e.tagName == 'svg') {
     $(e).attr("xmlns:xlink", "http://www.w3.org/1999/xlink");
   }
@@ -71,14 +72,14 @@ OntoVis.createLayout = function() {
   $(svg).attr("width", OntoVis.width);
   $(svg).attr("height", OntoVis.height);
 
-  var g_links = OntoVis.SVG("g");
-  $(g_links).attr("id", "links");
-  $(g_links).attr("transform",
+  var gLinks = OntoVis.SVG("g");
+  $(gLinks).attr("id", "links");
+  $(gLinks).attr("transform",
                   "translate(" + OntoVis.marginX + " " + OntoVis.marginY + ")");
-  $(svg).append(g_links);
-  var g_texts = OntoVis.SVG("g");
-  $(g_texts).attr("id", "elements");
-  $(svg).append(g_texts);
+  $(svg).append(gLinks);
+  var gTexts = OntoVis.SVG("g");
+  $(gTexts).attr("id", "elements");
+  $(svg).append(gTexts);
 
   // Initialize the tree layout.
   var visibleWidth = OntoVis.width - OntoVis.marginX * 2;
@@ -89,8 +90,9 @@ OntoVis.createLayout = function() {
   OntoVis.layout = layout;
 
   // Load JSON data and initialize.
-  d3.json("mmd_repo.json", function(error, json) {
+  d3.json(OntoVis.dataFile, function(error, json) {
       var root = json.node;
+      root.is_root = true;
       OntoVis.root = root;
       // See the later explanation of x0 and y0.
       root.x0 = 0;
@@ -107,6 +109,12 @@ OntoVis.createLayout = function() {
       root.subtypes.forEach(collapse);
 
       OntoVis.update(root);
+
+      setTimeout(function() {
+        var rootNode = $(".root_node")[0];
+        var scrollDist = $(rootNode).offset().top - window.innerHeight / 2;
+        $('html,body').animate({ scrollTop: scrollDist }, 200);
+      }, OntoVis.duration + 100);
   });
 }
 
@@ -128,7 +136,6 @@ OntoVis.update = function(source) {
       d.y = d.depth * OntoVis.maxLevelDistance;
     }
   });
-  console.log("minX = " + minX);
   nodes.forEach( function(d) {
     d.x = d.x - minX;
   });
@@ -165,7 +172,13 @@ OntoVis.update = function(source) {
     .attr("class", "text")
     .attr("text-anchor", "middle")
     .attr("alignment-baseline", "middle")
-    .text(function(d) { return d.name; })
+    .text(function(d) {
+      if (d._subtypes && d._subtypes.length > 0) {
+        return d.name + " [+]";
+      } else {
+        return d.name;
+      }
+    })
     .on("click", OntoVis.click);
 
   var bbox1 = function(shape) {
@@ -227,6 +240,13 @@ OntoVis.update = function(source) {
   enteringNodes
     .insert("rect", ":first-child")
     .attr("id", function(d) { return "box_" + d.name; })
+    .attr("class", function(d) {
+      if (d.is_root) {
+        return "root_node";
+      } else {
+        return "node";
+      }
+    })
     .attr("fill", function(d) { return OntoVis._colors(d.depth % 10 * 2 + 1); })
     .attr("rx", "5")
     .attr("ry", "5")
@@ -248,6 +268,16 @@ OntoVis.update = function(source) {
             var y = d.x + OntoVis.marginY;
             return "translate(" + x + " " + y + ")";
           });
+
+  // Update the plus sign according to its expansion/collapse status.
+  node.selectAll("text")
+    .text(function(d) {
+      if (d._subtypes && d._subtypes.length > 0) {
+        return d.name + " [+]";
+      } else {
+        return d.name;
+      }
+    });
 
   // For exiting nodes, transit them to the clicked node (which is their
   // parent) before removing them.
@@ -308,7 +338,6 @@ OntoVis.getMiceUrl = function(url) {
 }
 
 OntoVis.click = function(d) {
-  console.log(d);
   if (d.subtypes) {
     // Collapse
     d._subtypes = d.subtypes;
@@ -321,7 +350,9 @@ OntoVis.click = function(d) {
   OntoVis.update(d);
 }
 
-$(document).ready(OntoVis.createLayout);
+$(document).ready(function() {
+  OntoVis.createLayout();
+});
 </script>
 
 <body>
