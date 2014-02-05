@@ -7,10 +7,11 @@ var collapseIconPath = chrome.extension.getURL("content_script/img/collapse_icon
 
 var mice_condition = "mice";
 var experiment_condition = null;
+var response_condition = null;
+var userid = null;
 
 var currentUrl = null;
-
-var instance;
+var instance = null;
 
 //call to get and replace divs, queue w on-demand prioritizing
 function processPage()
@@ -196,20 +197,40 @@ function run_script(userid, cond)
 	currentUrl = document.URL;
 }
 
+function processInfoSheetResponse(resp)
+{
+	chrome.extension.sendRequest({storeOptions: {"agreeToInformationSheet": resp}});
+	if (resp == Util.YES)
+		run_script(response_condition, userid);
+}
+
 //run_at is document_end i.e. after DOM is complete but before images and frames are loaded
 chrome.extension.sendRequest({loadOptions: document.URL}, function(response) {
-	  if (response && response.condition != "none")
-		  experiment_condition = response.condition;
-	  else
-		  experiment_condition = mice_condition;
 	  
-	  run_script(response.userid, response.condition);
+	if (response && response.condition != "none")
+		experiment_condition = response.condition;
+	else
+		experiment_condition = mice_condition;
+		  
+	if (response && response.agree == Util.NO)
+		run_script(response.userid, response.condition);
+	else
+	{
+		if (response && response.agree != Util.NO)
+		{
+			response_condition = response.condition;
+			userid = response.userid;
+			Util.getInformationSheetResponse(processInfoSheetResponse);
+		}
+		//if (window.confirm(Util.info_sheet))
+			//processInfoSheetResponse(Util.YES);
+	}
 });
 
 chrome.extension.onRequest.addListener(
-		function(request, sender, sendResponse) {
-			
-		if (request.url != null)
-			processUrlChange(request.url);
+	function(request, sender, sendResponse) {
+		
+	if (request.url != null)
+		processUrlChange(request.url);
 });
 

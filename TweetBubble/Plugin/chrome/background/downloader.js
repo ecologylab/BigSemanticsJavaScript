@@ -5,6 +5,8 @@ chrome.extension.onRequest.addListener(
       		loadWebpage(request.load, sendResponse);
     	else if (request.loadOptions != null)
     		getOptions(request.loadOptions, sendResponse);
+    	else if (request.storeOptions != null)
+    		setOptions(request.storeOptions);
     	return true;	// async response    		
 	}
 );
@@ -19,7 +21,8 @@ chrome.tabs.onUpdated.addListener(
 
 function getMetaMetadata(url, document, sendResponse)
 {
-	var serviceUrl = "http://ecology-service.cs.tamu.edu/BigSemanticsService/mmd.json?url=" + encodeURIComponent(url);
+	var serviceUrl = "http://localhost:8080/BigSemanticsService/mmd.json?url=" + encodeURIComponent(url); 
+		//"http://ecology-service.cs.tamu.edu/BigSemanticsService/mmd.json?url=" + encodeURIComponent(url);
 	
 	var xhr = new XMLHttpRequest();
 	
@@ -94,5 +97,19 @@ function getOptions(url, sendResponse)
 	if (!localStorage["tweetBubbleStudyCondition"])
 		localStorage["tweetBubbleStudyCondition"] = "none";
 	
-	sendResponse({userid: localStorage["tweetBubbleUserId"], condition: localStorage["tweetBubbleStudyCondition"]});
+	sendResponse({userid: localStorage["tweetBubbleUserId"], 
+				condition: localStorage["tweetBubbleStudyCondition"],
+				agree: localStorage["agreeToInformationSheet"]});
+}
+
+function setOptions(options)
+{
+	for (var k in options)
+	{
+		if (options.hasOwnProperty(k))
+		{
+			var prop = k.toString();
+			localStorage[prop] = options[k];
+		}		
+	}
 }

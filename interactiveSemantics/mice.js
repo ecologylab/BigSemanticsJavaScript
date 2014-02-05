@@ -968,6 +968,12 @@ MetadataRenderer.downloadAndDisplayDocument = function(event)
 	else
 		MetadataRenderer.expandTable(table);
 	
+	
+	// Grow the In-Context Metadata Display
+	if(MetadataRenderer.updateInContextStyling)
+		MetadataRenderer.updateInContextStyling(table);
+	
+	
 	if(MetadataRenderer.LoggingFunction)
 	{			
 		var eventObj = {};
