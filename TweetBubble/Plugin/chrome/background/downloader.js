@@ -30,11 +30,11 @@ function getMetaMetadata(url, document, sendResponse)
 		
 		if (xhr.readyState==4 && xhr.status==200)
 	    {
-			console.log(xhr.response);
+			//console.log(xhr.response);
 			
 			var resp = jQuery.parseJSON(xhr.response);
 			var metadata = extractMetadata(document, resp.meta_metadata);
-			console.log(JSON.stringify(metadata));
+			//console.log(JSON.stringify(metadata));
 			
 			// mice looks for a metadata collection response
 			sendResponse({doc: metadata, mmd: resp});
@@ -54,7 +54,7 @@ function loadWebpage(url, sendResponse)
 		
 		if (xhr.readyState==4 && xhr.status==200)
 	    {
-			console.log(xhr.response);
+			//console.log(xhr.response);
 			
 			getMetaMetadata(url, xhr.response, sendResponse);
 	    }
