@@ -40,7 +40,6 @@
 
 .metadataTableDiv {
 	display: table;
-	/*background: white;*/
 }
 
 .metadataRow {
@@ -90,7 +89,6 @@
 .metadataContainer .fieldLabelImage{	
 	width: 35px;
 	height: 35px;
-	/*right: 0px;*/
 }
 
 .metadataContainer .fieldValue{	
@@ -139,7 +137,6 @@
 }
 
 .metadataContainer .valueCol{
-	/*background: white;*/
 	display: table-cell;
 	vertical-align: top;
 	text-align: left;
@@ -161,7 +158,6 @@
 .metadataContainer .fieldLabelContainer{
 	color: #999;
 	
-	/*background: white;*/	
 	
 	border-top-left-radius: 8px;
 	border-bottom-left-radius: 8px;
@@ -173,8 +169,6 @@
 
 .metadataContainer .fieldLabelContainerOpened{
 	color: #888;
-	
-	/*background: white;*/
 	
 	border-top-left-radius: 8px;
 	border-bottom-left-radius: 8px;
@@ -213,7 +207,6 @@
 
 .metadataContainer .fieldValueContainer{
 	
-	/*background: white;*/
 	
 	border-top-right-radius: 8px;
 	border-bottom-right-radius: 8px;
@@ -236,8 +229,6 @@
 
 
 .metadataContainer .fieldChildContainer{
-	
-	/*background: white;*/
 	
 	/*border-top-right-radius: 8px;
 	border-bottom-right-radius: 8px;

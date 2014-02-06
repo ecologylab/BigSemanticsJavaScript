@@ -126,7 +126,7 @@ MetadataRenderer.createAndRenderMetadata = function(task)
 	// Build the HTML table for the metadata
 	MetadataRenderer.currentDocumentLocation = task.url;
 	var bgColor = MetadataRenderer.getNextColor(task.container);
-	var metadataTable = MetadataRenderer.buildMetadataDisplay(task.isRoot, task.mmd, task.metadata, bgColor, task.url)
+	var metadataTable = MetadataRenderer.buildMetadataDisplay(task.isRoot, task.mmd, task.metadata, task.url, bgColor)
 	
 	if(metadataTable)
 	{
@@ -191,7 +191,7 @@ MetadataRenderer.createAndRenderMetadata = function(task)
  * @param metadata, metadata to display
  * @return table, HTML table for the metadata or null if there is no metadata to display
  */
-MetadataRenderer.buildMetadataDisplay = function(isRoot, mmd, metadata, bgColor, taskUrl)
+MetadataRenderer.buildMetadataDisplay = function(isRoot, mmd, metadata, taskUrl, bgColor)
 {
 	// Convert the metadata into a list of MetadataFields using the meta-metadata.
 	var metadataFields = MetadataRenderer.getMetadataFields(mmd["meta_metadata"]["kids"], metadata, 0, null, taskUrl);
@@ -201,7 +201,7 @@ MetadataRenderer.buildMetadataDisplay = function(isRoot, mmd, metadata, bgColor,
 	{
 		// If so, then build the HTML table	
 		var bgColorObj = {color: bgColor, bFirstField: true};
-		return MetadataRenderer.buildMetadataTable(null, false, isRoot, metadataFields, FIRST_LEVEL_FIELDS, bgColorObj, taskUrl);
+		return MetadataRenderer.buildMetadataTable(null, false, isRoot, metadataFields, FIRST_LEVEL_FIELDS, taskUrl, bgColorObj);
 	}	
 	else
 		// The metadata doesn't contain any visible fields so there is nothing to display
@@ -217,7 +217,7 @@ MetadataRenderer.buildMetadataDisplay = function(isRoot, mmd, metadata, bgColor,
  * @param fieldCount, the number of fields to render before cropping with a "More" button
  * @return HTML table of the metadata display
  */
-MetadataRenderer.buildMetadataTable = function(table, isChildTable, isRoot, metadataFields, fieldCount, bgColorObj, taskUrl)
+MetadataRenderer.buildMetadataTable = function(table, isChildTable, isRoot, metadataFields, fieldCount, taskUrl, bgColorObj)
 {
 	if(!table)
 	{
@@ -299,7 +299,7 @@ MetadataRenderer.buildMetadataTable = function(table, isChildTable, isRoot, meta
 				continue;
 			
 			var expandButton = null;
-			var fieldObj = MetadataRenderer.buildMetadataField(metadataField, isChildTable, fieldCount, row, bgColorObj, taskUrl);
+			var fieldObj = MetadataRenderer.buildMetadataField(metadataField, isChildTable, fieldCount, row, taskUrl, bgColorObj);
 			expandButton = fieldObj.expand_button;
 			
 			var fieldObjs = [];
@@ -307,7 +307,7 @@ MetadataRenderer.buildMetadataTable = function(table, isChildTable, isRoot, meta
 
 			for (var j = 0; j < metadataField.concatenates.length; j++)
 			{
-				fieldObj = MetadataRenderer.buildMetadataField(metadataField.concatenates[j], isChildTable, fieldCount, row, bgColorObj, taskUrl);
+				fieldObj = MetadataRenderer.buildMetadataField(metadataField.concatenates[j], isChildTable, fieldCount, row, taskUrl, bgColorObj);
 				fieldObjs.push(fieldObj);
 			}
 							
@@ -399,7 +399,7 @@ MetadataRenderer.buildMetadataTable = function(table, isChildTable, isRoot, meta
  * @param row, the containing element
  * @return HTML representation of the metadata field, expandButton, and fieldCount
  */
-MetadataRenderer.buildMetadataField = function(metadataField, isChildTable, fieldCount, row, bgColorObj, taskUrl)
+MetadataRenderer.buildMetadataField = function(metadataField, isChildTable, fieldCount, row, taskUrl, bgColorObj)
 {
 	var nameCol = document.createElement('div');
 		nameCol.className = "labelCol";
@@ -665,7 +665,7 @@ MetadataRenderer.buildMetadataField = function(metadataField, isChildTable, fiel
 			fieldValueDiv.className = "fieldCompositeContainer";
 
 		// Build the child table for the composite
-		var childTable =  MetadataRenderer.buildMetadataTable(null, false, false, metadataField.value, 1, bgColorObj, taskUrl);
+		var childTable =  MetadataRenderer.buildMetadataTable(null, false, false, metadataField.value, 1, taskUrl, bgColorObj);
 		
 		// If the childTable has more than 1 row, collapse table
 		if(metadataField.value.length > 1)
@@ -761,7 +761,7 @@ MetadataRenderer.buildMetadataField = function(metadataField, isChildTable, fiel
 		var fieldValueDiv = document.createElement('div');
 			fieldValueDiv.className = "fieldChildContainer";
 		
-		var childTable =  MetadataRenderer.buildMetadataTable(null, true, false, metadataField.value, 1, bgColorObj, taskUrl);
+		var childTable =  MetadataRenderer.buildMetadataTable(null, true, false, metadataField.value, 1, taskUrl, bgColorObj);
 		if(metadataField.value.length > 1)
 		{
 			MetadataRenderer.collapseTable(childTable);			
