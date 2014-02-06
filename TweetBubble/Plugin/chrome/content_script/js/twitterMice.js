@@ -841,16 +841,14 @@ MetadataRenderer.getLocationForParentTable = function(element)
 
 MetadataRenderer.getLocationForChildTable = function(element)
 {
-	var tables = element.getElementsByTagName("table");
-	if(tables.length > 0)
-	{
-		table = tables[0];
-	
+	var tables = element.getElementsByClassName("metadataTableDiv");
+	if (tables.length > 0)
+	{		
 		var aTags = table.getElementsByTagName("a");
 		if(aTags.length > 0)
 		{
 			return aTags[0].href;	
-		}	
+		}
 	}
 	return "none";
 }
