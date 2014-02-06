@@ -422,7 +422,7 @@ MetadataRenderer.guessDocumentLocation = function(metadata)
  * @param metadata, metadata object from the service
  * @param depth, current depth level
  */
-MetadataRenderer.getMetadataFields = function(mmdKids, metadata, depth, child_value_as_label)
+MetadataRenderer.getMetadataFields = function(mmdKids, metadata, depth, child_value_as_label, taskUrl)
 {
 	var metadataFields = [];
 	
@@ -439,7 +439,7 @@ MetadataRenderer.getMetadataFields = function(mmdKids, metadata, depth, child_va
 			mmdField = mmdField.scalar;
 			
 			// Is this a visible field?
-			if(MetadataRenderer.isFieldVisible(mmdField))
+			if(MetadataRenderer.isFieldVisible(mmdField, metadata, taskUrl))
 			{				
 				// Is there a metadata value for this field?		
 				var value = MetadataRenderer.getFieldValue(mmdField, metadata);				
@@ -463,7 +463,7 @@ MetadataRenderer.getMetadataFields = function(mmdKids, metadata, depth, child_va
 						var navigationLink = metadata[mmdField.navigates_to];
 						
 						// Is there a value for the navigation link
-						if(navigationLink != null && (navigationLink.toLowerCase() != MetadataRenderer.currentDocumentLocation || depth == 0))
+						if(navigationLink != null)// && (navigationLink.toLowerCase() != MetadataRenderer.currentDocumentLocation || depth == 0))
 							field.navigatesTo = navigationLink;
 					}
 					
@@ -481,7 +481,7 @@ MetadataRenderer.getMetadataFields = function(mmdKids, metadata, depth, child_va
 			mmdField = mmdField.composite;
 			
 			// Is this a visible field?
-			if(MetadataRenderer.isFieldVisible(mmdField))
+			if(MetadataRenderer.isFieldVisible(mmdField, metadata, taskUrl))
 			{				
 				// Is there a metadata value for this field?		
 				var value = MetadataRenderer.getFieldValue(mmdField, metadata);	
@@ -497,7 +497,7 @@ MetadataRenderer.getMetadataFields = function(mmdKids, metadata, depth, child_va
 						{
 							var field = new MetadataField(mmdField);
 							
-							field.value = MetadataRenderer.getMetadataFields(mmdField["kids"], value[i], depth + 1, null);
+							field.value = MetadataRenderer.getMetadataFields(mmdField["kids"], value[i], depth + 1, null, taskUrl);
 							if (mmdField.use_value_as_label != null)
 								field.value_as_label = MetadataRenderer.getValueForProperty(mmdField.use_value_as_label, value[i], mmdField["kids"], depth + 1);
 							
@@ -511,8 +511,8 @@ MetadataRenderer.getMetadataFields = function(mmdKids, metadata, depth, child_va
 					else
 					{
 						var field = new MetadataField(mmdField);
-						
-						field.value = MetadataRenderer.getMetadataFields(mmdField["kids"], value, depth + 1, null);
+												
+						field.value = MetadataRenderer.getMetadataFields(mmdField["kids"], value, depth + 1, null, taskUrl);
 						if (mmdField.use_value_as_label != null)
 						{
 							if (mmdField.child_value_as_label != null)
@@ -536,7 +536,7 @@ MetadataRenderer.getMetadataFields = function(mmdKids, metadata, depth, child_va
 			mmdField = mmdField.collection;	
 			
 			// Is this a visible field?
-			if(MetadataRenderer.isFieldVisible(mmdField))
+			if(MetadataRenderer.isFieldVisible(mmdField, metadata, taskUrl))
 			{		
 				//console.log(mmdField);			
 				// Is there a metadata value for this field?	
@@ -594,9 +594,9 @@ MetadataRenderer.getMetadataFields = function(mmdKids, metadata, depth, child_va
 					}
 					
 					if (mmdField.child_use_value_as_label != null)
-						field.value = MetadataRenderer.getMetadataFields(mmdField["kids"], value, depth + 1, mmdField.child_use_value_as_label);
+						field.value = MetadataRenderer.getMetadataFields(mmdField["kids"], value, depth + 1, mmdField.child_use_value_as_label, taskUrl);
 					else if(mmdField.child_scalar_type == null)
-						field.value = MetadataRenderer.getMetadataFields(mmdField["kids"], value, depth + 1, null);
+						field.value = MetadataRenderer.getMetadataFields(mmdField["kids"], value, depth + 1, null, taskUrl);
 					
 					if (mmdField.use_value_as_label != null) 
 						field.value_as_label = MetadataRenderer.getValueForProperty(mmdField.use_value_as_label, metadata, mmdKids);
@@ -622,9 +622,18 @@ MetadataRenderer.checkAndSetShowExpandedInitially = function(field, mmdField)
 	}
 }
 
-MetadataRenderer.isFieldVisible = function(mmdField)
+MetadataRenderer.isFieldVisible = function(mmdField, metadata, url)
 {
-	return mmdField.hide == null || mmdField.hide == false;
+	if (mmdField["styles"])
+	{
+		var style = mmdField["styles"][0];
+		var location = metadata[mmdField["name"]].location; 
+		if (style.is_child_metadata == "true" && style.hide == "true" 
+				&& url && location && location.toLowerCase() == url)
+			return false;
+	}
+	
+	return mmdField.hide == null || mmdField.hide == false || mmdField.always_show == "true";
 }
 
 MetadataRenderer.getFieldValue = function(mmdField, metadata)
@@ -636,7 +645,7 @@ MetadataRenderer.getFieldValue = function(mmdField, metadata)
 /**
  * 
  */
-MetadataRenderer.getValueForProperty = function(valueAsLabelStr, metadata, mmdKids, depth)
+MetadataRenderer.getValueForProperty = function(valueAsLabelStr, metadata, mmdKids, depth, taskUrl)
 {
 	var nestedFields = valueAsLabelStr.split(".");
 	var fieldValue = metadata;
@@ -705,7 +714,7 @@ MetadataRenderer.getValueForProperty = function(valueAsLabelStr, metadata, mmdKi
 		}
 		else	
 		{
-			var metadataFields = MetadataRenderer.getMetadataFields(mmdKids, fieldValue, depth, null);
+			var metadataFields = MetadataRenderer.getMetadataFields(mmdKids, fieldValue, depth, null, taskUrl);
 			return {value: metadataFields, type: fieldType};
 		}				
 	}	
@@ -1279,7 +1288,7 @@ var FIELDS_TO_EXPAND = 10;
 MetadataRenderer.buildMetadataDisplay = function(isRoot, mmd, metadata)
 {
 	// Convert the metadata into a list of MetadataFields using the meta-metadata.
-	var metadataFields = MetadataRenderer.getMetadataFields(mmd["meta_metadata"]["kids"], metadata, 0, null);
+	var metadataFields = MetadataRenderer.getMetadataFields(mmd["meta_metadata"]["kids"], metadata, 0, null, null);
 	
 	// Is there any visable metadata?
 	if(MetadataRenderer.hasVisibleMetadata(metadataFields))
@@ -1489,7 +1498,7 @@ MetadataRenderer.buildMetadataField = function(metadataField, isChildTable, fiel
 				// Uses http://getfavicon.appspot.com/ to resolve the favicon
 				var favicon = document.createElement('img');
 					favicon.className = "faviconICE";
-					favicon.src = "https://plus.google.com/_/favicon?domain_url=" + MetadataRenderer.getHost(metadataField.navigatesTo);
+					favicon.src = "http://g.etfv.co/" + MetadataRenderer.getHost(metadataField.navigatesTo);
 				
 				var aTag = document.createElement('a');
 				aTag.innerText = MetadataRenderer.removeLineBreaksAndCrazies(metadataField.value);
@@ -1517,7 +1526,7 @@ MetadataRenderer.buildMetadataField = function(metadataField, isChildTable, fiel
 				// Uses http://getfavicon.appspot.com/ to resolve the favicon
 				var favicon = document.createElement('img');
 					favicon.className = "faviconICE";
-					favicon.src = "https://plus.google.com/_/favicon?domain_url=" + MetadataRenderer.getHost(metadataField.navigatesTo);
+					favicon.src = "http://g.etfv.co/" + MetadataRenderer.getHost(metadataField.navigatesTo);
 				
 				var aTag = document.createElement('a');
 					aTag.className = "fieldValue";
