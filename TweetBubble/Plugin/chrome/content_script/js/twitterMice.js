@@ -790,6 +790,7 @@ MetadataRenderer.getTableForButton = function(button)
 {
 	var table = button.parentElement.parentElement.parentElement.getElementsByClassName("valueCol")[0];
 	
+	// label_at top or bottom
 	if (table == null)
 	{
 		var sibling = (button.parentElement.parentElement.parentElement.nextSibling == null) ?
@@ -843,7 +844,9 @@ MetadataRenderer.getLocationForChildTable = function(element)
 {
 	var tables = element.getElementsByClassName("metadataTableDiv");
 	if (tables.length > 0)
-	{		
+	{
+		table = tables[0];
+		
 		var aTags = table.getElementsByTagName("a");
 		if(aTags.length > 0)
 		{
