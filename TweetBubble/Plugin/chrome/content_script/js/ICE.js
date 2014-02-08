@@ -46,13 +46,15 @@ function downloadRequester(expandableItemUrl)
 function expandCollapseItem()
 {
 	console.log("event received");
-	var expandCollapseIcon = instance.getIcon(this);
+	var item = instance.getExpandedItem(this);
+	
+	var expandCollapseIcon = instance.getIcon(item);
 	var collapse = isExpanded(expandCollapseIcon); 
-		
+
 	if (collapse)
 	{
 		expandCollapseIcon.src = expandIconPath;
-		MetadataRenderer.removeMetadataDisplay(this);
+		MetadataRenderer.removeMetadataDisplay(item);
 	}
 	else
 	{
@@ -61,14 +63,14 @@ function expandCollapseItem()
 		var urlPrefix = instance.getUrlPrefix();
 		
 		// this refers to the element from which event handler was fired
-		var expandableItemUrl = instance.getExpandableItemUrl(this);
+		var expandableItemUrl = instance.getExpandableItemUrl(item);
 		expandableItemUrl = urlPrefix + expandableItemUrl;
 		console.log(expandableItemUrl);
 		
 		// relegate task of selecting apt parent to specific instance 
-		var parent = instance.getContainer(this);
+		var parent = instance.getContainer(item);
 			
-		MetadataRenderer.addMetadataDisplay(parent, expandableItemUrl, true, null, this);
+		MetadataRenderer.addMetadataDisplay(parent, expandableItemUrl, true, null, item);
 		
 		//request loading of webpage
 		downloadRequester(expandableItemUrl);
@@ -94,7 +96,7 @@ function layoutExpandableItems(node, isMetadata)
 		//expandableItem.innerText = expandableItem.innerText + "+";
 
 		instance.removeHrefAndSetAsUrl(expandableItem);
-		expandableItem.addEventListener('click', expandCollapseItem);
+		instance.addClickEventListener(expandableItem, expandCollapseItem);
 		
 		// remove or add the identifying attribute to prevent re-processing
 		instance.setProcessed(expandableItem);
@@ -109,7 +111,8 @@ function defaultConditionClickItem()
 	if (MetadataRenderer.LoggingFunction)
 	{
 		//url_popped
-		var url_p = instance.getUrlPrefix() + instance.getHrefAttribute(this);
+		var item = instance.getExpandedItem(this);
+		var url_p = instance.getUrlPrefix() + instance.getHrefAttribute(item);
 		
 		var eventObj = {
 			url_popped: {
@@ -131,7 +134,7 @@ function processDefaultConditionClicks(node)
 		var expandableItem = expandableItemsXPathResult.snapshotItem(i);
 		if (!instance.checkDefaultConditionProcessed(expandableItem))
 		{
-			expandableItem.addEventListener('click', defaultConditionClickItem);
+			instance.addClickEventListener(expandableItem, defaultConditionClickItem);
 			
 			// remove or add the identifying attribute to prevent re-processing
 			instance.setDefaultConditionProcessed(expandableItem);			
