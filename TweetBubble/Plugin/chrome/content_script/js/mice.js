@@ -608,7 +608,7 @@ MetadataRenderer.getMetadataFields = function(mmdKids, metadata, depth, child_va
 	}
 		
 	//Sort the fields by layer, higher layers first
-	metadataFields.sort(function(a,b){return b.layer - a.layer});
+	metadataFields.sort(function(a,b){return b.layer - a.layer - 0.5});
 	return metadataFields;
 }
 
