@@ -3,7 +3,11 @@ function twitterICE() {
 
 this.expandableItemsXPath = "//ol[@id='stream-items-id']/li//p[@class='js-tweet-text tweet-text']/a/b";
 
-this.expandableItemsXPath2 = ".//a[@class='twitter-atreply pretty-link']/b | .//a[@class='twitter-hashtag pretty-link js-nav']/b";
+//@usernames, #hashtags, tweet tweeter, @connect tweeter
+this.expandableItemsXPath2 = ".//a[@class='twitter-atreply pretty-link']/b | " + 
+							 ".//a[@class='twitter-hashtag pretty-link js-nav']/b | " + 
+							 ".//a[@class='account-group js-account-group js-action-profile js-user-profile-link js-nav']/strong | " + 
+							 ".//a[@class='pretty-link js-user-profile-link js-action-profile-name']/strong";
 
 this.defaultConditionXPath2 = ".//a[@class='twitter-atreply pretty-link']/b";
 
@@ -35,9 +39,20 @@ this.getExpandableItemUrl = function(item) {
 	return item.parentNode.getAttribute("url");
 };
 
+this.addClickEventListener = function(item, listener) {
+	item.parentNode.addEventListener('click', listener);
+};
+
 this.setProcessed = function(elt) {
 	// still keep pretty-link part for the styling purpose 
-	elt.parentNode.setAttribute("class", "pretty-link");
+	var eltClass = elt.parentNode.getAttribute("class");
+	if (eltClass.indexOf("account-group") == 0)
+	{
+		elt.parentNode.setAttribute("class", "account-group js-account-group js-action-profile js-nav");
+		elt.setAttribute("class", "fullname"); //initial is 'fullname js-action-profile-name'
+	}
+	else 
+		elt.parentNode.setAttribute("class", "pretty-link");
 };
 
 this.setMetadataBoolean = function(elt, isMetadata) {
@@ -45,7 +60,14 @@ this.setMetadataBoolean = function(elt, isMetadata) {
 };
 
 this.setIcon = function(elt, icon) {
+	icon.setAttribute("class", "expandCollapseIcon");
 	elt.appendChild(icon);
+};
+
+//expanded item might not be same as element for which click listener was added
+this.getExpandedItem = function(elt) {
+	var icon = elt.getElementsByClassName("expandCollapseIcon")[0];
+	return icon.parentNode;
 };
 
 this.getIcon = function(elt) {
