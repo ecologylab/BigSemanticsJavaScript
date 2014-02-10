@@ -305,6 +305,15 @@ MetadataRenderer.buildMetadataTable = function(table, isChildTable, isRoot, meta
 			var fieldObjs = [];
 			fieldObjs.push(fieldObj);
 
+			var innerRow = null;
+			if (metadataField.concatenates.length > 0)
+			{
+				innerRow = document.createElement('div');
+				innerRow.className = 'metadataRow';
+			}
+			else
+				innerRow = row;
+			
 			for (var j = 0; j < metadataField.concatenates.length; j++)
 			{
 				fieldObj = MetadataRenderer.buildMetadataField(metadataField.concatenates[j], isChildTable, fieldCount, row, taskUrl, bgColorObj);
@@ -341,33 +350,53 @@ MetadataRenderer.buildMetadataTable = function(table, isChildTable, isRoot, meta
 						innerTable.appendChild(row1);
 						innerTable.appendChild(row2);
 						
-						// to still make labels align well with fields having label_at left
-						var tdDummy = document.createElement('div');
-						tdDummy.style.display = 'table-cell';
-						
 						var td = document.createElement('div');
 						td.style.display = 'table-cell';
 						td.appendChild(innerTable);
 						
-						row.appendChild(tdDummy);
-						row.appendChild(td);
+						// to still make labels align well with fields having label_at left
+						if (metadataField.concatenates.length == 0)
+						{
+							var tdDummy = document.createElement('div');
+							tdDummy.style.display = 'table-cell';						
+							innerRow.appendChild(tdDummy);
+						}
+						innerRow.appendChild(td);
 					}						
 					else if (metadataField.label_at == "right")
 					{
-						row.appendChild(valueCol);
-						row.appendChild(nameCol);
+						innerRow.appendChild(valueCol);
+						innerRow.appendChild(nameCol);
 					}
 					else
 					{
-						row.appendChild(nameCol);
-						row.appendChild(valueCol);
+						innerRow.appendChild(nameCol);
+						innerRow.appendChild(valueCol);
 					}
 				}
 				else
 				{
-					row.appendChild(nameCol);
-					row.appendChild(valueCol);
+					innerRow.appendChild(nameCol);
+					innerRow.appendChild(valueCol);
 				}
+			}
+			
+			if (metadataField.concatenates.length > 0)
+			{
+				// new table for inner row
+				var outerTable = document.createElement('div');
+				outerTable.style.display = 'table';
+				outerTable.appendChild(innerRow);
+				
+				var tdOuter = document.createElement('div');
+				tdOuter.style.display = 'table-cell';						
+				tdOuter.appendChild(outerTable);
+				
+				var tdDummy1 = document.createElement('div');
+				tdDummy1.style.display = 'table-cell';						
+
+				row.appendChild(tdDummy1);
+				row.appendChild(tdOuter);
 			}
 			table.appendChild(row);
 			

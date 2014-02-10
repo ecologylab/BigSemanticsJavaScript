@@ -752,7 +752,8 @@ MetadataRenderer.concatenateField = function(field, metadataFields, mmdKids)
 			else if (mmdField.collection)
 				mmdField = mmdField.collection;
 			
-			var name = (mmdField.label != null) ? mmdField.label : mmdField.name;
+			var name = mmdField.name;
+				//(mmdField.label != null) ? mmdField.label : mmdField.name;
 			
 			if (name == field.concatenates_to)
 			{
