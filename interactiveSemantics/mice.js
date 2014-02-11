@@ -608,7 +608,7 @@ MetadataRenderer.getMetadataFields = function(mmdKids, metadata, depth, child_va
 	}
 		
 	//Sort the fields by layer, higher layers first
-	metadataFields.sort(function(a,b){return b.layer - a.layer});
+	metadataFields.sort(function(a,b){return b.layer - a.layer - 0.5});
 	return metadataFields;
 }
 
@@ -752,7 +752,8 @@ MetadataRenderer.concatenateField = function(field, metadataFields, mmdKids)
 			else if (mmdField.collection)
 				mmdField = mmdField.collection;
 			
-			var name = (mmdField.label != null) ? mmdField.label : mmdField.name;
+			var name = mmdField.name;
+				//(mmdField.label != null) ? mmdField.label : mmdField.name;
 			
 			if (name == field.concatenates_to)
 			{
@@ -1498,7 +1499,7 @@ MetadataRenderer.buildMetadataField = function(metadataField, isChildTable, fiel
 				// Uses http://getfavicon.appspot.com/ to resolve the favicon
 				var favicon = document.createElement('img');
 					favicon.className = "faviconICE";
-					favicon.src = "http://g.etfv.co/" + MetadataRenderer.getHost(metadataField.navigatesTo);
+					favicon.src = "https://plus.google.com/_/favicon?domain_url=" + MetadataRenderer.getHost(metadataField.navigatesTo);
 				
 				var aTag = document.createElement('a');
 				aTag.innerText = MetadataRenderer.removeLineBreaksAndCrazies(metadataField.value);
@@ -1526,7 +1527,7 @@ MetadataRenderer.buildMetadataField = function(metadataField, isChildTable, fiel
 				// Uses http://getfavicon.appspot.com/ to resolve the favicon
 				var favicon = document.createElement('img');
 					favicon.className = "faviconICE";
-					favicon.src = "http://g.etfv.co/" + MetadataRenderer.getHost(metadataField.navigatesTo);
+					favicon.src = "https://plus.google.com/_/favicon?domain_url=" + MetadataRenderer.getHost(metadataField.navigatesTo);
 				
 				var aTag = document.createElement('a');
 					aTag.className = "fieldValue";
