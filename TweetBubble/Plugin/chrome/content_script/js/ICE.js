@@ -24,6 +24,15 @@ function processMetadata(node)
 	layoutExpandableItems(node, true); 	// re-layout items in expanded metadata
 }
 
+function downloadRequester(expandableItemUrl)
+{
+	chrome.extension.sendRequest({load: expandableItemUrl}, function(response) {
+		  console.log(response);
+		  MetadataRenderer.setMetadata(response.doc);
+		  MetadataRenderer.setMetaMetadata(response.mmd);
+	});
+}
+
 function onUpdateHandler()
 {
 	processPage();
@@ -32,15 +41,6 @@ function onUpdateHandler()
 function isExpanded(icon)
 {
 	return (icon.src == collapseIconPath)? true : false;
-}
-
-function downloadRequester(expandableItemUrl)
-{
-	chrome.extension.sendRequest({load: expandableItemUrl}, function(response) {
-		  console.log(response);
-		  MetadataRenderer.setMetadata(response.doc);
-		  MetadataRenderer.setMetaMetadata(response.mmd);
-	});
 }
 
 function expandCollapseItem()
@@ -114,6 +114,11 @@ function layoutExpandableItems(node, isMetadata)
 	}
 }
 
+function defaultConditionOnUpdateHandler()
+{
+	processDefaultConditionClicks(document);
+}
+
 function defaultConditionClickItem()
 {
 	if (MetadataRenderer.LoggingFunction)
@@ -148,11 +153,6 @@ function processDefaultConditionClicks(node)
 			instance.setDefaultConditionProcessed(expandableItem);			
 		}
 	}
-}
-
-function defaultConditionOnUpdateHandler()
-{
-	processDefaultConditionClicks(document);
 }
 
 function processUrlChange(newUrl)

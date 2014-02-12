@@ -72,15 +72,15 @@ this.setIcon = function(elt, icon) {
 	elt.appendChild(icon);
 };
 
+this.getIcon = function(elt) {
+	// or, set class in above function, and check for child with class name here
+	return elt.lastChild;
+};
+
 //expanded item might not be same as element for which click listener was added
 this.getExpandedItem = function(elt) {
 	var icon = elt.getElementsByClassName("expandCollapseIcon")[0];
 	return icon.parentNode;
-};
-
-this.getIcon = function(elt) {
-	// or, set class in above function, and check for child with class name here
-	return elt.lastChild;
 };
 
 this.getContainer = function(elt) {

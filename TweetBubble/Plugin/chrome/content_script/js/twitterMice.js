@@ -184,6 +184,568 @@ MetadataRenderer.createAndRenderMetadata = function(task)
 }
 
 /**
+ * RenderingTask represents a metadata rendering that is in progress of being downloaded and parsed
+ * @param url of the document
+ * @param container, HTML container which will hold the rendering
+ * @param isRoot, true if this is the root document for a metadataRendering
+ * @param expandedItem, a non-metadata item for which the display was constructed
+ */
+function RenderingTask(url, container, isRoot, clipping, expandedItem)
+{
+	if(url != null)
+		this.url = url.toLowerCase();
+	
+	this.container = container;
+	this.clipping = clipping;
+	
+	this.metadata = null;	
+	this.mmd = null;
+	
+	this.isRoot = isRoot;
+	this.expandedItem = expandedItem;
+}
+
+/**
+ * Does the given url match the RenderingTask's url?
+ * @param url, url to check against the RenderingTask
+ */
+RenderingTask.prototype.matches = function(url)
+{
+	url = url.toLowerCase();
+	if(this.url.indexOf(url) == 0)
+		return true;
+		
+	else if(url.indexOf(this.url) == 0)
+		return true;
+
+	return false;
+}
+
+MetadataRenderer.isFieldVisible = function(mmdField, metadata, url)
+{
+	if (mmdField["styles"])
+	{
+		var style = mmdField["styles"][0];
+		var location = metadata[mmdField["name"]].location; 
+		if (style.is_child_metadata == "true" && style.hide == "true" 
+				&& url && location && location.toLowerCase() == url)
+			return false;
+	}
+	
+	return mmdField.hide == null || mmdField.hide == false || mmdField.always_show == "true";
+}
+
+/**
+ * Expand or collapse a collection or composite field table.
+ * @param event, mouse click event 
+ */
+MetadataRenderer.expandCollapseTable = function(event)
+{
+	var button = event.target;
+	
+	if(button.className == "collapseSymbol" || button.className == "expandSymbol")
+		button = button.parentElement;
+		
+	// Use the symbold to check if the table should expand or collapse
+	var expandSymbol = button.getElementsByTagName("div")[0];
+	if(expandSymbol.style.display == "block")
+	{
+		expandSymbol.style.display = "none";	
+		button.className = "collapseButton";
+		
+		var table = MetadataRenderer.getTableForButton(button);
+		MetadataRenderer.expandTable(table);
+		
+		if(MetadataRenderer.LoggingFunction && (event.name == null || event.name != "fakeEvent"))
+		{			
+			var eventObj = {};
+			if(typeof button.location === "undefined")
+			{
+				if(button.parentElement.childNodes[1])
+				{
+					eventObj = {
+						expand_metadata: {
+							field_name: button.parentElement.childNodes[1].innerText,
+							parent_doc: MetadataRenderer.getLocationForParentTable(button.parentElement)
+						}
+					};
+				}
+				else
+				{
+					eventObj = {
+						expand_metadata: {
+							parent_doc: MetadataRenderer.getLocationForParentTable(button.parentElement)
+						}
+					};
+				}
+			}
+			else
+			{
+				eventObj = {
+					expand_metadata: {
+						target_doc: MetadataRenderer.getLocationForChildTable(button.parentElement.parentElement.parentElement)
+					}
+				};
+			}
+			MetadataRenderer.LoggingFunction(eventObj);
+		}
+	}
+	else if(expandSymbol.style.display == "none")
+	{
+		expandSymbol.style.display = "block";			
+		button.className = "expandButton";
+		
+		var table = MetadataRenderer.getTableForButton(button);
+		MetadataRenderer.collapseTable(table);
+		
+		if(MetadataRenderer.LoggingFunction)
+		{
+			var eventObj = {};
+			if(typeof button.location === "undefined")
+			{
+				if (button.parentElement.childNodes[1])
+				{
+					eventObj = {
+						collapse_metadata: {
+							field_name: button.parentElement.childNodes[1].innerText,
+							parent_doc: MetadataRenderer.getLocationForParentTable(button.parentElement)
+						}
+					};
+				}
+				else
+				{
+					eventObj = {
+						collapse_metadata: {
+							parent_doc: MetadataRenderer.getLocationForParentTable(button.parentElement)
+						}
+					};
+				}
+			}
+			else
+			{
+				
+				eventObj = {
+					collapse_metadata: {
+						target_doc: MetadataRenderer.getLocationForChildTable(button.parentElement.parentElement.parentElement)
+					}
+				};
+			}
+			MetadataRenderer.LoggingFunction(eventObj);
+		}	
+	}
+	
+	// condition added for fakeEvent in case of show_expanded_initially
+	if (event.stopPropagation)
+		event.stopPropagation();
+}
+
+/**
+ * Get the table that corresponds to the given button through the DOM
+ * @param button, HTML object of the button
+ * @return corresponding table HTML object  
+ */
+MetadataRenderer.getTableForButton = function(button)
+{
+	var table = button.parentElement.parentElement.parentElement.getElementsByClassName("valueCol")[0];
+	
+	// label_at top or bottom
+	if (table == null)
+	{
+		var sibling = (button.parentElement.parentElement.parentElement.nextSibling == null) ?
+			button.parentElement.parentElement.parentElement.previousSibling : 
+			button.parentElement.parentElement.parentElement.nextSibling; 
+		table = sibling.getElementsByClassName("valueCol")[0];
+	}
+	
+	do
+	{
+		var rowsFound = false;
+		var elts = table.childNodes;
+		for (var i = 0; i < elts.length; i++)
+		{
+			if (elts[i].className == "metadataRow")
+			{
+				rowsFound = true;
+				break;
+			}
+		}
+		
+		if (rowsFound)
+			break;
+		else
+			table = table.firstChild;
+		
+	} while (table);
+	
+	//while(table.rows.length == 0)
+		//table = table.getElementsByTagName("table")[0];
+		
+	return table;
+}
+
+/**
+ * Expand the table, showing all of its rows
+ * @param table to expand 
+ */
+MetadataRenderer.expandTable = function(table)
+{
+	var rows = [];
+	var elts = table.childNodes;
+	
+	for (var i = 0; i < elts.length; i++)
+		if (elts[i].className == "metadataRow")
+			rows.push(elts[i]);
+	
+	for (var i = 0; i < rows.length; i++)
+	{
+		rows[i].style.display = "table-row";
+		if (metadataProcessor)
+			metadataProcessor(rows[i]);
+	}
+
+	// Remove any loading rows, just to be sure 	
+	MetadataRenderer.clearLoadingRows(table);
+	
+	// Unlight the documents because the connection lines will be in the wrong place
+	MetadataRenderer.unhighlightDocuments(null);
+	
+	// Check for More and expand it
+	if(table.lastChild.lastChild.lastChild.className == "moreButton")
+		MetadataRenderer.morePlease({"target": table.lastChild.lastChild.lastChild});
+}
+
+/**
+ * Collapse the table, showing only the first row
+ * @param table to collapse 
+ */
+MetadataRenderer.collapseTable = function(table)
+{
+	var rows = [];
+	var elts = table.childNodes;
+	
+	for (var i = 0; i < elts.length; i++)
+		if (elts[i].className == "metadataRow")
+			rows.push(elts[i]);
+	
+	for (var i = 0; i < rows.length; i++)
+	{
+		if(i == 0)
+			rows[i].style.display = "table-row";
+		else
+			rows[i].style.display = "none";
+	}
+	
+	// Remove any loading rows, just to be sure 	
+	MetadataRenderer.clearLoadingRows(table);
+	
+	// Unlight the documents because the connection lines will be in the wrong place
+	MetadataRenderer.unhighlightDocuments(null);
+}
+
+
+/**
+ * Queue the target document for downloading and display
+ * @param event, mouse click event
+ */
+MetadataRenderer.downloadAndDisplayDocument = function(event)
+{
+	var button = event.target;
+	
+	if(button.className == "collapseSymbol" || button.className == "expandSymbol")
+		button = button.parentElement;
+	
+	// Update button visuals
+	var expandSymbol = button.getElementsByTagName("div")[0];
+		expandSymbol.style.display = "none";
+		
+		button.className = "collapseButton";
+		
+	
+	// Change the onclick function of the button to expand/collapse the table
+	button.onclick = MetadataRenderer.expandCollapseTable;
+	var taskUrl = button.task_url;
+		
+	var table = MetadataRenderer.getTableForButton(button);
+		
+	// Search the table for the document location
+	var location = null;
+	var rows = [];
+	var elts = table.childNodes;
+	
+	for (var i = 0; i < elts.length; i++)
+		if (elts[i].className == "metadataRow")
+			rows.push(elts[i]);
+	
+	for (var i = 0; i < rows.length; i++)
+	{
+		var valueCol = rows[i].childNodes[1];
+		if(valueCol)
+		{
+			var valueDiv = valueCol.getElementsByTagName("div")[0];
+			if(valueDiv)
+				for (var j = 0; j < valueDiv.childNodes.length; j++)
+					if(valueDiv.childNodes[j].href != null && valueDiv.childNodes[j].className != "citeULikeButton" && location == null)
+						location = valueDiv.childNodes[j].href;
+		}
+	}
+
+	// Did the table have a document location?
+	if(location && location.toLowerCase() != taskUrl)
+	{
+		button.location = location;
+		
+		// Add a loadingRow for visual feedback that the metadata is being downloaded / parsed
+		table.appendChild(MetadataRenderer.createLoadingRow());
+		
+		MetadataRenderer.addMetadataDisplay(table.parentElement, location, false, null, button);
+		if (requestDocumentDownload)
+			requestDocumentDownload(location);
+	}
+	// If there was no document location then the table must be a non-document composite in which case just expand
+	else
+		MetadataRenderer.expandTable(table);
+	
+	if (event.stopPropagation)
+		event.stopPropagation();
+	
+	if(MetadataRenderer.LoggingFunction)
+	{			
+		var eventObj = {};
+			
+		if(location == null)
+		{	
+			if (button.parentElement.childNodes[1])
+			{
+				eventObj = {
+					expand_metadata: {
+						field_name: button.parentElement.childNodes[1].innerText,
+						parent_doc: MetadataRenderer.getLocationForParentTable(button.parentElement)
+					}
+				};
+			}
+			else
+			{
+				eventObj = {
+					expand_metadata: {
+						parent_doc: MetadataRenderer.getLocationForParentTable(button.parentElement)
+					}
+				};
+			}
+		}
+		else
+		{
+			eventObj = {
+				expand_metadata: {
+					target_doc: MetadataRenderer.getLocationForChildTable(button.parentElement.parentElement.parentElement)
+				}
+			};
+		}
+		MetadataRenderer.LoggingFunction(eventObj);
+	}
+}
+
+/**
+ * Finds matching documents, highlights them, and draws connecting lights
+ * @param event, mouse enter event 
+ */
+MetadataRenderer.highlightDocuments = function(event)
+{
+	var row = event.srcElement;
+	if(row.className == "expandButton")
+		row = row.parentElement;
+	
+	// Only fieldLabelContainer or fieldLabelContainerOpened rows can be highlighted
+	if(row.className.indexOf("fieldLabelContainerOpened") == 0 || row.className.indexOf("fieldLabelContainer") == 0)
+	{
+		// Highlight row
+		MetadataRenderer.highlightLabel(row);
+		
+		var table = row.parentElement.parentElement.getElementsByClassName("valueCol")[0];
+		
+		// label_at top or bottom
+		if (table == null)
+		{
+			var sibling = (button.parentElement.parentElement.nextSibling == null) ?
+				button.parentElement.parentElement.previousSibling : 
+				button.parentElement.parentElement.nextSibling; 
+			table = sibling.getElementsByClassName("valueCol")[0];
+		}
+		
+		// Search the table for a document location
+		var location = null;
+		
+		var aTags = table.getElementsByTagName("a");
+		for (var i = 0; i < aTags.length; i++)
+		{
+			if(aTags[i].className.indexOf("fieldValue") != -1)
+			{
+				location = aTags[i].href;
+				break;
+			}
+		}
+		// Did the table have a document location?
+		if(location != null)
+		{	
+			MetadataRenderer.clearAllCanvases();		
+						
+			// Find matches in the DocumentMap
+			var matches = [];
+			for(var i = 0; i < MetadataRenderer.documentMap.length; i++)
+			{
+				if(MetadataRenderer.documentMap[i].matches(location))
+				{
+					if(MetadataRenderer.documentMap[i].container.style.display != "none")
+						matches.push(MetadataRenderer.documentMap[i].container);
+				}	
+			}
+			
+			//console.log(location);
+			// Draw the lines to each match
+			for(var i = 0; i < matches.length; i++)			
+			{
+				MetadataRenderer.drawConnectionLine(matches[i], row);		
+			}			
+		}
+	}
+	return false;
+}
+
+/**
+ * Draw a line connecting the target to the source
+ * @param target HTML object
+ * @param source HTML source
+ */
+MetadataRenderer.drawConnectionLine = function(target, source)
+{
+	// Don't draw connection lines in ideaMACHE
+	if(typeof session != "undefined")
+	{
+		return;
+	}
+	
+	
+	// Get the first label of the target
+	var label = target.getElementsByClassName("fieldLabel")[0];
+	
+	// Highlight the target label
+	if (label)
+		MetadataRenderer.highlightLabel(label.parentElement);
+	else
+		label = target.getElementsByClassName("valueCol")[0];
+
+	// Get the canvas
+	var canvas = null;
+	
+	if(WWWStudy)
+		canvas = document.getElementById("bigLineCanvas");
+	
+	else
+	{
+		var canvases = document.getElementsByClassName("lineCanvas");
+		
+		// TODO - fix canvas finding, needs to find the least common canvas,
+		// the smallest canvas that contains both target and source
+		/*
+		for(var i = canvases.length - 1; i >= 0; i--)
+		{	
+			canvases[i];	
+		}
+		*/
+		// for the moment just use the biggest canvas
+		canvas = canvases[canvases.length - 1];		
+	}
+		
+	var startRect = label.getClientRects()[0];
+	var endRect = source.getClientRects()[0];	
+		
+	// Don't draw the line if the source and target are in the same container
+	if(canvas != null && Math.abs(startRect.top - endRect.top) > 12)
+	{	
+		var ctx = canvas.getContext('2d');
+			
+		var containerRect = canvas.parentElement.getClientRects()[0];
+						
+		ctx.moveTo(startRect.left - containerRect.left + METADATA_LINE_X_OFFSET, startRect.top - containerRect.top + METADATA_LINE_Y_OFFSET);
+		ctx.lineTo(1, startRect.top - containerRect.top + METADATA_LINE_Y_OFFSET);
+		ctx.lineTo(1, endRect.top - containerRect.top + METADATA_LINE_Y_OFFSET);
+		ctx.lineTo(endRect.left - containerRect.left + METADATA_LINE_X_OFFSET, endRect.top - containerRect.top + METADATA_LINE_Y_OFFSET);
+		ctx.strokeStyle = "rgba(200, 44, 4, 0.4)";
+		ctx.lineWidth = 3;
+		ctx.lineCap = "round";
+		ctx.stroke();
+	}
+	
+}
+
+MetadataRenderer.morePlease = function(event)
+{
+	var moreData = JSON.parse(event.target.lastChild.textContent);
+	
+	var parentRow =  event.target.parentElement.parentElement;
+	var parentTable = parentRow.parentElement;
+	
+	var taskUrl = event.target.task_url;
+	//remove More Button	
+	parentTable.removeChild(parentRow);
+	
+	// Build and add extra rows
+	MetadataRenderer.buildMetadataTable(parentTable, moreData.isChild, false, moreData.data, moreData.fields, null, taskUrl);
+	
+	// TODO add logging for the 'More' button
+	
+}
+
+/**
+ * DocumentContain represents a document that is part of a MetadataRendering
+ * @param url, location of the document, serves as the document ID
+ * @param container, HTML object which contains the rendering of this document
+ * @param rendered, true if the document has been downloaded and displayed, false otherwise
+ * @param expandedItem, a non-metadata item for which the display was constructed
+ */
+function DocumentContainer(url, additionalUrls, container, rendered, expandedItem, visual)
+{
+	this.urls = [];
+	this.urls.push(url.toLowerCase());
+	
+	if(additionalUrls)
+	{
+		for(var i = 0; i < additionalUrls.length; i++)
+		{
+			this.urls.push(additionalUrls[i].toLowerCase());
+		}
+	}
+		
+	this.container = container;
+	this.rendered = rendered;
+	this.expandedItem = expandedItem;
+	this.visual = visual;
+}
+
+/**
+ * Does the given url match the DocumentContainer's?
+ * @param url, url to check against the DocumentContainer
+ */
+DocumentContainer.prototype.matches = function(url)
+{
+	url = url.toLowerCase();
+	for(var i = 0; i < this.urls.length; i++)
+	{
+		if(this.urls[i].length > 1)
+		{		
+			if(this.urls[i].indexOf(url) == 0)
+			{
+				return true;
+			}
+			else if(url.indexOf(this.urls[i]) == 0)
+			{
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
+/**
  * Converts the metadata into a set of metadataFields using the meta-metadata.
  * If there is visible metadata then create and return the HTML table.
  * @param isRoot, is the metadata the root document in the container (for styling)
@@ -810,50 +1372,6 @@ MetadataRenderer.buildMetadataField = function(metadataField, isChildTable, fiel
 	return {name_col: nameCol, value_col: valueCol, count: fieldCount, expand_button: expandButton};
 }
 
-/**
- * Get the table that corresponds to the given button through the DOM
- * @param button, HTML object of the button
- * @return corresponding table HTML object  
- */
-MetadataRenderer.getTableForButton = function(button)
-{
-	var table = button.parentElement.parentElement.parentElement.getElementsByClassName("valueCol")[0];
-	
-	// label_at top or bottom
-	if (table == null)
-	{
-		var sibling = (button.parentElement.parentElement.parentElement.nextSibling == null) ?
-			button.parentElement.parentElement.parentElement.previousSibling : 
-			button.parentElement.parentElement.parentElement.nextSibling; 
-		table = sibling.getElementsByClassName("valueCol")[0];
-	}
-	
-	do
-	{
-		var rowsFound = false;
-		var elts = table.childNodes;
-		for (var i = 0; i < elts.length; i++)
-		{
-			if (elts[i].className == "metadataRow")
-			{
-				rowsFound = true;
-				break;
-			}
-		}
-		
-		if (rowsFound)
-			break;
-		else
-			table = table.firstChild;
-		
-	} while (table);
-	
-	//while(table.rows.length == 0)
-		//table = table.getElementsByTagName("table")[0];
-		
-	return table;
-}
-
 MetadataRenderer.getLocationForParentTable = function(element)
 {
 	while(element.className != "metadataTableDiv" && element.className != "rootMetadataTableDiv")
@@ -898,435 +1416,6 @@ MetadataRenderer.getLocationForChildTable = function(element)
 		}
 	}
 	return "none";
-}
-
-/**
- * Queue the target document for downloading and display
- * @param event, mouse click event
- */
-MetadataRenderer.downloadAndDisplayDocument = function(event)
-{
-	var button = event.target;
-	
-	if(button.className == "collapseSymbol" || button.className == "expandSymbol")
-		button = button.parentElement;
-	
-	// Update button visuals
-	var expandSymbol = button.getElementsByTagName("div")[0];
-		expandSymbol.style.display = "none";
-		
-		button.className = "collapseButton";
-		
-	
-	// Change the onclick function of the button to expand/collapse the table
-	button.onclick = MetadataRenderer.expandCollapseTable;
-	var taskUrl = button.task_url;
-		
-	var table = MetadataRenderer.getTableForButton(button);
-		
-	// Search the table for the document location
-	var location = null;
-	var rows = [];
-	var elts = table.childNodes;
-	
-	for (var i = 0; i < elts.length; i++)
-		if (elts[i].className == "metadataRow")
-			rows.push(elts[i]);
-	
-	for (var i = 0; i < rows.length; i++)
-	{
-		var valueCol = rows[i].childNodes[1];
-		if(valueCol)
-		{
-			var valueDiv = valueCol.getElementsByTagName("div")[0];
-			if(valueDiv)
-				for (var j = 0; j < valueDiv.childNodes.length; j++)
-					if(valueDiv.childNodes[j].href != null && valueDiv.childNodes[j].className != "citeULikeButton" && location == null)
-						location = valueDiv.childNodes[j].href;
-		}
-	}
-
-	// Did the table have a document location?
-	if(location && location.toLowerCase() != taskUrl)
-	{
-		button.location = location;
-		
-		// Add a loadingRow for visual feedback that the metadata is being downloaded / parsed
-		table.appendChild(MetadataRenderer.createLoadingRow());
-		
-		MetadataRenderer.addMetadataDisplay(table.parentElement, location, false, null, button);
-		if (requestDocumentDownload)
-			requestDocumentDownload(location);
-	}
-	// If there was no document location then the table must be a non-document composite in which case just expand
-	else
-		MetadataRenderer.expandTable(table);
-	
-	if (event.stopPropagation)
-		event.stopPropagation();
-	
-	if(MetadataRenderer.LoggingFunction)
-	{			
-		var eventObj = {};
-			
-		if(location == null)
-		{	
-			if (button.parentElement.childNodes[1])
-			{
-				eventObj = {
-					expand_metadata: {
-						field_name: button.parentElement.childNodes[1].innerText,
-						parent_doc: MetadataRenderer.getLocationForParentTable(button.parentElement)
-					}
-				};
-			}
-			else
-			{
-				eventObj = {
-					expand_metadata: {
-						parent_doc: MetadataRenderer.getLocationForParentTable(button.parentElement)
-					}
-				};
-			}
-		}
-		else
-		{
-			eventObj = {
-				expand_metadata: {
-					target_doc: MetadataRenderer.getLocationForChildTable(button.parentElement.parentElement.parentElement)
-				}
-			};
-		}
-		MetadataRenderer.LoggingFunction(eventObj);
-	}
-}
-
-/**
- * Finds matching documents, highlights them, and draws connecting lights
- * @param event, mouse enter event 
- */
-MetadataRenderer.highlightDocuments = function(event)
-{
-	var row = event.srcElement;
-	if(row.className == "expandButton")
-		row = row.parentElement;
-	
-	// Only fieldLabelContainer or fieldLabelContainerOpened rows can be highlighted
-	if(row.className.indexOf("fieldLabelContainerOpened") == 0 || row.className.indexOf("fieldLabelContainer") == 0)
-	{
-		// Highlight row
-		MetadataRenderer.highlightLabel(row);
-		
-		var table = row.parentElement.parentElement.getElementsByClassName("valueCol")[0];
-		
-		// label_at top or bottom
-		if (table == null)
-		{
-			var sibling = (button.parentElement.parentElement.nextSibling == null) ?
-				button.parentElement.parentElement.previousSibling : 
-				button.parentElement.parentElement.nextSibling; 
-			table = sibling.getElementsByClassName("valueCol")[0];
-		}
-		
-		// Search the table for a document location
-		var location = null;
-		
-		var aTags = table.getElementsByTagName("a");
-		for (var i = 0; i < aTags.length; i++)
-		{
-			if(aTags[i].className.indexOf("fieldValue") != -1)
-			{
-				location = aTags[i].href;
-				break;
-			}
-		}
-		// Did the table have a document location?
-		if(location != null)
-		{	
-			MetadataRenderer.clearAllCanvases();		
-						
-			// Find matches in the DocumentMap
-			var matches = [];
-			for(var i = 0; i < MetadataRenderer.documentMap.length; i++)
-			{
-				if(MetadataRenderer.documentMap[i].matches(location))
-				{
-					if(MetadataRenderer.documentMap[i].container.style.display != "none")
-						matches.push(MetadataRenderer.documentMap[i].container);
-				}	
-			}
-			
-			//console.log(location);
-			// Draw the lines to each match
-			for(var i = 0; i < matches.length; i++)			
-			{
-				MetadataRenderer.drawConnectionLine(matches[i], row);		
-			}			
-		}
-	}
-	return false;
-}
-
-/**
- * Draw a line connecting the target to the source
- * @param target HTML object
- * @param source HTML source
- */
-MetadataRenderer.drawConnectionLine = function(target, source)
-{
-	// Don't draw connection lines in ideaMACHE
-	if(typeof session != "undefined")
-	{
-		return;
-	}
-	
-	
-	// Get the first label of the target
-	var label = target.getElementsByClassName("fieldLabel")[0];
-	
-	// Highlight the target label
-	if (label)
-		MetadataRenderer.highlightLabel(label.parentElement);
-	else
-		label = target.getElementsByClassName("valueCol")[0];
-
-	// Get the canvas
-	var canvas = null;
-	
-	if(WWWStudy)
-		canvas = document.getElementById("bigLineCanvas");
-	
-	else
-	{
-		var canvases = document.getElementsByClassName("lineCanvas");
-		
-		// TODO - fix canvas finding, needs to find the least common canvas,
-		// the smallest canvas that contains both target and source
-		/*
-		for(var i = canvases.length - 1; i >= 0; i--)
-		{	
-			canvases[i];	
-		}
-		*/
-		// for the moment just use the biggest canvas
-		canvas = canvases[canvases.length - 1];		
-	}
-		
-	var startRect = label.getClientRects()[0];
-	var endRect = source.getClientRects()[0];	
-		
-	// Don't draw the line if the source and target are in the same container
-	if(canvas != null && Math.abs(startRect.top - endRect.top) > 12)
-	{	
-		var ctx = canvas.getContext('2d');
-			
-		var containerRect = canvas.parentElement.getClientRects()[0];
-						
-		ctx.moveTo(startRect.left - containerRect.left + METADATA_LINE_X_OFFSET, startRect.top - containerRect.top + METADATA_LINE_Y_OFFSET);
-		ctx.lineTo(1, startRect.top - containerRect.top + METADATA_LINE_Y_OFFSET);
-		ctx.lineTo(1, endRect.top - containerRect.top + METADATA_LINE_Y_OFFSET);
-		ctx.lineTo(endRect.left - containerRect.left + METADATA_LINE_X_OFFSET, endRect.top - containerRect.top + METADATA_LINE_Y_OFFSET);
-		ctx.strokeStyle = "rgba(200, 44, 4, 0.4)";
-		ctx.lineWidth = 3;
-		ctx.lineCap = "round";
-		ctx.stroke();
-	}
-	
-}
-
-/**
- * Expand or collapse a collection or composite field table.
- * @param event, mouse click event 
- */
-MetadataRenderer.expandCollapseTable = function(event)
-{
-	var button = event.target;
-	
-	if(button.className == "collapseSymbol" || button.className == "expandSymbol")
-		button = button.parentElement;
-		
-	// Use the symbold to check if the table should expand or collapse
-	var expandSymbol = button.getElementsByTagName("div")[0];
-	if(expandSymbol.style.display == "block")
-	{
-		expandSymbol.style.display = "none";	
-		button.className = "collapseButton";
-		
-		var table = MetadataRenderer.getTableForButton(button);
-		MetadataRenderer.expandTable(table);
-		
-		if(MetadataRenderer.LoggingFunction && (event.name == null || event.name != "fakeEvent"))
-		{			
-			var eventObj = {};
-			if(typeof button.location === "undefined")
-			{
-				if(button.parentElement.childNodes[1])
-				{
-					eventObj = {
-						expand_metadata: {
-							field_name: button.parentElement.childNodes[1].innerText,
-							parent_doc: MetadataRenderer.getLocationForParentTable(button.parentElement)
-						}
-					};
-				}
-				else
-				{
-					eventObj = {
-						expand_metadata: {
-							parent_doc: MetadataRenderer.getLocationForParentTable(button.parentElement)
-						}
-					};
-				}
-			}
-			else
-			{
-				eventObj = {
-					expand_metadata: {
-						target_doc: MetadataRenderer.getLocationForChildTable(button.parentElement.parentElement.parentElement)
-					}
-				};
-			}
-			MetadataRenderer.LoggingFunction(eventObj);
-		}
-	}
-	else if(expandSymbol.style.display == "none")
-	{
-		expandSymbol.style.display = "block";			
-		button.className = "expandButton";
-		
-		var table = MetadataRenderer.getTableForButton(button);
-		MetadataRenderer.collapseTable(table);
-		
-		if(MetadataRenderer.LoggingFunction)
-		{
-			var eventObj = {};
-			if(typeof button.location === "undefined")
-			{
-				if (button.parentElement.childNodes[1])
-				{
-					eventObj = {
-						collapse_metadata: {
-							field_name: button.parentElement.childNodes[1].innerText,
-							parent_doc: MetadataRenderer.getLocationForParentTable(button.parentElement)
-						}
-					};
-				}
-				else
-				{
-					eventObj = {
-						collapse_metadata: {
-							parent_doc: MetadataRenderer.getLocationForParentTable(button.parentElement)
-						}
-					};
-				}
-			}
-			else
-			{
-				
-				eventObj = {
-					collapse_metadata: {
-						target_doc: MetadataRenderer.getLocationForChildTable(button.parentElement.parentElement.parentElement)
-					}
-				};
-			}
-			MetadataRenderer.LoggingFunction(eventObj);
-		}	
-	}
-	
-	// condition added for fakeEvent in case of show_expanded_initially
-	if (event.stopPropagation)
-		event.stopPropagation();
-}
-
-/**
- * Expand the table, showing all of its rows
- * @param table to expand 
- */
-MetadataRenderer.expandTable = function(table)
-{
-	var rows = [];
-	var elts = table.childNodes;
-	
-	for (var i = 0; i < elts.length; i++)
-		if (elts[i].className == "metadataRow")
-			rows.push(elts[i]);
-	
-	for (var i = 0; i < rows.length; i++)
-	{
-		rows[i].style.display = "table-row";
-		if (metadataProcessor)
-			metadataProcessor(rows[i]);
-	}
-
-	// Remove any loading rows, just to be sure 	
-	MetadataRenderer.clearLoadingRows(table);
-	
-	// Unlight the documents because the connection lines will be in the wrong place
-	MetadataRenderer.unhighlightDocuments(null);
-	
-	// Check for More and expand it
-	if(table.lastChild.lastChild.lastChild.className == "moreButton")
-		MetadataRenderer.morePlease({"target": table.lastChild.lastChild.lastChild});
-}
-
-/**
- * Collapse the table, showing only the first row
- * @param table to collapse 
- */
-MetadataRenderer.collapseTable = function(table)
-{
-	var rows = [];
-	var elts = table.childNodes;
-	
-	for (var i = 0; i < elts.length; i++)
-		if (elts[i].className == "metadataRow")
-			rows.push(elts[i]);
-	
-	for (var i = 0; i < rows.length; i++)
-	{
-		if(i == 0)
-			rows[i].style.display = "table-row";
-		else
-			rows[i].style.display = "none";
-	}
-	
-	// Remove any loading rows, just to be sure 	
-	MetadataRenderer.clearLoadingRows(table);
-	
-	// Unlight the documents because the connection lines will be in the wrong place
-	MetadataRenderer.unhighlightDocuments(null);
-}
-
-MetadataRenderer.morePlease = function(event)
-{
-	var moreData = JSON.parse(event.target.lastChild.textContent);
-	
-	var parentRow =  event.target.parentElement.parentElement;
-	var parentTable = parentRow.parentElement;
-	
-	var taskUrl = event.target.task_url;
-	//remove More Button	
-	parentTable.removeChild(parentRow);
-	
-	// Build and add extra rows
-	MetadataRenderer.buildMetadataTable(parentTable, moreData.isChild, false, moreData.data, moreData.fields, null, taskUrl);
-	
-	// TODO add logging for the 'More' button
-	
-}
-
-MetadataRenderer.isFieldVisible = function(mmdField, metadata, url)
-{
-	if (mmdField["styles"])
-	{
-		var style = mmdField["styles"][0];
-		var location = metadata[mmdField["name"]].location; 
-		if (style.is_child_metadata == "true" && style.hide == "true" 
-				&& url && location && location.toLowerCase() == url)
-			return false;
-	}
-	
-	return mmdField.hide == null || mmdField.hide == false || mmdField.always_show == "true";
 }
 
 MetadataRenderer.getImageSource = function(mmdField)
@@ -1451,94 +1540,6 @@ MetadataRenderer.collapseOrScrollToExpandedItem = function(event)
 MetadataRenderer.stopEventPropagation = function(event)
 {
 	event.stopPropagation();
-}
-
-/**
- * RenderingTask represents a metadata rendering that is in progress of being downloaded and parsed
- * @param url of the document
- * @param container, HTML container which will hold the rendering
- * @param isRoot, true if this is the root document for a metadataRendering
- * @param expandedItem, a non-metadata item for which the display was constructed
- */
-function RenderingTask(url, container, isRoot, clipping, expandedItem)
-{
-	if(url != null)
-		this.url = url.toLowerCase();
-	
-	this.container = container;
-	this.clipping = clipping;
-	
-	this.metadata = null;	
-	this.mmd = null;
-	
-	this.isRoot = isRoot;
-	this.expandedItem = expandedItem;
-}
-
-/**
- * Does the given url match the RenderingTask's url?
- * @param url, url to check against the RenderingTask
- */
-RenderingTask.prototype.matches = function(url)
-{
-	url = url.toLowerCase();
-	if(this.url.indexOf(url) == 0)
-		return true;
-		
-	else if(url.indexOf(this.url) == 0)
-		return true;
-
-	return false;
-}
-
-/**
- * DocumentContain represents a document that is part of a MetadataRendering
- * @param url, location of the document, serves as the document ID
- * @param container, HTML object which contains the rendering of this document
- * @param rendered, true if the document has been downloaded and displayed, false otherwise
- * @param expandedItem, a non-metadata item for which the display was constructed
- */
-function DocumentContainer(url, additionalUrls, container, rendered, expandedItem, visual)
-{
-	this.urls = [];
-	this.urls.push(url.toLowerCase());
-	
-	if(additionalUrls)
-	{
-		for(var i = 0; i < additionalUrls.length; i++)
-		{
-			this.urls.push(additionalUrls[i].toLowerCase());
-		}
-	}
-		
-	this.container = container;
-	this.rendered = rendered;
-	this.expandedItem = expandedItem;
-	this.visual = visual;
-}
-
-/**
- * Does the given url match the DocumentContainer's?
- * @param url, url to check against the DocumentContainer
- */
-DocumentContainer.prototype.matches = function(url)
-{
-	url = url.toLowerCase();
-	for(var i = 0; i < this.urls.length; i++)
-	{
-		if(this.urls[i].length > 1)
-		{		
-			if(this.urls[i].indexOf(url) == 0)
-			{
-				return true;
-			}
-			else if(url.indexOf(this.urls[i]) == 0)
-			{
-				return true;
-			}
-		}
-	}
-	return false;
 }
 
 /**
