@@ -55,6 +55,14 @@ this.setProcessed = function(elt) {
 		elt.parentNode.setAttribute("class", "pretty-link");
 };
 
+this.setExpanded = function(elt) {
+	elt.parentNode.setAttribute("isExpanded", "true");
+};
+
+this.isExpanded = function(elt) {
+	return elt.parentNode.getAttribute("isExpanded");
+};
+
 this.setMetadataBoolean = function(elt, isMetadata) {
 	elt.parentNode.setAttribute("isMetadata", isMetadata);
 };

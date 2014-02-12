@@ -54,26 +54,34 @@ function expandCollapseItem()
 	if (collapse)
 	{
 		expandCollapseIcon.src = expandIconPath;
-		MetadataRenderer.removeMetadataDisplay(item);
+		MetadataRenderer.hideMetadataDisplay(item);
 	}
 	else
 	{
 		expandCollapseIcon.src = collapseIconPath;
 		
-		var urlPrefix = instance.getUrlPrefix();
-		
-		// this refers to the element from which event handler was fired
-		var expandableItemUrl = instance.getExpandableItemUrl(item);
-		expandableItemUrl = urlPrefix + expandableItemUrl;
-		console.log(expandableItemUrl);
-		
-		// relegate task of selecting apt parent to specific instance 
-		var parent = instance.getContainer(item);
+		if (instance.isExpanded(item))
+		{
+			MetadataRenderer.showMetadataDisplay(item);
+		}
+		else
+		{
+			var urlPrefix = instance.getUrlPrefix();
 			
-		MetadataRenderer.addMetadataDisplay(parent, expandableItemUrl, true, null, item);
-		
-		//request loading of webpage
-		downloadRequester(expandableItemUrl);
+			// this refers to the element from which event handler was fired
+			var expandableItemUrl = instance.getExpandableItemUrl(item);
+			expandableItemUrl = urlPrefix + expandableItemUrl;
+			console.log(expandableItemUrl);
+			
+			// relegate task of selecting apt parent to specific instance 
+			var parent = instance.getContainer(item);
+				
+			MetadataRenderer.addMetadataDisplay(parent, expandableItemUrl, true, null, item);
+			
+			//request loading of webpage
+			downloadRequester(expandableItemUrl);
+			instance.setExpanded(item);
+		}
 	}	
 }
 

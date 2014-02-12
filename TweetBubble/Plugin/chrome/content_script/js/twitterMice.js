@@ -1556,19 +1556,40 @@ MetadataRenderer.getDocumentContainerByExpandedItem = function(item)
 }
 
 /**
- * Remove the metadata display
+ * show the metadata display
  * @param expandedItem, item for which display was constructed
  */
-MetadataRenderer.removeMetadataDisplay = function(expandedItem)
+MetadataRenderer.showMetadataDisplay = function(expandedItem)
 {
 	var dc = MetadataRenderer.getDocumentContainerByExpandedItem(expandedItem);
 	if (dc)
 	{
 		// metadata display
-		dc.container.removeChild(dc.visual);
+		dc.visual.style.display = "";
 		
-		MetadataRenderer.removeColor(dc.container, dc.expandedItem.style.background);
-		dc.expandedItem.style.background = "";
+		if(MetadataRenderer.LoggingFunction)
+		{
+			var eventObj = {
+				show_metadata: {
+					primary_doc: dc.urls[0]
+				}
+			}
+			MetadataRenderer.LoggingFunction(eventObj);
+		}		
+	}
+}
+
+/**
+ * hide the metadata display
+ * @param expandedItem, item for which display was constructed
+ */
+MetadataRenderer.hideMetadataDisplay = function(expandedItem)
+{
+	var dc = MetadataRenderer.getDocumentContainerByExpandedItem(expandedItem);
+	if (dc)
+	{
+		// metadata display
+		dc.visual.style.display = "none";
 		
 		if(MetadataRenderer.LoggingFunction)
 		{
@@ -1578,9 +1599,7 @@ MetadataRenderer.removeMetadataDisplay = function(expandedItem)
 				}
 			}
 			MetadataRenderer.LoggingFunction(eventObj);
-		}
-		
-		MetadataRenderer.documentMap.splice(MetadataRenderer.documentMap.indexOf(dc), 1);		
+		}				
 	}
 }
 
