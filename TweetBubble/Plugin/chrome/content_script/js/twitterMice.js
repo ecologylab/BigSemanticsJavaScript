@@ -864,6 +864,7 @@ MetadataRenderer.getLocationForParentTable = function(element)
 	var aTags = element.getElementsByTagName("a");
 	if(aTags.length > 0)
 	{
+		console.log("parentTable loc: " + aTags[0].href);
 		return aTags[0].href;	
 	}	
 	return "none";
@@ -871,15 +872,29 @@ MetadataRenderer.getLocationForParentTable = function(element)
 
 MetadataRenderer.getLocationForChildTable = function(element)
 {
-	var tables = element.getElementsByClassName("metadataTableDiv");
-	if (tables.length > 0)
+	var valueCol = element.getElementsByClassName("valueCol")[0];
+	
+	// label_at top or bottom
+	if (valueCol == null)
 	{
-		table = tables[0];
+		var sibling = (element.nextSibling == null) ? element.previousSibling : element.nextSibling; 
+		valueCol = sibling.getElementsByClassName("valueCol")[0];
+	}
+	
+	if (valueCol)
+	{
+		var tables = valueCol.getElementsByClassName("metadataTableDiv");
 		
-		var aTags = table.getElementsByTagName("a");
-		if(aTags.length > 0)
+		if (tables.length > 0)
 		{
-			return aTags[0].href;	
+			table = tables[0];
+			
+			var aTags = table.getElementsByTagName("a");
+			if(aTags.length > 0)
+			{
+				console.log("childTable loc: " + aTags[0].href);
+				return aTags[0].href;
+			}
 		}
 	}
 	return "none";
@@ -934,6 +949,8 @@ MetadataRenderer.downloadAndDisplayDocument = function(event)
 	// Did the table have a document location?
 	if(location && location.toLowerCase() != taskUrl)
 	{
+		button.location = location;
+		
 		// Add a loadingRow for visual feedback that the metadata is being downloaded / parsed
 		table.appendChild(MetadataRenderer.createLoadingRow());
 		
@@ -951,14 +968,26 @@ MetadataRenderer.downloadAndDisplayDocument = function(event)
 	if(MetadataRenderer.LoggingFunction)
 	{			
 		var eventObj = {};
-		if(button.parentElement.childNodes[1])
-		{
-			eventObj = {
-				expand_metadata: {
-					field_name: button.parentElement.childNodes[1].innerText,
-					parent_doc: MetadataRenderer.getLocationForParentTable(button.parentElement)
-				}
-			};
+			
+		if(location == null)
+		{	
+			if (button.parentElement.childNodes[1])
+			{
+				eventObj = {
+					expand_metadata: {
+						field_name: button.parentElement.childNodes[1].innerText,
+						parent_doc: MetadataRenderer.getLocationForParentTable(button.parentElement)
+					}
+				};
+			}
+			else
+			{
+				eventObj = {
+					expand_metadata: {
+						parent_doc: MetadataRenderer.getLocationForParentTable(button.parentElement)
+					}
+				};
+			}
 		}
 		else
 		{
@@ -988,15 +1017,15 @@ MetadataRenderer.highlightDocuments = function(event)
 		// Highlight row
 		MetadataRenderer.highlightLabel(row);
 		
-		var table = null;
-		var children = row.parentElement.parentElement.childNodes;
-		for (var i = 0; i < children.length; i++)
+		var table = row.parentElement.parentElement.getElementsByClassName("valueCol")[0];
+		
+		// label_at top or bottom
+		if (table == null)
 		{
-			if (children[i].className == "valueCol")
-			{
-				table = children[i];
-				break;
-			}
+			var sibling = (button.parentElement.parentElement.nextSibling == null) ?
+				button.parentElement.parentElement.previousSibling : 
+				button.parentElement.parentElement.nextSibling; 
+			table = sibling.getElementsByClassName("valueCol")[0];
 		}
 		
 		// Search the table for a document location
@@ -1129,14 +1158,25 @@ MetadataRenderer.expandCollapseTable = function(event)
 		if(MetadataRenderer.LoggingFunction && (event.name == null || event.name != "fakeEvent"))
 		{			
 			var eventObj = {};
-			if(button.parentElement.childNodes[1])
+			if(typeof button.location === "undefined")
 			{
-				eventObj = {
-					expand_metadata: {
-						field_name: button.parentElement.childNodes[1].innerText,
-						parent_doc: MetadataRenderer.getLocationForParentTable(button.parentElement)
-					}
-				};
+				if(button.parentElement.childNodes[1])
+				{
+					eventObj = {
+						expand_metadata: {
+							field_name: button.parentElement.childNodes[1].innerText,
+							parent_doc: MetadataRenderer.getLocationForParentTable(button.parentElement)
+						}
+					};
+				}
+				else
+				{
+					eventObj = {
+						expand_metadata: {
+							parent_doc: MetadataRenderer.getLocationForParentTable(button.parentElement)
+						}
+					};
+				}
 			}
 			else
 			{
@@ -1160,14 +1200,25 @@ MetadataRenderer.expandCollapseTable = function(event)
 		if(MetadataRenderer.LoggingFunction)
 		{
 			var eventObj = {};
-			if(button.parentElement.childNodes[1])
+			if(typeof button.location === "undefined")
 			{
-				eventObj = {
-					collapse_metadata: {
-						field_name: button.parentElement.childNodes[1].innerText,
-						parent_doc: MetadataRenderer.getLocationForParentTable(button.parentElement)
-					}
-				};
+				if (button.parentElement.childNodes[1])
+				{
+					eventObj = {
+						collapse_metadata: {
+							field_name: button.parentElement.childNodes[1].innerText,
+							parent_doc: MetadataRenderer.getLocationForParentTable(button.parentElement)
+						}
+					};
+				}
+				else
+				{
+					eventObj = {
+						collapse_metadata: {
+							parent_doc: MetadataRenderer.getLocationForParentTable(button.parentElement)
+						}
+					};
+				}
 			}
 			else
 			{
