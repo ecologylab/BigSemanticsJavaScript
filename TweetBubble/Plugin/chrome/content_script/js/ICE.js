@@ -35,6 +35,16 @@ function downloadRequester(expandableItemUrl)
 
 function onUpdateHandler()
 {
+	if (MetadataRenderer.LoggingFunction)
+	{
+		var eventObj = {
+			scroll: {
+				offsetX: window.pageXOffset,
+				offsetY: window.pageYOffset
+			}
+		}
+		MetadataRenderer.LoggingFunction(eventObj);
+	}
 	processPage();
 }
 
@@ -116,6 +126,16 @@ function layoutExpandableItems(node, isMetadata)
 
 function defaultConditionOnUpdateHandler()
 {
+	if (MetadataRenderer.LoggingFunction)
+	{
+		var eventObj = {
+			scroll: {
+				offsetX: window.pageXOffset,
+				offsetY: window.pageYOffset
+			}
+		}
+		MetadataRenderer.LoggingFunction(eventObj);
+	}
 	processDefaultConditionClicks(document);
 }
 
@@ -128,7 +148,7 @@ function defaultConditionClickItem()
 		var url_p = instance.getUrlPrefix() + instance.getHrefAttribute(item);
 		
 		var eventObj = {
-			url_popped: {
+			url_pop: {
 				url: url_p
 			}
 		}
@@ -162,8 +182,8 @@ function processUrlChange(newUrl)
 		//url_changed
 		var eventObj = {
 			url_changed: {
-				oldUrl: currentUrl,
-				url: newUrl
+				old_url: currentUrl,
+				new_url: newUrl
 			}
 		}
 		MetadataRenderer.LoggingFunction(eventObj);
