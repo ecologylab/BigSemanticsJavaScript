@@ -1514,17 +1514,20 @@ MetadataRenderer.unhighlightTweet = function(event)
 
 MetadataRenderer.collapseOrScrollToExpandedItem = function(event)
 {
-	var elt = event.target;
+	var elt = event.currentTarget;
 	var y = 0;        
     while (elt && (typeof elt.offsetTop !== "undefined") && !isNaN(elt.offsetTop))
     {
     	y += elt.offsetTop;
     	elt = elt.offsetParent;
     }
-    if (window.pageYOffset > y)
+    
+	if (window.pageYOffset > y)
     {
-    	window.scrollTo(window.scrollLeft, (y - 50));
-    	/*var animateScroll = function() {
+    	//window.scrollTo(window.scrollLeft, (y - 50));
+		var containers = MetadataRenderer.getFirstLevelDocumentContainers(event.currentTarget);
+	    
+    	var animateScroll = function() {
     		if ((window.pageYOffset - (y-50)) > 0)
     		{
 	    		var scroll = (window.pageYOffset - (y-50)) > 100?
@@ -1532,9 +1535,24 @@ MetadataRenderer.collapseOrScrollToExpandedItem = function(event)
 	        	window.scrollTo(window.scrollLeft, (window.pageYOffset - scroll));
 	        	setTimeout(animateScroll, 10);
     		}
+    		else
+    		{
+    	    	for (var i = 0; i < containers.length; i++)
+    	    	{
+	    			var hideVisual = function(visual) {
+	    				visual.style.display = "none";
+	    			}
+	    			
+	    			containers[i].expandedItem.lastChild.src = expandIconPath;
+	    			containers[i].visual.style.opacity = 0.1;
+	    			    	    			
+    	    		setTimeout(hideVisual, 330, containers[i].visual);
+    	    	}
+    		}
         };
-        animateScroll();*/
+        animateScroll();
     }
+    event.stopPropagation();
 }
 
 MetadataRenderer.stopEventPropagation = function(event)
@@ -1556,6 +1574,16 @@ MetadataRenderer.getDocumentContainerByExpandedItem = function(item)
 	return null;
 }
 
+MetadataRenderer.getDocumentContainersByContainer = function(container)
+{
+	var containers = [];
+	for(var i = 0; i < MetadataRenderer.documentMap.length; i++)
+		if(MetadataRenderer.documentMap[i].container == container)
+			containers.push(MetadataRenderer.documentMap[i]);
+
+	return containers;
+}
+
 /**
  * show the metadata display
  * @param expandedItem, item for which display was constructed
@@ -1567,6 +1595,7 @@ MetadataRenderer.showMetadataDisplay = function(expandedItem)
 	{
 		// metadata display
 		dc.visual.style.display = "";
+		dc.visual.style.opacity = 1;
 		
 		if(MetadataRenderer.LoggingFunction)
 		{
@@ -1602,6 +1631,18 @@ MetadataRenderer.hideMetadataDisplay = function(expandedItem)
 			MetadataRenderer.LoggingFunction(eventObj);
 		}				
 	}
+}
+
+/**
+ * get the document containers existing inside given element
+ * @param elt, element containing the DocumentContainer(s)
+ */
+MetadataRenderer.getFirstLevelDocumentContainers = function(elt)
+{
+	//fieldCompositeContainer.nestedPad.metadataTableDiv.metadataRow.valueCol.fieldValueContainer
+	var container = elt.lastChild.lastChild.lastChild.lastChild.lastChild;
+	
+	return MetadataRenderer.getDocumentContainersByContainer(container);
 }
 
 /**

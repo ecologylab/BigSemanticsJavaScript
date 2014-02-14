@@ -35,7 +35,6 @@ this.removeHrefAndSetAsUrl = function(elt) {
 this.getExpandableItemUrl = function(item) {
 	// TODO: method for retweets
 	// get <a> hyperlink parent tag; in accordance with above XPath
-	// var parent = item.parentNode;
 	return item.parentNode.getAttribute("url");
 };
 
@@ -92,7 +91,6 @@ this.getContainer = function(elt) {
 	// append to last row, if metadata, to keep tweet content together 
 	if (elt.parentNode.getAttribute("isMetadata") == "true")
 	{
-		// metadataTableDiv
 		while (parent.className != "metadataTableDiv")
 			parent = parent.parentNode;
 		

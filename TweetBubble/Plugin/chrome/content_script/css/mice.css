@@ -20,6 +20,12 @@
 	line-height: 15px;
 	
 	position: relative;
+	
+	transition: opacity 0.3s;
+	-moz-transition: opacity 0.3s; /* Firefox 4 */
+	-webkit-transition: opacity 0.3s; /* Safari and Chrome */
+	-o-transition: opacity 0.3s; /* Opera */
+
 }
 
 .metadataTable {
@@ -36,10 +42,13 @@
 	border-radius: 8px;
 	padding-top: 5px;
 	padding-bottom: 1px;
+	
+	cursor: default;
 }
 
 .metadataTableDiv {
 	display: table;
+	cursor: default;
 }
 
 .metadataRow {
@@ -215,7 +224,7 @@
 	min-height: 19px;
 	height: auto;
 	text-overflow: ellipsis;
-	overflow-x: visible;
+	/*overflow-x: visible;*/
 
 	transition: height 0.3s;
 	-moz-transition: height 0.3s; /* Firefox 4 */
@@ -256,6 +265,7 @@
 
 .metadataContainer .fieldCompositeContainer.highlightTweet{
 	background: #F5F5F5;
+	cursor: pointer;
 }
 
 .metadataContainer .expandButton{
