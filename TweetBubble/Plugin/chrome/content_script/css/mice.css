@@ -263,11 +263,6 @@
 	text-overflow: ellipsis;	
 }
 
-.metadataContainer .fieldCompositeContainer.highlightTweet{
-	background: #F5F5F5;
-	cursor: pointer;
-}
-
 .metadataContainer .expandButton{
 	background: white;
 	width: 16px;

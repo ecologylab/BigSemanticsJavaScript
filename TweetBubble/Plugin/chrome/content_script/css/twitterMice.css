@@ -1,0 +1,13 @@
+.metadataContainer .fieldCompositeContainer.highlightTweet{
+	background: #F5F5F5;
+	cursor: pointer;
+}
+
+.metadataContainer a.tweetSemantics {
+	margin-left: 5px;
+	display: inline;
+}
+
+.metadataContainer div.tweetSemantics {
+	float: right;
+}

@@ -105,3 +105,32 @@ Util.getInformationSheetResponse = function(callback)
 	document.body.appendChild(outerDiv);
 	//window.addEventListener("scroll", handleScroll);
 }
+
+Util.getTweetSemanticsDiv = function(tweetId)
+{
+	var a_reply = document.createElement('a');
+	a_reply.href = "https://twitter.com/intent/tweet?in_reply_to=" + tweetId;
+	a_reply.className = "tweetSemantics";
+	a_reply.innerText = "reply";
+	a_reply.textContent = "reply";
+	
+	var a_retweet = document.createElement('a');
+	a_retweet.href = "https://twitter.com/intent/retweet?tweet_id=" + tweetId;
+	a_retweet.className = "tweetSemantics";
+	a_retweet.innerText = "retweet";
+	a_retweet.textContent = "retweet";
+	
+	var a_favorite = document.createElement('a');
+	a_favorite.href = "https://twitter.com/intent/favorite?tweet_id=" + tweetId;
+	a_favorite.className = "tweetSemantics";
+	a_favorite.innerText = "favorite";
+	a_favorite.textContent = "favorite";
+	
+	var twSemanticsDiv = document.createElement('div');
+	twSemanticsDiv.appendChild(a_reply);
+	twSemanticsDiv.appendChild(a_retweet);
+	twSemanticsDiv.appendChild(a_favorite);
+	twSemanticsDiv.className = "tweetSemantics";
+	
+	return twSemanticsDiv;
+}

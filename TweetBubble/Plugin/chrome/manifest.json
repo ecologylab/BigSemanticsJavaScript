@@ -3,7 +3,7 @@
 
   "name": "TweetBubble",
   "description": "Expand to explore @usernames, #hashtags on Twitter. See related content without switching back and forth between tabs and windows",
-  "version": "0.9.5",
+  "version": "0.9.6",
 
   "icons": {
     "16": "content_script/img/logo_16.png",
@@ -15,6 +15,7 @@
     "http://ecology-service.cs.tamu.edu/",
     "http://ideamache.ecologylab.net/",
     "http://ecoarray0:3080/",
+    "http://localhost:8080/",
     "cookies",
     "tabs"
   ],
@@ -26,7 +27,8 @@
       ],
       "run_at": "document_end",
       "css": ["content_script/css/mice.css",
-      		  "content_script/css/infosheet.css"
+      		  "content_script/css/infosheet.css",
+      		  "content_script/css/twitterMice.css"
       ],
       "js": [
         "content_script/js/simplDeserializer.js",
