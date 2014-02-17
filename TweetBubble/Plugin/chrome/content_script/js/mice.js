@@ -357,6 +357,7 @@ var METADATA_FIELD_MAX_DEPTH = 7;
 function MetadataField(mmdField)
 {
 	this.name = (mmdField.label != null) ? mmdField.label : mmdField.name;
+	this.mmdName = mmdField.name;
 	this.value = "";
 	this.value_as_label = "";
 	
@@ -417,6 +418,19 @@ MetadataRenderer.guessDocumentLocation = function(metadata)
 }
 
 /**
+ * looks up metadataFields collection for the instance, else creates new
+ */
+MetadataRenderer.getMetadataField = function(mmdField, metadataFields)
+{
+	for(var i = 0; i < metadataFields.length; i++)
+	{
+		if (metadataFields[i].mmdName == mmdField.name)
+			return metadataFields[i];
+	}
+	return new MetadataField(mmdField);
+}
+
+/**
  * Iterates through the meta-metadata, creating MetadataFields by matching meta-metadata fields to metadata values 
  * @param mmdKids, array of meta-metadata fields
  * @param metadata, metadata object from the service
@@ -440,7 +454,7 @@ MetadataRenderer.getMetadataFields = function(mmdKids, metadata, depth, child_va
 			
 			// Is this a visible field?
 			if(MetadataRenderer.isFieldVisible(mmdField, metadata, taskUrl))
-			{				
+			{
 				// Is there a metadata value for this field?		
 				var value = MetadataRenderer.getFieldValue(mmdField, metadata);				
 				if(value)
@@ -448,7 +462,7 @@ MetadataRenderer.getMetadataFields = function(mmdKids, metadata, depth, child_va
 					if (child_value_as_label != null)
 						mmdField.use_value_as_label = child_value_as_label; 
 										
-					var field = new MetadataField(mmdField);
+					var field = MetadataRenderer.getMetadataField(mmdField, metadataFields);
 										
 					field.value = value;
 					if (mmdField.use_value_as_label != null) 
@@ -471,8 +485,9 @@ MetadataRenderer.getMetadataFields = function(mmdKids, metadata, depth, child_va
 					{
 						MetadataRenderer.concatenateField(field, metadataFields, mmdKids);
 					}
-								
-					metadataFields.push(field);
+					
+					if (metadataFields.indexOf(field) == -1)
+						metadataFields.push(field);
 				}
 			}
 		}		
@@ -728,18 +743,15 @@ MetadataRenderer.concatenateField = function(field, metadataFields, mmdKids)
 	var metadataField = "";	
 	for(var i = 0; i < metadataFields.length; i++)
 	{
-		if (metadataFields[i].name == field.concatenates_to)
+		if (metadataFields[i].mmdName == field.concatenates_to)
 		{
 			metadataField = metadataFields[i];
+			metadataField.concatenates.push(field);
 			break;
 		}
 	}
 	
-	if (metadataField != "")
-	{
-		metadataField.concatenates.push(field);
-	}
-	else
+	if (metadataField == "")
 	{
 		for (var key in mmdKids)
 		{
@@ -757,11 +769,9 @@ MetadataRenderer.concatenateField = function(field, metadataFields, mmdKids)
 			
 			if (name == field.concatenates_to)
 			{
-				if (mmdField.concatenates == null)
-				{
-					mmdField.concatenates = [];					
-				}
-				mmdField.concatenates.push(field);
+				metadataField = new MetadataField(mmdField);
+				metadataField.concatenates.push(field);
+				metadataFields.push(metadataField);
 			}
 		}
 	}
