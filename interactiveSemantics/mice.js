@@ -215,7 +215,7 @@ MetadataRenderer.createAndRenderMetadata = function(task)
 	
 	// Build the HTML table for the metadata
 	MetadataRenderer.currentDocumentLocation = task.url;
-	var metadataTable = MetadataRenderer.buildMetadataDisplay(task.isRoot, task.mmd, task.metadata)
+	var metadataTable = MetadataRenderer.buildMetadataDisplay(task.isRoot, task.mmd, task.metadata, task.url)
 	
 	if(metadataTable)
 	{
@@ -357,6 +357,7 @@ var METADATA_FIELD_MAX_DEPTH = 7;
 function MetadataField(mmdField)
 {
 	this.name = (mmdField.label != null) ? mmdField.label : mmdField.name;
+	this.mmdName = mmdField.name;
 	this.value = "";
 	this.value_as_label = "";
 	
@@ -417,6 +418,19 @@ MetadataRenderer.guessDocumentLocation = function(metadata)
 }
 
 /**
+ * looks up metadataFields collection for the instance, else creates new
+ */
+MetadataRenderer.getMetadataField = function(mmdField, metadataFields)
+{
+	for(var i = 0; i < metadataFields.length; i++)
+	{
+		if (metadataFields[i].mmdName == mmdField.name)
+			return metadataFields[i];
+	}
+	return new MetadataField(mmdField);
+}
+
+/**
  * Iterates through the meta-metadata, creating MetadataFields by matching meta-metadata fields to metadata values 
  * @param mmdKids, array of meta-metadata fields
  * @param metadata, metadata object from the service
@@ -448,8 +462,8 @@ MetadataRenderer.getMetadataFields = function(mmdKids, metadata, depth, child_va
 					if (child_value_as_label != null)
 						mmdField.use_value_as_label = child_value_as_label; 
 										
-					var field = new MetadataField(mmdField);
-					
+					var field = MetadataRenderer.getMetadataField(mmdField, metadataFields);
+										
 					field.value = value;
 					if (mmdField.use_value_as_label != null) 
 						field.value_as_label = MetadataRenderer.getValueForProperty(mmdField.use_value_as_label, metadata, mmdKids, depth);
@@ -463,7 +477,7 @@ MetadataRenderer.getMetadataFields = function(mmdKids, metadata, depth, child_va
 						var navigationLink = metadata[mmdField.navigates_to];
 						
 						// Is there a value for the navigation link
-						if(navigationLink != null)// && (navigationLink.toLowerCase() != MetadataRenderer.currentDocumentLocation || depth == 0))
+						if(navigationLink != null && (navigationLink.toLowerCase() != taskUrl || depth == 0))
 							field.navigatesTo = navigationLink;
 					}
 					
@@ -471,8 +485,9 @@ MetadataRenderer.getMetadataFields = function(mmdKids, metadata, depth, child_va
 					{
 						MetadataRenderer.concatenateField(field, metadataFields, mmdKids);
 					}
-								
-					metadataFields.push(field);
+					
+					if (metadataFields.indexOf(field) == -1)
+						metadataFields.push(field);
 				}
 			}
 		}		
@@ -728,18 +743,15 @@ MetadataRenderer.concatenateField = function(field, metadataFields, mmdKids)
 	var metadataField = "";	
 	for(var i = 0; i < metadataFields.length; i++)
 	{
-		if (metadataFields[i].name == field.concatenates_to)
+		if (metadataFields[i].mmdName == field.concatenates_to)
 		{
 			metadataField = metadataFields[i];
+			metadataField.concatenates.push(field);
 			break;
 		}
 	}
 	
-	if (metadataField != "")
-	{
-		metadataField.concatenates.push(field);
-	}
-	else
+	if (metadataField == "")
 	{
 		for (var key in mmdKids)
 		{
@@ -757,11 +769,9 @@ MetadataRenderer.concatenateField = function(field, metadataFields, mmdKids)
 			
 			if (name == field.concatenates_to)
 			{
-				if (mmdField.concatenates == null)
-				{
-					mmdField.concatenates = [];					
-				}
-				mmdField.concatenates.push(field);
+				metadataField = new MetadataField(mmdField);
+				metadataField.concatenates.push(field);
+				metadataFields.push(metadataField);
 			}
 		}
 	}
@@ -795,14 +805,25 @@ MetadataRenderer.expandCollapseTable = function(event)
 		if(MetadataRenderer.LoggingFunction)
 		{			
 			var eventObj = {};
-			if(button.parentElement.childNodes[1])
+			if(typeof button.location === "undefined")
 			{
-				eventObj = {
-					expand_metadata: {
-						field_name: button.parentElement.childNodes[1].innerText,
-						parent_doc: MetadataRenderer.getLocationForParentTable(button.parentElement)
-					}
-				};
+				if(button.parentElement.childNodes[1])
+				{
+					eventObj = {
+						expand_metadata: {
+							field_name: button.parentElement.childNodes[1].innerText,
+							parent_doc: MetadataRenderer.getLocationForParentTable(button.parentElement)
+						}
+					};
+				}
+				else
+				{
+					eventObj = {
+						expand_metadata: {
+							parent_doc: MetadataRenderer.getLocationForParentTable(button.parentElement)
+						}
+					};
+				}
 			}
 			else
 			{
@@ -826,14 +847,25 @@ MetadataRenderer.expandCollapseTable = function(event)
 		if(MetadataRenderer.LoggingFunction)
 		{
 			var eventObj = {};
-			if(button.parentElement.childNodes[1])
+			if(typeof button.location === "undefined")
 			{
-				eventObj = {
-					collapse_metadata: {
-						field_name: button.parentElement.childNodes[1].innerText,
-						parent_doc: MetadataRenderer.getLocationForParentTable(button.parentElement)
-					}
-				};
+				if (button.parentElement.childNodes[1])
+				{
+					eventObj = {
+						collapse_metadata: {
+							field_name: button.parentElement.childNodes[1].innerText,
+							parent_doc: MetadataRenderer.getLocationForParentTable(button.parentElement)
+						}
+					};
+				}
+				else
+				{
+					eventObj = {
+						collapse_metadata: {
+							parent_doc: MetadataRenderer.getLocationForParentTable(button.parentElement)
+						}
+					};
+				}
 			}
 			else
 			{
@@ -856,21 +888,35 @@ MetadataRenderer.expandCollapseTable = function(event)
  */
 MetadataRenderer.getTableForButton = function(button)
 {
-	var table = button.parentElement.parentElement.parentElement.getElementsByTagName("td")[1];
+	var table = button.parentElement.parentElement.parentElement.getElementsByClassName("valueCol")[0];
 	
 	if (table == null)
 	{
 		var sibling = (button.parentElement.parentElement.parentElement.nextSibling == null) ?
 			button.parentElement.parentElement.parentElement.previousSibling : 
 			button.parentElement.parentElement.parentElement.nextSibling; 
-		table = sibling.getElementsByTagName("td")[0];
+		table = sibling.getElementsByClassName("valueCol")[0];
 	}
+	
+	do
+	{
+		var rowsFound = false;
+		var elts = table.childNodes;
+		for (var i = 0; i < elts.length; i++)
+		{
+			if (elts[i].className == "metadataRow")
+			{
+				rowsFound = true;
+				break;
+			}
+		}
 		
-	while(table.rows == null)
-		table = table.firstChild;
+		if (rowsFound)
+			break;
+		else
+			table = table.firstChild;
 		
-	while(table.rows.length == 0)
-		table = table.getElementsByTagName("table")[0];
+	} while (table);
 		
 	return table;
 }
@@ -881,8 +927,17 @@ MetadataRenderer.getTableForButton = function(button)
  */
 MetadataRenderer.expandTable = function(table)
 {
-	for (var i = 0; i < table.rows.length; i++)
-		table.rows[i].style.display = "";
+	var rows = [];
+	var elts = table.childNodes;
+	
+	for (var i = 0; i < elts.length; i++)
+		if (elts[i].className == "metadataRow")
+			rows.push(elts[i]);
+	
+	for (var i = 0; i < rows.length; i++)
+	{
+		rows[i].style.display = "table-row";
+	}
 
 	// Remove any loading rows, just to be sure 	
 	MetadataRenderer.clearLoadingRows(table);
@@ -901,12 +956,19 @@ MetadataRenderer.expandTable = function(table)
  */
 MetadataRenderer.collapseTable = function(table)
 {
-	for (var i = 0; i < table.rows.length; i++)
+	var rows = [];
+	var elts = table.childNodes;
+	
+	for (var i = 0; i < elts.length; i++)
+		if (elts[i].className == "metadataRow")
+			rows.push(elts[i]);
+	
+	for (var i = 0; i < rows.length; i++)
 	{
 		if(i == 0)
-			table.rows[i].style.display = "";
+			rows[i].style.display = "table-row";
 		else
-			table.rows[i].style.display = "none";
+			rows[i].style.display = "none";
 	}
 	
 	// Remove any loading rows, just to be sure 	
@@ -953,9 +1015,16 @@ MetadataRenderer.downloadAndDisplayDocument = function(event)
 		
 	// Search the table for the document location
 	var location = null;
-	for (var i = 0; i < table.rows.length; i++)
+	var rows = [];
+	var elts = table.childNodes;
+	
+	for (var i = 0; i < elts.length; i++)
+		if (elts[i].className == "metadataRow")
+			rows.push(elts[i]);
+	
+	for (var i = 0; i < rows.length; i++)
 	{
-		var valueCol = table.rows[i].getElementsByTagName("td")[1];
+		var valueCol = rows[i].childNodes[1];
 		if(valueCol)
 		{
 			var valueDiv = valueCol.getElementsByTagName("div")[0];
@@ -969,6 +1038,8 @@ MetadataRenderer.downloadAndDisplayDocument = function(event)
 	// Did the table have a document location?
 	if(location)
 	{
+		button.location = location;
+		
 		// Add a loadingRow for visual feedback that the metadata is being downloaded / parsed
 		table.appendChild(MetadataRenderer.createLoadingRow());
 		
@@ -987,14 +1058,26 @@ MetadataRenderer.downloadAndDisplayDocument = function(event)
 	if(MetadataRenderer.LoggingFunction)
 	{			
 		var eventObj = {};
-		if(button.parentElement.childNodes[1])
-		{
-			eventObj = {
-				expand_metadata: {
-					field_name: button.parentElement.childNodes[1].innerText,
-					parent_doc: MetadataRenderer.getLocationForParentTable(button.parentElement)
-				}
-			};
+			
+		if(location == null)
+		{	
+			if (button.parentElement.childNodes[1])
+			{
+				eventObj = {
+					expand_metadata: {
+						field_name: button.parentElement.childNodes[1].innerText,
+						parent_doc: MetadataRenderer.getLocationForParentTable(button.parentElement)
+					}
+				};
+			}
+			else
+			{
+				eventObj = {
+					expand_metadata: {
+						parent_doc: MetadataRenderer.getLocationForParentTable(button.parentElement)
+					}
+				};
+			}
 		}
 		else
 		{
@@ -1024,7 +1107,17 @@ MetadataRenderer.highlightDocuments = function(event)
 		// Highlight row
 		MetadataRenderer.highlightLabel(row);
 		
-		var table = row.parentElement.parentElement.getElementsByTagName("td")[1];
+		var table = row.parentElement.parentElement.getElementsByClassName("valueCol")[0];
+		
+		// label_at top or bottom
+		if (table == null)
+		{
+			var sibling = (button.parentElement.parentElement.nextSibling == null) ?
+				button.parentElement.parentElement.previousSibling : 
+				button.parentElement.parentElement.nextSibling; 
+			table = sibling.getElementsByClassName("valueCol")[0];
+		}
+
 		
 		// Search the table for a document location
 		var location = null;
@@ -1107,7 +1200,10 @@ MetadataRenderer.drawConnectionLine = function(target, source)
 	var label = target.getElementsByClassName("fieldLabel")[0];
 	
 	// Highlight the target label
-	MetadataRenderer.highlightLabel(label.parentElement);
+	if (label)
+		MetadataRenderer.highlightLabel(label.parentElement);
+	else // if label is hidden
+		label = target.getElementsByClassName("valueCol")[0];
 
 	// Get the canvas
 	var canvas = null;
@@ -1286,10 +1382,10 @@ var FIELDS_TO_EXPAND = 10;
  * @param metadata, metadata to display
  * @return table, HTML table for the metadata or null if there is no metadata to display
  */
-MetadataRenderer.buildMetadataDisplay = function(isRoot, mmd, metadata)
+MetadataRenderer.buildMetadataDisplay = function(isRoot, mmd, metadata, taskUrl)
 {
 	// Convert the metadata into a list of MetadataFields using the meta-metadata.
-	var metadataFields = MetadataRenderer.getMetadataFields(mmd["meta_metadata"]["kids"], metadata, 0, null, null);
+	var metadataFields = MetadataRenderer.getMetadataFields(mmd["meta_metadata"]["kids"], metadata, 0, null, taskUrl);
 	
 	// Is there any visable metadata?
 	if(MetadataRenderer.hasVisibleMetadata(metadataFields))
@@ -1314,7 +1410,8 @@ MetadataRenderer.buildMetadataTable = function(table, isChildTable, isRoot, meta
 {
 	if(!table)
 	{
-		table = document.createElement('table');
+		table = document.createElement('div');
+		table.className = "metadataTableDiv";
 		
 		//if(!isRoot)
 		//	table.className = "metadataTable";
@@ -1326,15 +1423,16 @@ MetadataRenderer.buildMetadataTable = function(table, isChildTable, isRoot, meta
 	for(var i = 0; i < metadataFields.length; i++)
 	{			
 		
-		var row = document.createElement('tr');
+		var row = document.createElement('div');
+		row.className = 'metadataRow';
 					
 		// if the maximum number of fields have been rendered then stop rendering and add a "More" expander
 		if(fieldCount <= 0)
 		{
-			var nameCol = document.createElement('td');
+			var nameCol = document.createElement('div');
 				nameCol.className = "labelCol";
-			
-			var valueCol = document.createElement('td');
+							
+			var valueCol = document.createElement('div');
 				valueCol.className = "valueCol";
 			
 			//TODO - add "more" expander
@@ -1387,6 +1485,15 @@ MetadataRenderer.buildMetadataTable = function(table, isChildTable, isRoot, meta
 			var fieldObjs = [];
 			fieldObjs.push(fieldObj);
 
+			var innerRow = null;
+			if (metadataField.concatenates.length > 0)
+			{
+				innerRow = document.createElement('div');
+				innerRow.className = 'metadataRow';
+			}
+			else
+				innerRow = row;
+			
 			for (var j = 0; j < metadataField.concatenates.length; j++)
 			{
 				fieldObj = MetadataRenderer.buildMetadataField(metadataField.concatenates[j], isChildTable, fieldCount, row);
@@ -1404,9 +1511,12 @@ MetadataRenderer.buildMetadataTable = function(table, isChildTable, isRoot, meta
 				{
 					if (metadataField.label_at == "top" || metadataField.label_at == "bottom")
 					{
-						var innerTable = document.createElement('table');
-						var row1 = document.createElement('tr');
-						var row2 = document.createElement('tr');
+						var innerTable = document.createElement('div');
+						var row1 = document.createElement('div');
+						var row2 = document.createElement('div');
+						innerTable.style.display = 'table';
+						row1.className = 'metadataRow';
+						row2.className = 'metadataRow';
 						if (metadataField.label_at == "top")
 						{
 							row1.appendChild(nameCol);							
@@ -1420,26 +1530,53 @@ MetadataRenderer.buildMetadataTable = function(table, isChildTable, isRoot, meta
 						innerTable.appendChild(row1);
 						innerTable.appendChild(row2);
 						
-						var td = document.createElement('td');
+						var td = document.createElement('div');
+						td.style.display = 'table-cell';
 						td.appendChild(innerTable);
-						row.appendChild(td);
+						
+						// to still make labels align well with fields having label_at left
+						if (metadataField.concatenates.length == 0)
+						{
+							var tdDummy = document.createElement('div');
+							tdDummy.style.display = 'table-cell';						
+							innerRow.appendChild(tdDummy);
+						}
+						innerRow.appendChild(td);
 					}						
 					else if (metadataField.label_at == "right")
 					{
-						row.appendChild(valueCol);
-						row.appendChild(nameCol);
+						innerRow.appendChild(valueCol);
+						innerRow.appendChild(nameCol);
 					}
 					else
 					{
-						row.appendChild(nameCol);
-						row.appendChild(valueCol);
+						innerRow.appendChild(nameCol);
+						innerRow.appendChild(valueCol);
 					}
 				}
 				else
 				{
-					row.appendChild(nameCol);
-					row.appendChild(valueCol);
-				}				
+					innerRow.appendChild(nameCol);
+					innerRow.appendChild(valueCol);
+				}
+			}
+			
+			if (metadataField.concatenates.length > 0)
+			{
+				// new table for inner row
+				var outerTable = document.createElement('div');
+				outerTable.style.display = 'table';
+				outerTable.appendChild(innerRow);
+				
+				var tdOuter = document.createElement('div');
+				tdOuter.style.display = 'table-cell';						
+				tdOuter.appendChild(outerTable);
+				
+				var tdDummy1 = document.createElement('div');
+				tdDummy1.style.display = 'table-cell';						
+
+				row.appendChild(tdDummy1);
+				row.appendChild(tdOuter);
 			}
 			table.appendChild(row);
 			
@@ -1464,10 +1601,10 @@ MetadataRenderer.buildMetadataTable = function(table, isChildTable, isRoot, meta
  */
 MetadataRenderer.buildMetadataField = function(metadataField, isChildTable, fieldCount, row)
 {
-	var nameCol = document.createElement('td');
+	var nameCol = document.createElement('div');
 		nameCol.className = "labelCol";
 	
-	var valueCol = document.createElement('td');
+	var valueCol = document.createElement('div');
 		valueCol.className = "valueCol";
 		
 	var expandButton = null;	
@@ -1801,7 +1938,7 @@ MetadataRenderer.logNavigate = function(event)
 
 MetadataRenderer.getLocationForParentTable = function(element)
 {
-	while(element.tagName != "TABLE")
+	while(element.className != "metadataTableDiv" && element.className != "rootMetadataTableDiv")
 	{
 		element = element.parentElement;
 	}
@@ -1809,6 +1946,7 @@ MetadataRenderer.getLocationForParentTable = function(element)
 	var aTags = element.getElementsByTagName("a");
 	if(aTags.length > 0)
 	{
+		console.log("parentTable loc: " + aTags[0].href);
 		return aTags[0].href;	
 	}	
 	return "none";
@@ -1816,16 +1954,29 @@ MetadataRenderer.getLocationForParentTable = function(element)
 
 MetadataRenderer.getLocationForChildTable = function(element)
 {
-	var tables = element.getElementsByTagName("table");
-	if(tables.length > 0)
-	{
-		table = tables[0];
+	var valueCol = element.getElementsByClassName("valueCol")[0];
 	
-		var aTags = table.getElementsByTagName("a");
-		if(aTags.length > 0)
+	// label_at top or bottom
+	if (valueCol == null)
+	{
+		var sibling = (element.nextSibling == null) ? element.previousSibling : element.nextSibling; 
+		valueCol = sibling.getElementsByClassName("valueCol")[0];
+	}
+	
+	if (valueCol)
+	{
+		var tables = valueCol.getElementsByClassName("metadataTableDiv");
+		
+		if (tables.length > 0)
 		{
-			return aTags[0].href;	
-		}	
+			table = tables[0];
+			
+			var aTags = table.getElementsByTagName("a");
+			if(aTags.length > 0)
+			{
+				return aTags[0].href;
+			}
+		}
 	}
 	return "none";
 }
