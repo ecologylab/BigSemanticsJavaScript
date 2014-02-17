@@ -1004,7 +1004,7 @@ MetadataRenderer.buildMetadataField = function(metadataField, isChildTable, fiel
 	{				
 		// Currently it only rendered Strings, Dates, Integers, and ParsedURLs
 		if(metadataField.scalar_type == "String" || metadataField.scalar_type == "Date" ||metadataField.scalar_type == "Integer" || metadataField.scalar_type == "ParsedURL")
-		{	
+		{
 			if(metadataField.name && !metadataField.hide_label)
 			{
 				var fieldLabelDiv = document.createElement('div');
@@ -1114,7 +1114,10 @@ MetadataRenderer.buildMetadataField = function(metadataField, isChildTable, fiel
 					fieldValue.innerText = MetadataRenderer.removeLineBreaksAndCrazies(metadataField.value);
 					fieldValue.textContent = MetadataRenderer.removeLineBreaksAndCrazies(metadataField.value);
 				}
-					
+				
+				if (metadataField.name == "id")
+					fieldValue = Util.getTweetSemanticsDiv(metadataField.value);
+													
 				if(metadataField.style != null)
 					fieldValue.className += " "+metadataField.style;
 				var fieldValueDiv = document.createElement('div');
