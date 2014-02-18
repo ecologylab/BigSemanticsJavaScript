@@ -1393,7 +1393,6 @@ MetadataRenderer.getLocationForParentTable = function(element)
 	var aTags = element.getElementsByTagName("a");
 	if(aTags.length > 0)
 	{
-		console.log("parentTable loc: " + aTags[0].href);
 		return aTags[0].href;	
 	}	
 	return "none";
@@ -1650,8 +1649,8 @@ MetadataRenderer.hideMetadataDisplay = function(expandedItem)
  */
 MetadataRenderer.getFirstLevelDocumentContainers = function(elt)
 {
-	//fieldCompositeContainer.nestedPad.metadataTableDiv.metadataRow.valueCol.fieldValueContainer
-	var container = elt.lastChild.lastChild.lastChild.lastChild.lastChild;
+	//fieldCompositeContainer.nestedPad.metadataTableDiv.metadataRow.valueCol
+	var container = elt.lastChild.lastChild.lastChild.lastChild;
 	
 	return MetadataRenderer.getDocumentContainersByContainer(container);
 }

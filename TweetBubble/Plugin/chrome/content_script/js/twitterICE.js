@@ -94,8 +94,8 @@ this.getContainer = function(elt) {
 		while (parent.className != "metadataTableDiv")
 			parent = parent.parentNode;
 		
-		// row.valueCol.fieldValueContainer
-		parent = parent.lastChild.lastChild.lastChild;
+		// metadataRow.tableCell
+		parent = parent.lastChild.lastChild;
 	}
 	
 	return parent;
