@@ -3,7 +3,7 @@
 
   "name": "TweetBubble",
   "description": "Expand to explore @usernames, #hashtags on Twitter. See related content without switching back and forth between tabs and windows",
-  "version": "0.9.6",
+  "version": "0.9.7",
 
   "icons": {
     "16": "content_script/img/logo_16.png",
@@ -14,8 +14,6 @@
     "https://twitter.com/*",
     "http://ecology-service.cs.tamu.edu/",
     "http://ideamache.ecologylab.net/",
-    "http://ecoarray0:3080/",
-    "http://localhost:8080/",
     "cookies",
     "tabs"
   ],
@@ -46,6 +44,12 @@
   },
   "web_accessible_resources": [
     "content_script/img/expand_icon.png",
-    "content_script/img/collapse_icon.png"
+    "content_script/img/collapse_icon.png",
+    "content_script/img/reply_153.png",
+    "content_script/img/retweet_153.png",
+    "content_script/img/favorite_153.png",
+    "content_script/img/reply_221.png",
+    "content_script/img/retweet_221.png",
+    "content_script/img/favorite_221.png"
   ]
 }
