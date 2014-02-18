@@ -74,17 +74,33 @@ Util.getInformationSheetResponse = function(callback)
 	//	outerDiv.style.top = window.scrollY;
 	//}
 	
+	var highlightbutton = function(event) {
+		if (event.target.value == "OK")
+			event.target.style.background = "#55ACEE";
+		else
+			event.target.style.background = "#AA0000";
+	}
+	
+	var unhighlightbutton = function(event) {
+		event.target.style.background = "#ddd";
+	}
+	
 	var button_ok = document.createElement("input");
 	button_ok.type = "button";
 	button_ok.value = "OK";
 	button_ok.className = "infoSheetButton";
 	button_ok.onclick = removeDivAndReturnResp;
+	button_ok.onmouseover = highlightbutton;
+	button_ok.onmouseout = unhighlightbutton;
 	
 	var button_cancel = document.createElement("input");
 	button_cancel.type = "button";
 	button_cancel.value = "Cancel";
 	button_cancel.className = "infoSheetButton";
+	button_cancel.style.float = "right";
 	button_cancel.onclick = removeDivAndReturnResp;
+	button_cancel.onmouseover = highlightbutton;
+	button_cancel.onmouseout = unhighlightbutton;
 			
 	var buttonDiv = document.createElement("div");
 	buttonDiv.appendChild(button_ok);
@@ -104,33 +120,4 @@ Util.getInformationSheetResponse = function(callback)
 	document.body.appendChild(bgDiv);
 	document.body.appendChild(outerDiv);
 	//window.addEventListener("scroll", handleScroll);
-}
-
-Util.getTweetSemanticsDiv = function(tweetId)
-{
-	var a_reply = document.createElement('a');
-	a_reply.href = "https://twitter.com/intent/tweet?in_reply_to=" + tweetId;
-	a_reply.className = "tweetSemantics";
-	a_reply.innerText = "reply";
-	a_reply.textContent = "reply";
-	
-	var a_retweet = document.createElement('a');
-	a_retweet.href = "https://twitter.com/intent/retweet?tweet_id=" + tweetId;
-	a_retweet.className = "tweetSemantics";
-	a_retweet.innerText = "retweet";
-	a_retweet.textContent = "retweet";
-	
-	var a_favorite = document.createElement('a');
-	a_favorite.href = "https://twitter.com/intent/favorite?tweet_id=" + tweetId;
-	a_favorite.className = "tweetSemantics";
-	a_favorite.innerText = "favorite";
-	a_favorite.textContent = "favorite";
-	
-	var twSemanticsDiv = document.createElement('div');
-	twSemanticsDiv.appendChild(a_reply);
-	twSemanticsDiv.appendChild(a_retweet);
-	twSemanticsDiv.appendChild(a_favorite);
-	twSemanticsDiv.className = "tweetSemantics";
-	
-	return twSemanticsDiv;
 }
