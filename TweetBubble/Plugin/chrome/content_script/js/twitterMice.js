@@ -1536,6 +1536,8 @@ MetadataRenderer.collapseOrScrollToExpandedItem = function(event)
     {
     	//window.scrollTo(window.scrollLeft, (y - 50));
 		var containers = MetadataRenderer.getFirstLevelDocumentContainers(event.currentTarget);
+		var contentExpansionContainers = containers.content_expansions;
+		var metadataExpansionButtons = containers.metadata_expansion_buttons;
 	    
     	var animateScroll = function() {
     		if ((window.pageYOffset - (y-50)) > 0)
@@ -1547,17 +1549,25 @@ MetadataRenderer.collapseOrScrollToExpandedItem = function(event)
     		}
     		else
     		{
-    	    	for (var i = 0; i < containers.length; i++)
+    			for (var i = 0; i < contentExpansionContainers.length; i++)
     	    	{
 	    			var hideVisual = function(visual) {
 	    				visual.style.display = "none";
 	    			}
 	    			
-	    			containers[i].expandedItem.lastChild.src = expandIconPath;
-	    			containers[i].visual.style.opacity = 0.1;
+	    			contentExpansionContainers[i].expandedItem.lastChild.src = expandIconPath;
+	    			contentExpansionContainers[i].visual.style.opacity = 0.1;
 	    			    	    			
-    	    		setTimeout(hideVisual, 330, containers[i].visual);
+    	    		setTimeout(hideVisual, 330, contentExpansionContainers[i].visual);
     	    	}
+    			for (var i = 0; i < metadataExpansionButtons.length; i++)
+    			{
+    				var fakeEvent = {};
+    				fakeEvent.target = metadataExpansionButtons[i];
+    				fakeEvent.name = "fakeEvent";
+    				//console.log("fake event ready");
+    				MetadataRenderer.expandCollapseTable(fakeEvent);
+    			}
     		}
         };
         animateScroll();
@@ -1649,10 +1659,30 @@ MetadataRenderer.hideMetadataDisplay = function(expandedItem)
  */
 MetadataRenderer.getFirstLevelDocumentContainers = function(elt)
 {
+	//check for content expansions	
 	//fieldCompositeContainer.nestedPad.metadataTableDiv.metadataRow.valueCol
 	var container = elt.lastChild.lastChild.lastChild.lastChild;
+	var contentExpansions = MetadataRenderer.getDocumentContainersByContainer(container);
 	
-	return MetadataRenderer.getDocumentContainersByContainer(container);
+	//check for metadata expansions
+	//fieldCompositeContainer.nestedPad.metadataTableDiv.rows
+	var rows = elt.lastChild.lastChild.childNodes;
+	var metadataExpansions = [];
+	for (var i = 0; i < rows.length; i++)
+	{
+		var labelCol = rows[i].getElementsByClassName("labelCol")[0];
+		var valueCol = rows[i].getElementsByClassName("valueCol")[0];
+		
+		if (valueCol.firstChild.className == "fieldCompositeContainer")
+		{
+			var labelContainerChildren = labelCol.firstChild.childNodes;
+			
+			for (var j = 0; j < labelContainerChildren.length; j++)
+				if (labelContainerChildren[j].className == "collapseButton")
+					metadataExpansions.push(labelContainerChildren[j]);
+		}
+	}
+	return {content_expansions: contentExpansions, metadata_expansion_buttons: metadataExpansions};
 }
 
 /**
