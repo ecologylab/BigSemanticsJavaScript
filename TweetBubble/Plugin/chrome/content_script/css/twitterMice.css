@@ -4,10 +4,44 @@
 }
 
 .metadataContainer a.tweetSemantics {
-	margin-left: 5px;
-	display: inline;
+	display: table-cell;
 }
 
-.metadataContainer div.tweetSemantics {
-	float: right;
+.metadataContainer a.tweetSemantics:hover {
+	cursor: pointer;
 }
+
+.metadataContainer img.tweetSemantics {
+	padding-left: 7px;
+	padding-right: 7px;
+}
+
+.metadataContainer .tweetSemanticsRow {
+	display: table-row;
+}
+
+.metadataContainer .tweetSemanticsDiv {
+	display: table;
+}
+
+/*.semanticsBgDiv {
+	background: black;
+	z-index: 9999;
+	position: fixed;
+	top: 0;
+	left: 0;
+	opacity: 0.6;
+}
+
+.semanticsIframe {
+	max-height: 50%;
+	max-width: 50%;
+	overflow: auto;
+	z-index: 10000;
+	position: fixed;
+	left: 0;
+	top: 0;
+	margin: 25%;
+	padding: 15px;
+	border-radius: 8px;
+}*/
