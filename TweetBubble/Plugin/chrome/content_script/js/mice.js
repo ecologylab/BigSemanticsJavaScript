@@ -890,6 +890,7 @@ MetadataRenderer.getTableForButton = function(button)
 {
 	var table = button.parentElement.parentElement.parentElement.getElementsByClassName("valueCol")[0];
 	
+	// label_at top or bottom
 	if (table == null)
 	{
 		var sibling = (button.parentElement.parentElement.parentElement.nextSibling == null) ?

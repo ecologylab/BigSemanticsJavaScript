@@ -228,19 +228,6 @@ RenderingTask.prototype.matches = function(url)
 	return false;
 }
 
-MetadataRenderer.isFieldVisible = function(mmdField, metadata, url)
-{
-	if (mmdField["styles"])
-	{
-		var style = mmdField["styles"][0];
-		var location = metadata[mmdField["name"]].location; 
-		if (style.is_child_metadata == "true" && style.hide == "true" 
-				&& url && location && location.toLowerCase() == url)
-			return false;
-	}
-	
-	return mmdField.hide == null || mmdField.hide == false || mmdField.always_show == "true";
-}
 
 /**
  * Expand or collapse a collection or composite field table.
@@ -347,50 +334,6 @@ MetadataRenderer.expandCollapseTable = function(event)
 }
 
 /**
- * Get the table that corresponds to the given button through the DOM
- * @param button, HTML object of the button
- * @return corresponding table HTML object  
- */
-MetadataRenderer.getTableForButton = function(button)
-{
-	var table = button.parentElement.parentElement.parentElement.getElementsByClassName("valueCol")[0];
-	
-	// label_at top or bottom
-	if (table == null)
-	{
-		var sibling = (button.parentElement.parentElement.parentElement.nextSibling == null) ?
-			button.parentElement.parentElement.parentElement.previousSibling : 
-			button.parentElement.parentElement.parentElement.nextSibling; 
-		table = sibling.getElementsByClassName("valueCol")[0];
-	}
-	
-	do
-	{
-		var rowsFound = false;
-		var elts = table.childNodes;
-		for (var i = 0; i < elts.length; i++)
-		{
-			if (elts[i].className == "metadataRow")
-			{
-				rowsFound = true;
-				break;
-			}
-		}
-		
-		if (rowsFound)
-			break;
-		else
-			table = table.firstChild;
-		
-	} while (table);
-	
-	//while(table.rows.length == 0)
-		//table = table.getElementsByTagName("table")[0];
-		
-	return table;
-}
-
-/**
  * Expand the table, showing all of its rows
  * @param table to expand 
  */
@@ -421,33 +364,6 @@ MetadataRenderer.expandTable = function(table)
 		MetadataRenderer.morePlease({"target": table.lastChild.lastChild.lastChild});
 }
 
-/**
- * Collapse the table, showing only the first row
- * @param table to collapse 
- */
-MetadataRenderer.collapseTable = function(table)
-{
-	var rows = [];
-	var elts = table.childNodes;
-	
-	for (var i = 0; i < elts.length; i++)
-		if (elts[i].className == "metadataRow")
-			rows.push(elts[i]);
-	
-	for (var i = 0; i < rows.length; i++)
-	{
-		if(i == 0)
-			rows[i].style.display = "table-row";
-		else
-			rows[i].style.display = "none";
-	}
-	
-	// Remove any loading rows, just to be sure 	
-	MetadataRenderer.clearLoadingRows(table);
-	
-	// Unlight the documents because the connection lines will be in the wrong place
-	MetadataRenderer.unhighlightDocuments(null);
-}
 
 
 /**
@@ -514,6 +430,9 @@ MetadataRenderer.downloadAndDisplayDocument = function(event)
 	
 	if (event.stopPropagation)
 		event.stopPropagation();
+	// Grow the In-Context Metadata Display
+	if(MetadataRenderer.updateInContextStyling)
+		MetadataRenderer.updateInContextStyling(table);
 	
 	if(MetadataRenderer.LoggingFunction)
 	{			
@@ -615,73 +534,6 @@ MetadataRenderer.highlightDocuments = function(event)
 		}
 	}
 	return false;
-}
-
-/**
- * Draw a line connecting the target to the source
- * @param target HTML object
- * @param source HTML source
- */
-MetadataRenderer.drawConnectionLine = function(target, source)
-{
-	// Don't draw connection lines in ideaMACHE
-	if(typeof session != "undefined")
-	{
-		return;
-	}
-	
-	
-	// Get the first label of the target
-	var label = target.getElementsByClassName("fieldLabel")[0];
-	
-	// Highlight the target label
-	if (label)
-		MetadataRenderer.highlightLabel(label.parentElement);
-	else
-		label = target.getElementsByClassName("valueCol")[0];
-
-	// Get the canvas
-	var canvas = null;
-	
-	if(WWWStudy)
-		canvas = document.getElementById("bigLineCanvas");
-	
-	else
-	{
-		var canvases = document.getElementsByClassName("lineCanvas");
-		
-		// TODO - fix canvas finding, needs to find the least common canvas,
-		// the smallest canvas that contains both target and source
-		/*
-		for(var i = canvases.length - 1; i >= 0; i--)
-		{	
-			canvases[i];	
-		}
-		*/
-		// for the moment just use the biggest canvas
-		canvas = canvases[canvases.length - 1];		
-	}
-		
-	var startRect = label.getClientRects()[0];
-	var endRect = source.getClientRects()[0];	
-		
-	// Don't draw the line if the source and target are in the same container
-	if(canvas != null && Math.abs(startRect.top - endRect.top) > 12)
-	{	
-		var ctx = canvas.getContext('2d');
-			
-		var containerRect = canvas.parentElement.getClientRects()[0];
-						
-		ctx.moveTo(startRect.left - containerRect.left + METADATA_LINE_X_OFFSET, startRect.top - containerRect.top + METADATA_LINE_Y_OFFSET);
-		ctx.lineTo(1, startRect.top - containerRect.top + METADATA_LINE_Y_OFFSET);
-		ctx.lineTo(1, endRect.top - containerRect.top + METADATA_LINE_Y_OFFSET);
-		ctx.lineTo(endRect.left - containerRect.left + METADATA_LINE_X_OFFSET, endRect.top - containerRect.top + METADATA_LINE_Y_OFFSET);
-		ctx.strokeStyle = "rgba(200, 44, 4, 0.4)";
-		ctx.lineWidth = 3;
-		ctx.lineCap = "round";
-		ctx.stroke();
-	}
-	
 }
 
 MetadataRenderer.morePlease = function(event)
@@ -1381,51 +1233,6 @@ MetadataRenderer.buildMetadataField = function(metadataField, isChildTable, fiel
 		fieldCount--;
 	}
 	return {name_col: nameCol, value_col: valueCol, count: fieldCount, expand_button: expandButton};
-}
-
-MetadataRenderer.getLocationForParentTable = function(element)
-{
-	while(element.className != "metadataTableDiv" && element.className != "rootMetadataTableDiv")
-	{
-		element = element.parentElement;
-	}
-	
-	var aTags = element.getElementsByTagName("a");
-	if(aTags.length > 0)
-	{
-		return aTags[0].href;	
-	}	
-	return "none";
-}
-
-MetadataRenderer.getLocationForChildTable = function(element)
-{
-	var valueCol = element.getElementsByClassName("valueCol")[0];
-	
-	// label_at top or bottom
-	if (valueCol == null)
-	{
-		var sibling = (element.nextSibling == null) ? element.previousSibling : element.nextSibling; 
-		valueCol = sibling.getElementsByClassName("valueCol")[0];
-	}
-	
-	if (valueCol)
-	{
-		var tables = valueCol.getElementsByClassName("metadataTableDiv");
-		
-		if (tables.length > 0)
-		{
-			table = tables[0];
-			
-			var aTags = table.getElementsByTagName("a");
-			if(aTags.length > 0)
-			{
-				console.log("childTable loc: " + aTags[0].href);
-				return aTags[0].href;
-			}
-		}
-	}
-	return "none";
 }
 
 MetadataRenderer.getImageSource = function(mmdField)
