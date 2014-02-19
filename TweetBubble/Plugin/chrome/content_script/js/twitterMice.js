@@ -548,7 +548,8 @@ MetadataRenderer.morePlease = function(event)
 	parentTable.removeChild(parentRow);
 	
 	// Build and add extra rows
-	MetadataRenderer.buildMetadataTable(parentTable, moreData.isChild, false, moreData.data, moreData.fields, null, taskUrl);
+	MetadataRenderer.buildMetadataTable(parentTable, moreData.isChild, false, moreData.data, moreData.fields, null, taskUrl,
+																								moreData.isMetadataDisplay);
 	
 	// TODO add logging for the 'More' button
 	
@@ -622,7 +623,7 @@ MetadataRenderer.buildMetadataDisplay = function(isRoot, mmd, metadata, taskUrl,
 	{
 		// If so, then build the HTML table	
 		var bgColorObj = {color: bgColor, bFirstField: true};
-		return MetadataRenderer.buildMetadataTable(null, false, isRoot, metadataFields, FIRST_LEVEL_FIELDS, taskUrl, bgColorObj);
+		return MetadataRenderer.buildMetadataTable(null, false, isRoot, metadataFields, FIRST_LEVEL_FIELDS, taskUrl, bgColorObj, true);
 	}	
 	else
 		// The metadata doesn't contain any visible fields so there is nothing to display
@@ -638,13 +639,13 @@ MetadataRenderer.buildMetadataDisplay = function(isRoot, mmd, metadata, taskUrl,
  * @param fieldCount, the number of fields to render before cropping with a "More" button
  * @return HTML table of the metadata display
  */
-MetadataRenderer.buildMetadataTable = function(table, isChildTable, isRoot, metadataFields, fieldCount, taskUrl, bgColorObj)
+MetadataRenderer.buildMetadataTable = function(table, isChildTable, isRoot, metadataFields, fieldCount, taskUrl, bgColorObj, isMetadataDisplay)
 {
 	if(!table)
 	{
 		table = document.createElement('div');
 		
-		if(isRoot)
+		if(isRoot || isMetadataDisplay)
 		{
 			table.className = "rootMetadataTableDiv";
 			table.style.background = MetadataRenderer.makeTinge(bgColorObj.color);
@@ -687,7 +688,8 @@ MetadataRenderer.buildMetadataTable = function(table, isChildTable, isRoot, meta
 			var moreData = {
 				"fields": FIELDS_TO_EXPAND,
 				"isChild": isChildTable,
-				"data": metadataFields.slice(i, metadataFields.length)
+				"data": metadataFields.slice(i, metadataFields.length),
+				"isMetadataDisplay": isMetadataDisplay
 			};
 			
 			
@@ -975,6 +977,9 @@ MetadataRenderer.buildMetadataField = function(metadataField, isChildTable, fiel
 					fieldValue.textContent = MetadataRenderer.removeLineBreaksAndCrazies(metadataField.value);
 				}
 				
+				if (metadataField.name == "post_date")
+					fieldValue.className = "fieldValue tweetPostDate";
+				
 				if (metadataField.name == "id")
 					fieldValue = MetadataRenderer.getTweetSemanticsDiv(metadataField.value);
 													
@@ -1119,7 +1124,7 @@ MetadataRenderer.buildMetadataField = function(metadataField, isChildTable, fiel
 			fieldValueDiv.className = "fieldCompositeContainer";
 
 		// Build the child table for the composite
-		var childTable =  MetadataRenderer.buildMetadataTable(null, false, false, metadataField.value, 1, taskUrl, bgColorObj);
+		var childTable =  MetadataRenderer.buildMetadataTable(null, false, false, metadataField.value, 1, taskUrl, bgColorObj, false);
 		
 		// If the childTable has more than 1 row, collapse table
 		if(metadataField.value.length > 1)
@@ -1215,7 +1220,7 @@ MetadataRenderer.buildMetadataField = function(metadataField, isChildTable, fiel
 		var fieldValueDiv = document.createElement('div');
 			fieldValueDiv.className = "fieldChildContainer";
 		
-		var childTable =  MetadataRenderer.buildMetadataTable(null, true, false, metadataField.value, 1, taskUrl, bgColorObj);
+		var childTable =  MetadataRenderer.buildMetadataTable(null, true, false, metadataField.value, 1, taskUrl, bgColorObj, false);
 		if(metadataField.value.length > 1)
 		{
 			MetadataRenderer.collapseTable(childTable);			
