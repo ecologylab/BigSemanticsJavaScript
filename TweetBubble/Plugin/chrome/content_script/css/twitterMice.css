@@ -24,6 +24,11 @@
 	display: table;
 }
 
+.metadataContainer .fieldValue.tweetPostDate {
+	font-size: 12px;
+	color: #8899A6;
+} 
+
 /*.semanticsBgDiv {
 	background: black;
 	z-index: 9999;
