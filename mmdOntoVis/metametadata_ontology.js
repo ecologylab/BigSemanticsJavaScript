@@ -44,6 +44,9 @@ OntoVis.subtypes = function(node) {
   if (!subtypes) {
     subtypes = node._subtypes;
   }
+  if (!subtypes) {
+    subtypes = node.subtype;
+  }
   if (subtypes) {
     if (subtypes instanceof Array) {
       return subtypes;
