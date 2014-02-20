@@ -11,7 +11,7 @@ OntoVis.width = 3000;
 OntoVis.height = 3200;
 OntoVis.marginX = 80;
 OntoVis.marginY = 20;
-OntoVis.nodePaddingX = 5;
+OntoVis.nodePaddingX = 15;
 OntoVis.nodePaddingY = 3;
 OntoVis.duration = 500;
 OntoVis.maxLevelDistance = 350;
@@ -38,22 +38,61 @@ OntoVis.SVG = function(elementName) {
   return e;
 }
 
-// Returns the node or the subnode with the given name.
-OntoVis.findNode = function(node, name) {
-  console.log("OntoVis.findNode()");
-  console.log(node);
-  console.log(name);
+// Returns the subtypes of a given node.
+OntoVis.subtypes = function(node) {
+  var subtypes = node.subtypes;
+  if (!subtypes) {
+    subtypes = node._subtypes;
+  }
+  if (!subtypes) {
+    subtypes = node.subtype;
+  }
+  if (subtypes) {
+    if (subtypes instanceof Array) {
+      return subtypes;
+    }
+    if (typeof subtypes == "object") {
+      subtypes = subtypes.subtype;
+      if (subtypes && subtypes instanceof Array) {
+        return subtypes;
+      }
+    }
+  }
+  return;
+}
+
+// Returns the number of subtypes for a node.
+OntoVis.subtypes_size = function(node) {
+  var subtypes = OntoVis.subtypes(node);
+  if (subtypes) {
+    return subtypes.length;
+  }
+  return 0;
+}
+
+// Traverse a node tree in pre order. For each node, carry out an operation
+// denoted by op. Then, test the node with a condition denoted by cond. If the
+// test returns true, terminate the process and return the node; otherwise the
+// process continues.
+//
+// If op or cond is null, is it simply ignored and the process continues.
+//
+// Returns: the first node (in pre order) that satisfies the cond if exists,
+// otherwise false.
+OntoVis.pre_order_traverse = function(node, op, cond) {
   if (node) {
-    if (node.name == name) {
-      return node;
+    if (op) {
+      op(node);
     }
-    var subtypes = node.subtypes;
-    if (!subtypes) {
-      subtypes = node._subtypes;
+    if (cond) {
+      if (cond(node)) {
+        return node;
+      }
     }
+    var subtypes = OntoVis.subtypes(node);
     if (subtypes) {
       for (var i = 0; i < subtypes.length; ++i) {
-        var result = OntoVis.findNode(subtypes[i], name);
+        var result = OntoVis.pre_order_traverse(subtypes[i], op, cond);
         if (result) {
           return result;
         }
@@ -63,20 +102,14 @@ OntoVis.findNode = function(node, name) {
   return false;
 }
 
-// Carries out an action on every (sub)node.
-OntoVis.forEachNode = function(node, f) {
-  if (node) {
-    var subtypes = node.subtypes;
-    if (!subtypes) {
-      subtypes = node._subtypes;
-    }
-    if (subtypes) {
-      for (var i = 0; i < subtypes.length; ++i) {
-        OntoVis.forEachNode(subtypes[i], f);
-      }
-    }
-    f(node);
-  }
+// Returns the node or the subnode with the given name.
+OntoVis.findNode = function(node, name) {
+  return OntoVis.pre_order_traverse(
+      node,
+      null,
+      function(n) {
+        return n.name == name
+      });
 }
 
 // Create and initialize the layout.
@@ -106,7 +139,12 @@ OntoVis.createLayout = function(rootNodeName) {
   var visibleHeight = OntoVis.height - OntoVis.marginY * 2;
   var layout = d3.layout.tree()
     .size([visibleWidth, visibleHeight])
-    .children(function(d) { return d.subtypes; });
+    .children(function(d) {
+      if (d.is_expanded) {
+        return OntoVis.subtypes(d);
+      }
+      return;
+    });
   OntoVis.layout = layout;
 
   // Load JSON data and initialize.
@@ -118,52 +156,38 @@ OntoVis.createLayout = function(rootNodeName) {
 }
 
 OntoVis.show = function(rootNodeName) {
-  console.log("OntoVis.show()");
   var root = OntoVis.findNode(OntoVis.data_root, rootNodeName);
-  console.log(root);
   if (!root) {
     root = OntoVis.findNode(OntoVis.data_root, "document");
   }
   if (root) {
-    console.log(root);
-    OntoVis.forEachNode(OntoVis.data_root, function(n) { n.is_root = false; });
     OntoVis.vis_root = root;
+
+    // Collapse all nodes except the root
+    OntoVis.pre_order_traverse(
+        OntoVis.data_root,
+        function(n) {
+          n.is_root = false;
+          n.is_expanded = false;
+        });
     root.is_root = true;
+    root.is_expanded = true;
 
     // See the later explanation of x0 and y0.
     root.x0 = 0;
     root.y0 = OntoVis.height / 2;
 
-    // If root is collapsed, expand it
-    if (root._subtypes) {
-      root.subtypes = root._subtypes;
-      root._subtypes = null;
-    }
-
-    function collapse(node) {
-      if (node.subtypes) {
-        node._subtypes = node.subtypes;
-        node.subtypes.forEach(collapse);
-        node.subtypes = null;
-      }
-    }
-    // Collapse subtrees.
-    root.subtypes.forEach(collapse);
-
-    OntoVis.update(root);
-
-    setTimeout(function() {
+    OntoVis.update(root, function() {
       var rootNode = $(".root_node")[0];
-      var scrollDist = $(rootNode).offset().top - window.innerHeight / 2;
-      $('html,body').animate({ scrollTop: scrollDist }, 200);
-    }, OntoVis.duration + 100);
+      OntoVis.scrollTo(rootNode);
+    });
   } else {
     alert("Cannot find root node: " + rootNodeName);
   }
 }
 
 // Update the presentation when clicking events happen.
-OntoVis.update = function(source) {
+OntoVis.update = function(source, end_listener) {
   // Use D3 to generate the layout.
   // This will set the x-y coordinates for nodes.
   var nodes = OntoVis.layout.nodes(OntoVis.vis_root);
@@ -217,7 +241,7 @@ OntoVis.update = function(source) {
     .attr("text-anchor", "middle")
     .attr("alignment-baseline", "middle")
     .text(function(d) {
-      if (d._subtypes && d._subtypes.length > 0) {
+      if (!d.is_expanded && OntoVis.subtypes_size(d) > 0) {
         return d.name + " [+]";
       } else {
         return d.name;
@@ -301,22 +325,29 @@ OntoVis.update = function(source) {
 
   // enteringNodes.select("text").on("click", OntoVis.click);
 
+  var handle_end_listener = function(transition) {
+    var n = 0;
+    transition
+      .each(function() { ++n; console.log("A: " + n); })
+      .each("end", function() { --n; console.log("B: " + n); if (n == 0) { end_listener() } });
+  }
+
   // Transit existing and entering nodes to their new locations (specified in
   // d.x and d.y).
   node
     .transition()
     .duration(OntoVis.duration)
-    .attr("transform",
-          function(d) {
-            var x = d.y + OntoVis.marginX;
-            var y = d.x + OntoVis.marginY;
-            return "translate(" + x + " " + y + ")";
-          });
+    .attr("transform", function(d) {
+      var x = d.y + OntoVis.marginX;
+      var y = d.x + OntoVis.marginY;
+      return "translate(" + x + " " + y + ")";
+    })
+    .call(handle_end_listener);
 
   // Update the plus sign according to its expansion/collapse status.
   node.selectAll("text")
     .text(function(d) {
-      if (d._subtypes && d._subtypes.length > 0) {
+      if (!d.is_expanded && OntoVis.subtypes_size(d) > 0) {
         return d.name + " [+]";
       } else {
         return d.name;
@@ -386,15 +417,21 @@ OntoVis.update = function(source) {
 
 // Handles clicks. Expands or collapse sub nodes by manipulating the data.
 OntoVis.click = function(d) {
-  if (d.subtypes) {
-    // Collapse
-    d._subtypes = d.subtypes;
-    d.subtypes = null;
-  } else {
-    // Expand
-    d.subtypes = d._subtypes;
-    d._subtypes = null;
+  d.is_expanded = ! d.is_expanded;
+  var element = $(this);
+  OntoVis.update(d, function() {
+    OntoVis.scrollTo(element);
+  });
+}
+
+OntoVis.scrollTo = function(element) {
+  console.log("scroll: ");
+  console.log(element);
+  if (element && $(element)) {
+    var sx = $(element).offset().left - window.innerWidth / 2;
+    var sy = $(element).offset().top - window.innerHeight / 2;
+    console.log("scrollTop: " + sy);
+    $('html,body').animate({ scrollLeft: sx, scrollTop: sy }, 200);
   }
-  OntoVis.update(d);
 }
 
