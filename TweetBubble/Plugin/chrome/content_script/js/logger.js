@@ -7,7 +7,7 @@ var MILLIS_BETWEEN_LOG = 12000;
 
 var LOGGING_SERVICE = "http://ideamache.ecologylab.net/i/event_log/";//"http://ecoarray0:3080/i/event_log/";
 
-var hashKey = "pcfndmfodhl";
+Logger.username = "pcfndmfodhl";
 
 function Operation(name, eventObj, timestamp)
 {
@@ -29,10 +29,10 @@ Logger.init = function(userid, cond)
 {
 	MetadataRenderer.LoggingFunction = Logger.recordMICEOperation;
 	
-	Logger.username = userid;
+	Logger.hash_key = userid;
 	
 	if (cond != "none")
-		hashKey = cond + "_s14";
+		Logger.username = cond + "_s14";
 	
 	setInterval(Logger.checkLogEvents, MILLIS_BETWEEN_LOG);
 }
@@ -51,7 +51,7 @@ Logger.emptyLogQueue = function()
 	
 	var logMessage = {
 		log_post: {
-			hash_key: hashKey,
+			hash_key: Logger.hash_key,
 			username: Logger.username,
 			app: "TweetBubble",
 			events: this.translateQueue()
