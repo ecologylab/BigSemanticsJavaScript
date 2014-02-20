@@ -1519,6 +1519,16 @@ MetadataRenderer.openUrlInNewWindow = function()
 {
 	var url = this.getAttribute("url");
 	window.open(url, 'Tweet', "height=500,width=500");
+	
+	if(MetadataRenderer.LoggingFunction)
+	{
+		var eventObj = {
+			tweet_action: {
+				action: url
+			}
+		}
+		MetadataRenderer.LoggingFunction(eventObj);
+	}
 }
 
 MetadataRenderer.highlightTweetSemanticsIcon = function()
