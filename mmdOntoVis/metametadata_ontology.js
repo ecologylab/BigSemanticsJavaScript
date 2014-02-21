@@ -62,7 +62,7 @@ OntoVis.subtypes = function(node) {
 }
 
 // Returns the number of subtypes for a node.
-OntoVis.subtypes_size = function(node) {
+OntoVis.subtypesSize = function(node) {
   var subtypes = OntoVis.subtypes(node);
   if (subtypes) {
     return subtypes.length;
@@ -79,7 +79,7 @@ OntoVis.subtypes_size = function(node) {
 //
 // Returns: the first node (in pre order) that satisfies the cond if exists,
 // otherwise false.
-OntoVis.pre_order_traverse = function(node, op, cond) {
+OntoVis.preOrderTraverse = function(node, op, cond) {
   if (node) {
     if (op) {
       op(node);
@@ -92,7 +92,7 @@ OntoVis.pre_order_traverse = function(node, op, cond) {
     var subtypes = OntoVis.subtypes(node);
     if (subtypes) {
       for (var i = 0; i < subtypes.length; ++i) {
-        var result = OntoVis.pre_order_traverse(subtypes[i], op, cond);
+        var result = OntoVis.preOrderTraverse(subtypes[i], op, cond);
         if (result) {
           return result;
         }
@@ -104,7 +104,7 @@ OntoVis.pre_order_traverse = function(node, op, cond) {
 
 // Returns the node or the subnode with the given name.
 OntoVis.findNode = function(node, name) {
-  return OntoVis.pre_order_traverse(
+  return OntoVis.preOrderTraverse(
       node,
       null,
       function(n) {
@@ -164,7 +164,7 @@ OntoVis.show = function(rootNodeName) {
     OntoVis.vis_root = root;
 
     // Collapse all nodes except the root
-    OntoVis.pre_order_traverse(
+    OntoVis.preOrderTraverse(
         OntoVis.data_root,
         function(n) {
           n.is_root = false;
@@ -241,7 +241,7 @@ OntoVis.update = function(source, end_listener) {
     .attr("text-anchor", "middle")
     .attr("alignment-baseline", "middle")
     .text(function(d) {
-      if (!d.is_expanded && OntoVis.subtypes_size(d) > 0) {
+      if (!d.is_expanded && OntoVis.subtypesSize(d) > 0) {
         return d.name + " [+]";
       } else {
         return d.name;
@@ -347,7 +347,7 @@ OntoVis.update = function(source, end_listener) {
   // Update the plus sign according to its expansion/collapse status.
   node.selectAll("text")
     .text(function(d) {
-      if (!d.is_expanded && OntoVis.subtypes_size(d) > 0) {
+      if (!d.is_expanded && OntoVis.subtypesSize(d) > 0) {
         return d.name + " [+]";
       } else {
         return d.name;
