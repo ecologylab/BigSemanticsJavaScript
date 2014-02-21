@@ -1122,6 +1122,9 @@ MetadataRenderer.buildMetadataField = function(metadataField, isChildTable, fiel
 		
 		var fieldValueDiv = document.createElement('div');
 			fieldValueDiv.className = "fieldCompositeContainer";
+			
+		if (metadataField.composite_type == "twitter_microblog")
+			fieldValueDiv.className = "fieldCompositeContainer twitterMicroblog";	
 
 		// Build the child table for the composite
 		var childTable =  MetadataRenderer.buildMetadataTable(null, false, false, metadataField.value, 1, taskUrl, bgColorObj, false);
