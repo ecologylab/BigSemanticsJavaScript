@@ -17,6 +17,7 @@ var instance = null;
 function processPage()
 {
 	layoutExpandableItems(document, false); // re-layout given page with the expandable version of selected few items
+	addScrollBackAndCollapseForContainers();
 }
 
 function processMetadata(node)
@@ -95,6 +96,33 @@ function expandCollapseItem()
 	}	
 }
 
+function scrollBackAndCollpaseHandler()
+{
+	var elt = this;
+	var y = 0;        
+    while (elt && (typeof elt.offsetTop !== "undefined") && !isNaN(elt.offsetTop))
+    {
+    	y += elt.offsetTop;
+    	elt = elt.offsetParent;
+    }
+    
+    if (window.pageYOffset > y)
+	{
+		var containers = instance.getContainers(this);
+		var documentContainers = [];
+		
+		for (var i = 0; i < containers.length; i++)
+		{
+			documentContainers = 
+					documentContainers.concat(MetadataRenderer.getDocumentContainersByContainer(containers[i]));
+		}
+		
+		if (documentContainers.length > 0)
+			MetadataRenderer.animateScrollBackAndCollapse(y, 
+					{content_expansions: documentContainers, metadata_expansion_buttons: []});
+	}
+}
+
 function layoutExpandableItems(node, isMetadata)
 {
 	//var isMetadata = (node == document)? false : true;
@@ -121,6 +149,19 @@ function layoutExpandableItems(node, isMetadata)
 		
 		// add isMetadata attribute (useful in later custom handling)
 		instance.setMetadataBoolean(expandableItem, isMetadata);
+	}
+}
+
+function addScrollBackAndCollapseForContainers() 
+{
+	var containersXPath = instance.getContainersXPath();
+	var containersXPathResult = 
+		document.evaluate(containersXPath, document, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
+	
+	for (var i = 0; i < containersXPathResult.snapshotLength; i++)
+	{
+		var container = containersXPathResult.snapshotItem(i);
+		instance.addContainerClickEventListener(container, scrollBackAndCollpaseHandler);		
 	}
 }
 

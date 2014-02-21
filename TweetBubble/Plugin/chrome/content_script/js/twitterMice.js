@@ -1340,6 +1340,46 @@ MetadataRenderer.unhighlightTweet = function(event)
 	fieldValueDiv.className = "fieldCompositeContainer";
 }
 
+MetadataRenderer.animateScrollBackAndCollapse = function(top, containers)
+{
+	var y = top;
+	var contentExpansionContainers = containers.content_expansions;
+	var metadataExpansionButtons = containers.metadata_expansion_buttons;
+    
+	var animateScroll = function() {
+		if ((window.pageYOffset - (y-50)) > 0)
+		{
+    		var scroll = (window.pageYOffset - (y-50)) > 100?
+    									100 : (window.pageYOffset - (y-50));    		
+        	window.scrollTo(window.scrollLeft, (window.pageYOffset - scroll));
+        	setTimeout(animateScroll, 10);
+		}
+		else
+		{
+			for (var i = 0; i < contentExpansionContainers.length; i++)
+	    	{
+    			var hideVisual = function(visual) {
+    				visual.style.display = "none";
+    			}
+    			
+    			contentExpansionContainers[i].expandedItem.lastChild.src = expandIconPath;
+    			contentExpansionContainers[i].visual.style.opacity = 0.1;
+    			    	    			
+	    		setTimeout(hideVisual, 330, contentExpansionContainers[i].visual);
+	    	}
+			for (var i = 0; i < metadataExpansionButtons.length; i++)
+			{
+				var fakeEvent = {};
+				fakeEvent.target = metadataExpansionButtons[i];
+				fakeEvent.name = "fakeEvent";
+				//console.log("fake event ready");
+				MetadataRenderer.expandCollapseTable(fakeEvent);
+			}
+		}
+    };
+    animateScroll();
+}
+
 MetadataRenderer.collapseOrScrollToExpandedItem = function(event)
 {
 	var elt = event.currentTarget;
@@ -1354,41 +1394,7 @@ MetadataRenderer.collapseOrScrollToExpandedItem = function(event)
     {
     	//window.scrollTo(window.scrollLeft, (y - 50));
 		var containers = MetadataRenderer.getFirstLevelDocumentContainers(event.currentTarget);
-		var contentExpansionContainers = containers.content_expansions;
-		var metadataExpansionButtons = containers.metadata_expansion_buttons;
-	    
-    	var animateScroll = function() {
-    		if ((window.pageYOffset - (y-50)) > 0)
-    		{
-	    		var scroll = (window.pageYOffset - (y-50)) > 100?
-	    									100 : (window.pageYOffset - (y-50));    		
-	        	window.scrollTo(window.scrollLeft, (window.pageYOffset - scroll));
-	        	setTimeout(animateScroll, 10);
-    		}
-    		else
-    		{
-    			for (var i = 0; i < contentExpansionContainers.length; i++)
-    	    	{
-	    			var hideVisual = function(visual) {
-	    				visual.style.display = "none";
-	    			}
-	    			
-	    			contentExpansionContainers[i].expandedItem.lastChild.src = expandIconPath;
-	    			contentExpansionContainers[i].visual.style.opacity = 0.1;
-	    			    	    			
-    	    		setTimeout(hideVisual, 330, contentExpansionContainers[i].visual);
-    	    	}
-    			for (var i = 0; i < metadataExpansionButtons.length; i++)
-    			{
-    				var fakeEvent = {};
-    				fakeEvent.target = metadataExpansionButtons[i];
-    				fakeEvent.name = "fakeEvent";
-    				//console.log("fake event ready");
-    				MetadataRenderer.expandCollapseTable(fakeEvent);
-    			}
-    		}
-        };
-        animateScroll();
+		animateScrollBackAndCollapse(y, containers);
     }
     event.stopPropagation();
 }

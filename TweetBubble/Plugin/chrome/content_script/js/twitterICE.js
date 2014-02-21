@@ -9,6 +9,8 @@ this.expandableItemsXPath2 = ".//a[@class='twitter-atreply pretty-link']/b | " +
 							 ".//a[@class='account-group js-account-group js-action-profile js-user-profile-link js-nav']/strong | " + 
 							 ".//a[@class='pretty-link js-user-profile-link js-action-profile-name']/strong";
 
+this.tweetsXPath = "//ol[@id='stream-items-id']/li/div";
+
 this.defaultConditionXPath2 = ".//a[@class='twitter-atreply pretty-link']/b";
 
 this.urlPrefix = "https://twitter.com";
@@ -25,8 +27,13 @@ this.getExpandableItemsXPath = function(isMetadata) {
 //		return this.expandableItemsXPath;
 };
 
+this.getContainersXPath = function() {
+	return this.tweetsXPath;
+}
+
 this.removeHrefAndSetAsUrl = function(elt) {
 	
+	// get parent <a> tag; in accordance with above XPath
 	var href = elt.parentNode.getAttribute("href");
 	elt.parentNode.removeAttribute("href");
 	
@@ -36,12 +43,15 @@ this.removeHrefAndSetAsUrl = function(elt) {
 
 this.getExpandableItemUrl = function(item) {
 	// TODO: method for retweets
-	// get <a> hyperlink parent tag; in accordance with above XPath
 	return item.parentNode.getAttribute("url");
 };
 
 this.addClickEventListener = function(item, listener) {
 	item.parentNode.addEventListener('click', listener);
+};
+
+this.addContainerClickEventListener = function(container, listener) {
+	container.addEventListener('click', listener);
 };
 
 this.setProcessed = function(elt) {
@@ -56,6 +66,7 @@ this.setProcessed = function(elt) {
 		elt.parentNode.setAttribute("class", "pretty-link");
 };
 
+// set to parent to keep similar as most other attributes
 this.setCached = function(elt) {
 	elt.parentNode.setAttribute("isExpanded", "true");
 };
@@ -102,6 +113,20 @@ this.getContainer = function(elt) {
 	
 	return parent;
 };
+
+this.getContainers = function(tweet) {
+	var containers = [];
+	
+	var contentDiv = tweet.getElementsByClassName("content")[0];
+	if (contentDiv)
+		containers.push(contentDiv);
+	
+	var streamHeaderDiv = tweet.getElementsByClassName("stream-item-header")[0];
+	if (streamHeaderDiv)
+		containers.push(streamHeaderDiv);
+	
+	return containers;
+}
 
 this.getDefaultConditionXPath = function(isMetadata) {
 	return this.defaultConditionXPath2;
