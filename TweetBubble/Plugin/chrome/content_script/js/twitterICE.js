@@ -26,8 +26,10 @@ this.getExpandableItemsXPath = function(isMetadata) {
 };
 
 this.removeHrefAndSetAsUrl = function(elt) {
+	
 	var href = elt.parentNode.getAttribute("href");
 	elt.parentNode.removeAttribute("href");
+	
 	// this attribute name shouldn't conflict with the existing ones
 	elt.parentNode.setAttribute("url", href);
 };
@@ -54,11 +56,11 @@ this.setProcessed = function(elt) {
 		elt.parentNode.setAttribute("class", "pretty-link");
 };
 
-this.setExpanded = function(elt) {
+this.setCached = function(elt) {
 	elt.parentNode.setAttribute("isExpanded", "true");
 };
 
-this.isExpanded = function(elt) {
+this.isCached = function(elt) {
 	return elt.parentNode.getAttribute("isExpanded");
 };
 

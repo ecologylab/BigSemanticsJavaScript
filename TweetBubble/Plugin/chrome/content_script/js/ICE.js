@@ -70,7 +70,7 @@ function expandCollapseItem()
 	{
 		expandCollapseIcon.src = collapseIconPath;
 		
-		if (instance.isExpanded(item))
+		if (instance.isCached(item))
 		{
 			MetadataRenderer.showMetadataDisplay(item);
 		}
@@ -90,7 +90,7 @@ function expandCollapseItem()
 			
 			//request loading of webpage
 			downloadRequester(expandableItemUrl);
-			instance.setExpanded(item);
+			instance.setCached(item);
 		}
 	}	
 }
@@ -258,7 +258,7 @@ chrome.extension.sendRequest({loadOptions: document.URL}, function(response) {
 	}
 });
 
-chrome.extension.onRequest.addListener(
+chrome.runtime.onMessage.addListener(
 	function(request, sender, sendResponse) {
 		
 	if (request.url != null)
