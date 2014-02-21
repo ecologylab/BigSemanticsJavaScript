@@ -33,6 +33,12 @@
 	border: none; 
 }
 
+.metadataContainer .faviconICE{
+	width: 16px;
+	height: 16px;
+	padding: 2px 0px 1px 1px;
+}
+
 /*.semanticsBgDiv {
 	background: black;
 	z-index: 9999;

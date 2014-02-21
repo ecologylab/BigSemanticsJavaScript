@@ -190,7 +190,7 @@
 
 .metadataContainer .fieldLabelContainer.highlight{
 	/*background: white;*/
-	border: 1px solid #555;
+	border: 1px solid #888;
 	min-height: 15px;
 	height: 17px;
 }
@@ -203,7 +203,7 @@
 
 .metadataContainer .fieldLabelContainerOpened.highlight{
 	/*background: white;*/
-	border: 1px solid #555;
+	border: 1px solid #888;
 	min-height: 15px;
 	height: 17px;
 }

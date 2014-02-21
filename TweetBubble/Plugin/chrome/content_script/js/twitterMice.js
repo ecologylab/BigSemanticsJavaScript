@@ -1051,8 +1051,11 @@ MetadataRenderer.buildMetadataField = function(metadataField, isChildTable, fiel
 		
 		var fieldLabelDiv = document.createElement('div');
 			fieldLabelDiv.className = "fieldLabelContainer unhighlight";
-			fieldLabelDiv.style.minWidth = "30px";					
-			
+			fieldLabelDiv.style.minWidth = "30px";
+		
+		if (metadataField.composite_type == "twitter_microblog")
+			fieldLabelDiv.style.minWidth = "16px";
+							
 		// Is the document already rendered?								
 		if(childUrl != "" && MetadataRenderer.isRenderedDocument(childUrl)
 							/*|| childUrl.toLowerCase() == taskUrl)*/)
@@ -1124,8 +1127,8 @@ MetadataRenderer.buildMetadataField = function(metadataField, isChildTable, fiel
 			fieldValueDiv.className = "fieldCompositeContainer";
 			
 		if (metadataField.composite_type == "twitter_microblog")
-			fieldValueDiv.className = "fieldCompositeContainer twitterMicroblog";	
-
+			fieldValueDiv.className = "fieldCompositeContainer twitterMicroblog";
+		
 		// Build the child table for the composite
 		var childTable =  MetadataRenderer.buildMetadataTable(null, false, false, metadataField.value, 1, taskUrl, bgColorObj, false);
 		
