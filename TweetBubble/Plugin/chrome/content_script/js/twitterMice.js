@@ -1610,3 +1610,8 @@ MetadataRenderer.getTweetSemanticsDiv = function(tweetId)
 	
 	return twSemanticsDiv;
 }
+
+MetadataRenderer.removeLineBreaksAndCrazies = function(string)
+{
+	return string;
+}
