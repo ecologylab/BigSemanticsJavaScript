@@ -29,7 +29,7 @@ function processMetadata(node)
 function downloadRequester(expandableItemUrl)
 {
 	chrome.extension.sendRequest({load: expandableItemUrl}, function(response) {
-		  console.log(response);
+		  //console.log(response);
 		  MetadataRenderer.setMetadata(response.doc);
 		  MetadataRenderer.setMetaMetadata(response.mmd);
 	});
@@ -173,6 +173,26 @@ function addScrollBackAndCollapseForContainers()
 	}
 }
 
+function ajaxContentUpdate()
+{
+	if (MetadataRenderer.LoggingFunction)
+	{
+		var eventObj = {
+			ajax_update: {
+				url: currentUrl
+			}
+		}
+		MetadataRenderer.LoggingFunction(eventObj);
+	}
+	
+	setTimeout(function() {
+		if(experiment_condition == mice_condition)
+			processPage();
+		else
+			processDefaultConditionClicks(document);
+	}, 1000);
+}
+
 function addOtherEventHandlers()
 {
 	instance.addOtherEventHandlers();
@@ -296,7 +316,12 @@ function run_script(userid, cond)
 		
 		window.addEventListener("scroll", defaultConditionOnUpdateHandler);
 	}
+	
 	currentUrl = document.URL;
+	
+	setInterval(function() {
+		instance.addAJAXContentListener(ajaxContentUpdate);
+	}, 5000);
 }
 
 function processInfoSheetResponse(resp)

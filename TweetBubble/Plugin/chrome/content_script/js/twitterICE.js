@@ -19,6 +19,8 @@ this.retweetXPath = "//li[@class='action-rt-container js-toggle-state js-toggle-
 
 this.favoriteXPath = "//li[@class='action-fav-container js-toggle-state js-toggle-fav']/a";
 
+this.ajaxContentXPath = "//div[@class='new-tweets-bar js-new-tweets-bar']";
+
 this.urlPrefix = "https://twitter.com";
 
 this.getUrlPrefix = function() {
@@ -230,6 +232,26 @@ this.addOtherEventHandlers = function()
 	{
 		var item = xpathResult.snapshotItem(i);
 		item.addEventListener('click', this.favoriteClick);		
+	}
+};
+
+this.ajaxItem = null;
+
+this.addAJAXContentListener = function(callback)
+{
+	var ajaxContentXPath = this.ajaxContentXPath;
+	var ajaxContentXPathResult = 
+		document.evaluate(ajaxContentXPath, document, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
+	
+	for (var i = 0; i < ajaxContentXPathResult.snapshotLength; i++)
+	{
+		if (this.ajaxItem != ajaxContentXPathResult.snapshotItem(i))
+		{
+			this.ajaxItem = ajaxContentXPathResult.snapshotItem(i);
+			
+			// as parent keeps changing but is actually a larger clickable area
+			this.ajaxItem.parentNode.addEventListener('click', callback);
+		}
 	}
 };
 
