@@ -1394,7 +1394,7 @@ MetadataRenderer.collapseOrScrollToExpandedItem = function(event)
     {
     	//window.scrollTo(window.scrollLeft, (y - 50));
 		var containers = MetadataRenderer.getFirstLevelDocumentContainers(event.currentTarget);
-		animateScrollBackAndCollapse(y, containers);
+		MetadataRenderer.animateScrollBackAndCollapse(y, containers);
     }
     event.stopPropagation();
 }
@@ -1497,7 +1497,7 @@ MetadataRenderer.getFirstLevelDocumentContainers = function(elt)
 		var labelCol = rows[i].getElementsByClassName("labelCol")[0];
 		var valueCol = rows[i].getElementsByClassName("valueCol")[0];
 		
-		if (valueCol.firstChild.className == "fieldCompositeContainer")
+		if (valueCol.firstChild.className.indexOf("fieldCompositeContainer") != -1)
 		{
 			var labelContainerChildren = labelCol.firstChild.childNodes;
 			
