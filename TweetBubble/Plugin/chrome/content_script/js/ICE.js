@@ -98,6 +98,13 @@ function expandCollapseItem()
 
 function scrollBackAndCollpaseHandler()
 {
+	if (MetadataRenderer.LoggingFunction)
+	{
+		//container clicked
+		var eventObj = instance.getContainerClickedEventObj(this);
+		MetadataRenderer.LoggingFunction(eventObj);
+	}
+		
 	var elt = this;
 	var y = 0;        
     while (elt && (typeof elt.offsetTop !== "undefined") && !isNaN(elt.offsetTop))
@@ -180,19 +187,24 @@ function defaultConditionOnUpdateHandler()
 	processDefaultConditionClicks(document);
 }
 
-function defaultConditionClickItem()
+function defaultConditionItemClick()
 {
 	if (MetadataRenderer.LoggingFunction)
 	{
-		//url_popped
+		//item clicked
 		var item = instance.getExpandedItem(this);
-		var url_p = instance.getUrlPrefix() + instance.getHrefAttribute(item);
 		
-		var eventObj = {
-			url_pop: {
-				url: url_p
-			}
-		}
+		var eventObj = instance.getContainerClickedEventObj(item);
+		MetadataRenderer.LoggingFunction(eventObj);
+	}
+}
+
+function defaultConditionContainerClick()
+{
+	if (MetadataRenderer.LoggingFunction)
+	{
+		//container clicked
+		var eventObj = instance.getContainerClickedEventObj(this);
 		MetadataRenderer.LoggingFunction(eventObj);
 	}
 }
@@ -208,12 +220,22 @@ function processDefaultConditionClicks(node)
 		var expandableItem = expandableItemsXPathResult.snapshotItem(i);
 		if (!instance.checkDefaultConditionProcessed(expandableItem))
 		{
-			instance.addClickEventListener(expandableItem, defaultConditionClickItem);
+			instance.addClickEventListener(expandableItem, defaultConditionItemClick);
 			
 			// remove or add the identifying attribute to prevent re-processing
 			instance.setDefaultConditionProcessed(expandableItem);			
 		}
 	}
+	
+	var containersXPath = instance.getContainersXPath();
+	var containersXPathResult = 
+		document.evaluate(containersXPath, document, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
+	
+	for (var i = 0; i < containersXPathResult.snapshotLength; i++)
+	{
+		var container = containersXPathResult.snapshotItem(i);
+		instance.addContainerClickEventListener(container, defaultConditionClickContainer);		
+	} 
 }
 
 function processUrlChange(newUrl)

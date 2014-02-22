@@ -128,6 +128,28 @@ this.getContainers = function(tweet) {
 	return containers;
 }
 
+this.getItemClickedEventObj = function(item) 
+{
+	var url_p = this.getUrlPrefix() + this.getHrefAttribute(item);
+	
+	var eventObj = {
+		click_username: {
+			url: url_p
+		}
+	}
+	return eventObj;
+};
+
+this.getContainerClickedEventObj = function(tweet) 
+{
+	var eventObj = {
+		click_tweet: {
+			id: tweet.getAttribute("data-tweet-id")
+		}
+	}
+	return eventObj;
+};
+
 this.getDefaultConditionXPath = function(isMetadata) {
 	return this.defaultConditionXPath2;
 };
