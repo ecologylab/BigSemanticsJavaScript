@@ -218,9 +218,7 @@ function defaultConditionItemClick()
 	if (MetadataRenderer.LoggingFunction)
 	{
 		//item clicked
-		var item = instance.getExpandedItem(this);
-		
-		var eventObj = instance.getContainerClickedEventObj(item);
+		var eventObj = instance.getItemClickedEventObj(this);
 		MetadataRenderer.LoggingFunction(eventObj);
 	}
 }
@@ -260,7 +258,7 @@ function processDefaultConditionClicks(node)
 	for (var i = 0; i < containersXPathResult.snapshotLength; i++)
 	{
 		var container = containersXPathResult.snapshotItem(i);
-		instance.addContainerClickEventListener(container, defaultConditionClickContainer);		
+		instance.addContainerClickEventListener(container, defaultConditionContainerClick);		
 	}
 	
 	addOtherEventHandlers();

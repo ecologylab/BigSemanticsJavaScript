@@ -11,7 +11,9 @@ this.expandableItemsXPath2 = ".//a[@class='twitter-atreply pretty-link']/b | " +
 
 this.tweetsXPath = "//ol[@id='stream-items-id']/li/div";
 
-this.defaultConditionXPath2 = ".//a[@class='twitter-atreply pretty-link']/b";
+this.defaultConditionXPath2 = ".//a[@class='twitter-atreply pretty-link']/b | " +
+							  ".//a[@class='account-group js-account-group js-action-profile js-user-profile-link js-nav']/strong | " + 
+							  ".//a[@class='pretty-link js-user-profile-link js-action-profile-name']/strong";
 
 this.replyXPath = "//li[@class='action-reply-container']/a";
 
@@ -138,7 +140,7 @@ this.getContainers = function(tweet) {
 
 this.getItemClickedEventObj = function(item) 
 {
-	var url_p = this.getUrlPrefix() + this.getHrefAttribute(item);
+	var url_p = this.getUrlPrefix() + item.getAttribute("href");
 	
 	var eventObj = {
 		click_username: {
