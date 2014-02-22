@@ -592,14 +592,7 @@ DocumentContainer.prototype.matches = function(url)
 	{
 		if(this.urls[i].length > 1)
 		{		
-			if(this.urls[i].indexOf(url) == 0)
-			{
-				return true;
-			}
-			else if(url.indexOf(this.urls[i]) == 0)
-			{
-				return true;
-			}
+			return this.urls[i].localeCompare(url) == 0;
 		}
 	}
 	return false;
@@ -977,8 +970,8 @@ MetadataRenderer.buildMetadataField = function(metadataField, isChildTable, fiel
 					fieldValue.textContent = MetadataRenderer.removeLineBreaksAndCrazies(metadataField.value);
 				}
 				
-				if (metadataField.name == "post_date")
-					fieldValue.className = "fieldValue tweetPostDate";
+				if (metadataField.name == "post_date" || metadataField.name == "username")
+					fieldValue.className = "fieldValue sub";
 				
 				if (metadataField.name == "id")
 					fieldValue = MetadataRenderer.getTweetSemanticsDiv(metadataField.value);

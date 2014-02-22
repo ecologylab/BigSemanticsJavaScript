@@ -1360,14 +1360,7 @@ DocumentContainer.prototype.matches = function(url)
 	{
 		if(this.urls[i].length > 1)
 		{		
-			if(this.urls[i].indexOf(url) == 0)
-			{
-				return true;
-			}
-			else if(url.indexOf(this.urls[i]) == 0)
-			{
-				return true;
-			}
+			return this.urls[i].localeCompare(url) == 0;
 		}
 	}
 	return false;
