@@ -18,6 +18,7 @@ function processPage()
 {
 	layoutExpandableItems(document, false); // re-layout given page with the expandable version of selected few items
 	addScrollBackAndCollapseForContainers();
+	addOtherEventHandlers();
 }
 
 function processMetadata(node)
@@ -172,6 +173,11 @@ function addScrollBackAndCollapseForContainers()
 	}
 }
 
+function addOtherEventHandlers()
+{
+	instance.addOtherEventHandlers();
+}
+
 function defaultConditionOnUpdateHandler()
 {
 	if (MetadataRenderer.LoggingFunction)
@@ -235,7 +241,9 @@ function processDefaultConditionClicks(node)
 	{
 		var container = containersXPathResult.snapshotItem(i);
 		instance.addContainerClickEventListener(container, defaultConditionClickContainer);		
-	} 
+	}
+	
+	addOtherEventHandlers();
 }
 
 function processUrlChange(newUrl)

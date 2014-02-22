@@ -13,6 +13,12 @@ this.tweetsXPath = "//ol[@id='stream-items-id']/li/div";
 
 this.defaultConditionXPath2 = ".//a[@class='twitter-atreply pretty-link']/b";
 
+this.replyXPath = "//li[@class='action-reply-container']/a";
+
+this.retweetXPath = "//li[@class='action-rt-container js-toggle-state js-toggle-rt']/a";
+
+this.favoriteXPath = "//li[@class='action-fav-container js-toggle-state js-toggle-fav']/a";
+
 this.urlPrefix = "https://twitter.com";
 
 this.getUrlPrefix = function() {
@@ -167,6 +173,64 @@ this.checkDefaultConditionProcessed = function(elt) {
 this.getHrefAttribute = function(elt)
 {
 	return elt.parentNode.getAttribute("href");
+};
+
+var logTweetAction = function(twAction, item) {
+	if (MetadataRenderer.LoggingFunction)
+	{
+		//a.li.ul.div
+		var aNode = item.parentNode.parentNode.parentNode.getElementsByTagName('a')[0];
+		
+		var eventObj = {
+			tweet_action: {
+				name: twAction,
+				url: aNode.getAttribute("href")
+			}
+		}
+		MetadataRenderer.LoggingFunction(eventObj);
+	}
+};
+
+this.replyClick = function()
+{
+	logTweetAction('reply', this);
+};
+
+this.retweetClick = function()
+{
+	logTweetAction('retweet', this);
+};
+
+this.favoriteClick = function()
+{
+	logTweetAction('favorite', this);
+};
+
+this.addOtherEventHandlers = function()
+{
+	var xpath = this.replyXPath;
+	var xpathResult = document.evaluate(xpath, document, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
+	for (var i = 0; i < xpathResult.snapshotLength; i++)
+	{
+		var item = xpathResult.snapshotItem(i);
+		item.addEventListener('click', this.replyClick);		
+	}
+	
+	xpath = this.retweetXPath;
+	xpathResult = document.evaluate(xpath, document, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
+	for (var i = 0; i < xpathResult.snapshotLength; i++)
+	{
+		var item = xpathResult.snapshotItem(i);
+		item.addEventListener('click', this.retweetClick);		
+	}
+	
+	xpath = this.favoriteXPath;
+	xpathResult = document.evaluate(xpath, document, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
+	for (var i = 0; i < xpathResult.snapshotLength; i++)
+	{
+		var item = xpathResult.snapshotItem(i);
+		item.addEventListener('click', this.favoriteClick);		
+	}
 };
 
 }
