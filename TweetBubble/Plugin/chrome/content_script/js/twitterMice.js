@@ -462,7 +462,7 @@ MetadataRenderer.downloadAndDisplayDocument = function(event)
 		{
 			eventObj = {
 				expand_metadata: {
-					target_doc: MetadataRenderer.getLocationForChildTable(button.parentElement.parentElement.parentElement)
+					target_doc: location
 				}
 			};
 		}
@@ -1237,6 +1237,21 @@ MetadataRenderer.buildMetadataField = function(metadataField, isChildTable, fiel
 		fieldCount--;
 	}
 	return {name_col: nameCol, value_col: valueCol, count: fieldCount, expand_button: expandButton};
+}
+
+MetadataRenderer.getLocationForParentTable = function(element)
+{
+	while(element.className != "rootMetadataTableDiv")
+	{
+		element = element.parentElement;
+	}
+	
+	var aTags = element.getElementsByTagName("a");
+	if(aTags.length > 0)
+	{
+		return aTags[0].href;	
+	}	
+	return "none";
 }
 
 MetadataRenderer.getImageSource = function(mmdField)

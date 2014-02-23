@@ -1959,7 +1959,7 @@ MetadataRenderer.getLocationForChildTable = function(element)
 	
 	if (valueCol)
 	{
-		var tables = valueCol.getElementsByClassName("metadataTableDiv");
+		var tables = valueCol.getElementsByClassName("rootMetadataTableDiv");
 		
 		if (tables.length > 0)
 		{
