@@ -328,7 +328,7 @@ function processInfoSheetResponse(resp)
 {
 	chrome.extension.sendRequest({storeOptions: {"agreeToInformationSheet": resp}});
 	if (resp == Util.YES)
-		run_script(response_condition, userid);
+		run_script(userid, response_condition);
 }
 
 //run_at is document_end i.e. after DOM is complete but before images and frames are loaded
