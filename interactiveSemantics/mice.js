@@ -890,6 +890,7 @@ MetadataRenderer.getTableForButton = function(button)
 {
 	var table = button.parentElement.parentElement.parentElement.getElementsByClassName("valueCol")[0];
 	
+	// label_at top or bottom
 	if (table == null)
 	{
 		var sibling = (button.parentElement.parentElement.parentElement.nextSibling == null) ?
@@ -1197,7 +1198,10 @@ MetadataRenderer.drawConnectionLine = function(target, source)
 	
 	
 	// Get the first label of the target
-	var label = target.getElementsByClassName("fieldLabel")[0];
+	var labelCol = target.getElementsByClassName("labelCol")[0];
+	// access fieldLabel from labelCol and not metadataRow which can return a nested value
+	// if this label was not rendered due to hide_label=true
+	var label = labelCol.getElementsByClassName("fieldLabel")[0];
 	
 	// Highlight the target label
 	if (label)
@@ -1231,7 +1235,7 @@ MetadataRenderer.drawConnectionLine = function(target, source)
 	var endRect = source.getClientRects()[0];	
 		
 	// Don't draw the line if the source and target are in the same container
-	if(canvas != null && Math.abs(startRect.top - endRect.top) > 12)
+	if(canvas != null && startRect && Math.abs(startRect.top - endRect.top) > 12)
 	{	
 		var ctx = canvas.getContext('2d');
 			
@@ -1958,7 +1962,7 @@ MetadataRenderer.getLocationForChildTable = function(element)
 	
 	if (valueCol)
 	{
-		var tables = valueCol.getElementsByClassName("metadataTableDiv");
+		var tables = valueCol.getElementsByClassName("rootMetadataTableDiv");
 		
 		if (tables.length > 0)
 		{
