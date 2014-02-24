@@ -55,7 +55,7 @@ function isExpanded(icon)
 	return (icon.src == collapseIconPath)? true : false;
 }
 
-function expandCollapseItem()
+function expandCollapseItem(event)
 {
 	console.log("event received");
 	var item = instance.getExpandedItem(this);
@@ -94,12 +94,13 @@ function expandCollapseItem()
 			downloadRequester(expandableItemUrl);
 			instance.setCached(item);
 		}
-	}	
+	}
+	instance.setItemClick(event);
 }
 
-function scrollBackAndCollpaseHandler()
+function scrollBackAndCollpaseHandler(event)
 {
-	if (MetadataRenderer.LoggingFunction)
+	if (MetadataRenderer.LoggingFunction && !instance.isItemClick(event))
 	{
 		//container clicked
 		var eventObj = instance.getContainerClickedEventObj(this);
@@ -213,8 +214,9 @@ function defaultConditionOnUpdateHandler()
 	processDefaultConditionClicks(document);
 }
 
-function defaultConditionItemClick()
+function defaultConditionItemClick(event)
 {
+	instance.setItemClick(event);
 	if (MetadataRenderer.LoggingFunction)
 	{
 		//item clicked
@@ -223,9 +225,9 @@ function defaultConditionItemClick()
 	}
 }
 
-function defaultConditionContainerClick()
+function defaultConditionContainerClick(event)
 {
-	if (MetadataRenderer.LoggingFunction)
+	if (MetadataRenderer.LoggingFunction && !instance.isItemClick(event))
 	{
 		//container clicked
 		var eventObj = instance.getContainerClickedEventObj(this);

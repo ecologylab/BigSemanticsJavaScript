@@ -195,19 +195,31 @@ var logTweetAction = function(twAction, item) {
 	}
 };
 
+var setItemClick = function(evt)
+{
+	evt.isItemClick = true;
+};
+
+this.isItemClick = function(evt)
+{
+	return evt.isItemClick;
+};
+
 this.replyClick = function()
 {
 	logTweetAction('reply', this);
 };
 
-this.retweetClick = function()
+this.retweetClick = function(event)
 {
 	logTweetAction('retweet', this);
+	setItemClick(event);
 };
 
-this.favoriteClick = function()
+this.favoriteClick = function(event)
 {
 	logTweetAction('favorite', this);
+	setItemClick(event);
 };
 
 this.addOtherEventHandlers = function()
