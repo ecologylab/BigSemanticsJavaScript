@@ -116,6 +116,6 @@ Logger.logEvents = function(logMessage)
 
 Logger.checkLogEvents = function()
 {
-	if(Logger.queue.length > 1)
+	if(Logger.queue.length > 0)
 		Logger.logEvents(Logger.emptyLogQueue());
 }
