@@ -799,6 +799,9 @@ MetadataRenderer.expandCollapseTable = function(event)
 		expandSymbol.style.display = "none";	
 		button.className = "collapseButton";
 		
+		if (button.nextSibling && button.nextSibling.className == "fieldLabelImage")
+			button.nextSibling.style.display = "";
+		
 		var table = MetadataRenderer.getTableForButton(button);
 		MetadataRenderer.expandTable(table);
 		
@@ -840,6 +843,9 @@ MetadataRenderer.expandCollapseTable = function(event)
 	{
 		expandSymbol.style.display = "block";			
 		button.className = "expandButton";
+		
+		if (button.nextSibling && button.nextSibling.className == "fieldLabelImage")
+			button.nextSibling.style.display = "none";
 		
 		var table = MetadataRenderer.getTableForButton(button);
 		MetadataRenderer.collapseTable(table);
