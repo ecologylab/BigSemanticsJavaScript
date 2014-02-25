@@ -98,6 +98,12 @@
 	width: 100%;
 }
 
+.metadataContainer .fieldLabelImage{	
+	width: 35px;
+	height: 35px;
+	padding-left: 3px;
+}
+
 .metadataContainer .fieldValue{	
 	white-space: normal;
 	text-align: left;
