@@ -610,7 +610,7 @@ DocumentContainer.prototype.matches = function(url)
  * @param metadata, metadata to display
  * @return table, HTML table for the metadata or null if there is no metadata to display
  */
-MetadataRenderer.buildMetadataDisplay = function(isRoot, mmd, metadata, bgColor)
+MetadataRenderer.buildMetadataDisplay = function(isRoot, mmd, metadata, taskUrl, bgColor)
 {
 	// Convert the metadata into a list of MetadataFields using the meta-metadata.
 	var metadataFields = MetadataRenderer.getMetadataFields(mmd["meta_metadata"]["kids"], metadata, 0, null, taskUrl);
