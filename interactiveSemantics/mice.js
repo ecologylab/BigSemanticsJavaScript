@@ -1813,9 +1813,10 @@ MetadataRenderer.buildMetadataField = function(metadataField, isChildTable, fiel
 		}
 		
 		if(metadataField.name)
-		{													
+		{												
+			var imageLabel = (metadataField.value_as_label == "") ?	false : metadataField.value_as_label.type == "image";
 			//If the table isn't a child table then display the label for the composite
-			if(!isChildTable && !metadataField.hide_label)
+			if((!isChildTable || imageLabel) && !metadataField.hide_label)
 			{				
 				var label = (metadataField.value_as_label == "" || (metadataField.value_as_label.type != "scalar"
 					&& metadataField.value_as_label.type != "image"))? metadataField.name : metadataField.value_as_label.value;
