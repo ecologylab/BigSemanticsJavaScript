@@ -11,12 +11,7 @@ this.expandableItemsXPath2 = ".//a[@class='twitter-atreply pretty-link']/b | " +
 
 this.tweetsXPath = "//ol[@id='stream-items-id']/li/div";
 
-this.defaultConditionXPath2 = ".//a[@class='twitter-atreply pretty-link']/b | " +
-							  ".//a[@class='twitter-hashtag pretty-link js-nav']/b | " +
-							  ".//a[@class='account-group js-account-group js-action-profile js-user-profile-link js-nav']/strong | " + 
-							  ".//a[@class='pretty-link js-user-profile-link js-action-profile-name']/strong";
-
-this.externalURLsXPath = "//a[@class='twitter-timeline-link']";
+this.externalURLsXPath = ".//a[@class='twitter-timeline-link']";
 
 this.replyXPath = "//li[@class='action-reply-container']/a";
 
@@ -63,11 +58,7 @@ this.addClickEventListener = function(item, listener) {
 	item.parentNode.addEventListener('click', listener);
 };
 
-this.addEventTargetListener = function(target, eventtype, listener) {
-	target.addEventListener(eventtype, listener);
-};
-
-this.setProcessed = function(elt) {
+this.setExpandableItemProcessed = function(elt) {
 	// still keep pretty-link part for the styling purpose 
 	var eltClass = elt.parentNode.getAttribute("class");
 	if (eltClass.indexOf("account-group") == 0)
@@ -141,6 +132,21 @@ this.getContainers = function(tweet) {
 	return containers;
 }
 
+this.addTargetEventListener = function(target, eventtype, listener) {
+	target.addEventListener(eventtype, listener);
+};
+
+this.setProcessed = function(elt) {
+	elt.setAttribute("setProcessed", "true");
+};
+
+this.isProcessed = function(elt) {
+	 var val = elt.getAttribute("setProcessed");
+	 if (val && val == "true")
+		 return true;
+	 return false;
+};
+
 this.getItemClickedEventObj = function(item) 
 {
 	var url_p = this.getUrlPrefix() + item.getAttribute("href");
@@ -174,17 +180,18 @@ this.getExternalURLClickedEventObj = function(externalURL)
 };
 
 this.getDefaultConditionXPath = function(isMetadata) {
-	return this.defaultConditionXPath2;
+	return this.expandableItemsXPath2;
 };
 
-this.setDefaultConditionProcessed = function(elt) {
+this.setDefaultConditionItemProcessed = function(elt) {
 	elt.parentNode.setAttribute("setProcessed", "true");
 };
 
-this.checkDefaultConditionProcessed = function(elt) {
+this.checkDefaultConditionItemProcessed = function(elt) {
 	 var val = elt.parentNode.getAttribute("setProcessed");
 	 if (val && val == "true")
 		 return true;
+	 return false;
 };
 
 this.getHrefAttribute = function(elt)
@@ -242,7 +249,11 @@ this.addOtherEventHandlers = function()
 	for (var i = 0; i < xpathResult.snapshotLength; i++)
 	{
 		var item = xpathResult.snapshotItem(i);
-		item.addEventListener('click', this.replyClick);		
+		if (!this.isProcessed(item))
+		{
+			item.addEventListener('click', this.replyClick);
+			this.setProcessed(item);
+		}
 	}
 	
 	xpath = this.retweetXPath;
@@ -250,7 +261,11 @@ this.addOtherEventHandlers = function()
 	for (var i = 0; i < xpathResult.snapshotLength; i++)
 	{
 		var item = xpathResult.snapshotItem(i);
-		item.addEventListener('click', this.retweetClick);		
+		if (!this.isProcessed(item))
+		{
+			item.addEventListener('click', this.retweetClick);
+			this.setProcessed(item);
+		}		
 	}
 	
 	xpath = this.favoriteXPath;
@@ -258,7 +273,11 @@ this.addOtherEventHandlers = function()
 	for (var i = 0; i < xpathResult.snapshotLength; i++)
 	{
 		var item = xpathResult.snapshotItem(i);
-		item.addEventListener('click', this.favoriteClick);		
+		if (!this.isProcessed(item))
+		{
+			item.addEventListener('click', this.favoriteClick);
+			this.setProcessed(item);
+		}
 	}
 };
 

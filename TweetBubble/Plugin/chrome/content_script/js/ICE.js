@@ -24,6 +24,7 @@ function processPage()
 function processMetadata(node)
 {
 	layoutExpandableItems(node, true); 	// re-layout items in expanded metadata
+	addExternalURLHandlers();
 }
 
 function downloadRequester(expandableItemUrl)
@@ -154,7 +155,7 @@ function layoutExpandableItems(node, isMetadata)
 		instance.addClickEventListener(expandableItem, expandCollapseItem);
 		
 		// remove or add the identifying attribute to prevent re-processing
-		instance.setProcessed(expandableItem);
+		instance.setExpandableItemProcessed(expandableItem);
 		
 		// add isMetadata attribute (useful in later custom handling)
 		instance.setMetadataBoolean(expandableItem, isMetadata);
@@ -170,7 +171,11 @@ function addScrollBackAndCollapseForContainers()
 	for (var i = 0; i < containersXPathResult.snapshotLength; i++)
 	{
 		var container = containersXPathResult.snapshotItem(i);
-		instance.addEventTargetListener(container, 'click', scrollBackAndCollpaseHandler);		
+		if (!instance.isProcessed(container))
+		{
+			instance.addTargetEventListener(container, 'click', scrollBackAndCollpaseHandler);
+			instance.setProcessed(container);
+		}
 	}
 }
 
@@ -194,7 +199,8 @@ function ajaxContentUpdate()
 	}, 1000);
 }
 
-function logExternalURLClick(event) {
+function logExternalURLClick(event) 
+{
 	instance.setItemClick(event);
 	if (MetadataRenderer.LoggingFunction)
 	{
@@ -203,7 +209,7 @@ function logExternalURLClick(event) {
 	}
 }
 
-function addOtherEventHandlers()
+function addExternalURLHandlers() 
 {
 	var externalURLsXPath = instance.getExternalURLsXPath();
 	var externalURLsXPathResult = 
@@ -212,8 +218,17 @@ function addOtherEventHandlers()
 	for (var i = 0; i < externalURLsXPathResult.snapshotLength; i++)
 	{
 		var externalURL = externalURLsXPathResult.snapshotItem(i);
-		instance.addEventTargetListener(externalURL, 'click', logExternalURLClick);		
+		if (!instance.isProcessed(externalURL))
+		{
+			instance.addTargetEventListener(externalURL, 'click', logExternalURLClick);
+			instance.setProcessed(externalURL);
+		}		
 	}
+}
+
+function addOtherEventHandlers()
+{
+	addExternalURLHandlers();
 	
 	instance.addOtherEventHandlers();
 }
@@ -263,12 +278,12 @@ function processDefaultConditionClicks(node)
 	for (var i = 0; i < expandableItemsXPathResult.snapshotLength; i++) 
 	{
 		var expandableItem = expandableItemsXPathResult.snapshotItem(i);
-		if (!instance.checkDefaultConditionProcessed(expandableItem))
+		if (!instance.checkDefaultConditionItemProcessed(expandableItem))
 		{
 			instance.addClickEventListener(expandableItem, defaultConditionItemClick);
 			
 			// remove or add the identifying attribute to prevent re-processing
-			instance.setDefaultConditionProcessed(expandableItem);			
+			instance.setDefaultConditionItemProcessed(expandableItem);			
 		}
 	}
 	
@@ -279,7 +294,11 @@ function processDefaultConditionClicks(node)
 	for (var i = 0; i < containersXPathResult.snapshotLength; i++)
 	{
 		var container = containersXPathResult.snapshotItem(i);
-		instance.addEventTargetListener(container, 'click', defaultConditionContainerClick);		
+		if (!instance.isProcessed(container))
+		{
+			instance.addTargetEventListener(container, 'click', defaultConditionContainerClick);
+			instance.setProcessed(container);
+		}
 	}
 	
 	addOtherEventHandlers();
