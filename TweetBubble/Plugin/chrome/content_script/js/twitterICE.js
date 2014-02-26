@@ -16,6 +16,8 @@ this.defaultConditionXPath2 = ".//a[@class='twitter-atreply pretty-link']/b | " 
 							  ".//a[@class='account-group js-account-group js-action-profile js-user-profile-link js-nav']/strong | " + 
 							  ".//a[@class='pretty-link js-user-profile-link js-action-profile-name']/strong";
 
+this.externalURLsXPath = "//a[@class='twitter-timeline-link']";
+
 this.replyXPath = "//li[@class='action-reply-container']/a";
 
 this.retweetXPath = "//li[@class='action-rt-container js-toggle-state js-toggle-rt']/a";
@@ -61,8 +63,8 @@ this.addClickEventListener = function(item, listener) {
 	item.parentNode.addEventListener('click', listener);
 };
 
-this.addContainerClickEventListener = function(container, listener) {
-	container.addEventListener('click', listener);
+this.addEventTargetListener = function(target, eventtype, listener) {
+	target.addEventListener(eventtype, listener);
 };
 
 this.setProcessed = function(elt) {
@@ -156,6 +158,16 @@ this.getContainerClickedEventObj = function(tweet)
 	var eventObj = {
 		click_tweet: {
 			id: tweet.getAttribute("data-tweet-id")
+		}
+	}
+	return eventObj;
+};
+
+this.getExternalURLClickedEventObj = function(externalURL)
+{
+	var eventObj = {
+		click_externalUrl: {
+			url: externalURL.getAttribute("href")
 		}
 	}
 	return eventObj;
@@ -268,6 +280,10 @@ this.addAJAXContentListener = function(callback)
 			this.ajaxItem.parentNode.addEventListener('click', callback);
 		}
 	}
+};
+
+this.getExternalURLsXPath = function() {
+	return this.externalURLsXPath;
 };
 
 }
