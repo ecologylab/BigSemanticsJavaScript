@@ -21,6 +21,9 @@ this.favoriteXPath = "//li[@class='action-fav-container js-toggle-state js-toggl
 
 this.ajaxContentXPath = "//div[@class='new-tweets-bar js-new-tweets-bar']";
 
+this.globalNewTweetXPath = "//button[@id='global-new-tweet-button']";
+var newTweetXPath = "//div[@class='tweet-button']/button[@class='btn primary-btn tweet-action tweet-btn js-tweet-btn']";
+
 this.urlPrefix = "https://twitter.com";
 
 this.getUrlPrefix = function() {
@@ -242,6 +245,32 @@ this.favoriteClick = function(event)
 	event.isItemClick = true;
 };
 
+var composeTweetBtnClick = function(event)
+{
+	logTweetAction('tweet', this);
+};
+
+this.addedGlobalNewTweetHandler = false;
+
+this.addGlobalNewTweetHandler = function()
+{
+	setTimeout(function() {
+		xpath = newTweetXPath;
+		xpathResult = document.evaluate(xpath, document, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
+		for (var i = 0; i < xpathResult.snapshotLength; i++)
+		{
+			var item = xpathResult.snapshotItem(i);
+			
+			var val = item.getAttribute("setProcessed");
+			if (!val || val == "false")
+			{
+				item.addEventListener('click', composeTweetBtnClick);
+				item.setAttribute("setProcessed", "true");
+			}
+		}
+	}, 1000);
+}
+
 this.addOtherEventHandlers = function()
 {
 	var xpath = this.replyXPath;
@@ -278,6 +307,29 @@ this.addOtherEventHandlers = function()
 			item.addEventListener('click', this.favoriteClick);
 			this.setProcessed(item);
 		}
+	}
+	
+	xpath = newTweetXPath;
+	xpathResult = document.evaluate(xpath, document, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
+	for (var i = 0; i < xpathResult.snapshotLength; i++)
+	{
+		var item = xpathResult.snapshotItem(i);
+		if (!this.isProcessed(item))
+		{
+			item.addEventListener('click', composeTweetBtnClick);
+			this.setProcessed(item);
+		}
+	}
+	
+	if (!this.addedGlobalNewTweetHandler)
+	{
+		xpath = this.globalNewTweetXPath;
+		xpathResult = document.evaluate(xpath, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null);
+		
+		var item = xpathResult.singleNodeValue;
+		item.addEventListener('click', this.addGlobalNewTweetHandler);
+		
+		this.addedGlobalNewTweetHandler = true;
 	}
 };
 
