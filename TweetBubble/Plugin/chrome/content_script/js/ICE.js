@@ -390,6 +390,23 @@ chrome.extension.sendRequest({loadOptions: document.URL}, function(response) {
 		//if (window.confirm(Util.info_sheet))
 			//processInfoSheetResponse(Util.YES);
 	}
+	
+	if (MetadataRenderer.LoggingFunction)
+	{
+		if (response && (response.last_userid != response.userid || response.last_condition != response.condition))
+		{
+			var eventObj = {
+				change_settings: {
+					lastUserId: response.last_userid,
+					currUserId: response.userid,
+					lastCond: response.last_condition,
+					currCond: response.condition,
+					infoSheetAgree: response.agree
+				}
+			}
+			MetadataRenderer.LoggingFunction(eventObj);
+		}
+	}
 });
 
 chrome.runtime.onMessage.addListener(
