@@ -218,7 +218,7 @@ var logTweetAction = function(twAction, item) {
 			eventObj = {
 				tweet_action: {
 					name: twAction,
-					url: txtBox.firstChild.textContent;
+					url: txtBox.firstChild.textContent
 				}
 			}
 		}	
