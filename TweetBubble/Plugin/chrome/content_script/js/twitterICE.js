@@ -22,7 +22,10 @@ this.favoriteXPath = "//li[@class='action-fav-container js-toggle-state js-toggl
 this.ajaxContentXPath = "//div[@class='new-tweets-bar js-new-tweets-bar']";
 
 this.globalNewTweetXPath = "//button[@id='global-new-tweet-button']";
+var globalNewTweetTextXPath = "//div[@id='tweet-box-global']";
+
 var newTweetXPath = "//div[@class='tweet-button']/button[@class='btn primary-btn tweet-action tweet-btn js-tweet-btn']";
+var newTweetTextXPath = "//div[@id='tweet-box-mini-home-profile']";
 
 this.urlPrefix = "https://twitter.com";
 
@@ -205,13 +208,30 @@ this.getHrefAttribute = function(elt)
 var logTweetAction = function(twAction, item) {
 	if (MetadataRenderer.LoggingFunction)
 	{
-		//a.li.ul.div
-		var aNode = item.parentNode.parentNode.parentNode.getElementsByTagName('a')[0];
-		
-		var eventObj = {
-			tweet_action: {
-				name: twAction,
-				url: aNode.getAttribute("href")
+		var eventObj = "";
+		if (twAction == "tweet")
+		{
+			var xpath = item.tweetTextXPath;
+			var xpathResult = document.evaluate(xpath, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null);			
+			var txtBox = xpathResult.singleNodeValue;
+			
+			eventObj = {
+				tweet_action: {
+					name: twAction,
+					url: txtBox.firstChild.textContent;
+				}
+			}
+		}	
+		else
+		{	
+			//a.li.ul.div
+			var aNode = item.parentNode.parentNode.parentNode.getElementsByTagName('a')[0];
+			
+			eventObj = {
+				tweet_action: {
+					name: twAction,
+					url: aNode.getAttribute("href")
+				}
 			}
 		}
 		MetadataRenderer.LoggingFunction(eventObj);
@@ -245,8 +265,15 @@ this.favoriteClick = function(event)
 	event.isItemClick = true;
 };
 
+var composeTweetGlobalBtnClick = function(event)
+{
+	this.tweetTextXPath = globalNewTweetTextXPath;
+	logTweetAction('tweet', this);
+};
+
 var composeTweetBtnClick = function(event)
 {
+	this.tweetTextXPath = newTweetXPath;
 	logTweetAction('tweet', this);
 };
 
@@ -264,7 +291,7 @@ this.addGlobalNewTweetHandler = function()
 			var val = item.getAttribute("setProcessed");
 			if (!val || val == "false")
 			{
-				item.addEventListener('click', composeTweetBtnClick);
+				item.addEventListener('click', composeTweetGlobalBtnClick);
 				item.setAttribute("setProcessed", "true");
 			}
 		}
