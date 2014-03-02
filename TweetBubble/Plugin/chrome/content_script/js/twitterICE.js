@@ -215,10 +215,13 @@ var logTweetAction = function(twAction, item) {
 			var xpathResult = document.evaluate(xpath, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null);			
 			var txtBox = xpathResult.singleNodeValue;
 			
-			eventObj = {
-				tweet_action: {
-					name: twAction,
-					url: txtBox.firstChild.textContent
+			if (txtBox && txtBox.firstChild) {
+			
+				eventObj = {
+					tweet_action: {
+						name: twAction,
+						url: txtBox.firstChild.textContent
+					}
 				}
 			}
 		}	
