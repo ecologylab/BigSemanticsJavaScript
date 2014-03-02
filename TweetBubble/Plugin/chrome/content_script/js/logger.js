@@ -32,7 +32,7 @@ Logger.init = function(userid, cond)
 	Logger.hash_key = userid;
 	
 	if (cond != "none")
-		Logger.username = cond + "_s14_p2";
+		Logger.username = cond + "_s14_p3";
 	
 	setInterval(Logger.checkLogEvents, MILLIS_BETWEEN_LOG);
 }
