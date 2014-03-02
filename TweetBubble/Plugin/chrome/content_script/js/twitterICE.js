@@ -22,10 +22,10 @@ this.favoriteXPath = "//li[@class='action-fav-container js-toggle-state js-toggl
 this.ajaxContentXPath = "//div[@class='new-tweets-bar js-new-tweets-bar']";
 
 this.globalNewTweetXPath = "//button[@id='global-new-tweet-button']";
-var globalNewTweetTextXPath = "//div[@id='tweet-box-global']";
+//var globalNewTweetTextXPath = "//div[@id='tweet-box-global']";
 
-var newTweetXPath = "//div[@class='tweet-button']/button[@class='btn primary-btn tweet-action tweet-btn js-tweet-btn']";
-var newTweetTextXPath = "//div[@id='tweet-box-mini-home-profile']";
+var newTweetXPath = "//div[@class='tweet-button']/button";
+var newTweetTextXPath = ".//div[@id='tweet-box-global'] | .//div[@id='tweet-box-mini-home-profile']";
 
 this.urlPrefix = "https://twitter.com";
 
@@ -209,10 +209,10 @@ var logTweetAction = function(twAction, item) {
 	if (MetadataRenderer.LoggingFunction)
 	{
 		var eventObj = "";
-		if (twAction == "tweet")
+		if (twAction == "tweet" && item.parentNode.parentNode && item.parentNode.parentNode.parentNode)
 		{
-			var xpath = item.tweetTextXPath;
-			var xpathResult = document.evaluate(xpath, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null);			
+			var xpathResult = document.evaluate(newTweetTextXPath, item.parentNode.parentNode.parentNode,
+														null, XPathResult.FIRST_ORDERED_NODE_TYPE, null);			
 			var txtBox = xpathResult.singleNodeValue;
 			
 			if (txtBox && txtBox.firstChild) {
@@ -268,15 +268,8 @@ this.favoriteClick = function(event)
 	event.isItemClick = true;
 };
 
-var composeTweetGlobalBtnClick = function(event)
-{
-	this.tweetTextXPath = globalNewTweetTextXPath;
-	logTweetAction('tweet', this);
-};
-
 var composeTweetBtnClick = function(event)
 {
-	this.tweetTextXPath = newTweetXPath;
 	logTweetAction('tweet', this);
 };
 
@@ -294,7 +287,7 @@ this.addGlobalNewTweetHandler = function()
 			var val = item.getAttribute("setProcessed");
 			if (!val || val == "false")
 			{
-				item.addEventListener('click', composeTweetGlobalBtnClick);
+				item.addEventListener('click', composeTweetBtnClick);
 				item.setAttribute("setProcessed", "true");
 			}
 		}
