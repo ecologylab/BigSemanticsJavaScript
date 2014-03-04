@@ -24,6 +24,7 @@ function processPage()
 function processMetadata(node)
 {
 	layoutExpandableItems(node, true); 	// re-layout items in expanded metadata
+	addExternalURLHandlers();
 }
 
 function downloadRequester(expandableItemUrl)
@@ -154,7 +155,7 @@ function layoutExpandableItems(node, isMetadata)
 		instance.addClickEventListener(expandableItem, expandCollapseItem);
 		
 		// remove or add the identifying attribute to prevent re-processing
-		instance.setProcessed(expandableItem);
+		instance.setExpandableItemProcessed(expandableItem);
 		
 		// add isMetadata attribute (useful in later custom handling)
 		instance.setMetadataBoolean(expandableItem, isMetadata);
@@ -170,7 +171,11 @@ function addScrollBackAndCollapseForContainers()
 	for (var i = 0; i < containersXPathResult.snapshotLength; i++)
 	{
 		var container = containersXPathResult.snapshotItem(i);
-		instance.addContainerClickEventListener(container, scrollBackAndCollpaseHandler);		
+		if (!instance.isProcessed(container))
+		{
+			instance.addTargetEventListener(container, 'click', scrollBackAndCollpaseHandler);
+			instance.setProcessed(container);
+		}
 	}
 }
 
@@ -194,8 +199,37 @@ function ajaxContentUpdate()
 	}, 1000);
 }
 
+function logExternalURLClick(event) 
+{
+	instance.setItemClick(event);
+	if (MetadataRenderer.LoggingFunction)
+	{
+		var eventObj = instance.getExternalURLClickedEventObj(this);
+		MetadataRenderer.LoggingFunction(eventObj);
+	}
+}
+
+function addExternalURLHandlers() 
+{
+	var externalURLsXPath = instance.getExternalURLsXPath();
+	var externalURLsXPathResult = 
+		document.evaluate(externalURLsXPath, document, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
+	
+	for (var i = 0; i < externalURLsXPathResult.snapshotLength; i++)
+	{
+		var externalURL = externalURLsXPathResult.snapshotItem(i);
+		if (!instance.isProcessed(externalURL))
+		{
+			instance.addTargetEventListener(externalURL, 'click', logExternalURLClick);
+			instance.setProcessed(externalURL);
+		}		
+	}
+}
+
 function addOtherEventHandlers()
 {
+	addExternalURLHandlers();
+	
 	instance.addOtherEventHandlers();
 }
 
@@ -244,12 +278,12 @@ function processDefaultConditionClicks(node)
 	for (var i = 0; i < expandableItemsXPathResult.snapshotLength; i++) 
 	{
 		var expandableItem = expandableItemsXPathResult.snapshotItem(i);
-		if (!instance.checkDefaultConditionProcessed(expandableItem))
+		if (!instance.checkDefaultConditionItemProcessed(expandableItem))
 		{
 			instance.addClickEventListener(expandableItem, defaultConditionItemClick);
 			
 			// remove or add the identifying attribute to prevent re-processing
-			instance.setDefaultConditionProcessed(expandableItem);			
+			instance.setDefaultConditionItemProcessed(expandableItem);			
 		}
 	}
 	
@@ -260,7 +294,11 @@ function processDefaultConditionClicks(node)
 	for (var i = 0; i < containersXPathResult.snapshotLength; i++)
 	{
 		var container = containersXPathResult.snapshotItem(i);
-		instance.addContainerClickEventListener(container, defaultConditionContainerClick);		
+		if (!instance.isProcessed(container))
+		{
+			instance.addTargetEventListener(container, 'click', defaultConditionContainerClick);
+			instance.setProcessed(container);
+		}
 	}
 	
 	addOtherEventHandlers();
@@ -351,6 +389,23 @@ chrome.extension.sendRequest({loadOptions: document.URL}, function(response) {
 		}
 		//if (window.confirm(Util.info_sheet))
 			//processInfoSheetResponse(Util.YES);
+	}
+	
+	if (MetadataRenderer.LoggingFunction)
+	{
+		if (response && (response.last_userid != response.userid || response.last_condition != response.condition))
+		{
+			var eventObj = {
+				change_settings: {
+					lastUserId: response.last_userid,
+					currUserId: response.userid,
+					lastCond: response.last_condition,
+					currCond: response.condition,
+					infoSheetAgree: response.agree
+				}
+			}
+			MetadataRenderer.LoggingFunction(eventObj);
+		}
 	}
 });
 

@@ -63,12 +63,15 @@ function loadWebpage(url, sendResponse)
 	xhr.send();
 }
 
-function generateUserId()
+function generateUserId(cond)
 {
 	var id = "";
     var charSet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
-    for (var i = 0; i < 5; i++)
+    // to avoid any possible duplicate between study and normal usage
+    var len = (cond == "none")? 6 : 7;
+    
+    for (var i = 0; i < len; i++)
         id += charSet.charAt(Math.floor(Math.random() * charSet.length));
 
     return id;
@@ -80,6 +83,9 @@ function getOptions(url, sendResponse)
 	var params = url.substring(url.indexOf("?")+1);
 	params = params.split("&");
 	
+	var prevUserId = localStorage["tweetBubbleUserId"];
+	var prevCondition = localStorage["tweetBubbleStudyCondition"];
+	
 	for (var i = 0; i < params.length; i++)
 	{
 		if (params[i].indexOf("condition") == 0)
@@ -89,15 +95,14 @@ function getOptions(url, sendResponse)
 			localStorage["tweetBubbleUserId"] = params[i].substring(params[i].indexOf("=")+1);
 	}
 	
-	if (!localStorage["tweetBubbleUserId"])
-		localStorage["tweetBubbleUserId"] = generateUserId();
-
-	
 	if (!localStorage["tweetBubbleStudyCondition"])
 		localStorage["tweetBubbleStudyCondition"] = "none";
 	
-	sendResponse({userid: localStorage["tweetBubbleUserId"], 
-				condition: localStorage["tweetBubbleStudyCondition"],
+	if (!localStorage["tweetBubbleUserId"])
+		localStorage["tweetBubbleUserId"] = generateUserId(localStorage["tweetBubbleStudyCondition"]);
+
+	sendResponse({last_userid: prevUserId, userid: localStorage["tweetBubbleUserId"], 
+				last_condition: prevCondition, condition: localStorage["tweetBubbleStudyCondition"],
 				agree: localStorage["agreeToInformationSheet"]});
 }
 
