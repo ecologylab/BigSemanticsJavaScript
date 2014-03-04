@@ -6,7 +6,7 @@
 
 // Global object.
 var OntoVis = {};
-OntoVis.dataFile = "mmd_repo.json"
+OntoVis.dataFile = "mmd_repo.json";
 OntoVis.width = 3000;
 OntoVis.height = 3200;
 OntoVis.marginX = 80;
@@ -20,7 +20,7 @@ OntoVis.maxLevelDistance = 350;
 OntoVis.getMiceUrl = function(url) {
   var eurl = encodeURIComponent(url);
   return "http://ecologylab.net/mice?url=" + eurl;
-}
+};
 
 // D3's projection() specifies a transform of coordinates for generated links.
 OntoVis._diagonal = d3.svg.diagonal().projection(
@@ -36,7 +36,7 @@ OntoVis.SVG = function(elementName) {
     $(e).attr("xmlns:xlink", "http://www.w3.org/1999/xlink");
   }
   return e;
-}
+};
 
 // Returns the subtypes of a given node.
 OntoVis.subtypes = function(node) {
@@ -59,7 +59,7 @@ OntoVis.subtypes = function(node) {
     }
   }
   return;
-}
+};
 
 // Returns the number of subtypes for a node.
 OntoVis.subtypesSize = function(node) {
@@ -68,7 +68,7 @@ OntoVis.subtypesSize = function(node) {
     return subtypes.length;
   }
   return 0;
-}
+};
 
 // Traverse a node tree in pre order. For each node, carry out an operation
 // denoted by op. Then, test the node with a condition denoted by cond. If the
@@ -100,7 +100,7 @@ OntoVis.preOrderTraverse = function(node, op, cond) {
     }
   }
   return false;
-}
+};
 
 // Returns the node or the subnode with the given name.
 OntoVis.findNode = function(node, name) {
@@ -110,7 +110,7 @@ OntoVis.findNode = function(node, name) {
       function(n) {
         return n.name == name
       });
-}
+};
 
 // Create and initialize the layout.
 OntoVis.createLayout = function(rootNodeName) {
@@ -153,7 +153,7 @@ OntoVis.createLayout = function(rootNodeName) {
       OntoVis.data_root = root;
       OntoVis.show(rootNodeName);
   });
-}
+};
 
 OntoVis.show = function(rootNodeName) {
   var root = OntoVis.findNode(OntoVis.data_root, rootNodeName);
@@ -184,7 +184,7 @@ OntoVis.show = function(rootNodeName) {
   } else {
     alert("Cannot find root node: " + rootNodeName);
   }
-}
+};
 
 // Update the presentation when clicking events happen.
 OntoVis.update = function(source, end_listener) {
@@ -251,7 +251,7 @@ OntoVis.update = function(source, end_listener) {
 
   var bbox1 = function(shape) {
     return $(shape.parentNode.parentNode).select("text.text")[0].getBBox();
-  }
+  };
   var anchors =
     g2s
       .insert("a")
@@ -302,7 +302,7 @@ OntoVis.update = function(source, end_listener) {
   // Add boxes.
   var bbox2 = function(shape) {
     return $(shape.parentNode).select("g.g2")[0].getBBox();
-  }
+  };
   var px = OntoVis.nodePaddingX;
   var py = OntoVis.nodePaddingY;
   enteringNodes
@@ -330,7 +330,7 @@ OntoVis.update = function(source, end_listener) {
     transition
       .each(function() { ++n; console.log("A: " + n); })
       .each("end", function() { --n; console.log("B: " + n); if (n == 0) { end_listener() } });
-  }
+  };
 
   // Transit existing and entering nodes to their new locations (specified in
   // d.x and d.y).
@@ -413,7 +413,7 @@ OntoVis.update = function(source, end_listener) {
 
   // Save the location of each node before next update().
   nodes.forEach(function(d) { d.x0 = d.x; d.y0 = d.y; });
-}
+};
 
 // Handles clicks. Expands or collapse sub nodes by manipulating the data.
 OntoVis.click = function(d) {
@@ -422,7 +422,7 @@ OntoVis.click = function(d) {
   OntoVis.update(d, function() {
     OntoVis.scrollTo(element);
   });
-}
+};
 
 OntoVis.scrollTo = function(element) {
   console.log("scroll: ");
@@ -433,5 +433,5 @@ OntoVis.scrollTo = function(element) {
     console.log("scrollTop: " + sy);
     $('html,body').animate({ scrollLeft: sx, scrollTop: sy }, 200);
   }
-}
+};
 
