@@ -1,0 +1,75 @@
+<html>
+	<head>
+		<title>Metadata Renderer Test</title>
+		
+		<!-- Styles -->
+        <link href="../MICE/css/bootstrap.min.css" rel="stylesheet" type="text/css"></link>
+        <link href="metadataRenderer.css" rel="stylesheet" type="text/css"></link>
+        <!--
+        <link href="../MICE/css/mice.css" rel="stylesheet" type="text/css"></link>
+        -->
+		
+		<!-- Code -->
+        <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+		<script type="text/javascript" src="../simpl/simplDeserializer.js"></script>
+		<script type="text/javascript" src="../simpl/simplFieldTypes.js"></script>
+		<script type="text/javascript" src="../simpl/simplGraphCollapse.js"></script>
+		<script type="text/javascript" src="../simpl/simplGraphExpand.js"></script>
+		<script type="text/javascript" src="../simpl/simplTypeScope.js"></script>
+		<script type="text/javascript" src="../simpl/simplTypeScopeDeserialize.js"></script>
+		<script type="text/javascript" src="../simpl/simplTypeScopeSerialize.js"></script>
+		<script type="text/javascript" src="mice.js"></script>
+		
+		<style>
+			#content {
+				background: white;
+				padding: 8px;
+				border: 1px solid black;
+				overflow: auto;
+			}
+		</style>
+		
+		<script>
+			function showMetadata()
+			{
+				var url = document.getElementById("targetURL").value;
+				var content = document.getElementById("content");
+				
+				MetadataRenderer.addMetadataDisplay(content, url, true);
+			}
+			
+			function onEnterShowMetadata(event)
+			{
+				if(event.keyCode == 13)
+					showMetadata();	
+			}
+		</script>
+	</head>
+	<body>
+		<div id="controls" class="navbar navbar-inverse navbar-fixed-top">
+          <div class="navbar-inner">
+            <div class="container">
+              <div class="brand">Metadata In-Context Expander (MICE)</div>
+              <form class="navbar-form pull-right" onsubmit="return false;">
+                <input id="targetURL" type="text" class="span5"
+                  size="500" style="height: 30px;" placeholder="Enter URL"
+                  onkeydown="onEnterShowMetadata(event);"/>
+                <input type="button" class="btn" value="Show Metadata"
+                  onclick="showMetadata();"/>
+            </form>
+          </div>
+          </div>
+		</div>
+		
+        <div class="container" style="margin-top: 50px; width: 90%">
+          <div id="content" class="metadataRendering">
+              <a href="http://en.wikipedia.org/wiki/Exploratory_search"> </a>			
+          </div>
+        </div>
+		
+		<script>
+            SEMANTIC_SERVICE_URL = "http://localhost:8080/BigSemanticsService/";
+			MetadataRenderer.initMetadataRenderings();
+		</script>
+	</body>
+</html>

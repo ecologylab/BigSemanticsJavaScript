@@ -1,0 +1,93 @@
+<html>
+	<head>
+		<title>Exploratory Search Test</title>
+		
+		<!-- Styles -->
+        <link href="./css/bootstrap.min.css" rel="stylesheet" type="text/css"></link>
+        <link href="metadataRenderer.css" rel="stylesheet" type="text/css"></link>
+        <!--
+        <link href="../MICE/css/mice.css" rel="stylesheet" type="text/css"></link>
+        -->
+		
+		<!-- Code -->
+        <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+		<script type="text/javascript" src="../simpl/simplDeserializer.js"></script>
+		<script type="text/javascript" src="../simpl/simplFieldTypes.js"></script>
+		<script type="text/javascript" src="../simpl/simplGraphCollapse.js"></script>
+		<script type="text/javascript" src="../simpl/simplGraphExpand.js"></script>
+		<script type="text/javascript" src="../simpl/simplTypeScope.js"></script>
+		<script type="text/javascript" src="../simpl/simplTypeScopeDeserialize.js"></script>
+		<script type="text/javascript" src="../simpl/simplTypeScopeSerialize.js"></script>
+		<script type="text/javascript" src="mice.js"></script>
+		
+		<style>
+			#content {
+				background: white;
+				padding: 8px;
+				border: 1px solid black;
+				overflow: auto;
+			}
+		</style>
+		
+		<script>
+			function toGoogleUrl(searchString){
+				var terms = searchString.split(" ");
+				var url = "http://www.google.com/search?q=";
+				for (var x in terms){
+					url += terms[x];
+					url += "+";
+				}
+				return url;
+			}
+			
+			function showMetadata()
+			{
+				var searchTerm = document.getElementById("targetURL").value;
+				var googleURL = toGoogleUrl(searchTerm);
+				
+				
+				
+				var content = document.getElementById("content");
+				
+				MetadataRenderer.addMetadataDisplay(content, googleURL, true);
+			}
+			
+			function onEnterShowMetadata(event)
+			{
+				if(event.keyCode == 13)
+					showMetadata();	
+			}
+		</script>
+	</head>
+	<body>
+		<div id="controls" class="navbar navbar-inverse navbar-fixed-top">
+          <div class="navbar-inner">
+            <div class="container">
+              <div class="brand">Exploratory Search</div>
+              <form class="navbar-form pull-right" onsubmit="return false;">
+                
+                <!-- So around her, I might change logic to regex the search terms into a google search and pass that URL
+                	to the metadata renderer-->
+                
+                <input id="targetURL" type="text" class="span5"
+                  size="500" style="height: 30px;" placeholder="Enter Search Term"
+                  onkeydown="onEnterShowMetadata(event);"/>
+                <input type="button" class="btn" value="Search"
+                  onclick="showMetadata();"/>
+            </form>
+          </div>
+          </div>
+		</div>
+		
+        <div class="container" style="margin-top: 50px; width: 90%">
+          <div id="content" class="metadataRendering">
+              <a href="https://www.google.com/search?q=exploratory+search"> </a>			
+          </div>
+        </div>
+		
+		<script>
+            SEMANTIC_SERVICE_URL = "http://localhost:8080/BigSemanticsService/";
+			MetadataRenderer.initMetadataRenderings();
+		</script>
+	</body>
+</html>
