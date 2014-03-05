@@ -18,6 +18,11 @@ body {
   cursor: default;
 }
 
+.text.subtree {
+  font-size: 13pt;
+  font-weight: 800;
+}
+
 .text:hover {
   stroke: #100873;
 }

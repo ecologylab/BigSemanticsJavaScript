@@ -15,6 +15,7 @@ OntoVis.nodePaddingX = 15;
 OntoVis.nodePaddingY = 3;
 OntoVis.duration = 500;
 OntoVis.maxLevelDistance = 350;
+OntoVis.rootSizeThresh = 10;
 
 // For generating the link to the MICE demo using example URL.
 OntoVis.getMiceUrl = function(url) {
@@ -112,6 +113,27 @@ OntoVis.findNode = function(node, name) {
   }, null);
 };
 
+// Sort children by their subtree size. Children with large subtree size will be
+// placed in the *middle*.
+OntoVis.sortBySubtreeSize = function(node) {
+  var subtypes = OntoVis.subtypes(node);
+  if (subtypes && subtypes.length > 0) {
+    var clone = subtypes.slice(0);
+    clone.sort(function(n1, n2) {
+      return n1.subtree_size - n2.subtree_size;
+    });
+    var n = clone.length;
+    for (var k = 0; k <= n / 2; ++k) {
+      if (k + k < n) {
+        subtypes[k] = clone[k + k];
+      }
+      if (k + k + 1 < n) {
+        subtypes[n - 1 - k] = clone[k + k + 1];
+      }
+    }
+  }
+};
+
 // Create and initialize the layout.
 OntoVis.createLayout = function(rootNodeName) {
   // Initialize color palette.
@@ -148,6 +170,22 @@ OntoVis.createLayout = function(rootNodeName) {
   d3.json(OntoVis.dataFile, function(error, json) {
     var root = json.node;
     OntoVis.data_root = root;
+    // Calculate subtree_size:
+    OntoVis.traverse(root, null, function(node) {
+      node.subtree_size = 1;
+      var subtypes = OntoVis.subtypes(node);
+      if (subtypes) {
+        for (var i = 0; i < subtypes.length; ++i) {
+          node.subtree_size += subtypes[i].subtree_size;
+        }
+      }
+      return false;
+    });
+    // Order by subtree_size:
+    OntoVis.traverse(root, null, function(node) {
+      OntoVis.sortBySubtreeSize(node);
+      return false;
+    });
     OntoVis.show(rootNodeName);
   });
 };
@@ -229,7 +267,13 @@ OntoVis.update = function(source, end_listener) {
 
   g2s.insert("text").attr("id", function(d) {
     return "text_" + d.name;
-  }).attr("class", "text").attr("text-anchor", "middle").attr("alignment-baseline", "middle").text(function(d) {
+  }).attr("class", function(d) {
+    if (d.subtree_size > OntoVis.rootSizeThresh) {
+      return "text subtree";
+    } else {
+      return "text";
+    }
+  }).attr("text-anchor", "middle").attr("alignment-baseline", "middle").text(function(d) {
     if (!d.is_expanded && OntoVis.subtypesSize(d) > 0) {
       return d.name + " [+]";
     } else {
@@ -281,7 +325,12 @@ OntoVis.update = function(source, end_listener) {
       return "node";
     }
   }).attr("fill", function(d) {
-    return OntoVis._colors(d.depth % 10 * 2 + 1);
+    var c = OntoVis._colors(d.depth % 10 * 2 + 1);
+    if (d.subtree_size > OntoVis.rootSizeThresh) {
+      return d3.hsl(c).darker(2).toString();
+    } else {
+      return c;
+    }
   }).attr("rx", "5").attr("ry", "5").attr("x", function(d) {
     return bbox2(this).x - px;
   }).attr("y", function(d) {
