@@ -221,6 +221,7 @@ function addExternalURLHandlers()
 		if (!instance.isProcessed(externalURL))
 		{
 			instance.addTargetEventListener(externalURL, 'click', logExternalURLClick);
+			instance.checkAndSetExternalUrlTarget(externalURL);
 			instance.setProcessed(externalURL);
 		}		
 	}
