@@ -190,10 +190,10 @@ function extractScalar(mmdScalarField, contextNode, metadata, fieldParserContext
     if (stringValue) {
         stringValue = stringValue.replace(new RegExp('\n', 'g'), "");
         stringValue = stringValue.trim();
-        if (mmdScalarField.filter != null)
+        if (mmdScalarField.regex_op != null)
         {
-            var regex = mmdScalarField.filter.regex;
-            var replace = mmdScalarField.filter.replace;
+            var regex = mmdScalarField.regex_op.regex;
+            var replace = mmdScalarField.regex_op.replace;
             if (replace != undefined && replace != null) // We must replace all newlines if the replacement is not a empty character
             {
                 stringValue = stringValue.replace(new RegExp(regex, 'g'), replace);
