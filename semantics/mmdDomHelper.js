@@ -190,6 +190,8 @@ function extractScalar(mmdScalarField, contextNode, metadata, fieldParserContext
     if (stringValue) {
         stringValue = stringValue.replace(new RegExp('\n', 'g'), "");
         stringValue = stringValue.trim();
+        // for compatibility 
+        mmdScalarField.regex_op =  getRegexOp(mmdScalarField);
         if (mmdScalarField.regex_op != null)
         {
             var regex = mmdScalarField.regex_op.regex;
@@ -610,6 +612,22 @@ function getXPaths(field) {
 		xpaths.push(field.xpath);
 		return xpaths;
 	}
+	
+	return null;
+}
+
+function getRegexOp(field) {
+	
+	if (field.field_ops != null)
+	{
+		for (var i = 0; i < field.field_ops.length; i++)
+		{
+			if (field.field_ops[i].regex_op != null)
+				return field.field_ops[i].regex_op;
+		}
+	}
+	else	
+		return field.filter;
 	
 	return null;
 }
