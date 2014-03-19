@@ -3,7 +3,7 @@
 
   "name": "TweetBubble",
   "description": "Expand to explore @usernames, #hashtags on Twitter. See related content without switching back and forth between tabs and windows",
-  "version": "0.9.36",
+  "version": "0.9.39",
 
   "icons": {
     "16": "content_script/img/logo_16.png",
