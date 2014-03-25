@@ -380,6 +380,11 @@ this.getExternalURLsXPath = function() {
 	return this.externalURLsXPath;
 };
 
+this.checkAndSetExternalUrlTarget = function(elt) {
+	if (elt.getAttribute("target") != "_blank")
+		elt.setAttribute("target", "_blank");
+};
+
 }
 
 function getICEInstance()

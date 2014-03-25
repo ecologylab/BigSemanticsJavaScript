@@ -167,13 +167,22 @@ function recursivelyExtractMetadata(mmd, contextNode, metadata, fieldParserConte
 }
 
 function extractScalar(mmdScalarField, contextNode, metadata, fieldParserContext) {
-    var xpathString = mmdScalarField.xpath;
+    var xpathString = getXPaths(mmdScalarField);
     var fieldParserKey = mmdScalarField.field_parser_key;
 
     var stringValue = null;
     
     if (xpathString != null && xpathString.length > 0 && contextNode != null && fieldParserKey == null) {
-        stringValue = getScalarWithXPath(contextNode, xpathString);
+        if (mmdScalarField.extract_as_html)
+        {
+        	var nodeValue = getScalarNodeWithXPath(contextNode, xpathString);
+        	if (nodeValue)
+        		stringValue = nodeValue.innerHTML;        	
+        }
+        if (stringValue == null)
+        {
+        	stringValue = getScalarWithXPath(contextNode, xpathString);
+        }
     } else if (fieldParserKey != null) {
         stringValue = getFieldParserValueByKey(fieldParserContext, fieldParserKey);
     }
@@ -181,10 +190,12 @@ function extractScalar(mmdScalarField, contextNode, metadata, fieldParserContext
     if (stringValue) {
         stringValue = stringValue.replace(new RegExp('\n', 'g'), "");
         stringValue = stringValue.trim();
-        if (mmdScalarField.filter != null)
+        // for compatibility 
+        mmdScalarField.regex_op =  getRegexOp(mmdScalarField);
+        if (mmdScalarField.regex_op != null)
         {
-            var regex = mmdScalarField.filter.regex;
-            var replace = mmdScalarField.filter.replace;
+            var regex = mmdScalarField.regex_op.regex;
+            var replace = mmdScalarField.regex_op.replace;
             if (replace != undefined && replace != null) // We must replace all newlines if the replacement is not a empty character
             {
                 stringValue = stringValue.replace(new RegExp(regex, 'g'), replace);
@@ -260,6 +271,13 @@ function extractCollection(mmdCollectionField, contextNode, metadata, fieldParse
                 var element = { };
                 element = recursivelyExtractMetadata(mmdCollectionField.kids[0].composite, thisNode, element, thisFieldParserContext);
 
+                if (mmdCollectionField.polymorphic_scope != null)
+                {
+                	var child_element = {};
+                	child_element[mmdCollectionField.child_type] = element;
+                	element = child_element;
+                }
+                
                 var newElement = clone(element);
                 	
                 if (!isEmpty(newElement))
@@ -274,7 +292,9 @@ function extractCollection(mmdCollectionField, contextNode, metadata, fieldParse
         //console.log("Metadata Collection: ");
         //console.info(elements);
         
-        extractedCollection[mmdCollectionField.child_type] = elements;
+        //fix for new collection representation (json) policy
+        //extractedCollection[mmdCollectionField.child_type] = elements;
+        extractedCollection = elements;
         
 		if(rawExtraction) {
         	metadata[mmdCollectionField.name] = extractedCollection;
@@ -311,7 +331,7 @@ function extractComposite(mmdCompositeField, contextNode, metadata, fieldParserC
     var thisFieldParserContext = fieldParserHelper.fieldParserContext;
 
     if (mmdCompositeField.parse_as_hypertext == true || mmdCompositeField.type == "hypertext_para") {
-        var paraNode = getNodeWithXPath(contextNode, mmdCompositeField.xpath);
+        var paraNode = getNodeWithXPath(contextNode, getXPaths(mmdCompositeField));
         var parsedPara = parseHypertextParaFromNode(paraNode);
         
         if(rawExtraction) {
@@ -354,7 +374,7 @@ function extractFieldParserHelperObject(mmdNestedField, contextNode, fieldParser
     var fieldParserHelper = { };
     
     // get xpath, context node, field parser defintion & key: basic information for following
-    var xpathString = mmdNestedField['xpath'];
+    var xpathString = getXPaths(mmdNestedField);
     var fieldParserElement = mmdNestedField['field_parser'];
     var fieldParserKey = mmdNestedField['field_parser_key'];
     
@@ -530,27 +550,86 @@ function isEmpty(obj) {
 /**
 * All scalars can be considered strings. Type holds no value in javascript (yet).
 */
-function getScalarWithXPath(contextNode, xpath)
+function getScalarWithXPath(contextNode, xpaths)
 {
-    return doc.evaluate(xpath, contextNode, null, XPathResult.STRING_TYPE, null).stringValue;
+	for (var i = 0; i < xpaths.length; i++)
+	{
+		var val = doc.evaluate(xpaths[i], contextNode, null, XPathResult.STRING_TYPE, null).stringValue;
+		if (val)
+			return val;
+	}
+    return null;
+}
+
+/**
+* Use singleNodeValue to return DOM node
+*/
+function getScalarNodeWithXPath(contextNode, xpaths)
+{
+	for (var i = 0; i < xpaths.length; i++)
+	{
+		var val = doc.evaluate(xpaths[i], contextNode, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+		if (val)
+			return val;
+	}
+    return null;
 }
 
 /**
 * Uses getNodeListWithXPath, but verifies and returns only the first value.
 */
-function getNodeWithXPath(contextNode, xpath)
+function getNodeWithXPath(contextNode, xpaths)
 {
-    var nodelist = getNodeListWithXPath(contextNode, xpath);
-    if (nodelist.snapshotLength == 0)
-        return null;
-    else
-        return nodelist.snapshotItem(0);
-    
+	for (var i = 0; i < xpaths.length; i++)
+	{
+		var xpath = [];
+		xpath.push(xpaths[i]);
+		
+		var nodelist = getNodeListWithXPath(contextNode, xpath);
+	    if (nodelist && nodelist.snapshotLength > 0)
+	    	return nodelist.snapshotItem(0);
+	}    
+    return null;
 }
 
-function getNodeListWithXPath(contextNode, xpath) {
-    return doc.evaluate(xpath, contextNode, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
+function getNodeListWithXPath(contextNode, xpaths) {
+    
+	for (var i = 0; i < xpaths.length; i++)
+	{
+		var val = doc.evaluate(xpaths[i], contextNode, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
+		if (val && val.snapshotLength > 0)
+			return val;
+	}
+	return doc.evaluate(xpaths[0], contextNode, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);;
+}
 
+function getXPaths(field) {
+	if (field.xpaths)
+		return field.xpaths;
+	else if (field.xpath)
+	{
+		var xpaths = [];
+		xpaths.push(field.xpath);
+		return xpaths;
+	}
+	
+	return null;
+}
+
+function getRegexOp(field) {
+	
+	if (field.field_ops != null)
+	{
+		for (var i = 0; i < field.field_ops.length; i++)
+		{
+			if (field.field_ops[i].regex_op != null)
+				return field.field_ops[i].regex_op;
+		}
+	}
+	else	
+		return field.filter;
+	
+	return null;
 }
 
 function clone(obj){
