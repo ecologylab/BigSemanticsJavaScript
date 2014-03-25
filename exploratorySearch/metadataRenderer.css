@@ -104,14 +104,24 @@
 	padding-left: 3px;
 }
 
-.metadataContainer .fieldValue{	
-	white-space: normal;
-	text-align: left;
-	vertical-align: middle;
-	text-overflow: ellipsis;
-	
-	
-	padding: 3px 8px;
+.metadataContainer .fieldValue.google_query{	
+	color: royalblue;
+	font-weight: bold;
+	font-size: 14px;
+	text-transform: capitalize;
+}
+.metadataContainer .fieldValue.google_link{    
+    color: #006621;
+    
+}
+.metadataContainer .fieldValue{ 
+    white-space: normal;
+    text-align: left;
+    vertical-align: middle;
+    text-overflow: ellipsis;
+    
+    
+    padding: 3px 8px;
 }
 
 .metadataContainer .favicon{
@@ -136,6 +146,13 @@
 	width: 20px;
 }
 
+
+.metadataContainer .labelCol .noShow{
+    display: none;
+}
+.noShow{
+    display: none;
+}
 .metadataContainer .valueCol{
 	display: table-cell;
 	vertical-align: top;

@@ -86,7 +86,8 @@
         </div>
 		
 		<script>
-            SEMANTIC_SERVICE_URL = "http://localhost:8080/BigSemanticsService/";
+		    var hostname = window.location.hostname;
+            SEMANTIC_SERVICE_URL = "http://" + hostname + ":8080/BigSemanticsService/";
 			MetadataRenderer.initMetadataRenderings();
 		</script>
 	</body>
