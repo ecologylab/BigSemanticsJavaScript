@@ -1463,10 +1463,10 @@ MetadataRenderer.buildMetadataTable = function(table, isChildTable, isRoot, meta
 		if(fieldCount <= 0)
 		{
 			var nameCol = document.createElement('div');
-				nameCol.className = "labelCol showDiv";
+				nameCol.className = "labelCol";
 							
 			var valueCol = document.createElement('div');
-				valueCol.className = "valueCol showDiv";
+				valueCol.className = "valueCol";
 			
 			//TODO - add "more" expander
 			var moreCount = metadataFields.length - i;
@@ -1638,18 +1638,17 @@ MetadataRenderer.buildMetadataField = function(metadataField, isChildTable, fiel
 	
 	var nameCol = document.createElement('div');
 	if (!metadataField.show_expanded_always ){	
-		nameCol.className = "labelCol showDiv";
+		nameCol.className = "labelCol";
 	}
 	else if(metadataField.composite_type != null && metadataField.composite_type != "image"){
-		nameCol.className = "labelCol noShow";
+		nameCol.className = "labelCol";
 		nameCol.style.display = "none";
 	}
 	var valueCol = document.createElement('div');
+    valueCol.className = "valueCol";
 	
-		valueCol.className = "valueCol";
-	
-	if(metadataField.composite_type != null && metadataField.composite_type != "image"){
-		valueCol.className = "valueCol";
+	if(metadataField.show_expanded_always && metadataField.composite_type != null && metadataField.composite_type != "image"){
+		
 		valueCol.style.position = "relative";
 		valueCol.style.left = "-9px";
 	}
