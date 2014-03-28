@@ -409,7 +409,7 @@ MetadataRenderer.guessDocumentLocation = function(metadata)
 	
 	for(var i = 0; i < metadata.length; i++)
 		// the document's location is typically the navigation target of the 'title' or 'name' field
-		if(metadata[i].name == "title" || metadata[i].name == "name")
+		if(metadata[i].mmdName == "title" || metadata[i].mmdName == "name")
 			if(metadata[i].navigatesTo != null)
 				location = metadata[i].navigatesTo;
 	
