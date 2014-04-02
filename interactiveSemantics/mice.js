@@ -649,9 +649,6 @@ MetadataRenderer.checkAndSetShowExpandedInitially = function(field, mmdField)
 {
 	if (mmdField.show_expanded_initially != null) {
 		field.show_expanded_initially = mmdField.show_expanded_initially;
-	} else if (mmdField.inherited_mmd != null
-			   && mmdField.inherited_mmd.show_expanded_initially != null) {
-		field.show_expanded_initially = mmdField.inherited_mmd.show_expanded_initially;
 	}
 }
 
@@ -659,9 +656,6 @@ MetadataRenderer.checkAndSetShowExpandedAlways = function(field, mmdField)
 {
 	if (mmdField.show_expanded_always != null) {
 		field.show_expanded_always = mmdField.show_expanded_always;
-	} else if (mmdField.inherited_mmd != null
-			   && mmdField.inherited_mmd.show_expanded_always != null) {
-		field.show_expanded_always = mmdField.inherited_mmd.show_expanded_always;
 	}
 }
 
