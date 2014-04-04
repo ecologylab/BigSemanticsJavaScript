@@ -18,7 +18,8 @@
 		<script type="text/javascript" src="../simpl/simplTypeScope.js"></script>
 		<script type="text/javascript" src="../simpl/simplTypeScopeDeserialize.js"></script>
 		<script type="text/javascript" src="../simpl/simplTypeScopeSerialize.js"></script>
-		<script type="text/javascript" src="mice.js"></script>
+		<script type="text/javascript" src="../interactiveSemantics/metadataRenderer.js"></script>
+        <script type="text/javascript" src="../interactiveSemantics/mice.js"></script>
 		
 		<style>
 			#content {
@@ -35,7 +36,7 @@
 				var url = document.getElementById("targetURL").value;
 				var content = document.getElementById("content");
 				
-				MetadataRenderer.addMetadataDisplay(content, url, true);
+				MICE.addMetadataDisplay(content, url, true);
 			}
 			
 			function onEnterShowMetadata(event)
@@ -69,7 +70,7 @@
 		
 		<script>
             SEMANTIC_SERVICE_URL = "http://localhost:8080/BigSemanticsService/";
-			MetadataRenderer.initMetadataRenderings();
+			MICE.initialize();
 		</script>
 	</body>
 </html>
