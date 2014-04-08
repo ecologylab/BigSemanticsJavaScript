@@ -62,7 +62,7 @@ MICE.render = function(task, metadataFields){
 	
 	// If there isn't a metadata table to display then keep the old visual and remove the loading indicator
 	else
-		MetadataRenderer.clearLoadingRows(task.container);
+		MICE.clearLoadingRows(task.container);
 	
 	// Remove the RenderingTask from the queue
 	MetadataRenderer.queue.splice(MetadataRenderer.queue.indexOf(task), 1);
@@ -83,6 +83,9 @@ MICE.render = function(task, metadataFields){
  * @param event, mouse click event 
  */
 
+/**
+ * Needs further separation 
+ */
 MICE.addMetadataDisplay = function(container, url, isRoot, clipping){
 	// Add the rendering task to the queue
 	var task = new RenderingTask(url, container, isRoot, clipping, MICE.render)
@@ -365,8 +368,8 @@ MICE.downloadAndDisplayDocument = function(event)
 		
 		// Add a loadingRow for visual feedback that the metadata is being downloaded / parsed
 		table.appendChild(MICE.createLoadingRow());
-		
-		MICE.addMetadataDisplay(table.parentElement, location, false);
+	    MetadataRenderer.render(MICE.render, table.parentElement, location, false)	;
+		//MICE.addMetadataDisplay(table.parentElement, location, false);
 	}
 	// If there was no document location then the table must be a non-document composite in which case just expand
 	else
