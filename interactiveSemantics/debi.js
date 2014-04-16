@@ -363,7 +363,7 @@ RenderingTask.prototype.matches = function(url)
  *
  * @param mmdField, meta-metadata field object
  */
-function MetadataField(mmdField)
+function MetadataViewModel(mmdField)
 {
   this.name = (mmdField.label != null) ? mmdField.label : mmdField.name;
   this.mmdName = mmdField.name;
@@ -386,6 +386,16 @@ function MetadataField(mmdField)
     }
   }
   this.extract_as_html = mmdField.extract_as_html;
+
+  if (mmdField.show_expanded_initially != null)
+  {
+    this.show_expanded_initially = mmdField.show_expanded_initially;
+  }
+
+  if (mmdField.show_expanded_always != null)
+  {
+    this.show_expanded_always = mmdField.show_expanded_always;
+  }
 }
 
 /**
@@ -454,15 +464,15 @@ MetadataLoader.getMetadataField = function(mmdField, metadataFields)
 }
 
 /**
- * Iterates through the meta-metadata, creating MetadataFields by matching
- * meta-metadata fields to metadata values 
+ * Iterates through the meta-metadata, creating MetadataViewModel by matching
+ * meta-metadata fields to metadata values.
  *
  * @param mmdKids, array of meta-metadata fields
  * @param metadata, metadata object from the service
  * @param depth, current depth level
  */
-MetadataLoader.getMetadataFields = function(mmdKids, metadata, depth,
-                                            child_value_as_label, taskUrl)
+MetadataLoader.getMetadataViewModel = function(mmdKids, metadata, depth,
+                                               child_value_as_label, taskUrl)
 {
   var metadataFields = [];
   
@@ -478,238 +488,267 @@ MetadataLoader.getMetadataFields = function(mmdKids, metadata, depth,
     
     if (mmdField.scalar)
     {
-      mmdField = mmdField.scalar;
-      
-      // Is this a visible field?
-      if (MetadataLoader.isFieldVisible(mmdField, metadata, taskUrl))
-      {        
-        // Is there a metadata value for this field?    
-        var value = MetadataLoader.getFieldValue(mmdField, metadata);        
-        if (value)
-        {  
-          if (child_value_as_label != null)
-          {
-            mmdField.use_value_as_label = child_value_as_label; 
-          }
-                    
-          var field = MetadataLoader.getMetadataField(mmdField, metadataFields);
-                    
-          field.value = value;
-          if (mmdField.use_value_as_label != null) 
-          {
-            field.value_as_label = MetadataLoader.getValueForProperty(mmdField.use_value_as_label, metadata, mmdKids, depth);
-          }
-                    
-          field.scalar_type = mmdField.scalar_type;
-          field.parentMDType = metadata.mm_name;  
-                
-          // Does the field have a navigation link?
-          if (mmdField.navigates_to != null)
-          {
-            var navigationLink = metadata[mmdField.navigates_to];
-            
-            // Is there a value for the navigation link
-            if (navigationLink != null && (navigationLink.toLowerCase() != taskUrl || depth == 0))
-            {
-              field.navigatesTo = navigationLink;
-            }
-          }
-          
-        
-          
-          if (mmdField.concatenates_to)
-          {
-            MetadataLoader.concatenateField(field, metadataFields, mmdKids);
-          }
-          
-          if (metadataFields.indexOf(field) == -1)
-          {
-            metadataFields.push(field);
-          }
-        }
-      }
+      MetadataLoader.getScalarMetadataViewModel(mmdField, mmdKids, metadata,
+                                                depth, child_value_as_label,
+                                                taskUrl);
     }    
     else if (mmdField.composite)
     {
-      mmdField = mmdField.composite;
-      
-      // Is this a visible field?
-      if (MetadataLoader.isFieldVisible(mmdField, metadata, taskUrl))
-      {        
-        // Is there a metadata value for this field?    
-        var value = MetadataLoader.getFieldValue(mmdField, metadata);  
-        if (value)
-        {  
-          
-          if (child_value_as_label != null)
-          {
-            mmdField.use_value_as_label = child_value_as_label;
-          }
-        
-          // If there is an array of values            
-          if (value.length != null)
-          {            
-            for (var i = 0; i < value.length; i++)
-            {
-              var field = new MetadataField(mmdField);
-              
-              field.value = MetadataLoader.getMetadataFields(mmdField["kids"], value[i], depth + 1, null, taskUrl);
-              if (mmdField.use_value_as_label != null)
-              {
-                field.value_as_label = MetadataLoader.getValueForProperty(mmdField.use_value_as_label, value[i], mmdField["kids"], depth + 1);
-              }
-              
-              field.composite_type = mmdField.type;
-              field.parentMDType = metadata.mm_name;              
-              MetadataLoader.checkAndSetShowExpandedInitially(field, mmdField);
-              MetadataLoader.checkAndSetShowExpandedAlways(field, mmdField);
-              
-              metadataFields.push(field);
-            }
-          }
-          else
-          {
-            var field = new MetadataField(mmdField);
-                        
-            field.value = MetadataLoader.getMetadataFields(mmdField["kids"], value, depth + 1, null, taskUrl);
-            if (mmdField.use_value_as_label != null)
-            {
-              if (mmdField.child_value_as_label != null)
-              {
-                field.value_as_label = MetadataLoader.getValueForProperty(mmdField.use_value_as_label, value, mmdField["kids"], depth + 1);
-              }
-              else
-              {
-                field.value_as_label = MetadataLoader.getValueForProperty(mmdField.use_value_as_label, metadata, mmdKids, depth + 1);
-              }
-            }
-            
-            field.composite_type = mmdField.type;
-            field.parentMDType = metadata.mm_name;            
-            MetadataLoader.checkAndSetShowExpandedInitially(field, mmdField);
-            MetadataLoader.checkAndSetShowExpandedAlways(field, mmdField);
-            
-            metadataFields.push(field);
-          }
-        }
-      }
-      else
-      {
-        if (value)
-        {
-          MetadataLoader.checkAndSetShowExpandedInitially(field, mmdField);
-          MetadataLoader.checkAndSetShowExpandedAlways(field, mmdField);
-        }
-      }
+      MetadataLoader.getCompositeMetadataViewModel(mmdField, mmdKids, metadata,
+                                                   depth, child_value_as_label,
+                                                   taskUrl);
     }
     else if (mmdField.collection != null)
     {
-      mmdField = mmdField.collection;  
-      
-      // Is this a visible field?
-      if (MetadataLoader.isFieldVisible(mmdField, metadata, taskUrl))
-      {    
-        // Is there a metadata value for this field?  
-        var value = MetadataLoader.getFieldValue(mmdField, metadata);  
-        if (value)
-        {  
-          if (child_value_as_label != null)
-          {
-            mmdField.use_value_as_label = child_value_as_label;
-          }
-          
-          var field = new MetadataField(mmdField);
-          
-          field.child_type = (mmdField.child_tag != null) ? mmdField.child_tag : mmdField.child_type;
-          field.parentMDType = metadata.mm_name;
-                      
-          // If scalar collection
-          if (mmdField.child_scalar_type != null)
-          {    
-            field.child_type = mmdField.child_scalar_type;      
-                        
-            var newList = [];
-            for (var k = 0; k < value.length; k++)
-            {
-              var scalarField = new MetadataField(mmdField);
-              scalarField.value = value[k]; 
-              scalarField.hide_label = true;
-              scalarField.scalar_type = mmdField.child_scalar_type;
-              newList.push(scalarField);
-            }
-            field.value = newList;
-          }    
-          // Else if it's a polymorphic collection
-          else if (mmdField.polymorphic_scope != null)
-          {            
-            var newObject = {};
-            var newArray = [];
-            
-            for (var i = 0; i < value.length; i++)
-            {
-              for (k in value[i])
-              {
-                newArray.push(value[i][k]);
-                continue;
-              }
-            }
-            
-            newObject[field.child_type] = newArray;
-            value = newObject;  
-            MetadataLoader.checkAndSetShowExpandedInitially(field, mmdField);
-            MetadataLoader.checkAndSetShowExpandedAlways(field, mmdField);
-          }
-          // Else, it must be a monomorphic collection
-          else
-          {
-            var newObject = {};
-            newObject[field.child_type] = value;
-            value = newObject;  
-            MetadataLoader.checkAndSetShowExpandedInitially(field, mmdField);
-            MetadataLoader.checkAndSetShowExpandedAlways(field, mmdField);
-          }
-          
-          if (mmdField.child_use_value_as_label != null)
-          {
-            field.value = MetadataLoader.getMetadataFields(mmdField["kids"], value, depth + 1, mmdField.child_use_value_as_label, taskUrl);
-          }
-          else if (mmdField.child_scalar_type == null)
-          {
-            field.value = MetadataLoader.getMetadataFields(mmdField["kids"], value, depth + 1, null, taskUrl);
-          }
-          if (mmdField.use_value_as_label != null) 
-          {
-            field.value_as_label = MetadataLoader.getValueForProperty(mmdField.use_value_as_label, metadata, mmdKids);
-          }
-          
-          metadataFields.push(field);
-        }
-      }
+      MetadataLoader.getCollectionMetadataViewModel(mmdField, mmdKids, metadata,
+                                                    depth, child_value_as_label,
+                                                    taskUrl);
     }    
   }
     
   //Sort the fields by layer, higher layers first
-  metadataFields.sort(function(a,b){return b.layer - a.layer - 0.5});
+  metadataFields.sort(function(a,b) { return b.layer - a.layer - 0.5; });
   return metadataFields;
 }
 
 /**
- * 
+ *
  */
-MetadataLoader.checkAndSetShowExpandedInitially = function(field, mmdField)
+MetadataLoader.getScalarMetadataViewModel(mmdField, mmdKids, metadata, depth,
+                                          child_value_as_label, taskUrl)
 {
-  if (mmdField.show_expanded_initially != null) {
-    field.show_expanded_initially = mmdField.show_expanded_initially;
+  mmdField = mmdField.scalar;
+
+  // Is this a visible field?
+  if (MetadataLoader.isFieldVisible(mmdField, metadata, taskUrl))
+  {        
+    // Is there a metadata value for this field?    
+    var value = MetadataLoader.getFieldValue(mmdField, metadata);        
+    if (value)
+    {  
+      if (child_value_as_label != null)
+      {
+        mmdField.use_value_as_label = child_value_as_label; 
+      }
+                
+      var field = MetadataLoader.getMetadataField(mmdField, metadataFields);
+                
+      field.value = value;
+      if (mmdField.use_value_as_label != null) 
+      {
+        field.value_as_label =
+          MetadataLoader.getValueForProperty(mmdField.use_value_as_label,
+                                             metadata, mmdKids, depth);
+      }
+                
+      field.scalar_type = mmdField.scalar_type;
+      field.parentMDType = metadata.mm_name;  
+            
+      // Does the field have a navigation link?
+      if (mmdField.navigates_to != null)
+      {
+        var navigationLink = metadata[mmdField.navigates_to];
+        
+        // Is there a value for the navigation link
+        if (navigationLink != null
+            && (navigationLink.toLowerCase() != taskUrl || depth == 0))
+        {
+          field.navigatesTo = navigationLink;
+        }
+      }
+      
+      if (mmdField.concatenates_to)
+      {
+        MetadataLoader.concatenateField(field, metadataFields, mmdKids);
+      }
+      
+      if (metadataFields.indexOf(field) == -1)
+      {
+        metadataFields.push(field);
+      }
+    }
   }
 }
 
-/**
- * 
- */
-MetadataLoader.checkAndSetShowExpandedAlways = function(field, mmdField)
+MetadataLoader.getCompositeMetadataViewModel(mmdField, mmdKids, metadata, depth,
+                                             child_value_as_label, taskUrl)
 {
-  if (mmdField.show_expanded_always != null) {
-    field.show_expanded_always = mmdField.show_expanded_always;
+  mmdField = mmdField.composite;
+      
+  // Is this a visible field?
+  if (MetadataLoader.isFieldVisible(mmdField, metadata, taskUrl))
+  {        
+    // Is there a metadata value for this field?    
+    var value = MetadataLoader.getFieldValue(mmdField, metadata);  
+    if (value)
+    {  
+      if (child_value_as_label != null)
+      {
+        mmdField.use_value_as_label = child_value_as_label;
+      }
+    
+      // If there is an array of values            
+      if (value.length != null)
+      {            
+        for (var i = 0; i < value.length; i++)
+        {
+          var field = new MetadataField(mmdField);
+          
+          field.value =
+            MetadataLoader.getMetadataViewModel(mmdField["kids"], value[i],
+                                                depth + 1, null, taskUrl);
+          if (mmdField.use_value_as_label != null)
+          {
+            field.value_as_label =
+              MetadataLoader.getValueForProperty(mmdField.use_value_as_label,
+                                                 value[i], mmdField["kids"],
+                                                 depth + 1);
+          }
+          
+          field.composite_type = mmdField.type;
+          field.parentMDType = metadata.mm_name;              
+          MetadataLoader.checkAndSetShowExpandedInitially(field, mmdField);
+          MetadataLoader.checkAndSetShowExpandedAlways(field, mmdField);
+          
+          metadataFields.push(field);
+        }
+      }
+      else
+      {
+        var field = new MetadataField(mmdField);
+                    
+        field.value =
+          MetadataLoader.getMetadataViewModel(mmdField["kids"], value,
+                                              depth + 1, null, taskUrl);
+        if (mmdField.use_value_as_label != null)
+        {
+          if (mmdField.child_value_as_label != null)
+          {
+            field.value_as_label =
+              MetadataLoader.getValueForProperty(mmdField.use_value_as_label,
+                                                 value, mmdField["kids"],
+                                                 depth + 1);
+          }
+          else
+          {
+            field.value_as_label =
+              MetadataLoader.getValueForProperty(mmdField.use_value_as_label,
+                                                 metadata, mmdKids, depth + 1);
+          }
+        }
+        
+        field.composite_type = mmdField.type;
+        field.parentMDType = metadata.mm_name;            
+        MetadataLoader.checkAndSetShowExpandedInitially(field, mmdField);
+        MetadataLoader.checkAndSetShowExpandedAlways(field, mmdField);
+        
+        metadataFields.push(field);
+      }
+    }
+  }
+  else
+  {
+    if (value)
+    {
+      MetadataLoader.checkAndSetShowExpandedInitially(field, mmdField);
+      MetadataLoader.checkAndSetShowExpandedAlways(field, mmdField);
+    }
+  }
+}
+
+MetadataLoader.getCollectionMetadataViewModel(mmdField, mmdKids, metadata, depth,
+                                              child_value_as_label, taskUrl)
+{
+  mmdField = mmdField.collection;  
+  
+  // Is this a visible field?
+  if (MetadataLoader.isFieldVisible(mmdField, metadata, taskUrl))
+  {    
+    // Is there a metadata value for this field?  
+    var value = MetadataLoader.getFieldValue(mmdField, metadata);  
+    if (value)
+    {  
+      if (child_value_as_label != null)
+      {
+        mmdField.use_value_as_label = child_value_as_label;
+      }
+      
+      var field = new MetadataField(mmdField);
+      
+      field.child_type = (mmdField.child_tag != null) ? mmdField.child_tag
+                                                      : mmdField.child_type;
+      field.parentMDType = metadata.mm_name;
+                  
+      // If scalar collection
+      if (mmdField.child_scalar_type != null)
+      {    
+        field.child_type = mmdField.child_scalar_type;      
+                    
+        var newList = [];
+        for (var k = 0; k < value.length; k++)
+        {
+          var scalarField = new MetadataField(mmdField);
+          scalarField.value = value[k]; 
+          scalarField.hide_label = true;
+          scalarField.scalar_type = mmdField.child_scalar_type;
+          newList.push(scalarField);
+        }
+        field.value = newList;
+      }    
+      // Else if it's a polymorphic collection
+      else if (mmdField.polymorphic_scope != null)
+      {            
+        var newObject = {};
+        var newArray = [];
+        
+        for (var i = 0; i < value.length; i++)
+        {             
+          for (k in value[i])
+          {
+            newArray.push(value[i][k]);
+            continue;
+          }
+        }
+        
+        newObject[field.child_type] = newArray;
+        value = newObject;  
+        MetadataLoader.checkAndSetShowExpandedInitially(field, mmdField);
+        MetadataLoader.checkAndSetShowExpandedAlways(field, mmdField);
+      }
+      // Else, it must be a monomorphic collection
+      else
+      {
+        var newObject = {};
+        newObject[field.child_type] = value;
+        value = newObject;  
+        MetadataLoader.checkAndSetShowExpandedInitially(field, mmdField);
+        MetadataLoader.checkAndSetShowExpandedAlways(field, mmdField);
+      }
+      
+      if (mmdField.child_use_value_as_label != null)
+      {
+        field.value =
+          MetadataLoader.getMetadataViewModel(mmdField["kids"],
+                                              value,
+                                              depth + 1,
+                                              mmdField.child_use_value_as_label,
+                                              taskUrl);
+      }
+      else if (mmdField.child_scalar_type == null)
+      {
+        field.value =
+          MetadataLoader.getMetadataViewModel(mmdField["kids"], value,
+                                              depth + 1, null, taskUrl);
+      }
+      if (mmdField.use_value_as_label != null) 
+      {
+        field.value_as_label =
+          MetadataLoader.getValueForProperty(mmdField.use_value_as_label,
+                                             metadata, mmdKids);
+      }
+      
+      metadataFields.push(field);
+    }
   }
 }
 
