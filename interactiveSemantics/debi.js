@@ -235,7 +235,7 @@ MetadataLoader.setMetaMetadata = function (mmd)
 MetadataLoader.createMetadata = function(isRoot, mmd, metadata, taskUrl)
 {
   var metadataFields =
-    MetadataLoader.getMetadataViewModel(mmd["meta_metadata"]["kids"], metadata,
+    MetadataLoader.getMetadataViewModel(mmd["meta_metadata"], mmd["meta_metadata"]["kids"], metadata,
                                         0, null, taskUrl);
   return metadataFields;
 }
@@ -471,7 +471,7 @@ MetadataLoader.getMetadataField = function(mmdField, metadataFields)
  * @param metadata, metadata object from the service
  * @param depth, current depth level
  */
-MetadataLoader.getMetadataViewModel = function(mmdKids, metadata, depth,
+MetadataLoader.getMetadataViewModel = function(parentField, mmdKids, metadata, depth,
                                                child_value_as_label, taskUrl)
 {
   var metadataViewModel = [];
@@ -488,19 +488,19 @@ MetadataLoader.getMetadataViewModel = function(mmdKids, metadata, depth,
     
     if (mmdField.scalar)
     {
-      MetadataLoader.getScalarMetadataViewModel(metadataViewModel, mmdField,
+      MetadataLoader.getScalarMetadataViewModel(metadataViewModel, parentField, mmdField,
           mmdKids, metadata, depth, child_value_as_label, taskUrl);
     }    
     else if (mmdField.composite)
     {
-      MetadataLoader.getCompositeMetadataViewModel(metadataViewModel, mmdField,
+      MetadataLoader.getCompositeMetadataViewModel(metadataViewModel, parentField, mmdField,
           mmdKids, metadata, depth, child_value_as_label, taskUrl);
     }
     else if (mmdField.collection != null)
     {
-      MetadataLoader.getCollectionMetadataViewModel(metadataViewModel, mmdField,
+      MetadataLoader.getCollectionMetadataViewModel(metadataViewModel, parentField, mmdField,
           mmdKids, metadata, depth, child_value_as_label, taskUrl);
-    }    
+    }
   }
     
   //Sort the fields by layer, higher layers first
@@ -513,6 +513,7 @@ MetadataLoader.getMetadataViewModel = function(mmdKids, metadata, depth,
  *
  */
 MetadataLoader.getScalarMetadataViewModel = function(metadataViewModel,
+													 parentField,
                                                      mmdField,
                                                      mmdKids,
                                                      metadata,
@@ -523,7 +524,7 @@ MetadataLoader.getScalarMetadataViewModel = function(metadataViewModel,
   mmdField = mmdField.scalar;
 
   // Is this a visible field?
-  if (MetadataLoader.isFieldVisible(mmdField, metadata, taskUrl))
+  if (MetadataLoader.isFieldVisible(mmdField, metadata, taskUrl, parentField))
   {        
     // Is there a metadata value for this field?    
     var value = MetadataLoader.getFieldValue(mmdField, metadata);        
@@ -574,6 +575,7 @@ MetadataLoader.getScalarMetadataViewModel = function(metadataViewModel,
 }
 
 MetadataLoader.getCompositeMetadataViewModel = function(metadataViewModel,
+														parentField,
                                                         mmdField,
                                                         mmdKids,
                                                         metadata,
@@ -584,7 +586,7 @@ MetadataLoader.getCompositeMetadataViewModel = function(metadataViewModel,
   mmdField = mmdField.composite;
       
   // Is this a visible field?
-  if (MetadataLoader.isFieldVisible(mmdField, metadata, taskUrl))
+  if (MetadataLoader.isFieldVisible(mmdField, metadata, taskUrl, parentField))
   {        
     // Is there a metadata value for this field?    
     var value = MetadataLoader.getFieldValue(mmdField, metadata);  
@@ -603,7 +605,7 @@ MetadataLoader.getCompositeMetadataViewModel = function(metadataViewModel,
           var field = new MetadataViewModel(mmdField);
           
           field.value =
-            MetadataLoader.getMetadataViewModel(mmdField["kids"], value[i],
+            MetadataLoader.getMetadataViewModel(mmdField, mmdField["kids"], value[i],
                                                 depth + 1, null, taskUrl);
           if (mmdField.use_value_as_label != null)
           {
@@ -624,7 +626,7 @@ MetadataLoader.getCompositeMetadataViewModel = function(metadataViewModel,
         var field = new MetadataViewModel(mmdField);
                     
         field.value =
-          MetadataLoader.getMetadataViewModel(mmdField["kids"], value,
+          MetadataLoader.getMetadataViewModel(mmdField, mmdField["kids"], value,
                                               depth + 1, null, taskUrl);
         if (mmdField.use_value_as_label != null)
         {
@@ -659,6 +661,7 @@ MetadataLoader.getCompositeMetadataViewModel = function(metadataViewModel,
 }
 
 MetadataLoader.getCollectionMetadataViewModel = function(metadataViewModel,
+														 parentField,
                                                          mmdField,
                                                          mmdKids,
                                                          metadata,
@@ -669,7 +672,7 @@ MetadataLoader.getCollectionMetadataViewModel = function(metadataViewModel,
   mmdField = mmdField.collection;  
   
   // Is this a visible field?
-  if (MetadataLoader.isFieldVisible(mmdField, metadata, taskUrl))
+  if (MetadataLoader.isFieldVisible(mmdField, metadata, taskUrl, parentField))
   {    
     // Is there a metadata value for this field?  
     var value = MetadataLoader.getFieldValue(mmdField, metadata);  
@@ -731,7 +734,8 @@ MetadataLoader.getCollectionMetadataViewModel = function(metadataViewModel,
       if (mmdField.child_use_value_as_label != null)
       {
         field.value =
-          MetadataLoader.getMetadataViewModel(mmdField["kids"],
+          MetadataLoader.getMetadataViewModel(mmdField,
+        		  							  mmdField["kids"],
                                               value,
                                               depth + 1,
                                               mmdField.child_use_value_as_label,
@@ -740,7 +744,7 @@ MetadataLoader.getCollectionMetadataViewModel = function(metadataViewModel,
       else if (mmdField.child_scalar_type == null)
       {
         field.value =
-          MetadataLoader.getMetadataViewModel(mmdField["kids"], value,
+          MetadataLoader.getMetadataViewModel(mmdField, mmdField["kids"], value,
                                               depth + 1, null, taskUrl);
       }
       if (mmdField.use_value_as_label != null) 
@@ -758,7 +762,7 @@ MetadataLoader.getCollectionMetadataViewModel = function(metadataViewModel,
 /**
  * 
  */
-MetadataLoader.isFieldVisible = function(mmdField, metadata, url)
+MetadataLoader.isFieldVisible = function(mmdField, metadata, url, parentField)
 {
   if (mmdField["styles"])
   {
@@ -770,7 +774,18 @@ MetadataLoader.isFieldVisible = function(mmdField, metadata, url)
       return false;
     }
   }
-  return mmdField.hide == null || mmdField.hide == false || mmdField.always_show == "true";
+  
+  var includeMediaField = MetadataLoader.isVisibleMediaField(mmdField, parentField);
+  
+  return includeMediaField || mmdField.hide == null || mmdField.hide == "false" || mmdField.always_show == "true";
+}
+
+MetadataLoader.isVisibleMediaField = function(mmdField, parentField)
+{
+	if (parentField.name == "image" && mmdField.name == "location")
+		return true;
+	
+	return false;
 }
 
 /**
@@ -867,7 +882,7 @@ MetadataLoader.getValueForProperty = function(valueAsLabelStr, metadata,
     else  
     {
       var metadataFields =
-        MetadataLoader.getMetadataViewModel(mmdKids, fieldValue, depth, null,
+        MetadataLoader.getMetadataViewModel(mmdField, mmdKids, fieldValue, depth, null,
                                             taskUrl);
       return {value: metadataFields, type: fieldType};
     }        
