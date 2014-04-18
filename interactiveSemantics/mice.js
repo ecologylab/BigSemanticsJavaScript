@@ -1,17 +1,17 @@
 //MICE renders the metaData for the MICE interface
 var MICE = {};
 
-
 // The documentMap contains a list of DocumentContainers for each found metadata object, both retrieved and not.
 MICE.documentMap = [];
+
+// deprecated
+var WWWStudy;
 
 
 
 /**
  * Initializes MICE. Gets the containers and locations from the original document.  
  */
-
-
 MICE.initialize = function(){
 	var miceRenderings = document.getElementsByClassName('metadataRendering');
 	for(var i = 0; i < miceRenderings.length; i++)
@@ -473,7 +473,8 @@ MICE.highlightDocuments = function(event)
 				}	
 			}
 			
-			//console.log(location);
+			// console.log(location);
+			
 			// Draw the lines to each match
 			for(var i = 0; i < matches.length; i++)			
 			{
@@ -727,7 +728,7 @@ MICE.buildMetadataTable = function(table, isChildTable, isRoot, metadataFields, 
 		//	table.className = "metadataTable";
 	}
 	
-	console.log(metadataFields);
+	// console.log(metadataFields);
 	
 	// Iterate through the metadataFields which are already sorted into display order
 	for(var i = 0; i < metadataFields.length; i++)
@@ -894,7 +895,7 @@ MICE.buildMetadataTable = function(table, isChildTable, isRoot, metadataFields, 
 			if (expandButton != null && metadataField.show_expanded_initially == "true") {
 				var fakeEvent = {};
 				fakeEvent.target = expandButton;
-				console.log("fake event ready");
+				// console.log("fake event ready");
 				MICE.expandCollapseTable(fakeEvent);
 			}
 		}
@@ -1333,7 +1334,7 @@ MICE.getLocationForParentTable = function(element)
 	var aTags = element.getElementsByTagName("a");
 	if(aTags.length > 0)
 	{
-		console.log("parentTable loc: " + aTags[0].href);
+		// console.log("parentTable loc: " + aTags[0].href);
 		return aTags[0].href;	
 	}	
 	return "none";

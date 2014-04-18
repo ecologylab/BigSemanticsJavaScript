@@ -123,9 +123,9 @@ function showMetadata()
     window.history.pushState("state", "MICE Demo", "index.html?url="+url)
   }
   
-  MetadataRenderer.clearDocumentCollection();
+  MetadataLoader.clearDocumentCollection();
 
-  MetadataRenderer.addMetadataDisplay(content, url, true);
+  MICE.addMetadataDisplay(content, url, true);
 
  //getJSONData(url);
 }

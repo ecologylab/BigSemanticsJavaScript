@@ -10,7 +10,7 @@
         -->
 		
 		<!-- Code -->
-        <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
 		<script type="text/javascript" src="../simpl/simplDeserializer.js"></script>
 		<script type="text/javascript" src="../simpl/simplFieldTypes.js"></script>
 		<script type="text/javascript" src="../simpl/simplGraphCollapse.js"></script>
@@ -18,6 +18,7 @@
 		<script type="text/javascript" src="../simpl/simplTypeScope.js"></script>
 		<script type="text/javascript" src="../simpl/simplTypeScopeDeserialize.js"></script>
 		<script type="text/javascript" src="../simpl/simplTypeScopeSerialize.js"></script>
+		<script type="text/javascript" src="debi.js"></script>
 		<script type="text/javascript" src="mice.js"></script>
 		
 		<style>
@@ -35,7 +36,7 @@
 				var url = document.getElementById("targetURL").value;
 				var content = document.getElementById("content");
 				
-				MetadataRenderer.addMetadataDisplay(content, url, true);
+				MICE.addMetadataDisplay(content, url, true);
 			}
 			
 			function onEnterShowMetadata(event)
@@ -68,8 +69,8 @@
         </div>
 		
 		<script>
-            SEMANTIC_SERVICE_URL = "http://localhost:8080/BigSemanticsService/";
-			MetadataRenderer.initMetadataRenderings();
+      SEMANTIC_SERVICE_URL = "http://localhost:8080/BigSemanticsService/";
+			MICE.initialize();
 		</script>
 	</body>
 </html>

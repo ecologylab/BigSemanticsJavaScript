@@ -235,8 +235,8 @@ MetadataLoader.setMetaMetadata = function (mmd)
 MetadataLoader.createMetadata = function(isRoot, mmd, metadata, taskUrl)
 {
   var metadataFields =
-    MetadataLoader.getMetadataFields(mmd["meta_metadata"]["kids"], metadata, 0,
-                                     null, taskUrl);
+    MetadataLoader.getMetadataViewModel(mmd["meta_metadata"]["kids"], metadata,
+                                        0, null, taskUrl);
   return metadataFields;
 }
 
@@ -460,7 +460,7 @@ MetadataLoader.getMetadataField = function(mmdField, metadataFields)
       return metadataFields[i];
     }
   }
-  return new MetadataField(mmdField);
+  return new MetadataViewModel(mmdField);
 }
 
 /**
@@ -474,12 +474,12 @@ MetadataLoader.getMetadataField = function(mmdField, metadataFields)
 MetadataLoader.getMetadataViewModel = function(mmdKids, metadata, depth,
                                                child_value_as_label, taskUrl)
 {
-  var metadataFields = [];
+  var metadataViewModel = [];
   
   // Stop recursing at the max depth
   if (depth >= METADATA_FIELD_MAX_DEPTH)
   {
-    return metadataFields;
+    return metadataViewModel;
   }
     
   for (var key in mmdKids)
@@ -488,34 +488,37 @@ MetadataLoader.getMetadataViewModel = function(mmdKids, metadata, depth,
     
     if (mmdField.scalar)
     {
-      MetadataLoader.getScalarMetadataViewModel(mmdField, mmdKids, metadata,
-                                                depth, child_value_as_label,
-                                                taskUrl);
+      MetadataLoader.getScalarMetadataViewModel(metadataViewModel, mmdField,
+          mmdKids, metadata, depth, child_value_as_label, taskUrl);
     }    
     else if (mmdField.composite)
     {
-      MetadataLoader.getCompositeMetadataViewModel(mmdField, mmdKids, metadata,
-                                                   depth, child_value_as_label,
-                                                   taskUrl);
+      MetadataLoader.getCompositeMetadataViewModel(metadataViewModel, mmdField,
+          mmdKids, metadata, depth, child_value_as_label, taskUrl);
     }
     else if (mmdField.collection != null)
     {
-      MetadataLoader.getCollectionMetadataViewModel(mmdField, mmdKids, metadata,
-                                                    depth, child_value_as_label,
-                                                    taskUrl);
+      MetadataLoader.getCollectionMetadataViewModel(metadataViewModel, mmdField,
+          mmdKids, metadata, depth, child_value_as_label, taskUrl);
     }    
   }
     
   //Sort the fields by layer, higher layers first
-  metadataFields.sort(function(a,b) { return b.layer - a.layer - 0.5; });
-  return metadataFields;
+  metadataViewModel.sort(function(a,b) { return b.layer - a.layer - 0.5; });
+
+  return metadataViewModel;
 }
 
 /**
  *
  */
-MetadataLoader.getScalarMetadataViewModel(mmdField, mmdKids, metadata, depth,
-                                          child_value_as_label, taskUrl)
+MetadataLoader.getScalarMetadataViewModel = function(metadataViewModel,
+                                                     mmdField,
+                                                     mmdKids,
+                                                     metadata,
+                                                     depth,
+                                                     child_value_as_label,
+                                                     taskUrl)
 {
   mmdField = mmdField.scalar;
 
@@ -531,7 +534,7 @@ MetadataLoader.getScalarMetadataViewModel(mmdField, mmdKids, metadata, depth,
         mmdField.use_value_as_label = child_value_as_label; 
       }
                 
-      var field = MetadataLoader.getMetadataField(mmdField, metadataFields);
+      var field = MetadataLoader.getMetadataField(mmdField, metadataViewModel);
                 
       field.value = value;
       if (mmdField.use_value_as_label != null) 
@@ -559,19 +562,24 @@ MetadataLoader.getScalarMetadataViewModel(mmdField, mmdKids, metadata, depth,
       
       if (mmdField.concatenates_to)
       {
-        MetadataLoader.concatenateField(field, metadataFields, mmdKids);
+        MetadataLoader.concatenateField(field, metadataViewModel, mmdKids);
       }
       
-      if (metadataFields.indexOf(field) == -1)
+      if (metadataViewModel.indexOf(field) == -1)
       {
-        metadataFields.push(field);
+        metadataViewModel.push(field);
       }
     }
   }
 }
 
-MetadataLoader.getCompositeMetadataViewModel(mmdField, mmdKids, metadata, depth,
-                                             child_value_as_label, taskUrl)
+MetadataLoader.getCompositeMetadataViewModel = function(metadataViewModel,
+                                                        mmdField,
+                                                        mmdKids,
+                                                        metadata,
+                                                        depth,
+                                                        child_value_as_label,
+                                                        taskUrl)
 {
   mmdField = mmdField.composite;
       
@@ -592,7 +600,7 @@ MetadataLoader.getCompositeMetadataViewModel(mmdField, mmdKids, metadata, depth,
       {            
         for (var i = 0; i < value.length; i++)
         {
-          var field = new MetadataField(mmdField);
+          var field = new MetadataViewModel(mmdField);
           
           field.value =
             MetadataLoader.getMetadataViewModel(mmdField["kids"], value[i],
@@ -607,15 +615,13 @@ MetadataLoader.getCompositeMetadataViewModel(mmdField, mmdKids, metadata, depth,
           
           field.composite_type = mmdField.type;
           field.parentMDType = metadata.mm_name;              
-          MetadataLoader.checkAndSetShowExpandedInitially(field, mmdField);
-          MetadataLoader.checkAndSetShowExpandedAlways(field, mmdField);
           
-          metadataFields.push(field);
+          metadataViewModel.push(field);
         }
       }
       else
       {
-        var field = new MetadataField(mmdField);
+        var field = new MetadataViewModel(mmdField);
                     
         field.value =
           MetadataLoader.getMetadataViewModel(mmdField["kids"], value,
@@ -639,10 +645,8 @@ MetadataLoader.getCompositeMetadataViewModel(mmdField, mmdKids, metadata, depth,
         
         field.composite_type = mmdField.type;
         field.parentMDType = metadata.mm_name;            
-        MetadataLoader.checkAndSetShowExpandedInitially(field, mmdField);
-        MetadataLoader.checkAndSetShowExpandedAlways(field, mmdField);
         
-        metadataFields.push(field);
+        metadataViewModel.push(field);
       }
     }
   }
@@ -650,14 +654,17 @@ MetadataLoader.getCompositeMetadataViewModel(mmdField, mmdKids, metadata, depth,
   {
     if (value)
     {
-      MetadataLoader.checkAndSetShowExpandedInitially(field, mmdField);
-      MetadataLoader.checkAndSetShowExpandedAlways(field, mmdField);
     }
   }
 }
 
-MetadataLoader.getCollectionMetadataViewModel(mmdField, mmdKids, metadata, depth,
-                                              child_value_as_label, taskUrl)
+MetadataLoader.getCollectionMetadataViewModel = function(metadataViewModel,
+                                                         mmdField,
+                                                         mmdKids,
+                                                         metadata,
+                                                         depth,
+                                                         child_value_as_label,
+                                                         taskUrl)
 {
   mmdField = mmdField.collection;  
   
@@ -673,7 +680,7 @@ MetadataLoader.getCollectionMetadataViewModel(mmdField, mmdKids, metadata, depth
         mmdField.use_value_as_label = child_value_as_label;
       }
       
-      var field = new MetadataField(mmdField);
+      var field = new MetadataViewModel(mmdField);
       
       field.child_type = (mmdField.child_tag != null) ? mmdField.child_tag
                                                       : mmdField.child_type;
@@ -687,7 +694,7 @@ MetadataLoader.getCollectionMetadataViewModel(mmdField, mmdKids, metadata, depth
         var newList = [];
         for (var k = 0; k < value.length; k++)
         {
-          var scalarField = new MetadataField(mmdField);
+          var scalarField = new MetadataViewModel(mmdField);
           scalarField.value = value[k]; 
           scalarField.hide_label = true;
           scalarField.scalar_type = mmdField.child_scalar_type;
@@ -712,8 +719,6 @@ MetadataLoader.getCollectionMetadataViewModel(mmdField, mmdKids, metadata, depth
         
         newObject[field.child_type] = newArray;
         value = newObject;  
-        MetadataLoader.checkAndSetShowExpandedInitially(field, mmdField);
-        MetadataLoader.checkAndSetShowExpandedAlways(field, mmdField);
       }
       // Else, it must be a monomorphic collection
       else
@@ -721,8 +726,6 @@ MetadataLoader.getCollectionMetadataViewModel(mmdField, mmdKids, metadata, depth
         var newObject = {};
         newObject[field.child_type] = value;
         value = newObject;  
-        MetadataLoader.checkAndSetShowExpandedInitially(field, mmdField);
-        MetadataLoader.checkAndSetShowExpandedAlways(field, mmdField);
       }
       
       if (mmdField.child_use_value_as_label != null)
@@ -747,7 +750,7 @@ MetadataLoader.getCollectionMetadataViewModel(mmdField, mmdKids, metadata, depth
                                              metadata, mmdKids);
       }
       
-      metadataFields.push(field);
+      metadataViewModel.push(field);
     }
   }
 }
@@ -864,8 +867,8 @@ MetadataLoader.getValueForProperty = function(valueAsLabelStr, metadata,
     else  
     {
       var metadataFields =
-        MetadataLoader.getMetadataFields(mmdKids, fieldValue, depth, null,
-                                         taskUrl);
+        MetadataLoader.getMetadataViewModel(mmdKids, fieldValue, depth, null,
+                                            taskUrl);
       return {value: metadataFields, type: fieldType};
     }        
   }  
@@ -909,7 +912,7 @@ MetadataLoader.concatenateField = function(field, metadataFields, mmdKids)
       var name = mmdField.name;
       if (name == field.concatenates_to)
       {
-        metadataField = new MetadataField(mmdField);
+        metadataField = new MetadataViewModel(mmdField);
         metadataField.concatenates.push(field);
         metadataFields.push(metadataField);
       }
