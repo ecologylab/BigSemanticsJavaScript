@@ -1065,9 +1065,6 @@ MICE.buildMetadataField = function(metadataField, isChildTable, fieldCount, row)
 			var fieldLabelDiv = document.createElement('div');
 				fieldLabelDiv.className = "fieldLabelContainer unhighlight";
 			
-			if (bgColorObj && bgColorObj.bFirstField)
-				fieldLabelDiv.style.background = bgColorObj.color;
-			
 			var label = (metadataField.value_as_label == "" || (metadataField.value_as_label.type != "scalar"
 				&& metadataField.value_as_label.type != "image"))? metadataField.name : metadataField.value_as_label.value;
 			if (metadataField.value_as_label == "" || metadataField.value_as_label.type != "image")
