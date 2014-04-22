@@ -133,7 +133,7 @@ MICE.expandCollapseTable = function(event)
 					eventObj = {
 						expand_metadata: {
 							field_name: button.parentElement.childNodes[1].innerText,
-							parent_doc: MetadataLoader.getLocationForParentTable(button.parentElement)
+							parent_doc: MICE.getLocationForParentTable(button.parentElement)
 						}
 					};
 				}
@@ -141,7 +141,7 @@ MICE.expandCollapseTable = function(event)
 				{
 					eventObj = {
 						expand_metadata: {
-							parent_doc: MetadataLoader.getLocationForParentTable(button.parentElement)
+							parent_doc: MICE.getLocationForParentTable(button.parentElement)
 						}
 					};
 				}
@@ -150,7 +150,7 @@ MICE.expandCollapseTable = function(event)
 			{
 				eventObj = {
 					expand_metadata: {
-						target_doc: MetadataLoader.getLocationForChildTable(button.parentElement.parentElement.parentElement)
+						target_doc: MICE.getLocationForChildTable(button.parentElement.parentElement.parentElement)
 					}
 				};
 			}
@@ -178,7 +178,7 @@ MICE.expandCollapseTable = function(event)
 					eventObj = {
 						collapse_metadata: {
 							field_name: button.parentElement.childNodes[1].innerText,
-							parent_doc: MetadataLoader.getLocationForParentTable(button.parentElement)
+							parent_doc: MICE.getLocationForParentTable(button.parentElement)
 						}
 					};
 				}
@@ -186,7 +186,7 @@ MICE.expandCollapseTable = function(event)
 				{
 					eventObj = {
 						collapse_metadata: {
-							parent_doc: MetadataLoader.getLocationForParentTable(button.parentElement)
+							parent_doc: MICE.getLocationForParentTable(button.parentElement)
 						}
 					};
 				}
@@ -196,7 +196,7 @@ MICE.expandCollapseTable = function(event)
 				
 				eventObj = {
 					collapse_metadata: {
-						target_doc: MetadataLoader.getLocationForChildTable(button.parentElement.parentElement.parentElement)
+						target_doc: MICE.getLocationForChildTable(button.parentElement.parentElement.parentElement)
 					}
 				};
 			}
