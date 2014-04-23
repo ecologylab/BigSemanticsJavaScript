@@ -76,13 +76,13 @@ MetadataLoader.getMetadata = function(url, callback)
  * Retrieves the meta-metadata from the service using a JSON-p call.
  * When the service responds the callback function will be called.
  *
- * @param type, name of the target meta-metadata
+ * @param name
  * @param callback, name of the function to be called from the JSON-p call
  */
-MetadataLoader.getMMD = function(type, callback)
+MetadataLoader.getMMD = function(name, callback)
 {
   var serviceURL = SEMANTIC_SERVICE_URL + "mmd.jsonp?callback=" + callback
-                   + "&name=" + type;
+                   + "&name=" + name;
   MetadataLoader.doJSONPCall(serviceURL);
 }
 
@@ -121,7 +121,7 @@ MetadataLoader.setMetadata = function(rawMetadata)
     if (i != "simpl.id" && i != "simpl.ref" && i != "deserialized")
     {
       metadata = rawMetadata[i];    
-      metadata.mm_name = i;
+      // metadata.mm_name = i;
     }
     
     if (i == "deserialized")
@@ -782,7 +782,7 @@ MetadataLoader.isFieldVisible = function(mmdField, metadata, url, parentField)
 
 MetadataLoader.isVisibleMediaField = function(mmdField, parentField)
 {
-	if (parentField.name == "image" && mmdField.name == "location")
+	if (parentField.type == "image" && mmdField.name == "location")
 		return true;
 	
 	return false;
