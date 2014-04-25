@@ -946,25 +946,34 @@ MICE.buildMetadataField = function(metadataField, isChildTable, fieldCount, row)
 				var fieldLabelDiv = document.createElement('div');
 					fieldLabelDiv.className = "fieldLabelContainer unhighlight";
 					
-				var label = (metadataField.value_as_label == "" || (metadataField.value_as_label.type != "scalar"
-					&& metadataField.value_as_label.type != "image"))? metadataField.name : metadataField.value_as_label.value;
-				if (metadataField.value_as_label == "" || metadataField.value_as_label.type != "image")
-				{
+        var label = metadataField.name;
+        if (metadataField.value_as_label && metadataField.value_as_label != "")
+        {
+          if (metadataField.value_as_label.type == "scalar"
+              || metadataField.value_as_label.type == "image")
+          {
+            label = metadataField.value_as_label.value;
+          }
+        }
+
+        if (metadataField.value_as_label
+            && metadataField.value_as_label.type == "image")
+        {
+          var img = document.createElement('img');
+          img.className = "fieldLabelImage";
+          img.src = MetadataLoader.getImageSource(label);
+
+          fieldLabelDiv.appendChild(img);	
+        }
+        else
+        {
 					var fieldLabel = document.createElement('p');
-						fieldLabel.className = "fieldLabel";
-						fieldLabel.innerText = MetadataLoader.toDisplayCase(label);
-						fieldLabel.textContent = MetadataLoader.toDisplayCase(label);
+          fieldLabel.className = "fieldLabel";
+          fieldLabel.innerText = MetadataLoader.toDisplayCase(label);
+          fieldLabel.textContent = MetadataLoader.toDisplayCase(label);
 						
 					fieldLabelDiv.appendChild(fieldLabel);	
-				}
-				else if (metadataField.value_as_label.type == "image")
-				{
-					var img = document.createElement('img');
-						img.className = "fieldLabelImage";
-						img.src = MetadataLoader.getImageSource(label);
-						
-					fieldLabelDiv.appendChild(img);	
-				}			
+        }
 				
 				nameCol.appendChild(fieldLabelDiv);
 			}
