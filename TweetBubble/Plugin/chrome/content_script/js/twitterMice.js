@@ -18,6 +18,8 @@ var replyIconPath2 = chrome.extension.getURL("content_script/img/reply_153.png")
 var retweetIconPath2 = chrome.extension.getURL("content_script/img/retweet_153.png");
 var favoriteIconPath2 = chrome.extension.getURL("content_script/img/favorite_153.png");
 
+var MetadataRenderer = MICE;
+
 /**
  * Retrieves the target metadata and meta-metadata, constructs the metadata table, and appends it to the container.
  * @param container, the HTML object which the final metadata rendering will be appened into
@@ -28,112 +30,39 @@ var favoriteIconPath2 = chrome.extension.getURL("content_script/img/favorite_153
 MetadataRenderer.addMetadataDisplay = function(container, url, isRoot, clipping, expandedItem)
 {	
 	// Add the rendering task to the queue
-	var task = new RenderingTask(url, container, isRoot, clipping, expandedItem)
-	MetadataRenderer.queue.push(task);	
+	var task = new RenderingTask(url, container, isRoot, clipping, MetadataRenderer.render, expandedItem);
+	MetadataLoader.queue.push(task);	
 	
 	if(clipping != null && clipping.rawMetadata != null)
 	{
 		clipping.rawMetadata.deserialized = true;
-		MetadataRenderer.setMetadata(clipping.rawMetadata);
+		MetadataLoader.setMetadata(clipping.rawMetadata);
 	}
 	else
 	{	
 		// Fetch the metadata from the service
-		//MetadataRenderer.getMetadata(url, "MetadataRenderer.setMetadata");	
+		//MetadataLoader.getMetadata(url, "MetadataLoader.setMetadata");	
 	}
 }
 
-/**
- * Deserializes the metadata from the service and matches the metadata with a queued RenderingTask
- * If the metadata matches then retrieve the needed meta-metadata
- * @param rawMetadata, JSON metadata string returned from the semantic service
- */
-MetadataRenderer.setMetadata = function(rawMetadata)
-{	
-	if(typeof MDC_rawMetadata != "undefined")
-	{
-		MDC_rawMetadata = JSON.parse(JSON.stringify(rawMetadata));
-		updateJSON(true);
-	}
-	
-	var metadata = rawMetadata;
-//	var metadata = {};
-	
-	var deserialized = false;
-//	for(i in rawMetadata)
-//	{
-//		if(i != "simpl.id" && i != "simpl.ref" && i != "deserialized")
-//		{
-//			metadata = rawMetadata[i];		
-//			metadata.mm_name = i;
-//		}
-//		
-//		if(i == "deserialized")
-//		deserialized = true;
-//	}
-	
-	if(!deserialized)
-		simplDeserialize(metadata);
-
-	//console.log("Retreived metadata: "+metadata.location);
-	
-	// Match the metadata with a task from the queue
-	var queueTasks = [];
-	
-	if(metadata.location)
-		queueTasks = MetadataRenderer.getTasksFromQueueByUrl(metadata.location);
-
-	// Check additional locations for more awaiting MICE tasks
-	if(metadata["additional_locations"])
-	{
-		//console.log("checking additional locations");
-		//console.log(MetadataRenderer.queue);
-		//console.log(metadata["additional_locations"]);
-		for(var i = 0; i < metadata["additional_locations"].length; i++)
-		{
-			var additional_location = metadata["additional_locations"][i]
-			queueTasks = queueTasks.concat(MetadataRenderer.getTasksFromQueueByUrl(additional_location));			
-		}
-	}
-	
-	for(var i = 0; i < queueTasks.length; i++)
-	{
-		var queueTask = queueTasks[i];
-		
-		if(metadata["additional_locations"])
-			queueTask.additionalUrls = metadata["additional_locations"];
-		
-		queueTask.metadata = metadata;
-		queueTask.mmdType = metadata.mm_name;
-	
-		if(queueTask.clipping != null)
-			queueTask.clipping.rawMetadata = rawMetadata;
-				
-		//MetadataRenderer.getMMD(queueTask.mmdType, "MetadataRenderer.setMetaMetadata");
-	}
-	
-	if(queueTasks.length < 0)
-	{
-		console.error("Retreived metadata: "+metadata.location+"  but it doesn't match a document from the queue.");
-		console.log(MetadataRenderer.queue);
-	}
-}
 
 
 /**
  * Create the metadataRendering, add it to the HTML container, and complete the RenderingTask
  * @param task, RenderingTask to complete 
  */
-MetadataRenderer.createAndRenderMetadata = function(task)
+MetadataRenderer.render = function(task, metadataFields)
 {	
 	// Create the interior HTML container
 	task.visual = document.createElement('div');
 	task.visual.className = "metadataContainer";
 	
 	// Build the HTML table for the metadata
-	MetadataRenderer.currentDocumentLocation = task.url;
+	MetadataLoader.currentDocumentLocation = task.url;
 	var bgColor = MetadataRenderer.getNextColor(task.container);
-	var metadataTable = MetadataRenderer.buildMetadataDisplay(task.isRoot, task.mmd, task.metadata, task.url, bgColor)
+	var bgColorObj = {color: bgColor, bFirstField: true};
+	var metadataTable =  MetadataRenderer.buildMetadataTable(null, false, task.isRoot, metadataFields, FIRST_LEVEL_FIELDS, bgColorObj, true);
+	//MetadataRenderer.buildMetadataDisplay(task.isRoot, task.mmd, task.metadata, task.url, bgColor)
 	
 	if(metadataTable)
 	{
@@ -187,7 +116,7 @@ MetadataRenderer.createAndRenderMetadata = function(task)
 		MetadataRenderer.clearLoadingRows(task.container);
 	
 	// Remove the RenderingTask from the queue
-	MetadataRenderer.queue.splice(MetadataRenderer.queue.indexOf(task), 1);
+	MetadataLoader.queue.splice(MetadataLoader.queue.indexOf(task), 1);
 }
 
 /**
@@ -197,7 +126,7 @@ MetadataRenderer.createAndRenderMetadata = function(task)
  * @param isRoot, true if this is the root document for a metadataRendering
  * @param expandedItem, a non-metadata item for which the display was constructed
  */
-function RenderingTask(url, container, isRoot, clipping, expandedItem)
+function RenderingTask(url, container, isRoot, clipping, renderer, expandedItem)
 {
 	if(url != null)
 		this.url = url.toLowerCase();
@@ -209,6 +138,8 @@ function RenderingTask(url, container, isRoot, clipping, expandedItem)
 	this.mmd = null;
 	
 	this.isRoot = isRoot;
+	
+	this.renderer = renderer;
 	this.expandedItem = expandedItem;
 }
 
@@ -220,11 +151,13 @@ RenderingTask.prototype.matches = function(url)
 {
 	url = url.toLowerCase();
 	if(this.url.indexOf(url) == 0)
+	{
 		return true;
-		
+	}	
 	else if(url.indexOf(this.url) == 0)
+	{
 		return true;
-
+	}
 	return false;
 }
 
@@ -603,31 +536,6 @@ DocumentContainer.prototype.matches = function(url)
 }
 
 /**
- * Converts the metadata into a set of metadataFields using the meta-metadata.
- * If there is visible metadata then create and return the HTML table.
- * @param isRoot, is the metadata the root document in the container (for styling)
- * @param mmd, meta-metadata for the given metadata
- * @param metadata, metadata to display
- * @return table, HTML table for the metadata or null if there is no metadata to display
- */
-MetadataRenderer.buildMetadataDisplay = function(isRoot, mmd, metadata, taskUrl, bgColor)
-{
-	// Convert the metadata into a list of MetadataFields using the meta-metadata.
-	var metadataFields = MetadataRenderer.getMetadataFields(mmd["meta_metadata"]["kids"], metadata, 0, null, taskUrl);
-	
-	// Is there any visable metadata?
-	if(MetadataRenderer.hasVisibleMetadata(metadataFields))
-	{
-		// If so, then build the HTML table	
-		var bgColorObj = {color: bgColor, bFirstField: true};
-		return MetadataRenderer.buildMetadataTable(null, false, isRoot, metadataFields, FIRST_LEVEL_FIELDS, bgColorObj, true);
-	}	
-	else
-		// The metadata doesn't contain any visible fields so there is nothing to display
-		return null;	
-}
-
-/**
  * Build the HTML table for the list of MetadataFields
  * @param table, the table that the metadata fields should be rendered to, null if the table should be created
  * @param isChildTable, true if the table belongs to a collection table, false otherwise
@@ -668,10 +576,10 @@ MetadataRenderer.buildMetadataTable = function(table, isChildTable, isRoot, meta
 		if(fieldCount <= 0)
 		{
 			var nameCol = document.createElement('div');
-				nameCol.className = "labelCol";
+				nameCol.className = "labelCol showDiv";
 							
 			var valueCol = document.createElement('div');
-				valueCol.className = "valueCol";
+				valueCol.className = "valueCol showDiv";
 							
 			//TODO - add "more" expander
 			var moreCount = metadataFields.length - i;
@@ -820,7 +728,8 @@ MetadataRenderer.buildMetadataTable = function(table, isChildTable, isRoot, meta
 			}
 			table.appendChild(row);
 			
-			if (expandButton != null && metadataField.show_expanded_initially == "true") {
+			if (expandButton != null && (metadataField.show_expanded_initially == "true"
+										|| metadataField.show_expanded_always == "true")) {
 				var fakeEvent = {};
 				fakeEvent.target = expandButton;
 				fakeEvent.name = "fakeEvent";
@@ -851,10 +760,23 @@ MetadataRenderer.buildMetadataTable = function(table, isChildTable, isRoot, meta
 MetadataRenderer.buildMetadataField = function(metadataField, isChildTable, fieldCount, row, bgColorObj)
 {
 	var nameCol = document.createElement('div');
+	//if (!metadataField.show_expanded_always) { 
+		//|| (metadataField.composite_type != null && metadataField.composite_type == "tweet")) {	
 		nameCol.className = "labelCol";
+	/*}
+	else if (metadataField.composite_type != null && metadataField.composite_type != "image") {
+		nameCol.className = "labelCol";
+		nameCol.style.display = "none";
+	}*/
 	
 	var valueCol = document.createElement('div');
 		valueCol.className = "valueCol";
+	
+	/*if(metadataField.composite_type != null && metadataField.composite_type != "image") {
+		valueCol.className = "valueCol";
+		valueCol.style.position = "relative";
+		valueCol.style.left = "-9px";
+	}*/	
 		
 	var expandButton = null;	
 	
@@ -877,8 +799,8 @@ MetadataRenderer.buildMetadataField = function(metadataField, isChildTable, fiel
 				{
 					var fieldLabel = document.createElement('p');
 						fieldLabel.className = "fieldLabel";
-						fieldLabel.innerText = MetadataRenderer.toDisplayCase(label);
-						fieldLabel.textContent = MetadataRenderer.toDisplayCase(label);
+						fieldLabel.innerText = MetadataLoader.toDisplayCase(label);
+						fieldLabel.textContent = MetadataLoader.toDisplayCase(label);
 						
 					fieldLabelDiv.appendChild(fieldLabel);	
 				}
@@ -886,7 +808,7 @@ MetadataRenderer.buildMetadataField = function(metadataField, isChildTable, fiel
 				{
 					var img = document.createElement('img');
 						img.className = "fieldLabelImage";
-						img.src = MetadataRenderer.getImageSource(label);
+						img.src = MetadataLoader.getImageSource(label);
 						
 					fieldLabelDiv.appendChild(img);	
 				}			
@@ -900,11 +822,11 @@ MetadataRenderer.buildMetadataField = function(metadataField, isChildTable, fiel
 				// Uses http://getfavicon.appspot.com/ to resolve the favicon
 				var favicon = document.createElement('img');
 					favicon.className = "faviconICE";
-					favicon.src = "http://g.etfv.co/" + MetadataRenderer.getHost(metadataField.navigatesTo);
+					favicon.src = "http://g.etfv.co/" + MetadataLoader.getHost(metadataField.navigatesTo);
 				
 				var aTag = document.createElement('a');
-				aTag.innerText = MetadataRenderer.removeLineBreaksAndCrazies(metadataField.value);
-				aTag.textContent = MetadataRenderer.removeLineBreaksAndCrazies(metadataField.value);
+				aTag.innerText = MetadataLoader.removeLineBreaksAndCrazies(metadataField.value);
+				aTag.textContent = MetadataLoader.removeLineBreaksAndCrazies(metadataField.value);
 				
 				aTag.href = metadataField.value;
 				aTag.onclick = MetadataRenderer.logNavigate;
@@ -930,13 +852,13 @@ MetadataRenderer.buildMetadataField = function(metadataField, isChildTable, fiel
 				// Uses http://getfavicon.appspot.com/ to resolve the favicon
 				var favicon = document.createElement('img');
 					favicon.className = "faviconICE";
-					favicon.src = "http://g.etfv.co/" + MetadataRenderer.getHost(metadataField.navigatesTo);
+					favicon.src = "http://g.etfv.co/" + MetadataLoader.getHost(metadataField.navigatesTo);
 				
 				var aTag = document.createElement('a');
 					aTag.className = "fieldValue";
 					aTag.target = "_blank";
-					aTag.innerText = MetadataRenderer.removeLineBreaksAndCrazies(metadataField.value);
-					aTag.textContent = MetadataRenderer.removeLineBreaksAndCrazies(metadataField.value);
+					aTag.innerText = MetadataLoader.removeLineBreaksAndCrazies(metadataField.value);
+					aTag.textContent = MetadataLoader.removeLineBreaksAndCrazies(metadataField.value);
 					
 					aTag.href = metadataField.navigatesTo;
 					aTag.onclick = MetadataRenderer.logNavigate;
@@ -965,12 +887,12 @@ MetadataRenderer.buildMetadataField = function(metadataField, isChildTable, fiel
 					
 				if (metadataField.extract_as_html)
 				{
-					fieldValue.innerHTML = MetadataRenderer.removeLineBreaksAndCrazies(metadataField.value);
+					fieldValue.innerHTML = MetadataLoader.removeLineBreaksAndCrazies(metadataField.value);
 				}
 				else
 				{
-					fieldValue.innerText = MetadataRenderer.removeLineBreaksAndCrazies(metadataField.value);
-					fieldValue.textContent = MetadataRenderer.removeLineBreaksAndCrazies(metadataField.value);
+					fieldValue.innerText = MetadataLoader.removeLineBreaksAndCrazies(metadataField.value);
+					fieldValue.textContent = MetadataLoader.removeLineBreaksAndCrazies(metadataField.value);
 				}
 				
 				if (metadataField.name == "post_date" || metadataField.name == "username")
@@ -979,8 +901,8 @@ MetadataRenderer.buildMetadataField = function(metadataField, isChildTable, fiel
 				if (metadataField.name == "id")
 					fieldValue = MetadataRenderer.getTweetSemanticsDiv(metadataField.value);
 													
-				if(metadataField.style != null)
-					fieldValue.className += " "+metadataField.style;
+				if(metadataField.style_name != null)
+					fieldValue.className += " "+metadataField.style_name;
 				var fieldValueDiv = document.createElement('div');
 					fieldValueDiv.className = "fieldValueContainer";
 				if (bgColorObj && bgColorObj.bFirstField)
@@ -1013,8 +935,8 @@ MetadataRenderer.buildMetadataField = function(metadataField, isChildTable, fiel
 			{
 				var fieldLabel = document.createElement('p');
 					fieldLabel.className = "fieldLabel";
-					fieldLabel.innerText = MetadataRenderer.toDisplayCase(label);
-					fieldLabel.textContent = MetadataRenderer.toDisplayCase(label);
+					fieldLabel.innerText = MetadataLoader.toDisplayCase(label);
+					fieldLabel.textContent = MetadataLoader.toDisplayCase(label);
 				
 				fieldLabelDiv.appendChild(fieldLabel);	
 			}
@@ -1022,7 +944,7 @@ MetadataRenderer.buildMetadataField = function(metadataField, isChildTable, fiel
 			{
 				var img = document.createElement('img');
 					img.className = "fieldLabelImage";
-					img.src = MetadataRenderer.getImageSource(label);
+					img.src = MetadataLoader.getImageSource(label);
 
 				fieldLabelDiv.appendChild(img);
 			}		
@@ -1031,7 +953,7 @@ MetadataRenderer.buildMetadataField = function(metadataField, isChildTable, fiel
 		}
 		
 		var img1 = document.createElement('img');
-			img1.src = MetadataRenderer.getImageSource(metadataField.value);
+			img1.src = MetadataLoader.getImageSource(metadataField.value);
 		
 		var fieldValueDiv = document.createElement('div');
 			fieldValueDiv.className = "fieldValueContainer";
@@ -1043,7 +965,7 @@ MetadataRenderer.buildMetadataField = function(metadataField, isChildTable, fiel
 	else if(metadataField.composite_type != null && metadataField.composite_type != "image")
 	{
 		/** Label Column **/
-		var childUrl = MetadataRenderer.guessDocumentLocation(metadataField.value);
+		var childUrl = MetadataLoader.guessDocumentLocation(metadataField.value);
 		
 		var fieldLabelDiv = document.createElement('div');
 			fieldLabelDiv.className = "fieldLabelContainer unhighlight";
@@ -1062,7 +984,7 @@ MetadataRenderer.buildMetadataField = function(metadataField, isChildTable, fiel
 		{
 			// If the document hasn't been download then display a button that will download it
 			expandButton = document.createElement('div');
-				expandButton.className = "expandButton";
+				expandButton.className = "expandButton X";
 			
 			expandButton.onclick = MetadataRenderer.downloadAndDisplayDocument;
 			
@@ -1086,9 +1008,10 @@ MetadataRenderer.buildMetadataField = function(metadataField, isChildTable, fiel
 		}
 		
 		if(metadataField.name)
-		{													
+		{			
+			var imageLabel = (metadataField.value_as_label == "") ?	false : metadataField.value_as_label.type == "image";
 			//If the table isn't a child table then display the label for the composite
-			if((!isChildTable || (metadataField.composite_type == "tweet")) && !metadataField.hide_label)
+			if((!isChildTable || imageLabel) && !metadataField.hide_label)
 			{				
 				var label = (metadataField.value_as_label == "" || (metadataField.value_as_label.type != "scalar"
 					&& metadataField.value_as_label.type != "image"))? metadataField.name : metadataField.value_as_label.value;
@@ -1096,8 +1019,8 @@ MetadataRenderer.buildMetadataField = function(metadataField, isChildTable, fiel
 				{
 					var fieldLabel = document.createElement('p');
 						fieldLabel.className = "fieldLabel";
-						fieldLabel.innerText = MetadataRenderer.toDisplayCase(label);
-						fieldLabel.textContent = MetadataRenderer.toDisplayCase(label);
+						fieldLabel.innerText = MetadataLoader.toDisplayCase(label);
+						fieldLabel.textContent = MetadataLoader.toDisplayCase(label);
 					
 					fieldLabelDiv.appendChild(fieldLabel);
 				}
@@ -1105,7 +1028,7 @@ MetadataRenderer.buildMetadataField = function(metadataField, isChildTable, fiel
 				{
 					var img = document.createElement('img');
 						img.className = "fieldLabelImage";
-						img.src = MetadataRenderer.getImageSource(label);
+						img.src = MetadataLoader.getImageSource(label);
 
 					fieldLabelDiv.appendChild(img);
 				}
@@ -1126,8 +1049,12 @@ MetadataRenderer.buildMetadataField = function(metadataField, isChildTable, fiel
 		var childTable =  MetadataRenderer.buildMetadataTable(null, false, false, metadataField.value, 1, bgColorObj, false);
 		
 		// If the childTable has more than 1 row, collapse table
-		if(metadataField.value.length > 1)
+		if(metadataField.value.length > 1 && !metadataField.show_expanded_always){
 			MetadataRenderer.collapseTable(childTable);			
+		}
+		if(metadataField.show_expanded_always){
+			MetadataRenderer.expandTable(childTable);
+		}			
 		
 		fieldValueDiv.appendChild(childTable);				
 		
@@ -1168,25 +1095,25 @@ MetadataRenderer.buildMetadataField = function(metadataField, isChildTable, fiel
 			var fieldLabelDiv = document.createElement('div');
 			fieldLabelDiv.className = "fieldLabelContainer unhighlight";
 		
-			// does it need to expand / collapse
+			// does it need to expand / collapse [CONFIRM]
 			if(metadataField.value.length > 1)
 			{
 				var expandButton = document.createElement('div');
-					expandButton.className = "expandButton";
-					
-					expandButton.onclick = MetadataRenderer.expandCollapseTable;
-					
-					var expandSymbol = document.createElement('div');
-						expandSymbol.className = "expandSymbol";
-						expandSymbol.style.display = "block";
-						
-					var collapseSymbol = document.createElement('div');
-						collapseSymbol.className = "collapseSymbol";
-						collapseSymbol.style.display = "block";						
+				expandButton.className = "expandButton";
 				
-					expandButton.appendChild(expandSymbol);
-					expandButton.appendChild(collapseSymbol);
+				expandButton.onclick = MetadataRenderer.expandCollapseTable;
+				
+				var expandSymbol = document.createElement('div');
+					expandSymbol.className = "expandSymbol";
+					expandSymbol.style.display = "block";
 					
+				var collapseSymbol = document.createElement('div');
+					collapseSymbol.className = "collapseSymbol";
+					collapseSymbol.style.display = "block";						
+			
+				expandButton.appendChild(expandSymbol);
+				expandButton.appendChild(collapseSymbol);
+				
 				fieldLabelDiv.appendChild(expandButton);
 			}
 			
@@ -1196,8 +1123,8 @@ MetadataRenderer.buildMetadataField = function(metadataField, isChildTable, fiel
 			{
 				var fieldLabel = document.createElement('p');
 					fieldLabel.className = "fieldLabel";
-					fieldLabel.innerText = MetadataRenderer.toDisplayCase(label) + "(" + metadataField.value.length + ")";
-					fieldLabel.textContent = MetadataRenderer.toDisplayCase(label) + "(" + metadataField.value.length + ")";
+					fieldLabel.innerText = MetadataLoader.toDisplayCase(label) + "(" + metadataField.value.length + ")";
+					fieldLabel.textContent = MetadataLoader.toDisplayCase(label) + "(" + metadataField.value.length + ")";
 					
 				if (!metadataField.hide_label)
 					fieldLabelDiv.appendChild(fieldLabel);
@@ -1206,7 +1133,7 @@ MetadataRenderer.buildMetadataField = function(metadataField, isChildTable, fiel
 			{
 				var img = document.createElement('img');
 					img.className = "fieldLabelImage";
-					img.src = MetadataRenderer.getImageSource(label);
+					img.src = MetadataLoader.getImageSource(label);
 
 				if (!metadataField.hide_label)
 					fieldLabelDiv.appendChild(img);
@@ -1219,7 +1146,7 @@ MetadataRenderer.buildMetadataField = function(metadataField, isChildTable, fiel
 			fieldValueDiv.className = "fieldChildContainer";
 		
 		var childTable =  MetadataRenderer.buildMetadataTable(null, true, false, metadataField.value, 1, bgColorObj, false);
-		if(metadataField.value.length > 1)
+		if(metadataField.value.length >= 1)
 		{
 			MetadataRenderer.collapseTable(childTable);			
 		}					
@@ -1614,9 +1541,4 @@ MetadataRenderer.getTweetSemanticsDiv = function(tweetId)
 	twSemanticsDiv.appendChild(twSemanticsRow);
 	
 	return twSemanticsDiv;
-}
-
-MetadataRenderer.removeLineBreaksAndCrazies = function(string)
-{
-	return string;
 }

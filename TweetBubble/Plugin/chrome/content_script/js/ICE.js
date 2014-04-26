@@ -31,8 +31,8 @@ function downloadRequester(expandableItemUrl)
 {
 	chrome.extension.sendRequest({load: expandableItemUrl}, function(response) {
 		  //console.log(response);
-		  MetadataRenderer.setMetadata(response.doc);
-		  MetadataRenderer.setMetaMetadata(response.mmd);
+		  MetadataLoader.setMetadata(response.doc);
+		  MetadataLoader.setMetaMetadata(response.mmd);
 	});
 }
 
@@ -333,7 +333,7 @@ function run_script(userid, cond)
 	
 	if(experiment_condition == mice_condition)
 	{
-		MetadataRenderer.initMetadataRenderings();
+		MetadataRenderer.initialize();
 
 		if (MetadataRenderer.setMetadataProcessor)
 			MetadataRenderer.setMetadataProcessor(processMetadata);

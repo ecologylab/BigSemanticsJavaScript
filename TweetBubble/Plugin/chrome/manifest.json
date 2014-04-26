@@ -30,6 +30,8 @@
       ],
       "js": [
         "content_script/js/simplDeserializer.js",
+        "content_script/js/debi.js",
+        "content_script/js/twitterDebi.js",
         "content_script/js/mice.js",
         "content_script/js/twitterMice.js",
         "content_script/js/util.js",
