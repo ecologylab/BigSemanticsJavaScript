@@ -811,7 +811,7 @@ MetadataLoader.getValueForProperty = function(valueAsLabelStr, metadata,
     fieldValue = fieldValue[nestedFields[i]];
     // if value is to be read from a collection, then use first element
     // TODO: define semantics for selection
-    if (fieldValue.length != null)
+    if (fieldValue && fieldValue.length != null)
     {
       fieldValue = fieldValue[0];
     }
@@ -873,7 +873,7 @@ MetadataLoader.getValueForProperty = function(valueAsLabelStr, metadata,
   {
     return {value: mmdField.metadataFields, type: fieldType};
   }
-  else
+  else if (fieldValue)
   {
     if (fieldType == "scalar")
     {
@@ -886,7 +886,9 @@ MetadataLoader.getValueForProperty = function(valueAsLabelStr, metadata,
                                             taskUrl);
       return {value: metadataFields, type: fieldType};
     }        
-  }  
+  }
+
+  return "";
 }
 
 /**
