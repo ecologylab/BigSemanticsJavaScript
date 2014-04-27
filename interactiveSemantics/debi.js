@@ -76,14 +76,15 @@ MetadataLoader.getMetadata = function(url, callback)
  * Retrieves the meta-metadata from the service using a JSON-p call.
  * When the service responds the callback function will be called.
  *
- * @param name
+ * @param url, the URL of the document the requested meta-metadata is for.
  * @param callback, name of the function to be called from the JSON-p call
  */
-MetadataLoader.getMMD = function(name, callback)
+MetadataLoader.getMMD = function(url, callback)
 {
   var serviceURL = SEMANTIC_SERVICE_URL + "mmd.jsonp?callback=" + callback
-                   + "&name=" + name;
+                   + "&url=" + encodeURIComponent(url) + "&withurl";
   MetadataLoader.doJSONPCall(serviceURL);
+  console.log("requesting semantics service for mmd: " + serviceURL);
 }
 
 /**
@@ -171,7 +172,7 @@ MetadataLoader.setMetadata = function(rawMetadata)
       queueTask.clipping.rawMetadata = rawMetadata;
     }
         
-    MetadataLoader.getMMD(queueTask.mmdType, "MetadataLoader.setMetaMetadata");
+    MetadataLoader.getMMD(metadata.location, "MetadataLoader.setMetaMetadata");
   }
   
   if (queueTasks.length < 0)
@@ -188,8 +189,18 @@ MetadataLoader.setMetadata = function(rawMetadata)
  *
  * @param mmd, raw meta-metadata json returned from the service
  */
-MetadataLoader.setMetaMetadata = function (mmd)
+MetadataLoader.setMetaMetadata = function (url, mmd)
 {
+  console.log("Received url: " + url);
+  console.log("Received mmd: " + mmd);
+
+  // For temporary backward compatibility:
+  if (url && !mmd)
+  {
+    mmd = url;
+    url = undefined;
+  }
+
   // TODO move MDC related code to mdc.js
   if (typeof MDC_rawMMD != "undefined")
   {
@@ -198,7 +209,16 @@ MetadataLoader.setMetaMetadata = function (mmd)
   
   simplDeserialize(mmd);
   
-  var tasks = MetadataLoader.getTasksFromQueueByType(mmd["meta_metadata"].name);
+  var tasks = [];
+  if (typeof url != "undefined")
+  {
+    tasks = MetadataLoader.getTasksFromQueueByUrl(url);
+  }
+  else
+  {
+    // For temporary backward compatibility:
+    tasks = MetadataLoader.getTasksFromQueueByType(mmd["meta_metadata"].name);
+  }
   
   if (tasks.length > 0)
   {
