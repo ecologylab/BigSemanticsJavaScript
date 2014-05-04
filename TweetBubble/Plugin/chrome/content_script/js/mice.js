@@ -142,7 +142,7 @@ MICE.expandCollapseTable = function(event)
 		var table = MICE.getTableForButton(button);
 		MICE.expandTable(table);
 		
-		if(MICE.logger)
+		if(MetadataLoader.logger)
 		{			
 			var eventObj = {};
 			if(typeof button.location === "undefined")
@@ -173,7 +173,7 @@ MICE.expandCollapseTable = function(event)
 					}
 				};
 			}
-			MICE.logger(eventObj);
+			MetadataLoader.logger(eventObj);
 		}
 	}
 	else if(expandSymbol.style.display == "none")
@@ -187,7 +187,7 @@ MICE.expandCollapseTable = function(event)
 		var table = MICE.getTableForButton(button);
 		MICE.collapseTable(table);
 		
-		if(MICE.logger)
+		if(MetadataLoader.logger)
 		{
 			var eventObj = {};
 			if(typeof button.location === "undefined")
@@ -219,7 +219,7 @@ MICE.expandCollapseTable = function(event)
 					}
 				};
 			}
-			MICE.logger(eventObj);
+			MetadataLoader.logger(eventObj);
 		}	
 	}	
 }
@@ -400,7 +400,7 @@ MICE.downloadAndDisplayDocument = function(event)
 		MICE.updateInContextStyling(table);
 	
 	
-	if(MICE.logger)
+	if(MetadataLoader.logger)
 	{			
 		var eventObj = {};
 			
@@ -432,7 +432,7 @@ MICE.downloadAndDisplayDocument = function(event)
 				}
 			};
 		}
-		MICE.logger(eventObj);
+		MetadataLoader.logger(eventObj);
 	}
 }
 
@@ -1329,14 +1329,14 @@ MICE.buildMetadataField = function(metadataField, isChildTable, fieldCount, row)
 
 MICE.logNavigate = function(event)
 {
-	if(MICE.logger)
+	if(MetadataLoader.logger)
 	{
 		var eventObj = {
 			navigate_from_metadata: {
 				target_doc: event.target.href
 			}
 		}
-		MICE.logger(eventObj);
+		MetadataLoader.logger(eventObj);
 	}
 }
 

@@ -38,7 +38,7 @@ function downloadRequester(expandableItemUrl)
 
 function onUpdateHandler()
 {
-	if (MetadataRenderer.LoggingFunction)
+	if (MetadataLoader.logger)
 	{
 		var eventObj = {
 			scroll: {
@@ -46,7 +46,7 @@ function onUpdateHandler()
 				offsetY: window.pageYOffset
 			}
 		}
-		MetadataRenderer.LoggingFunction(eventObj);
+		MetadataLoader.logger(eventObj);
 	}
 	processPage();
 }
@@ -101,11 +101,11 @@ function expandCollapseItem(event)
 
 function scrollBackAndCollpaseHandler(event)
 {
-	if (MetadataRenderer.LoggingFunction && !instance.isItemClick(event))
+	if (MetadataLoader.logger && !instance.isItemClick(event))
 	{
 		//container clicked
 		var eventObj = instance.getContainerClickedEventObj(this);
-		MetadataRenderer.LoggingFunction(eventObj);
+		MetadataLoader.logger(eventObj);
 	}
 		
 	var elt = this;
@@ -181,14 +181,14 @@ function addScrollBackAndCollapseForContainers()
 
 function ajaxContentUpdate()
 {
-	if (MetadataRenderer.LoggingFunction)
+	if (MetadataLoader.logger)
 	{
 		var eventObj = {
 			ajax_update: {
 				url: currentUrl
 			}
 		}
-		MetadataRenderer.LoggingFunction(eventObj);
+		MetadataLoader.logger(eventObj);
 	}
 	
 	setTimeout(function() {
@@ -202,10 +202,10 @@ function ajaxContentUpdate()
 function logExternalURLClick(event) 
 {
 	instance.setItemClick(event);
-	if (MetadataRenderer.LoggingFunction)
+	if (MetadataLoader.logger)
 	{
 		var eventObj = instance.getExternalURLClickedEventObj(this);
-		MetadataRenderer.LoggingFunction(eventObj);
+		MetadataLoader.logger(eventObj);
 	}
 }
 
@@ -236,7 +236,7 @@ function addOtherEventHandlers()
 
 function defaultConditionOnUpdateHandler()
 {
-	if (MetadataRenderer.LoggingFunction)
+	if (MetadataLoader.logger)
 	{
 		var eventObj = {
 			scroll: {
@@ -244,7 +244,7 @@ function defaultConditionOnUpdateHandler()
 				offsetY: window.pageYOffset
 			}
 		}
-		MetadataRenderer.LoggingFunction(eventObj);
+		MetadataLoader.logger(eventObj);
 	}
 	processDefaultConditionClicks(document);
 }
@@ -252,21 +252,21 @@ function defaultConditionOnUpdateHandler()
 function defaultConditionItemClick(event)
 {
 	instance.setItemClick(event);
-	if (MetadataRenderer.LoggingFunction)
+	if (MetadataLoader.logger)
 	{
 		//item clicked
 		var eventObj = instance.getItemClickedEventObj(this);
-		MetadataRenderer.LoggingFunction(eventObj);
+		MetadataLoader.logger(eventObj);
 	}
 }
 
 function defaultConditionContainerClick(event)
 {
-	if (MetadataRenderer.LoggingFunction && !instance.isItemClick(event))
+	if (MetadataLoader.logger && !instance.isItemClick(event))
 	{
 		//container clicked
 		var eventObj = instance.getContainerClickedEventObj(this);
-		MetadataRenderer.LoggingFunction(eventObj);
+		MetadataLoader.logger(eventObj);
 	}
 }
 
@@ -307,7 +307,7 @@ function processDefaultConditionClicks(node)
 
 function processUrlChange(newUrl)
 {
-	if (MetadataRenderer.LoggingFunction)
+	if (MetadataLoader.logger)
 	{
 		//url_changed
 		var eventObj = {
@@ -316,7 +316,7 @@ function processUrlChange(newUrl)
 				new_url: newUrl
 			}
 		}
-		MetadataRenderer.LoggingFunction(eventObj);
+		MetadataLoader.logger(eventObj);
 	}
 	
 	currentUrl = newUrl;
@@ -392,7 +392,7 @@ chrome.extension.sendRequest({loadOptions: document.URL}, function(response) {
 			//processInfoSheetResponse(Util.YES);
 	}
 	
-	if (MetadataRenderer.LoggingFunction)
+	if (MetadataLoader.logger)
 	{
 		if (response && (response.last_userid != response.userid || response.last_condition != response.condition))
 		{
@@ -405,7 +405,7 @@ chrome.extension.sendRequest({loadOptions: document.URL}, function(response) {
 					infoSheetAgree: response.agree
 				}
 			}
-			MetadataRenderer.LoggingFunction(eventObj);
+			MetadataLoader.logger(eventObj);
 		}
 	}
 });

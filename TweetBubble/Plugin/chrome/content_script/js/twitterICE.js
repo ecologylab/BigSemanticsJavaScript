@@ -3,13 +3,15 @@ function twitterICE() {
 
 this.expandableItemsXPath = "//ol[@id='stream-items-id']/li//p[@class='js-tweet-text tweet-text']/a/b";
 
-//@usernames, #hashtags, tweet tweeter, @connect tweeter
+//@usernames, #hashtags, tweet tweeter, @connect tweeter, new layout tweet tweeter
 this.expandableItemsXPath2 = ".//a[@class='twitter-atreply pretty-link']/b | " + 
 							 ".//a[@class='twitter-hashtag pretty-link js-nav']/b | " + 
 							 ".//a[@class='account-group js-account-group js-action-profile js-user-profile-link js-nav']/strong | " + 
-							 ".//a[@class='pretty-link js-user-profile-link js-action-profile-name']/strong";
+							 ".//a[@class='pretty-link js-user-profile-link js-action-profile-name']/strong | " +
+							 ".//a[@class='ProfileTweet-originalAuthorLink u-linkComplex js-nav js-user-profile-link']/span/b";
 
-this.tweetsXPath = "//ol[@id='stream-items-id']/li/div";
+this.tweetsXPath = "//ol[@id='stream-items-id']/li/div | " +
+					"//div[@class='GridTimeline-items']/div[@class='Grid']//div[@class='StreamItem js-stream-item']";
 
 this.externalURLsXPath = ".//a[@class='twitter-timeline-link']";
 
@@ -46,7 +48,11 @@ this.getContainersXPath = function() {
 }
 
 this.removeHrefAndSetAsUrl = function(elt) {
-	
+	var eltClass = elt.parentNode.getAttribute("class");
+	if (eltClass && eltClass.indexOf("ProfileTweet-originalAuthor") == 0)	//span class for new layout tweet tweeter
+	{
+		elt = elt.parentNode;
+	}
 	// get parent <a> tag; in accordance with above XPath
 	var href = elt.parentNode.getAttribute("href");
 	elt.parentNode.removeAttribute("href");
@@ -57,6 +63,11 @@ this.removeHrefAndSetAsUrl = function(elt) {
 
 this.getExpandableItemUrl = function(item) {
 	// TODO: method for retweets
+	var eltClass = item.parentNode.getAttribute("class");
+	if (eltClass && eltClass.indexOf("ProfileTweet-originalAuthor") == 0)	//span class for new layout tweet tweeter
+	{
+		item = item.parentNode;
+	}
 	return item.parentNode.getAttribute("url");
 };
 
@@ -71,6 +82,11 @@ this.setExpandableItemProcessed = function(elt) {
 	{
 		elt.parentNode.setAttribute("class", "account-group js-account-group js-action-profile js-nav");
 		elt.setAttribute("class", "fullname"); //initial is 'fullname js-action-profile-name'
+	}
+	else if (eltClass.indexOf("ProfileTweet-originalAuthor") == 0)	//span class for new layout tweet tweeter
+	{
+		elt.parentNode.parentNode.setAttribute("class", "ProfileTweet-originalAuthorLink u-linkComplex js-user-profile-link js-nav");
+		//elt.setAttribute("class", "fullname"); //initial is 'fullname js-action-profile-name'
 	}
 	else 
 		elt.parentNode.setAttribute("class", "pretty-link");
@@ -110,6 +126,15 @@ this.getContainer = function(elt) {
 	var parent = elt.parentNode;
 	while (parent.nodeName.toLowerCase() !== "div")
 		parent = parent.parentNode;
+	
+	// new layout tweet teweeter
+	var eltClass = parent.getAttribute("class");
+	if (eltClass && eltClass.indexOf("ProfileTweet-authorDetails") == 0)
+	{
+		//	parent = parent.parentNode;
+		var lineBreak = document.createElement('br');
+		parent.appendChild(lineBreak);
+	}
 	
 	// append to last row, if metadata, to keep tweet content together 
 	if (elt.parentNode.getAttribute("isMetadata") == "true")
@@ -206,7 +231,7 @@ this.getHrefAttribute = function(elt)
 };
 
 var logTweetAction = function(twAction, item) {
-	if (MetadataRenderer.LoggingFunction)
+	if (MetadataLoader.logger)
 	{
 		var eventObj = "";
 		if (twAction == "tweet" && item.parentNode.parentNode && item.parentNode.parentNode.parentNode)
@@ -237,7 +262,7 @@ var logTweetAction = function(twAction, item) {
 				}
 			}
 		}
-		MetadataRenderer.LoggingFunction(eventObj);
+		MetadataLoader.logger(eventObj);
 	}
 };
 

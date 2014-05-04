@@ -27,7 +27,7 @@ function Operation(name, eventObj, timestamp)
 
 Logger.init = function(userid, cond)
 {
-	MetadataRenderer.LoggingFunction = Logger.recordMICEOperation;
+	MetadataLoader.logger = Logger.recordMICEOperation;
 	
 	Logger.hash_key = userid;
 	

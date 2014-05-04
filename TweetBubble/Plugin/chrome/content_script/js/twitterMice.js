@@ -89,14 +89,14 @@ MetadataRenderer.render = function(task, metadataFields)
 		if (metadataProcessor)
 			metadataProcessor(task.visual);
 		
-		if(MetadataRenderer.LoggingFunction)
+		if(MetadataLoader.logger)
 		{
 			var eventObj = {
 				show_metadata: {
 					primary_doc: task.url
 				}
 			}
-			MetadataRenderer.LoggingFunction(eventObj);
+			MetadataLoader.logger(eventObj);
 		}
 		
 		// Create and add a new DocumentContainer to the list
@@ -186,7 +186,7 @@ MetadataRenderer.expandCollapseTable = function(event)
 		var table = MetadataRenderer.getTableForButton(button);
 		MetadataRenderer.expandTable(table);
 		
-		if(MetadataRenderer.LoggingFunction && (event.name == null || event.name != "fakeEvent"))
+		if(MetadataLoader.logger && (event.name == null || event.name != "fakeEvent"))
 		{			
 			var eventObj = {};
 			if(typeof button.location === "undefined")
@@ -217,7 +217,7 @@ MetadataRenderer.expandCollapseTable = function(event)
 					}
 				};
 			}
-			MetadataRenderer.LoggingFunction(eventObj);
+			MetadataLoader.logger(eventObj);
 		}
 	}
 	else if(expandSymbol.style.display == "none")
@@ -231,7 +231,7 @@ MetadataRenderer.expandCollapseTable = function(event)
 		var table = MetadataRenderer.getTableForButton(button);
 		MetadataRenderer.collapseTable(table);
 		
-		if(MetadataRenderer.LoggingFunction)
+		if(MetadataLoader.logger)
 		{
 			var eventObj = {};
 			if(typeof button.location === "undefined")
@@ -263,7 +263,7 @@ MetadataRenderer.expandCollapseTable = function(event)
 					}
 				};
 			}
-			MetadataRenderer.LoggingFunction(eventObj);
+			MetadataLoader.logger(eventObj);
 		}	
 	}
 	
@@ -372,7 +372,7 @@ MetadataRenderer.downloadAndDisplayDocument = function(event)
 	if(MetadataRenderer.updateInContextStyling)
 		MetadataRenderer.updateInContextStyling(table);
 	
-	if(MetadataRenderer.LoggingFunction)
+	if(MetadataLoader.logger)
 	{			
 		var eventObj = {};
 			
@@ -404,7 +404,7 @@ MetadataRenderer.downloadAndDisplayDocument = function(event)
 				}
 			};
 		}
-		MetadataRenderer.LoggingFunction(eventObj);
+		MetadataLoader.logger(eventObj);
 	}
 }
 
@@ -1366,14 +1366,14 @@ MetadataRenderer.showMetadataDisplay = function(expandedItem)
 		dc.visual.style.display = "";
 		dc.visual.style.opacity = 1;
 		
-		if(MetadataRenderer.LoggingFunction)
+		if(MetadataLoader.logger)
 		{
 			var eventObj = {
 				show_metadata: {
 					primary_doc: dc.urls[0]
 				}
 			}
-			MetadataRenderer.LoggingFunction(eventObj);
+			MetadataLoader.logger(eventObj);
 		}		
 	}
 }
@@ -1390,14 +1390,14 @@ MetadataRenderer.hideMetadataDisplay = function(expandedItem)
 		// metadata display
 		dc.visual.style.display = "none";
 		
-		if(MetadataRenderer.LoggingFunction)
+		if(MetadataLoader.logger)
 		{
 			var eventObj = {
 				hide_metadata: {
 					primary_doc: dc.urls[0]
 				}
 			}
-			MetadataRenderer.LoggingFunction(eventObj);
+			MetadataLoader.logger(eventObj);
 		}				
 	}
 }
@@ -1457,14 +1457,14 @@ MetadataRenderer.openUrlInNewWindow = function()
 	var url = this.getAttribute("url");
 	window.open(url, 'Tweet', "height=500,width=500");
 	
-	if(MetadataRenderer.LoggingFunction)
+	if(MetadataLoader.logger)
 	{
 		var eventObj = {
 			tweet_action: {
 				action: url
 			}
 		}
-		MetadataRenderer.LoggingFunction(eventObj);
+		MetadataLoader.logger(eventObj);
 	}
 }
 
