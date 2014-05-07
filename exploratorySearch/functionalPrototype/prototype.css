@@ -1,0 +1,239 @@
+
+
+.metadataContainer, .searchContainer, .resultContainer {
+	float: bottom;	
+	
+}
+
+.contentContainer, .searchContentContainer, .resultContentContainer{
+	
+	border-style: solid;
+	border-width: 2px;
+	border-top-style: none;
+	border-color: lightgray;
+	
+}
+
+
+.queryRow{
+	border-bottom-style: solid;
+	border-bottom-width: 2px;
+	border-color: darkblue;
+    padding: 4px;
+    font-family: calibri;
+    font-size: 18px;
+    
+}
+.headerRow{
+	border-bottom-style: solid;
+    border-bottom-width: 2px;
+    border-color: gray;
+    font-family: calibri;
+    font-size: 18px;
+    
+    padding-right: 4px;
+    line-height: 15px;
+    padding-bottom: 4px;
+    padding-top: 4px;
+}
+.history{
+	display: inline-block;
+	float: left;
+	max-width: 400px;
+}
+.searchContainer {
+
+	overflow: auto;
+
+}
+.searchRendering{
+	
+	overflow:none;
+}
+.searchContentContainer {
+	min-height:800px;
+	overflow: auto;
+}
+.column{
+	display: inline-block;
+}
+.history{
+	border-right: solid;
+	border-width: 1px;
+	border-color: gray;
+	margin-right: 18px;
+	margin-left: 8px;
+	padding-right: 0px;
+	height: 100%;
+}
+.resultContainer{
+	width: 450px;
+	display: block;
+	position: relative;
+	margin-left: 8px;
+	margin-top: 8px;
+	
+}
+.resultContentContainer{
+	height: auto;
+}
+.expanded{
+	height: auto;
+}
+
+.resultContentContainer img{
+	margin-left: auto;
+    margin-right: auto;
+    display: block;
+}
+.titleBar {
+	background-color: #8d8d8d;
+	height: 30px;
+	
+	}
+.amazon{
+	background-color: darkorange;
+}
+.amazon .light{
+	background-color: #f8b670;
+}
+.button, .rightButton{
+	background-color: #b1b1b1;
+	display: inline-block;
+	width: 30px;
+	float: left;
+	height: 100%;
+	
+	
+}
+.rightButton{
+	float: right;
+	margin-left: 15px;
+	width: 30px;
+
+}
+.buttonText{
+	float: center;
+	color: white;
+	display: inline-block;
+	text-align: center;
+	padding-top: 4px;
+	font-family: calibri;
+	font-size: 18px;
+}
+.expandSymbol{
+    position: absolute;
+    background: white;
+    width: 4px;
+    height: 22px;
+    margin: 4px 0px 0px 13px;
+    pointer-events: none;
+}
+
+.collapseSymbol{
+    position: absolute;
+    background: white;
+    width: 22px;
+    height: 4px;
+    margin: 13px 0px 0px 4px;
+    pointer-events: none;
+}
+.title { 
+	color:white;
+
+	float: left;
+
+	margin-left: 10px;
+	margin-top: 4px;
+	font-family: calibri;
+	font-size: 18px;
+	text-align: left;
+	display: inline-block;
+}
+.engineLink{
+	
+
+
+	text-align: right;
+	float: right;
+	margin-right: 10px;
+	margin-top: 4px;
+	color: white;
+	font-family: calibri;
+	font-size: 18px;
+	display: inline-block;
+
+}
+
+.queryRow{
+	font-family: calibri;
+	font-size: 18px;
+	min-width: 800px;
+	
+}
+.queryVal{
+	font-weight: bold;
+}
+
+.resultContainerP{
+	background: #EEE;
+    border-radius: 8px;
+    border: 1px solid gray;
+    margin: 8px;
+    padding: 8px;
+    min-width: 640px;
+}
+.main{
+}
+.queryLocation{
+	display: inline-block;
+	float: right;
+	max-width:300px;
+	max-height: 16px;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+.historyEntry{
+	border: 1px solid gray;
+	border-radius: 8px;
+	margin-top: 4px;
+	margin-bottom: 6px;
+	padding: 4px 8px 4px 8px;
+	margin-right: 6px;
+	cursor: pointer;
+	position: relative;
+	
+}
+.historyEntry:hover
+{ 
+    background-color: #EDEDED;
+}
+.historyEntry.active{
+    border: 2px solid blue;
+   
+    
+}
+.weightLabel{
+	float: right;
+	font-family: calibri;
+	position: absolute;
+    right: 60px;
+	
+}
+.entryWeight{
+	float: right;
+	font-family: calibri;
+	font-weight: bold;
+	color: darkblue;
+}
+.historyEntry img{
+	margin-right: 8px;
+}
+a{
+	color:white;
+}
+img{
+	max-width: 400px;
+	max-height: 150px;
+}

@@ -13,11 +13,16 @@ var WWWStudy;
  * Initializes MICE. Gets the containers and locations from the original document.  
  */
 MICE.initialize = function(){
+	
 	var miceRenderings = document.getElementsByClassName('metadataRendering');
+
+	
 	for(var i = 0; i < miceRenderings.length; i++)
 	{
+		console.log("called");
 		var location = miceRenderings[i].getElementsByTagName('a')[0];
 		if(location)
+			
 			MetadataLoader.render(MICE.render, miceRenderings[i], location.href, true);
 	}
 }
@@ -133,7 +138,7 @@ MICE.expandCollapseTable = function(event)
 					eventObj = {
 						expand_metadata: {
 							field_name: button.parentElement.childNodes[1].innerText,
-							parent_doc: MetadataLoader.getLocationForParentTable(button.parentElement)
+							parent_doc: MICE.getLocationForParentTable(button.parentElement)
 						}
 					};
 				}
@@ -141,7 +146,7 @@ MICE.expandCollapseTable = function(event)
 				{
 					eventObj = {
 						expand_metadata: {
-							parent_doc: MetadataLoader.getLocationForParentTable(button.parentElement)
+							parent_doc: MICE.getLocationForParentTable(button.parentElement)
 						}
 					};
 				}
@@ -150,7 +155,7 @@ MICE.expandCollapseTable = function(event)
 			{
 				eventObj = {
 					expand_metadata: {
-						target_doc: MetadataLoader.getLocationForChildTable(button.parentElement.parentElement.parentElement)
+						target_doc: MICE.getLocationForChildTable(button.parentElement.parentElement.parentElement)
 					}
 				};
 			}
@@ -178,7 +183,7 @@ MICE.expandCollapseTable = function(event)
 					eventObj = {
 						collapse_metadata: {
 							field_name: button.parentElement.childNodes[1].innerText,
-							parent_doc: MetadataLoader.getLocationForParentTable(button.parentElement)
+							parent_doc: MICE.getLocationForParentTable(button.parentElement)
 						}
 					};
 				}
@@ -186,7 +191,7 @@ MICE.expandCollapseTable = function(event)
 				{
 					eventObj = {
 						collapse_metadata: {
-							parent_doc: MetadataLoader.getLocationForParentTable(button.parentElement)
+							parent_doc: MICE.getLocationForParentTable(button.parentElement)
 						}
 					};
 				}
@@ -196,7 +201,7 @@ MICE.expandCollapseTable = function(event)
 				
 				eventObj = {
 					collapse_metadata: {
-						target_doc: MetadataLoader.getLocationForChildTable(button.parentElement.parentElement.parentElement)
+						target_doc: MICE.getLocationForChildTable(button.parentElement.parentElement.parentElement)
 					}
 				};
 			}
@@ -740,12 +745,12 @@ MICE.buildMetadataTable = function(table, isChildTable, isRoot, metadataFields, 
 		// if the maximum number of fields have been rendered then stop rendering and add a "More" expander
 		if(fieldCount <= 0)
 		{
+		
 			var nameCol = document.createElement('div');
-				nameCol.className = "labelCol showDiv";
-							
-			var valueCol = document.createElement('div');
-				valueCol.className = "valueCol showDiv";
-			
+							nameCol.className = "labelCol showDiv";
+										
+						var valueCol = document.createElement('div');
+							valueCol.className = "valueCol showDiv";
 			//TODO - add "more" expander
 			var moreCount = metadataFields.length - i;
 			
@@ -933,6 +938,10 @@ MICE.buildMetadataField = function(metadataField, isChildTable, fieldCount, row)
 	}
 	
 	var expandButton = null;	
+	
+	
+		
+	
 	
 	if(metadataField.scalar_type)
 	{				
