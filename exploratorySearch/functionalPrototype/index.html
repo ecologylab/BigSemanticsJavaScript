@@ -1,0 +1,118 @@
+<html>
+	<head>
+		<title>Prototype</title>
+		<link rel="stylesheet" type="text/css" href="../../interactiveSemantics/metadataRenderer.css"/>
+         <script type="text/javascript" src="../../interactiveSemantics/debi.js"></script>
+         <script type="text/javascript" src="../../interactiveSemantics/mice.js"></script>
+         <script type="text/javascript" src="prototype.js"></script>
+         <script type="text/javascript" src="history.js"></script>
+         
+         
+         <script src="jquery-2.0.0.min.js"></script>
+         <script type="text/javascript" src="../../simpl/simplDeserializer.js"></script>
+         <script type="text/javascript" src="../../simpl/simplFieldTypes.js"></script>
+         <script type="text/javascript" src="../../simpl/simplGraphCollapse.js"></script>
+         <script type="text/javascript" src="../../simpl/simplGraphExpand.js"></script>
+         <script type="text/javascript" src="../../simpl/simplTypeScope.js"></script>
+         <script type="text/javascript" src="../../simpl/simplTypeScopeDeserialize.js"></script>
+         <script type="text/javascript" src="../../simpl/simplTypeScopeSerialize.js"></script>
+
+        
+    
+    <script type="text/javascript" src="../../semantics/MetaMetadataRepositoryLibrary.js"></script>
+    <script type="text/javascript" src="../../semantics/testRepository.js"></script>
+         
+         
+         
+		<link href="css/bootstrap.min.css" rel="stylesheet" type="text/css"></link>
+
+		<link rel="stylesheet" type="text/css" href="prototype.css"/>
+		
+		  <script>
+           
+                function toGoogleUrl(searchString){
+                    
+                    var url = "http://www.google.com/search?q=";
+                    url+=encodeURI(searchString);
+                    
+                    return url;
+                }
+                function toACMUrl(searchString){
+                    var url = "http://dl.acm.org/results.cfm?query=";
+                    
+                    url+=encodeURI(searchString);
+                    return url;
+                }
+                function showMetadata(engine)
+                 {
+                    var query = document.getElementById("targetURL").value;
+                    var url = "";
+                    var content = document.getElementById("content");
+                    if(engine){
+                    	if (engine=="google_search"){
+                    		url = toGoogleUrl(query);
+                    	}
+                    	else if (engine == "acm"){
+                    		url = toACMUrl(query);
+                    	}
+                    }else{
+                    	url = toGoogleUrl(query);
+                    }
+                    
+                    History.addHistory(query, url, engine);
+                    Prototype.addMetadataDisplay(content, url, true);
+                }
+            
+            function onEnterShowMetadata(event)
+            {
+                if(event.keyCode == 13)
+                    showMetadata(); 
+            }
+         </script>
+	</head>
+	<body>
+		<div id="controls" class="navbar navbar-inverse navbar-fixed-top">
+          <div class="navbar-inner">
+            <div class="container">
+              <div class="brand">Prototype</div>
+              <form class="navbar-form pull-right" onsubmit="return false;">
+                
+                <!-- So around her, I might change logic to regex the search terms into a google search and pass that URL
+                	to the metadata renderer-->
+              
+                <input id="targetURL" type="text" class="span5"
+                  size="500" style="height: 30px;" placeholder="Enter Search Term"
+                  onkeydown="onEnterShowMetadata(event);"/>
+                <input type="button" class="btn" value="Google"
+                  onclick="showMetadata('google_search');"/>
+                  
+                  <input type="button" class="btn" value="ACM"
+                  onclick="showMetadata('acm');"/>
+                  
+            </form>
+            
+          </div>
+          </div>
+		</div>
+		<div class="main" style="margin-top: 50px; margin-left:8px">
+		<div class="column history" style=" width: 30%; float: left">
+		  <div id="history_bar" class="historyRendering">
+		      <div class="headerRow">History</div>
+		  </div>
+		  <div class="historyContainer"></div> 
+		</div>
+		
+		<div class="column" style="width: 60%">
+          <div id="content" class="searchRendering">
+          
+        <a href="https://www.google.com/search?q=exploratory+search" engine ="google_search" query="exploratory search"> </a>     
+          </div>
+        </div>
+        </div>
+			
+	    <script>
+	    SEMANTIC_SERVICE_URL = "http://localhost:8080/BigSemanticsService/";
+	    Prototype.initialize();
+	    </script>
+	</body>
+</html>

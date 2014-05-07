@@ -1,5 +1,26 @@
 //MICE renders the metaData for the MICE interface
 var MICE = {};
+<<<<<<< HEAD
+
+
+// The documentMap contains a list of DocumentContainers for each found metadata object, both retrieved and not.
+MICE.documentMap = [];
+
+
+
+/**
+ * Initializes MICE. Gets the containers and locations from the original document.  
+ */
+
+
+MICE.initialize = function(){
+	var miceRenderings = document.getElementsByClassName('metadataRendering');
+	for(var i = 0; i < miceRenderings.length; i++)
+	{
+		var location = miceRenderings[i].getElementsByTagName('a')[0];
+		if(location)
+			MetadataRenderer.render(MICE.render, miceRenderings[i], location.href, true);
+=======
 
 // The documentMap contains a list of DocumentContainers for each found metadata object, both retrieved and not.
 MICE.documentMap = [];
@@ -13,12 +34,18 @@ var WWWStudy;
  * Initializes MICE. Gets the containers and locations from the original document.  
  */
 MICE.initialize = function(){
+	
 	var miceRenderings = document.getElementsByClassName('metadataRendering');
+
+	
 	for(var i = 0; i < miceRenderings.length; i++)
 	{
+		console.log("called");
 		var location = miceRenderings[i].getElementsByTagName('a')[0];
 		if(location)
+			
 			MetadataLoader.render(MICE.render, miceRenderings[i], location.href, true);
+>>>>>>> f2eda4a
 	}
 }
 
@@ -28,7 +55,11 @@ MICE.render = function(task, metadataFields){
 	task.visual.className = "metadataContainer";
 	
 	// Build the HTML table for the metadata
+<<<<<<< HEAD
+	MetadataRenderer.currentDocumentLocation = task.url;
+=======
 	MetadataLoader.currentDocumentLocation = task.url;
+>>>>>>> f2eda4a
 	
 	var metadataTable = MICE.buildMetadataTable(null, false, task.isRoot, metadataFields, FIRST_LEVEL_FIELDS);
 	if(metadataTable)
@@ -69,13 +100,21 @@ MICE.render = function(task, metadataFields){
 }
 
 
+<<<<<<< HEAD
+=======
+
+
+>>>>>>> f2eda4a
 
 
 
 
 
+<<<<<<< HEAD
 
 
+=======
+>>>>>>> f2eda4a
 /** Functions related to the interactions of the metadata HTML **/
 
 /**
@@ -89,17 +128,29 @@ MICE.render = function(task, metadataFields){
 MICE.addMetadataDisplay = function(container, url, isRoot, clipping){
 	// Add the rendering task to the queue
 	var task = new RenderingTask(url, container, isRoot, clipping, MICE.render)
+<<<<<<< HEAD
+	MetadataRenderer.queue.push(task);	
+=======
 	MetadataLoader.queue.push(task);	
+>>>>>>> f2eda4a
 	
 	if(clipping != null && clipping.rawMetadata != null)
 	{
 		clipping.rawMetadata.deserialized = true;
+<<<<<<< HEAD
+		MetadataRenderer.setMetadata(clipping.rawMetadata);
+=======
 		MetadataLoader.setMetadata(clipping.rawMetadata);
+>>>>>>> f2eda4a
 	}
 	else
 	{	
 		// Fetch the metadata from the service
+<<<<<<< HEAD
+		MetadataRenderer.getMetadata(url, "MetadataRenderer.setMetadata");	
+=======
 		MetadataLoader.getMetadata(url, "MetadataLoader.setMetadata");	
+>>>>>>> f2eda4a
 	}
 }
 MICE.expandCollapseTable = function(event)
@@ -368,7 +419,11 @@ MICE.downloadAndDisplayDocument = function(event)
 		
 		// Add a loadingRow for visual feedback that the metadata is being downloaded / parsed
 		table.appendChild(MICE.createLoadingRow());
+<<<<<<< HEAD
+	    MetadataRenderer.render(MICE.render, table.parentElement, location, false)	;
+=======
 	    MetadataLoader.render(MICE.render, table.parentElement, location, false)	;
+>>>>>>> f2eda4a
 		//MICE.addMetadataDisplay(table.parentElement, location, false);
 	}
 	// If there was no document location then the table must be a non-document composite in which case just expand
@@ -381,7 +436,11 @@ MICE.downloadAndDisplayDocument = function(event)
 		MICE.updateInContextStyling(table);
 	
 	
+<<<<<<< HEAD
+	if(MICE.LoggingFunction)
+=======
 	if(MICE.logger)
+>>>>>>> f2eda4a
 	{			
 		var eventObj = {};
 			
@@ -413,7 +472,11 @@ MICE.downloadAndDisplayDocument = function(event)
 				}
 			};
 		}
+<<<<<<< HEAD
+		MICE.LoggingFunction(eventObj);
+=======
 		MICE.logger(eventObj);
+>>>>>>> f2eda4a
 	}
 }
 
@@ -740,12 +803,12 @@ MICE.buildMetadataTable = function(table, isChildTable, isRoot, metadataFields, 
 		// if the maximum number of fields have been rendered then stop rendering and add a "More" expander
 		if(fieldCount <= 0)
 		{
+		
 			var nameCol = document.createElement('div');
-				nameCol.className = "labelCol showDiv";
-							
-			var valueCol = document.createElement('div');
-				valueCol.className = "valueCol showDiv";
-			
+							nameCol.className = "labelCol showDiv";
+										
+						var valueCol = document.createElement('div');
+							valueCol.className = "valueCol showDiv";
 			//TODO - add "more" expander
 			var moreCount = metadataFields.length - i;
 			
@@ -895,7 +958,11 @@ MICE.buildMetadataTable = function(table, isChildTable, isRoot, metadataFields, 
 			if (expandButton != null && metadataField.show_expanded_initially == "true") {
 				var fakeEvent = {};
 				fakeEvent.target = expandButton;
+<<<<<<< HEAD
+				console.log("fake event ready");
+=======
 				// console.log("fake event ready");
+>>>>>>> f2eda4a
 				MICE.expandCollapseTable(fakeEvent);
 			}
 		}
@@ -933,6 +1000,10 @@ MICE.buildMetadataField = function(metadataField, isChildTable, fieldCount, row)
 	}
 	
 	var expandButton = null;	
+	
+	
+		
+	
 	
 	if(metadataField.scalar_type)
 	{				
@@ -1319,14 +1390,22 @@ MICE.buildMetadataField = function(metadataField, isChildTable, fieldCount, row)
 
 MICE.logNavigate = function(event)
 {
+<<<<<<< HEAD
+	if(MICE.LoggingFunction)
+=======
 	if(MICE.logger)
+>>>>>>> f2eda4a
 	{
 		var eventObj = {
 			navigate_from_metadata: {
 				target_doc: event.target.href
 			}
 		}
+<<<<<<< HEAD
+		MICE.LoggingFunction(eventObj);
+=======
 		MICE.logger(eventObj);
+>>>>>>> f2eda4a
 	}
 }
 
