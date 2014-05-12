@@ -139,13 +139,7 @@ function extractMetadata(targetDoc, mmd) {
 	    	metadata['location'] = locationField;  
 	    }
 	    
-	    if (mmd.hasOwnProperty('mm_name'))
-			metadata['mm_name'] = mmd.mm_name;
-	
-		var metadataTag = mmd.hasOwnProperty('name') ? mmd.name : mmd.type;
-	    metadata['mm_name'] = metadataTag;
-	    
-	    
+	    metadata['mm_name'] = mmd.name;
 	    
 	    return metadata;
    }
