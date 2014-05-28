@@ -4,10 +4,13 @@
 		<link rel="stylesheet" type="text/css" href="../../interactiveSemantics/metadataRenderer.css"/>
          <script type="text/javascript" src="../../interactiveSemantics/debi.js"></script>
          <script type="text/javascript" src="../../interactiveSemantics/mice.js"></script>
-         <script type="text/javascript" src="prototype.js"></script>
+         <script type="text/javascript" src="exploratorySearchObject.js"></script>
+         <script type="text/javascript" src="search.js"></script>
+         <script type="text/javascript" src="searchResultSet.js"></script>
+         <script type="text/javascript" src="expSearch.js"></script>
          <script type="text/javascript" src="history.js"></script>
-         
-         
+         <script type="text/javascript" src="entry.js"></script>
+         <script type="text/javascript" src="dragAndDrop.js"></script>
          <script src="jquery-2.0.0.min.js"></script>
          <script type="text/javascript" src="../../simpl/simplDeserializer.js"></script>
          <script type="text/javascript" src="../../simpl/simplFieldTypes.js"></script>
@@ -30,43 +33,20 @@
 		
 		  <script>
            
-                function toGoogleUrl(searchString){
-                    
-                    var url = "http://www.google.com/search?q=";
-                    url+=encodeURI(searchString);
-                    
-                    return url;
-                }
-                function toACMUrl(searchString){
-                    var url = "http://dl.acm.org/results.cfm?query=";
-                    
-                    url+=encodeURI(searchString);
-                    return url;
-                }
-                function showMetadata(engine)
+              
+                function showMetadata(engineList)
                  {
                     var query = document.getElementById("targetURL").value;
-                    var url = "";
+                  
                     var content = document.getElementById("content");
-                    if(engine){
-                    	if (engine=="google_search"){
-                    		url = toGoogleUrl(query);
-                    	}
-                    	else if (engine == "acm"){
-                    		url = toACMUrl(query);
-                    	}
-                    }else{
-                    	url = toGoogleUrl(query);
-                    }
                     
-                    History.addHistory(query, url, engine);
-                    Prototype.addMetadataDisplay(content, url, true);
+                    ExpSearchApp.addQuery(query, engineList);
                 }
             
             function onEnterShowMetadata(event)
             {
                 if(event.keyCode == 13)
-                    showMetadata(); 
+                    showMetadata(['google_search', 'bing']); 
             }
          </script>
 	</head>
@@ -84,10 +64,10 @@
                   size="500" style="height: 30px;" placeholder="Enter Search Term"
                   onkeydown="onEnterShowMetadata(event);"/>
                 <input type="button" class="btn" value="Google"
-                  onclick="showMetadata('google_search');"/>
+                  onclick="showMetadata(['google_search']);"/>
                   
-                  <input type="button" class="btn" value="ACM"
-                  onclick="showMetadata('acm');"/>
+                  <input type="button" class="btn" value="Bing"
+                  onclick="showMetadata(['bing']);"/>
                   
             </form>
             
@@ -102,17 +82,27 @@
 		  <div class="historyContainer"></div> 
 		</div>
 		
-		<div class="column" style="width: 60%">
-          <div id="content" class="searchRendering">
+		<div class="column" style="width: 35%; float: left">
+          <div id="content" class="expRendering">
           
         <a href="https://www.google.com/search?q=exploratory+search" engine ="google_search" query="exploratory search"> </a>     
           </div>
         </div>
+          <div class="column comparison" id="comp" style="width: 35%">
+          <div class="comparisonContainer" ondragover="comparisonDragOver(event)" ondrop="comparisonDrop(event)" ondragenter="comparisonDragEnter(event)" ondragleave="comparisonDragLeave(event)">
+          <span class="dragCenteringMechanism">
+            <span class="dragHint">Drag a history entry here</span>
+          </span>
+             
+      
+          </div>
         </div>
-			
+       
+        </div>
+	
 	    <script>
 	    SEMANTIC_SERVICE_URL = "http://localhost:8080/BigSemanticsService/";
-	    Prototype.initialize();
+	    ExpSearchApp.initialize();
 	    </script>
 	</body>
 </html>

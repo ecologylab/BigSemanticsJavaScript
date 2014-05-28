@@ -1,104 +1,65 @@
-/**
- * Contains the functions that create History objects and renders the history display for the functional prototype
- */
 
 
-var History = {};
-History.historyList = [];
-
-function logHowdy(){
-	console.log("Hellowdy");
+function History()
+{
+	this.entryList = [];
+	this.container = document.getElementsByClassName('historyContainer')[0];
+	
 }
-function Entry(query, location, engine, isactive){
-	this.query = query;
-	this.location = location;
-	this.engine = engine;
-	this.weight = 1;
-	this.active = true;
 
-	if (isactive != null){
-		this.active = isactive;
+//maps search engines to urls. This lets us grab favicons
+//Can't use search url's, because that would make the favicons appear after
+//a history has been made, which would be a bit odd
+function engineURL(engine){
+	if (engine == "bing_search_xpath"){
+		return MetadataLoader.getHost("http://www.bing.com");
+	}
+	else if (engine == "google_search"){
+		return MetadataLoader.getHost("http://www.google.com");
 	}
 	
 }
-/*
- * Adds whatever the current search query is to the history
- * by scanning the page for a query, location, and search engine data
- */
-History.addHistory = function(query, location, engine){
-	
 
-	var history = new Entry(query, location, engine);
+History.prototype.buildEntry = function(entry){
 	
-	History.display(history);
-	//return history;
-}
-
-function getByValue(arr, attr, value) {
-
-	  for (var i=0; i < arr.length;  i++) {
-	    if (arr[i].attr == value) return arr[i];
-	  }
-	}
-/*
- *	Here be the ways we take an entry from the history and restore it, gloriously, to the search results container
- */
-
-//I assume that we want the item to remain in the history after being restored
-History.restoreEntry = function (entryNode){
-	
-	
-	var content = document.getElementById("content");
-	var url = entryNode.getAttribute("location");
-	
-	var restoredEntry = new Entry(null, url);
-	History.display(restoredEntry);
-	
-	Prototype.addMetadataDisplay(content, url, true);
-	
-}
-
-
-/*
- *  Does the good work of placing histories on the page. 
- *  Adds history to list of histories, sorts the list, and then displays in sorted order
- *  Currently sorts in alphabetical order as a proof-of-concept
- */
-History.sortHistory = function(){
-	History.historyList.sort(
-		function(a,b) {
-			if(a.weight > b.weight) return -1;
-			if(a.weight < b.weight) return 1;
-			/*
-			if(a.query < b.query) return -1;
-			if(a.query > b.query) return 1;
-			*/
-			return 0;
-			
-		} 
-	);
-}
-
-History.buildHistoryEntry = function(history){
 	var historyEntry = document.createElement('div');
 	historyEntry.className = "historyEntry";
-	if (history.active){
+	historyEntry.setAttribute("draggable", "true");
+	if (entry.active){
 		historyEntry.className += " active";
 	}
 	
-	
-	
-	//Favicon
+
+	//Favicon - I need to switch to a multi-search approach
+	/*
 	var favicon = document.createElement('img');
 	favicon.className = "faviconICE";
 	favicon.src = "https://plus.google.com/_/favicon?domain_url=" + MetadataLoader.getHost(history.location);
 	historyEntry.appendChild(favicon);
-	//Query
-	historyText = document.createTextNode(history.query);
-	historyEntry.appendChild(historyText);
+	*/
 	
-	historyEntry.setAttribute("onClick", "History.restoreEntry(this)");
-	historyEntry.setAttribute("location", history.location);
+	var engines = entry.SearchSet.engines;
+	for (var i = 0; i < engines.length; i++){
+		var favicon = document.createElement('img');
+		favicon.className = "faviconICE";
+		favicon.src = "https://plus.google.com/_/favicon?domain_url=" + engineURL(engines[i]);
+		historyEntry.appendChild(favicon);
+	}
+	//Query
+	var historyText = document.createElement('span');
+	historyText.className = "entryQuery";
+	historyText.innerHTML = entry.query;
+		
+	historyEntry.appendChild(historyText);
+	var restoreCommand = "History.prototype.restoreEntry('";
+	restoreCommand += entry.id;
+	restoreCommand += "')";
+	
+	historyEntry.setAttribute("onClick", restoreCommand);
+	historyEntry.setAttribute("ondragstart", "entryDragStart(event)")
+	historyEntry.setAttribute("ondragend", "entryDragEnd(event)")
+	historyEntry.setAttribute("id", entry.id);
+	
 	//Weight
 	var weight = document.createElement('span');
 	var weightLabel = document.createElement('span');
@@ -106,53 +67,82 @@ History.buildHistoryEntry = function(history){
 	weightLText = document.createTextNode("Weight:");
 	weightLabel.appendChild(weightLText);
 	weight.className = 'entryWeight';
-	weightText = document.createTextNode(history.weight);
+	weightText = document.createTextNode(entry.weight);
 	
 	
 	weight.appendChild(weightText);
 	historyEntry.appendChild(weight);
 	historyEntry.appendChild(weightLabel);
 	
-	
-	
-	
+	if(entry.compared){
+		historyEntry.classList.add('compared');
+	}
 	return historyEntry;
 	
 }
 
-History.display = function (history){
-	//Need more code to prevent duplicate entries
-	var pushEntry = true;		
-	for (var i = 0; i < History.historyList.length; i++){
-		if (history.location == History.historyList[i].location){
-			History.historyList[i].weight++;
-			History.historyList[i].active = true;
-			pushEntry = false;
+History.prototype.addHistoryDisplay = function(){
+	//Renders its historylist
+	//Remove all current nodes
+	while (exploratorySearches.last().history.container.hasChildNodes())
+		exploratorySearches.last().history.container.removeChild(exploratorySearches.last().history.container.lastChild);
+	//Add in the new ones :)
+	for (var i = 0; i < exploratorySearches.last().history.entryList.length; i++){
+		exploratorySearches.last().history.container.appendChild(exploratorySearches.last().history.buildEntry(exploratorySearches.last().history.entryList[i]));
+	}
+}
+
+History.prototype.addEntry = function(entry){
+	//adds entry to list, sorts list, and calls addHistoryDisplay
+	
+	//check to see if entry is already in list
+
+	this.sortEntryList();
+	//A new entry always starts at the top of the list
+	for (var i = 0; i < exploratorySearches.last().history.entryList.length; i++){
+		exploratorySearches.last().history.entryList[i].active = false;
+	}
+	
+	this.entryList.unshift(entry);
+				
+	this.addHistoryDisplay();
+}
+
+History.prototype.restoreEntry = function(entryID){
+	//updates entry, sorts list, and calls addHistoryDisplay
+	
+	var entry;		
+	for (var i = 0; i < exploratorySearches.last().history.entryList.length; i++){
+		if (entryID == exploratorySearches.last().history.entryList[i].id){
+			exploratorySearches.last().history.entryList[i].weight++;
+			exploratorySearches.last().history.entryList[i].active = true;
+			entry = exploratorySearches.last().history.entryList[i];
 		}
 		else{
-			History.historyList[i].active = false;
+			exploratorySearches.last().history.entryList[i].active = false;
 		}
 	}
-	History.sortHistory();
+	
+	this.sortEntryList();
+	this.addHistoryDisplay();
+	//Put the correct searchSet in back
+	
+	exploratorySearches.last().searchResultSets.splice(exploratorySearches.last().searchResultSets.indexOf(entry.SearchSet), 1);
+	exploratorySearches.last().searchResultSets.push(entry.SearchSet);
+	ExpSearchApp.displaySearchSet(exploratorySearches.last());
+}
 
-	
-	if (pushEntry){
-		History.historyList.unshift(history);
-	}				
-	
-	
-	
-	var historyParent = document.getElementsByClassName('historyContainer')[0];
-	
-	//Remove previous history
-	while (historyParent.hasChildNodes())
-		historyParent.removeChild(historyParent.lastChild);
-	
-
-	
-	for (var i = 0; i < History.historyList.length; i++){
-		historyParent.appendChild(History.buildHistoryEntry(History.historyList[i]));
-	}
-	
-	
+History.prototype.sortEntryList = function(){
+	exploratorySearches.last().history.entryList.sort(
+			function(a,b) {
+				if(a.weight > b.weight) return -1;
+				if(a.weight < b.weight) return 1;
+				/*
+				if(a.query < b.query) return -1;
+				if(a.query > b.query) return 1;
+				*/
+				return 0;
+				
+			} 
+		);
 }

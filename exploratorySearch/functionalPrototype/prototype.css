@@ -1,5 +1,8 @@
 
-
+body{
+	min-width: 2330px;
+	overflow: auto;
+}
 .metadataContainer, .searchContainer, .resultContainer {
 	float: bottom;	
 	
@@ -13,16 +16,59 @@
 	border-color: lightgray;
 	
 }
+/*
+.searchResultContainer.google_search .metadataRendering{
+	
+	border-color: royalblue;
+}
+
+.searchResultContainer.bing_search_xpath .metadataRendering{
+    border-color: #ffb900;
+}
+*/
+
+.metadataRendering{
+	display: inline-block;
+}
+.comparisonDismissButton{
+	float: right;
+	margin-top: -12px;
+}
+.indresultContainer{
+	margin-left: 11px;
+}
+.searchLabel{
+	display: inline-block;
+    margin-top: 12px;
+    margin-left: 8px;
+    font-size: 14px;
+}
 
 
-.queryRow{
+.labelSpan{
+    margin-left: 8px;	
+}
+.searchResultContainer{
+	display: inline-block;
+	
+}
+.searchContainer{
+	/*max-width:800px;*/
+	overflow: auto;
 	border-bottom-style: solid;
-	border-bottom-width: 2px;
-	border-color: darkblue;
-    padding: 4px;
-    font-family: calibri;
-    font-size: 18px;
-    
+    border-bottom-width: 1px;
+    border-color: gray;
+    padding-bottom: 2px;
+}
+
+.collapsedSearch{
+	display: inline-block;
+}
+.comparisonContainer{
+	margin-left: 18px;
+	padding-top: 8px;
+	
+	height: 100px%;
 }
 .headerRow{
 	border-bottom-style: solid;
@@ -46,16 +92,173 @@
 	overflow: auto;
 
 }
-.searchRendering{
+.historyRendering{
+	padding-top: 8px;
+}
+.searchCollapseSymbol{
+	position: absolute;
+    background: white;
+    width: 16px;
+    height: 3px;
+    margin: 10.5px 4px 0px 4px;
+    pointer-events: none;
+}
+
+.searchExpandSymbol{
+    position: absolute;
+    background: white;
+    width: 3px;
+    height: 16px;
+    margin: 4px 0px 4px 10.5px;
+    pointer-events: none;
+}
+/*
+.searchCollapseButton.google_search{
+	background: royalblue;
+}
+
+
+.searchCollapseButton.google_search:hover{
+    
+    background: #1D4095;
+}
+.searchExpandButton.google_search{
+    background: #1D4095;
+}
+
+
+.searchExpandButton.google_search:hover{
+    
+    background: royalblue;
+}
+.searchCollapseSymbol.acmHighlight{
 	
+}
+*/
+.searchCollapseButton{
+	height: 24px;
+	width: 24px;
+	border-radius: 20px;
+	background: rgb(230, 200, 200);
+	float: left;
+	margin-top: 8px;
+	display: inline-block;
+}
+.searchCollapseButton:hover{
+   background: rgb(194, 152, 152);
+}
+.searchExpandButton{
+    height: 24px;
+    width: 24px;
+    border-radius: 20px;
+    background: rgb(134, 155, 128);
+    float: left;
+    margin-top: 8px;
+    display: inline-block;
+}
+.searchExpandButton:hover{
+    background: #808080;
+}
+
+
+.searchResultExpandButton{
+    width: 18px;
+    height: 18px;
+    border-radius: 8px;
+    float: left;
+    margin: 8px 4px 1px 4px;
+    background: rgb(213, 228, 209);
+}
+.searchResultExpandButton:hover{
+    background: rgb(134, 155, 128);
+    cursor: pointer;
+}
+
+.searchResultCollapseButton{
+    width: 18px;
+    height: 18px;
+    border-radius: 8px;
+    float: left;
+    margin: 8px 4px 1px 4px;
+    background: rgb(230, 200, 200);
+}
+.searchResultCollapseButton:hover{
+    background: rgb(194, 152, 152);
+    cursor: pointer;
+}
+
+.searchResultExpandSymbol{
+    position: absolute;
+    background: #ACACAC;
+    width: 2px;
+    height: 12px;
+    margin: 3px 7px 2px 8px;
+    pointer-events: none;
+}
+
+.searchResultCollapseSymbol{
+    position: absolute;
+    background: #ACACAC;
+    width: 12px;
+    height: 2px;
+    margin: 8px 2px 7px 3px;
+    pointer-events: none;
+}
+
+.expRendering{
+	padding-top: 8px;
 	overflow:none;
 }
 .searchContentContainer {
 	min-height:800px;
+	
 	overflow: auto;
 }
 .column{
 	display: inline-block;
+	
+	}
+.comparison{
+	border-left: solid;
+    border-width: 1px;
+    border-color: gray;
+    margin-right: 18px;
+    margin-left: 8px;
+    padding-right: 0px;
+    height: 100%;
+    display: inline-block;
+}
+.comparisonRendering{
+	height: 100%;
+}
+.dragHint{
+	font-family: calibri;
+	font-weight: bold;
+	font-size: 24px;
+	color: gray;
+	text-align: center;
+	float: center;
+	vertical-align:middle;
+	display: block;
+	height: 100%;
+	display: table-cell;
+    width: 100%;
+    	
+	
+}
+.dragCenteringMechanism{
+	display: table;
+    width: 100%; /* width of parent */
+    height: 70%; /* height of parent */
+    overflow: hidden;
+
+}
+.entryPickedUp{
+	border-width: 2px;
+	border-color: lightblue;
+	border-style: solid;
+	border-radius: 8px;
+	
 }
 .history{
 	border-right: solid;
@@ -73,6 +276,12 @@
 	margin-left: 8px;
 	margin-top: 8px;
 	
+}
+.over{
+	border-width: 2px;
+	border-style: solid;
+	border-color: blue;
+	border-radius: 8px;
 }
 .resultContentContainer{
 	height: auto;
@@ -165,11 +374,31 @@
 
 }
 
-.queryRow{
+.comparisonRow{
 	font-family: calibri;
-	font-size: 18px;
-	min-width: 800px;
-	
+    font-size: 18px;
+    min-width: 800px;
+    border-bottom-style: solid;
+    border-bottom-width: 2px;
+    border-color: gray;
+    padding: 4px;
+    font-family: calibri;
+    font-size: 18px;
+}
+.comparisonVal{
+	font-weight: bold;
+}
+.queryRow{
+    border-bottom-style: solid;
+    border-bottom-width: 2px;
+    border-color: gray;
+    padding: 4px;
+    font-family: calibri;
+    font-size: 18px;
+    font-family: calibri;
+    font-size: 18px;
+    min-width: 800px;
+    
 }
 .queryVal{
 	font-weight: bold;
@@ -202,7 +431,50 @@
 	padding: 4px 8px 4px 8px;
 	margin-right: 6px;
 	cursor: pointer;
+	
 	position: relative;
+		
+	
+}
+.comparisonMargins{
+	margin-left: 12px;
+}
+.relatedQueryContainer{
+	border: 1px solid gray;
+    border-radius: 8px;
+    margin-top: 4px;
+    margin-bottom: 6px;
+    padding: 4px 8px 4px 8px;
+    margin-right: 6px;
+    cursor: pointer;
+    width: 240px;
+    position: relative;
+    display: inline-block;
+    line-height: 15px;
+}
+.relatedQueryContainer:hover{
+	background-color: #EDEDED;
+}
+.entryQuery{
+	max-width: 240px;
+	white-space: nowrap;
+    text-overflow: ellipsis;
+    display: inline-block;
+    overflow: hidden;
+}
+.relatedQueryTextContainer{
+	max-width: 240px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    display: block;
+    overflow: hidden;
+    float: center;
+    margin-right: auto;
+    margin-left: auto;
+    font-size: 12px;
+}
+.relatedQueriesContainer{
+	margin-left: 24px;
 	
 }
 .historyEntry:hover
@@ -210,9 +482,12 @@
     background-color: #EDEDED;
 }
 .historyEntry.active{
-    border: 2px solid blue;
+    border: 2px solid gray;
    
     
+}
+.compared{
+	background-color: lightgray;
 }
 .weightLabel{
 	float: right;
@@ -229,6 +504,7 @@
 }
 .historyEntry img{
 	margin-right: 8px;
+	margin-top: -10px;
 }
 a{
 	color:white;
