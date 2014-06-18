@@ -813,8 +813,18 @@ MetadataLoader.isVisibleMediaField = function(mmdField, parentField)
  */
 MetadataLoader.getFieldValue = function(mmdField, metadata)
 {
-  var valueName = (mmdField.tag != null) ? mmdField.tag : mmdField.name;        
-  return metadata[valueName];
+  
+  if (mmdField.tag != null){
+	  if(metadata[mmdField.tag] != null){
+		  return metadata[mmdField.tag];
+	  }
+	  else{
+		  return metadata[mmdField.name];
+	  }
+  }
+  else{
+	  return metadata[mmdField.name];
+  }
 }
 
 /**
