@@ -1,0 +1,9 @@
+.slide {
+	width: 300px;
+	height: 100%;
+	right: -300px;
+	background-color: #66FF33;
+	z-index: 500;
+	position: absolute;
+	top: 0px;
+}
