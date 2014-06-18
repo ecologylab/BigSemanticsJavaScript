@@ -133,7 +133,9 @@ this.getContainer = function(elt) {
 	{
 		//	parent = parent.parentNode;
 		var lineBreak = document.createElement('br');
+		var lineBreak1 = document.createElement('br');
 		parent.appendChild(lineBreak);
+		parent.appendChild(lineBreak1);
 	}
 	
 	// append to last row, if metadata, to keep tweet content together 
