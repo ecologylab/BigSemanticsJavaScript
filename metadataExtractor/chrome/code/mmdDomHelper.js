@@ -1,9 +1,4 @@
 ﻿var currentMMDField;
-//var xpathResult = document.evaluate( xpathExpression, contextNode, namespaceResolver, resultType, result );  
-//More info at: https://developer.mozilla.org/en/Introduction_to_using_XPath_in_JavaScript
-//Mozilla has better documentation, but we're using chromium.
-//Not to worry, we're working with standards here. Both browsers implement the XPath defined in
-// http://www.w3.org/TR/2004/NOTE-DOM-Level-3-XPath-20040226/DOM3-XPath.html
 
 var defVars = {};
 var extractedMetadata = null;
@@ -17,80 +12,45 @@ var doc = null;
  * @param targetDoc, the target DOM on which to extract the metadata
  * @param callback, callback function(metadata)   
  */
-function extractMetadataFromUrl(purl, targetDoc, callback) {
-	
-	
-	
+function extractMetadataFromUrl(purl, targetDoc, callback)
+{	
 	rawExtraction = false;
 	doc = targetDoc;
 	
 	var serviceURL = "http://ecology-service.cse.tamu.edu/BigSemanticsService/mmd.json?url=";//settings.serviceUrl;
 	
-	if(settings.service == "infoComp") {
-		serviceURL = "http://localhost:2107";
-		var request = {lookup_mmd_request: {url: purl}};
+	serviceURL += purl;
 	
-		var xmlhttp = new XMLHttpRequest();
-		xmlhttp.open("POST", serviceURL, true);
-		xmlhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
-		
-		xmlhttp.onreadystatechange = function() {
-			//Call a function when the state changes.
-			if(xmlhttp.readyState == 4 && xmlhttp.status == 200) {
-				//console.log(xmlhttp.responseText);
-				
-				var response = jQuery.parseJSON(xmlhttp.responseText);
-				//var response = JSON.parse(xmlhttp.responseText);
-				//var response = eval('(' + xmlhttp.responseText + ')');
-				
-				//if(settings.debugMmd == "true") {
-					console.log("Meta-metadata object:");
-					console.log(response['lookup_mmd_response']);
-				//}
-				
-				callback(extractMetadata(doc, response['lookup_mmd_response']['meta_metadata']));
-			}
-		}
-		var msg = JSON.stringify(request);
-		xmlhttp.send(msg);
-	}
-	else if(settings.service == "ecologyLab") {
-		serviceURL += purl;
-		
-		var xmlhttp = new XMLHttpRequest();
-		xmlhttp.open("GET", serviceURL, true);
-		xmlhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
-		
-		xmlhttp.onreadystatechange = function() {
+	var xmlhttp = new XMLHttpRequest();
+	xmlhttp.open("GET", serviceURL, true);
+	xmlhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+	
+	xmlhttp.onreadystatechange = function()
+	{
+		//Call a function when the state changes.
+		if(xmlhttp.readyState == 4 && xmlhttp.status == 200) {
 			
-			//Call a function when the state changes.
-			if(xmlhttp.readyState == 4 && xmlhttp.status == 200) {
-				
-				var response = jQuery.parseJSON(xmlhttp.responseText);
-				
-				//if(settings.debugMmd == "true") {
-					console.log("Meta-metadata object:");
-					console.log(response);
-				//}
-				
-				callback(extractMetadata(doc, response['meta_metadata']));
-			}
+			var response = jQuery.parseJSON(xmlhttp.responseText);
+		
+			//console.log("Meta-metadata object:");
+			//console.log(response);
+			
+			callback(extractMetadata(doc, response['meta_metadata']));
 		}
-		var msg = JSON.stringify(request);
-		xmlhttp.send(msg);		
-	}
+	};
+	
+	xmlhttp.send();		
 }
 
-function extractMetadata(targetDoc, mmd) {
-	
-	
+function extractMetadata(targetDoc, mmd)
+{	
 	doc = targetDoc;
 	
 	if(mmd != null) {	
 		//simplDeserialize(mmd);
 
 		//console.log("\n\nDeserialized MMD\n");
-		console.log(mmd);
+		//console.log(mmd);
 
 		var metadata = {};
 		
