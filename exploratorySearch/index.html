@@ -2,8 +2,8 @@
 	<head>
 		<title>Prototype</title>
 		<link rel="stylesheet" type="text/css" href="../../interactiveSemantics/metadataRenderer.css"/>
-         <script type="text/javascript" src="../../interactiveSemantics/debi.js"></script>
-         <script type="text/javascript" src="../../interactiveSemantics/mice.js"></script>
+         <script type="text/javascript" src="../interactiveSemantics/debi.js"></script>
+         <script type="text/javascript" src="../interactiveSemantics/mice.js"></script>
          <script type="text/javascript" src="exploratorySearchObject.js"></script>
          <script type="text/javascript" src="search.js"></script>
          <script type="text/javascript" src="searchSet.js"></script>
@@ -126,7 +126,8 @@
         </div>
 	
 	    <script>
-	    SEMANTIC_SERVICE_URL = "http://localhost:8080/BigSemanticsService/";
+	    var port = window.location.port;
+	    SEMANTIC_SERVICE_URL = "http://" + hostname + ":" + port + "/BigSemanticsService/";
 	    ExpSearchApp.initialize();
 	    </script>
 	</body>
