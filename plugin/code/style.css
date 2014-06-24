@@ -12,4 +12,21 @@
 	background-color: rgb(239, 244, 248);
 	
 	-webkit-transition: width 0.2s ease-in-out;
+	
+	text-transform: capitalize;
+
+	font-size: 14px;
+	font-family: Arial, Helvetica, sans-serif;
+	/*margin-left: 40px;*/
 }
+div.mmdField {
+	color:	#000000;
+	font-weight: 500; 
+	text-indent: 30px;
+	
+} 
+div.mmdField .mmdFieldType {
+	color: #999999;
+	font-weight: 500;
+}
+
