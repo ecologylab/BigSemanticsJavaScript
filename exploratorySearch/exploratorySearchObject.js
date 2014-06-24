@@ -14,25 +14,27 @@ Object.defineProperty( Array.prototype, "last", {
     }
 } );
 function ExploratorySearch(resultSetContainer, historyContainer){
-	this.searchResultSets = [];
+	this.SearchSets = [];
 	this.history = new History();
 	this.resultSetContainer = resultSetContainer;
 	this.historyContainer = historyContainer;
 }
 
 ExploratorySearch.prototype.addSearchSet = function(searchSet){
-	this.searchResultSets.push(searchSet);
+	this.SearchSets.push(searchSet);
+	
 	var newEntry = new Entry(searchSet);
+	
 	this.history.addEntry(newEntry);
 }
 
 ExploratorySearch.prototype.currentSearchSet = function(){
-	return this.searchResultSets.last();
+	return this.SearchSets.last();
 }
 
 //Used to give a url to debi.js / check later to see if this strictly necessary
 ExploratorySearch.prototype.currentUrl = function(){
-	return this.searchResultSets.last().searches.last().location;
+	return this.SearchSets.last().searches.last().location;
 }
 /*
  * Used to clean up the history after a multiple search

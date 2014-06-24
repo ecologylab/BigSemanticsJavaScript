@@ -1,97 +1,133 @@
 <html>
 	<head>
-		<title>Exploratory Search Test</title>
+		<title>Prototype</title>
+		<link rel="stylesheet" type="text/css" href="../../interactiveSemantics/metadataRenderer.css"/>
+         <script type="text/javascript" src="../../interactiveSemantics/debi.js"></script>
+         <script type="text/javascript" src="../../interactiveSemantics/mice.js"></script>
+         <script type="text/javascript" src="exploratorySearchObject.js"></script>
+         <script type="text/javascript" src="search.js"></script>
+         <script type="text/javascript" src="searchSet.js"></script>
+         <script type="text/javascript" src="expSearch.js"></script>
+         <script type="text/javascript" src="history.js"></script>
+         <script type="text/javascript" src="entry.js"></script>
+         <script type="text/javascript" src="dragAndDrop.js"></script>
+         <script src="jquery-2.0.0.min.js"></script>
+         <script type="text/javascript" src="../../simpl/simplDeserializer.js"></script>
+         <script type="text/javascript" src="../../simpl/simplFieldTypes.js"></script>
+         <script type="text/javascript" src="../../simpl/simplGraphCollapse.js"></script>
+         <script type="text/javascript" src="../../simpl/simplGraphExpand.js"></script>
+         <script type="text/javascript" src="../../simpl/simplTypeScope.js"></script>
+         <script type="text/javascript" src="../../simpl/simplTypeScopeDeserialize.js"></script>
+         <script type="text/javascript" src="../../simpl/simplTypeScopeSerialize.js"></script>
+
+        
+    
+    <script type="text/javascript" src="../../semantics/MetaMetadataRepositoryLibrary.js"></script>
+    <script type="text/javascript" src="../../semantics/testRepository.js"></script>
+         
+         
+         
+		<link href="css/bootstrap.min.css" rel="stylesheet" type="text/css"></link>
+
+		<link rel="stylesheet" type="text/css" href="prototype.css"/>
 		
-		<!-- Styles -->
-        <link href="../MICE/css/bootstrap.min.css" rel="stylesheet" type="text/css"></link>
-        <link href="../interactiveSemantics/metadataRenderer.css" rel="stylesheet" type="text/css"></link>
-        <!--
-        <link href="../MICE/css/mice.css" rel="stylesheet" type="text/css"></link>
-        -->
-		
-		<!-- Code -->
-        <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
-		<script type="text/javascript" src="../simpl/simplDeserializer.js"></script>
-		<script type="text/javascript" src="../simpl/simplFieldTypes.js"></script>
-		<script type="text/javascript" src="../simpl/simplGraphCollapse.js"></script>
-		<script type="text/javascript" src="../simpl/simplGraphExpand.js"></script>
-		<script type="text/javascript" src="../simpl/simplTypeScope.js"></script>
-		<script type="text/javascript" src="../simpl/simplTypeScopeDeserialize.js"></script>
-		<script type="text/javascript" src="../simpl/simplTypeScopeSerialize.js"></script>
-		<script type="text/javascript" src="../interactiveSemantics/metadataRenderer.js"></script>
-		<script type="text/javascript" src="../interactiveSemantics/debi.js"></script>
-		<script type="text/javascript" src="../interactiveSemantics/mice.js"></script>
-		
-		<style>
-			#content {
-				background: white;
-				padding: 8px;
-				border: 1px solid black;
-				overflow: auto;
-			}
-		</style>
-		
-		<script>
-			function toGoogleUrl(searchString){
-				var terms = searchString.split(" ");
-				var url = "http://www.google.com/search?q=";
-				for (var x in terms){
-					url += terms[x];
-					url += "+";
-				}
-				return url;
-			}
-			
-			function showMetadata()
-			{
-				var searchTerm = document.getElementById("targetURL").value;
-				var googleURL = toGoogleUrl(searchTerm);
-				
-				
-				
-				var content = document.getElementById("content");
-				
-				MICE.addMetadataDisplay(content, googleURL, true);
-			}
-			
-			function onEnterShowMetadata(event)
-			{
-				if(event.keyCode == 13)
-					showMetadata();	
-			}
-		</script>
+		  <script>
+           
+              //englineList -> list of engines to search with
+              //newExpSearch -> true if starting a new exploratory search
+                function showMetadata(engineList,isNewExpSearch)
+                 {
+                    if (engineList.length < 1){
+                    	return;
+                    }
+                	var query = document.getElementById("targetURL").value;
+                  
+                    var content = document.getElementById("content");
+                    
+                    ExpSearchApp.addQuery(query, engineList);
+                }
+            
+            function onEnterShowMetadata(event)
+            {
+                if(event.keyCode == 13)
+                	showMetadata(ExpSearchApp.getEngines());
+            }
+         </script>
 	</head>
 	<body>
-		<div id="controls" class="navbar navbar-inverse navbar-fixed-top">
+		<div id="controls" class="navbar navbar-inverse navbar-default">
           <div class="navbar-inner">
             <div class="container">
-              <div class="brand">Exploratory Search</div>
-              <form class="navbar-form pull-right" onsubmit="return false;">
+              <form class="navbar-form pull-left form-inline" onsubmit="return false;">
                 
                 <!-- So around her, I might change logic to regex the search terms into a google search and pass that URL
                 	to the metadata renderer-->
-                
+              
                 <input id="targetURL" type="text" class="span5"
                   size="500" style="height: 30px;" placeholder="Enter Search Term"
                   onkeydown="onEnterShowMetadata(event);"/>
-                <input type="button" class="btn" value="Search"
-                  onclick="showMetadata();"/>
+                <input type="button" class="btn" value="Add Query"
+                  onclick="showMetadata(ExpSearchApp.getEngines());"/>
+                 <input type="button" class="btn" value="New Exploratory Search"
+                  onclick="ExpSearchApp.newExpSearch(event);"  margin-right:10px"/> 
+                <div class = "checkBoxGroup">
+	                <div class="checkbox ">
+	                  <label>
+	                    <input type="checkbox" class="searchToggle" name="google_search" checked="true" value="true"> Google
+	                 </label>
+	                </div>
+	                <div class="checkbox ">
+	                  <label>
+	                    <input type="checkbox" class="searchToggle" name="bing" value="true"> Bing
+	                 </label>
+	                </div>
+	                 <div class="checkbox ">
+                      <label>
+                        <input type="checkbox" class="searchToggle" name="acm" value="true"> ACM
+                     </label>
+                    </div>
+                </div>
+               
+                  
+                  
             </form>
+             
+                  
+                  
+              <div class="brand" style="float: right; margin-right: 500px;">Exploratory Search prototype</div>
+              
           </div>
           </div>
 		</div>
+		<div class="main" style="margin-top: -8px; margin-left:8px">
+		<div class="column history" style=" width: 30%; float: left">
+		  <div id="history_bar" class="historyRendering">
+		      <div class="headerRow">History</div>
+		  </div>
+		  <div class="historyContainer"></div> 
+		</div>
 		
-        <div class="container" style="margin-top: 50px; width: 90%">
-          <div id="content" class="metadataRendering">
-              <a href="https://www.google.com/search?q=exploratory+search"> </a>			
+		<div class="column" style="width: 35%; float: left">
+          <div id="content" class="expRendering">
+          
+        <a href="https://www.google.com/search?q=exploratory+search" engine ="google_search" query="exploratory search"> </a>     
           </div>
         </div>
-		
-		<script>
-		    var hostname = window.location.hostname;
-        var port = window.location.port;
-        SEMANTIC_SERVICE_URL = "http://" + hostname + ":" + port + "/BigSemanticsService/";
-        MICE.initialize();
-		</script>
+          <div class="column comparison" id="comp" style="width: 35%">
+          <div class="comparisonContainer" ondragover="comparisonDragOver(event)" ondrop="comparisonDrop(event)" ondragenter="comparisonDragEnter(event)" ondragleave="comparisonDragLeave(event)">
+          <span class="dragCenteringMechanism">
+            <span class="dragHint">Drag a history entry here</span>
+          </span>
+             
+      
+          </div>
+        </div>
+       
+        </div>
+	
+	    <script>
+	    SEMANTIC_SERVICE_URL = "http://localhost:8080/BigSemanticsService/";
+	    ExpSearchApp.initialize();
+	    </script>
 	</body>
 </html>
