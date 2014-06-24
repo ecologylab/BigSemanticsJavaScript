@@ -19,6 +19,7 @@
 		<script type="text/javascript" src="../simpl/simplTypeScopeDeserialize.js"></script>
 		<script type="text/javascript" src="../simpl/simplTypeScopeSerialize.js"></script>
 		<script type="text/javascript" src="../interactiveSemantics/metadataRenderer.js"></script>
+		<script type="text/javascript" src="../interactiveSemantics/debi.js"></script>
 		<script type="text/javascript" src="../interactiveSemantics/mice.js"></script>
 		
 		<style>
@@ -88,8 +89,9 @@
 		
 		<script>
 		    var hostname = window.location.hostname;
-            SEMANTIC_SERVICE_URL = "http://" + hostname + ":8080/BigSemanticsService/";
-			MICE.initialize();
+        var port = window.location.port;
+        SEMANTIC_SERVICE_URL = "http://" + hostname + ":" + port + "/BigSemanticsService/";
+        MICE.initialize();
 		</script>
 	</body>
 </html>
