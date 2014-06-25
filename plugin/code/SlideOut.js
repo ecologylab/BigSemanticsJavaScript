@@ -69,7 +69,7 @@ function renderMMD(mmd)
 				
 			var mmdFieldType = document.createElement('span');
 				mmdFieldType.className = "mmdFieldType";
-				mmdFieldType.innerText = prettifyText(field["type"]) + " (composite)";
+				mmdFieldType.innerText = prettifyText(field["type"]);
 			
 			mmdField.appendChild(mmdFieldType);
 			slideOutVisual.appendChild(mmdField);
