@@ -35,9 +35,9 @@ function renderMMD(mmd)
 	var k; //string of stuff for kids
 	
 	for (var i = 0; i < kids.length; i++)
-	{
+	{	
 		var field = kids[i];
-		//console.log(field.scalar);
+		//console.log(field.composite);
 		
 		// render scalar types
 		if(field.scalar != null)
@@ -47,16 +47,57 @@ function renderMMD(mmd)
 			
 			var mmdField = document.createElement('div');
 				mmdField.className = "mmdField";
-				//dont need prettifytext but if its not there undefinds show up
-				mmdField.innerText = prettifyText(field["name"]); 
+				mmdField.innerText = prettifyText(field["name"]) + " : "; 
 				
 			var mmdFieldType = document.createElement('span');
 				mmdFieldType.className = "mmdFieldType";
-			
-				mmdFieldType.innerText = " : " + prettifyText(field["scalar_type"]);
+				mmdFieldType.innerText = prettifyText(field["scalar_type"]);
 				
 			mmdField.appendChild(mmdFieldType);
 				
+			slideOutVisual.appendChild(mmdField);
+		}
+		
+		if(field.composite != null) 
+		{
+			field = field.composite;	
+			//console.log(field['name']);
+			
+			var mmdField = document.createElement('div');
+				mmdField.className = "mmdField";
+				mmdField.innerText = prettifyText(field["name"]) + " : ";
+				
+			var mmdFieldType = document.createElement('span');
+				mmdFieldType.className = "mmdFieldType";
+				mmdFieldType.innerText = prettifyText(field["type"]) + " (composite)";
+			
+			mmdField.appendChild(mmdFieldType);
+			slideOutVisual.appendChild(mmdField);
+		}
+		
+		if(field.collection != null)
+		{
+			field = field.collection;
+			console.log(field);
+			
+			var mmdField = document.createElement('div');
+				mmdField.className = "mmdField";
+				mmdField.innerText = prettifyText(field["name"]) + " : ";
+				
+			console.log(prettifyText(field["name"]) + " " + prettifyText(field["child_scalar_type"]));
+			
+			if (field['child_scalar_type'] != null)
+			{
+				var mmdFieldType = document.createElement('span');
+					mmdFieldType.className = "mmdFieldType";
+					mmdFieldType.innerText = prettifyText(field["child_scalar_type"]);
+			} else {
+				var mmdFieldType = document.createElement('span');
+					mmdFieldType.className = "mmdFieldType";
+					mmdFieldType.innerText = prettifyText(field["child_type"]) + " (collection)";
+			}
+			
+			mmdField.appendChild(mmdFieldType);
 			slideOutVisual.appendChild(mmdField);
 		}
 		/*
