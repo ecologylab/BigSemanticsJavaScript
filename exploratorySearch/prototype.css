@@ -85,12 +85,34 @@ body{
 .history{
 	display: inline-block;
 	float: left;
-	max-width: 400px;
+	max-width: 450px;
+	width: 450px;
 }
 .searchContainer {
 
 	overflow: auto;
 
+}
+.addSearchContainer{
+	display: inline-block;
+    position: relative;
+    top: -11.5px;
+	width: 30px;
+	height: 28px;
+	margin-right: 2px;
+	border-style: solid;
+	border-width: 1px;
+	border-color: gray;
+	border-radius: 0px 4px 4px 0px;
+	
+}
+.addSearchContainer:hover{
+	cursor: pointer; 
+	background-color: #EDEDED;
+}
+.addSearchContainer.active{
+	border-width: 2px 2px 2px 1px;
+	border-color: gray;
 }
 .historyRendering{
 	padding-top: 8px;
@@ -112,29 +134,7 @@ body{
     margin: 4px 0px 4px 10.5px;
     pointer-events: none;
 }
-/*
-.searchCollapseButton.google_search{
-	background: royalblue;
-}
 
-
-.searchCollapseButton.google_search:hover{
-    
-    background: #1D4095;
-}
-.searchExpandButton.google_search{
-    background: #1D4095;
-}
-
-
-.searchExpandButton.google_search:hover{
-    
-    background: royalblue;
-}
-.searchCollapseSymbol.acmHighlight{
-	
-}
-*/
 .searchCollapseButton{
 	height: 24px;
 	width: 24px;
@@ -166,7 +166,7 @@ body{
     height: 18px;
     border-radius: 8px;
     float: left;
-    margin: 8px 4px 1px 4px;
+    margin: 2px 3px 1px 7px;
     background: rgb(213, 228, 209);
 }
 .searchResultExpandButton:hover{
@@ -179,7 +179,7 @@ body{
     height: 18px;
     border-radius: 8px;
     float: left;
-    margin: 8px 4px 1px 4px;
+    margin: 2px 3px 1px 7px;
     background: rgb(230, 200, 200);
 }
 .searchResultCollapseButton:hover{
@@ -310,6 +310,7 @@ body{
 	background-color: #b1b1b1;
 	display: inline-block;
 	width: 30px;
+	
 	float: left;
 	height: 100%;
 	
@@ -421,21 +422,90 @@ body{
 	max-height: 16px;
 	white-space: nowrap;
 	overflow: hidden;
+	
 	text-overflow: ellipsis;
 }
 .historyEntry{
 	border: 1px solid gray;
-	border-radius: 8px;
+	border-radius: 4px 0px 0px 4px;
 	margin-top: 4px;
 	margin-bottom: 6px;
 	padding: 4px 8px 4px 8px;
-	margin-right: 6px;
+	display: inline-block;
 	cursor: pointer;
-	
+	margin-left:0px;
 	position: relative;
+	width: 374px;
 		
 	
 }
+.newEntryForm{
+	
+    border: 1px solid gray;
+    border-radius: 4px 4px 4px 4px;
+    margin-top: 4px;
+    margin-bottom: 6px;
+    padding: 4px 8px 4px 8px;
+    display: inline-block;
+    margin-left:0px;
+    position: relative;
+    width: 374px;
+    height: 32px;
+}
+.rootEntryContainer{
+	}
+.buttonContainer{
+	width: 20px;
+	height:20px;
+	display: inline-block;
+	position: relative;
+	top: -6px;
+}
+.entryExpandButton{
+    width: 18px;
+    height: 18px;
+    border-radius: 6px;
+    float: left;
+    margin: 6px 0px 0px 0px;
+    background: rgb(213, 228, 209);
+}
+.entryExpandButton:hover{
+    background: rgb(134, 155, 128);
+    cursor: pointer;
+}
+
+.entryCollapseButton{
+    width: 18px;
+    height: 18px;
+    border-radius: 6px;
+    float: left;
+    margin: 6px 0px 0px 0px;
+    background: rgb(230, 200, 200);
+}
+.entryCollapseButton:hover{
+    background: rgb(194, 152, 152);
+    cursor: pointer;
+}
+
+.entryExpandSymbol{
+    position: absolute;
+    background: #ACACAC;
+    width: 2px;
+    height: 12px;
+    margin: 3px 7px 2px 8px;
+    pointer-events: none;
+}
+
+.entryCollapseSymbol{
+    position: absolute;
+    background: #ACACAC;
+    width: 12px;
+    height: 2px;
+    margin: 8px 2px 7px 3px;
+    pointer-events: none;
+}
+
+
 .comparisonMargins{
 	margin-left: 12px;
 }
@@ -456,7 +526,7 @@ body{
 	background-color: #EDEDED;
 }
 .entryQuery{
-	max-width: 240px;
+	max-width: 230px;
 	white-space: nowrap;
     text-overflow: ellipsis;
     display: inline-block;
@@ -477,13 +547,69 @@ body{
 	margin-left: 24px;
 	
 }
+.comparison{
+	position: relative;
+}
 .historyEntry:hover
 { 
     background-color: #EDEDED;
 }
 .historyEntry.active{
-    border: 2px solid gray;
+    border-width: 2px 1px 2px 2px; 
+    border-type: solid;
+    border-color: gray;
    
+    
+}
+
+.childEntryContainer.level1{
+	
+	margin-left: 20px;
+}
+.entryQuery.level1{
+	max-width: 210px;
+}
+.historyEntry.level1{
+	max-width: 352px;
+}
+.newEntryForm.level1{
+	   max-width: 352px;
+	
+}
+.childEntryContainer.level2{
+    margin-left: 20px;
+}
+.entryQuery.level2{
+    max-width: 190px;
+}
+.historyEntry.level2{
+    max-width: 332px;
+}
+.newEntryForm.level2{
+       max-width: 332px;
+    
+}
+.childEntryContainer.level3{
+    margin-left:20px;
+	}
+.entryQuery.level3{
+    max-width: 170px;
+}
+.historyEntry.level3{
+    max-width: 312px;
+}
+.newEntryForm.level3{
+       max-width: 312px;
+    
+}
+.childEntryContainer.level4{
+    margin-left:0px;
+    }
+.historyEntry.level4{
+    max-width: 292px;
+}
+.newEntryForm.level4{
+       max-width: 292px;
     
 }
 .compared{
@@ -496,6 +622,9 @@ body{
     right: 60px;
 	
 }
+.newEntryForm{
+	display: inline-block;
+}
 .entryWeight{
 	float: right;
 	font-family: calibri;
@@ -506,10 +635,122 @@ body{
 	margin-right: 8px;
 	margin-top: -10px;
 }
+.newSearchDismissButton{
+	display: inline-block;
+	max-width: 25px;
+    position: relative;
+    bottom: 8px;
+    height: 28px;
+    width: 28px;
+    margin-right: 2px;
+    border-style: solid;
+    border-width: 1px;
+    border-color: CCC;
+    border-radius: 4px;
+    
+}
+.newSearchDismissButton:hover{
+	background-color: #EDEDED;
+	
+}
+.dismiss-button{
+	max-width: 25px;
+}
+.checkbox{
+	display: inline-block;
+	padding-left: 4px;
+	padding-right: 6px;
+	padding-top: 2px;
+	padding-bottom: 2px;
+	margin-left: 6px;
+}
+.checkBoxGroup{
+	display: inline-block;
+	position: relative;
+	top: 4px;
+	margin-left: 8px;
+	background-color: white;
+	border-radius: 4px;
+	max-height: 30px;
+	
+}
+
+.toQueryBox{
+	z-index: 10;
+	position: relative;
+	top: -20px;
+	width: 40px;
+	height: 20px;
+	background-color: #333;
+	border-radius: 4px;
+	opacity: .7;
+}
+.toQueryBox:hover{
+	opacity: 1;
+}
+.toQueryIcon{
+	margin-top: 3px;
+
+	margin-left: 12px;
+	-webkit-filter: invert(100%);
+}
+
+.grip{
+	margin-left: 10px;
+    font-size: 7px;
+    margin-top: -3px;
+    cursor: pointer;
+    line-height: 8px;
+}
+.searchResultHandle{
+	width: 32px;
+	border-style: solid;
+	border-width: 1px 0px 1px 1px;
+	border-color: gray;
+	border-radius: 4px 0 0 4px;
+	display: inline-block;
+	color: gray;
+	vertical-align: top;
+	margin-top: 8px;
+	padding-bottom: 2px;
+	
+}
+.metadataRendering{
+	margin-left: 0px;
+	border-radius: 0 4px 4px 4px;
+	max-width: 705px;
+	overflow: auto;
+	
+}
 a{
 	color:white;
 }
 img{
 	max-width: 400px;
 	max-height: 150px;
+}
+iframe{
+	height: 100%;
+	width: 100%;
+	z-index: 1;
+	 top: 0;
+    left: 0;
+    
+    position : absolute;
+}
+label{
+	color: black;
+}
+.overlayDiv{
+	z-index: 10;
+	opacity: 1;
+	height: 100%;
+    width: 100%;
+    color: blue;
+    position: absolute;
+    top: 0;
+    left: 0;
+    
+    position : absolute;
+  
 }

@@ -340,7 +340,7 @@ MICE.downloadAndDisplayDocument = function(event)
 		
 	
 	// Change the onclick function of the button to expand/collapse the table
-	button.onclick = MICE.expandCollapseTable;
+	button.setAttribute('onclick', 'MICE.expandCollapseTable(event)');
 	
 	var table = MICE.getTableForButton(button);
 		
@@ -757,7 +757,7 @@ MICE.buildMetadataTable = function(table, isChildTable, isRoot, metadataFields, 
 			var fieldValueDiv = document.createElement('div');
 				fieldValueDiv.className = "moreButton";
 				fieldValueDiv.textContent = "More... ("+moreCount+")";
-				fieldValueDiv.onclick = MICE.morePlease;
+				fieldValueDiv.setAttribute('onclick', 'MICE.morePlease(event)');;
 						
 			var moreData = {
 				"fields": FIELDS_TO_EXPAND,
@@ -991,8 +991,8 @@ MICE.buildMetadataField = function(metadataField, isChildTable, fieldCount, row)
 				aTag.textContent = MetadataLoader.removeLineBreaksAndCrazies(metadataField.value);
 				
 				aTag.href = metadataField.value;
-				aTag.onclick = MICE.logNavigate;
 				
+				aTag.setAttribute('onclick', 'MICE.logNavigate(event)');
 				aTag.className = "fieldValue";
 						
 				if(metadataField.style != null)
@@ -1021,8 +1021,8 @@ MICE.buildMetadataField = function(metadataField, isChildTable, fieldCount, row)
 					aTag.textContent = MetadataLoader.removeLineBreaksAndCrazies(metadataField.value);
 					
 					aTag.href = metadataField.navigatesTo;
-					aTag.onclick = MICE.logNavigate;
-										
+					aTag.setAttribute('onclick', 'MICE.logNavigate(event)');
+						
 					if(metadataField.style != null)
 						aTag.className += " "+metadataField.style;
 				var fieldValueDiv = document.createElement('div');
@@ -1137,7 +1137,7 @@ MICE.buildMetadataField = function(metadataField, isChildTable, fieldCount, row)
 				expandButton = document.createElement('div');
 					expandButton.className = "expandButton X";
 					
-				expandButton.onclick = MICE.downloadAndDisplayDocument;
+				expandButton.setAttribute('onclick', 'MICE.downloadAndDisplayDocument(event)');
 				
 				if(childUrl != "")
 				{
@@ -1252,7 +1252,7 @@ MICE.buildMetadataField = function(metadataField, isChildTable, fieldCount, row)
 				var expandButton = document.createElement('div');
 					expandButton.className = "expandButton";
 					
-					expandButton.onclick = MICE.expandCollapseTable;
+					expandButton.setAttribute('onclick', 'MICE.expandCollapseTable(event)');
 					
 					var expandSymbol = document.createElement('div');
 						expandSymbol.className = "expandSymbol";

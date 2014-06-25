@@ -23,13 +23,8 @@ function SearchResult(location, type, title){
 	this.type = type;
 	//this.title = title;
 }
-Search.prototype.addSearchDisplay = function(searchX, parent){
-	
-	//Builds a header for each search
-	var searchHeader = document.createElement('div');
-	searchHeader.className = "searchHeader";
-		
-	parent.appendChild(searchHeader);
+
+Search.prototype.addSearchExpandCollapseButton = function(searchX){
 	//Builds the button for expanding and collapsing a search
 	var searchCollapseButton = document.createElement('div');
 	searchCollapseButton.className = 'searchCollapseButton ';
@@ -47,12 +42,23 @@ Search.prototype.addSearchDisplay = function(searchX, parent){
 	
 	searchCollapseButton.appendChild(searchExpandSymbol);
 	searchCollapseButton.appendChild(searchCollapseSymbol);
+	return searchCollapseButton;
+}
+
+Search.prototype.addSearchDisplay = function(searchX, parent){
+	
+	//Builds a header for each search
+	var searchHeader = document.createElement('div');
+	searchHeader.className = "searchHeader";
+	searchHeader.setAttribute("searchtype", searchX.type);	
+	parent.appendChild(searchHeader);
+	
 	
 	//Builds a placeholder for representing a collapsed search
 	var collapsedRepresentation = document.createElement('div');
 	collapsedRepresentation.className = 'collapsedSearch';
 	
-	searchHeader.appendChild(searchCollapseButton);
+	searchHeader.appendChild(Search.prototype.addSearchExpandCollapseButton(searchX));
 	
 	var searchLabel = document.createElement('span');
 	searchLabel.className = "searchLabel";
@@ -101,17 +107,14 @@ Search.prototype.addSearchDisplay = function(searchX, parent){
 		SearchResult.prototype.addSearchResultDisplay(searchX.searchResults[i], searchResultsContainer);
 	}
 	
+	parent.setAttribute("searchtype", searchX.type);	
 	parent.appendChild(searchResultsContainer);
 	parent.appendChild(collapsedRepresentation);
 	parent.appendChild(searchFooter);
 	
 }
 
-SearchResult.prototype.addSearchResultDisplay = function(searchResultX, parent){
-	var newSearchDisplay = document.createElement('div');
-	newSearchDisplay.className = "indResultContainer";
-	parent.appendChild(newSearchDisplay);
-
+SearchResult.prototype.addSearchResultExpandCollapseButton = function(searchResultX){
 	var searchRCollapseButton = document.createElement('div');
 	searchRCollapseButton.className = 'searchResultCollapseButton ';
 	searchRCollapseButton.onclick = ExpSearchApp.expandCollapseSearchResult;
@@ -127,17 +130,43 @@ SearchResult.prototype.addSearchResultDisplay = function(searchResultX, parent){
 	searchRCollapseButton.appendChild(searchRExpandSymbol);
 	searchRCollapseButton.appendChild(searchRCollapseSymbol);
 	
+	return searchRCollapseButton;
+} 
+
+SearchResult.prototype.addSearchHandle = function(searchResultX){
+	var searchHandle = document.createElement('div');
+	searchHandle.className = "searchResultHandle";
+	searchHandle.appendChild(SearchResult.prototype.addSearchResultExpandCollapseButton(searchResultX));
+	//Creates three rows of stacked black squares to indicate drag and droppability!
+	for (var i = 0; i < 2; i++){
+		var grip = document.createElement('div');
+		grip.className = 'grip';
+		grip.innerHTML = '<p>&#x25A0;&#x25A0;&#x25A0;</p>';
+		searchHandle.appendChild(grip);
+	}
 	
 	
-	
-	
+	//Drag and dro prelated attributes
+	searchHandle.setAttribute("draggable", "true");
+	searchHandle.setAttribute('ondragstart', 'clippingDragStart(event)');
+	searchHandle.setAttribute('ondragend', 'clippingDragEnd(event)');
+	return searchHandle;
+}
+
+SearchResult.prototype.addSearchResultDisplay = function(searchResultX, parent){
+	var newSearchDisplay = document.createElement('div');
+	newSearchDisplay.className = "indResultContainer";
+	parent.appendChild(newSearchDisplay);
 	
 	
 	
 	var miceContainer = document.createElement('div');
 	miceContainer.className = "metadataRendering";
-	newSearchDisplay.appendChild(searchRCollapseButton);
+	newSearchDisplay.appendChild(SearchResult.prototype.addSearchHandle(searchResultX));
 	newSearchDisplay.appendChild(miceContainer);
 	
 	MetadataLoader.render(MICE.render, miceContainer, searchResultX.location, true);
+	miceContainer.setAttribute('onmousedown', 'ExpSearchApp.removeQuerySearchBox(event)')
+	miceContainer.setAttribute('onmouseup', 'ExpSearchApp.textSelected(event)');
 }
+

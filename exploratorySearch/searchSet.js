@@ -1,6 +1,6 @@
 
 /*
- * I'm running into a problem: a need a better way of quickly looking up SearchResultSets
+ * I'm running into a problem: a need a better way of quickly looking up SearchSets
  * query + engines = SRS...what's the nest way to combine that info for quick lookups?
  * 
  * In the meantime, I'm assigning id's as follows:
@@ -19,7 +19,7 @@ Object.defineProperty( Array.prototype, "equals", {
       this.every( function(this_i,i) { return this_i == array[i] } )  
   }
 } );
-function SearchResultSet(query, searches){
+function SearchSet(query, searches, parentSetID){
 	this.query = query;
 	this.searches = searches;
 	this.id = query + idIndex.toString();
@@ -27,19 +27,27 @@ function SearchResultSet(query, searches){
 	this.expansionState = null;
 	this.parent = null;
 	this.engines = [];
-	
+	this.parentSetID = parentSetID;
 	for(var i = 0; i < searches.length; i++){
 		this.engines.push(searches[i].type);
 	}
 	this.engines.sort();
+	
 }
 
-SearchResultSet.prototype.sameSet = function(query, engineList){
+SearchSet.prototype.sameSet = function(query, engineList, parentID){
 	// SS's are equal if same engines and query
 	// Don't bother sorting engine list unless needed
 	
-	
-	if (this.query == query && engineList.equals(this.engines)){
+	if(parentID != null){
+		if (this.query == query && this.id == parentID){
+			return true;
+		}
+		else{
+			return false;
+		}
+	}
+	else if (this.query == query && engineList.equals(this.engines) && this.parent == null){
 		return true;
 	}
 	else{
@@ -47,7 +55,7 @@ SearchResultSet.prototype.sameSet = function(query, engineList){
 	}
 }
 
-SearchResultSet.prototype.buildQueryRow = function(query, parent){
+SearchSet.prototype.buildQueryRow = function(query, parent){
 	
 	var queryRow = document.createElement('div');
 	queryRow.className = 'queryRow';
@@ -70,7 +78,7 @@ SearchResultSet.prototype.buildQueryRow = function(query, parent){
 	queryRow.appendChild(queryVal);
 	parent.appendChild(queryRow);
 }
-SearchResultSet.prototype.buildComparisonUI = function(query, parent, entryID){
+SearchSet.prototype.buildComparisonUI = function(query, parent, entryID){
 	var comparisonRow = document.createElement('div');
 	comparisonRow.className = 'headerRow';
 	parent.appendChild(comparisonRow);
@@ -98,48 +106,51 @@ SearchResultSet.prototype.buildComparisonUI = function(query, parent, entryID){
 	parent.appendChild(comparisonRow);
 	
 }
-SearchResultSet.prototype.addSearch = function(search){
+SearchSet.prototype.addSearch = function(search){
+	
 	this.searches.push(search);
 	this.engines.push(search.type);
 	this.engines.sort();
 	//this.addResultSetDisplay(this, this.parent);
 }
 
-SearchResultSet.prototype.buildExpandButton
+SearchSet.prototype.buildExpandButton
 /*
  * Builds the query row and asks Search to please build its own search objects. If isComparison, builds
  * an interface for comparison instead of primary display
  */
-SearchResultSet.prototype.addResultSetDisplay = function(searchResultSetX, parent, isComparison, entryID){
+
+
+SearchSet.prototype.addResultSetDisplay = function(SearchSetX, parent, isComparison, entryID){
 	
 	//Builds the row where the query is displayed
-	searchResultSetX.parent = parent;
+	SearchSetX.parent = parent;
 	if(isComparison){
-		SearchResultSet.prototype.buildComparisonUI(searchResultSetX.query, parent, entryID)
+		SearchSet.prototype.buildComparisonUI(SearchSetX.query, parent, entryID)
 
 	}
 	else{
-		SearchResultSet.prototype.buildQueryRow(searchResultSetX.query, parent);
+		SearchSet.prototype.buildQueryRow(SearchSetX.query, parent);
 	}
 
 	//To-do: add logic to get for which search's should be expanded
 	
 	//Right now, searches don't know about being expanded or not.
-	//Only searchResultSets handle that
-	console.log(searchResultSetX);
-	for(var i = 0; i < searchResultSetX.searches.length; i++){
+	//Only SearchSets handle that
+	console.log(SearchSetX);
+	for(var i = 0; i < SearchSetX.searches.length; i++){
 		
 		var searchRendering = document.createElement('div');
 		//Should change the name of that class
 		searchRendering.className = 'searchSetContainer';
-		
+		searchRendering.setAttribute("searchSetID", SearchSetX.id);
 		//searchRendering.appendChild(searchResultContainer);
-		console.log(searchResultSetX);
-		for(var i = 0; i < searchResultSetX.searches.length; i++){
+		console.log(SearchSetX);
+		for(var i = 0; i < SearchSetX.searches.length; i++){
 			var searchContainer = document.createElement('div');
 			searchContainer.className = 'searchContainer';
 			searchRendering.appendChild(searchContainer);
-			Search.prototype.addSearchDisplay(searchResultSetX.searches[i], searchContainer);
+			Search.prototype.addSearchDisplay(SearchSetX.searches[i], searchContainer);
 			
 		}
 		
