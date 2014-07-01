@@ -162,6 +162,7 @@ MetadataLoader.setMetadata = function(rawMetadata)
     if (metadata["additional_locations"])
     {
       queueTask.additionalUrls = metadata["additional_locations"];
+      queueTask.url = metadata["location"].toLowerCase();
     }
     
     queueTask.metadata = metadata;
@@ -364,11 +365,7 @@ function RenderingTask(url, container, isRoot, clipping, renderer)
 RenderingTask.prototype.matches = function(url)
 {
   url = url.toLowerCase();
-  if (this.url == url)
-  {
-    return true;
-  }
-  return false;
+  return this.url === url;
 }
 
 /* MetadataField and related functions */
