@@ -24,7 +24,6 @@ function renderMMD(mmd)
 	
 	var typeHeader = document.createElement('h1');
 		typeHeader.className = "mmdTypeTitle";
-	
 		typeHeader.innerText = prettifyText(mmd["name"]);
 		
 	slideOutVisual.appendChild(typeHeader);
@@ -35,7 +34,6 @@ function renderMMD(mmd)
 	for (var i = 0; i < kids.length; i++)
 	{	
 		// iterate through the mmd to find all the fields
-		
 		var field = kids[i];
 		
 		// render scalar types
@@ -49,13 +47,44 @@ function renderMMD(mmd)
 				mmdField.className = "mmdField";
 				mmdField.innerText = prettifyText(field["name"]) + " : "; 
 				
+			console.log(prettifyText(field["name"]));
+			
 			var mmdFieldType = document.createElement('span');
 				mmdFieldType.className = "mmdFieldType";
 				mmdFieldType.innerText = prettifyText(field["scalar_type"]);
-				
+			
 			mmdField.appendChild(mmdFieldType);
-				
 			slideOutVisual.appendChild(mmdField);
+			
+			if (field["xpaths"] != null)
+			{
+				var fieldx = field["xpaths"];
+				console.log(fieldx);
+
+				for (var j = 0; j < fieldx.length; j++) {
+					var mmdXPath = document.createElement('div');
+						mmdXPath.className = "mmdXPath";
+						mmdXPath.innerText = fieldx[j];
+						
+						var nodes = document.evaluate(field[j], document, null, XPathResult.ANY_TYPE, null);
+						console.log(nodes);
+						//var result = nodes.iterateNext();
+						//console.log(result);
+						var result = nodes.iterateNext();
+						
+						while (result != null)
+						{
+							console.log('asdf');
+							//console.log(result.childNodes[0].nodeValue);
+							console.log(result.textContent);
+							//result = result.iterateNext();
+						}
+						
+					slideOutVisual.appendChild(mmdXPath);
+				}
+		
+			}
+			
 		}
 		
 		if(field.composite != null) 
@@ -68,12 +97,30 @@ function renderMMD(mmd)
 				mmdField.className = "mmdField";
 				mmdField.innerText = prettifyText(field["name"]) + " : ";
 				
+			console.log(prettifyText(field["name"]));	
+				
 			var mmdFieldType = document.createElement('span');
 				mmdFieldType.className = "mmdFieldType";
 				mmdFieldType.innerText = prettifyText(field["type"]);
 			
 			mmdField.appendChild(mmdFieldType);
 			slideOutVisual.appendChild(mmdField);
+			
+			if (field["xpaths"] != null)
+			{
+				var fieldx = field["xpaths"];
+				console.log(fieldx);
+
+				for (var j = 0; j < fieldx.length; j++) {
+					var mmdXPath = document.createElement('div');
+						mmdXPath.className = "mmdXPath";
+						mmdXPath.innerText = fieldx[j];
+						
+					slideOutVisual.appendChild(mmdXPath);
+				}
+		
+			}
+			
 		}
 		
 		if(field.collection != null)
@@ -85,6 +132,8 @@ function renderMMD(mmd)
 			var mmdField = document.createElement('div');
 				mmdField.className = "mmdField";
 				mmdField.innerText = prettifyText(field["name"]) + " : ";
+			
+			console.log(prettifyText(field["name"]));
 			
 			if (field['child_scalar_type'] != null)
 			{
@@ -99,6 +148,22 @@ function renderMMD(mmd)
 			
 			mmdField.appendChild(mmdFieldType);
 			slideOutVisual.appendChild(mmdField);
+			
+			if (field["xpaths"] != null)
+			{
+				var fieldx = field["xpaths"];
+				console.log(fieldx);
+
+				for (var j = 0; j < fieldx.length; j++) {
+					var mmdXPath = document.createElement('div');
+						mmdXPath.className = "mmdXPath";
+						mmdXPath.innerText = fieldx[j];
+						
+					slideOutVisual.appendChild(mmdXPath);
+				}
+		
+			}
+			
 		}
 
 	}
@@ -109,16 +174,19 @@ function renderMMD(mmd)
 	
 }
 
+
+function xpath(path) {
+	var data = document.evaluate(path,document,null,XPathResult.ANY_TYPE,null);
+	return data;
+}
+
 function prettifyText(str)
 {
 	// replaces '_' with spaces
 	try 
 	{
 		str = str.replace('_', " ");
-	} catch (e) 
-	{
-		
-	}
+	} catch (e) { }
 	
 	
 	return str;
