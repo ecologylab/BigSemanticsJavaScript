@@ -2,6 +2,7 @@ var ExpSearchApp = {};
 //maximum number of results to show
 var MAX_RESULTS = 5;
 var exploratorySearches = [];
+var LOG_SERVICE_URL = "ecoarray0:3801/i/event_log/";
 
 /*
  * Collection of functions to render 
@@ -15,6 +16,8 @@ var exploratorySearches = [];
 /*
  * http://stackoverflow.com/questions/2959642/how-to-make-a-valid-string-for-xml-in-javascript
  */
+
+
 function encodeXml(s) {
     return (s
         .replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&apos;')
@@ -22,7 +25,7 @@ function encodeXml(s) {
         .replace(/\t/g, '&#x9;').replace(/\n/g, '&#xA;').replace(/\r/g, '&#xD;')
     );
 }
-  
+
 /*
  * Creates ExpSearchApp object and renders it.  
  * Unlike the mice function, we assume that there are either 0 or 1 
@@ -873,10 +876,10 @@ ExpSearchApp.newExpSearch = function(){
 	var newExpSearch = new ExploratorySearch(resultSetContainer, historyContainer);
 	exploratorySearches.push(newExpSearch);
 	console.log(exploratorySearches);
-	//Display said search object
-	
-	
+	//Display said search object	
 }
+
+
 
 
 

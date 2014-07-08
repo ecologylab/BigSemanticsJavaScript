@@ -27,6 +27,9 @@ body{
 }
 */
 
+.newSearchDismissButton{
+	cursor: pointer; 
+}
 .metadataRendering{
 	display: inline-block;
 }

@@ -25,6 +25,7 @@
    -->
    
    <script type="text/javascript" src="../interactiveSemantics/mice.js"></script>
+	<script type="text/javascript" src="../interactiveSemantics/debi.js"></script>
 
 	<script type="text/javascript" src="../simpl/simplDeserializer.js"></script>
 	<script type="text/javascript" src="../simpl/simplFieldTypes.js"></script>
@@ -38,6 +39,12 @@
     
     <script type="text/javascript" src="../semantics/MetaMetadataRepositoryLibrary.js"></script>
     <script type="text/javascript" src="../semantics/testRepository.js"></script>
+    <script>
+     var hostname = window.location.hostname;
+	    var port = window.location.port;
+	    SEMANTIC_SERVICE_URL = "http://" + hostname + ":" + port + "/BigSemanticsService/";
+    </script
+
   </head>
   <body onload="onBodyLoad()">
 
@@ -179,7 +186,7 @@ The wrapper shown here contains nested structures inherited from its base types;
     </div>
 
     <script>
-      MetadataRenderer.initMetadataRenderings();
+    MICE.initialize();
     </script>
 
   </body>

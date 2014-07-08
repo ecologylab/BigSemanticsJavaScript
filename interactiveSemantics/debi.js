@@ -289,6 +289,16 @@ MetadataLoader.getTasksFromQueueByUrl = function(url)
     {
       list.push(MetadataLoader.queue[i]);
     }
+    
+    else if(MetadataLoader.queue[i].additionalUrls != null){
+    	//Checks to see if MMD matches any additionalLocations
+    	  for (var j = 0; j < MetadataLoader.queue[i].additionalUrls.length; j++){
+    		  if (MetadataLoader.queue[i].additionalUrls[j] == url){
+    			  list.push(MetadataLoader.queue[i]);
+    		  }
+    	  }
+    }
+    
   }
   return list;
 }
