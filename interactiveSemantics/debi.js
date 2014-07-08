@@ -162,6 +162,7 @@ MetadataLoader.setMetadata = function(rawMetadata)
     if (metadata["additional_locations"])
     {
       queueTask.additionalUrls = metadata["additional_locations"];
+      queueTask.url = metadata["location"].toLowerCase();
     }
     
     queueTask.metadata = metadata;
@@ -289,6 +290,16 @@ MetadataLoader.getTasksFromQueueByUrl = function(url)
     {
       list.push(MetadataLoader.queue[i]);
     }
+    
+    else if(MetadataLoader.queue[i].additionalUrls != null){
+    	//Checks to see if MMD matches any additionalLocations
+    	  for (var j = 0; j < MetadataLoader.queue[i].additionalUrls.length; j++){
+    		  if (MetadataLoader.queue[i].additionalUrls[j] == url){
+    			  list.push(MetadataLoader.queue[i]);
+    		  }
+    	  }
+    }
+    
   }
   return list;
 }
@@ -310,24 +321,6 @@ MetadataLoader.getTasksFromQueueByType = function(type)
     }
   }
   return tasks;
-}
-
-/**
- * Searches the document map for the given url.
- *
- * @param url, url to search for in the document map
- * @return true, if the url exists in the document map, false otherwise
- */
-MetadataLoader.isRenderedDocument = function(url)
-{
-  for (var i = 0; i < MICE.documentMap.length; i++)
-  {
-    if (MICE.documentMap[i].matches(url) && MICE.documentMap[i].rendered)
-    {
-      return true;
-    }
-  }
-  return false;
 }
 
 /**
@@ -364,11 +357,7 @@ function RenderingTask(url, container, isRoot, clipping, renderer)
 RenderingTask.prototype.matches = function(url)
 {
   url = url.toLowerCase();
-  if (this.url == url)
-  {
-    return true;
-  }
-  return false;
+  return this.url === url;
 }
 
 /* MetadataField and related functions */
@@ -632,7 +621,8 @@ MetadataLoader.getCompositeMetadataViewModel = function(metadataViewModel,
           }
           
           field.composite_type = mmdField.type;
-          field.parentMDType = metadata.mm_name;              
+          field.parentMDType = metadata.mm_name;
+          MetadataLoader.checkAndSetShowExpanded(parentField, field);
           
           metadataViewModel.push(field);
         }
@@ -662,7 +652,8 @@ MetadataLoader.getCompositeMetadataViewModel = function(metadataViewModel,
         }
         
         field.composite_type = mmdField.type;
-        field.parentMDType = metadata.mm_name;            
+        field.parentMDType = metadata.mm_name;
+        MetadataLoader.checkAndSetShowExpanded(parentField, field);
         
         metadataViewModel.push(field);
       }
@@ -773,6 +764,16 @@ MetadataLoader.getCollectionMetadataViewModel = function(metadataViewModel,
       metadataViewModel.push(field);
     }
   }
+}
+
+MetadataLoader.checkAndSetShowExpanded = function(parentField, field)
+{
+	if (parentField.child_show_expanded_initially != null) {
+		field.show_expanded_initially = parentField.child_show_expanded_initially;
+	}
+	if (parentField.child_show_expanded_always != null) {
+		field.show_expanded_always = parentField.child_show_expanded_always;
+	}
 }
 
 /**
