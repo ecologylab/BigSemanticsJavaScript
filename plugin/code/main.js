@@ -18,12 +18,12 @@ chrome.runtime.onMessage.addListener(
 function setup(document)
 {
 	//adding jquery to head
-	var head = document.getElementsByTagName("head")[0];
-	var get = head.getElementsByTagName("script");
-	var jq = document.createElement("script");
-	jq.type = "text/javascript";
-	jq.src = "js/jquery-1.9.1.min.js";
-	head.insertBefore(jq,get[0]);
+	//var head = document.getElementsByTagName("head")[0];
+	//var get = head.getElementsByTagName("script");
+	//var jq = document.createElement("script");
+	//jq.type = "text/javascript";
+	//jq.src = "js/jquery-1.9.1.min.js";
+	//head.insertBefore(jq,get[0]);
 	
 	// create the the 'slide-out'
 	buildSlideOut(document);

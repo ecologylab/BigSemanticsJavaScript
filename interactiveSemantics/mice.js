@@ -107,6 +107,25 @@ MICE.addMetadataDisplay = function(container, url, isRoot, clipping){
 		MetadataLoader.getMetadata(url, "MetadataLoader.setMetadata");	
 	}
 }
+
+/**
+ * Searches the document map for the given url.
+ *
+ * @param url, url to search for in the document map
+ * @return true, if the url exists in the document map, false otherwise
+ */
+MICE.isRenderedDocument = function(url)
+{
+  for (var i = 0; i < MICE.documentMap.length; i++)
+  {
+    if (MICE.documentMap[i].matches(url) && MICE.documentMap[i].rendered)
+    {
+      return true;
+    }
+  }
+  return false;
+}
+
 MICE.expandCollapseTable = function(event)
 {
 	
@@ -1120,7 +1139,7 @@ MICE.buildMetadataField = function(metadataField, isChildTable, fieldCount, row)
 				fieldLabelDiv.style.minWidth = "30px";					
 				
 			// Is the document already rendered?								
-			if(childUrl != "" && MetadataLoader.isRenderedDocument(childUrl) )
+			if(childUrl != "" && MICE.isRenderedDocument(childUrl) )
 			{
 				
 				// If so, then don't allow the document to be expaned, to prevent looping						
