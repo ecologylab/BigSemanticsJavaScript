@@ -178,7 +178,6 @@ ExpSearchApp.searchFromMetadata = function(metadataFields){
 			
 			if (metadataField.parentMDType == "google_search"){
 				for (var k = 0; k < metadataField.value.length && k < MAX_RESULTS; k++){
-					console.log(metadataField.value[k].value[0].value[0].navigatesTo);
 					result_locations.push(toHTTPS(metadataField.value[k].value[0].value[0].navigatesTo));
 					
 				}
@@ -679,8 +678,19 @@ ExpSearchApp.entrySearch = function(event){
 	      
 	      container.parentNode.removeChild(container);
 	      ExpSearchApp.addQuery(query, ExpSearchApp.getEngines(), id);
+	      //Logging event builder
+	      //Should eventually include the parent query, but for now this is what we got
+	      
+	      var time = new Date().getTime();
+	      eventObj = {
+	  			entry_search: {
+	  				query: query,
+	  			
+	  				timestamp: time
+	  			}
+	  		};
+	      TheRecord.addEvent(eventObj);
 	   }
-	//get engines from whatever defaults are set...in the meantime the gs/bing combo
 	
 }
 ExpSearchApp.removeSearchField = function(event){
