@@ -45,7 +45,7 @@
                 	var query = document.getElementById("targetURL").value;
                   
                     var content = document.getElementById("content");
-                    logNewSearch("a");
+
                     ExpSearchApp.addQuery(query, engineList);
                 }
             
@@ -128,9 +128,6 @@
         </div>
 	
 	    <script>
-	    var hostname = window.location.hostname;
-	    var port = window.location.port;
-	    SEMANTIC_SERVICE_URL = "http://" + hostname + ":" + port + "/BigSemanticsService/";
 	    ExpSearchApp.initialize();
 	    </script>
 	</body>
