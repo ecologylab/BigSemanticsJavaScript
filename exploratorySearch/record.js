@@ -15,6 +15,7 @@ TheRecord.emptyQueue = function(){
     //Code for the obtaining of hashkeys
 	
 	//Code for the discovering of names
+	var USER_NAME = null;
 	var name = USER_NAME ? USER_NAME : "AnonymousUser";
 	
 	var logMessage = {
@@ -81,7 +82,7 @@ function sendLog(log){
 }
 
 //Father Time!!
-/*
+
 var MILLIS_BETWEEN_SAVE = 12000;
 
 var FatherTime = {};
@@ -94,4 +95,4 @@ FatherTime.init = function()
 FatherTime.aTimeToLog = function()
 {
 	sendLog(TheRecord.emptyQueue());
-}*/
+}
