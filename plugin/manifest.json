@@ -17,7 +17,9 @@
 	    ],
 	    "js": [
 	    	"code/SlideOut.js",
-	    	"code/main.js"
+	    	"code/main.js",
+	    	"code/mice/debi.js",
+	    	"code/mice/mice.js"
 	    ],
 	    "css": [
 	    	"code/style.css"

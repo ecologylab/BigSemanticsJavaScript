@@ -7,13 +7,12 @@
 	top: 0px;
 	bottom: 0px;
 	right: 0px;	
-	z-index: 50000;
+	z-index: 10000000000000;
 	
 	background-color: rgb(239, 244, 248);
 	
 	-webkit-transition: width 0.2s ease-in-out;
 	
-	text-transform: capitalize;
 	text-align: left;
 }
 .slide h1 {
@@ -26,6 +25,8 @@
     line-height: 200%;
     padding: 0px;
     border: 0px;
+    text-transform: capitalize;
+    text-align: left;
 }
 div.mmdField {
 	font-family: Arial, Helvetica, sans-serif;
@@ -36,6 +37,7 @@ div.mmdField {
 	margin-top: 0px;
     margin-bottom: 0px;
     line-height: 120%;
+    text-align: left;
 } 
 div.mmdField .mmdFieldType {
 	color: #999999;
@@ -51,5 +53,19 @@ div.mmdXPath {
     margin-bottom: 0px;
     line-height: 120%;
     text-transform: none;
+    text-align: left;
+}
+
+div.exData {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 11px;
+	color:	#000000;
+	font-weight: 500; 
+	text-indent: 40px;
+	margin-top: 0px;
+    margin-bottom: 0px;
+    line-height: 120%;
+    text-transform: none;
+    text-align: left;
 }
 
