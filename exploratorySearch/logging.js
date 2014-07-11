@@ -5,6 +5,35 @@
 
 //Stolen (appropriated) from ideaMache/site_media/static/mache/code/logging/historicOperation
 
+
+
+
+
+
+/*
+ * A function that takes the name of the event and its timestamp and wraps it up into a tasty pie of an event
+ */
+/*
+function newLogEvent(eventsToSend, appName, userName, hashkey){
+	
+	//yay magic numbers
+	var hashKey = hashkey;
+	var appname = appName;
+	var name = userName;
+	var events = eventsToSend;
+	var logMessage = {
+		log_post: {
+			hash_key: hashKey,
+			username: name,
+			app: appname,
+			events: events
+		}
+	};
+	
+	return logMessage;
+}
+*/
+
 function HistoricEvent(name, eventObj, timestamp)
 {
 	this.name = name;
@@ -48,27 +77,8 @@ function sendVeryUsefulEvent(){
 
 	
 }
-//Makes the user/hashkey/time to wrap around the event
-function newLogWrapper(eventToSend){
-	
-	//yay magic numbers
-	var hashKey = 612345;
-	var test ="test";
-	var name = "AnonymousUser";
-	var events = new Array(eventToSend);
-	var logMessage = {
-		log_post: {
-			hash_key: hashKey,
-			username: name,
-			app: test,
-			events: events
-		}
-	};
-	
-	return logMessage;
-}
 //Comes up with a dummy log event
-function logNewQuery(nquery){
+function dummnyEvent(nquery){
 
 	eventObj = {
 			new_query: {
@@ -80,3 +90,4 @@ function logNewQuery(nquery){
 
 	return eventObj;
 }
+
