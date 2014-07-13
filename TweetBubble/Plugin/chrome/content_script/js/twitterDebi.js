@@ -56,7 +56,10 @@ MetadataLoader.setMetadata = function(rawMetadata)
 		var queueTask = queueTasks[i];
 		
 		if(metadata["additional_locations"])
+		{
 			queueTask.additionalUrls = metadata["additional_locations"];
+			queueTask.url = metadata["location"].toLowerCase();
+		}
 		
 		queueTask.metadata = metadata;
 		queueTask.mmdType = metadata.mm_name;

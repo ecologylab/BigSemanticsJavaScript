@@ -35,7 +35,7 @@
         "content_script/js/mice.js",
         "content_script/js/twitterMice.js",
         "content_script/js/util.js",
-      	"content_script/js/logger.js",
+     		"content_script/js/logger.js",
         "content_script/js/twitterICE.js",
       	"content_script/js/ICE.js"
       ]

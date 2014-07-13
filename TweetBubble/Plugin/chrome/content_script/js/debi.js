@@ -161,6 +161,7 @@ MetadataLoader.setMetadata = function(rawMetadata)
     if (metadata["additional_locations"])
     {
       queueTask.additionalUrls = metadata["additional_locations"];
+      queueTask.url = metadata["location"].toLowerCase();
     }
     
     queueTask.metadata = metadata;
@@ -234,9 +235,10 @@ MetadataLoader.setMetaMetadata = function (url, mmd)
                                         tasks[i].metadata, tasks[i].url);
         // Is there any visable metadata?
         if (MetadataLoader.hasVisibleMetadata(metadataFields))
-        {
-          // If so, then build the HTML table  
-          tasks[i].renderer(tasks[i], metadataFields);
+        {	
+          // If so, then build the HTML table	
+          var miceStyles = getMiceStyleDictionary(mmd["meta_metadata"].name);	
+          tasks[i].renderer(tasks[i], metadataFields, {styles: miceStyles, type: mmd["meta_metadata"].name});
         }
       }
     }
@@ -345,15 +347,7 @@ function RenderingTask(url, container, isRoot, clipping, renderer)
 RenderingTask.prototype.matches = function(url)
 {
   url = url.toLowerCase();
-  if (this.url.indexOf(url) == 0)
-  {
-    return true;
-  }
-  else if (url.indexOf(this.url) == 0)
-  {
-    return true;
-  }
-  return false;
+  return this.url === url;
 }
 
 /* MetadataField and related functions */
@@ -806,8 +800,18 @@ MetadataLoader.isVisibleMediaField = function(mmdField, parentField)
  */
 MetadataLoader.getFieldValue = function(mmdField, metadata)
 {
-  var valueName = (mmdField.tag != null) ? mmdField.tag : mmdField.name;        
-  return metadata[valueName];
+  
+  if (mmdField.tag != null){
+	  if(metadata[mmdField.tag] != null){
+		  return metadata[mmdField.tag];
+	  }
+	  else{
+		  return metadata[mmdField.name];
+	  }
+  }
+  else{
+	  return metadata[mmdField.name];
+  }
 }
 
 /**

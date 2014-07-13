@@ -365,13 +365,13 @@ function run_script(userid, cond)
 
 function processInfoSheetResponse(resp)
 {
-	chrome.extension.sendRequest({storeOptions: {"agreeToInformationSheet": resp}});
+	chrome.extension.sendRequest({storeStudySettings: {"agreeToInformationSheet": resp}});
 	if (resp == Util.YES)
 		run_script(userid, response_condition);
 }
 
 //run_at is document_end i.e. after DOM is complete but before images and frames are loaded
-chrome.extension.sendRequest({loadOptions: document.URL}, function(response) {
+chrome.extension.sendRequest({loadStudySettings: document.URL}, function(response) {
 	  
 	if (response && response.condition != "none")
 		experiment_condition = response.condition;
