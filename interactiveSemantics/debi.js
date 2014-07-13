@@ -117,6 +117,7 @@ MetadataLoader.setMetadata = function(rawMetadata)
   var metadata = {};
   
   var deserialized = false;
+  
   for (i in rawMetadata)
   {
     if (i != "simpl.id" && i != "simpl.ref" && i != "deserialized")
@@ -236,9 +237,10 @@ MetadataLoader.setMetaMetadata = function (url, mmd)
                                         tasks[i].metadata, tasks[i].url);
         // Is there any visable metadata?
         if (MetadataLoader.hasVisibleMetadata(metadataFields))
-        {
-          // If so, then build the HTML table  
-          tasks[i].renderer(tasks[i], metadataFields);
+        {	
+          // If so, then build the HTML table	
+          var miceStyles = getMiceStyleDictionary(mmd["meta_metadata"].name);	
+          tasks[i].renderer(tasks[i], metadataFields, {styles: miceStyles, type: mmd["meta_metadata"].name});
         }
       }
     }

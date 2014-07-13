@@ -125,8 +125,11 @@ function showMetadata()
   
   MetadataLoader.clearDocumentCollection();
 
-  MICE.addMetadataDisplay(content, url, true);
-
+  if (url.indexOf("twitter.com") != -1)
+	  document.dispatchEvent(new Event("tweetbubbleExternal"));
+  else
+	  MICE.addMetadataDisplay(content, url, true);
+  
  //getJSONData(url);
 }
 
