@@ -22,15 +22,15 @@ MICE.initialize = function(){
 	}
 }
 
-MICE.render = function(task, metadataFields){
+MICE.render = function(task, metadataFields, styleInfo){
 	// Create the interior HTML container
 	task.visual = document.createElement('div');
-	task.visual.className = "metadataContainer";
+	task.visual.className = styleInfo.styles.metadataContainer;
 	
 	// Build the HTML table for the metadata
 	MetadataLoader.currentDocumentLocation = task.url;
 	
-	var metadataTable = MICE.buildMetadataTable(null, false, task.isRoot, metadataFields, FIRST_LEVEL_FIELDS);
+	var metadataTable = MICE.buildMetadataTable(null, false, task.isRoot, metadataFields, FIRST_LEVEL_FIELDS, styleInfo);
 	if(metadataTable)
 	{
 		// Clear out the container so that it will only contain the new metadata table
@@ -39,7 +39,7 @@ MICE.render = function(task, metadataFields){
 		    
 		// Add the HTML5 canvas for the drawing of connection lines
 		var canvas = document.createElement("canvas");
-			canvas.className = "lineCanvas";
+			canvas.className = styleInfo.styles.lineCanvas;
 		
 		// Add the table and canvas to the interior container
 		task.visual.appendChild(metadataTable);
@@ -52,7 +52,7 @@ MICE.render = function(task, metadataFields){
 		MICE.documentMap.push( new DocumentContainer(task.url, task.additionalUrls, task.container, true));
 	
 		// Remove any highlighting of documents as the addition of the new table will cause the connection-lines to be out of place
-		MICE.unhighlightDocuments(null);
+		MICE.unhighlightDocuments(null, styleInfo);
 		
 		// For the WWW study, log the expansion of metadata
 		if(WWWStudy)
@@ -62,7 +62,7 @@ MICE.render = function(task, metadataFields){
 	
 	// If there isn't a metadata table to display then keep the old visual and remove the loading indicator
 	else
-		MICE.clearLoadingRows(task.container);
+		MICE.clearLoadingRows(task.container, styleInfo);
 	
 	// Remove the RenderingTask from the queue
 	MetadataLoader.queue.splice(MetadataLoader.queue.indexOf(task), 1);
@@ -125,8 +125,10 @@ MICE.expandCollapseTable = function(event)
 {
 	
 	var button = event.target;
+	var miceStyles = getMiceStyleDictionary(button.mmdType);
+	var styleInfo = {styles: miceStyles, type: button.mmdType};
 	
-	if(button.className == "collapseSymbol" || button.className == "expandSymbol")
+	if(button.className == styleInfo.styles.collapseSymbol || button.className == styleInfo.styles.expandSymbol)
 		button = button.parentElement;
 		
 	// Use the symbold to check if the table should expand or collapse
@@ -134,13 +136,13 @@ MICE.expandCollapseTable = function(event)
 	if(expandSymbol.style.display == "block")
 	{
 		expandSymbol.style.display = "none";	
-		button.className = "collapseButton";
+		button.className = styleInfo.styles.collapseButton;
 		
-		if (button.nextSibling && button.nextSibling.className == "fieldLabelImage")
+		if (button.nextSibling && button.nextSibling.className == styleInfo.styles.fieldLabelImage)
 			button.nextSibling.style.display = "";
 		
-		var table = MICE.getTableForButton(button);
-		MICE.expandTable(table);
+		var table = MICE.getTableForButton(button, styleInfo);
+		MICE.expandTable(table, styleInfo);
 		
 		if(MetadataLoader.logger)
 		{			
@@ -152,7 +154,7 @@ MICE.expandCollapseTable = function(event)
 					eventObj = {
 						expand_metadata: {
 							field_name: button.parentElement.childNodes[1].innerText,
-							parent_doc: MICE.getLocationForParentTable(button.parentElement)
+							parent_doc: MICE.getLocationForParentTable(button.parentElement, styleInfo)
 						}
 					};
 				}
@@ -160,7 +162,7 @@ MICE.expandCollapseTable = function(event)
 				{
 					eventObj = {
 						expand_metadata: {
-							parent_doc: MICE.getLocationForParentTable(button.parentElement)
+							parent_doc: MICE.getLocationForParentTable(button.parentElement, styleInfo)
 						}
 					};
 				}
@@ -169,7 +171,7 @@ MICE.expandCollapseTable = function(event)
 			{
 				eventObj = {
 					expand_metadata: {
-						target_doc: MICE.getLocationForChildTable(button.parentElement.parentElement.parentElement)
+						target_doc: MICE.getLocationForChildTable(button.parentElement.parentElement.parentElement, styleInfo)
 					}
 				};
 			}
@@ -179,13 +181,13 @@ MICE.expandCollapseTable = function(event)
 	else if(expandSymbol.style.display == "none")
 	{
 		expandSymbol.style.display = "block";			
-		button.className = "expandButton";
+		button.className = styleInfo.styles.expandButton;
 		
-		if (button.nextSibling && button.nextSibling.className == "fieldLabelImage")
+		if (button.nextSibling && button.nextSibling.className == styleInfo.styles.fieldLabelImage)
 			button.nextSibling.style.display = "none";
 		
-		var table = MICE.getTableForButton(button);
-		MICE.collapseTable(table);
+		var table = MICE.getTableForButton(button, styleInfo);
+		MICE.collapseTable(table, styleInfo);
 		
 		if(MetadataLoader.logger)
 		{
@@ -197,7 +199,7 @@ MICE.expandCollapseTable = function(event)
 					eventObj = {
 						collapse_metadata: {
 							field_name: button.parentElement.childNodes[1].innerText,
-							parent_doc: MICE.getLocationForParentTable(button.parentElement)
+							parent_doc: MICE.getLocationForParentTable(button.parentElement, styleInfo)
 						}
 					};
 				}
@@ -205,7 +207,7 @@ MICE.expandCollapseTable = function(event)
 				{
 					eventObj = {
 						collapse_metadata: {
-							parent_doc: MICE.getLocationForParentTable(button.parentElement)
+							parent_doc: MICE.getLocationForParentTable(button.parentElement, styleInfo)
 						}
 					};
 				}
@@ -215,7 +217,7 @@ MICE.expandCollapseTable = function(event)
 				
 				eventObj = {
 					collapse_metadata: {
-						target_doc: MICE.getLocationForChildTable(button.parentElement.parentElement.parentElement)
+						target_doc: MICE.getLocationForChildTable(button.parentElement.parentElement.parentElement, styleInfo)
 					}
 				};
 			}
@@ -230,9 +232,9 @@ MICE.expandCollapseTable = function(event)
  * @return corresponding table HTML object  
  */
 
-MICE.getTableForButton = function(button)
+MICE.getTableForButton = function(button, styleInfo)
 {
-	var table = button.parentElement.parentElement.parentElement.getElementsByClassName("valueCol")[0];
+	var table = button.parentElement.parentElement.parentElement.getElementsByClassName(styleInfo.styles.valueCol)[0];
 	
 	// label_at top or bottom
 	if (table == null)
@@ -240,7 +242,7 @@ MICE.getTableForButton = function(button)
 		var sibling = (button.parentElement.parentElement.parentElement.nextSibling == null) ?
 			button.parentElement.parentElement.parentElement.previousSibling : 
 			button.parentElement.parentElement.parentElement.nextSibling; 
-		table = sibling.getElementsByClassName("valueCol")[0];
+		table = sibling.getElementsByClassName(styleInfo.styles.valueCol)[0];
 	}
 	
 	do
@@ -249,7 +251,7 @@ MICE.getTableForButton = function(button)
 		var elts = table.childNodes;
 		for (var i = 0; i < elts.length; i++)
 		{
-			if (elts[i].className == "metadataRow")
+			if (elts[i].className == styleInfo.styles.metadataRow)
 			{
 				rowsFound = true;
 				break;
@@ -270,13 +272,13 @@ MICE.getTableForButton = function(button)
  * Expand the table, showing all of its rows
  * @param table to expand 
  */
-MICE.expandTable = function(table)
+MICE.expandTable = function(table, styleInfo)
 {
 	var rows = [];
 	var elts = table.childNodes;
 	
 	for (var i = 0; i < elts.length; i++)
-		if (elts[i].className == "metadataRow")
+		if (elts[i].className == styleInfo.styles.metadataRow)
 			rows.push(elts[i]);
 	
 	for (var i = 0; i < rows.length; i++)
@@ -285,13 +287,13 @@ MICE.expandTable = function(table)
 	}
 
 	// Remove any loading rows, just to be sure 	
-	MICE.clearLoadingRows(table);
+	MICE.clearLoadingRows(table, styleInfo);
 	
 	// Unlight the documents because the connection lines will be in the wrong place
-	MICE.unhighlightDocuments(null);
+	MICE.unhighlightDocuments(null, styleInfo);
 	
 	// Check for More and expand it
-	if(table.lastChild.lastChild.lastChild.className == "moreButton")
+	if(table.lastChild.lastChild.lastChild.className == styleInfo.styles.moreButton)
 		MICE.morePlease({"target": table.lastChild.lastChild.lastChild});
 }
 
@@ -299,13 +301,13 @@ MICE.expandTable = function(table)
  * Collapse the table, showing only the first row
  * @param table to collapse 
  */
-MICE.collapseTable = function(table)
+MICE.collapseTable = function(table, styleInfo)
 {
 	var rows = [];
 	var elts = table.childNodes;
 	
 	for (var i = 0; i < elts.length; i++)
-		if (elts[i].className == "metadataRow")
+		if (elts[i].className == styleInfo.styles.metadataRow)
 			rows.push(elts[i]);
 	
 	for (var i = 0; i < rows.length; i++)
@@ -317,21 +319,21 @@ MICE.collapseTable = function(table)
 	}
 	
 	// Remove any loading rows, just to be sure 	
-	MICE.clearLoadingRows(table);
+	MICE.clearLoadingRows(table, styleInfo);
 	
 	// Unlight the documents because the connection lines will be in the wrong place
-	MICE.unhighlightDocuments(null);
+	MICE.unhighlightDocuments(null, styleInfo);
 }
 
 /**
  * Remove any loadingRows from the container
  * @param container to remove loadingRows from
  */
-MICE.clearLoadingRows = function(container)
+MICE.clearLoadingRows = function(container, styleInfo)
 {
 	var divs = container.getElementsByTagName("div");
 	for( var i = 0; i < divs.length; i++)
-		if(divs[i].className == "loadingRow")
+		if(divs[i].className == styleInfo.styles.loadingRow)
 			divs[i].parentElement.removeChild(divs[i]);
 }
 
@@ -342,21 +344,23 @@ MICE.clearLoadingRows = function(container)
 MICE.downloadAndDisplayDocument = function(event)
 {
 	var button = event.target;
+	var miceStyles = getMiceStyleDictionary(button.mmdType);
+	var styleInfo = {styles: miceStyles, type: button.mmdType};
 	
-	if(button.className == "collapseSymbol" || button.className == "expandSymbol")
+	if(button.className == styleInfo.styles.collapseSymbol || button.className == styleInfo.styles.expandSymbol)
 		button = button.parentElement;
 	
 	// Update button visuals
 	var expandSymbol = button.getElementsByTagName("div")[0];
 		expandSymbol.style.display = "none";
 		
-		button.className = "collapseButton";
+		button.className = styleInfo.styles.collapseButton;
 		
 	
 	// Change the onclick function of the button to expand/collapse the table
 	button.onclick = MICE.expandCollapseTable;
 	
-	var table = MICE.getTableForButton(button);
+	var table = MICE.getTableForButton(button, styleInfo);
 		
 	// Search the table for the document location
 	var location = null;
@@ -364,7 +368,7 @@ MICE.downloadAndDisplayDocument = function(event)
 	var elts = table.childNodes;
 	
 	for (var i = 0; i < elts.length; i++)
-		if (elts[i].className == "metadataRow")
+		if (elts[i].className == styleInfo.styles.metadataRow)
 			rows.push(elts[i]);
 	
 	for (var i = 0; i < rows.length; i++)
@@ -375,7 +379,7 @@ MICE.downloadAndDisplayDocument = function(event)
 			var valueDiv = valueCol.getElementsByTagName("div")[0];
 			if(valueDiv)
 				for (var j = 0; j < valueDiv.childNodes.length; j++)
-					if(valueDiv.childNodes[j].href != null && valueDiv.childNodes[j].className != "citeULikeButton" && location == null)
+					if(valueDiv.childNodes[j].href != null && valueDiv.childNodes[j].className != styleInfo.styles.citeULikeButton && location == null)
 						location = valueDiv.childNodes[j].href;
 		}
 	}
@@ -386,13 +390,13 @@ MICE.downloadAndDisplayDocument = function(event)
 		button.location = location;
 		
 		// Add a loadingRow for visual feedback that the metadata is being downloaded / parsed
-		table.appendChild(MICE.createLoadingRow());
+		table.appendChild(MICE.createLoadingRow(styleInfo));
 	    MetadataLoader.render(MICE.render, table.parentElement, location, false)	;
 		//MICE.addMetadataDisplay(table.parentElement, location, false);
 	}
 	// If there was no document location then the table must be a non-document composite in which case just expand
 	else
-		MICE.expandTable(table);
+		MICE.expandTable(table, styleInfo);
 	
 	
 	// Grow the In-Context Metadata Display
@@ -411,7 +415,7 @@ MICE.downloadAndDisplayDocument = function(event)
 				eventObj = {
 					expand_metadata: {
 						field_name: button.parentElement.childNodes[1].innerText,
-						parent_doc: MICE.getLocationForParentTable(button.parentElement)
+						parent_doc: MICE.getLocationForParentTable(button.parentElement, styleInfo)
 					}
 				};
 			}
@@ -419,7 +423,7 @@ MICE.downloadAndDisplayDocument = function(event)
 			{
 				eventObj = {
 					expand_metadata: {
-						parent_doc: MICE.getLocationForParentTable(button.parentElement)
+						parent_doc: MICE.getLocationForParentTable(button.parentElement, styleInfo)
 					}
 				};
 			}
@@ -428,7 +432,7 @@ MICE.downloadAndDisplayDocument = function(event)
 		{
 			eventObj = {
 				expand_metadata: {
-					target_doc: MICE.getLocationForChildTable(button.parentElement.parentElement.parentElement)
+					target_doc: MICE.getLocationForChildTable(button.parentElement.parentElement.parentElement, styleInfo)
 				}
 			};
 		}
@@ -443,16 +447,20 @@ MICE.downloadAndDisplayDocument = function(event)
 MICE.highlightDocuments = function(event)
 {
 	var row = event.srcElement;
-	if(row.className == "expandButton")
+	var miceStyles = getMiceStyleDictionary(row.mmdType);
+	var styleInfo = {styles: miceStyles, type: row.mmdType};
+	
+	if(row.className == styleInfo.styles.expandButton)
 		row = row.parentElement;
 	
 	// Only fieldLabelContainer or fieldLabelContainerOpened rows can be highlighted
-	if(row.className.indexOf("fieldLabelContainerOpened") == 0 || row.className.indexOf("fieldLabelContainer") == 0)
+	if(row.className.indexOf(styleInfo.styles.fieldLabelContainerOpened) == 0 
+				|| row.className.indexOf(styleInfo.styles.fieldLabelContainer) == 0)
 	{
 		// Highlight row
 		MICE.highlightLabel(row);
 		
-		var table = row.parentElement.parentElement.getElementsByClassName("valueCol")[0];
+		var table = row.parentElement.parentElement.getElementsByClassName(styleInfo.styles.valueCol)[0];
 		
 		// label_at top or bottom
 		if (table == null)
@@ -460,7 +468,7 @@ MICE.highlightDocuments = function(event)
 			var sibling = (button.parentElement.parentElement.nextSibling == null) ?
 				button.parentElement.parentElement.previousSibling : 
 				button.parentElement.parentElement.nextSibling; 
-			table = sibling.getElementsByClassName("valueCol")[0];
+			table = sibling.getElementsByClassName(styleInfo.styles.valueCol)[0];
 		}
 
 		
@@ -470,7 +478,7 @@ MICE.highlightDocuments = function(event)
 		var aTags = table.getElementsByTagName("a");
 		for (var i = 0; i < aTags.length; i++)
 		{
-			if(aTags[i].className.indexOf("fieldValue") != -1)
+			if(aTags[i].className.indexOf(styleInfo.styles.fieldValue) != -1)
 			{
 				location = aTags[i].href;
 				break;
@@ -479,7 +487,7 @@ MICE.highlightDocuments = function(event)
 		// Did the table have a document location?
 		if(location != null)
 		{	
-			MICE.clearAllCanvases();		
+			MICE.clearAllCanvases(styleInfo);		
 						
 			// Find matches in the DocumentMap
 			var matches = [];
@@ -497,7 +505,7 @@ MICE.highlightDocuments = function(event)
 			// Draw the lines to each match
 			for(var i = 0; i < matches.length; i++)			
 			{
-				MICE.drawConnectionLine(matches[i], row);		
+				MICE.drawConnectionLine(matches[i], row, styleInfo);		
 			}			
 		}
 	}
@@ -533,7 +541,7 @@ var METADATA_LINE_Y_OFFSET = 9;
  * @param target HTML object
  * @param source HTML source
  */
-MICE.drawConnectionLine = function(target, source)
+MICE.drawConnectionLine = function(target, source, styleInfo)
 {
 	// Don't draw connection lines in ideaMACHE
 	if(typeof session != "undefined")
@@ -543,26 +551,26 @@ MICE.drawConnectionLine = function(target, source)
 	
 	
 	// Get the first label of the target
-	var labelCol = target.getElementsByClassName("labelCol")[0];
+	var labelCol = target.getElementsByClassName(styleInfo.styles.labelCol)[0];
 	// access fieldLabel from labelCol and not metadataRow which can return a nested value
 	// if this label was not rendered due to hide_label=true
-	var label = labelCol.getElementsByClassName("fieldLabel")[0];
+	var label = labelCol.getElementsByClassName(styleInfo.styles.fieldLabel)[0];
 	
 	// Highlight the target label
 	if (label)
 		MICE.highlightLabel(label.parentElement);
 	else // if label is hidden
-		label = target.getElementsByClassName("valueCol")[0];
+		label = target.getElementsByClassName(styleInfo.styles.valueCol)[0];
 
 	// Get the canvas
 	var canvas = null;
 	
 	if(WWWStudy)
-		canvas = document.getElementById("bigLineCanvas");
+		canvas = document.getElementById(styleInfo.styles.bigLineCanvas);
 	
 	else
 	{
-		var canvases = document.getElementsByClassName("lineCanvas");
+		var canvases = document.getElementsByClassName(styleInfo.styles.lineCanvas);
 		
 		// TODO - fix canvas finding, needs to find the least common canvas,
 		// the smallest canvas that contains both target and source
@@ -598,13 +606,13 @@ MICE.drawConnectionLine = function(target, source)
 	
 }
 
-MICE.clearAllCanvases = function()
+MICE.clearAllCanvases = function(styleInfo)
 {
 	if(WWWStudy)
 		WWWStudy.clearBigCanvas();
 	else
 	{
-		var canvases = document.getElementsByClassName("lineCanvas");
+		var canvases = document.getElementsByClassName(styleInfo.styles.lineCanvas);
 		for(var i = 0; i < canvases.length; i++)
 		{
 			var containerRect =  canvases[i].parentElement.getClientRects()[0];
@@ -621,32 +629,39 @@ MICE.clearAllCanvases = function()
  * Unhighlights all documents, reverting highlight styling and clearing canvases 
  * @param event, mouse exit event
  */
-MICE.unhighlightDocuments = function(event)
+MICE.unhighlightDocuments = function(event, styleInfo)
 {
-	var labels = document.getElementsByClassName("fieldLabelContainerOpened");
+	if (event)
+	{
+		button = event.target;
+		var miceStyles = getMiceStyleDictionary(button.mmdType);
+		styleInfo = {styles: miceStyles, type: button.mmdType};
+	}
+	
+	var labels = document.getElementsByClassName(styleInfo.styles.fieldLabelContainerOpened);
 	for(var i = 0; i < labels.length; i++)
 	{
 		MICE.unhighlightLabel(labels[i]);
 		labels[i].style.background = "white";
 	}
 	
-	labels = document.getElementsByClassName("fieldLabelContainer");
+	labels = document.getElementsByClassName(styleInfo.styles.fieldLabelContainer);
 	for(var i = 0; i < labels.length; i++)
 		MICE.unhighlightLabel(labels[i]);
 	
-	MICE.clearAllCanvases();
+	MICE.clearAllCanvases(styleInfo);
 }
 
 /**
  * Creat the HTML for the laadingRow
  * @return HTML TR object for the lodaing row
  */
-MICE.createLoadingRow = function()
+MICE.createLoadingRow = function(styleInfo)
 {
 	var row = document.createElement('tr');
 	
 	var loadingRow = document.createElement('div');
-		loadingRow.className = "loadingRow";
+		loadingRow.className = styleInfo.styles.loadingRow;
 		loadingRow.innerText = "Loading document...";
 		loadingRow.textContent = "Loading document...";
 		
@@ -665,7 +680,9 @@ MICE.morePlease = function(event)
 	parentTable.removeChild(parentRow);
 	
 	// Build and add extra rows
-	MICE.buildMetadataTable(parentTable, moreData.isChild, false, moreData.data, moreData.fields);
+	var miceStyles = getMiceStyleDictionary(moreData.type);
+	var styleInfo = {styles: miceStyles, type: moreData.type};
+	MICE.buildMetadataTable(parentTable, moreData.isChild, false, moreData.data, moreData.fields, styleInfo);
 	
 	// TODO add logging for the 'More' button
 	
@@ -736,12 +753,12 @@ var FIELDS_TO_EXPAND = 10;
  * @param fieldCount, the number of fields to render before cropping with a "More" button
  * @return HTML table of the metadata display
  */
-MICE.buildMetadataTable = function(table, isChildTable, isRoot, metadataFields, fieldCount)
+MICE.buildMetadataTable = function(table, isChildTable, isRoot, metadataFields, fieldCount, styleInfo)
 {
 	if(!table)
 	{
 		table = document.createElement('div');
-		table.className = "metadataTableDiv";
+		table.className = styleInfo.styles.metadataTableDiv;
 		
 		//if(!isRoot)
 		//	table.className = "metadataTable";
@@ -754,36 +771,36 @@ MICE.buildMetadataTable = function(table, isChildTable, isRoot, metadataFields, 
 	{			
 		
 		var row = document.createElement('div');
-		row.className = 'metadataRow';
+		row.className = styleInfo.styles.metadataRow;
 					
 		// if the maximum number of fields have been rendered then stop rendering and add a "More" expander
 		if(fieldCount <= 0)
 		{
 			var nameCol = document.createElement('div');
-				nameCol.className = "labelCol showDiv";
+				nameCol.className = styleInfo.styles.labelColShowDiv;
 							
 			var valueCol = document.createElement('div');
-				valueCol.className = "valueCol showDiv";
+				valueCol.className = styleInfo.styles.valueColShowDiv;
 			
 			//TODO - add "more" expander
 			var moreCount = metadataFields.length - i;
 			
 			var fieldValueDiv = document.createElement('div');
-				fieldValueDiv.className = "moreButton";
+				fieldValueDiv.className = styleInfo.styles.moreButton;
 				fieldValueDiv.textContent = "More... ("+moreCount+")";
 				fieldValueDiv.onclick = MICE.morePlease;
 						
 			var moreData = {
 				"fields": FIELDS_TO_EXPAND,
 				"isChild": isChildTable,
-				"data": metadataFields.slice(i, metadataFields.length)
-			
+				"data": metadataFields.slice(i, metadataFields.length),
+				"type": styleInfo.type
 			};
 			
 			
 			
 			var detailsSpan = document.createElement('span');
-				detailsSpan.className = "hidden";
+				detailsSpan.className = styleInfo.styles.hidden;
 				detailsSpan.textContent = JSON.stringify(moreData);
 			
 			fieldValueDiv.appendChild(detailsSpan);
@@ -810,7 +827,7 @@ MICE.buildMetadataTable = function(table, isChildTable, isRoot, metadataFields, 
 				continue;
 			
 			var expandButton = null;
-			var fieldObj = MICE.buildMetadataField(metadataField, isChildTable, fieldCount, row);
+			var fieldObj = MICE.buildMetadataField(metadataField, isChildTable, fieldCount, row, styleInfo);
 			expandButton = fieldObj.expand_button;
 
 			var fieldObjs = [];
@@ -820,14 +837,14 @@ MICE.buildMetadataTable = function(table, isChildTable, isRoot, metadataFields, 
 			if (metadataField.concatenates.length > 0)
 			{
 				innerRow = document.createElement('div');
-				innerRow.className = 'metadataRow';
+				innerRow.className = styleInfo.styles.metadataRow;
 			}
 			else
 				innerRow = row;
 			
 			for (var j = 0; j < metadataField.concatenates.length; j++)
 			{
-				fieldObj = MICE.buildMetadataField(metadataField.concatenates[j], isChildTable, fieldCount, row);
+				fieldObj = MICE.buildMetadataField(metadataField.concatenates[j], isChildTable, fieldCount, row, styleInfo);
 				fieldObjs.push(fieldObj);
 			}
 			
@@ -846,8 +863,8 @@ MICE.buildMetadataTable = function(table, isChildTable, isRoot, metadataFields, 
 						var row1 = document.createElement('div');
 						var row2 = document.createElement('div');
 						innerTable.style.display = 'table';
-						row1.className = 'metadataRow';
-						row2.className = 'metadataRow';
+						row1.className = styleInfo.styles.metadataRow;
+						row2.className = styleInfo.styles.metadataRow;
 						if (metadataField.label_at == "top")
 						{
 							row1.appendChild(nameCol);							
@@ -911,7 +928,8 @@ MICE.buildMetadataTable = function(table, isChildTable, isRoot, metadataFields, 
 			}
 			table.appendChild(row);
 			
-			if (expandButton != null && metadataField.show_expanded_initially == "true") {
+			if (expandButton != null && (metadataField.show_expanded_initially == "true"
+										|| metadataField.show_expanded_always == "true")) {
 				var fakeEvent = {};
 				fakeEvent.target = expandButton;
 				// console.log("fake event ready");
@@ -930,23 +948,23 @@ MICE.buildMetadataTable = function(table, isChildTable, isRoot, metadataFields, 
  * @param row, the containing element
  * @return HTML representation of the metadata field, and related properties
  */
-MICE.buildMetadataField = function(metadataField, isChildTable, fieldCount, row)
+MICE.buildMetadataField = function(metadataField, isChildTable, fieldCount, row, styleInfo)
 {
 	
 	var nameCol = document.createElement('div');
 	if (!metadataField.show_expanded_always ){	
-		nameCol.className = "labelCol";
+		nameCol.className = styleInfo.styles.labelCol;
 	}
 	else if(metadataField.composite_type != null && metadataField.composite_type != "image"){
-		nameCol.className = "labelCol";
+		nameCol.className = styleInfo.styles.labelCol;
 		nameCol.style.display = "none";
 	}
 	var valueCol = document.createElement('div');
 	
-		valueCol.className = "valueCol";
+		valueCol.className = styleInfo.styles.valueCol;
 	
 	if(metadataField.composite_type != null && metadataField.composite_type != "image"){
-		valueCol.className = "valueCol";
+		valueCol.className = styleInfo.styles.valueCol;
 		valueCol.style.position = "relative";
 		valueCol.style.left = "-9px";
 	}
@@ -963,14 +981,14 @@ MICE.buildMetadataField = function(metadataField, isChildTable, fieldCount, row)
 			if(metadataField.name && !metadataField.hide_label)
 			{
 				var fieldLabelDiv = document.createElement('div');
-					fieldLabelDiv.className = "fieldLabelContainer unhighlight";
+					fieldLabelDiv.className = styleInfo.styles.fieldLabelContainerUnhighlight;
 					
 				var label = (metadataField.value_as_label == "" || (metadataField.value_as_label.type != "scalar"
 					&& metadataField.value_as_label.type != "image"))? metadataField.name : metadataField.value_as_label.value;
 				if (metadataField.value_as_label == "" || metadataField.value_as_label.type != "image")
 				{
 					var fieldLabel = document.createElement('p');
-						fieldLabel.className = "fieldLabel";
+						fieldLabel.className = styleInfo.styles.fieldLabel;
 						fieldLabel.innerText = MetadataLoader.toDisplayCase(label);
 						fieldLabel.textContent = MetadataLoader.toDisplayCase(label);
 						
@@ -979,7 +997,7 @@ MICE.buildMetadataField = function(metadataField, isChildTable, fieldCount, row)
 				else if (metadataField.value_as_label.type == "image")
 				{
 					var img = document.createElement('img');
-						img.className = "fieldLabelImage";
+						img.className = styleInfo.styles.fieldLabelImage;
 						img.src = MetadataLoader.getImageSource(label);
 						
 					fieldLabelDiv.appendChild(img);	
@@ -993,7 +1011,7 @@ MICE.buildMetadataField = function(metadataField, isChildTable, fieldCount, row)
 			{
 				// Uses http://getfavicon.appspot.com/ to resolve the favicon
 				var favicon = document.createElement('img');
-					favicon.className = "faviconICE";
+					favicon.className = styleInfo.styles.faviconICE;
 					favicon.src = "https://plus.google.com/_/favicon?domain_url=" + MetadataLoader.getHost(metadataField.navigatesTo);
 				
 				var aTag = document.createElement('a');
@@ -1009,7 +1027,7 @@ MICE.buildMetadataField = function(metadataField, isChildTable, fieldCount, row)
 					aTag.className += " "+metadataField.style;
 			
 				var fieldValueDiv = document.createElement('div');
-					fieldValueDiv.className = "fieldValueContainer";
+					fieldValueDiv.className = styleInfo.styles.fieldValueContainer;
 				
 				fieldValueDiv.appendChild(favicon);
 				fieldValueDiv.appendChild(aTag);
@@ -1021,11 +1039,11 @@ MICE.buildMetadataField = function(metadataField, isChildTable, fieldCount, row)
 			{				
 				// Uses http://getfavicon.appspot.com/ to resolve the favicon
 				var favicon = document.createElement('img');
-					favicon.className = "faviconICE";
+					favicon.className = styleInfo.styles.faviconICE;
 					favicon.src = "https://plus.google.com/_/favicon?domain_url=" + MetadataLoader.getHost(metadataField.navigatesTo);
 				
 				var aTag = document.createElement('a');
-					aTag.className = "fieldValue";
+					aTag.className = styleInfo.styles.fieldValue;
 					aTag.target = "_blank";
 					aTag.innerText = MetadataLoader.removeLineBreaksAndCrazies(metadataField.value);
 					aTag.textContent = MetadataLoader.removeLineBreaksAndCrazies(metadataField.value);
@@ -1036,7 +1054,7 @@ MICE.buildMetadataField = function(metadataField, isChildTable, fieldCount, row)
 					if(metadataField.style != null)
 						aTag.className += " "+metadataField.style;
 				var fieldValueDiv = document.createElement('div');
-					fieldValueDiv.className = "fieldValueContainer";						
+					fieldValueDiv.className = styleInfo.styles.fieldValueContainer;						
 				
 				// For the current WWW study the rendering should have incontext CiteULike bookmarklets for specific types of metadata
 				if(WWWStudy)				
@@ -1051,7 +1069,7 @@ MICE.buildMetadataField = function(metadataField, isChildTable, fieldCount, row)
 			else
 			{
 				var fieldValue = document.createElement('p');
-					fieldValue.className = "fieldValue";
+					fieldValue.className = styleInfo.styles.fieldValue;
 					
 				if (metadataField.extract_as_html)
 				{
@@ -1067,7 +1085,7 @@ MICE.buildMetadataField = function(metadataField, isChildTable, fieldCount, row)
 					fieldValue.className += " " + metadataField.style_name;
 				}		
 				var fieldValueDiv = document.createElement('div');
-					fieldValueDiv.className = "fieldValueContainer";
+					fieldValueDiv.className = styleInfo.styles.fieldValueContainer;
 				
 				fieldValueDiv.appendChild(fieldValue);
 				valueCol.appendChild(fieldValueDiv);
@@ -1082,14 +1100,14 @@ MICE.buildMetadataField = function(metadataField, isChildTable, fieldCount, row)
 		if(metadataField.name && !metadataField.hide_label)
 		{
 			var fieldLabelDiv = document.createElement('div');
-				fieldLabelDiv.className = "fieldLabelContainer unhighlight";
+				fieldLabelDiv.className = styleInfo.styles.fieldLabelContainerUnhighlight;
 			
 			var label = (metadataField.value_as_label == "" || (metadataField.value_as_label.type != "scalar"
 				&& metadataField.value_as_label.type != "image"))? metadataField.name : metadataField.value_as_label.value;
 			if (metadataField.value_as_label == "" || metadataField.value_as_label.type != "image")
 			{
 				var fieldLabel = document.createElement('p');
-					fieldLabel.className = "fieldLabel";
+					fieldLabel.className = styleInfo.styles.fieldLabel;
 					fieldLabel.innerText = MetadataLoader.toDisplayCase(label);
 					fieldLabel.textContent = MetadataLoader.toDisplayCase(label);
 				
@@ -1098,7 +1116,7 @@ MICE.buildMetadataField = function(metadataField, isChildTable, fieldCount, row)
 			else if (metadataField.value_as_label.type == "image")
 			{
 				var img = document.createElement('img');
-					img.className = "fieldLabelImage";
+					img.className = styleInfo.styles.fieldLabelImage;
 					img.src = MetadataLoader.getImageSource(label);
 
 				fieldLabelDiv.appendChild(img);
@@ -1111,7 +1129,7 @@ MICE.buildMetadataField = function(metadataField, isChildTable, fieldCount, row)
 			img1.src = MetadataLoader.getImageSource(metadataField.value);
 		
 		var fieldValueDiv = document.createElement('div');
-			fieldValueDiv.className = "fieldValueContainer";
+			fieldValueDiv.className = styleInfo.styles.fieldValueContainer;
 		
 		fieldValueDiv.appendChild(img1);
 		valueCol.appendChild(fieldValueDiv);
@@ -1126,7 +1144,7 @@ MICE.buildMetadataField = function(metadataField, isChildTable, fieldCount, row)
 		var childUrl = MetadataLoader.guessDocumentLocation(metadataField.value);
 		
 			var fieldLabelDiv = document.createElement('div');
-				fieldLabelDiv.className = "fieldLabelContainer unhighlight";
+				fieldLabelDiv.className = styleInfo.styles.fieldLabelContainerUnhighlight;
 				fieldLabelDiv.style.minWidth = "30px";					
 				
 			// Is the document already rendered?								
@@ -1134,7 +1152,7 @@ MICE.buildMetadataField = function(metadataField, isChildTable, fieldCount, row)
 			{
 				
 				// If so, then don't allow the document to be expaned, to prevent looping						
-				fieldLabelDiv.className = "fieldLabelContainerOpened unhighlight";			
+				fieldLabelDiv.className = styleInfo.styles.fieldLabelContainerOpenedUnhighlight;			
 			}
 			else
 			{
@@ -1145,7 +1163,7 @@ MICE.buildMetadataField = function(metadataField, isChildTable, fieldCount, row)
 					
 				// If the document hasn't been download then display a button that will download it
 				expandButton = document.createElement('div');
-					expandButton.className = "expandButton X";
+					expandButton.className = styleInfo.styles.expandButtonX;
 					
 				expandButton.onclick = MICE.downloadAndDisplayDocument;
 				
@@ -1157,12 +1175,17 @@ MICE.buildMetadataField = function(metadataField, isChildTable, fieldCount, row)
 			
 			
 				var expandSymbol = document.createElement('div');
-					expandSymbol.className = "expandSymbol";
+					expandSymbol.className = styleInfo.styles.expandSymbol;
 					expandSymbol.style.display = "block";
 					
 				var collapseSymbol = document.createElement('div');
-					collapseSymbol.className = "collapseSymbol";
+					collapseSymbol.className = styleInfo.styles.collapseSymbol;
 					collapseSymbol.style.display = "block";						
+				
+				/* set mmdType to all as any may receive event */
+				expandButton.mmdType = styleInfo.type;
+				expandSymbol.mmdType = styleInfo.type;
+				collapseSymbol.mmdType = styleInfo.type;
 									
 				expandButton.appendChild(expandSymbol);
 				expandButton.appendChild(collapseSymbol);
@@ -1184,7 +1207,7 @@ MICE.buildMetadataField = function(metadataField, isChildTable, fieldCount, row)
 					if (metadataField.value_as_label == "" || metadataField.value_as_label.type != "image")
 					{
 						var fieldLabel = document.createElement('p');
-							fieldLabel.className = "fieldLabel";
+							fieldLabel.className = styleInfo.styles.fieldLabel;
 							fieldLabel.innerText = MetadataLoader.toDisplayCase(label);
 							fieldLabel.textContent = MetadataLoader.toDisplayCase(label);
 						
@@ -1193,7 +1216,7 @@ MICE.buildMetadataField = function(metadataField, isChildTable, fieldCount, row)
 					else if (metadataField.value_as_label.type == "image")
 					{
 						var img = document.createElement('img');
-							img.className = "fieldLabelImage";
+							img.className = styleInfo.styles.fieldLabelImage;
 							img.src = MetadataLoader.getImageSource(label);
 	
 						fieldLabelDiv.appendChild(img);
@@ -1207,24 +1230,24 @@ MICE.buildMetadataField = function(metadataField, isChildTable, fieldCount, row)
 		/** Value Column **/
 		
 		var fieldValueDiv = document.createElement('div');
-			fieldValueDiv.className = "fieldCompositeContainer";
+			fieldValueDiv.className = styleInfo.styles.fieldCompositeContainer;
 
 		// Build the child table for the composite
-		var childTable =  MICE.buildMetadataTable(null, false, false, metadataField.value, 1);
+		var childTable =  MICE.buildMetadataTable(null, false, false, metadataField.value, 1, styleInfo);
 		
 		// If the childTable has more than 1 row, collapse table
 		
 		if(metadataField.value.length > 1 && !metadataField.show_expanded_always){
-			MICE.collapseTable(childTable);			
+			MICE.collapseTable(childTable, styleInfo);			
 		}
 		if(metadataField.show_expanded_always){
-			MICE.expandTable(childTable);
+			MICE.expandTable(childTable, styleInfo);
 		}
 		
 		fieldValueDiv.appendChild(childTable);				
 		
 		var nestedPad = document.createElement('div');
-			nestedPad.className = "nestedPad";
+			nestedPad.className = styleInfo.styles.nestedPad;
 		
 		nestedPad.appendChild(childTable);
 		
@@ -1241,6 +1264,7 @@ MICE.buildMetadataField = function(metadataField, isChildTable, fieldCount, row)
 		{	
 			nameCol.onmouseover = MICE.highlightDocuments;
 			nameCol.onmouseout = MICE.unhighlightDocuments;
+			nameCol.mmdType = styleInfo.type;
 		}
 	
 				
@@ -1254,24 +1278,28 @@ MICE.buildMetadataField = function(metadataField, isChildTable, fieldCount, row)
 		if(metadataField.name != null)
 		{
 			var fieldLabelDiv = document.createElement('div');
-					fieldLabelDiv.className = "fieldLabelContainer unhighlight";
+					fieldLabelDiv.className = styleInfo.styles.fieldLabelContainerUnhighlight;
 					
 			// does it need to expand / collapse
 			
 			
 				var expandButton = document.createElement('div');
-					expandButton.className = "expandButton";
+					expandButton.className = styleInfo.styles.expandButton;
 					
 					expandButton.onclick = MICE.expandCollapseTable;
 					
 					var expandSymbol = document.createElement('div');
-						expandSymbol.className = "expandSymbol";
+						expandSymbol.className = styleInfo.styles.expandSymbol;
 						expandSymbol.style.display = "block";
 						
 					var collapseSymbol = document.createElement('div');
-						collapseSymbol.className = "collapseSymbol";
+						collapseSymbol.className = styleInfo.styles.collapseSymbol;
 						collapseSymbol.style.display = "block";						
-				
+			
+					expandButton.mmdType = styleInfo.type;
+					expandSymbol.mmdType = styleInfo.type;
+					collapseSymbol.mmdType = styleInfo.type;	
+						
 					expandButton.appendChild(expandSymbol);
 					expandButton.appendChild(collapseSymbol);
 					
@@ -1283,7 +1311,7 @@ MICE.buildMetadataField = function(metadataField, isChildTable, fieldCount, row)
 			if (metadataField.value_as_label == "" || metadataField.value_as_label.type != "image")
 			{
 				var fieldLabel = document.createElement('p');
-					fieldLabel.className = "fieldLabel";
+					fieldLabel.className = styleInfo.styles.fieldLabel;
 					fieldLabel.innerText = MetadataLoader.toDisplayCase(label) + "(" + metadataField.value.length + ")";
 					fieldLabel.textContent = MetadataLoader.toDisplayCase(label) + "(" + metadataField.value.length + ")";
 					
@@ -1293,7 +1321,7 @@ MICE.buildMetadataField = function(metadataField, isChildTable, fieldCount, row)
 			else if (metadataField.value_as_label.type == "image")
 			{
 				var img = document.createElement('img');
-					img.className = "fieldLabelImage";
+					img.className = styleInfo.styles.fieldLabelImage;
 					img.src = MetadataLoader.getImageSource(label);
 
 				if (!metadataField.hide_label)
@@ -1304,16 +1332,16 @@ MICE.buildMetadataField = function(metadataField, isChildTable, fieldCount, row)
 		}
 			
 		var fieldValueDiv = document.createElement('div');
-			fieldValueDiv.className = "fieldChildContainer";
+			fieldValueDiv.className = styleInfo.styles.fieldChildContainer;
 		
-		var childTable =  MICE.buildMetadataTable(null, true, false, metadataField.value, 1);
+		var childTable =  MICE.buildMetadataTable(null, true, false, metadataField.value, 1, styleInfo);
 		if(metadataField.value.length >= 1)
 		{
-			MICE.collapseTable(childTable);			
+			MICE.collapseTable(childTable, styleInfo);			
 		}					
 			
 		var nestedPad = document.createElement('div');
-			nestedPad.className = "nestedPad";
+			nestedPad.className = styleInfo.styles.nestedPad;
 		
 		nestedPad.appendChild(childTable);
 		
@@ -1340,9 +1368,9 @@ MICE.logNavigate = function(event)
 	}
 }
 
-MICE.getLocationForParentTable = function(element)
+MICE.getLocationForParentTable = function(element, styleInfo)
 {
-	while(element.className != "metadataTableDiv" && element.className != "rootMetadataTableDiv")
+	while(element.className != styleInfo.styles.metadataTableDiv && element.className != styleInfo.styles.rootMetadataTableDiv)
 	{
 		element = element.parentElement;
 	}
@@ -1356,20 +1384,20 @@ MICE.getLocationForParentTable = function(element)
 	return "none";
 }
 
-MICE.getLocationForChildTable = function(element)
+MICE.getLocationForChildTable = function(element, styleInfo)
 {
-	var valueCol = element.getElementsByClassName("valueCol")[0];
+	var valueCol = element.getElementsByClassName(styleInfo.styles.valueCol)[0];
 	
 	// label_at top or bottom
 	if (valueCol == null)
 	{
 		var sibling = (element.nextSibling == null) ? element.previousSibling : element.nextSibling; 
-		valueCol = sibling.getElementsByClassName("valueCol")[0];
+		valueCol = sibling.getElementsByClassName(styleInfo.styles.valueCol)[0];
 	}
 	
 	if (valueCol)
 	{
-		var tables = valueCol.getElementsByClassName("rootMetadataTableDiv");
+		var tables = valueCol.getElementsByClassName(styleInfo.styles.rootMetadataTableDiv);
 		
 		if (tables.length > 0)
 		{

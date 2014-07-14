@@ -3,10 +3,10 @@ chrome.extension.onRequest.addListener(
 	function(request, sender, sendResponse) {
     	if (request.load != null)
       		loadWebpage(request.load, sendResponse);
-    	else if (request.loadOptions != null)
-    		getOptions(request.loadOptions, sendResponse);
-    	else if (request.storeOptions != null)
-    		setOptions(request.storeOptions);
+    	else if (request.loadStudySettings != null)
+    		getStudySettings(request.loadStudySettings, sendResponse);
+    	else if (request.storeStudySettings != null)
+    		setStudySettings(request.storeStudySettings);
     	return true;	// async response    		
 	}
 );
@@ -77,7 +77,7 @@ function generateUserId(cond)
     return id;
 }
 
-function getOptions(url, sendResponse)
+function getStudySettings(url, sendResponse)
 {
 	//read params from url
 	var params = url.substring(url.indexOf("?")+1);
@@ -106,7 +106,7 @@ function getOptions(url, sendResponse)
 				agree: localStorage["agreeToInformationSheet"]});
 }
 
-function setOptions(options)
+function setStudySettings(options)
 {
 	for (var k in options)
 	{
