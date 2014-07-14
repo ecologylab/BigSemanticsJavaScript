@@ -117,7 +117,12 @@ function showMetadata()
 {
   var url = document.getElementById("targetURL").value;
   var content = document.getElementById("mdcIce");
-  
+  if(document.URL.indexOf("uselocal") > 0){
+	  var hostname = window.location.hostname;
+	  var port = window.location.port;
+	  SEMANTIC_SERVICE_URL = "http://" + hostname + ":" + port + "/BigSemanticsService/";
+
+  }
   if(window.history.pushState)
   {
     window.history.pushState("state", "MICE Demo", "index.html?url="+url)
