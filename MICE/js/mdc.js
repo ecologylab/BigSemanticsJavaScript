@@ -117,7 +117,7 @@ function showMetadata()
 {
   var url = document.getElementById("targetURL").value;
   var content = document.getElementById("mdcIce");
-  if(document.URL.indexOf("uselocal") > 0){
+  if ($.QueryString["uselocal"]){
 	  var hostname = window.location.hostname;
 	  var port = window.location.port;
 	  SEMANTIC_SERVICE_URL = "http://" + hostname + ":" + port + "/BigSemanticsService/";
@@ -216,5 +216,19 @@ function onBodyLoad() {
   }
 }
 
+//Extends jquery to easily get a param value from URL
+(function($) {
+    $.QueryString = (function(a) {
+        if (a == "") return {};
+        var b = {};
+        for (var i = 0; i < a.length; ++i)
+        {
+            var p=a[i].split('=');
+            if (p.length != 2) continue;
+            b[p[0]] = decodeURIComponent(p[1].replace(/\+/g, " "));
+        }
+        return b;
+    })(window.location.search.substr(1).split('&'))
+})(jQuery);
 
 
