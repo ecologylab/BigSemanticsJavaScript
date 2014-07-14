@@ -123,9 +123,20 @@ function showMetadata()
 	  SEMANTIC_SERVICE_URL = "http://" + hostname + ":" + port + "/BigSemanticsService/";
 
   }
+  else{
+	   SEMANTIC_SERVICE_URL = "http://ecology-service.cse.tamu.edu/BigSemanticsService/";
+
+  }
   if(window.history.pushState)
   {
-    window.history.pushState("state", "MICE Demo", "index.html?url="+url)
+    if($.QueryString["uselocal"]){
+  	  window.history.pushState("state", "MICE Demo", "index.html?url="+url+"&uselocal=true")
+
+    }
+    else{
+  	  window.history.pushState("state", "MICE Demo", "index.html?url="+url)
+
+    }
   }
   
   MetadataLoader.clearDocumentCollection();
