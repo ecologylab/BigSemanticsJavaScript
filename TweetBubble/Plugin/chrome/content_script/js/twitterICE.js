@@ -141,7 +141,7 @@ this.getContainer = function(elt) {
 	// append to last row, if metadata, to keep tweet content together 
 	if (elt.parentNode.getAttribute("isMetadata") == "true")
 	{
-		while (parent.className != "metadataTableDiv")
+		while (parent.className != "twMetadataTableDiv")
 			parent = parent.parentNode;
 		
 		// metadataRow.tableCell
@@ -377,7 +377,8 @@ this.addOtherEventHandlers = function()
 		xpathResult = document.evaluate(xpath, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null);
 		
 		var item = xpathResult.singleNodeValue;
-		item.addEventListener('click', this.addGlobalNewTweetHandler);
+		if (item)
+			item.addEventListener('click', this.addGlobalNewTweetHandler);
 		
 		this.addedGlobalNewTweetHandler = true;
 	}
