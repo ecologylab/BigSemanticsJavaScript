@@ -31,7 +31,8 @@ MICE.render = function(task, metadataFields, styleInfo){
 	// Create the interior HTML container
 	task.visual = document.createElement('div');
 	task.visual.className = styleInfo.styles.metadataContainer;
-	
+	task.visual.setAttribute('mdType', metadataFields[0].parentMDType);
+
 	// Build the HTML table for the metadata
 	MetadataLoader.currentDocumentLocation = task.url;
 	
