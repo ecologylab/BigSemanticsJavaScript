@@ -1033,7 +1033,7 @@ MICE.buildMetadataField = function(metadataField, isChildTable, fieldCount, row,
 				
 				aTag.className = "fieldValue";
 						
-				if(metadataField.style_name != null)
+				if(metadataField.style_name != null && metadataField.style_name != "")
 					aTag.classList.add(metadataField.style_name);
 			
 				var fieldValueDiv = document.createElement('div');
@@ -1065,7 +1065,7 @@ MICE.buildMetadataField = function(metadataField, isChildTable, fieldCount, row,
 					aTag.href = metadataField.navigatesTo;
 					aTag.onclick = MICE.logNavigate;
 										
-					if(metadataField.style_name != null)
+					if(metadataField.style_name != null && metadataField.style_name != "")
 						aTag.classList.add(metadataField.style_name);
 				var fieldValueDiv = document.createElement('div');
 					fieldValueDiv.className = styleInfo.styles.fieldValueContainer;						
