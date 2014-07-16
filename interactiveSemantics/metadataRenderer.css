@@ -114,6 +114,9 @@
     color: #006621;
     
 }
+.metadataContainer .fieldValue.google_search_result{
+	color: #1a0dab;
+}
 .metadataContainer .fieldValue{ 
     white-space: normal;
     text-align: left;
