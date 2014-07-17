@@ -132,7 +132,17 @@ function toACMUrl(searchString){
     console.log(url);
     return url;
 }
-
+function toGScholarUrl(searchString){
+	var terms = searchString.split(" ");
+	var url = "http://scholar.google.com/scholar?q=";
+	for (var x in terms){
+		url += terms[x];
+		url += "+";
+	}
+    encodeURI(url);
+    console.log(url);
+    return url;
+}
 function toHTTPS(url){
 	/*
 	var patt = /https?/i;
@@ -184,8 +194,8 @@ ExpSearchApp.searchFromMetadata = function(metadataFields){
 				}
 			}
 			else{
-				for (var j = 0; j < metadataField.value.length && j < MAX_RESULTS; j++){
-					console.log(metadataField.value[j].value[0].navigatesTo);
+				for (var j = 0; j < 1 && j < MAX_RESULTS; j++){
+					//console.log(metadataField.value[j].value[0].navigatesTo);
 					result_locations.push(toHTTPS(metadataField.value[j].value[0].navigatesTo));
 					
 				}
@@ -261,6 +271,9 @@ ExpSearchApp.addQuery = function(query, engineList, parentSearchSetID){
     	}
     	else if (engineList[i] == "acm"){
     		url = toACMUrl(query);
+    	}
+    	else if (engineList[i] == "google_scholar"){
+    		url = toGScholarUrl(query);
     	}
     	
     	urlList.push(url);
@@ -349,7 +362,7 @@ ExpSearchApp.renderNewMultipleSearch = function(task, metadataFields){
 	var newSearch = ExpSearchApp.searchFromMetadata(metadataFields);
 	//Checks the current query used by the most recent ExploratorySearch
 	
-	if (exploratorySearches.last().currentSearchSet().query == newSearch.query){
+	if (currentExpSearch.currentSearchSet().query == newSearch.query){
 		
 		exploratorySearches.last().currentSearchSet().addSearch(newSearch);
 		ExpSearchApp.displaySearchSet(exploratorySearches.last());
