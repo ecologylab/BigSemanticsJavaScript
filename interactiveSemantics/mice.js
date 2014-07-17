@@ -31,7 +31,8 @@ MICE.render = function(task, metadataFields, styleInfo){
 	// Create the interior HTML container
 	task.visual = document.createElement('div');
 	task.visual.className = styleInfo.styles.metadataContainer;
-	
+	task.visual.setAttribute('mdType', metadataFields[0].parentMDType);
+
 	// Build the HTML table for the metadata
 	MetadataLoader.currentDocumentLocation = task.url;
 	
@@ -1032,8 +1033,8 @@ MICE.buildMetadataField = function(metadataField, isChildTable, fieldCount, row,
 				
 				aTag.className = "fieldValue";
 						
-				if(metadataField.style != null)
-					aTag.className += " "+metadataField.style;
+				if(metadataField.style_name != null && metadataField.style_name != "")
+					aTag.classList.add(metadataField.style_name);
 			
 				var fieldValueDiv = document.createElement('div');
 					fieldValueDiv.className = styleInfo.styles.fieldValueContainer;
@@ -1053,6 +1054,10 @@ MICE.buildMetadataField = function(metadataField, isChildTable, fieldCount, row,
 				
 				var aTag = document.createElement('a');
 					aTag.className = styleInfo.styles.fieldValue;
+					if(metadataField.style_name != "null"){
+						aTag.classList.add(metadataField.style_name);
+					}
+					
 					aTag.target = "_blank";
 					aTag.innerText = MetadataLoader.removeLineBreaksAndCrazies(metadataField.value);
 					aTag.textContent = MetadataLoader.removeLineBreaksAndCrazies(metadataField.value);
@@ -1060,8 +1065,8 @@ MICE.buildMetadataField = function(metadataField, isChildTable, fieldCount, row,
 					aTag.href = metadataField.navigatesTo;
 					aTag.onclick = MICE.logNavigate;
 										
-					if(metadataField.style != null)
-						aTag.className += " "+metadataField.style;
+					if(metadataField.style_name != null && metadataField.style_name != "")
+						aTag.classList.add(metadataField.style_name);
 				var fieldValueDiv = document.createElement('div');
 					fieldValueDiv.className = styleInfo.styles.fieldValueContainer;						
 				
