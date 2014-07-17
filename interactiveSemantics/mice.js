@@ -148,40 +148,43 @@ MICE.expandCollapseTable = function(event)
 			button.nextSibling.style.display = "";
 		
 		var table = MICE.getTableForButton(button, styleInfo);
-		MICE.expandTable(table, styleInfo);
-		
-		if(MetadataLoader.logger)
-		{			
-			var eventObj = {};
-			if(typeof button.location === "undefined")
-			{
-				if(button.parentElement.childNodes[1])
+		if (table)
+		{	
+			MICE.expandTable(table, styleInfo);
+			
+			if(MetadataLoader.logger)
+			{			
+				var eventObj = {};
+				if(typeof button.location === "undefined")
 				{
-					eventObj = {
-						expand_metadata: {
-							field_name: button.parentElement.childNodes[1].innerText,
-							parent_doc: MICE.getLocationForParentTable(button.parentElement, styleInfo)
-						}
-					};
+					if(button.parentElement.childNodes[1])
+					{
+						eventObj = {
+							expand_metadata: {
+								field_name: button.parentElement.childNodes[1].innerText,
+								parent_doc: MICE.getLocationForParentTable(button.parentElement, styleInfo)
+							}
+						};
+					}
+					else
+					{
+						eventObj = {
+							expand_metadata: {
+								parent_doc: MICE.getLocationForParentTable(button.parentElement, styleInfo)
+							}
+						};
+					}
 				}
 				else
 				{
 					eventObj = {
 						expand_metadata: {
-							parent_doc: MICE.getLocationForParentTable(button.parentElement, styleInfo)
+							target_doc: MICE.getLocationForChildTable(button.parentElement.parentElement.parentElement, styleInfo)
 						}
 					};
 				}
+				MetadataLoader.logger(eventObj);
 			}
-			else
-			{
-				eventObj = {
-					expand_metadata: {
-						target_doc: MICE.getLocationForChildTable(button.parentElement.parentElement.parentElement, styleInfo)
-					}
-				};
-			}
-			MetadataLoader.logger(eventObj);
 		}
 	}
 	else if(expandSymbol.style.display == "none")
@@ -193,42 +196,45 @@ MICE.expandCollapseTable = function(event)
 			button.nextSibling.style.display = "none";
 		
 		var table = MICE.getTableForButton(button, styleInfo);
-		MICE.collapseTable(table, styleInfo);
-		
-		if(MetadataLoader.logger)
+		if(table)
 		{
-			var eventObj = {};
-			if(typeof button.location === "undefined")
+			MICE.collapseTable(table, styleInfo);
+			
+			if(MetadataLoader.logger)
 			{
-				if (button.parentElement.childNodes[1])
+				var eventObj = {};
+				if(typeof button.location === "undefined")
 				{
-					eventObj = {
-						collapse_metadata: {
-							field_name: button.parentElement.childNodes[1].innerText,
-							parent_doc: MICE.getLocationForParentTable(button.parentElement, styleInfo)
-						}
-					};
+					if (button.parentElement.childNodes[1])
+					{
+						eventObj = {
+							collapse_metadata: {
+								field_name: button.parentElement.childNodes[1].innerText,
+								parent_doc: MICE.getLocationForParentTable(button.parentElement, styleInfo)
+							}
+						};
+					}
+					else
+					{
+						eventObj = {
+							collapse_metadata: {
+								parent_doc: MICE.getLocationForParentTable(button.parentElement, styleInfo)
+							}
+						};
+					}
 				}
 				else
 				{
+					
 					eventObj = {
 						collapse_metadata: {
-							parent_doc: MICE.getLocationForParentTable(button.parentElement, styleInfo)
+							target_doc: MICE.getLocationForChildTable(button.parentElement.parentElement.parentElement, styleInfo)
 						}
 					};
 				}
-			}
-			else
-			{
-				
-				eventObj = {
-					collapse_metadata: {
-						target_doc: MICE.getLocationForChildTable(button.parentElement.parentElement.parentElement, styleInfo)
-					}
-				};
-			}
-			MetadataLoader.logger(eventObj);
-		}	
+				MetadataLoader.logger(eventObj);
+			}	
+		}
 	}	
 }
 
@@ -1296,7 +1302,8 @@ MICE.buildMetadataField = function(metadataField, isChildTable, fieldCount, row,
 					
 			// does it need to expand / collapse
 			
-			
+			//if(metadataField.value.length > 0)
+			//{
 				var expandButton = document.createElement('div');
 					expandButton.className = styleInfo.styles.expandButton;
 					
@@ -1318,7 +1325,7 @@ MICE.buildMetadataField = function(metadataField, isChildTable, fieldCount, row,
 					expandButton.appendChild(collapseSymbol);
 					
 				fieldLabelDiv.appendChild(expandButton);
-			
+			//}
 			
 			var label = (metadataField.value_as_label == "" || (metadataField.value_as_label.type != "scalar"
 				&& metadataField.value_as_label.type != "image"))? metadataField.name : metadataField.value_as_label.value;
