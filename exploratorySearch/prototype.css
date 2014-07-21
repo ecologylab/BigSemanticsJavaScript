@@ -722,9 +722,10 @@ body{
 }
 .metadataRendering{
 	margin-left: 0px;
-	border-radius: 0 4px 4px 4px;
+	border-radius: 0 4px 4px 0px;
 	max-width: 705px;
 	overflow: auto;
+	min-height: 20px;
 	
 }
 a{

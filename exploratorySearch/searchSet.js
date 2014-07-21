@@ -40,7 +40,7 @@ SearchSet.prototype.sameSet = function(query, engineList, parentID){
 	// Don't bother sorting engine list unless needed
 	
 	if(parentID != null){
-		if (this.query == query && this.id == parentID){
+		if (this.query == query && this.parentSetID == parentID){
 			return true;
 		}
 		else{

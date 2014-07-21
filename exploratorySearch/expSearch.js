@@ -76,7 +76,16 @@ ExpSearchApp.isRelatedSearch = function(metadataField){
 	return false;
 }
 ExpSearchApp.initialize = function(){
-	
+	if (document.URL.indexOf("http://localhost:") > -1){
+		var hostname = window.location.hostname;
+		var port = window.location.port;
+		SEMANTIC_SERVICE_URL = "http://" + hostname + ":" + port + "/BigSemanticsService/";
+
+	}
+	else{
+		SEMANTIC_SERVICE_URL = "http://ecology-service.cse.tamu.edu/BigSemanticsService/";
+
+	}
 	var expRenderings = document.getElementsByClassName('expRendering');
 	for (var i = 0; i < expRenderings.length; i++){
 		var query = expRenderings[i].getElementsByTagName('a')[0].getAttribute("query");
@@ -278,14 +287,14 @@ ExpSearchApp.addQuery = function(query, engineList, parentSearchSetID){
     	if (engineList[i]=="google_search"){
     		url = toGoogleUrl(query);
     	}
-    	else if (engineList[i] == 'bing'){
+    	else if (engineList[i] == 'bing_search_xpath'){
     		url = toBingUrl(query);
     		engineList[i] = "bing_search_xpath";
     	}
-    	else if (engineList[i] == "acm"){
+    	else if (engineList[i] == "acm_portal_search"){
     		url = toACMUrl(query);
     	}
-    	else if (engineList[i] == "google_scholar"){
+    	else if (engineList[i] == "google_scholar_search"){
     		url = toGScholarUrl(query);
     	}
     	
@@ -308,7 +317,7 @@ ExpSearchApp.addQuery = function(query, engineList, parentSearchSetID){
 		
 		engineList.sort();
 		console.log(engineList);
-		for (var i = 0; i < exploratorySearches.last().SearchSets.length; i++){
+		for (var i = 0; i < currentExpSearch.SearchSets.length; i++){
 			if (exploratorySearches.last().SearchSets[i].sameSet(query, engineList, parentSearchSetID)){
 				exploratorySearches.last().history.restoreEntry(exploratorySearches.last().SearchSets[i].id);
 				return;
