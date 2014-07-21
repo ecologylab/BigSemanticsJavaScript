@@ -103,10 +103,13 @@ function getLog(){
 var MILLIS_BETWEEN_SAVE = 12000;
 
 var FatherTime = {};
+var FatherTime = {};
+
 
 FatherTime.init = function()
 {
 	setInterval(FatherTime.aTimeToLog, MILLIS_BETWEEN_SAVE);	
+
 }
 
 FatherTime.aTimeToLog = function()

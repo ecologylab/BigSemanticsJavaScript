@@ -113,6 +113,9 @@ body{
 	cursor: pointer; 
 	background-color: #EDEDED;
 }
+.newSearchDismissButton{
+	margin-left: 2px;
+}
 .addSearchContainer.active{
 	border-width: 2px 2px 2px 1px;
 	border-color: gray;

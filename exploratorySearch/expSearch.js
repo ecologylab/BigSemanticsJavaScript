@@ -84,7 +84,7 @@ ExpSearchApp.initialize = function(){
 	}
 	else{
 		SEMANTIC_SERVICE_URL = "http://ecology-service.cse.tamu.edu/BigSemanticsService/";
-
+		FatherTime.init();
 	}
 	var expRenderings = document.getElementsByClassName('expRendering');
 	for (var i = 0; i < expRenderings.length; i++){
@@ -893,8 +893,8 @@ ExpSearchApp.appendQuery = function(event, level){
 	removeSearchButton.className = "newSearchDismissButton";
 	removeSearchButton.innerHTML = "<i class='icon-remove' style='margin-top: 8px; margin-left: 6px;'></i>";
 	removeSearchButton.setAttribute("onclick", "ExpSearchApp.removeSearchField(event)");
-	formContainer.appendChild(removeSearchButton);
 	formContainer.appendChild(entryForm);
+	formContainer.appendChild(removeSearchButton);
 
 	historyEntry.parentNode.appendChild(formContainer);
 	var parentID = historyEntry.getAttribute("id");
