@@ -142,11 +142,30 @@ function showMetadata()
   MetadataLoader.clearDocumentCollection();
 
   if (url.indexOf("twitter.com") != -1)
+  {
 	  document.dispatchEvent(new Event("tweetbubbleExternal"));
+	  window.setTimeout(function()
+	  {
+		  checkForMissingMetadata();
+	  }, 5000);
+  }
   else
 	  MICE.addMetadataDisplay(content, url, true);
   
  //getJSONData(url);
+}
+
+function checkForMissingMetadata()
+{
+	var url = document.getElementById("targetURL").value;
+	var content = document.getElementById("mdcIce");		
+	
+	// if the tab doesnt have metadata
+	if(content.getElementsByClassName("metadataContainer").length == 0 && content.getElementsByClassName("twMetadataContainer").length == 0)
+	{
+		if (url.indexOf("twitter.com") != -1)
+			MICE.addMetadataDisplay(content, url, true);
+	}	
 }
 
 function onEnterShowMetadata(event)

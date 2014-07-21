@@ -2,6 +2,7 @@ var ExpSearchApp = {};
 //maximum number of results to show
 var MAX_RESULTS = 5;
 var exploratorySearches = [];
+var currentExpSearch = null;
 var LOG_SERVICE_URL = "ecoarray0:3801/i/event_log/";
 
 /*
@@ -75,7 +76,16 @@ ExpSearchApp.isRelatedSearch = function(metadataField){
 	return false;
 }
 ExpSearchApp.initialize = function(){
-	
+	if (document.URL.indexOf("http://localhost:") > -1){
+		var hostname = window.location.hostname;
+		var port = window.location.port;
+		SEMANTIC_SERVICE_URL = "http://" + hostname + ":" + port + "/BigSemanticsService/";
+
+	}
+	else{
+		SEMANTIC_SERVICE_URL = "http://ecology-service.cse.tamu.edu/BigSemanticsService/";
+		FatherTime.init();
+	}
 	var expRenderings = document.getElementsByClassName('expRendering');
 	for (var i = 0; i < expRenderings.length; i++){
 		var query = expRenderings[i].getElementsByTagName('a')[0].getAttribute("query");
@@ -131,7 +141,17 @@ function toACMUrl(searchString){
     console.log(url);
     return url;
 }
-
+function toGScholarUrl(searchString){
+	var terms = searchString.split(" ");
+	var url = "http://scholar.google.com/scholar?q=";
+	for (var x in terms){
+		url += terms[x];
+		url += "+";
+	}
+    encodeURI(url);
+    console.log(url);
+    return url;
+}
 function toHTTPS(url){
 	/*
 	var patt = /https?/i;
@@ -178,14 +198,27 @@ ExpSearchApp.searchFromMetadata = function(metadataFields){
 			
 			if (metadataField.parentMDType == "google_search"){
 				for (var k = 0; k < metadataField.value.length && k < MAX_RESULTS; k++){
-					result_locations.push(toHTTPS(metadataField.value[k].value[0].value[0].navigatesTo));
+					if(metadataField.value[k].value[0].value[0] != null){
+						result_locations.push(toHTTPS(metadataField.value[k].value[0].value[0].navigatesTo));
+					}
+					else{
+						result_locations.push(toHTTPS("https://www.google.com"));
+						
+					}
 					
 				}
 			}
 			else{
-				for (var j = 0; j < metadataField.value.length && j < MAX_RESULTS; j++){
-					console.log(metadataField.value[j].value[0].navigatesTo);
-					result_locations.push(toHTTPS(metadataField.value[j].value[0].navigatesTo));
+				for (var j = 0; j < MAX_RESULTS && j < metadataField.value.length; j++){
+					//console.log(metadataField.value[j].value[0].navigatesTo);
+					if(metadataField.value[j].value[0] != null){
+						result_locations.push(toHTTPS(metadataField.value[j].value[0].navigatesTo));
+					}else{
+						result_locations.push(toHTTPS("https://www.google.com"));
+						
+					}
+					
+					
 					
 				}
 			}
@@ -254,12 +287,15 @@ ExpSearchApp.addQuery = function(query, engineList, parentSearchSetID){
     	if (engineList[i]=="google_search"){
     		url = toGoogleUrl(query);
     	}
-    	else if (engineList[i] == 'bing'){
+    	else if (engineList[i] == 'bing_search_xpath'){
     		url = toBingUrl(query);
     		engineList[i] = "bing_search_xpath";
     	}
-    	else if (engineList[i] == "acm"){
+    	else if (engineList[i] == "acm_portal_search"){
     		url = toACMUrl(query);
+    	}
+    	else if (engineList[i] == "google_scholar_search"){
+    		url = toGScholarUrl(query);
     	}
     	
     	urlList.push(url);
@@ -281,7 +317,7 @@ ExpSearchApp.addQuery = function(query, engineList, parentSearchSetID){
 		
 		engineList.sort();
 		console.log(engineList);
-		for (var i = 0; i < exploratorySearches.last().SearchSets.length; i++){
+		for (var i = 0; i < currentExpSearch.SearchSets.length; i++){
 			if (exploratorySearches.last().SearchSets[i].sameSet(query, engineList, parentSearchSetID)){
 				exploratorySearches.last().history.restoreEntry(exploratorySearches.last().SearchSets[i].id);
 				return;
@@ -325,7 +361,22 @@ ExpSearchApp.newSearchFromRelatedQuery = function(event){
 	var searchContainer = document.getElementsByClassName("searchSetContainer")[0];
 	
 	ExpSearchApp.addQuery(query,ExpSearchApp.getEngines(), searchContainer.getAttribute("searchSetID"));
-	
+	var previousID = document.getElementsByClassName("searchSetContainer")[0].getAttribute("searchsetid")
+	var previousQuery = currentExpSearch.getQueryForID(previousID);
+	var searchEngines = ExpSearchApp.getEngines();
+	var depth = currentExpSearch.history.getSearchSetDepth(previousID)+1;
+	//logging
+	var time = new Date().getTime();
+	eventObj = {
+		related_search: {
+	  		timestamp: time,
+	  		query: query,
+	  		previous_query: previousQuery,
+	  		depth: depth,
+	  		search_engine: searchEngines
+	  	}
+	 };
+	 TheRecord.addEvent(eventObj);
 	
 }
 ExpSearchApp.renderNewMultipleSearch = function(task, metadataFields){
@@ -333,7 +384,7 @@ ExpSearchApp.renderNewMultipleSearch = function(task, metadataFields){
 	var newSearch = ExpSearchApp.searchFromMetadata(metadataFields);
 	//Checks the current query used by the most recent ExploratorySearch
 	
-	if (exploratorySearches.last().currentSearchSet().query == newSearch.query){
+	if (currentExpSearch.currentSearchSet().query == newSearch.query){
 		
 		exploratorySearches.last().currentSearchSet().addSearch(newSearch);
 		ExpSearchApp.displaySearchSet(exploratorySearches.last());
@@ -373,7 +424,7 @@ ExpSearchApp.initialRender = function(task, metadataFields){
 		
 		expSearch = new ExploratorySearch(task.container);
 		exploratorySearches.push(expSearch);
-
+		currentExpSearch = expSearch;
 		expSearch.addSearchSet(searchSet);
 			
 		if (expSearch != null){
@@ -410,9 +461,7 @@ ExpSearchApp.displaySearchSet = function(expSearch){
 	
 	// Create and add a new DocumentContainer to the list
 	MICE.documentMap.push( new DocumentContainer(expSearch.currentUrl(), null, expSearch.resultSetContainer, true));
-
-	// Remove any highlighting of documents as the addition of the new table will cause the connection-lines to be out of place
-	MICE.unhighlightDocuments(null);
+ 
 	
 	
 	SearchSet.prototype.addResultSetDisplay(expSearch.SearchSets.last(), visual);
@@ -439,6 +488,9 @@ ExpSearchApp.expandCollapseSearch = function(event)
 	var expandSymbol = button.getElementsByTagName("div")[0];
 	var searchRep = button.parentNode.nextSibling.nextSibling;
 	var searchFooter = button.parentNode.parentNode.childNodes[3];
+	
+	var searchEngine = button.parentNode.getAttribute("searchtype") ;
+	var query = document.getElementsByClassName("queryVal")[0].innerHTML;
 	if(expandSymbol.style.display == "block")
 	{
 		expandSymbol.style.display = "none";	
@@ -457,7 +509,16 @@ ExpSearchApp.expandCollapseSearch = function(event)
 		
 		searchRep.style.display = 'none';
 		searchFooter.style.display = 'block';
-		
+		//logging
+		var time = new Date().getTime();
+		eventObj = {
+			expand_search: {
+		  		timestamp: time,
+		  		query: query,
+		  		search_engine: searchEngine
+		  	}
+		 };
+		 TheRecord.addEvent(eventObj);
 
 	}
 	else if(expandSymbol.style.display == "none")
@@ -478,7 +539,16 @@ ExpSearchApp.expandCollapseSearch = function(event)
 		}
 		searchRep.style.display = 'block';
 		searchFooter.style.display = 'none';
-
+		//logging
+		var time = new Date().getTime();
+		eventObj = {
+			collapse_search: {
+		  		timestamp: time,
+		  		query: query,
+		  		search_engine: searchEngine
+		  	}
+		 };
+		 TheRecord.addEvent(eventObj);
 	}	
 }
 
@@ -495,6 +565,12 @@ ExpSearchApp.expandCollapseSearchResult = function(event){
 	var expandSymbol = button.getElementsByTagName("div")[0];
 	
 	button.className += searchType;
+	
+	//finds the first value in the associated metadataRendering
+	var title = button.parentNode.nextSibling.childNodes[0].childNodes[0].childNodes[0].childNodes[1].childNodes[0].childNodes[1].innerHTML;
+	var type = button.parentNode.nextSibling.childNodes[0].getAttribute('mdtype');
+	
+	
 	/*
 	 * Hides/restores all but the first row
 	*/
@@ -504,7 +580,7 @@ ExpSearchApp.expandCollapseSearchResult = function(event){
 		button.className = "searchResultCollapseButton ";
 		if(searchType != null)
 		
-		var rendering = button.nextSibling.childNodes[0];
+		var rendering = button.parentNode.nextSibling.childNodes[0];
 		var tableDiv = rendering.childNodes[0];
 		var tableRows = tableDiv.childNodes;
 		for (var i = 1; i < tableRows.length; i++){
@@ -512,7 +588,16 @@ ExpSearchApp.expandCollapseSearchResult = function(event){
 		}
 		
 		
-		
+		//logging
+		var time = new Date().getTime();
+		eventObj = {
+			expand_result: {
+		  		timestamp: time,
+		  		result_type: type,
+		  		result_title: title
+		  	}
+		 };
+		 TheRecord.addEvent(eventObj);
 
 	}
 	else if(expandSymbol.style.display == "none")
@@ -522,13 +607,23 @@ ExpSearchApp.expandCollapseSearchResult = function(event){
 		if(searchType != null)
 			button.className += searchType;
 	
-		var rendering = button.nextSibling.childNodes[0];
+		var rendering = button.parentNode.nextSibling.childNodes[0];
 		var tableDiv = rendering.childNodes[0];
 		var tableRows = tableDiv.childNodes;
 		for (var i = 1; i < tableRows.length; i++){
 			tableRows[i].style.display = 'none';
 		
 		}
+		//logging
+		var time = new Date().getTime();
+		eventObj = {
+			collapse_result: {
+		  		timestamp: time,
+		  		result_type: type,
+		  		result_title: title
+		  	}
+		 };
+		 TheRecord.addEvent(eventObj);
 	}	
 }
 
@@ -540,6 +635,10 @@ ExpSearchApp.expandCollapseEntry = function(event){
 		var expandSymbol = button.getElementsByTagName("div")[0];
 	
 	button.className;
+	//Find the searchSetID for the entry
+	var searchSetID = button.parentNode.nextSibling.getAttribute("id");
+	var query = currentExpSearch.getQueryForID(searchSetID);
+	var depth = currentExpSearch.history.getSearchSetDepth(searchSetID);	    
 	/*
 	 * Expand all kids
 	*/
@@ -562,8 +661,16 @@ ExpSearchApp.expandCollapseEntry = function(event){
 		}
 		
 		
-		
-
+		//logging
+		var time = new Date().getTime();
+		eventObj = {
+			expand_history_entry: {
+		  		timestamp: time,
+		  		query: query,
+		  		depth: depth
+		  	}
+		 };
+		 TheRecord.addEvent(eventObj);
 	}
 	//Hide all kids
 	else if(expandSymbol.style.display == "none")
@@ -583,6 +690,16 @@ ExpSearchApp.expandCollapseEntry = function(event){
 			}
 			childContainer = childContainer.nextSibling;
 		}
+		//logging
+		var time = new Date().getTime();
+		eventObj = {
+			collapse_history_entry: {
+		  		timestamp: time,
+		  		query: query,
+		  		depth: depth
+		  	}
+		 };
+		 TheRecord.addEvent(eventObj);
 	}	
 
 }
@@ -679,13 +796,13 @@ ExpSearchApp.entrySearch = function(event){
 	      container.parentNode.removeChild(container);
 	      ExpSearchApp.addQuery(query, ExpSearchApp.getEngines(), id);
 	      //Logging event builder
-	      //Should eventually include the parent query, but for now this is what we got
 	      
+	      var depth = 1 + currentExpSearch.history.getSearchSetDepth(id);
 	      var time = new Date().getTime();
 	      eventObj = {
-	  			entry_search: {
+	  			append_query_submit: {
 	  				query: query,
-	  			
+	  				depth: depth,
 	  				timestamp: time
 	  			}
 	  		};
@@ -694,17 +811,33 @@ ExpSearchApp.entrySearch = function(event){
 	
 }
 ExpSearchApp.removeSearchField = function(event){
+	
+	
 	var button = event.target;
 	if (event.target.className == "icon-remove"){
 		button = button.parentNode;
 	}
+	var parentID = button.nextSibling.getAttribute("parentset")
 	var formContainer = button.parentNode;
 	while(formContainer.hasChildNodes()){
 		formContainer.removeChild(formContainer.lastChild);
 	}
 	
+	//Logging
+	var parentQuery = currentExpSearch.getQueryForID(parentID);
+	var depth = currentExpSearch.history.getSearchSetDepth(parentID) + 1;
+	var time = new Date().getTime();
+	eventObj = {
+		append_query_cancel: {
+	  		parent_query: parentQuery,
+	  		depth: depth,
+	  		timestamp: time
+	  	}
+	 };
+	 TheRecord.addEvent(eventObj);
+	
 }
-ExpSearchApp.newEntrySearch = function(event, level){
+ExpSearchApp.appendQuery = function(event, level){
 	
 	
 	//get parent id
@@ -760,12 +893,22 @@ ExpSearchApp.newEntrySearch = function(event, level){
 	removeSearchButton.className = "newSearchDismissButton";
 	removeSearchButton.innerHTML = "<i class='icon-remove' style='margin-top: 8px; margin-left: 6px;'></i>";
 	removeSearchButton.setAttribute("onclick", "ExpSearchApp.removeSearchField(event)");
-	formContainer.appendChild(removeSearchButton);
 	formContainer.appendChild(entryForm);
+	formContainer.appendChild(removeSearchButton);
 
 	historyEntry.parentNode.appendChild(formContainer);
-
-	
+	var parentID = historyEntry.getAttribute("id");
+	var depth = currentExpSearch.history.getSearchSetDepth(parentID) + 1;
+	//logging
+	var time = new Date().getTime();
+	eventObj = {
+		append_query: {
+	  		parent_search: query,
+	  		depth: depth,
+	  		timestamp: time
+	  	}
+	 };
+	 TheRecord.addEvent(eventObj);
 }
 //Returns the list of serach engines currently toggled
 ExpSearchApp.getEngines = function(){
@@ -803,6 +946,11 @@ function getSelectionHtml() {
 }
 
 ExpSearchApp.removeQuerySearchBox = function(event){
+	if(event != null){
+		if(event.target.className == "toQueryBox" || event.target.className == "icon-search toQueryIcon"){
+			return;
+		}
+	}
 	//Removes any existing query boxes
 	var queryBox = document.getElementById('toQueryBox');
 	if (queryBox != null){
@@ -810,6 +958,7 @@ ExpSearchApp.removeQuerySearchBox = function(event){
 	}
 }
 ExpSearchApp.textSelected = function(event){
+	document.addEventListener("mousedown", ExpSearchApp.removeQuerySearchBox);
 	ExpSearchApp.removeQuerySearchBox();
 	
 	//Client has pressed the mouse button without releasing it...
@@ -831,6 +980,7 @@ ExpSearchApp.textSelected = function(event){
 	   
 	   
 	   toQueryBox.className = "toQueryBox";
+	   toQueryBox.removeEventListener('mousedown', ExpSearchApp.removeQuerySearchBox);
 	   toQueryBox.innerHTML = "<i class='icon-search toQueryIcon'></i>"
 	   
 	  
@@ -846,7 +996,18 @@ ExpSearchApp.textSelected = function(event){
 	   console.log(textToQuery);
 	   toQueryBox.setAttribute('onclick', textToQuery);
 	   document.body.appendChild(toQueryBox);
-	   
+		var data = ExpSearchApp.cleanQuery(sel.toString());
+		var length = data.length;
+		//logging
+		var time = new Date().getTime();
+		eventObj = {
+			metadata_highlighted: {
+		  		timestamp: time,
+		  		data: data,
+		  		length: length
+		  	}
+		 };
+		 TheRecord.addEvent(eventObj);   
    }
    	  //If selected, extract text
    		//And find somewhere to build the query button
@@ -859,6 +1020,20 @@ ExpSearchApp.textToQuery = function(query, id){
 	ExpSearchApp.removeQuerySearchBox();
 	//Adds query
 	ExpSearchApp.addQuery(query, ExpSearchApp.getEngines(), id);
+	//logging
+	var time = new Date().getTime();
+	var engines = ExpSearchApp.getEngines();
+	var query_length = query.length;
+	eventObj = {
+		search_from_metadata: {
+	  		query: query,
+	  		engine_list: engines,
+	  		query_length: length,
+	  		timestamp: time
+	  	}
+	 };
+	 TheRecord.addEvent(eventObj);
+
 }
 ExpSearchApp.buildMetadataToQueryButton = function(parent, query){
 
@@ -886,6 +1061,15 @@ ExpSearchApp.newExpSearch = function(){
 	var newExpSearch = new ExploratorySearch(resultSetContainer, historyContainer);
 	exploratorySearches.push(newExpSearch);
 	console.log(exploratorySearches);
+	//logging
+	var time = new Date().getTime();
+	eventObj = {
+		new_exploratory_search: {
+	  		timestamp: time
+	  	}
+	 };
+	 TheRecord.addEvent(eventObj);
+	 currentExpSearch = newExpSearch;
 	//Display said search object	
 }
 

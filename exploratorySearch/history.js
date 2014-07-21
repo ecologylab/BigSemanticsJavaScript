@@ -40,10 +40,13 @@ History.prototype.buildEntry = function(entry, parent, depth){
 	
 	//Expand/collapse buttons
 	
+	
+	var buttonContainer = document.createElement('div');
+	buttonContainer.className = "buttonContainer";
+	
+	historyEntryContainer.appendChild(buttonContainer);
 	if (entry.childEntries.length > 0){
-		var buttonContainer = document.createElement('div');
-		buttonContainer.className = "buttonContainer";
-		
+
 		var entryCollapseButton = document.createElement('div');
 		entryCollapseButton.className = 'entryCollapseButton ';
 		
@@ -61,10 +64,6 @@ History.prototype.buildEntry = function(entry, parent, depth){
 		entryCollapseButton.appendChild(entryCollapseSymbol);
 		entryCollapseButton.onclick = ExpSearchApp.expandCollapseEntry;
 		buttonContainer.appendChild(entryCollapseButton);
-		historyEntryContainer.appendChild(buttonContainer);
-	}
-	else{
-		historyEntryContainer.style.marginLeft = '20px';
 	}
 	
 	
@@ -114,8 +113,8 @@ History.prototype.buildEntry = function(entry, parent, depth){
 		historyEntry.classList.add('compared');
 		addSearchContainer.classList.add('compared');
 	}
-	addSearchContainer.innerHTML = "<i class='icon-plus' style='margin-left: 9px; margin-top: 8px;'></i>";
-	var click = "ExpSearchApp.newEntrySearch(event, " + depth.toString() + ")";
+	addSearchContainer.innerHTML = "<i class='icon-plus' style='margin-left: 9px; margin-top: 7px;'></i>";
+	var click = "ExpSearchApp.appendQuery(event, " + depth.toString() + ")";
 	addSearchContainer.setAttribute("onclick", click);
 	if (entry.active){
 		historyEntry.className += " active";
@@ -182,8 +181,12 @@ History.prototype.addEntry = function(entry){
 History.prototype.restoreEntry = function(entryID){
 	//updates entry, sorts list, and calls addHistoryDisplay
 	
-	var entry;		
+	var entry;
+	var previousQuery;		
 	for (var i = 0; i < exploratorySearches.last().history.entryList.length; i++){
+		if(exploratorySearches.last().history.entryList[i].active == true){
+			previousQuery = exploratorySearches.last().history.entryList[i].query;
+		}
 		if (entryID == exploratorySearches.last().history.entryList[i].id){
 			exploratorySearches.last().history.entryList[i].weight++;
 			exploratorySearches.last().history.entryList[i].active = true;
@@ -201,9 +204,34 @@ History.prototype.restoreEntry = function(entryID){
 	exploratorySearches.last().SearchSets.splice(exploratorySearches.last().SearchSets.indexOf(entry.SearchSet), 1);
 	exploratorySearches.last().SearchSets.push(entry.SearchSet);
 	ExpSearchApp.displaySearchSet(exploratorySearches.last());
+	//logging
+	var query = currentExpSearch.getQueryForID(entryID);
+	var depth = currentExpSearch.history.getSearchSetDepth(entryID);
+	var time = new Date().getTime();
+	eventObj = {
+		revisit_history_entry: {
+	  		timestamp: time,
+	  		query: query,
+	  		previous_query: previousQuery,
+	  		depth: depth
+	  	}
+	 };
+	 TheRecord.addEvent(eventObj);
 }
 
-
+History.prototype.getSearchSetDepth = function(searchSetID){
+	for (var i = 0; i < this.entryList.length; i++){
+		if (this.entryList[i].id == searchSetID){
+			var depth = 0;
+			var target = this.entryList[i];
+			while(target.parentEntry != null){
+				depth++;
+				target = target.parentEntry;
+			}
+			return depth;
+		}
+	}	
+}
 
 
 

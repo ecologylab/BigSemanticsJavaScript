@@ -39,6 +39,22 @@ function clippingDragStart(event){
 	//metadataContainer
 	console.log(locationHunter);
 	event.dataTransfer.setData("text/url/md", locationHunter);
+	var grip = event.target;
+	while (grip.className != 'searchResultHandle'){
+		grip = grip.parentNode;
+	}
+	var title = grip.nextSibling.childNodes[0].childNodes[0].childNodes[0].childNodes[1].childNodes[0].childNodes[1].innerHTML;
+	var type = grip.nextSibling.childNodes[0].getAttribute('mdtype');
+	//logging
+	var time = new Date().getTime();
+	eventObj = {
+		drag_start: {
+	  		timestamp: time,
+	  		result_title: title,
+	  		result_type: type
+	  	}
+	 };
+	 TheRecord.addEvent(eventObj); 
 }
 function clippingDragEnd(event){
 	
@@ -54,8 +70,9 @@ function entryDragStart(event){
 	var idMod = 'X' + event.target.id;
 	event.dataTransfer.setData("Text", idMod);
 	var compContainer = document.getElementsByClassName('comparisonContainer')[0];
-	
+	var button = event.target;
 	compContainer.classList.add('entryPickedUp');
+  
 }
 
 function comparisonDragOver(event){

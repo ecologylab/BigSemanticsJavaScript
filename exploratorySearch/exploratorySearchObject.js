@@ -52,3 +52,21 @@ ExploratorySearch.prototype.isSetAdded = function(searchSet){
 	return null;
 }
 
+ExploratorySearch.prototype.getParentSearchID = function(searchSetID){
+	for(var i = 0; i < this.SearchSets.length; i++){
+		if (this.SearchSets[i].id == searchSetID){
+			return SearchSets[i].parentSetID;
+		}
+	}
+	return null;
+
+}
+
+ExploratorySearch.prototype.getQueryForID = function(searchSetID){
+	for(var i = 0; i < this.SearchSets.length; i++){
+		if (this.SearchSets[i].id == searchSetID){
+			return this.SearchSets[i].query;
+		}
+	}
+	return null;
+}

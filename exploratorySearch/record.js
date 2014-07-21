@@ -62,17 +62,17 @@ function sendLog(log){
 	fd.append("events_json ", JSON.stringify(log));
 		 
 	var xhr = new XMLHttpRequest();
-	xhr.open("POST", "/i/event_log/");
+	xhr.open("POST", "http://ecoarray0:3801/i/event_log/");
 	xhr.onload = function()
 	{
 		if(xhr.statusText == "OK")
 		{
-	   		//console.log("Logging Successful");
+	   		console.log("Logging Successful");
 	   		TheRecord.clearLogQueue();
 	   	}	   		
 	   	else
 	   	{
-	   		//console.log("Logging Failed");
+	   		console.log("Logging Failed");
 	   		TheRecord.dontClearLogQueue();
 	   	}	
 	   		
@@ -80,16 +80,36 @@ function sendLog(log){
 	xhr.send(fd);
 	
 }
-
+function getLog(){
+	var xhr = new XMLHttpRequest();
+	xhr.open("GET", "http://ecoarray0:3801/i/event_log/?username=AnonymousUser");
+	
+	xhr.send();
+	xhr.onload = function()
+	{
+		if(xhr.statusText == "OK")
+		{
+	   		console.log(xhr.response);
+	   	}	   		
+	   	else
+	   	{
+	   		console.log(xhr.response);
+	   	}	
+	   		
+	}
+}
 //Father Time!!
 
 var MILLIS_BETWEEN_SAVE = 12000;
 
 var FatherTime = {};
+var FatherTime = {};
+
 
 FatherTime.init = function()
 {
 	setInterval(FatherTime.aTimeToLog, MILLIS_BETWEEN_SAVE);	
+
 }
 
 FatherTime.aTimeToLog = function()

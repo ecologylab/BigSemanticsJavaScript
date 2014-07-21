@@ -4,6 +4,7 @@
 		<link rel="stylesheet" type="text/css" href="../interactiveSemantics/metadataRenderer.css"/>
          <script type="text/javascript" src="../interactiveSemantics/debi.js"></script>
          <script type="text/javascript" src="../interactiveSemantics/mice.js"></script>
+         <script type="text/javascript" src="../interactiveSemantics/interfaceStyle.js"></script>
          <script type="text/javascript" src="exploratorySearchObject.js"></script>
          <script type="text/javascript" src="search.js"></script>
          <script type="text/javascript" src="searchSet.js"></script>
@@ -35,18 +36,28 @@
 		<link rel="stylesheet" type="text/css" href="prototype.css"/>
 		
 		  <script>
-           
-              //englineList -> list of engines to search with
+         
+		  //englineList -> list of engines to search with
               //newExpSearch -> true if starting a new exploratory search
                 function showMetadata(engineList,isNewExpSearch)
                  {
-                    if (engineList.length < 1){
-                    	return;
-                    }
-                	var query = document.getElementById("targetURL").value;
+                   if (engineList.length < 1){
+                   		return;
+                   }
+                   var query = document.getElementById("targetURL").value;
                   
-                    var content = document.getElementById("content");
-
+                   var content = document.getElementById("content");
+				
+					var time = new Date().getTime();
+				    eventObj = {
+				  		add_query: {
+				  			query: query,
+				  			timestamp: time,
+				  			search_engines: engineList
+				  		}
+				  	};
+				  	
+				    TheRecord.addEvent(eventObj);
                     ExpSearchApp.addQuery(query, engineList);
                 }
             
@@ -55,6 +66,22 @@
                 if(event.keyCode == 13)
                 	showMetadata(ExpSearchApp.getEngines());
             }
+            
+            function logEngineToggle(event){
+            	var checkbox = event.target;
+            	var checked = checkbox.checked;
+            	var engine = checkbox.getAttribute("name");
+				//logging
+				var time = new Date().getTime();
+				eventObj = {
+					engine_toggle: {
+				  		engine_name: engine,
+				  		turning_on: checked,
+				  		timestamp: time
+				  	}
+				 };
+				 TheRecord.addEvent(eventObj);
+			}
          </script>
 	</head>
 	<body>
@@ -76,17 +103,24 @@
                 <div class = "checkBoxGroup">
 	                <div class="checkbox ">
 	                  <label>
-	                    <input type="checkbox" class="searchToggle" name="google_search" checked="true" value="true"> Google
+	                    <input type="checkbox" class="searchToggle" name="google_search" checked="true" value="true" onclick="logEngineToggle(event)"> Google
+	                    
 	                 </label>
 	                </div>
 	                <div class="checkbox ">
 	                  <label>
-	                    <input type="checkbox" class="searchToggle" name="bing" value="true"> Bing
+	                    <input type="checkbox" class="searchToggle" name="bing_search_xpath" value="true" onclick="logEngineToggle(event)"> Bing
 	                 </label>
 	                </div>
 	                 <div class="checkbox ">
                       <label>
-                        <input type="checkbox" class="searchToggle" name="acm" value="true"> ACM
+                        <input type="checkbox" class="searchToggle" name="acm_portal_search" value="true" onclick="logEngineToggle(event)"> ACM
+                     </label>
+                    </div>
+                    <div class="checkbox ">
+                      <label>
+                        <input type="checkbox" class="searchToggle" name="google_scholar_search" value="true" onclick="logEngineToggle(event)"> Google Scholar
+                        
                      </label>
                     </div>
                 </div>
@@ -113,7 +147,7 @@
 		<div class="column" style="width: 35%; float: left">
           <div id="content" class="expRendering">
           
-        <a href="https://www.google.com/search?q=exploratory+search" engine ="google_search" query="exploratory search"> </a>     
+        <a href="https://www.google.com/search?q=search" engine ="google_search" query="exploratory search"> </a>     
           </div>
         </div>
           <div class="column comparison" id="comp" style="width: 35%">
