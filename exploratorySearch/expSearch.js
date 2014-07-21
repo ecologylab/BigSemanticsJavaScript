@@ -189,14 +189,27 @@ ExpSearchApp.searchFromMetadata = function(metadataFields){
 			
 			if (metadataField.parentMDType == "google_search"){
 				for (var k = 0; k < metadataField.value.length && k < MAX_RESULTS; k++){
-					result_locations.push(toHTTPS(metadataField.value[k].value[0].value[0].navigatesTo));
+					if(metadataField.value[k].value[0].value[0] != null){
+						result_locations.push(toHTTPS(metadataField.value[k].value[0].value[0].navigatesTo));
+					}
+					else{
+						result_locations.push(toHTTPS("https://www.google.com"));
+						
+					}
 					
 				}
 			}
 			else{
-				for (var j = 0; j < 1 && j < MAX_RESULTS; j++){
+				for (var j = 0; j < MAX_RESULTS && j < metadataField.value.length; j++){
 					//console.log(metadataField.value[j].value[0].navigatesTo);
-					result_locations.push(toHTTPS(metadataField.value[j].value[0].navigatesTo));
+					if(metadataField.value[j].value[0] != null){
+						result_locations.push(toHTTPS(metadataField.value[j].value[0].navigatesTo));
+					}else{
+						result_locations.push(toHTTPS("https://www.google.com"));
+						
+					}
+					
+					
 					
 				}
 			}
