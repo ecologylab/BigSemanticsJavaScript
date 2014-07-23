@@ -9,6 +9,8 @@ var DEFAULT_MICE_STYLE = {
 	    metadata_h1 : "metadata_h1",
 	    fieldLabel : "fieldLabel",
 	    fieldLabelImage : "fieldLabelImage",
+	    fieldValueGoogleQuery : "fieldValue google_query",
+	    fieldValueGoogle_link : "fieldValue google_link",
 	    fieldValue : "fieldValue",
 	    favicon : "favicon",
 	    faviconICE : "faviconICE",
@@ -34,12 +36,13 @@ var DEFAULT_MICE_STYLE = {
 	    lineCanvas : "lineCanvas",
 	    bigLineCanvas : "bigLineCanvas",
 	    hidden : "hidden",
-	    moreButton : "moreButton"
+	    moreButton : "moreButton",
+	    tabLabel : "tabLabel"
 	}	
 };
 
 var TWITTER_MICE_STYLE = {
-	types : ["twitter_microblog", "twitter_search_results"],
+	types : ["twitter_microblog", "twitter_search_results", "twitter_status"],
 	styles : {
 	    metadataRendering : "metadataRendering",
 	    metadataContainer : "twMetadataContainer",
