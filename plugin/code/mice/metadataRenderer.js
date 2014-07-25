@@ -254,7 +254,7 @@ MetadataRenderer.isRenderedDocument = function(url)
  * @param container, HTML container which will hold the rendering
  * @param isRoot, true if this is the root document for a metadataRendering
  */
-function RenderingTask(url, container, isRoot, clipping, renderer) //asdf
+function RenderingTask(url, container, isRoot, clipping, renderer)
 {
 	if(url != null)
 		this.url = url.toLowerCase();

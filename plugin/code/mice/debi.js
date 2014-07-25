@@ -42,7 +42,7 @@ MetadataLoader.logger = function(message) { /* null default implementation */ };
 MetadataLoader.render = function(renderer, container, url, isRoot, clipping)
 {
   // Add the rendering task to the queue
-  var task = new RenderingTask(url, container, isRoot, clipping, renderer)
+  var task = new RenderingTask(url, container, isRoot, clipping, renderer);
   MetadataLoader.queue.push(task);  
   
   if (clipping != null && clipping.rawMetadata != null)
@@ -533,9 +533,6 @@ MetadataLoader.getScalarMetadataViewModel = function(metadataViewModel,
   {        
     // Is there a metadata value for this field?    
     var value = MetadataLoader.getFieldValue(mmdField, metadata);
-    
-    console.log(value);
-    
     if (value)
     {  
     	
@@ -814,12 +811,6 @@ MetadataLoader.isVisibleMediaField = function(mmdField, parentField)
  */
 MetadataLoader.getFieldValue = function(mmdField, metadata)
 {
-	// console.log(mmdField);
-	// console.log(metadata);
-	// console.log(mmdField.tag);
-	// console.log(metadata[mmdField.name]);
-	// console.log(metadata[mmdField.tag]);
-	
   if (mmdField.tag != null){
 	  if(metadata[mmdField.tag] != null){
 		  return metadata[mmdField.tag];

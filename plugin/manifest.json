@@ -19,7 +19,11 @@
 	    	"code/SlideOut.js",
 	    	"code/main.js",
 	    	"code/mice/debi.js",
-	    	"code/mice/mice.js"
+	    	"code/mice/mice.js",
+	    	"code/mice/metadataRenderer.js",
+	    	"code/fieldParsers.js",
+	    	"code/mice/simplDeserializer.js",
+	    	"code/extractMetadata.js"
 	    ],
 	    "css": [
 	    	"code/style.css"

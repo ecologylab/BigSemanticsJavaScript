@@ -8,6 +8,8 @@
 	bottom: 0px;
 	right: 0px;	
 	z-index: 10000000000000;
+	height: 100%;
+	overflow-y: scroll;
 	
 	background-color: rgb(239, 244, 248);
 	
@@ -20,12 +22,35 @@
 	font-weight: normal;
 	font-size: 20px;
 	margin-top: 10px;
-    margin-bottom: 10px;
+    margin-bottom: 0px;
     color:	#000000;
-    line-height: 200%;
+    /*line-height: 200%;*/
     padding: 0px;
     border: 0px;
     text-transform: capitalize;
+}
+div.contextNode {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 11px;
+	color: #000000;
+	font-weight: 500; 
+	padding-left: 25px;
+	margin-top: 0px;
+    margin-bottom: 0px;
+    line-height: 120%;
+    text-transform: none;
+    text-align: left;
+} 
+#contextTitle {
+	margin-top: 10px;
+	font-weight: bold;
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 14px;
+	color:	#000000;
+	padding-left: 10px;
+	margin-top: 10px;
+    margin-bottom: 0px;
+    line-height: 120%;
     text-align: left;
 }
 div.mmdField {
@@ -33,12 +58,17 @@ div.mmdField {
 	font-size: 14px;
 	color:	#000000;
 	font-weight: 500; 
-	text-indent: 25px;
+	padding-left: 25px;
 	margin-top: 0px;
     margin-bottom: 0px;
     line-height: 120%;
     text-align: left;
 } 
+#metaTitle {
+	margin-top: 10px;
+	font-weight: bold;
+	padding-left: 10px
+}
 div.mmdField .mmdFieldType {
 	color: #999999;
 	font-weight: 500;
@@ -46,9 +76,9 @@ div.mmdField .mmdFieldType {
 div.mmdXPath {
 	font-family: Arial, Helvetica, sans-serif;
 	font-size: 11px;
-	color:	#000000;
+	color: #999999;
 	font-weight: 500; 
-	text-indent: 40px;
+	padding-left: 40px;
 	margin-top: 0px;
     margin-bottom: 0px;
     line-height: 120%;
@@ -61,7 +91,7 @@ div.exData {
 	font-size: 11px;
 	color:	#000000;
 	font-weight: 500; 
-	text-indent: 40px;
+	padding-left: 40px;
 	margin-top: 0px;
     margin-bottom: 0px;
     line-height: 120%;
