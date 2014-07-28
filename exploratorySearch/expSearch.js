@@ -152,6 +152,17 @@ function toGScholarUrl(searchString){
     console.log(url);
     return url;
 }
+function toResearchGateUrl(searchString){
+	var terms = searchString.split(" ");
+	var url = "http://www.researchgate.net/publicliterature.PublicLiterature.search.html?type=keyword&search-keyword=";
+	for (var x in terms){
+		url += terms[x];
+		url += "+";
+	}
+    encodeURI(url);
+    console.log(url);
+    return url;
+}
 function toHTTPS(url){
 	/*
 	var patt = /https?/i;
@@ -196,7 +207,7 @@ ExpSearchApp.searchFromMetadata = function(metadataFields){
 		
 		else if (ExpSearchApp.isResult(metadataField)){
 			
-			if (metadataField.parentMDType == "google_search"){
+			if (metadataField.parentMDType == "google_search" || metadataField.parentMDType=="research_gate_search"){
 				for (var k = 0; k < metadataField.value.length && k < MAX_RESULTS; k++){
 					if(metadataField.value[k].value[0].value[0] != null){
 						result_locations.push(toHTTPS(metadataField.value[k].value[0].value[0].navigatesTo));
@@ -296,6 +307,8 @@ ExpSearchApp.addQuery = function(query, engineList, parentSearchSetID){
     	}
     	else if (engineList[i] == "google_scholar_search"){
     		url = toGScholarUrl(query);
+    	}else if (engineList[i] == "research_gate"){
+    		url = toResearchGateUrl(query);
     	}
     	
     	urlList.push(url);
