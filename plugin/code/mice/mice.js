@@ -359,7 +359,8 @@ MICE.downloadAndDisplayDocument = function(event)
 		
 	
 	// Change the onclick function of the button to expand/collapse the table
-	button.setAttribute('onclick', 'MICE.expandCollapseTable(event)');
+	//button.setAttribute('onclick', 'MICE.expandCollapseTable(event)');
+	button.onclick = MICE.expandCollapseTable;
 	
 	var table = MICE.getTableForButton(button);
 		
@@ -1157,6 +1158,7 @@ MICE.buildMetadataField = function(metadataField, isChildTable, fieldCount, row)
 					expandButton.className = "expandButton X";
 					
 				expandButton.setAttribute('onclick', 'MICE.downloadAndDisplayDocument(event)');
+				expandButton.onclick = MICE.downloadAndDisplayDocument;
 				
 				if(childUrl != "")
 				{
@@ -1271,7 +1273,8 @@ MICE.buildMetadataField = function(metadataField, isChildTable, fieldCount, row)
 				var expandButton = document.createElement('div');
 					expandButton.className = "expandButton";
 					
-					expandButton.setAttribute('onclick', 'MICE.expandCollapseTable(event)');
+					//expandButton.setAttribute('onclick', 'MICE.expandCollapseTable(event)');
+					expandButton.onclick = MICE.expandCollapseTable;
 					
 					var expandSymbol = document.createElement('div');
 						expandSymbol.className = "expandSymbol";

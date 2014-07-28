@@ -21,7 +21,7 @@ MetadataRenderer.LoggingFunction = null;
 MetadataRenderer.render = function(renderer, container, url, isRoot, clipping){
 	
 	// Add the rendering task to the queue
-	var task = new RenderingTask(url, container, isRoot, clipping, renderer);
+	var task = new RenderingTask(url, container, isRoot, clipping, renderer)
 	MetadataRenderer.queue.push(task);	
 	
 	if(clipping != null && clipping.rawMetadata != null)
@@ -34,7 +34,7 @@ MetadataRenderer.render = function(renderer, container, url, isRoot, clipping){
 		// Fetch the metadata from the service
 		MetadataRenderer.getMetadata(url, "MetadataRenderer.setMetadata");	
 	}
-};
+}
 
 
 
@@ -46,10 +46,10 @@ MetadataRenderer.render = function(renderer, container, url, isRoot, clipping){
  */
 MetadataRenderer.getMetadata = function(url, callback)
 {
-	var serviceURL = SEMANTIC_SERVICE_URL + "metadata.jsonp?callback=" + callback + "&url=" + encodeURIComponent(url);
+	var serviceURL = SEMANTIC_SERVICE_URL + "metadata.jsonp?callback=" + callback + "&url=" + encodeURIComponent(url)
 	MetadataRenderer.doJSONPCall(serviceURL);
 	console.log("requesting semantics service for metadata: " + serviceURL);
-};
+}
 
 /**
  * Retrieves the meta-metadata from the service using a JSON-p call.
@@ -61,7 +61,7 @@ MetadataRenderer.getMetadata = function(url, callback)
 MetadataRenderer.getMMD = function(type, callback)
 {
 	MetadataRenderer.doJSONPCall(SEMANTIC_SERVICE_URL + "mmd.jsonp?callback=" + callback + "&name=" + type);
-};
+}
 
 
 /**
@@ -73,7 +73,7 @@ MetadataRenderer.doJSONPCall = function(jsonpURL)
 	var script = document.createElement('script');
 	script.src = jsonpURL;
 	document.head.appendChild(script);
-};
+}
 /**
  * Deserializes the metadata from the service and matches the metadata with a queued RenderingTask
  * If the metadata matches then retrieve the needed meta-metadata
@@ -122,7 +122,7 @@ MetadataRenderer.setMetadata = function(rawMetadata)
 		//console.log(metadata["additional_locations"]);
 		for(var i = 0; i < metadata["additional_locations"].length; i++)
 		{
-			var additional_location = metadata["additional_locations"][i];
+			var additional_location = metadata["additional_locations"][i]
 			queueTasks = queueTasks.concat(MetadataRenderer.getTasksFromQueueByUrl(additional_location));			
 		}
 	}
@@ -148,7 +148,7 @@ MetadataRenderer.setMetadata = function(rawMetadata)
 		console.error("Retreived metadata: "+metadata.location+"  but it doesn't match a document from the queue.");
 		console.log(MetadataRenderer.queue);
 	}
-};
+}
 
 /**
  * Deserializes the meta-metadata, attempts to matche it with any awaiting tasks
@@ -188,12 +188,12 @@ MetadataRenderer.setMetaMetadata = function (mmd)
 	}
 	else
 		console.error("Retreived meta-metadata: " + mmd["meta_metadata"].name + "  but it doesn't match a document from the queue.");
-};
+}
 
 MetadataRenderer.createMetadata = function(isRoot, mmd, metadata, taskUrl){
 	var metadataFields = MetadataRenderer.getMetadataFields(mmd["meta_metadata"]["kids"], metadata, 0, null, taskUrl);
 	return metadataFields;
-};
+}
 /**
  * Get a matching RenderingTask from the queue 
  * @param url, target url to attempt to match to any tasks in the queue
@@ -206,7 +206,7 @@ MetadataRenderer.getTaskFromQueueByUrl = function(url)
 			return MetadataRenderer.queue[i];
 
 	return null;
-};
+}
 
 MetadataRenderer.getTasksFromQueueByUrl = function(url)
 {
@@ -216,7 +216,7 @@ MetadataRenderer.getTasksFromQueueByUrl = function(url)
 			list.push(MetadataRenderer.queue[i]);
 
 	return list;
-};
+}
 
 
 /**
@@ -232,7 +232,7 @@ MetadataRenderer.getTasksFromQueueByType = function(type)
 			tasks.push(MetadataRenderer.queue[i]);
 			
 	return tasks;
-};
+}
 
 /**
  * Searches the document map for the given url
@@ -246,7 +246,7 @@ MetadataRenderer.isRenderedDocument = function(url)
 			return true;
 			
 	return false;
-};
+}
 
 /**
  * RenderingTask represents a metadata rendering that is in progress of being downloaded and parsed
@@ -284,7 +284,7 @@ RenderingTask.prototype.matches = function(url)
 		return true;
 
 	return false;
-};
+}
 
 /** MetadataField and related functions **/
 
@@ -339,7 +339,7 @@ MetadataRenderer.hasVisibleMetadata = function(metadata)
 		}
 	
 	return false;
-};
+}
 
 /**
  * Searches an array of MetadataFields to find the document's location 
@@ -357,7 +357,7 @@ MetadataRenderer.guessDocumentLocation = function(metadata)
 	
 	//console.log("guessing document location: " + location);
 	return location;
-};
+}
 
 /**
  * looks up metadataFields collection for the instance, else creates new
@@ -370,7 +370,7 @@ MetadataRenderer.getMetadataField = function(mmdField, metadataFields)
 			return metadataFields[i];
 	}
 	return new MetadataField(mmdField);
-};
+}
 
 /**
  * Iterates through the meta-metadata, creating MetadataFields by matching meta-metadata fields to metadata values 
@@ -582,9 +582,9 @@ MetadataRenderer.getMetadataFields = function(mmdKids, metadata, depth, child_va
 	}
 		
 	//Sort the fields by layer, higher layers first
-	metadataFields.sort(function(a,b){return b.layer - a.layer - 0.5;});
+	metadataFields.sort(function(a,b){return b.layer - a.layer - 0.5});
 	return metadataFields;
-};
+}
 
 
 MetadataRenderer.checkAndSetShowExpandedInitially = function(field, mmdField)
@@ -592,14 +592,14 @@ MetadataRenderer.checkAndSetShowExpandedInitially = function(field, mmdField)
 	if (mmdField.show_expanded_initially != null) {
 		field.show_expanded_initially = mmdField.show_expanded_initially;
 	}
-};
+}
 
 MetadataRenderer.checkAndSetShowExpandedAlways = function(field, mmdField)
 {
 	if (mmdField.show_expanded_always != null) {
 		field.show_expanded_always = mmdField.show_expanded_always;
 	}
-};
+}
 
 MetadataRenderer.isFieldVisible = function(mmdField, metadata, url)
 {
@@ -613,13 +613,13 @@ MetadataRenderer.isFieldVisible = function(mmdField, metadata, url)
 	}
 	
 	return mmdField.hide == null || mmdField.hide == false || mmdField.always_show == "true";
-};
+}
 
 MetadataRenderer.getFieldValue = function(mmdField, metadata)
 {
 	var valueName = (mmdField.tag != null) ? mmdField.tag : mmdField.name;				
 	return metadata[valueName];
-};
+}
 
 /**
  * 
@@ -697,7 +697,7 @@ MetadataRenderer.getValueForProperty = function(valueAsLabelStr, metadata, mmdKi
 			return {value: metadataFields, type: fieldType};
 		}				
 	}	
-};
+}
 
 /**
  * 
@@ -739,7 +739,7 @@ MetadataRenderer.concatenateField = function(field, metadataFields, mmdKids)
 			}
 		}
 	}
-};
+}
 
 
 MetadataRenderer.getImageSource = function(mmdField)
@@ -749,7 +749,7 @@ MetadataRenderer.getImageSource = function(mmdField)
 			return mmdField[i].value;
 	
 	return null;
-};
+}
 /** 
  * Make the string prettier by replacing underscores with spaces  
  * @param string to make over
@@ -763,7 +763,7 @@ MetadataRenderer.toDisplayCase = function(string)
 		display += strings[s].charAt(0).toLowerCase() + strings[s].slice(1) + " ";
 
 	return display;
-};
+}
 
 /**
  * Remove line breaks from the string and any non-ASCII characters
@@ -779,13 +779,13 @@ MetadataRenderer.removeLineBreaksAndCrazies = function(string)
             result += string.charAt(i);
  
 	return result;
-};
+}
 
 MetadataRenderer.clearDocumentCollection = function()
 {
 	MetadataRenderer.queue = [];
 	MetadataRenderer.documentMap = [];
-};
+}
 
 
 /**
@@ -799,97 +799,4 @@ MetadataRenderer.getHost = function(url)
 	var host = url.match(/:\/\/(www\.)?(.[^/:]+)/)[2];
 	return "http://www." + host;
 	}
-};
-
-
-
-
-
-function simplDeserialize(simplObj)
-{
-var simplReferences = [];
-var simplId = "simpl.id";
-var simplRef = "simpl.ref";
-var idCount = 0;
-var refCount = 0;
-
-	function recurse(currentObj, parentObj, parentFieldName, level)
-	{
-		var skipRecursion = false;
-
-		////console.info("recursing[" + level + "] Parent and currentObj:"); //Too detailed prints.
-		//console.log(parentObj);
-		//console.log(currentObj);
-		
-		if((typeof currentObj) != 'object' || currentObj == null)
-		{
-			return;
-		}
-		
-		if(simplId in currentObj)
-		{
-			//console.info(parentFieldName + " ------------ Adding ref: " + currentObj[simplId] + " [" + ++idCount +"]");
-			simplReferences[currentObj[simplId]] = currentObj;
-			delete currentObj[simplId];
-		}
-		
-		else if(simplRef in currentObj)
-		{
-			var ref = currentObj[simplRef];
-			if(ref in simplReferences)
-			{
-				//console.info(parentFieldName + "---------- Resolving Ref: " + ref + " [" + ++refCount +"]");
-				//Replace field in the parent with the simplRef
-				if(parentObj instanceof Array) //Never happens?
-				{
-					//console.info("parentObj is an Array!");
-					var index = parentObj.indexOf(currentObj);
-					if(index == -1)
-					{
-						//console.info("Item not found in parent!");
-					}
-					else
-					{
-						//console.info("Replacing item at index: " + index);
-						parentObj[index] = simplReferences[ref];
-					}					
-				}
-				else
-				{
-					//console.info("Replacing item with name: " + parentFieldName + " with reference" + ref);
-					parentObj[parentFieldName] = simplReferences[ref];
-				}
-			}
-			else 
-				//console.info("No Such Reference: " + ref);
-				
-			skipRecursion = true;
-		}
-
-		if(!skipRecursion)
-		{
-			for(var fieldName in currentObj)
-			{
-				if(!currentObj.hasOwnProperty(fieldName))
-				{
-					//console.info("Found shitty props");
-					continue;
-				}
-				var field = currentObj[fieldName];
-				if(field instanceof Array)
-				{
-					for(var i = 0; i < field.length; i++)// arrayItem in field)
-					{
-						recurse(field[i], field, fieldName, level + 1);
-					}
-				}
-				else if(field instanceof Object)
-				{
-					recurse(field, currentObj, fieldName, level + 1);
-				}
-			}
-		}
-	}
-	
-    recurse(simplObj, null, null, 0);
 }

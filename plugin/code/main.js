@@ -1,9 +1,12 @@
 // GLODBAL VARIABLES
 var slideOutVisual;
 var SLIDEOUT_WIDTH = 660; //320
+var browserExtraction = true;
 var MICEDISPLAY = true;
 var defVars = { };
-var browserExtraction = true;
+var url;
+var description;
+var baseURL;
 
 window.onload = setup(document);
 
@@ -27,8 +30,14 @@ function setup(document)
 /**
  * Asks the semantic service for the meta-metadata for the given URL
  */
-function getMMD(url, callback)
+function getMMD(pageURL, callback)
 {
+	url = pageURL;
+	
+	baseURL = url.substring(0,getPosition(url,"/",3));
+	console.log(baseURL);
+	
+	console.log(url);
 	var serviceURL = "http://ecology-service.cse.tamu.edu/BigSemanticsService/mmd.json?url="; //settings.serviceUrl;
 	serviceURL += url;
 	
@@ -44,7 +53,7 @@ function getMMD(url, callback)
 			if (request.status == 200) {
 				// if the request succeeds, call the callback function with the mmd as the param
 				ans = request.responseText;
-				callback(ans, url);
+				callback(ans);
 
 			} else {
 				// if the request fails, call the callback function with an error message
@@ -64,7 +73,7 @@ function getMMD(url, callback)
  * Callback function for getMMD() 
  * @param mmd, returned mmd JSON from service
  */
-function handleMMD(mmd, url)
+function handleMMD(mmd)
 {
 	// deserialize
 	mmd = JSON.parse(mmd);
@@ -78,7 +87,7 @@ function handleMMD(mmd, url)
 	if (MICEDISPLAY) {
 		simplDeserialize(mmd);	
 		console.log(mmd['meta_metadata']);
-		getMetadata(url,mmd);
+		getMetadata(mmd);
 	} else {
 		console.log(mmd['meta_metadata']);
 		renderMMD(mmd['meta_metadata'], url);
@@ -88,9 +97,12 @@ function handleMMD(mmd, url)
 /*
  * temps?
  */
-function getMetadata(url,mmd)
+function getMetadata(mmd)
 {
-	if (browserExtraction)
+	var parser = mmd.meta_metadata.parser;
+	console.log(parser);
+		
+	if (browserExtraction && parser == "xpath")
 	{
 		var metadataObject;
 		metadataObject = extractMetadata(mmd);
@@ -113,7 +125,7 @@ function getMetadata(url,mmd)
 				//var ans = JSON.parse(JSON.stringify(request.responseText));
 				var ans = JSON.parse(request.responseText);
 				//console.log(ans);
-				handleMetadata(mmd,ans,url);
+				handleMetadata(mmd,ans);
 			}
 		};
 		
@@ -124,13 +136,14 @@ function getMetadata(url,mmd)
 
 }
 
-function handleMetadata(mmd,meta,url)
+function handleMetadata(mmd,meta)
 {
+	console.log("metadata: ");
 	console.log(meta);
+	console.log("mmd: ");
 	console.log(mmd);
 	
 	for (i in meta) {
-		console.log(i);
 		meta = meta[i];
 	}
 
@@ -139,5 +152,10 @@ function handleMetadata(mmd,meta,url)
 	var fields = MetadataLoader.createMetadata(true,mmd,meta,url);
 	console.log(fields);
 	MICE.render(task,fields);
+}
+
+function getPosition(str, m, i) 
+{
+   return str.split(m, i).join(m).length;
 }
 
