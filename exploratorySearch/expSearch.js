@@ -41,7 +41,7 @@ ExpSearchApp.isQuery = function(metadataField){
 	else if (metadataField['name'] == 'query'){
 		return true;
 	}
-	
+	//I  love turtles
 	return false;
 }
 
