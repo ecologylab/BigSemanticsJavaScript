@@ -24,7 +24,7 @@ function setup(document)
 {
 	// create the the 'slide-out'
 	buildSlideOut(document);
-	var x = getMMD(document.URL, handleMMD);
+	getMMD(document.URL, handleMMD);
 }
 
 /**
@@ -53,6 +53,7 @@ function getMMD(pageURL, callback)
 			if (request.status == 200) {
 				// if the request succeeds, call the callback function with the mmd as the param
 				ans = request.responseText;
+				//console.log(ans);
 				callback(ans);
 
 			} else {
@@ -65,7 +66,6 @@ function getMMD(pageURL, callback)
 		}	
 	};
 	request.send();
-	return request;
 }
 
 
@@ -80,10 +80,7 @@ function handleMMD(mmd)
 	//console.log(mmd);
 
 	console.log(mmd);
-	
-	//mmd = mmd['meta_metadata'];
-	//console.log(mmd);
-	
+
 	if (MICEDISPLAY) {
 		simplDeserialize(mmd);	
 		console.log(mmd['meta_metadata']);
@@ -130,7 +127,6 @@ function getMetadata(mmd)
 		};
 		
 		request.send();
-		// return request;
 	}
 	
 

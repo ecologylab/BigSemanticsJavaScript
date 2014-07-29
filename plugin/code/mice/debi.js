@@ -53,7 +53,7 @@ MetadataLoader.render = function(renderer, container, url, isRoot, clipping)
   else
   {  
     // Fetch the metadata from the service
-    MetadataLoader.getMetadata(url, "MetadataLoader.setMetadata");  
+    MetadataLoader.getMetadata(url, "MetadataLoader.setMetadata"); 
   }
 };
 

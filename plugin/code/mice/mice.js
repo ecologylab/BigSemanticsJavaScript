@@ -393,7 +393,7 @@ MICE.downloadAndDisplayDocument = function(event)
 		
 		// Add a loadingRow for visual feedback that the metadata is being downloaded / parsed
 		table.appendChild(MICE.createLoadingRow());
-	    MetadataLoader.render(MICE.render, table.parentElement, location, false)	;
+	    MetadataLoader.render(MICE.render, table.parentElement, location, false);
 		//MICE.addMetadataDisplay(table.parentElement, location, false);
 	}
 	// If there was no document location then the table must be a non-document composite in which case just expand
@@ -777,7 +777,8 @@ MICE.buildMetadataTable = function(table, isChildTable, isRoot, metadataFields, 
 			var fieldValueDiv = document.createElement('div');
 				fieldValueDiv.className = "moreButton";
 				fieldValueDiv.textContent = "More... ("+moreCount+")";
-				fieldValueDiv.setAttribute('onclick', 'MICE.morePlease(event)');;
+				//fieldValueDiv.setAttribute('onclick', 'MICE.morePlease(event)');
+				fieldValueDiv.onclick = MICE.morePlease;
 						
 			var moreData = {
 				"fields": FIELDS_TO_EXPAND,
@@ -1012,7 +1013,8 @@ MICE.buildMetadataField = function(metadataField, isChildTable, fieldCount, row)
 				
 				aTag.href = metadataField.value;
 				
-				aTag.setAttribute('onclick', 'MICE.logNavigate(event)');
+				//aTag.setAttribute('onclick', 'MICE.logNavigate(event)');
+				aTag.onclick = MICE.logNavigate;
 				aTag.className = "fieldValue";
 						
 				if(metadataField.style != null)
@@ -1041,7 +1043,8 @@ MICE.buildMetadataField = function(metadataField, isChildTable, fieldCount, row)
 					aTag.textContent = MetadataLoader.removeLineBreaksAndCrazies(metadataField.value);
 					
 					aTag.href = metadataField.navigatesTo;
-					aTag.setAttribute('onclick', 'MICE.logNavigate(event)');
+					//aTag.setAttribute('onclick', 'MICE.logNavigate(event)');
+					aTag.onclick = MICE.logNavigate;
 						
 					if(metadataField.style != null)
 						aTag.className += " "+metadataField.style;
@@ -1157,7 +1160,7 @@ MICE.buildMetadataField = function(metadataField, isChildTable, fieldCount, row)
 				expandButton = document.createElement('div');
 					expandButton.className = "expandButton X";
 					
-				expandButton.setAttribute('onclick', 'MICE.downloadAndDisplayDocument(event)');
+				//expandButton.setAttribute('onclick', 'MICE.downloadAndDisplayDocument(event)');
 				expandButton.onclick = MICE.downloadAndDisplayDocument;
 				
 				if(childUrl != "")

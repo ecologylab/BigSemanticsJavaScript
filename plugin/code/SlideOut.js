@@ -1,5 +1,3 @@
-var defVars = { };
-
 /**
  * Creates the slide-out to display information about the meta-metadata, metadata, and clippings available on the page.
  */

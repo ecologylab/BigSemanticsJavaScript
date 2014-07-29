@@ -79,6 +79,14 @@ function dataFromKids(mmdKids,contextNode,recurse)
 				}
 			}
 			
+			// if (field.scalar_type == "ParsedURL") {
+				// //obj = obj.replace(new RegExp(" ", 'g'),"_");
+				// obj = obj.split(' ').join('_');
+			// }
+			console.log("scalar: " + obj);
+			//console.log(string);
+			
+			
 			if (!recurse && field.name == 'location' && obj != null && obj != url) {
 				break;
 			}
@@ -92,18 +100,20 @@ function dataFromKids(mmdKids,contextNode,recurse)
 			field = field.composite;
 			name = field.name;
 			
-			if (name == 'root_document') continue;
-			
 			console.log(field.name + ": composite");
-			//console.log(field);
+			console.log(field);
 			
 			obj = getCompositeD(field,contextNode,recurse);
-			if(!isObjEmpty(obj,recurse))
+			console.log(obj);
+			if(!isObjEmpty(obj))
 			{
 				e = false;
-				d[name] = obj;
+				if (tag != undefined){
+					d[tag] = obj;
+				} else {
+					d[name] = obj;
+				}			
 			}
-			
 		}
 		else if (field.collection)
 		{
@@ -111,13 +121,17 @@ function dataFromKids(mmdKids,contextNode,recurse)
 			name = field.name;
 			
 			console.log(field.name + ": collection");
-			//console.log(field);
+			console.log(field);
 			
 			obj = getCollectionD(field,contextNode,recurse);
 			if(obj != null)
 			{
 				e = false;
-				d[name] = obj;
+				if (tag != undefined){
+					d[tag] = obj;
+				} else {
+					d[name] = obj;
+				}
 				//console.log(obj);
 			}			
 		}
@@ -170,10 +184,8 @@ function getScalarD(field,contextNode,recurse)
 			
 			data = data.replace(new RegExp(regex, 'g'),replace);
 		}
-		
 		return data;
 	} 
-	
 	return null;
 }
 
@@ -199,8 +211,6 @@ function getCompositeD(field,contextNode,recurse)
 		
 	} else if (recurse)
 	{
-		//console.log("kids");
-		//console.log(kids);
 		data = dataFromKids(kids,contextNode,false);
 		//console.log("asdf");
 		//console.log(data);
@@ -210,12 +220,6 @@ function getCompositeD(field,contextNode,recurse)
 	
 	if(data != null)
 	{	
-		//console.log(data);
-		
-		// var data = prettifyText(data);
-		// data = data.replace(new RegExp('\n', 'g'), "");
-		// data = data.trim();
-		
 		data['download_status'] = "UNPROCESSED";
 		if (field.hasOwnProperty('type')) {
 			data['mm_name'] = field.type;
@@ -245,14 +249,11 @@ function getCollectionD(field,contextNode,recurse)
 			if (x != null && x != "") {
 				data = x;
 			}
-
 		}
-		
 	}	
 			
 	if(data != null)
 	{	
-		//console.log(data);
 		return data;
 	}				
 	return null;
@@ -268,14 +269,21 @@ function getScalarString(field,xpath,contextNode)
 	string = data.stringValue;
 	
 	console.log(string);
-	console.log(string.charAt(0) == '/');
+	//console.log(string.charAt(0) == '/');
 	
 
 	
 	if (field.scalar_type == "ParsedURL" && string.charAt(0) == "/")
 	{
-		string = baseURL.concat(string);
-		console.log(string);
+		if (string.charAt(1) != "/") {
+			string = baseURL.concat(string);
+			console.log(string);	
+		} else {
+			var h = "http:";
+			string = h.concat(string);			
+			console.log(string);		
+		}
+		
 	}
 	
 	
@@ -345,10 +353,11 @@ function getCollectionArray(field,xpath,contextNode,recurse)
 	//console.log(d);
 	return d;
 }
-
-function isObjEmpty(o,recurse)
+/*
+ * checks if composite object should be included
+ */
+function isObjEmpty(o)
 {
-	//return (o.description == description && !recurse);
 	var size = 0;
 	var qua = true;
 	

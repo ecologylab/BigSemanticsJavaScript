@@ -17,14 +17,13 @@
 	
 	text-align: left;
 }
-.slide h1 {
+/*.slide h1 {
 	font-family: Arial, Helvetica, sans-serif;
 	font-weight: normal;
 	font-size: 20px;
 	margin-top: 10px;
     margin-bottom: 0px;
     color:	#000000;
-    /*line-height: 200%;*/
     padding: 0px;
     border: 0px;
     text-transform: capitalize;
@@ -97,5 +96,5 @@ div.exData {
     line-height: 120%;
     text-transform: none;
     text-align: left;
-}
+}*/
 
