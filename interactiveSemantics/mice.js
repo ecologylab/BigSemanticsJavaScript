@@ -1061,7 +1061,7 @@ MICE.buildMetadataField = function(metadataField, isChildTable, fieldCount, row,
 				
 				var aTag = document.createElement('a');
 					aTag.className = styleInfo.styles.fieldValue;
-					if(metadataField.style_name != "null"){
+					if(metadataField.style_name != "null" && metadataField.style_name!=""){
 						aTag.classList.add(metadataField.style_name);
 					}
 					
