@@ -149,8 +149,15 @@ function showMetadata()
 		  checkForMissingMetadata();
 	  }, 5000);
   }
-  else
-	  MICE.addMetadataDisplay(content, url, true);
+  else{
+	  if(document.URL.indexOf('reload=true') > -1){
+		  url = url.replace('&reload=true', '');
+		  MICE.addMetadataDisplay(content, url, true, null, true);
+	  }else{
+		  MICE.addMetadataDisplay(content, url, true, null, false);
+	  }
+	 
+  }
   
  //getJSONData(url);
 }
