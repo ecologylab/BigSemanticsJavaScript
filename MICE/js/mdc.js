@@ -1,5 +1,5 @@
 
-
+var reload_md = false;
 //Helpful function from http://jsfiddle.net/KJQ9K/
 function syntaxHighlight(json) {
   json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -148,7 +148,7 @@ function showMetadata()
   }
   else{
 	 
-		  MICE.addMetadataDisplay(content, url, true, null);
+		  MICE.addMetadataDisplay(content, url, true, null, reload_md);
 	  
 	 
   }
@@ -156,7 +156,7 @@ function showMetadata()
  //getJSONData(url);
 }
 function toggleReload(){
-	FORCE_METADATA_RELOAD = !FORCE_METADATA_RELOAD;
+	reload_md = !reload_md;
 }
 function checkForMissingMetadata()
 {
