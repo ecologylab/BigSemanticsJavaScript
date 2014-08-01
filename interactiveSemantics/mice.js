@@ -92,7 +92,7 @@ MICE.render = function(task, metadataFields, styleInfo){
 /**
  * Needs further separation 
  */
-MICE.addMetadataDisplay = function(container, url, isRoot, clipping, refreshMD){
+MICE.addMetadataDisplay = function(container, url, isRoot, clipping){
 	// Add the rendering task to the queue
 	var task = new RenderingTask(url, container, isRoot, clipping, MICE.render)
 	MetadataLoader.queue.push(task);	
@@ -105,7 +105,7 @@ MICE.addMetadataDisplay = function(container, url, isRoot, clipping, refreshMD){
 	else
 	{	
 		// Fetch the metadata from the service
-		MetadataLoader.getMetadata(url, "MetadataLoader.setMetadata", refreshMD);	
+		MetadataLoader.getMetadata(url, "MetadataLoader.setMetadata");	
 	}
 }
 

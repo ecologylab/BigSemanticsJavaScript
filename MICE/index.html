@@ -71,17 +71,31 @@
 
     <!-- Navbar -->
     <div class="navbar navbar-inverse navbar-fixed-top">
-      <div class="navbar-inner">
+      <div class="navbar-inner form-inline">
         <div class="container">
           <a class="brand">Metadata In-Context Expander (MICE)</a>
-
+						
             <form class="navbar-form pull-right" action="" onsubmit="return false;">
+              
               <input type="text" size="500" class="span5" id="targetURL" onkeydown="onEnterShowMetadata(event);" value="http://www.amazon.com/Discovery-Daft-Punk/dp/B000059MEK/ref=sr_1_1?s=music&ie=UTF8&qid=1365793732"/>
               <button type="button" class="btn" onclick="showMetadata();">Go!</button>
               <button type="button" class="btn" data-toggle="modal" data-target="#linkModal" onclick="setLinkValue();"><i class="icon-bookmark"></i></button>
+            	
             </form>
-
+ 						<!-- <div class="checkbox " style="position:relative; top:10px"  title="When checked, the service will not use any cached metadata for a page.">
+	                  <label>
+	                    <input type="checkbox" name="force_reload" id='force_reload'>Refresh MD
+	                    
+	                 </label>
+             </div> -->
+	                  <label style="position:relative; top:10px" title="When checked, the service will not use any cached metadata for a page.">
+	                    <input type="checkbox" name="force_reload" id='force_reload' style="position: relative;bottom: 2.5px;" onclick="toggleReload()">Refresh MD
+	                    
+	                 </label>
+	                
+	                
         </div>
+          
       </div>
     </div>
 
@@ -92,7 +106,7 @@
             <li><a href="http://ecologylab.net" target="_blank">Interface Ecology Lab</a></li>
             <li><a href="http://ecologylab.net" target="_blank"><img class="nav-img pull-right" src="img/ecologylab.png" /></a></li>
           </ul>
-
+				
         </div>
       </div>
     </div>

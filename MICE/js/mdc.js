@@ -129,18 +129,15 @@ function showMetadata()
   }
   if(window.history.pushState)
   {
-    if($.QueryString["uselocal"]){
-  	  window.history.pushState("state", "MICE Demo", "index.html?url="+url+"&uselocal=true")
-
-    }
-    else{
+   
+    
   	  window.history.pushState("state", "MICE Demo", "index.html?url="+url)
 
-    }
+    
   }
   
   MetadataLoader.clearDocumentCollection();
-
+  var refreshCheckbox = document.getElementById('force_reload').checked;
   if (url.indexOf("twitter.com") != -1)
   {
 	  document.dispatchEvent(new Event("tweetbubbleExternal"));
@@ -150,18 +147,17 @@ function showMetadata()
 	  }, 5000);
   }
   else{
-	  if(document.URL.indexOf('reload=true') > -1){
-		  url = url.replace('&reload=true', '');
-		  MICE.addMetadataDisplay(content, url, true, null, true);
-	  }else{
-		  MICE.addMetadataDisplay(content, url, true, null, false);
-	  }
+	 
+		  MICE.addMetadataDisplay(content, url, true, null);
+	  
 	 
   }
   
  //getJSONData(url);
 }
-
+function toggleReload(){
+	FORCE_METADATA_RELOAD = !FORCE_METADATA_RELOAD;
+}
 function checkForMissingMetadata()
 {
 	var url = document.getElementById("targetURL").value;

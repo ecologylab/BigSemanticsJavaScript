@@ -9,7 +9,7 @@ var SEMANTIC_SERVICE_URL = "http://ecology-service.cse.tamu.edu/BigSemanticsServ
 
 // Constant for how deep to recurse through the metadata
 var METADATA_FIELD_MAX_DEPTH = 7;
-
+var FORCE_METADATA_RELOAD = false;
 // The main namespace.
 var MetadataLoader = {};
 
@@ -64,10 +64,10 @@ MetadataLoader.render = function(renderer, container, url, isRoot, clipping)
  * @param url, url of the target document
  * @param callback, name of the function to be called from the JSON-p call
  */
-MetadataLoader.getMetadata = function(url, callback, reload)
+MetadataLoader.getMetadata = function(url, callback)
 {
 	var serviceURL; 
-	if(reload == true){
+	if(FORCE_METADATA_RELOAD == true){
 		serviceURL = SEMANTIC_SERVICE_URL + "metadata.jsonp?reload=true&callback=" + callback
         + "&url=" + encodeURIComponent(url);
 	}
@@ -88,8 +88,18 @@ MetadataLoader.getMetadata = function(url, callback, reload)
  */
 MetadataLoader.getMMD = function(url, callback)
 {
-  var serviceURL = SEMANTIC_SERVICE_URL + "mmd.jsonp?callback=" + callback
-                   + "&url=" + encodeURIComponent(url) + "&withurl";
+  var serviceURL; 
+  
+  if(FORCE_METADATA_RELOAD == true){
+	  serviceURL = SEMANTIC_SERVICE_URL + "mmd.jsonp?reload=true&callback=" + callback
+      + "&url=" + encodeURIComponent(url) + "&withurl";
+	}
+	else{
+		serviceURL = SEMANTIC_SERVICE_URL + "mmd.jsonp?callback=" + callback
+        + "&url=" + encodeURIComponent(url) + "&withurl";
+	}
+  
+  
   MetadataLoader.doJSONPCall(serviceURL);
   console.log("requesting semantics service for mmd: " + serviceURL);
 }

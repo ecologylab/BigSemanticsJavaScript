@@ -28,7 +28,9 @@ div#mdcJson.span9 {
 	margin-bottom: 100px;
 
 }
-
+.toggle{
+	vertical-align: middle;
+}
 div.collapse {
 	min-width: 870px !important;
 
