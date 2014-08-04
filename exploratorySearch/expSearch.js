@@ -830,7 +830,7 @@ ExpSearchApp.removeSearchField = function(event){
 	if (event.target.className == "icon-remove"){
 		button = button.parentNode;
 	}
-	var parentID = button.nextSibling.getAttribute("parentset")
+	var parentID = button.previousSibling.getAttribute("parentset")
 	var formContainer = button.parentNode;
 	while(formContainer.hasChildNodes()){
 		formContainer.removeChild(formContainer.lastChild);
