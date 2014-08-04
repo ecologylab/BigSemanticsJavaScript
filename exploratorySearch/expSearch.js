@@ -219,6 +219,18 @@ ExpSearchApp.searchFromMetadata = function(metadataFields){
 					
 				}
 			}
+			else if(metadataField.parentMDType = 'google_scholar_search'){
+				for (var k = 0; k < metadataField.value.length && k < MAX_RESULTS; k++){
+					if(metadataField.value[k].value[5]!= null){
+						result_locations.push(toHTTPS(metadataField.value[k].value[5].value[0].navigatesTo));
+					}
+					else{
+						result_locations.push(toHTTPS("https://www.google.com"));
+						
+					}
+					
+				}
+			}
 			else{
 				for (var j = 0; j < MAX_RESULTS && j < metadataField.value.length; j++){
 					//console.log(metadataField.value[j].value[0].navigatesTo);

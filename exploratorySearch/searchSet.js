@@ -47,7 +47,7 @@ SearchSet.prototype.sameSet = function(query, engineList, parentID){
 			return false;
 		}
 	}
-	else if (this.query == query && engineList.equals(this.engines) && this.parent == null){
+	else if (this.query == query && engineList.equals(this.engines)){
 		return true;
 	}
 	else{
