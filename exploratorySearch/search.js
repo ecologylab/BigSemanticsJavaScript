@@ -2,7 +2,8 @@ var MAX_RELATED = 9;
 function onlyUnique(value, index, self) { 
     return self.indexOf(value) === index;
 }
-function Search(query, type, location, result_locations, searchResults ){
+
+function Search(query, type, location, result_locations, searchResults){
 	this.query = query;
 	this.type = type;
 	this.location = location;
@@ -16,12 +17,7 @@ function Search(query, type, location, result_locations, searchResults ){
 
 	}
 	this.relatedQueries = [];
-}
 
-function SearchResult(location, type, title){
-	this.location = location;
-	this.type = type;
-	//this.title = title;
 }
 
 Search.prototype.addSearchExpandCollapseButton = function(searchX){
@@ -114,59 +110,4 @@ Search.prototype.addSearchDisplay = function(searchX, parent){
 	
 }
 
-SearchResult.prototype.addSearchResultExpandCollapseButton = function(searchResultX){
-	var searchRCollapseButton = document.createElement('div');
-	searchRCollapseButton.className = 'searchResultCollapseButton ';
-	searchRCollapseButton.onclick = ExpSearchApp.expandCollapseSearchResult;
-	var searchRCollapseSymbol = document.createElement('div');
-	searchRCollapseSymbol.className = 'searchResultCollapseSymbol ';
-
-	searchRCollapseSymbol.style.display = 'block';
-	var searchRExpandSymbol = document.createElement('div');
-	searchRExpandSymbol.className = 'searchResultExpandSymbol ';
-	searchRExpandSymbol.style.display = 'none';
-	
-	
-	searchRCollapseButton.appendChild(searchRExpandSymbol);
-	searchRCollapseButton.appendChild(searchRCollapseSymbol);
-	
-	return searchRCollapseButton;
-} 
-
-SearchResult.prototype.addSearchHandle = function(searchResultX){
-	var searchHandle = document.createElement('div');
-	searchHandle.className = "searchResultHandle";
-	searchHandle.appendChild(SearchResult.prototype.addSearchResultExpandCollapseButton(searchResultX));
-	//Creates three rows of stacked black squares to indicate drag and droppability!
-	for (var i = 0; i < 2; i++){
-		var grip = document.createElement('div');
-		grip.className = 'grip';
-		grip.innerHTML = '<p>&#x25A0;&#x25A0;&#x25A0;</p>';
-		searchHandle.appendChild(grip);
-	}
-	
-	
-	//Drag and dro prelated attributes
-	searchHandle.setAttribute("draggable", "true");
-	searchHandle.setAttribute('ondragstart', 'clippingDragStart(event)');
-	searchHandle.setAttribute('ondragend', 'clippingDragEnd(event)');
-	return searchHandle;
-}
-
-SearchResult.prototype.addSearchResultDisplay = function(searchResultX, parent){
-	var newSearchDisplay = document.createElement('div');
-	newSearchDisplay.className = "indResultContainer";
-	parent.appendChild(newSearchDisplay);
-	
-	
-	
-	var miceContainer = document.createElement('div');
-	miceContainer.className = "metadataRendering";
-	newSearchDisplay.appendChild(SearchResult.prototype.addSearchHandle(searchResultX));
-	newSearchDisplay.appendChild(miceContainer);
-	
-	MetadataLoader.render(MICE.render, miceContainer, searchResultX.location, true);
-	miceContainer.setAttribute('onmousedown', 'ExpSearchApp.removeQuerySearchBox(event)')
-	miceContainer.setAttribute('onmouseup', 'ExpSearchApp.textSelected(event)');
-}
 

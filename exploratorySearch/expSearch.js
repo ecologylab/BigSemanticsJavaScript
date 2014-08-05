@@ -34,47 +34,7 @@ function encodeXml(s) {
  * 
  * For now, we're just going to let it start with ONE engine 
  */
-ExpSearchApp.isQuery = function(metadataField){
-	if (!metadataField){
-		return false;
-	}
-	else if (metadataField['name'] == 'query'){
-		return true;
-	}
-	//I  love turtles
-	return false;
-}
 
-ExpSearchApp.isLocation = function (metadataField){
-	if (!metadataField){
-		return false;
-	}
-	else if (metadataField['name'] == 'location'){
-		return true;
-	}
-	
-	return false;
-}
-ExpSearchApp.isResult = function (metadataField){
-	
-	if (!metadataField){
-		return false;
-	}
-	else if (metadataField['name'] == 'search_results'){
-		return true;
-	}
-	
-	return false;
-}
-ExpSearchApp.isRelatedSearch = function(metadataField){
-	if(!metadataField){
-		return false;
-	}
-	else if(metadataField['name'] == 'related_searches'){
-		return true;
-	}
-	return false;
-}
 ExpSearchApp.initialize = function(){
 	if (document.URL.indexOf("http://localhost:") > -1){
 		var hostname = window.location.hostname;
@@ -179,104 +139,7 @@ function toHTTPS(url){
  *  To-do: add support for storing title
  */
 
-ExpSearchApp.searchFromMetadata = function(metadataFields){
-	
-	/*
-	 * Builds display for a search and adds it to the container for the SearchSet
-	 */
-	
-	var query;
-	var result_locations = [];
-	var type;
-	var search_location;
-	var search;
-	console.log(metadataFields);
-	for(var i = 0; i < metadataFields.length; i++)
-	{
-		
-		 console.log(i);
-		var metadataField = metadataFields[i];
-		if(ExpSearchApp.isQuery(metadataField)){
-			query = metadataField['value'];
-			type = metadataField['parentMDType'];
-		}
-		
-		else if (ExpSearchApp.isLocation(metadataField)){
-			search_location = metadataField['value'];
-		}
-		
-		else if (ExpSearchApp.isResult(metadataField)){
-			
-			if (metadataField.parentMDType == "google_search" || metadataField.parentMDType=="research_gate_search"){
-				for (var k = 0; k < metadataField.value.length && k < MAX_RESULTS; k++){
-					if(metadataField.value[k].value[0].value[0] != null){
-						result_locations.push(toHTTPS(metadataField.value[k].value[0].value[0].navigatesTo));
-					}
-					else{
-						result_locations.push(toHTTPS("https://www.google.com"));
-						
-					}
-					
-				}
-			}
-			else if(metadataField.parentMDType = 'google_scholar_search'){
-				for (var k = 0; k < metadataField.value.length && k < MAX_RESULTS; k++){
-					if(metadataField.value[k].value[5]!= null){
-						result_locations.push(toHTTPS(metadataField.value[k].value[5].value[0].navigatesTo));
-					}
-					else{
-						result_locations.push(toHTTPS("https://www.google.com"));
-						
-					}
-					
-				}
-			}
-			else{
-				for (var j = 0; j < MAX_RESULTS && j < metadataField.value.length; j++){
-					//console.log(metadataField.value[j].value[0].navigatesTo);
-					if(metadataField.value[j].value[0] != null){
-						result_locations.push(toHTTPS(metadataField.value[j].value[0].navigatesTo));
-					}else{
-						result_locations.push(toHTTPS("https://www.google.com"));
-						
-					}
-					
-					
-					
-				}
-			}
 
-			if(result_locations.length > 0 && query != null){
-				
-				/*Uses the above information to start constructing
-				 * searchResults, searches, and a SearchSet
-				 */
-				var searchResults = [];
-				for(var k = 0; (k < result_locations.length)  && k <MAX_RESULTS; k++){
-					var result = new SearchResult(result_locations[k], type);
-					searchResults.push(result);
-				}
-				search = new Search(query, type, search_location, result_locations, searchResults);
-					
-				
-			}
-		
-		}
-		else if (ExpSearchApp.isRelatedSearch(metadataField)){
-			if (search != null){
-				var rQueries = [];
-				for (var k = 0; k < metadataField.value.length; k++){
-					rQueries.push(metadataField.value[k].value[0].value);
-				}
-				console.log(rQueries);
-				search.relatedQueries = rQueries;
-			}
-		}
-		
-	}
-	
-	return search;
-}
 
 /*
  * Adds new SearchSet to ExpSearch, redraws searchRenderings and History
@@ -289,7 +152,7 @@ ExpSearchApp.addQuery = function(query, engineList, parentSearchSetID){
 	if(engineList.length < 1){
 		return;
 	}
-	if (exploratorySearches.last() == null){
+	if (currentExpSearch == null){
 		return "error";
 	}
 	var searchSet;
@@ -341,10 +204,10 @@ ExpSearchApp.addQuery = function(query, engineList, parentSearchSetID){
 	
 		
 		engineList.sort();
-		console.log(engineList);
+		
 		for (var i = 0; i < currentExpSearch.SearchSets.length; i++){
-			if (exploratorySearches.last().SearchSets[i].sameSet(query, engineList, parentSearchSetID)){
-				exploratorySearches.last().history.restoreEntry(exploratorySearches.last().SearchSets[i].id);
+			if (currentExpSearch.SearchSets[i].sameSet(query, engineList, parentSearchSetID)){
+				currentExpSearch.history.restoreEntry(currentExpSearch.SearchSets[i].id);
 				return;
 			}
 			
@@ -354,7 +217,7 @@ ExpSearchApp.addQuery = function(query, engineList, parentSearchSetID){
 		if (parentSearchSetID != null){
 			ss.parentSetID = parentSearchSetID;
 			//Increase weight of parent SS
-			var entries = exploratorySearches.last().history.entryList;
+			var entries = currentExpSearch.history.entryList;
 			for (var i = 0; i < entries.length; i++){
 				if(entries[i].id == parentSearchSetID){
 					entries[i].increaseWeight(1);
@@ -362,7 +225,7 @@ ExpSearchApp.addQuery = function(query, engineList, parentSearchSetID){
 			}
 		}
 
-		exploratorySearches.last().addSearchSet(ss);
+		currentExpSearch.addSearchSet(ss);
 		ss.engines = [];
 
 		for (var i = 0; i < engineList.length ; i++){
@@ -372,7 +235,7 @@ ExpSearchApp.addQuery = function(query, engineList, parentSearchSetID){
 		
 	
 	console.log(exploratorySearches);
-	exploratorySearches.last().resultSetContainer.appendChild(visual);
+	currentExpSearch.resultSetContainer.appendChild(visual);
 }
 
 /*
@@ -406,19 +269,19 @@ ExpSearchApp.newSearchFromRelatedQuery = function(event){
 }
 ExpSearchApp.renderNewMultipleSearch = function(task, metadataFields){
 	
-	var newSearch = ExpSearchApp.searchFromMetadata(metadataFields);
+	var newSearch = searchBuilder.searchFromMetadata(metadataFields);
 	//Checks the current query used by the most recent ExploratorySearch
 	
 	if (currentExpSearch.currentSearchSet().query == newSearch.query){
 		
-		exploratorySearches.last().currentSearchSet().addSearch(newSearch);
-		ExpSearchApp.displaySearchSet(exploratorySearches.last());
+		currentExpSearch.currentSearchSet().addSearch(newSearch);
+		ExpSearchApp.displaySearchSet(currentExpSearch);
 
 	}
 	
 	else{
 	
-		ExpSearchApp.displaySearchSet(exploratorySearches.last());
+		ExpSearchApp.displaySearchSet(currentExpSearch);
 
 	}
 	
@@ -431,16 +294,16 @@ ExpSearchApp.renderNewMultipleSearch = function(task, metadataFields){
  * Matches from single searches to searchSets based on shared queries
  */
 ExpSearchApp.renderNewSingleSearch= function(task, metadataFields){
-	var newSearch = ExpSearchApp.searchFromMetadata(metadataFields);
+	var newSearch = searchBuilder.searchFromMetadata(metadataFields);
 	
 	var newSS = new SearchSet(newSearch.query, [newSearch]);
-	exploratorySearches.last().addSearchSet(newSS);
-	ExpSearchApp.displaySearchSet(exploratorySearches.last());
+	currentExpSearch.addSearchSet(newSS);
+	ExpSearchApp.displaySearchSet(currentExpSearch);
 	MetadataLoader.queue.splice(MetadataLoader.queue.indexOf(task), 1);
 }
 
 ExpSearchApp.initialRender = function(task, metadataFields){
-	var searchList = [ExpSearchApp.searchFromMetadata(metadataFields)];
+	var searchList = [searchBuilder.searchFromMetadata(metadataFields)];
 	var searchSet = new SearchSet(searchList[0].query ,searchList);
 	
 	if (searchSet != null){
@@ -592,7 +455,13 @@ ExpSearchApp.expandCollapseSearchResult = function(event){
 	button.className += searchType;
 	
 	//finds the first value in the associated metadataRendering
-	var title = button.parentNode.nextSibling.childNodes[0].childNodes[0].childNodes[0].childNodes[1].childNodes[0].childNodes[1].innerHTML;
+	var preTitle= button.parentNode.nextSibling.childNodes[0].childNodes[0].childNodes[0].childNodes[1].childNodes[0]
+	var title;
+	if(preTitle.childNodes[1] != null){
+		title = preTitle.childNodes[1].innerHTML;
+	}else{
+		title = preTitle.childNodes[0].innerHTML;
+	}
 	var type = button.parentNode.nextSibling.childNodes[0].getAttribute('mdtype');
 	
 	
@@ -731,12 +600,12 @@ ExpSearchApp.expandCollapseEntry = function(event){
 ExpSearchApp.displayComparison = function(entryID, entry){
 	
 	var searchSet;
-		for(var i = 0; i < exploratorySearches.last().history.entryList.length; i++){
-		if (exploratorySearches.last().history.entryList[i].id == entryID){
-			exploratorySearches.last().history.entryList[i].compared = true;
-			exploratorySearches.last().history.entryList[i].weight++;
-			exploratorySearches.last().history.addHistoryDisplay();
-			searchSet = exploratorySearches.last().history.entryList[i].SearchSet;
+		for(var i = 0; i < currentExpSearch.history.entryList.length; i++){
+		if (currentExpSearch.history.entryList[i].id == entryID){
+			currentExpSearch.history.entryList[i].compared = true;
+			currentExpSearch.history.entryList[i].weight++;
+			currentExpSearch.history.addHistoryDisplay();
+			searchSet = currentExpSearch.history.entryList[i].SearchSet;
 		}
 		
 		entry.className += " compared";
@@ -781,20 +650,20 @@ ExpSearchApp.addDropHint = function(phrase){
 }
 ExpSearchApp.removeComparisonDisplay = function(entryID, parent){
 	
-	for(var i = 0; i < exploratorySearches.last().history.entryList.length; i++){
-		exploratorySearches.last().history.entryList[i].compared = false;
+	for(var i = 0; i < currentExpSearch.history.entryList.length; i++){
+		currentExpSearch.history.entryList[i].compared = false;
 		var entryHTML = document.getElementById(entryID);
 
 		entryHTML.classList.remove('compared');
 
-		if (exploratorySearches.last().history.entryList[i].id == entryID){
-			exploratorySearches.last().history.entryList[i].compared = false;
+		if (currentExpSearch.history.entryList[i].id == entryID){
+			currentExpSearch.history.entryList[i].compared = false;
 			var entryHTML = document.getElementById(entryID);
 		
 			entryHTML.classList.remove('compared');
 		}
 	}
-	exploratorySearches.last().history.addHistoryDisplay();
+	currentExpSearch.history.addHistoryDisplay();
 		//Remove all nodes
 	while (parent.hasChildNodes())
 		parent.removeChild(parent.lastChild);	
