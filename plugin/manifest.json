@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "plugin",
-  "description": "This extension helps ideamache",
+  "description": "This extension extracts metadata while you browse",
   "version": "1.0",
   "permissions": [
 	  	"http://*/*",
@@ -23,7 +23,8 @@
 	    	"code/mice/metadataRenderer.js",
 	    	"code/fieldParsers.js",
 	    	"code/mice/simplDeserializer.js",
-	    	"code/extractMetadata.js"
+	    	"code/extractMetadata.js",
+	    	"code/dragEvents.js"
 	    ],
 	    "css": [
 	    	"code/style.css",
