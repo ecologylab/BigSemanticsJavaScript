@@ -1,51 +1,26 @@
-// function makeDraggable()
-// {
-	// console.log("Getting pictures and stuff. . .");
-	// var images = document.getElementsByTagName("img");
-	// var num = images.length;
-// 
-	// for (var i = 0; i < num; i++) {
-		// images[i].draggable = true;
-		// images[i].ondragstart = mouseDown;
-	// }
-// }
-
-
-function dragStart(event)
-{
-	console.log(serializedMeta);
-	//var data = event.dataTransfer.setData("Text",serializedMeta); //??
-}
-
-
 function handleDrag() {
-	document.addEventListener("dragstart", attach);
+	document.addEventListener("dragstart", attachInfo);
 }
 
-
-function attach(event)
-{
-	//console.log(event);
-	// var element = event.srcElement;
-	// event.srcElement['simpl:metadata'] = serializedMeta;
-	// event.srcElement.ondragstart = dragStart;
-	// console.log(event);
-	
+/*
+ * attaches the needed information to the target node before it sends metadata to ideamache
+ */
+function attachInfo(event)
+{	
 	var obj = new Object();
 	obj.metadata = serializedMeta;
 	obj.source = document.URL;
 	obj.xpath = getPath(event.target);
-	//getPath(event.target);
-	console.log(obj.xpath);
-	//console.log(event.target);
 	
 	event.dataTransfer.setData("application/json",JSON.stringify(obj));
-	
 }
 
+/*
+ * gets xpath of target node of clipping
+ */
 function getPath(element)
 {
-	console.log("path");
+	//console.log("path");
 	//console.log(element.id=="");
 	if (element.id != "")
 	{

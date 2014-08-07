@@ -86,7 +86,7 @@ function handleMMD(mmd)
 }
 
 /*
- * temps?
+ * decides whether or not the code will call the service for the metadata
  */
 function callService(mmd)
 {
@@ -107,6 +107,9 @@ function callService(mmd)
 	handleMetadata(mmd,metadataObject,url);
 }
 
+/*
+ * get metadata from service if needed
+ */
 function getMetadataFromService(mmd)
 {
 	//to get metadata
@@ -132,7 +135,9 @@ function getMetadataFromService(mmd)
 	request.send();
 }
 
-
+/*
+ * sends mmd and metadata to mice display code for a mice display on the slide-out
+ */
 function handleMetadata(mmd,meta)
 {
 	console.log("mmd: ");
@@ -141,11 +146,11 @@ function handleMetadata(mmd,meta)
 	console.log(meta);
 	
 	for (i in meta) {
-		meta = meta[i];
+		var meta2 = meta[i];
 	}
 
 	var task = new RenderingTask(url,slideOutVisual,true);	
-	var fields = MetadataLoader.createMetadata(true,mmd,meta,url);
+	var fields = MetadataLoader.createMetadata(true,mmd,meta2,url);
 	console.log(fields);
 	MICE.render(task,fields);
 	
