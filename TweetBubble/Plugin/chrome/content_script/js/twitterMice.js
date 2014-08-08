@@ -133,7 +133,7 @@ MetadataRenderer.addMetadataDisplay = function(container, url, isRoot, clipping,
 MetadataRenderer.expandCollapseTable = function(event)
 {
 	var button = event.target;
-	var miceStyles = getMiceStyleDictionary(button.mmdType);
+	var miceStyles = InterfaceStyle.getMiceStyleDictionary(button.mmdType);
 	var styleInfo = {styles: miceStyles, type: button.mmdType};
 	
 	if(button.className == styleInfo.styles.collapseSymbol || button.className == styleInfo.styles.expandSymbol)
@@ -278,7 +278,7 @@ MetadataRenderer.expandTable = function(table, styleInfo)
 MetadataRenderer.downloadAndDisplayDocument = function(event)
 {
 	var button = event.target;
-	var miceStyles = getMiceStyleDictionary(button.mmdType);
+	var miceStyles = InterfaceStyle.getMiceStyleDictionary(button.mmdType);
 	var styleInfo = {styles: miceStyles, type: button.mmdType};
 	
 	if(button.className == styleInfo.styles.collapseSymbol || button.className == styleInfo.styles.expandSymbol)
@@ -383,7 +383,7 @@ MetadataRenderer.downloadAndDisplayDocument = function(event)
 MetadataRenderer.highlightDocuments = function(event)
 {
 	var row = event.srcElement;
-	var miceStyles = getMiceStyleDictionary(row.mmdType);
+	var miceStyles = InterfaceStyle.getMiceStyleDictionary(row.mmdType);
 	var styleInfo = {styles: miceStyles, type: row.mmdType};
 	
 	if(row.className == styleInfo.styles.expandButton)
@@ -457,7 +457,7 @@ MetadataRenderer.morePlease = function(event)
 	parentTable.removeChild(parentRow);
 	
 	// Build and add extra rows
-	var miceStyles = getMiceStyleDictionary(moreData.type);
+	var miceStyles = InterfaceStyle.getMiceStyleDictionary(moreData.type);
 	var styleInfo = {styles: miceStyles, type: moreData.type};
 	MetadataRenderer.buildMetadataTable(parentTable, moreData.isChild, false, moreData.data, moreData.fields, styleInfo, null,
 																								moreData.isMetadataDisplay);
@@ -1243,7 +1243,7 @@ MetadataRenderer.makeTinge = function(color)
 MetadataRenderer.highlightTweet = function(event)
 {
 	var fieldValueDiv = event.currentTarget;
-	var miceStyles = getMiceStyleDictionary(fieldValueDiv.mmdType);
+	var miceStyles = InterfaceStyle.getMiceStyleDictionary(fieldValueDiv.mmdType);
 	var styleInfo = {styles: miceStyles};
 	
 	fieldValueDiv.className = styleInfo.styles.fieldCompositeContainerHighlightTweet;
@@ -1252,7 +1252,7 @@ MetadataRenderer.highlightTweet = function(event)
 MetadataRenderer.unhighlightTweet = function(event)
 {
 	var fieldValueDiv = event.currentTarget;
-	var miceStyles = getMiceStyleDictionary(fieldValueDiv.mmdType);
+	var miceStyles = InterfaceStyle.getMiceStyleDictionary(fieldValueDiv.mmdType);
 	var styleInfo = {styles: miceStyles};
 	
 	fieldValueDiv.className = styleInfo.styles.fieldCompositeContainer;
@@ -1301,7 +1301,7 @@ MetadataRenderer.animateScrollBackAndCollapse = function(top, containers)
 MetadataRenderer.collapseOrScrollToExpandedItem = function(event)
 {
 	var elt = event.currentTarget;
-	var miceStyles = getMiceStyleDictionary(elt.mmdType);
+	var miceStyles = InterfaceStyle.getMiceStyleDictionary(elt.mmdType);
 	var styleInfo = {styles: miceStyles};
 	
 	var y = 0;        
