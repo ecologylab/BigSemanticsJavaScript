@@ -22,33 +22,6 @@ var favoriteIconPath2 = isExtension? chrome.extension.getURL("content_script/img
 
 var MetadataRenderer = MICE;
 
-/**
- * Retrieves the target metadata and meta-metadata, constructs the metadata table, and appends it to the container.
- * @param container, the HTML object which the final metadata rendering will be appened into
- * @param url, url of the target document
- * @param isRoot, true if this is the root metadata for the rendering,
- * 		needed because styling is slightly different for the root metadata rendering
- */
-MetadataRenderer.addMetadataDisplay = function(container, url, isRoot, clipping, expandedItem)
-{	
-	// Add the rendering task to the queue
-	var task = new RenderingTask(url, container, isRoot, clipping, MetadataRenderer.render, expandedItem);
-	MetadataLoader.queue.push(task);	
-	
-	if(clipping != null && clipping.rawMetadata != null)
-	{
-		clipping.rawMetadata.deserialized = true;
-		MetadataLoader.setMetadata(clipping.rawMetadata);
-	}
-	else
-	{	
-		// Fetch the metadata from the service
-		if(!isExtension)
-			MetadataLoader.getMetadata(url, "MetadataLoader.setMetadata");	
-	}
-}
-
-
 
 /**
  * Create the metadataRendering, add it to the HTML container, and complete the RenderingTask
@@ -128,47 +101,30 @@ MetadataRenderer.render = function(task, metadataFields, styleInfo)
 }
 
 /**
- * RenderingTask represents a metadata rendering that is in progress of being downloaded and parsed
- * @param url of the document
- * @param container, HTML container which will hold the rendering
- * @param isRoot, true if this is the root document for a metadataRendering
- * @param expandedItem, a non-metadata item for which the display was constructed
+ * Retrieves the target metadata and meta-metadata, constructs the metadata table, and appends it to the container.
+ * @param container, the HTML object which the final metadata rendering will be appened into
+ * @param url, url of the target document
+ * @param isRoot, true if this is the root metadata for the rendering,
+ * 		needed because styling is slightly different for the root metadata rendering
  */
-function RenderingTask(url, container, isRoot, clipping, renderer, expandedItem)
-{
-	if(url != null)
-		this.url = url.toLowerCase();
+MetadataRenderer.addMetadataDisplay = function(container, url, isRoot, clipping, expandedItem)
+{	
+	// Add the rendering task to the queue
+	var task = new RenderingTask(url, container, isRoot, clipping, MetadataRenderer.render, expandedItem);
+	MetadataLoader.queue.push(task);	
 	
-	this.container = container;
-	this.clipping = clipping;
-	
-	this.metadata = null;	
-	this.mmd = null;
-	
-	this.isRoot = isRoot;
-	
-	this.renderer = renderer;
-	this.expandedItem = expandedItem;
-}
-
-/**
- * Does the given url match the RenderingTask's url?
- * @param url, url to check against the RenderingTask
- */
-RenderingTask.prototype.matches = function(url)
-{
-	url = url.toLowerCase();
-	if(this.url.indexOf(url) == 0)
+	if(clipping != null && clipping.rawMetadata != null)
 	{
-		return true;
-	}	
-	else if(url.indexOf(this.url) == 0)
-	{
-		return true;
+		clipping.rawMetadata.deserialized = true;
+		MetadataLoader.setMetadata(clipping.rawMetadata);
 	}
-	return false;
+	else
+	{	
+		// Fetch the metadata from the service
+		if(!isExtension)
+			MetadataLoader.getMetadata(url, "MetadataLoader.setMetadata");	
+	}
 }
-
 
 /**
  * Expand or collapse a collection or composite field table.
