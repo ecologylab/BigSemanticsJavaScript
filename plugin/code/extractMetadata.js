@@ -46,6 +46,9 @@ function extractMetadata(mmd) {
 	return extractedMeta;
 }
 
+/*
+ * loops through the kids of the metadata field
+ */
 function dataFromKids(mmdKids,contextNode,recurse,parserContext)
 {
 	var d = { };
@@ -57,15 +60,15 @@ function dataFromKids(mmdKids,contextNode,recurse,parserContext)
 		var obj;
 		var tag;
 		
-		console.log("recurse: " + recurse);
+		//console.log("recurse: " + recurse);
 		
 		if(field.scalar) 
 		{
 			field = field.scalar;
 			name = field.name;
 			
-			console.log(name + ": scalar");
-			console.log(field);
+			//console.log(name + ": scalar");
+			//console.log(field);
 			
 			if (field.hasOwnProperty('context_node'))
 			{
@@ -100,7 +103,7 @@ function dataFromKids(mmdKids,contextNode,recurse,parserContext)
 			}
 
 			//console.log("scalar: " + obj);
-			console.log("string: " + string);
+			//console.log("string: " + string);
 			
 			if (!recurse && field.name == 'location' && obj != null && obj != url) {
 				break;
@@ -111,8 +114,8 @@ function dataFromKids(mmdKids,contextNode,recurse,parserContext)
 			field = field.composite;
 			name = field.name;
 			
-			console.log(name + ": composite");
-			console.log(field);
+			//console.log(name + ": composite");
+			//console.log(field);
 			
 			if (field.hasOwnProperty('context_node'))
 			{
@@ -137,8 +140,8 @@ function dataFromKids(mmdKids,contextNode,recurse,parserContext)
 			field = field.collection;
 			name = field.name;
 			
-			console.log(name + ": collection");
-			console.log(field);
+			//console.log(name + ": collection");
+			//console.log(field);
 			
 			if (field.hasOwnProperty('context_node'))
 			{
@@ -334,7 +337,7 @@ function getScalarString(field,xpath,contextNode)
 			}
 		} else if (string.indexOf("@") > -1)
 		{
-			console.log(string);
+			//console.log(string);
 			return null;
 		}
 		
@@ -389,7 +392,7 @@ function getCollectionData(field,xpath,contextNode,recurse)
 		return null; //for now until we get field parsers handled
 	}
 	
-	// if (field.hasOwnProperty('field_parser'))
+	// if (field.hasOwnProperty('field_parser'))   //field parsers are not currently handled
 	// {
 		// console.log(field['field_parser'].name);
 		// var fieldName = fieldParserEl.name;
@@ -437,7 +440,7 @@ function getCollectionData(field,xpath,contextNode,recurse)
 		var kids = f.kids;
 		
 		for (var i = 0; i < size; i++) {
-			console.log(i);
+			//console.log(i);
 			var newNode = nodes.snapshotItem(i);
 			//console.log(newNode.textContent);
 			//console.log(newNode);
@@ -492,23 +495,23 @@ function getCollectionData(field,xpath,contextNode,recurse)
  */
 function concatValues(concatList)
 {
-	console.log("listy");
-	console.log(concatList);
+	//console.log("listy");
+	//console.log(concatList);
 	
 	var string = "";
 	
 	for (var i = 0; i < concatList.length; i++)
 	{
 		var concat = concatList[i];
-		console.log(concat.value);
+		//console.log(concat.value);
 		if (concat.hasOwnProperty("from_scalar"))
 		{
-			console.log(concat);
+			//console.log(concat);
 			var x = concat.from_scalar;
-			console.log(x);
-			console.log(scalars[x]);
+			//console.log(x);
+			//console.log(scalars[x]);
 			string = string + scalars[x];
-			console.log("string: " + string);
+			//console.log("string: " + string);
 		}
 	}
 }
@@ -533,10 +536,10 @@ function isObjEmpty(o)
 		
 		size++;
 		if (upperLevel.hasOwnProperty(x)) {
-			console.log(o[x]);
-			console.log(upperLevel[x]);
+			//console.log(o[x]);
+			//console.log(upperLevel[x]);
 			if (o[x] == upperLevel[x]) {
-				console.log('asdf');
+				//console.log('asdf');
 				matches++;
 			}
 		}
@@ -552,6 +555,9 @@ function isObjEmpty(o)
 	return false;
 }
 
+/*
+ * supposed to help handle field parsers ?
+ */
 function getFieldParserValueByKey(fieldParserContext, fieldParserKey) {
     var pos = fieldParserKey.indexOf('|');
     if (pos < 0)
