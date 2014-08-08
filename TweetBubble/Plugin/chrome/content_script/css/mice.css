@@ -110,9 +110,15 @@
     font-size: 14px;
     text-transform: capitalize;
 }
-.metadataContainer .fieldValue.google_link{    
+.fieldValue.google_link{    
     color: #006621;
+    font-weight: bold;
     
+}
+.fieldValue.google_search_result{
+	font-weight: bold;
+	font-size: 14px;
+	
 }
 .metadataContainer .fieldValue{ 
     white-space: normal;
