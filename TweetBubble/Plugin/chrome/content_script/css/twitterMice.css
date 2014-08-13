@@ -26,6 +26,20 @@
 	
 }
 
+/* for non-twitter compatibility */
+.rootMetadataTableDiv {
+	display: table;
+    
+    font-size: 12px;
+    white-space: normal;
+    overflow: scroll;
+    text-overflow: ellipsis;
+    
+    border-spacing: 0px;
+    border-collapse:collapse;
+    margin: 0px;
+}
+
 .twRootMetadataTableDiv {
 	display: table;
 	background: white;
