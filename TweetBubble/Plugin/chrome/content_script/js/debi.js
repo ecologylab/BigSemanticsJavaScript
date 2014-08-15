@@ -64,10 +64,17 @@ MetadataLoader.render = function(renderer, container, url, isRoot, clipping)
  * @param url, url of the target document
  * @param callback, name of the function to be called from the JSON-p call
  */
-MetadataLoader.getMetadata = function(url, callback)
+MetadataLoader.getMetadata = function(url, callback, reload)
 {
-  var serviceURL = SEMANTIC_SERVICE_URL + "metadata.jsonp?callback=" + callback
-                   + "&url=" + encodeURIComponent(url);
+	var serviceURL; 
+	if(reload == true){
+		serviceURL = SEMANTIC_SERVICE_URL + "metadata.jsonp?reload=true&callback=" + callback
+        + "&url=" + encodeURIComponent(url);
+	}
+	else{
+		serviceURL = SEMANTIC_SERVICE_URL + "metadata.jsonp?callback=" + callback
+        + "&url=" + encodeURIComponent(url);
+	}
   MetadataLoader.doJSONPCall(serviceURL);
   console.log("requesting semantics service for metadata: " + serviceURL);
 }
@@ -84,6 +91,7 @@ MetadataLoader.getMMD = function(url, callback)
   var serviceURL = SEMANTIC_SERVICE_URL + "mmd.jsonp?callback=" + callback
                    + "&url=" + encodeURIComponent(url) + "&withurl";
   MetadataLoader.doJSONPCall(serviceURL);
+  console.log("requesting semantics service for mmd: " + serviceURL);
 }
 
 /**
@@ -172,7 +180,7 @@ MetadataLoader.setMetadata = function(rawMetadata)
       queueTask.clipping.rawMetadata = rawMetadata;
     }
         
-    MetadataLoader.getMMD(queueTask.mmdType, "MetadataLoader.setMetaMetadata");
+    MetadataLoader.getMMD(metadata.location, "MetadataLoader.setMetaMetadata");
   }
   
   if (queueTasks.length < 0)

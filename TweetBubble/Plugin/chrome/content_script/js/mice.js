@@ -86,7 +86,7 @@ MICE.render = function(task, metadataFields, styleInfo){
 /**
  * Needs further separation 
  */
-MICE.addMetadataDisplay = function(container, url, isRoot, clipping){
+MICE.addMetadataDisplay = function(container, url, isRoot, clipping, reloadMD){
 	// Add the rendering task to the queue
 	var task = new RenderingTask(url, container, isRoot, clipping, MICE.render)
 	MetadataLoader.queue.push(task);	
@@ -99,7 +99,7 @@ MICE.addMetadataDisplay = function(container, url, isRoot, clipping){
 	else
 	{	
 		// Fetch the metadata from the service
-		MetadataLoader.getMetadata(url, "MetadataLoader.setMetadata");	
+		MetadataLoader.getMetadata(url, "MetadataLoader.setMetadata", reloadMD);	
 	}
 }
 
@@ -644,12 +644,13 @@ MICE.unhighlightDocuments = function(event, styleInfo)
 		MICE.unhighlightLabel(labels[i]);
 		labels[i].style.background = "white";
 	}
-	
+	if (styleInfo != null){
 	labels = document.getElementsByClassName(styleInfo.styles.fieldLabelContainer);
 	for(var i = 0; i < labels.length; i++)
 		MICE.unhighlightLabel(labels[i]);
 	
 	MICE.clearAllCanvases(styleInfo);
+	}
 }
 
 /**
