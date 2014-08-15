@@ -845,14 +845,6 @@ MetadataLoader.getValueForProperty = function(valueAsLabelStr, metadata,
   var fieldType = "";
   for (var i = 0; i < nestedFields.length; i++)
   {
-    fieldValue = fieldValue[nestedFields[i]];
-    // if value is to be read from a collection, then use first element
-    // TODO: define semantics for selection
-    if (fieldValue && fieldValue.length != null)
-    {
-      fieldValue = fieldValue[0];
-    }
-    
     for (var key in mmdKids)
     {
       var mmdField = mmdKids[key];
@@ -902,6 +894,14 @@ MetadataLoader.getValueForProperty = function(valueAsLabelStr, metadata,
           break;
         }
       }      
+    }
+    
+    fieldValue = fieldValue[nestedFields[i]];
+    // if value is to be read from a collection, then use first element
+    // TODO: define semantics for selection
+    if (fieldValue && fieldValue.length != null && mmdField.collection)
+    {
+      fieldValue = fieldValue[0];
     }
   }
   
