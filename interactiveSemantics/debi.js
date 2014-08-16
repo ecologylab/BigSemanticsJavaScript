@@ -113,7 +113,7 @@ MetadataLoader.doJSONPCall = function(jsonpURL)
  *
  * @param rawMetadata, JSON metadata string returned from the semantic service
  */
-MetadataLoader.setMetadata = function(rawMetadata)
+MetadataLoader.setMetadata = function(rawMetadata, requestMmd)
 {  
   // TODO move MDC related code to mdc.js
   if (typeof MDC_rawMetadata != "undefined")
@@ -181,8 +181,9 @@ MetadataLoader.setMetadata = function(rawMetadata)
     {
       queueTask.clipping.rawMetadata = rawMetadata;
     }
-        
-    MetadataLoader.getMMD(metadata.location, "MetadataLoader.setMetaMetadata");
+    
+    if (typeof requestMmd === "undefined" || requestMmd == true) 
+    	MetadataLoader.getMMD(metadata.location, "MetadataLoader.setMetaMetadata");
   }
   
   if (queueTasks.length < 0)

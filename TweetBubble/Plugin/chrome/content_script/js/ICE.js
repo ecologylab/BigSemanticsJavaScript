@@ -89,7 +89,7 @@ function expandCollapseItem(event)
 			// relegate task of selecting apt parent to specific instance 
 			var parent = instance.getContainer(item);
 				
-			MetadataRenderer.addMetadataDisplay(parent, expandableItemUrl, true, null, item);
+			MetadataRenderer.addMetadataDisplay(parent, expandableItemUrl, true, null, false, false, item);
 			
 			//request loading of webpage
 			downloadRequester(expandableItemUrl);

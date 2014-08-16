@@ -92,7 +92,7 @@ MICE.render = function(task, metadataFields, styleInfo){
 /**
  * Needs further separation 
  */
-MICE.addMetadataDisplay = function(container, url, isRoot, clipping, reloadMD){
+MICE.addMetadataDisplay = function(container, url, isRoot, clipping, requestMD, reloadMD){
 	// Add the rendering task to the queue
 	var task = new RenderingTask(url, container, isRoot, clipping, MICE.render)
 	MetadataLoader.queue.push(task);	

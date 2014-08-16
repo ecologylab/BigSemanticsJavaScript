@@ -138,21 +138,23 @@ function showMetadata()
   
   MetadataLoader.clearDocumentCollection();
   var refreshCheckbox = document.getElementById('force_reload').checked;
-  if (url.indexOf("twitter.com") != -1)
+  
+  var twitterUrl = (url.indexOf("twitter.com") != -1)? true : false;
+  var request_md = !twitterUrl;
+    
+  MICE.addMetadataDisplay(content, url, true, null, request_md, reload_md);
+  if (twitterUrl)
   {
-	  document.dispatchEvent(new Event("tweetbubbleExternal"));
+	  //document.dispatchEvent(new Event("tweetbubbleExternal"));
+	  var extEvent = new CustomEvent("extractionRequest", {bubbles: true, cancelable: false, detail: {location: url}});
+	  document.dispatchEvent(extEvent);
+	  
 	  window.setTimeout(function()
 	  {
 		  checkForMissingMetadata();
 	  }, 5000);
   }
-  else{
-	 
-		  MICE.addMetadataDisplay(content, url, true, null, reload_md);
-	  
-	 
-  }
-  
+
  //getJSONData(url);
 }
 function toggleReload(){

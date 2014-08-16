@@ -107,7 +107,7 @@ MetadataRenderer.render = function(task, metadataFields, styleInfo)
  * @param isRoot, true if this is the root metadata for the rendering,
  * 		needed because styling is slightly different for the root metadata rendering
  */
-MetadataRenderer.addMetadataDisplay = function(container, url, isRoot, clipping, expandedItem)
+MetadataRenderer.addMetadataDisplay = function(container, url, isRoot, clipping, requestMD, reloadMD, expandedItem)
 {	
 	// Add the rendering task to the queue
 	var task = new RenderingTask(url, container, isRoot, clipping, MetadataRenderer.render, expandedItem);
@@ -120,9 +120,11 @@ MetadataRenderer.addMetadataDisplay = function(container, url, isRoot, clipping,
 	}
 	else
 	{	
+		var requestMetadata = (typeof requestMD === "undefined") || requestMD == true;
+		
 		// Fetch the metadata from the service
-		if(!isExtension)
-			MetadataLoader.getMetadata(url, "MetadataLoader.setMetadata");	
+		if(!isExtension && requestMetadata)
+			MetadataLoader.getMetadata(url, "MetadataLoader.setMetadata", reloadMD);	
 	}
 }
 
@@ -326,7 +328,8 @@ MetadataRenderer.downloadAndDisplayDocument = function(event)
 		// Add a loadingRow for visual feedback that the metadata is being downloaded / parsed
 		table.appendChild(MetadataRenderer.createLoadingRow(styleInfo));
 		
-		MetadataRenderer.addMetadataDisplay(table.parentElement, location, false, null, button);
+		var requestMD = (location.indexOf("twitter.com") != -1)? false : true;
+		MetadataRenderer.addMetadataDisplay(table.parentElement, location, false, null, requestMD, false, button);
 		if (requestDocumentDownload)
 			requestDocumentDownload(location);
 	}
