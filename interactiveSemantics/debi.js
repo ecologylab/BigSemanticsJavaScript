@@ -877,7 +877,7 @@ MetadataLoader.getValueForProperty = function(valueAsLabelStr, metadata,
         {
           mmdKids = mmdField["kids"];
 
-          // get the child type; as directly selecting the first child above
+          // get the child type; as directly selecting the first child below
           mmdField = mmdKids[0];
           if (mmdField.scalar)
           {
