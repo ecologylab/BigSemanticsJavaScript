@@ -36,6 +36,7 @@ function encodeXml(s) {
  */
 
 ExpSearchApp.initialize = function(){
+	
 	if (document.URL.indexOf("http://localhost:") > -1){
 		var hostname = window.location.hostname;
 		var port = window.location.port;
@@ -46,6 +47,7 @@ ExpSearchApp.initialize = function(){
 		SEMANTIC_SERVICE_URL = "http://ecology-service.cse.tamu.edu/BigSemanticsService/";
 		FatherTime.init();
 	}
+	
 	var expRenderings = document.getElementsByClassName('expRendering');
 	for (var i = 0; i < expRenderings.length; i++){
 		var query = expRenderings[i].getElementsByTagName('a')[0].getAttribute("query");
@@ -348,7 +350,7 @@ ExpSearchApp.displaySearchSet = function(expSearch){
 	expSearch.resultSetContainer.appendChild(visual);
 	
 	// Create and add a new DocumentContainer to the list
-	MICE.documentMap.push( new DocumentContainer(expSearch.currentUrl(), null, expSearch.resultSetContainer, true));
+	//MICE.documentMap.push( new DocumentContainer(expSearch.currentUrl(), null, expSearch.resultSetContainer, true));
  
 	
 	
