@@ -78,26 +78,7 @@ function sendLog(log){
 	   		
 	}
 	xhr.send(fd);
-	var xhr2 = new XMLHttpRequest();
-	xhr2.open("GET", "http://ecoarray0:2084");
-	xhr2.setRequestHeader("Accept", "application/json");
 	
-	
-	xhr2.onload = function()
-	{
-		if(xhr2.statusText == "OK")
-		{
-	   		console.log("Logging Successful");
-	   		TheRecord.clearLogQueue();
-	   	}	   		
-	   	else
-	   	{
-	   		console.log("Logging Failed");
-	   		TheRecord.dontClearLogQueue();
-	   	}	
-	   		
-	}
-	xhr2.send(fd);
 	
 }
 

@@ -968,10 +968,41 @@ ExpSearchApp.newExpSearch = function(){
 }
 
 
+/*
+ * Functions pertaining to maximum metadata mc.filtering
+ */
 
+ExpSearchApp.onEnterFilter = function (event){
+	 if(event.keyCode == 13){
+		 var ssContainer = document.getElementsByClassName('searchSetContainer')[0];
+		 var id = ssContainer.getAttribute('searchsetid');
+		 ExpSearchApp.buildFilter(document.getElementById('filterInput').value, id);
+	 }
+	
+}
+ExpSearchApp.buildFilter = function(term, ssId){
+	var filter = new Filter(term, ssId);
+	var searchSet;
+	for (var i = 0; i < currentExpSearch.SearchSets.length; i++){
+		if (currentExpSearch.SearchSets[i].id == ssId){
+			searchSet = currentExpSearch.SearchSets[i];
+		}
+	}
+	searchSet.addFilter(filter);
+	ExpSearchApp.displaySearchSet(currentExpSearch);
+}
 
-
-
+ExpSearchApp.removeFilter = function(event){
+	var button = event.target;
+	while (button.getAttribute('filterid') == "" || button.getAttribute('filterid') == null){
+		button = button.parentNode;
+	}
+	var filterId = button.getAttribute("filterid");
+	var ss = currentExpSearch.SearchSets.last();
+	ss.removeFilter(filterId);
+	ExpSearchApp.displaySearchSet(currentExpSearch);
+	
+}
 
 
 
