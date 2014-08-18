@@ -125,7 +125,7 @@ MICE.expandCollapseTable = function(event)
 {
 	
 	var button = event.target;
-	var miceStyles = getMiceStyleDictionary(button.mmdType);
+	var miceStyles = InterfaceStyle.getMiceStyleDictionary(button.mmdType);
 	var styleInfo = {styles: miceStyles, type: button.mmdType};
 	
 	if(button.className == styleInfo.styles.collapseSymbol || button.className == styleInfo.styles.expandSymbol)
@@ -344,7 +344,7 @@ MICE.clearLoadingRows = function(container, styleInfo)
 MICE.downloadAndDisplayDocument = function(event)
 {
 	var button = event.target;
-	var miceStyles = getMiceStyleDictionary(button.mmdType);
+	var miceStyles = InterfaceStyle.getMiceStyleDictionary(button.mmdType);
 	var styleInfo = {styles: miceStyles, type: button.mmdType};
 	
 	if(button.className == styleInfo.styles.collapseSymbol || button.className == styleInfo.styles.expandSymbol)
@@ -447,7 +447,7 @@ MICE.downloadAndDisplayDocument = function(event)
 MICE.highlightDocuments = function(event)
 {
 	var row = event.srcElement;
-	var miceStyles = getMiceStyleDictionary(row.mmdType);
+	var miceStyles = InterfaceStyle.getMiceStyleDictionary(row.mmdType);
 	var styleInfo = {styles: miceStyles, type: row.mmdType};
 	
 	if(row.className == styleInfo.styles.expandButton)
@@ -634,7 +634,7 @@ MICE.unhighlightDocuments = function(event, styleInfo)
 	if (event)
 	{
 		button = event.target;
-		var miceStyles = getMiceStyleDictionary(button.mmdType);
+		var miceStyles = InterfaceStyle.getMiceStyleDictionary(button.mmdType);
 		styleInfo = {styles: miceStyles, type: button.mmdType};
 	}
 	
@@ -680,7 +680,7 @@ MICE.morePlease = function(event)
 	parentTable.removeChild(parentRow);
 	
 	// Build and add extra rows
-	var miceStyles = getMiceStyleDictionary(moreData.type);
+	var miceStyles = InterfaceStyle.getMiceStyleDictionary(moreData.type);
 	var styleInfo = {styles: miceStyles, type: moreData.type};
 	MICE.buildMetadataTable(parentTable, moreData.isChild, false, moreData.data, moreData.fields, styleInfo);
 	
@@ -1023,8 +1023,8 @@ MICE.buildMetadataField = function(metadataField, isChildTable, fieldCount, row,
 				
 				aTag.className = "fieldValue";
 						
-				if(metadataField.style != null)
-					aTag.className += " "+metadataField.style;
+				if(metadataField.style_name != null && metadataField.style_name != "")
+					aTag.classList.add(metadataField.style_name);
 			
 				var fieldValueDiv = document.createElement('div');
 					fieldValueDiv.className = styleInfo.styles.fieldValueContainer;
@@ -1044,6 +1044,10 @@ MICE.buildMetadataField = function(metadataField, isChildTable, fieldCount, row,
 				
 				var aTag = document.createElement('a');
 					aTag.className = styleInfo.styles.fieldValue;
+					if(metadataField.style_name != "null" && metadataField.style_name!=""){
+						aTag.classList.add(metadataField.style_name);
+					}
+					
 					aTag.target = "_blank";
 					aTag.innerText = MetadataLoader.removeLineBreaksAndCrazies(metadataField.value);
 					aTag.textContent = MetadataLoader.removeLineBreaksAndCrazies(metadataField.value);
@@ -1051,8 +1055,8 @@ MICE.buildMetadataField = function(metadataField, isChildTable, fieldCount, row,
 					aTag.href = metadataField.navigatesTo;
 					aTag.onclick = MICE.logNavigate;
 										
-					if(metadataField.style != null)
-						aTag.className += " "+metadataField.style;
+					if(metadataField.style_name != null && metadataField.style_name != "")
+						aTag.classList.add(metadataField.style_name);
 				var fieldValueDiv = document.createElement('div');
 					fieldValueDiv.className = styleInfo.styles.fieldValueContainer;						
 				

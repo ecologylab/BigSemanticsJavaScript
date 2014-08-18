@@ -247,7 +247,7 @@ MetadataLoader.setMetaMetadata = function (url, mmd)
         if (MetadataLoader.hasVisibleMetadata(metadataFields))
         {	
           // If so, then build the HTML table	
-          var miceStyles = getMiceStyleDictionary(mmd["meta_metadata"].name);	
+          var miceStyles = InterfaceStyle.getMiceStyleDictionary(mmd["meta_metadata"].name);	
           tasks[i].renderer(tasks[i], metadataFields, {styles: miceStyles, type: mmd["meta_metadata"].name});
         }
       }
@@ -845,14 +845,6 @@ MetadataLoader.getValueForProperty = function(valueAsLabelStr, metadata,
   var fieldType = "";
   for (var i = 0; i < nestedFields.length; i++)
   {
-    fieldValue = fieldValue[nestedFields[i]];
-    // if value is to be read from a collection, then use first element
-    // TODO: define semantics for selection
-    if (fieldValue && fieldValue.length != null)
-    {
-      fieldValue = fieldValue[0];
-    }
-    
     for (var key in mmdKids)
     {
       var mmdField = mmdKids[key];
@@ -885,7 +877,7 @@ MetadataLoader.getValueForProperty = function(valueAsLabelStr, metadata,
         {
           mmdKids = mmdField["kids"];
 
-          // get the child type; as directly selecting the first child above
+          // get the child type; as directly selecting the first child below
           mmdField = mmdKids[0];
           if (mmdField.scalar)
           {
@@ -902,6 +894,14 @@ MetadataLoader.getValueForProperty = function(valueAsLabelStr, metadata,
           break;
         }
       }      
+    }
+    
+    fieldValue = fieldValue[nestedFields[i]];
+    // if value is to be read from a collection, then use first element (if its a composite)
+    // TODO: define semantics for selection
+    if (fieldValue && fieldValue.length != null && mmdField.composite)
+    {
+      fieldValue = fieldValue[0];
     }
   }
   

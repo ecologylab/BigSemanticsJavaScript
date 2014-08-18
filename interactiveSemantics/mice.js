@@ -131,7 +131,7 @@ MICE.expandCollapseTable = function(event)
 {
 	
 	var button = event.target;
-	var miceStyles = getMiceStyleDictionary(button.mmdType);
+	var miceStyles = InterfaceStyle.getMiceStyleDictionary(button.mmdType);
 	var styleInfo = {styles: miceStyles, type: button.mmdType};
 	
 	if(button.className == styleInfo.styles.collapseSymbol || button.className == styleInfo.styles.expandSymbol)
@@ -356,7 +356,7 @@ MICE.clearLoadingRows = function(container, styleInfo)
 MICE.downloadAndDisplayDocument = function(event)
 {
 	var button = event.target;
-	var miceStyles = getMiceStyleDictionary(button.mmdType);
+	var miceStyles = InterfaceStyle.getMiceStyleDictionary(button.mmdType);
 	var styleInfo = {styles: miceStyles, type: button.mmdType};
 	
 	if(button.className == styleInfo.styles.collapseSymbol || button.className == styleInfo.styles.expandSymbol)
@@ -459,7 +459,7 @@ MICE.downloadAndDisplayDocument = function(event)
 MICE.highlightDocuments = function(event)
 {
 	var row = event.srcElement;
-	var miceStyles = getMiceStyleDictionary(row.mmdType);
+	var miceStyles = InterfaceStyle.getMiceStyleDictionary(row.mmdType);
 	var styleInfo = {styles: miceStyles, type: row.mmdType};
 	
 	if(row.className == styleInfo.styles.expandButton)
@@ -646,7 +646,7 @@ MICE.unhighlightDocuments = function(event, styleInfo)
 	if (event)
 	{
 		button = event.target;
-		var miceStyles = getMiceStyleDictionary(button.mmdType);
+		var miceStyles = InterfaceStyle.getMiceStyleDictionary(button.mmdType);
 		styleInfo = {styles: miceStyles, type: button.mmdType};
 	}
 	
@@ -693,7 +693,7 @@ MICE.morePlease = function(event)
 	parentTable.removeChild(parentRow);
 	
 	// Build and add extra rows
-	var miceStyles = getMiceStyleDictionary(moreData.type);
+	var miceStyles = InterfaceStyle.getMiceStyleDictionary(moreData.type);
 	var styleInfo = {styles: miceStyles, type: moreData.type};
 	MICE.buildMetadataTable(parentTable, moreData.isChild, false, moreData.data, moreData.fields, styleInfo);
 	

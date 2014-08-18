@@ -10,7 +10,7 @@ var DEFAULT_MICE_STYLE = {
 	    fieldLabel : "fieldLabel",
 	    fieldLabelImage : "fieldLabelImage",
 	    fieldValueGoogleQuery : "fieldValue google_query",
-	    fieldValueGoogle_link : "fieldValue google_link",
+	    fieldValueGoogleLink : "fieldValue google_link",
 	    fieldValue : "fieldValue",
 	    favicon : "favicon",
 	    faviconICE : "faviconICE",
@@ -89,7 +89,9 @@ var TWITTER_MICE_STYLE = {
 
 var miceStyles = [TWITTER_MICE_STYLE];
 
-var getMiceStyleDictionary = function(type)
+var InterfaceStyle = {};
+
+InterfaceStyle.getMiceStyleDictionary = function(type)
 {
 	for (var i = 0; i < miceStyles.length; i++)
 	{
