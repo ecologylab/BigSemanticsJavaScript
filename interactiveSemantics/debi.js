@@ -899,7 +899,7 @@ MetadataLoader.getValueForProperty = function(valueAsLabelStr, metadata,
     fieldValue = fieldValue[nestedFields[i]];
     // if value is to be read from a collection, then use first element (if its a composite)
     // TODO: define semantics for selection
-    if (fieldValue && fieldValue.length != null && mmdField.composite)
+    if (fieldValue && fieldValue.length != null && mmdField.type)
     {
       fieldValue = fieldValue[0];
     }
