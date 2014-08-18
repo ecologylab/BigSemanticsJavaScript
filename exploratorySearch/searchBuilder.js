@@ -50,7 +50,8 @@ searchBuilder.searchFromMetadata = function(metadataFields){
 			if (metadataField.parentMDType == "google_search" || metadataField.parentMDType=="research_gate_search"){
 				result_locations = searchBuilder.getWrappedLocation(metadataField);
 			}
-			else if(metadataField.parentMDType = 'google_scholar_search'){
+			//this is a bit of a hack until i can guarantee that google_search knows its type!
+			else if(metadataField.parentMDType == 'google_scholar_search' || metadataField.parentMDType=="bing_search_xpath" || metadataField.parentMDType === undefined){
 				result_metadata = searchBuilder.getWrapper(metadataField);
 				result_locations = searchBuilder.getScholarLocation(metadataField);
 			}
