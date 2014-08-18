@@ -1,14 +1,14 @@
 
 var ExtensionInterface = {};
 
-ExtensionInterface.initialized = false;
+//ExtensionInterface.initialized = false;
 
 ExtensionInterface.init = function()
 {
-	if (!ExtensionInterface.initialized) {
-		ExtensionInterface.initialized = true;
+	//if (!ExtensionInterface.initialized) {
+		//ExtensionInterface.initialized = true;
 		document.addEventListener("extractionResponse", ExtensionInterface.onMessage);
-	}
+	//}
 }
 
 /**

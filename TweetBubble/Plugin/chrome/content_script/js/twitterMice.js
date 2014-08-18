@@ -11,14 +11,15 @@ var colors = ['rgb(255, 255, 204)', 'rgb(187, 226, 250)', 'rgb(250, 227, 200)', 
               'rgb(255, 208, 201)', 'rgb(212, 222, 255)', 'rgb(213, 238, 242)']; // use rgb for direct comparison
 var lastColorIndex = Math.floor(Math.random()*colors.length);
 
-var isExtension = (typeof chrome.extension !== "undefined"); 
+var isExtension = (typeof chrome.extension !== "undefined");
+var imgDir = "../TweetBubble/Plugin/chrome/content_script/img/"
 	
-var replyIconPath1 = isExtension? chrome.extension.getURL("content_script/img/reply_221.png") :	"../img/reply_221.png";
-var retweetIconPath1 = isExtension? chrome.extension.getURL("content_script/img/retweet_221.png") :	"../img/retweet_221.png";
-var favoriteIconPath1 = isExtension? chrome.extension.getURL("content_script/img/favorite_221.png") : "../img/favorite_221.png";
-var replyIconPath2 = isExtension? chrome.extension.getURL("content_script/img/reply_153.png") :	"../img/reply_153.png";
-var retweetIconPath2 = isExtension? chrome.extension.getURL("content_script/img/retweet_153.png") :	"../img/retweet_153.png";
-var favoriteIconPath2 = isExtension? chrome.extension.getURL("content_script/img/favorite_153.png") : "../img/favorite_153.png";
+var replyIconPath1 = isExtension? chrome.extension.getURL("content_script/img/reply_221.png") :	imgDir + "reply_221.png";
+var retweetIconPath1 = isExtension? chrome.extension.getURL("content_script/img/retweet_221.png") :	imgDir + "retweet_221.png";
+var favoriteIconPath1 = isExtension? chrome.extension.getURL("content_script/img/favorite_221.png") : imgDir + "favorite_221.png";
+var replyIconPath2 = isExtension? chrome.extension.getURL("content_script/img/reply_153.png") :	imgDir + "reply_153.png";
+var retweetIconPath2 = isExtension? chrome.extension.getURL("content_script/img/retweet_153.png") :	imgDir + "retweet_153.png";
+var favoriteIconPath2 = isExtension? chrome.extension.getURL("content_script/img/favorite_153.png") : imgDir + "favorite_153.png";
 
 var MetadataRenderer = MICE;
 
