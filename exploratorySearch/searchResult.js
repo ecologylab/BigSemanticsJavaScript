@@ -54,6 +54,8 @@ SearchResult.prototype.addSearchHandle = function(searchResultX){
 
 SearchResult.prototype.addSearchResultDisplay = function(searchResultX, parent){
 	var newSearchDisplay = document.createElement('div');
+	newSearchDisplay.setAttribute('draggable', 'true');
+	newSearchDisplay.setAttribute('ondragstart', 'clippingDragStart(event)');
 	newSearchDisplay.className = "indResultContainer";
 	parent.appendChild(newSearchDisplay);
 	
