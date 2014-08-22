@@ -8,7 +8,7 @@
  * 
  */
 
-var idIndex = 0;
+var ssidIndex = 0;
 
 Object.defineProperty( Array.prototype, "equals", {
     enumerable: false,
@@ -22,8 +22,8 @@ Object.defineProperty( Array.prototype, "equals", {
 function SearchSet(query, searches, parentSetID){
 	this.query = query;
 	this.searches = searches;
-	this.id = query + idIndex.toString();
-	idIndex++;
+	this.id = query + ssidIndex.toString();
+	ssidIndex++;
 	this.expansionState = null;
 	this.parent = null;
 	this.engines = [];
@@ -31,6 +31,7 @@ function SearchSet(query, searches, parentSetID){
 	for(var i = 0; i < searches.length; i++){
 		this.engines.push(searches[i].type);
 	}
+	this.filters = [];
 	this.engines.sort();
 	
 }
@@ -54,8 +55,18 @@ SearchSet.prototype.sameSet = function(query, engineList, parentID){
 		return false;
 	}
 }
+SearchSet.prototype.addFilter = function(filter){
+	this.filters.push(filter);
+}
 
-SearchSet.prototype.buildQueryRow = function(query, parent){
+SearchSet.prototype.removeFilter = function(filterId){
+	for(var i = 0; i < this.filters.length; i++){
+		if (this.filters[i].id == filterId){
+			this.filters.splice(i, 1);
+		}
+	}
+}
+SearchSet.prototype.buildQueryRow = function(query, filters, parent){
 	
 	var queryRow = document.createElement('div');
 	queryRow.className = 'queryRow';
@@ -76,7 +87,39 @@ SearchSet.prototype.buildQueryRow = function(query, parent){
 
 	
 	queryRow.appendChild(queryVal);
+	
+	
+	
+	var filterContainer = document.createElement('span');
+	filterContainer.className = "filterContainer";
+	SearchSet.prototype.buildFilterDisplay(filters, filterContainer);
+	var filterInput = document.createElement('input');
+	filterInput.className = "filterInput";
+	filterInput.type = "text";
+	filterInput.id = "filterInput"
+	filterInput.placeholder = 'filter by data';
+	filterInput.setAttribute('onkeydown', "ExpSearchApp.onEnterFilter(event)");
+	filterContainer.appendChild(filterInput);
+	queryRow.appendChild(filterContainer);
 	parent.appendChild(queryRow);
+}
+
+SearchSet.prototype.buildFilterDisplay = function(filters, parent){
+	for(var i = filters.length - 1; i > -1; i--){
+		var filter = document.createElement('span');
+		filter.className = "filter";
+		var filterLabel = document.createElement('span');
+		filterLabel.className = 'filterLabel';
+		filterLabel.innerHTML = filters[i].term;
+		var filterRemove = document.createElement('span');
+		filterRemove.className = "filterRemove";
+		filterRemove.innerHTML = "<i class='icon-remove';'></i>";
+		filter.setAttribute('onclick', 'ExpSearchApp.removeFilter(event)');
+		filter.appendChild(filterLabel);
+		filter.appendChild(filterRemove);
+		filter.setAttribute('filterid', filters[i].id);
+		parent.appendChild(filter);
+	}
 }
 SearchSet.prototype.buildComparisonUI = function(query, parent, entryID){
 	var comparisonRow = document.createElement('div');
@@ -130,7 +173,7 @@ SearchSet.prototype.addResultSetDisplay = function(SearchSetX, parent, isCompari
 
 	}
 	else{
-		SearchSet.prototype.buildQueryRow(SearchSetX.query, parent);
+		SearchSet.prototype.buildQueryRow(SearchSetX.query, SearchSetX.filters, parent);
 	}
 
 	//To-do: add logic to get for which search's should be expanded
@@ -150,7 +193,7 @@ SearchSet.prototype.addResultSetDisplay = function(SearchSetX, parent, isCompari
 			var searchContainer = document.createElement('div');
 			searchContainer.className = 'searchContainer';
 			searchRendering.appendChild(searchContainer);
-			Search.prototype.addSearchDisplay(SearchSetX.searches[i], searchContainer);
+			Search.prototype.addSearchDisplay(SearchSetX.searches[i], searchContainer, SearchSetX.filters);
 			
 		}
 		

@@ -81,9 +81,22 @@
 
 .metadataContainer table .metadata_h1{
     font-weight: 700;
+	}
+
+.metadataContainer table .metadata_bold{
+    font-weight: 700;
+	}
+
+.metadataContainer table .metadata_normal{
+    font-weight: 300;
 }
 
-.metadataContainer .metadataTableDiv .metadata_h1{
+.metadataContainer .metadataTableDiv .metadata_italic{
+    font-style: italic;
+}
+
+.metadataContainer .metadataTableDiv .metadata_bolditalic{
+    font-style: italic;
     font-weight: 700;
 }
 

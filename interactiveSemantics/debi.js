@@ -518,10 +518,12 @@ MetadataLoader.getMetadataViewModel = function(parentField, mmdKids, metadata, d
           mmdKids, metadata, depth, child_value_as_label, taskUrl);
     }
   }
-    
+  
   //Sort the fields by layer, higher layers first
   metadataViewModel.sort(function(a,b) { return b.layer - a.layer - 0.5; });
 
+  MetadataLoader.collapseEmptyLabelSet(metadataViewModel, parentField);
+  
   return metadataViewModel;
 }
 
@@ -777,6 +779,70 @@ MetadataLoader.getCollectionMetadataViewModel = function(metadataViewModel,
   }
 }
 
+MetadataLoader.collapseEmptyLabelSet = function(metadataViewModel, parentField)
+{
+	var deleteLabelCol = true;
+	// make deleteLabelCol false if any child label is visible
+	for (var i = 0; i < metadataViewModel.length; i++)
+	{
+		if (MetadataLoader.isLabelVisible(metadataViewModel[i], parentField))
+		{
+			deleteLabelCol = false;
+			break;
+		}		
+	}
+	
+	if (deleteLabelCol)
+	{
+		for (var i = 0; i < metadataViewModel.length; i++)
+		{
+			var field = metadataViewModel[i];
+			if (field.scalar_type)
+			{
+				// TODO: set use_value_as_label as itself?
+			}
+			else if (field.composite_type || field.child_type)
+			{
+				if (field.value.length > 0)
+					metadataViewModel[i] = field.value[0];
+			}
+		}
+	}
+}
+
+MetadataLoader.isLabelVisible = function(field, parentField)
+{
+	if (field.scalar_type)
+	{
+		if (field.name && !field.hide_label)
+		{
+			return true;
+		}
+	}
+	else if (field.composite_type)
+	{
+		var imageLabel = (field.value_as_label == "") ?	false : field.value_as_label.type == "image";
+		// if label visible OR 
+		// expandable composite -- more than one item
+		// downloadable document OR composite media field
+		if ( ((field.name && !field.hide_label) && (imageLabel || !parentField.child_type)) 
+				|| (field.value.length > 1) 
+				|| (field.value.length == 1 && (field.value[0].navigatesTo || field.value[0].name == "location")) )
+		{
+			return true;
+		}
+	}
+	else if (field.child_type)
+	{
+		// if label visible OR expandable collection
+		if ((field.name && !field.hide_label) || (field.value.length > 1))
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
 MetadataLoader.checkAndSetShowExpanded = function(parentField, field)
 {
 	if (parentField.child_show_expanded_initially != null) {
@@ -846,14 +912,6 @@ MetadataLoader.getValueForProperty = function(valueAsLabelStr, metadata,
   var fieldType = "";
   for (var i = 0; i < nestedFields.length; i++)
   {
-    fieldValue = fieldValue[nestedFields[i]];
-    // if value is to be read from a collection, then use first element
-    // TODO: define semantics for selection
-    if (fieldValue && fieldValue.length != null)
-    {
-      fieldValue = fieldValue[0];
-    }
-    
     for (var key in mmdKids)
     {
       var mmdField = mmdKids[key];
@@ -886,7 +944,7 @@ MetadataLoader.getValueForProperty = function(valueAsLabelStr, metadata,
         {
           mmdKids = mmdField["kids"];
 
-          // get the child type; as directly selecting the first child above
+          // get the child type; as directly selecting the first child below
           mmdField = mmdKids[0];
           if (mmdField.scalar)
           {
@@ -903,6 +961,14 @@ MetadataLoader.getValueForProperty = function(valueAsLabelStr, metadata,
           break;
         }
       }      
+    }
+    
+    fieldValue = fieldValue[nestedFields[i]];
+    // if value is to be read from a collection, then use first element (if its a composite)
+    // TODO: define semantics for selection
+    if (fieldValue && fieldValue.length != null && mmdField.type)
+    {
+      fieldValue = fieldValue[0];
     }
   }
   
@@ -978,13 +1044,13 @@ MetadataLoader.concatenateField = function(field, metadataFields, mmdKids)
 /**
  *
  */
-MetadataLoader.getImageSource = function(mmdField)
+MetadataLoader.getImageSource = function(metadataViewModel)
 {
-  for (var i = 0; i < mmdField.length; i++)
+  for (var i = 0; i < metadataViewModel.length; i++)
   {
-    if (mmdField[i].name == "location")
+    if (metadataViewModel[i].name == "location")
     {
-      return mmdField[i].value;
+      return metadataViewModel[i].value;
     }
   }
   return null;

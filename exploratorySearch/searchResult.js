@@ -2,10 +2,14 @@
  * 
  */
 
+var filterIdIndex = 0;
+
 function SearchResult(location, type, metadata){
 	this.location = location;
 	this.type = type;
 	this.metadata = metadata;
+	this.id = "result" + filterIdIndex.toString();
+	filterIdIndex++;
 	//this.title = title;
 }
 
@@ -87,6 +91,7 @@ SearchResult.prototype.addSearchResultDisplay = function(searchResultX, parent){
 		newSearchDisplay.appendChild(rendering);
 		rendering.setAttribute('onmousedown', 'ExpSearchApp.removeQuerySearchBox(event)')
 		rendering.setAttribute('onmouseup', 'ExpSearchApp.textSelected(event)');
+		rendering.setAttribute('id', searchResultX.id);
 	}
 	else{
 		var miceContainer = document.createElement('div');
@@ -97,6 +102,7 @@ SearchResult.prototype.addSearchResultDisplay = function(searchResultX, parent){
 		MetadataLoader.render(MICE.render, miceContainer, searchResultX.location, true);
 		miceContainer.setAttribute('onmousedown', 'ExpSearchApp.removeQuerySearchBox(event)')
 		miceContainer.setAttribute('onmouseup', 'ExpSearchApp.textSelected(event)');
+		miceContainer.setAttribute('id', searchResultX.id);
 	}
 
 }

@@ -782,19 +782,18 @@ MICE.buildMetadataTable = function(table, isChildTable, isRoot, metadataFields, 
 	// Iterate through the metadataFields which are already sorted into display order
 	for(var i = 0; i < metadataFields.length; i++)
 	{			
-		
 		var row = document.createElement('div');
 		row.className = styleInfo.styles.metadataRow;
 					
 		// if the maximum number of fields have been rendered then stop rendering and add a "More" expander
 		if(fieldCount <= 0)
 		{
-		
 			var nameCol = document.createElement('div');
-							nameCol.className = styleInfo.styles.labelColShowDiv;
-										
-						var valueCol = document.createElement('div');
-							valueCol.className = styleInfo.styles.valueColShowDiv;
+				nameCol.className = styleInfo.styles.labelColShowDiv;
+							
+			var valueCol = document.createElement('div');
+				valueCol.className = styleInfo.styles.valueColShowDiv;
+			
 			//TODO - add "more" expander
 			var moreCount = metadataFields.length - i;
 			
@@ -809,8 +808,6 @@ MICE.buildMetadataTable = function(table, isChildTable, isRoot, metadataFields, 
 				"data": metadataFields.slice(i, metadataFields.length),
 				"type": styleInfo.type
 			};
-			
-			
 			
 			var detailsSpan = document.createElement('span');
 				detailsSpan.className = styleInfo.styles.hidden;
@@ -865,6 +862,7 @@ MICE.buildMetadataTable = function(table, isChildTable, isRoot, metadataFields, 
 			{
 				var nameCol = fieldObjs[j].name_col;
 				var valueCol = fieldObjs[j].value_col;
+				
 				fieldCount = fieldObjs[j].count;
 				
 				// append name and value in the needed order
@@ -983,10 +981,6 @@ MICE.buildMetadataField = function(metadataField, isChildTable, fieldCount, row,
 	}
 	
 	var expandButton = null;	
-	
-	
-		
-	
 	
 	if(metadataField.scalar_type)
 	{				
@@ -1158,30 +1152,25 @@ MICE.buildMetadataField = function(metadataField, isChildTable, fieldCount, row,
 	
 	else if(metadataField.composite_type != null && metadataField.composite_type != "image")
 	{
-		
-		
-		
 		/** Label Column **/
 		var childUrl = MetadataLoader.guessDocumentLocation(metadataField.value);
 		
-			var fieldLabelDiv = document.createElement('div');
-				fieldLabelDiv.className = styleInfo.styles.fieldLabelContainerUnhighlight;
-				fieldLabelDiv.style.minWidth = "30px";					
-				
-			// Is the document already rendered?								
-			if(childUrl != "" && MICE.isRenderedDocument(childUrl) )
+		var fieldLabelDiv = document.createElement('div');
+			fieldLabelDiv.className = styleInfo.styles.fieldLabelContainerUnhighlight;
+			fieldLabelDiv.style.minWidth = "30px";					
+			
+		// Is the document already rendered?								
+		if(childUrl != "" && MICE.isRenderedDocument(childUrl) )
+		{
+			
+			// If so, then don't allow the document to be expaned, to prevent looping						
+			fieldLabelDiv.className = styleInfo.styles.fieldLabelContainerOpenedUnhighlight;
+		}
+		else
+		{
+			if (childUrl != "" || metadataField.value.length > 1)
 			{
 				
-				// If so, then don't allow the document to be expaned, to prevent looping						
-				fieldLabelDiv.className = styleInfo.styles.fieldLabelContainerOpenedUnhighlight;			
-			}
-			else
-			{
-				
-				
-		
-					
-					
 				// If the document hasn't been download then display a button that will download it
 				expandButton = document.createElement('div');
 					expandButton.className = styleInfo.styles.expandButtonX;
@@ -1211,41 +1200,40 @@ MICE.buildMetadataField = function(metadataField, isChildTable, fieldCount, row,
 				expandButton.appendChild(expandSymbol);
 				expandButton.appendChild(collapseSymbol);
 				fieldLabelDiv.appendChild(expandButton);
-				
-				
-				
-			}
+			}				
 			
-			if(metadataField.name)
-			{												
-				var imageLabel = (metadataField.value_as_label == "") ?	false : metadataField.value_as_label.type == "image";
-				//If the table isn't a child table then display the label for the composite
-				
-				if((!isChildTable || imageLabel) && !metadataField.hide_label)
-				{				
-					var label = (metadataField.value_as_label == "" || (metadataField.value_as_label.type != "scalar"
-						&& metadataField.value_as_label.type != "image"))? metadataField.name : metadataField.value_as_label.value;
-					if (metadataField.value_as_label == "" || metadataField.value_as_label.type != "image")
-					{
-						var fieldLabel = document.createElement('p');
-							fieldLabel.className = styleInfo.styles.fieldLabel;
-							fieldLabel.innerText = MetadataLoader.toDisplayCase(label);
-							fieldLabel.textContent = MetadataLoader.toDisplayCase(label);
-						
-						fieldLabelDiv.appendChild(fieldLabel);
-					}
-					else if (metadataField.value_as_label.type == "image")
-					{
-						var img = document.createElement('img');
-							img.className = styleInfo.styles.fieldLabelImage;
-							img.src = MetadataLoader.getImageSource(label);
-	
-						fieldLabelDiv.appendChild(img);
-					}
+		}
+		
+		if(metadataField.name)
+		{												
+			var imageLabel = (metadataField.value_as_label == "") ?	false : metadataField.value_as_label.type == "image";
+			//If the table isn't a child table then display the label for the composite
+			
+			if((!isChildTable || imageLabel) && !metadataField.hide_label)
+			{				
+				var label = (metadataField.value_as_label == "" || (metadataField.value_as_label.type != "scalar"
+					&& metadataField.value_as_label.type != "image"))? metadataField.name : metadataField.value_as_label.value;
+				if (metadataField.value_as_label == "" || metadataField.value_as_label.type != "image")
+				{
+					var fieldLabel = document.createElement('p');
+						fieldLabel.className = styleInfo.styles.fieldLabel;
+						fieldLabel.innerText = MetadataLoader.toDisplayCase(label);
+						fieldLabel.textContent = MetadataLoader.toDisplayCase(label);
+					
+					fieldLabelDiv.appendChild(fieldLabel);
+				}
+				else if (metadataField.value_as_label.type == "image")
+				{
+					var img = document.createElement('img');
+						img.className = styleInfo.styles.fieldLabelImage;
+						img.src = MetadataLoader.getImageSource(label);
+
+					fieldLabelDiv.appendChild(img);
 				}
 			}
-			
-			nameCol.appendChild(fieldLabelDiv);
+		}
+	
+		nameCol.appendChild(fieldLabelDiv);
 		
 		
 		/** Value Column **/
@@ -1303,30 +1291,30 @@ MICE.buildMetadataField = function(metadataField, isChildTable, fieldCount, row,
 					
 			// does it need to expand / collapse
 			
-			//if(metadataField.value.length > 0)
-			//{
+			if(metadataField.value.length > 1)
+			{
 				var expandButton = document.createElement('div');
 					expandButton.className = styleInfo.styles.expandButton;
 					
 					expandButton.onclick = MICE.expandCollapseTable;
 					
-					var expandSymbol = document.createElement('div');
-						expandSymbol.className = styleInfo.styles.expandSymbol;
-						expandSymbol.style.display = "block";
+				var expandSymbol = document.createElement('div');
+					expandSymbol.className = styleInfo.styles.expandSymbol;
+					expandSymbol.style.display = "block";
+					
+				var collapseSymbol = document.createElement('div');
+					collapseSymbol.className = styleInfo.styles.collapseSymbol;
+					collapseSymbol.style.display = "block";						
+		
+				expandButton.mmdType = styleInfo.type;
+				expandSymbol.mmdType = styleInfo.type;
+				collapseSymbol.mmdType = styleInfo.type;	
 						
-					var collapseSymbol = document.createElement('div');
-						collapseSymbol.className = styleInfo.styles.collapseSymbol;
-						collapseSymbol.style.display = "block";						
-			
-					expandButton.mmdType = styleInfo.type;
-					expandSymbol.mmdType = styleInfo.type;
-					collapseSymbol.mmdType = styleInfo.type;	
-						
-					expandButton.appendChild(expandSymbol);
-					expandButton.appendChild(collapseSymbol);
+				expandButton.appendChild(expandSymbol);
+				expandButton.appendChild(collapseSymbol);
 					
 				fieldLabelDiv.appendChild(expandButton);
-			//}
+			}
 			
 			var label = (metadataField.value_as_label == "" || (metadataField.value_as_label.type != "scalar"
 				&& metadataField.value_as_label.type != "image"))? metadataField.name : metadataField.value_as_label.value;

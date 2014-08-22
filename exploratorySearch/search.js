@@ -41,7 +41,7 @@ Search.prototype.addSearchExpandCollapseButton = function(searchX){
 	return searchCollapseButton;
 }
 
-Search.prototype.addSearchDisplay = function(searchX, parent){
+Search.prototype.addSearchDisplay = function(searchX, parent, filters){
 	
 	//Builds a header for each search
 	var searchHeader = document.createElement('div');
@@ -99,10 +99,36 @@ Search.prototype.addSearchDisplay = function(searchX, parent){
 	searchResultsContainer.className += searchX.type;
 	parent.appendChild(searchResultsContainer);
 	console.log(searchX);
-	for(var i = 0; (i < searchX.searchResults.length)  && i <7; i++){
-		SearchResult.prototype.addSearchResultDisplay(searchX.searchResults[i], searchResultsContainer);
+	var filteredResults = [];
+	for(var i = 0; i <searchX.searchResults.length; i++){
+		filteredResults.push(searchX.searchResults[i]);
 	}
+	if (filters.length > 0){
+		for(var i = 0; i < searchX.searchResults.length; i++){
+			for(var j = 0; j < filters.length; j++){
+				var ids = filters[j].filteredResultIds;
+				var doesItPass = false;
+				for (var k = 0; k < ids.length; k++){
+					if(searchX.searchResults[i] == null){
+						console.log('eww');
+					}
+					if (searchX.searchResults[i].id == ids[k]){
+						doesItPass = true;
+					}
+				}
+				if(!doesItPass){
+					var index = filteredResults.indexOf(searchX.searchResults[i]);
+					if (index > -1) {
+					    filteredResults.splice(index, 1);
+					}
 	
+				}
+			}
+		}
+	}
+	for (var i = 0; i < filteredResults.length; i++){
+		SearchResult.prototype.addSearchResultDisplay(filteredResults[i], searchResultsContainer);
+	}
 	parent.setAttribute("searchtype", searchX.type);	
 	parent.appendChild(searchResultsContainer);
 	parent.appendChild(collapsedRepresentation);
