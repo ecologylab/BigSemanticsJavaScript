@@ -146,8 +146,14 @@ function showMetadata()
   if (twitterUrl)
   {
 	  //document.dispatchEvent(new Event("tweetbubbleExternal"));
-	  var extEvent = new CustomEvent("extractionRequest", {bubbles: true, cancelable: false, detail: {location: url}});
-	  document.dispatchEvent(extEvent);
+	  var message = {
+			  type : "extractionRequest",
+			  sender : content,
+			  detail : {
+				  url : url
+			  }
+	  };
+	  ExtensionInterface.dispatchMessage(message);
 	  
 	  window.setTimeout(function()
 	  {

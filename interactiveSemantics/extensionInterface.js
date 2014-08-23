@@ -1,14 +1,9 @@
 
 var ExtensionInterface = {};
 
-//ExtensionInterface.initialized = false;
-
 ExtensionInterface.init = function()
 {
-	//if (!ExtensionInterface.initialized) {
-		//ExtensionInterface.initialized = true;
-		document.addEventListener("extractionResponse", ExtensionInterface.onMessage);
-	//}
+	document.addEventListener("extractionResponse", ExtensionInterface.onMessage);
 }
 
 /**
@@ -19,7 +14,7 @@ ExtensionInterface.init = function()
  *		sender, originator or the element for which message is to be sent
  *		(optional) detail, additional information 
  */
-ExtensionInterface.sendMessage = function(message)
+ExtensionInterface.dispatchMessage = function(message)
 {
 	if (typeof message === "undefined" || typeof message.type === "undefined" || typeof message.sender === "undefined")
 		return;
@@ -55,8 +50,7 @@ ExtensionInterface.setMetadata = function(metadata)
 {
 	//var rawMetadata = node.getAttribute("extensionMetadata");
 	
-	//object wrapper
-	
+	// object wrapper is already there, directly set
 	MetadataLoader.setMetadata(metadata);
 }
 
