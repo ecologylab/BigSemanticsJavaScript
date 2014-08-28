@@ -1284,7 +1284,7 @@ MetadataRenderer.animateScrollBackAndCollapse = function(top, containers)
     				visual.style.display = "none";
     			}
     			
-    			contentExpansionContainers[i].expandedItem.lastChild.src = expandIconPath;
+    			contentExpansionContainers[i].expandedItem.firstChild.src = expandIconPath;
     			contentExpansionContainers[i].visual.style.opacity = 0.1;
     			    	    			
 	    		setTimeout(hideVisual, 330, contentExpansionContainers[i].visual);
