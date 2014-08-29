@@ -124,7 +124,7 @@ function dataFromKids(mmdKids,contextNode,recurse,parserContext)
 			
 			obj = getCompositeD(field,contextNode,recurse,parserContext);
 
-			if(!isObjEmpty(obj))
+			if(!isObjEmpty(obj,recurse))
 			if(obj != null)
 			{
 				e = false;
@@ -527,27 +527,31 @@ function isObjEmpty(o)
 	var size = 0;
 	var matches = 0;
 
-	//console.log(upperLevel);
-	//console.log(o);
+	console.log(upperLevel);
+	console.log(o);
 	
 	for (x in o) {
 		
-		if (x =="description" || x == 'site_name' || x == "mm_name" || x == "download_status"){continue;}
+		if (x == "title" || x =="description" || x == 'site_name' || x == "mm_name" || x == "download_status") {continue;}
+		
+		// console.log(x);
+		// console.log(o[x]);
+		// console.log(upperLevel[x]);
 		
 		size++;
 		if (upperLevel.hasOwnProperty(x)) {
-			//console.log(o[x]);
-			//console.log(upperLevel[x]);
+			
 			if (o[x] == upperLevel[x]) {
-				//console.log('asdf');
+				// console.log('asdf');
 				matches++;
 			}
 		}
 	}
 	
-	//console.log("size: " + size);
-	//console.log("matches: " + matches);
+	console.log("size: " + size);
+	console.log("matches: " + matches);
 	
+	//if (matches == size) {
 	if (matches == size) {
 		return true;
 	}

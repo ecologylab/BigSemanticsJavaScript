@@ -1,5 +1,13 @@
 function handleDrag() {
-	document.addEventListener("dragstart", attachInfo);
+	document.addEventListener("dragstart", extractOnDrag);
+}
+
+function extractOnDrag(event) 
+{
+	reset();
+	display = false;
+	callService(MMD);
+	attachInfo(event);
 }
 
 /*
@@ -7,6 +15,8 @@ function handleDrag() {
  */
 function attachInfo(event)
 {	
+	console.log("extracting again . . ");
+	console.log(event);
 	var obj = new Object();
 	obj.metadata = serializedMeta;
 	obj.source = document.URL;
@@ -20,8 +30,6 @@ function attachInfo(event)
  */
 function getPath(element)
 {
-	//console.log("path");
-	//console.log(element.id=="");
 	if (element.id != "")
 	{
 		return '//*[@id="'+element.id+'"]';
@@ -33,8 +41,6 @@ function getPath(element)
 	
 	var parent = element.parentNode;
 	var siblings = parent.childNodes;
-	//console.log(parent);
-	//console.log(siblings);
 	
 	for (var i = 0; i < siblings.length; i++)
 	{
@@ -44,4 +50,5 @@ function getPath(element)
 			return getPath(element.parentNode) + '/' + element.tagName.toLowerCase();
 		}
 	}
-}
+}
+
