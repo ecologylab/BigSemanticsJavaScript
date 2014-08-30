@@ -1,0 +1,59 @@
+*{
+	padding: 0px;
+	margin: 0px;
+}
+
+#headband {
+	width: calc(100% - 8px);
+	height: 36px;
+	background: pink;
+	padding: 4px;
+}
+
+#content {
+	position: absolute;
+	top: 44px;
+	left: 0px;
+	right: 0px;
+	background: gray;
+	
+	min-height: calc(100% - 76px);
+	padding: 16px;
+}
+
+#controls {
+	width: calc(100% - 0px);
+	background: skyblue;	
+	min-height: 100px;
+}
+
+#theStage {
+	width: calc(100% - 0px);
+	background: seagreen;	
+	min-height: 240px;
+}
+
+.simpleDividerLine {
+	background:black;
+	opacity: 0.72;
+	height: 0.5px;
+	width:100%;
+}
+
+.listContainer {
+	position:absolute;
+	background: lightgreen;
+	padding: 16px;
+}
+
+.paperContainer {
+	position:absolute;
+	background: green;
+	min-width: 400px;
+	min-height: 140px;
+	
+	-webkit-transition: top 0.5s; /* For Safari 3.1 to 6.0 */
+    transition: top 0.5s;
+    -webkit-transition-timing-function: ease-in-out;
+    transition-timing-function: ease-in-out;
+}

@@ -1023,8 +1023,8 @@ MICE.buildMetadataField = function(metadataField, isChildTable, fieldCount, row,
 				// Uses http://getfavicon.appspot.com/ to resolve the favicon
 				var favicon = document.createElement('img');
 					favicon.className = styleInfo.styles.faviconICE;
-					favicon.src = "https://plus.google.com/_/favicon?domain_url=" + MetadataLoader.getHost(metadataField.navigatesTo);
-				
+					favicon.src = "http://g.etfv.co/" + metadataField.value;
+					
 				var aTag = document.createElement('a');
 				aTag.innerText = MetadataLoader.removeLineBreaksAndCrazies(metadataField.value);
 				aTag.textContent = MetadataLoader.removeLineBreaksAndCrazies(metadataField.value);
@@ -1051,8 +1051,8 @@ MICE.buildMetadataField = function(metadataField, isChildTable, fieldCount, row,
 				// Uses http://getfavicon.appspot.com/ to resolve the favicon
 				var favicon = document.createElement('img');
 					favicon.className = styleInfo.styles.faviconICE;
-					favicon.src = "https://plus.google.com/_/favicon?domain_url=" + MetadataLoader.getHost(metadataField.navigatesTo);
-				
+					favicon.src = "http://g.etfv.co/" + metadataField.navigatesTo;
+					
 				var aTag = document.createElement('a');
 					aTag.className = styleInfo.styles.fieldValue;
 					if(metadataField.style_name != "null" && metadataField.style_name!=""){

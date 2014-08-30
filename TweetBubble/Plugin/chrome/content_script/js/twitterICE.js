@@ -4,11 +4,11 @@ function twitterICE() {
 this.expandableItemsXPath = "//ol[@id='stream-items-id']/li//p[@class='js-tweet-text tweet-text']/a/b";
 
 //@usernames, #hashtags, tweet tweeter, @connect tweeter, new layout tweet tweeter
-this.expandableItemsXPath2 = ".//a[@class='twitter-atreply pretty-link']/b | " + 
-							 ".//a[@class='twitter-hashtag pretty-link js-nav']/b | " + 
-							 ".//a[@class='account-group js-account-group js-action-profile js-user-profile-link js-nav']/strong | " + 
-							 ".//a[@class='pretty-link js-user-profile-link js-action-profile-name']/strong | " +
-							 ".//a[@class='ProfileTweet-originalAuthorLink u-linkComplex js-nav js-user-profile-link']/span/b";
+this.expandableItemsXPath2 = ".//a[@class='twitter-atreply pretty-link'] | " + 
+							 ".//a[@class='twitter-hashtag pretty-link js-nav'] | " + 
+							 ".//a[@class='account-group js-account-group js-action-profile js-user-profile-link js-nav'] | " + 
+							 ".//a[@class='pretty-link js-user-profile-link js-action-profile-name'] | " +
+							 ".//a[@class='ProfileTweet-originalAuthorLink u-linkComplex js-nav js-user-profile-link']/span";
 
 this.tweetsXPath = "//ol[@id='stream-items-id']/li/div | " +
 					"//div[@class='GridTimeline-items']/div[@class='Grid']//div[@class='StreamItem js-stream-item']";
@@ -48,75 +48,78 @@ this.getContainersXPath = function() {
 }
 
 this.removeHrefAndSetAsUrl = function(elt) {
-	var eltClass = elt.parentNode.getAttribute("class");
+	var eltClass = elt.getAttribute("class");
 	if (eltClass && eltClass.indexOf("ProfileTweet-originalAuthor") == 0)	//span class for new layout tweet tweeter
 	{
 		elt = elt.parentNode;
 	}
 	// get parent <a> tag; in accordance with above XPath
-	var href = elt.parentNode.getAttribute("href");
-	elt.parentNode.removeAttribute("href");
+	var href = elt.getAttribute("href");
+	elt.removeAttribute("href");
 	
 	// this attribute name shouldn't conflict with the existing ones
-	elt.parentNode.setAttribute("url", href);
+	elt.setAttribute("url", href);
 };
 
 this.getExpandableItemUrl = function(item) {
 	// TODO: method for retweets
-	var eltClass = item.parentNode.getAttribute("class");
+	var eltClass = item.getAttribute("class");
 	if (eltClass && eltClass.indexOf("ProfileTweet-originalAuthor") == 0)	//span class for new layout tweet tweeter
 	{
 		item = item.parentNode;
 	}
-	return item.parentNode.getAttribute("url");
+	return item.getAttribute("url");
 };
 
 this.addClickEventListener = function(item, listener) {
-	item.parentNode.addEventListener('click', listener);
+	item.addEventListener('click', listener);
 };
 
 this.setExpandableItemProcessed = function(elt) {
 	// still keep pretty-link part for the styling purpose 
-	var eltClass = elt.parentNode.getAttribute("class");
+	var eltClass = elt.getAttribute("class");
 	if (eltClass.indexOf("account-group") == 0)
 	{
-		elt.parentNode.setAttribute("class", "account-group js-account-group js-action-profile js-nav");
-		elt.setAttribute("class", "fullname"); //initial is 'fullname js-action-profile-name'
+		elt.setAttribute("class", "account-group js-account-group js-action-profile js-nav");
+		var childElt = elt.getElementsByClassName("fullname js-action-profile-name")[0]
+		if (childElt)
+			childElt.setAttribute("class", "fullname"); //initial is 'fullname js-action-profile-name'
 	}
 	else if (eltClass.indexOf("ProfileTweet-originalAuthor") == 0)	//span class for new layout tweet tweeter
 	{
-		elt.parentNode.parentNode.setAttribute("class", "ProfileTweet-originalAuthorLink u-linkComplex js-user-profile-link js-nav");
+		elt.parentNode.setAttribute("class", "ProfileTweet-originalAuthorLink u-linkComplex js-user-profile-link js-nav");
 		//elt.setAttribute("class", "fullname"); //initial is 'fullname js-action-profile-name'
 	}
 	else 
-		elt.parentNode.setAttribute("class", "pretty-link");
+		elt.setAttribute("class", "pretty-link");
 };
 
-// set to parent to keep similar as most other attributes
+// set to element to keep similar as most other attributes
 this.setCached = function(elt) {
-	elt.parentNode.setAttribute("isExpanded", "true");
+	elt.setAttribute("isExpanded", "true");
 };
 
 this.isCached = function(elt) {
-	return elt.parentNode.getAttribute("isExpanded");
+	return elt.getAttribute("isExpanded");
 };
 
 this.setMetadataBoolean = function(elt, isMetadata) {
-	elt.parentNode.setAttribute("isMetadata", isMetadata);
+	elt.setAttribute("isMetadata", isMetadata);
 };
 
 this.setIcon = function(elt, icon) {
 	icon.setAttribute("class", "expandCollapseIcon");
-	elt.appendChild(icon);
+	elt.insertBefore(icon, elt.firstChild);
 };
 
 this.getIcon = function(elt) {
 	// or, set class in above function, and check for child with class name here
-	return elt.lastChild;
+	return elt.firstChild;
 };
 
 //expanded item might not be same as element for which click listener was added
 this.getExpandedItem = function(elt) {
+	// or, just return elt
 	var icon = elt.getElementsByClassName("expandCollapseIcon")[0];
 	return icon.parentNode;
 };
@@ -139,7 +142,7 @@ this.getContainer = function(elt) {
 	}
 	
 	// append to last row, if metadata, to keep tweet content together 
-	if (elt.parentNode.getAttribute("isMetadata") == "true")
+	if (elt.getAttribute("isMetadata") == "true")
 	{
 		while (parent.className != "twMetadataTableDiv")
 			parent = parent.parentNode;
@@ -217,11 +220,11 @@ this.getDefaultConditionXPath = function(isMetadata) {
 };
 
 this.setDefaultConditionItemProcessed = function(elt) {
-	elt.parentNode.setAttribute("setProcessed", "true");
+	elt.setAttribute("setProcessed", "true");
 };
 
 this.checkDefaultConditionItemProcessed = function(elt) {
-	 var val = elt.parentNode.getAttribute("setProcessed");
+	 var val = elt.getAttribute("setProcessed");
 	 if (val && val == "true")
 		 return true;
 	 return false;
@@ -229,7 +232,7 @@ this.checkDefaultConditionItemProcessed = function(elt) {
 
 this.getHrefAttribute = function(elt)
 {
-	return elt.parentNode.getAttribute("href");
+	return elt.getAttribute("href");
 };
 
 var logTweetAction = function(twAction, item) {
