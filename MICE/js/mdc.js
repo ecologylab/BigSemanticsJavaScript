@@ -142,7 +142,7 @@ function showMetadata()
   var twitterUrl = (url.indexOf("twitter.com") != -1)? true : false;
   var request_md = !twitterUrl;
     
-  MICE.addMetadataDisplay(content, url, true, null, request_md, reload_md);
+  MICE.addMetadataDisplay(content, url, false, null, request_md, reload_md);
   if (twitterUrl)
   {
 	  //document.dispatchEvent(new Event("tweetbubbleExternal"));
