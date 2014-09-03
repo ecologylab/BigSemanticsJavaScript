@@ -38,23 +38,27 @@ searchBuilder.searchFromMetadata = function(metadataFields){
 		
 		if(searchBuilder.isField('query', metadataField)){
 			query = metadataField['value'];
+			
+		}
+		else if(searchBuilder.isField('title', metadataField)){
 			type = metadataField['parentMDType'];
 		}
-		
 		else if (searchBuilder.isField('location', metadataField)){
 			search_location = metadataField['value'];
 		}
 		
 		else if (searchBuilder.isField('search_results', metadataField)){
 			
-			if (metadataField.parentMDType == "google_search" || metadataField.parentMDType=="research_gate_search"){
+			//When the location is in destination page
+			if  (type=="research_gate_search"){
 				result_locations = searchBuilder.getWrappedLocation(metadataField);
 			}
-			//this is a bit of a hack until i can guarantee that google_search knows its type!
-			else if(metadataField.parentMDType == 'google_scholar_search' || metadataField.parentMDType=="bing_search_xpath" || metadataField.parentMDType === undefined){
+			//When you want the data around the destination page
+			else if(type == 'google_scholar_search'  || type == "google_search" ){
 				result_metadata = searchBuilder.getWrapper(metadataField);
 				result_locations = searchBuilder.getScholarLocation(metadataField);
 			}
+			//When the location is not in destination page
 			else{
 				result_locations = searchBuilder.getUnwrappedLocation(metadataField);
 			}

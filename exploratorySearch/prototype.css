@@ -798,3 +798,6 @@ label{
     position : absolute;
   
 }
+p{
+	cursor: text;
+}

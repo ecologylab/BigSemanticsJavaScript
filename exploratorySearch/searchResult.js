@@ -54,7 +54,11 @@ SearchResult.prototype.addSearchHandle = function(searchResultX){
 
 SearchResult.prototype.addSearchResultDisplay = function(searchResultX, parent){
 	var newSearchDisplay = document.createElement('div');
+	//newSearchDisplay.setAttribute('draggable', true);
+	newSearchDisplay.setAttribute('dragstart', 'clippingDragStart(event)');
 	newSearchDisplay.className = "indResultContainer";
+	//recursiveDragEventInjector(newSearchDisplay, clippingDragStart);
+
 	parent.appendChild(newSearchDisplay);
 	
 	var rendering = document.createElement('div');
@@ -65,6 +69,8 @@ SearchResult.prototype.addSearchResultDisplay = function(searchResultX, parent){
 		 * and use that the draw our lovely little metadata fields. Pray, bretheren, that the MICE
 		 * gods have mercy upon our code*/
 		var visual = document.createElement('div');
+		
+
 		
 		
 		visual.className = 'metadataContainer';
@@ -89,8 +95,16 @@ SearchResult.prototype.addSearchResultDisplay = function(searchResultX, parent){
 		
 		newSearchDisplay.appendChild(SearchResult.prototype.addSearchHandle(searchResultX));
 		newSearchDisplay.appendChild(rendering);
-		rendering.setAttribute('onmousedown', 'ExpSearchApp.removeQuerySearchBox(event)')
+		/*rendering.setAttribute('onmousedown', 'ExpSearchApp.removeQuerySearchBox(event)')
 		rendering.setAttribute('onmouseup', 'ExpSearchApp.textSelected(event)');
+		*/
+		//rendering.setAttribute("draggable", true);
+		$(rendering).on({
+			//  dragstart: clippingDragStart,
+			  
+			  mousedown: ExpSearchApp.removeQuerySearchBox,
+			  mouseup: ExpSearchApp.textSelected
+			});
 		rendering.setAttribute('id', searchResultX.id);
 	}
 	else{
@@ -100,8 +114,15 @@ SearchResult.prototype.addSearchResultDisplay = function(searchResultX, parent){
 		newSearchDisplay.appendChild(miceContainer);
 		
 		MetadataLoader.render(MICE.render, miceContainer, searchResultX.location, true);
-		miceContainer.setAttribute('onmousedown', 'ExpSearchApp.removeQuerySearchBox(event)')
-		miceContainer.setAttribute('onmouseup', 'ExpSearchApp.textSelected(event)');
+		/*miceContainer.setAttribute('onmousedown', 'ExpSearchApp.removeQuerySearchBox(event)')
+		miceContainer.setAttribute('onmouseup', 'ExpSearchApp.textSelected(event)');*/
+		//miceContainer.setAttribute("draggable", true);
+		$(miceContainer).on({
+			 //dragstart: clippingDragStart,
+			
+			  mousedown: ExpSearchApp.removeQuerySearchBox,
+			  mouseup: ExpSearchApp.textSelected
+			});
 		miceContainer.setAttribute('id', searchResultX.id);
 	}
 
