@@ -7,6 +7,8 @@ var defVars = { };
 var url;
 var baseURL;
 var serviceCall = false; //whether or not service call is needed when extracting metadata
+var MMD;
+var display = true;
 
 window.onload = setup(document);
 
@@ -62,7 +64,8 @@ function getMMD(pageURL, callback)
 				console.log(errormes);
 				handleMMD(errormes);
 			}
-		}	
+		}	
+
 	};
 	request.send();
 }
@@ -82,6 +85,7 @@ function handleMMD(mmd)
 
 	simplDeserialize(mmd);	
 	//console.log(mmd['meta_metadata']);
+	MMD = mmd;
 	callService(mmd);
 }
 
@@ -148,11 +152,17 @@ function handleMetadata(mmd,meta)
 	for (i in meta) {
 		var meta2 = meta[i];
 	}
-
-	var task = new RenderingTask(url,slideOutVisual,true);	
-	var fields = MetadataLoader.createMetadata(true,mmd,meta2,url);
-	console.log(fields);
-	MICE.render(task,fields);
+	
+	if (display) {
+		var task = new RenderingTask(url,slideOutVisual,true);	
+		var fields = MetadataLoader.createMetadata(true,mmd,meta2,url);
+		console.log(fields);
+		MICE.render(task,fields);		
+	}
+	// var task = new RenderingTask(url,slideOutVisual,true);	
+	// var fields = MetadataLoader.createMetadata(true,mmd,meta2,url);
+	// console.log(fields);
+	// MICE.render(task,fields);
 	
 	serialize(meta);
 }
@@ -170,3 +180,13 @@ function serialize(meta)
 	serializedMeta = JSON.stringify(meta);
 	handleDrag();
 }
+
+/*
+ * resets globals
+ */
+function reset(){
+	var defVars = { };
+	var serviceCall = false;
+	//var serializedMeta = null;
+}
+
