@@ -12,12 +12,20 @@
 //HTML
 
 
+var draggedElement = null;
+
+
 function clippingDragStart(event){
+	
 	
 	/*
 	 * First priority. If I'm on a text node that isn't a grip, ABORT AND GO TO TEXT SELECTION
 	 */
-	
+	console.log("drag start"); console.log(draggedElement);
+	event.target.draggable=false;
+	ExpSearchApp.removeQuerySearchBox(event);
+	//return false;
+	/*return false;
 	var clippingHTML = event.target;
 	while(clippingHTML.className != "indResultContainer"){
 		clippingHTML = clippingHTML.parentNode;
@@ -35,7 +43,7 @@ function clippingDragStart(event){
 	metadataRend.setAttribute('onmouseup', "");
 	event.dataTransfer.setData("text/html/clipping", clippingClone.outerHTML);
 	//Obtain the location for the md clipping - it should always be in the first valueCol of the metadatarendering
-	//indResultContainer -> metadataRendering -> metadataContainer*/
+	//indResultContainer -> metadataRendering -> metadataContainer
 	var metadataRendering = clippingHTML.childNodes[1].childNodes[0];
 	//metadataContainer -> metadataTableDiv -> metadataRow->valueCol
 	metadataRows = metadataRendering.childNodes[0].childNodes[0];
@@ -43,7 +51,7 @@ function clippingDragStart(event){
 	var location = $(metadataRows).find('a')[0].href;
 	//metadataContainer
 	console.log(location);
-	event.dataTransfer.setData("text/url/md", location);
+	event.dataTransfer.setData("text/url/md", location);*/
 
 	
 /*
@@ -67,7 +75,9 @@ function clippingDragStart(event){
 function clippingDragEnd(event){
 	
 }
-
+function clippingDrag(event){
+	console.log(event.target);
+}
 
 
 

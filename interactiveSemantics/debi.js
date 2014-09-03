@@ -248,6 +248,8 @@ MetadataLoader.setMetaMetadata = function (url, mmd)
         {	
           // If so, then build the HTML table	
           var miceStyles = InterfaceStyle.getMiceStyleDictionary(mmd["meta_metadata"].name);	
+         //Adds the metadata type as an attribute to the first field in the MD
+          metadataFields[0].parentMDType = mmd["meta_metadata"].name;
           tasks[i].renderer(tasks[i], metadataFields, {styles: miceStyles, type: mmd["meta_metadata"].name});
         }
       }

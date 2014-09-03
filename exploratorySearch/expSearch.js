@@ -4,7 +4,7 @@ var MAX_RESULTS = 5;
 var exploratorySearches = [];
 var currentExpSearch = null;
 var LOG_SERVICE_URL = "ecoarray0:3801/i/event_log/";
-
+var ALL_ENGINES = ["google_search","google_scholar_search","acm_portal_search","research_gate", "bing_search_xpath"];
 /*
  * Collection of functions to render 
  */
@@ -51,14 +51,15 @@ ExpSearchApp.initialize = function(){
 	var expRenderings = document.getElementsByClassName('expRendering');
 	for (var i = 0; i < expRenderings.length; i++){
 		var query = expRenderings[i].getElementsByTagName('a')[0].getAttribute("query");
-		var location = expRenderings[i].getElementsByTagName('a')[0].href;
-		var engines = expRenderings[i].getElementsByTagName('a')[0].getAttribute("engine");
-		location = encodeXml(location);
+		var urlList = ExpSearchApp.prepareUrls(query);
+		var resultSetHolder = document.getElementById("content");
+		var historyHolder = document.getElementById("history_bar");
+		var expSearch = new ExploratorySearch(resultSetHolder, historyHolder);
 		
-		//Get search md from debi. Use it to build search results.
-
-		MetadataLoader.render(ExpSearchApp.initialRender, expRenderings[i], location, true, null);
-				
+		exploratorySearches.push(expSearch);
+		currentExpSearch = expSearch;
+			
+		ExpSearchApp.addQuery(query);
 	}
 	
 }
@@ -149,92 +150,81 @@ function toHTTPS(url){
  * Engines - list of engines to search with
  * parentSearchSetID - optional, specifies if a searchSet came from another
  */
-ExpSearchApp.addQuery = function(query, engineList, parentSearchSetID){
-	console.log(engineList);
-	if(engineList.length < 1){
-		return;
-	}
-	if (currentExpSearch == null){
-		return "error";
-	}
-	var searchSet;
-	var urlList = [];
-	var parentID;
-	console.log(query);
-	console.log(engineList);
+ExpSearchApp.prepareUrls = function(query){
 
-	
-	
 	/*
 	 * I'm still in need of a good general solution. For now, the code
 	 * checks for google and acm searches and manually creates the appropriate URL
 	 */
-	for (var i = 0; i < engineList.length ; i++){
+	var urlList = [];
+	for (var i = 0; i < ALL_ENGINES.length ; i++){
 		
        
-    	if (engineList[i]=="google_search"){
+    	if (ALL_ENGINES[i]=="google_search"){
     		url = toGoogleUrl(query);
     	}
-    	else if (engineList[i] == 'bing_search_xpath'){
+    	else if (ALL_ENGINES[i] == 'bing_search_xpath'){
     		url = toBingUrl(query);
-    		engineList[i] = "bing_search_xpath";
+    		ALL_ENGINES[i] = "bing_search_xpath";
     	}
-    	else if (engineList[i] == "acm_portal_search"){
+    	else if (ALL_ENGINES[i] == "acm_portal_search"){
     		url = toACMUrl(query);
     	}
-    	else if (engineList[i] == "google_scholar_search"){
+    	else if (ALL_ENGINES[i] == "google_scholar_search"){
     		url = toGScholarUrl(query);
-    	}else if (engineList[i] == "research_gate"){
+    	}else if (ALL_ENGINES[i] == "research_gate"){
     		url = toResearchGateUrl(query);
     	}
     	
     	urlList.push(url);
     
 	}
+	return urlList;
+}
+ExpSearchApp.addQuery = function(query, parentSearchSetID){
+	
+	
+	if (currentExpSearch == null){
+		return "error";
+	}
+	var searchSet;
+	var urlList = ExpSearchApp.prepareUrls(query);
+	var parentID;
+	console.log(query);
+
+	
+	
 	
 	var visual = document.createElement('div');
 	visual.className = "metadataContainer";
 	
-	//In the case where there is a parent searchSet, we check to see if a searchSet with the same query/parent
-	//has already been rendered instead of checking for a searchSet with the same query, engineList
 	
-	
-	
-	//If only one search engine is used, no special logic is needed to handle history conflicts
-	
-	//With multisearch, we need to check before rendering if the searchSet has already been looked up
-	
-		
-		engineList.sort();
-		
-		for (var i = 0; i < currentExpSearch.SearchSets.length; i++){
-			if (currentExpSearch.SearchSets[i].sameSet(query, engineList, parentSearchSetID)){
-				currentExpSearch.history.restoreEntry(currentExpSearch.SearchSets[i].id);
-				return;
-			}
-			
+	for (var i = 0; i < currentExpSearch.SearchSets.length; i++){
+		if (currentExpSearch.SearchSets[i].sameSet(query, ALL_ENGINES, parentSearchSetID)){
+			currentExpSearch.history.restoreEntry(currentExpSearch.SearchSets[i].id);
+			return;
 		}
-		var ss = new SearchSet(query, []);
-		ss.engines = engineList;
-		if (parentSearchSetID != null){
-			ss.parentSetID = parentSearchSetID;
-			//Increase weight of parent SS
-			var entries = currentExpSearch.history.entryList;
-			for (var i = 0; i < entries.length; i++){
-				if(entries[i].id == parentSearchSetID){
-					entries[i].increaseWeight(1);
-				}
+		
+	}
+	var ss = new SearchSet(query, []);
+	ss.engines = ALL_ENGINES;
+	if (parentSearchSetID != null){
+		ss.parentSetID = parentSearchSetID;
+		//Increase weight of parent SS
+		var entries = currentExpSearch.history.entryList;
+		for (var i = 0; i < entries.length; i++){
+			if(entries[i].id == parentSearchSetID){
+				entries[i].increaseWeight(1);
 			}
 		}
+	}
 
-		currentExpSearch.addSearchSet(ss);
-		ss.engines = [];
+	currentExpSearch.addSearchSet(ss);
+	ss.engines = [];
 
-		for (var i = 0; i < engineList.length ; i++){
-			MetadataLoader.render(ExpSearchApp.renderNewMultipleSearch, visual, urlList[i], true, null);
-		}
-		
-		
+	for (var i = 0; i < ALL_ENGINES.length ; i++){
+		MetadataLoader.render(ExpSearchApp.renderNewMultipleSearch, visual, urlList[i], true, null);
+	}
 	
 	console.log(exploratorySearches);
 	currentExpSearch.resultSetContainer.appendChild(visual);
@@ -271,25 +261,26 @@ ExpSearchApp.newSearchFromRelatedQuery = function(event){
 }
 ExpSearchApp.renderNewMultipleSearch = function(task, metadataFields){
 	
-	var newSearch = searchBuilder.searchFromMetadata(metadataFields);
-	//Checks the current query used by the most recent ExploratorySearch
 	
-	if (currentExpSearch.currentSearchSet().query == newSearch.query){
+	
+	
+		var newSearch = searchBuilder.searchFromMetadata(metadataFields);
+		if (currentExpSearch.currentSearchSet().query == newSearch.query){
+			
+			currentExpSearch.currentSearchSet().addSearch(newSearch);
+			ExpSearchApp.displaySearchSet(currentExpSearch);
+
+		}
 		
-		currentExpSearch.currentSearchSet().addSearch(newSearch);
-		ExpSearchApp.displaySearchSet(currentExpSearch);
+		else{
+		
+			ExpSearchApp.displaySearchSet(currentExpSearch);
 
-	}
+		}
 	
-	else{
-	
-		ExpSearchApp.displaySearchSet(currentExpSearch);
 
-	}
 	
-	//Redraws display
 	
-	MetadataLoader.queue.splice(MetadataLoader.queue.indexOf(task), 1);
 	
 }
 /*
@@ -840,18 +831,36 @@ function getSelectionHtml() {
     }
     return html;
 }
-
+//MOUSEDOWN
 ExpSearchApp.removeQuerySearchBox = function(event){
 	if(event != null){
 		if(event.target.className == "toQueryBox" || event.target.className == "icon-search toQueryIcon"){
 			return;
 		}
 	}
-	//Removes any existing query boxes
-	var queryBox = document.getElementById('toQueryBox');
-	if (queryBox != null){
-		queryBox.parentNode.removeChild(queryBox);
+	if(event!=null){
+		if (event.target.tagName == "P"){
+			//Removes any existing query boxes
+			var queryBox = document.getElementById('toQueryBox');
+			if (queryBox != null){
+				queryBox.parentNode.removeChild(queryBox);
+			}
+		}
+		else{
+			draggedElement = event.target;
+			var t = event.target;
+			while (t.className != "indResultContainer"){
+				t = t.parentNode;
+			}
+			t.draggable=true;
+		}
+		
 	}
+	
+	
+	
+
+	
 }
 ExpSearchApp.textSelected = function(event){
 	document.addEventListener("mousedown", ExpSearchApp.removeQuerySearchBox);

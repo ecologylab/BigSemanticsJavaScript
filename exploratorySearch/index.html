@@ -18,7 +18,6 @@
          <script type="text/javascript" src="searchResult.js"></script>
          <script type="text/javascript" src="filter.js"></script>
          <script src="jquery-2.0.0.min.js"></script>
-      
          <script type="text/javascript" src="../simpl/simplDeserializer.js"></script>
          <script type="text/javascript" src="../simpl/simplFieldTypes.js"></script>
          <script type="text/javascript" src="../simpl/simplGraphCollapse.js"></script>
@@ -42,11 +41,8 @@
          
 		  //englineList -> list of engines to search with
               //newExpSearch -> true if starting a new exploratory search
-                function showMetadata(engineList,isNewExpSearch)
+                function showMetadata(isNewExpSearch)
                  {
-                   if (engineList.length < 1){
-                   		return;
-                   }
                    var query = document.getElementById("targetURL").value;
                   
                    var content = document.getElementById("content");
@@ -55,19 +51,18 @@
 				    eventObj = {
 				  		add_query: {
 				  			query: query,
-				  			timestamp: time,
-				  			search_engines: engineList
+				  			timestamp: time
 				  		}
 				  	};
 				  	
 				    TheRecord.addEvent(eventObj);
-                    ExpSearchApp.addQuery(query, engineList);
+                    ExpSearchApp.addQuery(query);
                 }
             
             function onEnterShowMetadata(event)
             {
                 if(event.keyCode == 13)
-                	showMetadata(ExpSearchApp.getEngines());
+                	showMetadata();
             }
             
             function logEngineToggle(event){
@@ -100,7 +95,7 @@
                   size="500" style="height: 30px;" placeholder="Enter Search Term"
                   onkeydown="onEnterShowMetadata(event);"/>
                 <input type="button" class="btn" value="Add Query"
-                  onclick="showMetadata(ExpSearchApp.getEngines());"/>
+                  onclick="showMetadata();"/>
                  <input type="button" class="btn" value="New Exploratory Search"
                   onclick="ExpSearchApp.newExpSearch(event);"  margin-right:10px"/> 
                 <div class = "checkBoxGroup">
@@ -156,7 +151,7 @@
 		<div class="column" style="width: 35%; float: left">
           <div id="content" class="expRendering">
           
-        <a href="https://www.google.com/search?q=search" engine ="google_search" query="exploratory search"> </a>     
+        <a href="https://www.google.com/search?q=search" engine ="google_search" query="search"> </a>     
           </div>
         </div>
           <div class="column comparison" id="comp" style="width: 35%">
