@@ -104,8 +104,11 @@ MICE.addMetadataDisplay = function(container, url, isRoot, clipping, requestMD, 
 	}
 	else
 	{	
+		var requestMetadata = (typeof requestMD === "undefined") || requestMD == true;
+		
 		// Fetch the metadata from the service
-		MetadataLoader.getMetadata(url, "MetadataLoader.setMetadata", reloadMD);	
+		if(!isExtension && requestMetadata)
+			MetadataLoader.getMetadata(url, "MetadataLoader.setMetadata", reloadMD);	
 	}
 }
 
@@ -403,6 +406,8 @@ MICE.downloadAndDisplayDocument = function(event)
 		
 		// Add a loadingRow for visual feedback that the metadata is being downloaded / parsed
 		table.appendChild(MICE.createLoadingRow(styleInfo));
+
+		var requestMD = (location.indexOf("twitter.com") != -1)? false : true;
 	    MetadataLoader.render(MICE.render, table.parentElement, location, false)	;
 		//MICE.addMetadataDisplay(table.parentElement, location, false);
 	}

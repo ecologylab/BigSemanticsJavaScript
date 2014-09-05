@@ -33,7 +33,8 @@ MetadataRenderer.render = function(task, metadataFields, styleInfo)
 	// Create the interior HTML container
 	task.visual = document.createElement('div');
 	task.visual.className = styleInfo.styles.metadataContainer;
-	
+	task.visual.setAttribute('mdType', metadataFields[0].parentMDType);
+
 	// Build the HTML table for the metadata
 	MetadataLoader.currentDocumentLocation = task.url;
 	var bgColor = null;
@@ -153,40 +154,43 @@ MetadataRenderer.expandCollapseTable = function(event)
 			button.nextSibling.style.display = "";
 		
 		var table = MetadataRenderer.getTableForButton(button, styleInfo);
-		MetadataRenderer.expandTable(table, styleInfo);
-		
-		if(MetadataLoader.logger && (event.name == null || event.name != "fakeEvent"))
-		{			
-			var eventObj = {};
-			if(typeof button.location === "undefined")
-			{
-				if(button.parentElement.childNodes[1])
+		if (table)
+		{
+			MetadataRenderer.expandTable(table, styleInfo);
+			
+			if(MetadataLoader.logger && (event.name == null || event.name != "fakeEvent"))
+			{			
+				var eventObj = {};
+				if(typeof button.location === "undefined")
 				{
-					eventObj = {
-						expand_metadata: {
-							field_name: button.parentElement.childNodes[1].innerText,
-							parent_doc: MetadataRenderer.getLocationForParentTable(button.parentElement, styleInfo)
-						}
-					};
+					if(button.parentElement.childNodes[1])
+					{
+						eventObj = {
+							expand_metadata: {
+								field_name: button.parentElement.childNodes[1].innerText,
+								parent_doc: MetadataRenderer.getLocationForParentTable(button.parentElement, styleInfo)
+							}
+						};
+					}
+					else
+					{
+						eventObj = {
+							expand_metadata: {
+								parent_doc: MetadataRenderer.getLocationForParentTable(button.parentElement, styleInfo)
+							}
+						};
+					}
 				}
 				else
 				{
 					eventObj = {
 						expand_metadata: {
-							parent_doc: MetadataRenderer.getLocationForParentTable(button.parentElement, styleInfo)
+							target_doc: MetadataRenderer.getLocationForChildTable(button.parentElement.parentElement.parentElement, styleInfo)
 						}
 					};
 				}
+				MetadataLoader.logger(eventObj);
 			}
-			else
-			{
-				eventObj = {
-					expand_metadata: {
-						target_doc: MetadataRenderer.getLocationForChildTable(button.parentElement.parentElement.parentElement, styleInfo)
-					}
-				};
-			}
-			MetadataLoader.logger(eventObj);
 		}
 	}
 	else if(expandSymbol.style.display == "none")
@@ -198,42 +202,45 @@ MetadataRenderer.expandCollapseTable = function(event)
 			button.nextSibling.style.display = "none";
 		
 		var table = MetadataRenderer.getTableForButton(button, styleInfo);
-		MetadataRenderer.collapseTable(table, styleInfo);
-		
-		if(MetadataLoader.logger)
+		if (table)
 		{
-			var eventObj = {};
-			if(typeof button.location === "undefined")
+			MetadataRenderer.collapseTable(table, styleInfo);
+			
+			if(MetadataLoader.logger)
 			{
-				if (button.parentElement.childNodes[1])
+				var eventObj = {};
+				if(typeof button.location === "undefined")
 				{
-					eventObj = {
-						collapse_metadata: {
-							field_name: button.parentElement.childNodes[1].innerText,
-							parent_doc: MetadataRenderer.getLocationForParentTable(button.parentElement, styleInfo)
-						}
-					};
+					if (button.parentElement.childNodes[1])
+					{
+						eventObj = {
+							collapse_metadata: {
+								field_name: button.parentElement.childNodes[1].innerText,
+								parent_doc: MetadataRenderer.getLocationForParentTable(button.parentElement, styleInfo)
+							}
+						};
+					}
+					else
+					{
+						eventObj = {
+							collapse_metadata: {
+								parent_doc: MetadataRenderer.getLocationForParentTable(button.parentElement, styleInfo)
+							}
+						};
+					}
 				}
 				else
 				{
+					
 					eventObj = {
 						collapse_metadata: {
-							parent_doc: MetadataRenderer.getLocationForParentTable(button.parentElement, styleInfo)
+							target_doc: MetadataRenderer.getLocationForChildTable(button.parentElement.parentElement.parentElement, styleInfo)
 						}
 					};
 				}
-			}
-			else
-			{
-				
-				eventObj = {
-					collapse_metadata: {
-						target_doc: MetadataRenderer.getLocationForChildTable(button.parentElement.parentElement.parentElement, styleInfo)
-					}
-				};
-			}
-			MetadataLoader.logger(eventObj);
-		}	
+				MetadataLoader.logger(eventObj);
+			}	
+		}
 	}
 	
 	// condition added for fakeEvent in case of show_expanded_initially
@@ -802,8 +809,8 @@ MetadataRenderer.buildMetadataField = function(metadataField, isChildTable, fiel
 				// Uses http://getfavicon.appspot.com/ to resolve the favicon
 				var favicon = document.createElement('img');
 					favicon.className = styleInfo.styles.faviconICE;
-					favicon.src = "http://g.etfv.co/" + MetadataLoader.getHost(metadataField.navigatesTo);
-				
+					favicon.src = "http://g.etfv.co/" + metadataField.value;
+					
 				var aTag = document.createElement('a');
 				aTag.innerText = MetadataLoader.removeLineBreaksAndCrazies(metadataField.value);
 				aTag.textContent = MetadataLoader.removeLineBreaksAndCrazies(metadataField.value);
@@ -832,8 +839,8 @@ MetadataRenderer.buildMetadataField = function(metadataField, isChildTable, fiel
 				// Uses http://getfavicon.appspot.com/ to resolve the favicon
 				var favicon = document.createElement('img');
 					favicon.className = styleInfo.styles.faviconICE;
-					favicon.src = "http://g.etfv.co/" + MetadataLoader.getHost(metadataField.navigatesTo);
-				
+					favicon.src = "http://g.etfv.co/" + metadataField.navigatesTo;
+					
 				var aTag = document.createElement('a');
 					aTag.className = styleInfo.styles.fieldValue;
 					if(metadataField.style_name != "null" && metadataField.style_name!=""){
@@ -887,6 +894,7 @@ MetadataRenderer.buildMetadataField = function(metadataField, isChildTable, fiel
 													
 				if(metadataField.style_name != null)
 					fieldValue.className += " "+metadataField.style_name;
+
 				var fieldValueDiv = document.createElement('div');
 					fieldValueDiv.className = styleInfo.styles.fieldValueContainer;
 				if (bgColorObj && bgColorObj.bFirstField)
@@ -966,34 +974,38 @@ MetadataRenderer.buildMetadataField = function(metadataField, isChildTable, fiel
 		}
 		else
 		{
-			// If the document hasn't been download then display a button that will download it
-			expandButton = document.createElement('div');
-				expandButton.className = styleInfo.styles.expandButtonX;
-			
-			expandButton.onclick = MetadataRenderer.downloadAndDisplayDocument;
-
-			if(childUrl != "")
+			if (childUrl != "" || metadataField.value.length > 1)
 			{
-				expandButton.onmouseover = MetadataRenderer.highlightDocuments;
-				expandButton.onmouseout = MetadataRenderer.unhighlightDocuments;
-			}
-					
-			var expandSymbol = document.createElement('div');
-				expandSymbol.className = styleInfo.styles.expandSymbol;
-				expandSymbol.style.display = "block";
 				
-			var collapseSymbol = document.createElement('div');
-				collapseSymbol.className = styleInfo.styles.collapseSymbol;
-				collapseSymbol.style.display = "block";						
-			
-			/* set mmdType to all as any may receive event */
-			expandButton.mmdType = styleInfo.type;
-			expandSymbol.mmdType = styleInfo.type;
-			collapseSymbol.mmdType = styleInfo.type;
+				// If the document hasn't been download then display a button that will download it
+				expandButton = document.createElement('div');
+					expandButton.className = styleInfo.styles.expandButtonX;
+				
+				expandButton.onclick = MetadataRenderer.downloadAndDisplayDocument;
+	
+				if(childUrl != "")
+				{
+					expandButton.onmouseover = MetadataRenderer.highlightDocuments;
+					expandButton.onmouseout = MetadataRenderer.unhighlightDocuments;
+				}
+						
+				var expandSymbol = document.createElement('div');
+					expandSymbol.className = styleInfo.styles.expandSymbol;
+					expandSymbol.style.display = "block";
 					
-			expandButton.appendChild(expandSymbol);
-			expandButton.appendChild(collapseSymbol);
-			fieldLabelDiv.appendChild(expandButton);
+				var collapseSymbol = document.createElement('div');
+					collapseSymbol.className = styleInfo.styles.collapseSymbol;
+					collapseSymbol.style.display = "block";						
+				
+				/* set mmdType to all as any may receive event */
+				expandButton.mmdType = styleInfo.type;
+				expandSymbol.mmdType = styleInfo.type;
+				collapseSymbol.mmdType = styleInfo.type;
+						
+				expandButton.appendChild(expandSymbol);
+				expandButton.appendChild(collapseSymbol);
+				fieldLabelDiv.appendChild(expandButton);
+			}
 		}
 		
 		if(metadataField.name)
@@ -1086,7 +1098,6 @@ MetadataRenderer.buildMetadataField = function(metadataField, isChildTable, fiel
 			var fieldLabelDiv = document.createElement('div');
 			fieldLabelDiv.className = styleInfo.styles.fieldLabelContainerUnhighlight;
 		
-			// does it need to expand / collapse [CONFIRM]
 			if(metadataField.value.length > 1)
 			{
 				var expandButton = document.createElement('div');
