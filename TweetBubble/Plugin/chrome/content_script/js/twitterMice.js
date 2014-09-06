@@ -338,8 +338,21 @@ MetadataRenderer.downloadAndDisplayDocument = function(event)
 		
 		var requestMD = (location.indexOf("twitter.com") != -1)? false : true;
 		MetadataRenderer.addMetadataDisplay(table.parentElement, location, false, null, requestMD, false, button);
-		if (requestDocumentDownload)
-			requestDocumentDownload(location);
+		if (!requestMD)
+		{
+			//document.dispatchEvent(new Event("tweetbubbleExternal"));
+			var message = {
+				type : "extractionRequest",
+				sender : table.parentElement,
+				detail : {
+					url : location
+				}
+			};
+			ExtensionInterface.dispatchMessage(message);
+		}
+
+		//if (requestDocumentDownload)
+			//requestDocumentDownload(location);
 	}
 	// If there was no document location then the table must be a non-document composite in which case just expand
 	else

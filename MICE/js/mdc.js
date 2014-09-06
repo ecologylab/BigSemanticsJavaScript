@@ -139,11 +139,10 @@ function showMetadata()
   MetadataLoader.clearDocumentCollection();
   var refreshCheckbox = document.getElementById('force_reload').checked;
   
-  var twitterUrl = (url.indexOf("twitter.com") != -1)? true : false;
-  var request_md = !twitterUrl;
+  var request_md = (url.indexOf("twitter.com") != -1)? false : true;
     
   MICE.addMetadataDisplay(content, url, false, null, request_md, reload_md);
-  if (twitterUrl)
+  if (!request_md)
   {
 	  //document.dispatchEvent(new Event("tweetbubbleExternal"));
 	  var message = {
