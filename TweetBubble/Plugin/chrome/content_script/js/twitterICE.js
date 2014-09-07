@@ -144,7 +144,7 @@ this.getContainer = function(elt) {
 	// append to last row, if metadata, to keep tweet content together 
 	if (elt.getAttribute("isMetadata") == "true")
 	{
-		while (parent.className != "twMetadataTableDiv")
+		while (parent.className != "twMetadataTableDiv" || parent.className != "twRootMetadataTableDiv")
 			parent = parent.parentNode;
 		
 		// metadataRow.tableCell

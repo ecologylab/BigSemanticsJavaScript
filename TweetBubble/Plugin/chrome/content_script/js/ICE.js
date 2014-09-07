@@ -2,8 +2,10 @@
 // replace different hyperlink elements with styled divs.
 // queue asynchronous population of these divs using loading of webpages via background script
 
-var expandIconPath = chrome.extension.getURL("content_script/img/expand_icon.png");	// "https://abs.twimg.com/favicons/favicon.ico";
-var collapseIconPath = chrome.extension.getURL("content_script/img/collapse_icon.png");
+var iconDir = "../TweetBubble/Plugin/chrome/content_script/img/";
+
+var expandIconPath = isExtension? chrome.extension.getURL("content_script/img/expand_icon.png") : imgDir + "expand_icon.png";	// "https://abs.twimg.com/favicons/favicon.ico";
+var collapseIconPath = isExtension? chrome.extension.getURL("content_script/img/collapse_icon.png") : imgDir + "collapse_icon.png";
 
 var mice_condition = "mice";
 var experiment_condition = null;
@@ -344,8 +346,17 @@ function run_script(userid, cond)
 		Logger.init(userid, cond);
 
 		processPage();
-
-		window.addEventListener("scroll", onUpdateHandler);
+		
+		if (isExtension)
+		{
+			window.addEventListener("scroll", onUpdateHandler);
+		}
+		else	// IdeaMACHE / standalone MICE context
+		{
+			//for backward compatibility
+			document.addEventListener("tweetbubbleExternal", externalRequestHandler);
+			document.addEventListener("extractionRequest", extractionRequestHandler);
+		}
 	}
 	else
 	{
@@ -353,14 +364,20 @@ function run_script(userid, cond)
 		
 		processDefaultConditionClicks(document);
 		
-		window.addEventListener("scroll", defaultConditionOnUpdateHandler);
+		if (isExtension)
+		{
+			window.addEventListener("scroll", defaultConditionOnUpdateHandler);
+		}
 	}
 	
 	currentUrl = document.URL;
 	
-	setInterval(function() {
-		instance.addAJAXContentListener(ajaxContentUpdate);
-	}, 5000);
+	if (isExtension) 
+	{
+		setInterval(function() {
+			instance.addAJAXContentListener(ajaxContentUpdate);
+		}, 5000);
+	}
 }
 
 function processInfoSheetResponse(resp)
@@ -371,49 +388,98 @@ function processInfoSheetResponse(resp)
 }
 
 //run_at is document_end i.e. after DOM is complete but before images and frames are loaded
-chrome.extension.sendRequest({loadStudySettings: document.URL}, function(response) {
-	  
-	if (response && response.condition != "none")
-		experiment_condition = response.condition;
-	else
-		experiment_condition = mice_condition;
+if (!isExtension)
+{
+	experiment_condition = mice_condition;
+	if (document.URL.indexOf("https://twitter.com") != 0)
+		run_script('imExtTest', mice_condition);
+}
+else
+{
+	chrome.extension.sendRequest({loadStudySettings: document.URL}, function(response) {
 		  
-	if (response && response.agree == Util.YES)
-		run_script(response.userid, response.condition);
-	else
-	{
-		if (response && response.agree != Util.NO)
+		if (response && response.condition != "none")
+			experiment_condition = response.condition;
+		else
+			experiment_condition = mice_condition;
+			  
+		if (response && response.agree == Util.YES)
+			run_script(response.userid, response.condition);
+		else
 		{
-			response_condition = response.condition;
-			userid = response.userid;
-			Util.getInformationSheetResponse(processInfoSheetResponse);
-		}
-		//if (window.confirm(Util.info_sheet))
-			//processInfoSheetResponse(Util.YES);
-	}
-	
-	if (MetadataLoader.logger)
-	{
-		if (response && (response.last_userid != response.userid || response.last_condition != response.condition))
-		{
-			var eventObj = {
-				change_settings: {
-					lastUserId: response.last_userid,
-					currUserId: response.userid,
-					lastCond: response.last_condition,
-					currCond: response.condition,
-					infoSheetAgree: response.agree
-				}
+			if (response && response.agree != Util.NO)
+			{
+				response_condition = response.condition;
+				userid = response.userid;
+				Util.getInformationSheetResponse(processInfoSheetResponse);
 			}
-			MetadataLoader.logger(eventObj);
+			//if (window.confirm(Util.info_sheet))
+				//processInfoSheetResponse(Util.YES);
 		}
-	}
-});
+		
+		if (MetadataLoader.logger)
+		{
+			if (response && (response.last_userid != response.userid || response.last_condition != response.condition))
+			{
+				var eventObj = {
+					change_settings: {
+						lastUserId: response.last_userid,
+						currUserId: response.userid,
+						lastCond: response.last_condition,
+						currCond: response.condition,
+						infoSheetAgree: response.agree
+					}
+				}
+				MetadataLoader.logger(eventObj);
+			}
+		}
+	});
+}
 
 chrome.runtime.onMessage.addListener(
 	function(request, sender, sendResponse) {
 		
-	if (request.url != null)
-		processUrlChange(request.url);
+	if (isExtension)
+	{
+		if (request.url != null)
+			processUrlChange(request.url);
+	}
 });
 
+function extractionRequestHandler(event)
+{
+	var url = event.detail.location;
+	// originator: event.target
+	chrome.extension.sendRequest({load: url}, function(response) {
+		  //console.log(response);
+		  //var requester = response.target;
+		  //requester.setAttribute("extensionMetadata", JSON.stringify(response.doc));
+		  
+		  var extEvent = new CustomEvent("extractionResponse", {bubbles: true, cancelable: false, detail: {extensionMetadata: response.doc}});
+		  document.dispatchEvent(extEvent);
+	});
+}
+
+function externalRequestHandler(event)
+{
+	 var url = document.getElementById("targetURL");
+	 var content = null;
+	 
+	 //mice
+	 if (url)
+	 {
+		 url = url.value;
+		 content = document.getElementById("mdcIce");
+	 }	 
+	 else //ideamache
+	 {
+		 url = event.detail.location;
+		 content = event.target;
+	 }
+	 
+	 if (url && content)
+	 {
+		 MetadataRenderer.addMetadataDisplay(content, url, false);
+		 downloadRequester(url);
+	 }
+}
