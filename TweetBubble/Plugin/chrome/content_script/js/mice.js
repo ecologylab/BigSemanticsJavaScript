@@ -403,8 +403,21 @@ MICE.downloadAndDisplayDocument = function(event)
 		table.appendChild(MICE.createLoadingRow(styleInfo));
 
 		var requestMD = (location.indexOf("twitter.com") != -1)? false : true;
-	    MetadataLoader.render(MICE.render, table.parentElement, location, false)	;
+	    //MetadataLoader.render(MICE.render, table.parentElement, location, false)	;
 		//MICE.addMetadataDisplay(table.parentElement, location, false);
+		MetadataRenderer.addMetadataDisplay(table.parentElement, location, false, null, requestMD, false, button);
+		if (!requestMD)
+		{
+			//document.dispatchEvent(new Event("tweetbubbleExternal"));
+			var message = {
+				type : "extractionRequest",
+				sender : table.parentElement,
+				detail : {
+					url : location
+				}
+			};
+			ExtensionInterface.dispatchMessage(message);
+		}
 	}
 	// If there was no document location then the table must be a non-document composite in which case just expand
 	else
