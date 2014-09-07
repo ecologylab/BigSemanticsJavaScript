@@ -2,7 +2,8 @@
 // replace different hyperlink elements with styled divs.
 // queue asynchronous population of these divs using loading of webpages via background script
 
-var iconDir = "../TweetBubble/Plugin/chrome/content_script/img/";
+var iconDir = (typeof MDC_rawMetadata != "undefined")? "../TweetBubble/Plugin/chrome/content_script/img/"
+										: "/static/mache/code/BigSemanticsJS/TweetBubble/Plugin/chrome/content_script/img/";
 
 var expandIconPath = isExtension? chrome.extension.getURL("content_script/img/expand_icon.png") : imgDir + "expand_icon.png";	// "https://abs.twimg.com/favicons/favicon.ico";
 var collapseIconPath = isExtension? chrome.extension.getURL("content_script/img/collapse_icon.png") : imgDir + "collapse_icon.png";
@@ -29,13 +30,28 @@ function processMetadata(node)
 	addExternalURLHandlers();
 }
 
-function downloadRequester(expandableItemUrl)
+function downloadRequester(expandableItemUrl, container)
 {
-	chrome.extension.sendRequest({load: expandableItemUrl}, function(response) {
-		  //console.log(response);
-		  MetadataLoader.setMetadata(response.doc);
-		  MetadataLoader.setMetaMetadata(response.mmd);
-	});
+	if (!isExtension)
+	{
+		//document.dispatchEvent(new Event("tweetbubbleExternal"));
+		var message = {
+			type : "extractionRequest",
+			sender : container,
+			detail : {
+				url : expandableItemUrl
+			}
+		};
+		ExtensionInterface.dispatchMessage(message);
+	}
+	else
+	{
+		chrome.extension.sendRequest({load: expandableItemUrl}, function(response) {
+			//console.log(response);
+			MetadataLoader.setMetadata(response.doc, false);
+			MetadataLoader.setMetaMetadata(response.mmd);
+		});
+	}
 }
 
 function onUpdateHandler()
@@ -94,7 +110,7 @@ function expandCollapseItem(event)
 			MetadataRenderer.addMetadataDisplay(parent, expandableItemUrl, true, null, false, false, item);
 			
 			//request loading of webpage
-			downloadRequester(expandableItemUrl);
+			downloadRequester(expandableItemUrl, parent);
 			instance.setCached(item);
 		}
 	}
@@ -343,7 +359,10 @@ function run_script(userid, cond)
 		if (MetadataRenderer.setDocumentDownloader)
 			MetadataRenderer.setDocumentDownloader(downloadRequester);
 
-		Logger.init(userid, cond);
+		if (isExtension)
+		{
+			Logger.init(userid, cond);
+		}
 
 		processPage();
 		
@@ -351,16 +370,13 @@ function run_script(userid, cond)
 		{
 			window.addEventListener("scroll", onUpdateHandler);
 		}
-		else	// IdeaMACHE / standalone MICE context
-		{
-			//for backward compatibility
-			document.addEventListener("tweetbubbleExternal", externalRequestHandler);
-			document.addEventListener("extractionRequest", extractionRequestHandler);
-		}
 	}
 	else
 	{
-		Logger.init(userid, cond);
+		if (isExtension)
+		{
+			Logger.init(userid, cond);
+		}
 		
 		processDefaultConditionClicks(document);
 		
@@ -436,50 +452,13 @@ else
 	});
 }
 
-chrome.runtime.onMessage.addListener(
-	function(request, sender, sendResponse) {
-		
-	if (isExtension)
-	{
+if (isExtension)
+{
+	chrome.runtime.onMessage.addListener(
+		function(request, sender, sendResponse) {
+			
 		if (request.url != null)
 			processUrlChange(request.url);
-	}
-});
-
-function extractionRequestHandler(event)
-{
-	var url = event.detail.location;
-	// originator: event.target
-	chrome.extension.sendRequest({load: url}, function(response) {
-		  //console.log(response);
-		  //var requester = response.target;
-		  //requester.setAttribute("extensionMetadata", JSON.stringify(response.doc));
-		  
-		  var extEvent = new CustomEvent("extractionResponse", {bubbles: true, cancelable: false, detail: {extensionMetadata: response.doc}});
-		  document.dispatchEvent(extEvent);
 	});
 }
 
-function externalRequestHandler(event)
-{
-	 var url = document.getElementById("targetURL");
-	 var content = null;
-	 
-	 //mice
-	 if (url)
-	 {
-		 url = url.value;
-		 content = document.getElementById("mdcIce");
-	 }	 
-	 else //ideamache
-	 {
-		 url = event.detail.location;
-		 content = event.target;
-	 }
-	 
-	 if (url && content)
-	 {
-		 MetadataRenderer.addMetadataDisplay(content, url, false);
-		 downloadRequester(url);
-	 }
-}

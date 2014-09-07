@@ -174,7 +174,7 @@ function checkForMissingMetadata()
 	if(content.getElementsByClassName("metadataContainer").length == 0 && content.getElementsByClassName("twMetadataContainer").length == 0)
 	{
 		if (url.indexOf("twitter.com") != -1)
-			MICE.addMetadataDisplay(content, url, true);
+			MetadataLoader.getMetadata(url, "MetadataLoader.setMetadata", reload_md);
 	}	
 }
 

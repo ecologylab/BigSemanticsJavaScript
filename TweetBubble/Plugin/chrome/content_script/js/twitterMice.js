@@ -12,7 +12,8 @@ var colors = ['rgb(255, 255, 204)', 'rgb(187, 226, 250)', 'rgb(250, 227, 200)', 
 var lastColorIndex = Math.floor(Math.random()*colors.length);
 
 var isExtension = (typeof chrome.extension !== "undefined");
-var imgDir = "../TweetBubble/Plugin/chrome/content_script/img/";
+var imgDir = (typeof MDC_rawMetadata != "undefined")? "../TweetBubble/Plugin/chrome/content_script/img/"
+										: "/static/mache/code/BigSemanticsJS/TweetBubble/Plugin/chrome/content_script/img/";
 	
 var replyIconPath1 = isExtension? chrome.extension.getURL("content_script/img/reply_221.png") :	imgDir + "reply_221.png";
 var retweetIconPath1 = isExtension? chrome.extension.getURL("content_script/img/retweet_221.png") :	imgDir + "retweet_221.png";
@@ -1447,8 +1448,8 @@ MetadataRenderer.getFirstLevelDocumentContainers = function(elt, styleInfo)
 	var metadataExpansions = [];
 	for (var i = 0; i < rows.length; i++)
 	{
-		var labelCol = rows[i].getElementsByClassName("labelCol")[0];
-		var valueCol = rows[i].getElementsByClassName("valueCol")[0];
+		var labelCol = rows[i].getElementsByClassName(styleInfo.styles.labelCol)[0];
+		var valueCol = rows[i].getElementsByClassName(styleInfo.styles.valueCol)[0];
 		
 		if (valueCol.firstChild.className.indexOf(styleInfo.styles.fieldCompositeContainer) != -1)
 		{

@@ -24,7 +24,8 @@ ExtensionInterface.dispatchMessage = function(message)
 		if (message.detail && message.detail.url)
 		{
 			var extEvent = new CustomEvent(message.type, {bubbles: true, cancelable: false, detail: {location: message.detail.url}});
-			message.sender.dispatchEvent(extEvent);
+			document.dispatchEvent(extEvent);
+			//message.sender.dispatchEvent(extEvent);
 		}
 	}
 }
