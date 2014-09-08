@@ -832,7 +832,7 @@ MetadataRenderer.buildMetadataField = function(metadataField, isChildTable, fiel
 				aTag.href = metadataField.value;
 				aTag.onclick = MetadataRenderer.logNavigate;
 				
-				aTag.className = "fieldValue";
+				aTag.className = styleInfo.styles.fieldValue;
 						
 				if(metadataField.style_name != null && metadataField.style_name != "")
 					aTag.classList.add(metadataField.style_name);
@@ -1058,7 +1058,7 @@ MetadataRenderer.buildMetadataField = function(metadataField, isChildTable, fiel
 			fieldValueDiv.className = styleInfo.styles.fieldCompositeContainer;
 			
 		if (metadataField.composite_type == "twitter_microblog")
-			fieldValueDiv.className = "fieldCompositeContainer twitterMicroblog";
+			fieldValueDiv.className = styleInfo.styles.fieldCompositeContainer + " twitterMicroblog";
 		
 		// Build the child table for the composite
 		var childTable =  MetadataRenderer.buildMetadataTable(null, false, false, metadataField.value, 1, styleInfo, bgColorObj, false);

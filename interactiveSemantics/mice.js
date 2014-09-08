@@ -1050,7 +1050,7 @@ MICE.buildMetadataField = function(metadataField, isChildTable, fieldCount, row,
 				aTag.href = metadataField.value;
 				aTag.onclick = MICE.logNavigate;
 				
-				aTag.className = "fieldValue";
+				aTag.className = styleInfo.styles.fieldValue;
 						
 				if(metadataField.style_name != null && metadataField.style_name != "")
 					aTag.classList.add(metadataField.style_name);
