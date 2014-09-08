@@ -2,11 +2,11 @@
 // replace different hyperlink elements with styled divs.
 // queue asynchronous population of these divs using loading of webpages via background script
 
-var iconDir = (typeof MDC_rawMetadata != "undefined")? "../TweetBubble/Plugin/chrome/content_script/img/"
+var iconDir = (window.PR_SHOULD_USE_CONTINUATION)? "../TweetBubble/Plugin/chrome/content_script/img/"
 										: "/static/mache/code/BigSemanticsJS/TweetBubble/Plugin/chrome/content_script/img/";
 
-var expandIconPath = isExtension? chrome.extension.getURL("content_script/img/expand_icon.png") : imgDir + "expand_icon.png";	// "https://abs.twimg.com/favicons/favicon.ico";
-var collapseIconPath = isExtension? chrome.extension.getURL("content_script/img/collapse_icon.png") : imgDir + "collapse_icon.png";
+var expandIconPath = isExtension? chrome.extension.getURL("content_script/img/expand_icon.png") : iconDir + "expand_icon.png";	// "https://abs.twimg.com/favicons/favicon.ico";
+var collapseIconPath = isExtension? chrome.extension.getURL("content_script/img/collapse_icon.png") : iconDir + "collapse_icon.png";
 
 var mice_condition = "mice";
 var experiment_condition = null;
