@@ -7,7 +7,7 @@ MICE.documentMap = [];
 // deprecated
 var WWWStudy;
 
-
+var isExtension = (typeof chrome !== "undefined" && typeof chrome.extension !== "undefined");
 
 /**
  * Initializes MICE. Gets the containers and locations from the original document.  

@@ -11,7 +11,7 @@ var colors = ['rgb(255, 255, 204)', 'rgb(187, 226, 250)', 'rgb(250, 227, 200)', 
               'rgb(255, 208, 201)', 'rgb(212, 222, 255)', 'rgb(213, 238, 242)']; // use rgb for direct comparison
 var lastColorIndex = Math.floor(Math.random()*colors.length);
 
-var isExtension = (typeof chrome.extension !== "undefined");
+var isExtension = (typeof chrome !== "undefined" && typeof chrome.extension !== "undefined");
 var imgDir = (application_name == "mdc")? "../TweetBubble/Plugin/chrome/content_script/img/"
 										: "/static/mache/code/BigSemanticsJS/TweetBubble/Plugin/chrome/content_script/img/";
 	
