@@ -31,8 +31,6 @@ var MetadataRenderer = MICE;
  */
 MetadataRenderer.render = function(task, metadataFields, styleInfo)
 {	
-	var a = typeof MDC_rawMetadata;
-	console.log(a);
 	// Create the interior HTML container
 	task.visual = document.createElement('div');
 	task.visual.className = styleInfo.styles.metadataContainer;
@@ -716,7 +714,7 @@ MetadataRenderer.buildMetadataTable = function(table, isChildTable, isRoot, meta
 				// new table for inner row
 				var outerTable = document.createElement('div');
 				outerTable.style.display = 'table';
-				outerTable.style.width = "100%";
+				//outerTable.style.width = "100%";
 				outerTable.appendChild(innerRow);
 				
 				var tdOuter = document.createElement('div');
@@ -763,23 +761,23 @@ MetadataRenderer.buildMetadataTable = function(table, isChildTable, isRoot, meta
 MetadataRenderer.buildMetadataField = function(metadataField, isChildTable, fieldCount, row, styleInfo, bgColorObj)
 {
 	var nameCol = document.createElement('div');
-	//if (!metadataField.show_expanded_always) { 
+	if (!metadataField.show_expanded_always) { 
 		//|| (metadataField.composite_type != null && metadataField.composite_type == "tweet")) {	
 		nameCol.className = styleInfo.styles.labelCol;
-	/*}
+	}
 	else if (metadataField.composite_type != null && metadataField.composite_type != "image") {
 		nameCol.className = styleInfo.styles.labelCol;
 		nameCol.style.display = "none";
-	}*/
+	}
 	
 	var valueCol = document.createElement('div');
 		valueCol.className = styleInfo.styles.valueCol;
 	
-	/*if(metadataField.composite_type != null && metadataField.composite_type != "image") {
+	if(metadataField.composite_type != null && metadataField.composite_type != "image") {
 		valueCol.className = styleInfo.styles.valueCol;
 		valueCol.style.position = "relative";
 		valueCol.style.left = "-9px";
-	}*/	
+	}	
 		
 	var expandButton = null;	
 	
