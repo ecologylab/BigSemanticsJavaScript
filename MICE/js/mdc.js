@@ -139,7 +139,7 @@ function showMetadata()
   MetadataLoader.clearDocumentCollection();
   var refreshCheckbox = document.getElementById('force_reload').checked;
   
-  var request_md = (url.indexOf("twitter.com") != -1)? false : true;
+  var request_md = MetadataLoader.toRequestMetadataFromService(url);
     
   MICE.addMetadataDisplay(content, url, false, null, request_md, reload_md);
   if (!request_md)
@@ -153,6 +153,7 @@ function showMetadata()
 			  }
 	  };
 	  ExtensionInterface.dispatchMessage(message);
+	  console.log("requested extension for metadata: " + url);
 	  
 	  window.setTimeout(function()
 	  {
@@ -173,7 +174,7 @@ function checkForMissingMetadata()
 	// if the tab doesnt have metadata
 	if(content.getElementsByClassName("metadataContainer").length == 0 && content.getElementsByClassName("twMetadataContainer").length == 0)
 	{
-		if (url.indexOf("twitter.com") != -1)
+		if (MetadataLoader.isExtensionMetadataDomain(url))
 			MetadataLoader.getMetadata(url, "MetadataLoader.setMetadata", reload_md);
 	}	
 }

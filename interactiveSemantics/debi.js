@@ -22,7 +22,7 @@ MetadataLoader.currentDocumentLocation = "";
 // Logger
 MetadataLoader.logger = function(message) { /* null default implementation */ };
 
-
+MetadataLoader.extensionMetadataDomains = ["twitter.com"];
 
 /**
  * Requests metadata of the given URL and the corresponding meta-metadata from
@@ -334,6 +334,55 @@ MetadataLoader.getTasksFromQueueByType = function(type)
     }
   }
   return tasks;
+}
+
+/**
+ * Get all tasks from the queue which are waiting for given meta-metadata type.
+ *
+ * @param domain, site domain to search for
+ * @return array of RenderingTasks, empty if no matches found
+ */
+MetadataLoader.getTasksFromQueueByDomain = function(domain)
+{
+  var tasks = [];
+  for (var i = 0; i < MetadataLoader.queue.length; i++)
+  {
+    if (MetadataLoader.queue[i].url.indexOf(domain) != -1)
+    {
+      tasks.push(MetadataLoader.queue[i]);
+    }
+  }
+  return tasks;
+}
+
+/**
+ * @returns bool, to request extension for metadata or not
+ */
+MetadataLoader.toRequestMetadataFromService = function(location)
+{
+	return !MetadataLoader.isExtensionMetadataDomain(location);
+}
+
+MetadataLoader.isExtensionMetadataDomain = function(location)
+{
+	for (var i = 0; i < MetadataLoader.extensionMetadataDomains.length; i++)
+	{
+		if (location.indexOf(MetadataLoader.extensionMetadataDomains[i]) != -1)
+			return true;
+	}
+	return false;
+}
+
+MetadataLoader.checkForMetadataFromExtension = function()
+{
+	for (var i = 0; i < MetadataLoader.extensionMetadataDomains.length; i++)
+	{
+		var tasks = MetadataLoader.getTasksFromQueueByDomain(MetadataLoader.extensionMetadataDomains[i]);
+		for (var j = 0; j < tasks.length; j++)
+		{
+			MetadataLoader.getMetadata(tasks[i].url, "MetadataLoader.setMetadata");
+		}
+	}
 }
 
 /**
