@@ -2,7 +2,7 @@
 // replace different hyperlink elements with styled divs.
 // queue asynchronous population of these divs using loading of webpages via background script
 
-var iconDir = (window.PR_SHOULD_USE_CONTINUATION)? "../TweetBubble/Plugin/chrome/content_script/img/"
+var iconDir = (application_name == "mdc")? "../TweetBubble/Plugin/chrome/content_script/img/"
 										: "/static/mache/code/BigSemanticsJS/TweetBubble/Plugin/chrome/content_script/img/";
 
 var expandIconPath = isExtension? chrome.extension.getURL("content_script/img/expand_icon.png") : iconDir + "expand_icon.png";	// "https://abs.twimg.com/favicons/favicon.ico";

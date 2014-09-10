@@ -12,7 +12,7 @@ var colors = ['rgb(255, 255, 204)', 'rgb(187, 226, 250)', 'rgb(250, 227, 200)', 
 var lastColorIndex = Math.floor(Math.random()*colors.length);
 
 var isExtension = (typeof chrome.extension !== "undefined");
-var imgDir = (window.PR_SHOULD_USE_CONTINUATION)? "../TweetBubble/Plugin/chrome/content_script/img/"
+var imgDir = (application_name == "mdc")? "../TweetBubble/Plugin/chrome/content_script/img/"
 										: "/static/mache/code/BigSemanticsJS/TweetBubble/Plugin/chrome/content_script/img/";
 	
 var replyIconPath1 = isExtension? chrome.extension.getURL("content_script/img/reply_221.png") :	imgDir + "reply_221.png";

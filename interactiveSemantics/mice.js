@@ -92,6 +92,15 @@ MICE.render = function(task, metadataFields, styleInfo){
 /**
  * Needs further separation 
  */
+
+/**
+ * add metadata display to the container.
+ * @param container, the HTML object to which the metadata rendering will be appended
+ * @param url, url of the target document
+ * @param isRoot, is this the root metadata for the rendering (currently used for removing existing children)
+ * @param requestMD, true if the function should request metadata from service, else false
+ * @param reloadMD, true if the metadata should be extracted afresh, else false 
+ */
 MICE.addMetadataDisplay = function(container, url, isRoot, clipping, requestMD, reloadMD){
 	// Add the rendering task to the queue
 	var task = new RenderingTask(url, container, isRoot, clipping, MICE.render)
