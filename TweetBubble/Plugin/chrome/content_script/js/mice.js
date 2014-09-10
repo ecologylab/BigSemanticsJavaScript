@@ -985,12 +985,13 @@ MICE.buildMetadataTable = function(table, isChildTable, isRoot, metadataFields, 
  */
 MICE.buildMetadataField = function(metadataField, isChildTable, fieldCount, row, styleInfo)
 {
+	var imageLabel = (metadataField.value_as_label == "") ?	false : metadataField.value_as_label.type == "image";
 	
 	var nameCol = document.createElement('div');
 	if (!metadataField.show_expanded_always ){	
 		nameCol.className = styleInfo.styles.labelCol;
 	}
-	else if(metadataField.composite_type != null && metadataField.composite_type != "image"){
+	else if(metadataField.composite_type != null && metadataField.composite_type != "image" && !imageLabel){
 		nameCol.className = styleInfo.styles.labelCol;
 		nameCol.style.display = "none";
 	}
@@ -998,7 +999,7 @@ MICE.buildMetadataField = function(metadataField, isChildTable, fieldCount, row,
 	
 		valueCol.className = styleInfo.styles.valueCol;
 	
-	if(metadataField.composite_type != null && metadataField.composite_type != "image"){
+	if(metadataField.composite_type != null && metadataField.composite_type != "image" && !imageLabel){
 		valueCol.className = styleInfo.styles.valueCol;
 		valueCol.style.position = "relative";
 		valueCol.style.left = "-9px";
