@@ -337,7 +337,7 @@ MetadataRenderer.downloadAndDisplayDocument = function(event)
 		// Add a loadingRow for visual feedback that the metadata is being downloaded / parsed
 		table.appendChild(MetadataRenderer.createLoadingRow(styleInfo));
 		
-		var requestMD = (location.indexOf("twitter.com") != -1)? false : true;
+		var requestMD = MetadataLoader.toRequestMetadataFromService(location);
 		MetadataRenderer.addMetadataDisplay(table.parentElement, location, false, null, requestMD, false, button);
 		if (!requestMD)
 		{
@@ -350,6 +350,12 @@ MetadataRenderer.downloadAndDisplayDocument = function(event)
 				}
 			};
 			ExtensionInterface.dispatchMessage(message);
+			console.log("requested extension for metadata: " + location);
+
+			window.setTimeout(function()
+			{
+				MetadataLoader.checkForMetadataFromExtension();
+			}, 3000);
 		}
 
 		//if (requestDocumentDownload)

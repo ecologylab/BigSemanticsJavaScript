@@ -416,7 +416,7 @@ MICE.downloadAndDisplayDocument = function(event)
 		// Add a loadingRow for visual feedback that the metadata is being downloaded / parsed
 		table.appendChild(MICE.createLoadingRow(styleInfo));
 
-		var requestMD = (location.indexOf("twitter.com") != -1)? false : true;
+		var requestMD = MetadataLoader.toRequestMetadataFromService(location);
 	    //MetadataLoader.render(MICE.render, table.parentElement, location, false)	;
 		//MICE.addMetadataDisplay(table.parentElement, location, false);
 		MetadataRenderer.addMetadataDisplay(table.parentElement, location, false, null, requestMD, false, button);
@@ -431,6 +431,12 @@ MICE.downloadAndDisplayDocument = function(event)
 				}
 			};
 			ExtensionInterface.dispatchMessage(message);
+			console.log("requested extension for metadata: " + location);
+			
+			window.setTimeout(function()
+			{
+				MetadataLoader.checkForMetadataFromExtension();
+			}, 3000);
 		}
 	}
 	// If there was no document location then the table must be a non-document composite in which case just expand
