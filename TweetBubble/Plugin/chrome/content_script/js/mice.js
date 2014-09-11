@@ -414,7 +414,7 @@ MICE.downloadAndDisplayDocument = function(event)
 		var requestMD = MetadataLoader.toRequestMetadataFromService(location);
 	    //MetadataLoader.render(MICE.render, table.parentElement, location, false)	;
 		//MICE.addMetadataDisplay(table.parentElement, location, false);
-		MetadataRenderer.addMetadataDisplay(table.parentElement, location, false, null, requestMD, false, button);
+		MICE.addMetadataDisplay(table.parentElement, location, false, null, requestMD, false, button);
 		if (!requestMD)
 		{
 			//document.dispatchEvent(new Event("tweetbubbleExternal"));
