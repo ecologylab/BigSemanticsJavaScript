@@ -11,14 +11,16 @@ var colors = ['rgb(255, 255, 204)', 'rgb(187, 226, 250)', 'rgb(250, 227, 200)', 
               'rgb(255, 208, 201)', 'rgb(212, 222, 255)', 'rgb(213, 238, 242)']; // use rgb for direct comparison
 var lastColorIndex = Math.floor(Math.random()*colors.length);
 
-var isExtension = (typeof chrome.extension !== "undefined"); 
+var isExtension = (typeof chrome !== "undefined" && typeof chrome.extension !== "undefined");
+var imgDir = (application_name == "mdc")? "../TweetBubble/Plugin/chrome/content_script/img/"
+										: "/static/mache/code/BigSemanticsJS/TweetBubble/Plugin/chrome/content_script/img/";
 	
-var replyIconPath1 = isExtension? chrome.extension.getURL("content_script/img/reply_221.png") :	"../img/reply_221.png";
-var retweetIconPath1 = isExtension? chrome.extension.getURL("content_script/img/retweet_221.png") :	"../img/retweet_221.png";
-var favoriteIconPath1 = isExtension? chrome.extension.getURL("content_script/img/favorite_221.png") : "../img/favorite_221.png";
-var replyIconPath2 = isExtension? chrome.extension.getURL("content_script/img/reply_153.png") :	"../img/reply_153.png";
-var retweetIconPath2 = isExtension? chrome.extension.getURL("content_script/img/retweet_153.png") :	"../img/retweet_153.png";
-var favoriteIconPath2 = isExtension? chrome.extension.getURL("content_script/img/favorite_153.png") : "../img/favorite_153.png";
+var replyIconPath1 = isExtension? chrome.extension.getURL("content_script/img/reply_221.png") :	imgDir + "reply_221.png";
+var retweetIconPath1 = isExtension? chrome.extension.getURL("content_script/img/retweet_221.png") :	imgDir + "retweet_221.png";
+var favoriteIconPath1 = isExtension? chrome.extension.getURL("content_script/img/favorite_221.png") : imgDir + "favorite_221.png";
+var replyIconPath2 = isExtension? chrome.extension.getURL("content_script/img/reply_153.png") :	imgDir + "reply_153.png";
+var retweetIconPath2 = isExtension? chrome.extension.getURL("content_script/img/retweet_153.png") :	imgDir + "retweet_153.png";
+var favoriteIconPath2 = isExtension? chrome.extension.getURL("content_script/img/favorite_153.png") : imgDir + "favorite_153.png";
 
 var MetadataRenderer = MICE;
 
@@ -32,7 +34,8 @@ MetadataRenderer.render = function(task, metadataFields, styleInfo)
 	// Create the interior HTML container
 	task.visual = document.createElement('div');
 	task.visual.className = styleInfo.styles.metadataContainer;
-	
+	task.visual.setAttribute('mdType', metadataFields[0].parentMDType);
+
 	// Build the HTML table for the metadata
 	MetadataLoader.currentDocumentLocation = task.url;
 	var bgColor = null;
@@ -107,7 +110,7 @@ MetadataRenderer.render = function(task, metadataFields, styleInfo)
  * @param isRoot, true if this is the root metadata for the rendering,
  * 		needed because styling is slightly different for the root metadata rendering
  */
-MetadataRenderer.addMetadataDisplay = function(container, url, isRoot, clipping, expandedItem)
+MetadataRenderer.addMetadataDisplay = function(container, url, isRoot, clipping, requestMD, reloadMD, expandedItem)
 {	
 	// Add the rendering task to the queue
 	var task = new RenderingTask(url, container, isRoot, clipping, MetadataRenderer.render, expandedItem);
@@ -120,9 +123,11 @@ MetadataRenderer.addMetadataDisplay = function(container, url, isRoot, clipping,
 	}
 	else
 	{	
+		var requestMetadata = (typeof requestMD === "undefined") || requestMD == true;
+		
 		// Fetch the metadata from the service
-		if(!isExtension)
-			MetadataLoader.getMetadata(url, "MetadataLoader.setMetadata");	
+		if(!isExtension && requestMetadata)
+			MetadataLoader.getMetadata(url, "MetadataLoader.setMetadata", reloadMD);	
 	}
 }
 
@@ -150,40 +155,43 @@ MetadataRenderer.expandCollapseTable = function(event)
 			button.nextSibling.style.display = "";
 		
 		var table = MetadataRenderer.getTableForButton(button, styleInfo);
-		MetadataRenderer.expandTable(table, styleInfo);
-		
-		if(MetadataLoader.logger && (event.name == null || event.name != "fakeEvent"))
-		{			
-			var eventObj = {};
-			if(typeof button.location === "undefined")
-			{
-				if(button.parentElement.childNodes[1])
+		if (table)
+		{
+			MetadataRenderer.expandTable(table, styleInfo);
+			
+			if(MetadataLoader.logger && (event.name == null || event.name != "fakeEvent"))
+			{			
+				var eventObj = {};
+				if(typeof button.location === "undefined")
 				{
-					eventObj = {
-						expand_metadata: {
-							field_name: button.parentElement.childNodes[1].innerText,
-							parent_doc: MetadataRenderer.getLocationForParentTable(button.parentElement, styleInfo)
-						}
-					};
+					if(button.parentElement.childNodes[1])
+					{
+						eventObj = {
+							expand_metadata: {
+								field_name: button.parentElement.childNodes[1].innerText,
+								parent_doc: MetadataRenderer.getLocationForParentTable(button.parentElement, styleInfo)
+							}
+						};
+					}
+					else
+					{
+						eventObj = {
+							expand_metadata: {
+								parent_doc: MetadataRenderer.getLocationForParentTable(button.parentElement, styleInfo)
+							}
+						};
+					}
 				}
 				else
 				{
 					eventObj = {
 						expand_metadata: {
-							parent_doc: MetadataRenderer.getLocationForParentTable(button.parentElement, styleInfo)
+							target_doc: MetadataRenderer.getLocationForChildTable(button.parentElement.parentElement.parentElement, styleInfo)
 						}
 					};
 				}
+				MetadataLoader.logger(eventObj);
 			}
-			else
-			{
-				eventObj = {
-					expand_metadata: {
-						target_doc: MetadataRenderer.getLocationForChildTable(button.parentElement.parentElement.parentElement, styleInfo)
-					}
-				};
-			}
-			MetadataLoader.logger(eventObj);
 		}
 	}
 	else if(expandSymbol.style.display == "none")
@@ -195,42 +203,45 @@ MetadataRenderer.expandCollapseTable = function(event)
 			button.nextSibling.style.display = "none";
 		
 		var table = MetadataRenderer.getTableForButton(button, styleInfo);
-		MetadataRenderer.collapseTable(table, styleInfo);
-		
-		if(MetadataLoader.logger)
+		if (table)
 		{
-			var eventObj = {};
-			if(typeof button.location === "undefined")
+			MetadataRenderer.collapseTable(table, styleInfo);
+			
+			if(MetadataLoader.logger)
 			{
-				if (button.parentElement.childNodes[1])
+				var eventObj = {};
+				if(typeof button.location === "undefined")
 				{
-					eventObj = {
-						collapse_metadata: {
-							field_name: button.parentElement.childNodes[1].innerText,
-							parent_doc: MetadataRenderer.getLocationForParentTable(button.parentElement, styleInfo)
-						}
-					};
+					if (button.parentElement.childNodes[1])
+					{
+						eventObj = {
+							collapse_metadata: {
+								field_name: button.parentElement.childNodes[1].innerText,
+								parent_doc: MetadataRenderer.getLocationForParentTable(button.parentElement, styleInfo)
+							}
+						};
+					}
+					else
+					{
+						eventObj = {
+							collapse_metadata: {
+								parent_doc: MetadataRenderer.getLocationForParentTable(button.parentElement, styleInfo)
+							}
+						};
+					}
 				}
 				else
 				{
+					
 					eventObj = {
 						collapse_metadata: {
-							parent_doc: MetadataRenderer.getLocationForParentTable(button.parentElement, styleInfo)
+							target_doc: MetadataRenderer.getLocationForChildTable(button.parentElement.parentElement.parentElement, styleInfo)
 						}
 					};
 				}
-			}
-			else
-			{
-				
-				eventObj = {
-					collapse_metadata: {
-						target_doc: MetadataRenderer.getLocationForChildTable(button.parentElement.parentElement.parentElement, styleInfo)
-					}
-				};
-			}
-			MetadataLoader.logger(eventObj);
-		}	
+				MetadataLoader.logger(eventObj);
+			}	
+		}
 	}
 	
 	// condition added for fakeEvent in case of show_expanded_initially
@@ -326,9 +337,29 @@ MetadataRenderer.downloadAndDisplayDocument = function(event)
 		// Add a loadingRow for visual feedback that the metadata is being downloaded / parsed
 		table.appendChild(MetadataRenderer.createLoadingRow(styleInfo));
 		
-		MetadataRenderer.addMetadataDisplay(table.parentElement, location, false, null, button);
-		if (requestDocumentDownload)
-			requestDocumentDownload(location);
+		var requestMD = MetadataLoader.toRequestMetadataFromService(location);
+		MetadataRenderer.addMetadataDisplay(table.parentElement, location, false, null, requestMD, false, button);
+		if (!requestMD)
+		{
+			//document.dispatchEvent(new Event("tweetbubbleExternal"));
+			var message = {
+				type : "extractionRequest",
+				sender : table.parentElement,
+				detail : {
+					url : location
+				}
+			};
+			ExtensionInterface.dispatchMessage(message);
+			console.log("requested extension for metadata: " + location);
+
+			window.setTimeout(function()
+			{
+				MetadataLoader.checkForMetadataFromExtension();
+			}, 3000);
+		}
+
+		//if (requestDocumentDownload)
+			//requestDocumentDownload(location);
 	}
 	// If there was no document location then the table must be a non-document composite in which case just expand
 	else
@@ -735,24 +766,26 @@ MetadataRenderer.buildMetadataTable = function(table, isChildTable, isRoot, meta
  */
 MetadataRenderer.buildMetadataField = function(metadataField, isChildTable, fieldCount, row, styleInfo, bgColorObj)
 {
+	var imageLabel = (metadataField.value_as_label == "") ?	false : metadataField.value_as_label.type == "image";
+	
 	var nameCol = document.createElement('div');
-	//if (!metadataField.show_expanded_always) { 
+	if (!metadataField.show_expanded_always) { 
 		//|| (metadataField.composite_type != null && metadataField.composite_type == "tweet")) {	
 		nameCol.className = styleInfo.styles.labelCol;
-	/*}
-	else if (metadataField.composite_type != null && metadataField.composite_type != "image") {
+	}
+	else if(metadataField.composite_type != null && metadataField.composite_type != "image" && !imageLabel){
 		nameCol.className = styleInfo.styles.labelCol;
 		nameCol.style.display = "none";
-	}*/
+	}
 	
 	var valueCol = document.createElement('div');
 		valueCol.className = styleInfo.styles.valueCol;
 	
-	/*if(metadataField.composite_type != null && metadataField.composite_type != "image") {
+	if(metadataField.composite_type != null && metadataField.composite_type != "image" && !imageLabel){
 		valueCol.className = styleInfo.styles.valueCol;
 		valueCol.style.position = "relative";
 		valueCol.style.left = "-9px";
-	}*/	
+	}	
 		
 	var expandButton = null;	
 	
@@ -769,22 +802,21 @@ MetadataRenderer.buildMetadataField = function(metadataField, isChildTable, fiel
 				if (bgColorObj && bgColorObj.bFirstField)
 					fieldLabelDiv.style.background = bgColorObj.color;
 					
-				var label = (metadataField.value_as_label == "" || (metadataField.value_as_label.type != "scalar"
-					&& metadataField.value_as_label.type != "image"))? metadataField.name : metadataField.value_as_label.value;
-				if (metadataField.value_as_label == "" || metadataField.value_as_label.type != "image")
+				var label = MetadataRenderer.getFieldLabel(metadataField);
+				if (label.type == "scalar")
 				{
 					var fieldLabel = document.createElement('p');
 						fieldLabel.className = styleInfo.styles.fieldLabel;
-						fieldLabel.innerText = MetadataLoader.toDisplayCase(label);
-						fieldLabel.textContent = MetadataLoader.toDisplayCase(label);
+						fieldLabel.innerText = MetadataLoader.toDisplayCase(label.value);
+						fieldLabel.textContent = MetadataLoader.toDisplayCase(label.value);
 						
 					fieldLabelDiv.appendChild(fieldLabel);	
 				}
-				else if (metadataField.value_as_label.type == "image")
+				else if (label.type == "image")
 				{
 					var img = document.createElement('img');
 						img.className = styleInfo.styles.fieldLabelImage;
-						img.src = MetadataLoader.getImageSource(label);
+						img.src = MetadataLoader.getImageSource(label.value);
 						
 					fieldLabelDiv.appendChild(img);	
 				}			
@@ -798,8 +830,8 @@ MetadataRenderer.buildMetadataField = function(metadataField, isChildTable, fiel
 				// Uses http://getfavicon.appspot.com/ to resolve the favicon
 				var favicon = document.createElement('img');
 					favicon.className = styleInfo.styles.faviconICE;
-					favicon.src = "http://g.etfv.co/" + MetadataLoader.getHost(metadataField.navigatesTo);
-				
+					favicon.src = "http://g.etfv.co/" + metadataField.value;
+					
 				var aTag = document.createElement('a');
 				aTag.innerText = MetadataLoader.removeLineBreaksAndCrazies(metadataField.value);
 				aTag.textContent = MetadataLoader.removeLineBreaksAndCrazies(metadataField.value);
@@ -807,7 +839,7 @@ MetadataRenderer.buildMetadataField = function(metadataField, isChildTable, fiel
 				aTag.href = metadataField.value;
 				aTag.onclick = MetadataRenderer.logNavigate;
 				
-				aTag.className = "fieldValue";
+				aTag.className = styleInfo.styles.fieldValue;
 						
 				if(metadataField.style_name != null && metadataField.style_name != "")
 					aTag.classList.add(metadataField.style_name);
@@ -828,8 +860,8 @@ MetadataRenderer.buildMetadataField = function(metadataField, isChildTable, fiel
 				// Uses http://getfavicon.appspot.com/ to resolve the favicon
 				var favicon = document.createElement('img');
 					favicon.className = styleInfo.styles.faviconICE;
-					favicon.src = "http://g.etfv.co/" + MetadataLoader.getHost(metadataField.navigatesTo);
-				
+					favicon.src = "http://g.etfv.co/" + metadataField.navigatesTo;
+					
 				var aTag = document.createElement('a');
 					aTag.className = styleInfo.styles.fieldValue;
 					if(metadataField.style_name != "null" && metadataField.style_name!=""){
@@ -883,6 +915,7 @@ MetadataRenderer.buildMetadataField = function(metadataField, isChildTable, fiel
 													
 				if(metadataField.style_name != null)
 					fieldValue.className += " "+metadataField.style_name;
+
 				var fieldValueDiv = document.createElement('div');
 					fieldValueDiv.className = styleInfo.styles.fieldValueContainer;
 				if (bgColorObj && bgColorObj.bFirstField)
@@ -909,22 +942,21 @@ MetadataRenderer.buildMetadataField = function(metadataField, isChildTable, fiel
 			if (bgColorObj && bgColorObj.bFirstField)
 				fieldLabelDiv.style.background = bgColorObj.color;
 			
-			var label = (metadataField.value_as_label == "" || (metadataField.value_as_label.type != "scalar"
-				&& metadataField.value_as_label.type != "image"))? metadataField.name : metadataField.value_as_label.value;
-			if (metadataField.value_as_label == "" || metadataField.value_as_label.type != "image")
+			var label = MetadataRenderer.getFieldLabel(metadataField);
+			if (label.type == "scalar")
 			{
 				var fieldLabel = document.createElement('p');
 					fieldLabel.className = styleInfo.styles.fieldLabel;
-					fieldLabel.innerText = MetadataLoader.toDisplayCase(label);
-					fieldLabel.textContent = MetadataLoader.toDisplayCase(label);
+					fieldLabel.innerText = MetadataLoader.toDisplayCase(label.value);
+					fieldLabel.textContent = MetadataLoader.toDisplayCase(label.value);
 				
 				fieldLabelDiv.appendChild(fieldLabel);	
 			}
-			else if (metadataField.value_as_label.type == "image")
+			else if (label.type == "image")
 			{
 				var img = document.createElement('img');
 					img.className = styleInfo.styles.fieldLabelImage;
-					img.src = MetadataLoader.getImageSource(label);
+					img.src = MetadataLoader.getImageSource(label.value);
 
 				fieldLabelDiv.appendChild(img);
 			}		
@@ -962,58 +994,61 @@ MetadataRenderer.buildMetadataField = function(metadataField, isChildTable, fiel
 		}
 		else
 		{
-			// If the document hasn't been download then display a button that will download it
-			expandButton = document.createElement('div');
-				expandButton.className = styleInfo.styles.expandButtonX;
-			
-			expandButton.onclick = MetadataRenderer.downloadAndDisplayDocument;
-
-			if(childUrl != "")
+			if (childUrl != "" || metadataField.value.length > 1)
 			{
-				expandButton.onmouseover = MetadataRenderer.highlightDocuments;
-				expandButton.onmouseout = MetadataRenderer.unhighlightDocuments;
-			}
-					
-			var expandSymbol = document.createElement('div');
-				expandSymbol.className = styleInfo.styles.expandSymbol;
-				expandSymbol.style.display = "block";
 				
-			var collapseSymbol = document.createElement('div');
-				collapseSymbol.className = styleInfo.styles.collapseSymbol;
-				collapseSymbol.style.display = "block";						
-			
-			/* set mmdType to all as any may receive event */
-			expandButton.mmdType = styleInfo.type;
-			expandSymbol.mmdType = styleInfo.type;
-			collapseSymbol.mmdType = styleInfo.type;
+				// If the document hasn't been download then display a button that will download it
+				expandButton = document.createElement('div');
+					expandButton.className = styleInfo.styles.expandButtonX;
+				
+				expandButton.onclick = MetadataRenderer.downloadAndDisplayDocument;
+	
+				if(childUrl != "")
+				{
+					expandButton.onmouseover = MetadataRenderer.highlightDocuments;
+					expandButton.onmouseout = MetadataRenderer.unhighlightDocuments;
+				}
+						
+				var expandSymbol = document.createElement('div');
+					expandSymbol.className = styleInfo.styles.expandSymbol;
+					expandSymbol.style.display = "block";
 					
-			expandButton.appendChild(expandSymbol);
-			expandButton.appendChild(collapseSymbol);
-			fieldLabelDiv.appendChild(expandButton);
+				var collapseSymbol = document.createElement('div');
+					collapseSymbol.className = styleInfo.styles.collapseSymbol;
+					collapseSymbol.style.display = "block";						
+				
+				/* set mmdType to all as any may receive event */
+				expandButton.mmdType = styleInfo.type;
+				expandSymbol.mmdType = styleInfo.type;
+				collapseSymbol.mmdType = styleInfo.type;
+						
+				expandButton.appendChild(expandSymbol);
+				expandButton.appendChild(collapseSymbol);
+				fieldLabelDiv.appendChild(expandButton);
+			}
 		}
 		
 		if(metadataField.name)
 		{			
-			var imageLabel = (metadataField.value_as_label == "") ?	false : metadataField.value_as_label.type == "image";
+			var label = MetadataRenderer.getFieldLabel(metadataField);
+			
 			//If the table isn't a child table then display the label for the composite
-			if((!isChildTable || imageLabel) && !metadataField.hide_label)
+			if((!isChildTable || label.type == "image") && !metadataField.hide_label)
 			{				
-				var label = (metadataField.value_as_label == "" || (metadataField.value_as_label.type != "scalar"
-					&& metadataField.value_as_label.type != "image"))? metadataField.name : metadataField.value_as_label.value;
-				if (metadataField.value_as_label == "" || metadataField.value_as_label.type != "image")
+				if (label.type == "scalar")
 				{
 					var fieldLabel = document.createElement('p');
 						fieldLabel.className = styleInfo.styles.fieldLabel;
-						fieldLabel.innerText = MetadataLoader.toDisplayCase(label);
-						fieldLabel.textContent = MetadataLoader.toDisplayCase(label);
+						fieldLabel.innerText = MetadataLoader.toDisplayCase(label.value);
+						fieldLabel.textContent = MetadataLoader.toDisplayCase(label.value);
 					
 					fieldLabelDiv.appendChild(fieldLabel);
 				}
-				else if (metadataField.value_as_label.type == "image")
+				else if (label.type == "image")
 				{
 					var img = document.createElement('img');
 						img.className = styleInfo.styles.fieldLabelImage;
-						img.src = MetadataLoader.getImageSource(label);
+						img.src = MetadataLoader.getImageSource(label.value);
 
 					fieldLabelDiv.appendChild(img);
 				}
@@ -1028,7 +1063,7 @@ MetadataRenderer.buildMetadataField = function(metadataField, isChildTable, fiel
 			fieldValueDiv.className = styleInfo.styles.fieldCompositeContainer;
 			
 		if (metadataField.composite_type == "twitter_microblog")
-			fieldValueDiv.className = "fieldCompositeContainer twitterMicroblog";
+			fieldValueDiv.className = styleInfo.styles.fieldCompositeContainer + " twitterMicroblog";
 		
 		// Build the child table for the composite
 		var childTable =  MetadataRenderer.buildMetadataTable(null, false, false, metadataField.value, 1, styleInfo, bgColorObj, false);
@@ -1082,7 +1117,6 @@ MetadataRenderer.buildMetadataField = function(metadataField, isChildTable, fiel
 			var fieldLabelDiv = document.createElement('div');
 			fieldLabelDiv.className = styleInfo.styles.fieldLabelContainerUnhighlight;
 		
-			// does it need to expand / collapse [CONFIRM]
 			if(metadataField.value.length > 1)
 			{
 				var expandButton = document.createElement('div');
@@ -1108,23 +1142,22 @@ MetadataRenderer.buildMetadataField = function(metadataField, isChildTable, fiel
 				fieldLabelDiv.appendChild(expandButton);
 			}
 			
-			var label = (metadataField.value_as_label == "" || (metadataField.value_as_label.type != "scalar"
-				&& metadataField.value_as_label.type != "image"))? metadataField.name : metadataField.value_as_label.value;
-			if (metadataField.value_as_label == "" || metadataField.value_as_label.type != "image")
+			var label = MetadataRenderer.getFieldLabel(metadataField);
+			if (label.type == "scalar")
 			{
 				var fieldLabel = document.createElement('p');
 					fieldLabel.className = styleInfo.styles.fieldLabel;
-					fieldLabel.innerText = MetadataLoader.toDisplayCase(label) + "(" + metadataField.value.length + ")";
-					fieldLabel.textContent = MetadataLoader.toDisplayCase(label) + "(" + metadataField.value.length + ")";
+					fieldLabel.innerText = MetadataLoader.toDisplayCase(label.value) + "(" + metadataField.value.length + ")";
+					fieldLabel.textContent = MetadataLoader.toDisplayCase(label.value) + "(" + metadataField.value.length + ")";
 					
 				if (!metadataField.hide_label)
 					fieldLabelDiv.appendChild(fieldLabel);
 			}
-			else if (metadataField.value_as_label.type == "image")
+			else if (label.type == "image")
 			{
 				var img = document.createElement('img');
 					img.className = styleInfo.styles.fieldLabelImage;
-					img.src = MetadataLoader.getImageSource(label);
+					img.src = MetadataLoader.getImageSource(label.value);
 
 				if (!metadataField.hide_label)
 					fieldLabelDiv.appendChild(img);
@@ -1419,8 +1452,8 @@ MetadataRenderer.getFirstLevelDocumentContainers = function(elt, styleInfo)
 	var metadataExpansions = [];
 	for (var i = 0; i < rows.length; i++)
 	{
-		var labelCol = rows[i].getElementsByClassName("labelCol")[0];
-		var valueCol = rows[i].getElementsByClassName("valueCol")[0];
+		var labelCol = rows[i].getElementsByClassName(styleInfo.styles.labelCol)[0];
+		var valueCol = rows[i].getElementsByClassName(styleInfo.styles.valueCol)[0];
 		
 		if (valueCol.firstChild.className.indexOf(styleInfo.styles.fieldCompositeContainer) != -1)
 		{

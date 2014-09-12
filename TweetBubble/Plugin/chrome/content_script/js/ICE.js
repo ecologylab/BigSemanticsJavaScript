@@ -2,8 +2,11 @@
 // replace different hyperlink elements with styled divs.
 // queue asynchronous population of these divs using loading of webpages via background script
 
-var expandIconPath = chrome.extension.getURL("content_script/img/expand_icon.png");	// "https://abs.twimg.com/favicons/favicon.ico";
-var collapseIconPath = chrome.extension.getURL("content_script/img/collapse_icon.png");
+var iconDir = (application_name == "mdc")? "../TweetBubble/Plugin/chrome/content_script/img/"
+										: "/static/mache/code/BigSemanticsJS/TweetBubble/Plugin/chrome/content_script/img/";
+
+var expandIconPath = isExtension? chrome.extension.getURL("content_script/img/expand_icon.png") : iconDir + "expand_icon.png";	// "https://abs.twimg.com/favicons/favicon.ico";
+var collapseIconPath = isExtension? chrome.extension.getURL("content_script/img/collapse_icon.png") : iconDir + "collapse_icon.png";
 
 var mice_condition = "mice";
 var experiment_condition = null;
@@ -27,13 +30,28 @@ function processMetadata(node)
 	addExternalURLHandlers();
 }
 
-function downloadRequester(expandableItemUrl)
+function downloadRequester(expandableItemUrl, container)
 {
-	chrome.extension.sendRequest({load: expandableItemUrl}, function(response) {
-		  //console.log(response);
-		  MetadataLoader.setMetadata(response.doc);
-		  MetadataLoader.setMetaMetadata(response.mmd);
-	});
+	if (!isExtension)
+	{
+		//document.dispatchEvent(new Event("tweetbubbleExternal"));
+		var message = {
+			type : "extractionRequest",
+			sender : container,
+			detail : {
+				url : expandableItemUrl
+			}
+		};
+		ExtensionInterface.dispatchMessage(message);
+	}
+	else
+	{
+		chrome.extension.sendRequest({load: expandableItemUrl}, function(response) {
+			//console.log(response);
+			MetadataLoader.setMetadata(response.doc, false);
+			MetadataLoader.setMetaMetadata(response.mmd);
+		});
+	}
 }
 
 function onUpdateHandler()
@@ -89,10 +107,10 @@ function expandCollapseItem(event)
 			// relegate task of selecting apt parent to specific instance 
 			var parent = instance.getContainer(item);
 				
-			MetadataRenderer.addMetadataDisplay(parent, expandableItemUrl, true, null, item);
+			MetadataRenderer.addMetadataDisplay(parent, expandableItemUrl, true, null, false, false, item);
 			
 			//request loading of webpage
-			downloadRequester(expandableItemUrl);
+			downloadRequester(expandableItemUrl, parent);
 			instance.setCached(item);
 		}
 	}
@@ -341,26 +359,41 @@ function run_script(userid, cond)
 		if (MetadataRenderer.setDocumentDownloader)
 			MetadataRenderer.setDocumentDownloader(downloadRequester);
 
-		Logger.init(userid, cond);
+		if (isExtension)
+		{
+			Logger.init(userid, cond);
+		}
 
 		processPage();
-
-		window.addEventListener("scroll", onUpdateHandler);
+		
+		if (isExtension)
+		{
+			window.addEventListener("scroll", onUpdateHandler);
+		}
 	}
 	else
 	{
-		Logger.init(userid, cond);
+		if (isExtension)
+		{
+			Logger.init(userid, cond);
+		}
 		
 		processDefaultConditionClicks(document);
 		
-		window.addEventListener("scroll", defaultConditionOnUpdateHandler);
+		if (isExtension)
+		{
+			window.addEventListener("scroll", defaultConditionOnUpdateHandler);
+		}
 	}
 	
 	currentUrl = document.URL;
 	
-	setInterval(function() {
-		instance.addAJAXContentListener(ajaxContentUpdate);
-	}, 5000);
+	if (isExtension) 
+	{
+		setInterval(function() {
+			instance.addAJAXContentListener(ajaxContentUpdate);
+		}, 5000);
+	}
 }
 
 function processInfoSheetResponse(resp)
@@ -371,49 +404,61 @@ function processInfoSheetResponse(resp)
 }
 
 //run_at is document_end i.e. after DOM is complete but before images and frames are loaded
-chrome.extension.sendRequest({loadStudySettings: document.URL}, function(response) {
-	  
-	if (response && response.condition != "none")
-		experiment_condition = response.condition;
-	else
-		experiment_condition = mice_condition;
+if (!isExtension)
+{
+	experiment_condition = mice_condition;
+	if (document.URL.indexOf("https://twitter.com") != 0)
+		run_script('imExtTest', mice_condition);
+}
+else
+{
+	chrome.extension.sendRequest({loadStudySettings: document.URL}, function(response) {
 		  
-	if (response && response.agree == Util.YES)
-		run_script(response.userid, response.condition);
-	else
-	{
-		if (response && response.agree != Util.NO)
+		if (response && response.condition != "none")
+			experiment_condition = response.condition;
+		else
+			experiment_condition = mice_condition;
+			  
+		if (response && response.agree == Util.YES)
+			run_script(response.userid, response.condition);
+		else
 		{
-			response_condition = response.condition;
-			userid = response.userid;
-			Util.getInformationSheetResponse(processInfoSheetResponse);
-		}
-		//if (window.confirm(Util.info_sheet))
-			//processInfoSheetResponse(Util.YES);
-	}
-	
-	if (MetadataLoader.logger)
-	{
-		if (response && (response.last_userid != response.userid || response.last_condition != response.condition))
-		{
-			var eventObj = {
-				change_settings: {
-					lastUserId: response.last_userid,
-					currUserId: response.userid,
-					lastCond: response.last_condition,
-					currCond: response.condition,
-					infoSheetAgree: response.agree
-				}
+			if (response && response.agree != Util.NO)
+			{
+				response_condition = response.condition;
+				userid = response.userid;
+				Util.getInformationSheetResponse(processInfoSheetResponse);
 			}
-			MetadataLoader.logger(eventObj);
+			//if (window.confirm(Util.info_sheet))
+				//processInfoSheetResponse(Util.YES);
 		}
-	}
-});
-
-chrome.runtime.onMessage.addListener(
-	function(request, sender, sendResponse) {
 		
-	if (request.url != null)
-		processUrlChange(request.url);
-});
+		if (MetadataLoader.logger)
+		{
+			if (response && (response.last_userid != response.userid || response.last_condition != response.condition))
+			{
+				var eventObj = {
+					change_settings: {
+						lastUserId: response.last_userid,
+						currUserId: response.userid,
+						lastCond: response.last_condition,
+						currCond: response.condition,
+						infoSheetAgree: response.agree
+					}
+				}
+				MetadataLoader.logger(eventObj);
+			}
+		}
+	});
+}
+
+if (isExtension)
+{
+	chrome.runtime.onMessage.addListener(
+		function(request, sender, sendResponse) {
+			
+		if (request.url != null)
+			processUrlChange(request.url);
+	});
+}
 

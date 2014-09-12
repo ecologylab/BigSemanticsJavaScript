@@ -23,7 +23,7 @@ MetadataLoader.currentDocumentLocation = "";
 // Logger
 MetadataLoader.logger = function(message) { /* null default implementation */ };
 
-
+MetadataLoader.extensionMetadataDomains = ["twitter.com"];
 
 /**
  * Requests metadata of the given URL and the corresponding meta-metadata from
@@ -64,10 +64,17 @@ MetadataLoader.render = function(renderer, container, url, isRoot, clipping)
  * @param url, url of the target document
  * @param callback, name of the function to be called from the JSON-p call
  */
-MetadataLoader.getMetadata = function(url, callback)
+MetadataLoader.getMetadata = function(url, callback, reload)
 {
-  var serviceURL = SEMANTIC_SERVICE_URL + "metadata.jsonp?callback=" + callback
-                   + "&url=" + encodeURIComponent(url);
+	var serviceURL; 
+	if(reload == true){
+		serviceURL = SEMANTIC_SERVICE_URL + "metadata.jsonp?reload=true&callback=" + callback
+        + "&url=" + encodeURIComponent(url);
+	}
+	else{
+		serviceURL = SEMANTIC_SERVICE_URL + "metadata.jsonp?callback=" + callback
+        + "&url=" + encodeURIComponent(url);
+	}
   MetadataLoader.doJSONPCall(serviceURL);
   console.log("requesting semantics service for metadata: " + serviceURL);
 }
@@ -84,6 +91,7 @@ MetadataLoader.getMMD = function(url, callback)
   var serviceURL = SEMANTIC_SERVICE_URL + "mmd.jsonp?callback=" + callback
                    + "&url=" + encodeURIComponent(url) + "&withurl";
   MetadataLoader.doJSONPCall(serviceURL);
+  console.log("requesting semantics service for mmd: " + serviceURL);
 }
 
 /**
@@ -104,7 +112,7 @@ MetadataLoader.doJSONPCall = function(jsonpURL)
  *
  * @param rawMetadata, JSON metadata string returned from the semantic service
  */
-MetadataLoader.setMetadata = function(rawMetadata)
+MetadataLoader.setMetadata = function(rawMetadata, requestMmd)
 {  
   // TODO move MDC related code to mdc.js
   if (typeof MDC_rawMetadata != "undefined")
@@ -172,7 +180,8 @@ MetadataLoader.setMetadata = function(rawMetadata)
       queueTask.clipping.rawMetadata = rawMetadata;
     }
         
-    MetadataLoader.getMMD(queueTask.mmdType, "MetadataLoader.setMetaMetadata");
+    if (typeof requestMmd === "undefined" || requestMmd == true) 
+    MetadataLoader.getMMD(metadata.location, "MetadataLoader.setMetaMetadata");
   }
   
   if (queueTasks.length < 0)
@@ -238,6 +247,8 @@ MetadataLoader.setMetaMetadata = function (url, mmd)
         {	
           // If so, then build the HTML table	
           var miceStyles = InterfaceStyle.getMiceStyleDictionary(mmd["meta_metadata"].name);	
+         //Adds the metadata type as an attribute to the first field in the MD
+          metadataFields[0].parentMDType = mmd["meta_metadata"].name;
           tasks[i].renderer(tasks[i], metadataFields, {styles: miceStyles, type: mmd["meta_metadata"].name});
         }
       }
@@ -321,6 +332,55 @@ MetadataLoader.getTasksFromQueueByType = function(type)
     }
   }
   return tasks;
+}
+
+/**
+ * Get all tasks from the queue which are waiting for given meta-metadata type.
+ *
+ * @param domain, site domain to search for
+ * @return array of RenderingTasks, empty if no matches found
+ */
+MetadataLoader.getTasksFromQueueByDomain = function(domain)
+{
+  var tasks = [];
+  for (var i = 0; i < MetadataLoader.queue.length; i++)
+  {
+    if (MetadataLoader.queue[i].url.indexOf(domain) != -1)
+    {
+      tasks.push(MetadataLoader.queue[i]);
+    }
+  }
+  return tasks;
+}
+
+/**
+ * @returns bool, to request extension for metadata or not
+ */
+MetadataLoader.toRequestMetadataFromService = function(location)
+{
+	return !MetadataLoader.isExtensionMetadataDomain(location);
+}
+
+MetadataLoader.isExtensionMetadataDomain = function(location)
+{
+	for (var i = 0; i < MetadataLoader.extensionMetadataDomains.length; i++)
+	{
+		if (location.indexOf(MetadataLoader.extensionMetadataDomains[i]) != -1)
+			return true;
+	}
+	return false;
+}
+
+MetadataLoader.checkForMetadataFromExtension = function()
+{
+	for (var i = 0; i < MetadataLoader.extensionMetadataDomains.length; i++)
+	{
+		var tasks = MetadataLoader.getTasksFromQueueByDomain(MetadataLoader.extensionMetadataDomains[i]);
+		for (var j = 0; j < tasks.length; j++)
+		{
+			MetadataLoader.getMetadata(tasks[i].url, "MetadataLoader.setMetadata");
+		}
+	}
 }
 
 /**
@@ -511,6 +571,8 @@ MetadataLoader.getMetadataViewModel = function(parentField, mmdKids, metadata, d
   //Sort the fields by layer, higher layers first
   metadataViewModel.sort(function(a,b) { return b.layer - a.layer - 0.5; });
 
+  MetadataLoader.collapseEmptyLabelSet(metadataViewModel, parentField);
+  
   return metadataViewModel;
 }
 
@@ -766,6 +828,70 @@ MetadataLoader.getCollectionMetadataViewModel = function(metadataViewModel,
   }
 }
 
+MetadataLoader.collapseEmptyLabelSet = function(metadataViewModel, parentField)
+{
+	var deleteLabelCol = true;
+	// make deleteLabelCol false if any child label is visible
+	for (var i = 0; i < metadataViewModel.length; i++)
+	{
+		if (MetadataLoader.isLabelVisible(metadataViewModel[i], parentField))
+		{
+			deleteLabelCol = false;
+			break;
+		}		
+	}
+	
+	if (deleteLabelCol)
+	{
+		for (var i = 0; i < metadataViewModel.length; i++)
+		{
+			var field = metadataViewModel[i];
+			if (field.scalar_type)
+			{
+				// TODO: set use_value_as_label as itself?
+			}
+			else if (field.composite_type || field.child_type)
+			{
+				if (field.value.length > 0)
+					metadataViewModel[i] = field.value[0];
+			}
+		}
+	}
+}
+
+MetadataLoader.isLabelVisible = function(field, parentField)
+{
+	if (field.scalar_type)
+	{
+		if (field.name && !field.hide_label)
+		{
+			return true;
+		}
+	}
+	else if (field.composite_type)
+	{
+		var imageLabel = (field.value_as_label == "") ?	false : field.value_as_label.type == "image";
+		// if label visible OR 
+		// expandable composite -- more than one item
+		// downloadable document OR composite media field
+		if ( ((field.name && !field.hide_label) && (imageLabel || !parentField.child_type)) 
+				|| (field.value.length > 1) 
+				|| (field.value.length == 1 && (field.value[0].navigatesTo || field.value[0].name == "location")) )
+		{
+			return true;
+		}
+	}
+	else if (field.child_type)
+	{
+		// if label visible OR expandable collection
+		if ((field.name && !field.hide_label) || (field.value.length > 1))
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
 MetadataLoader.checkAndSetShowExpanded = function(parentField, field)
 {
 	if (parentField.child_show_expanded_initially != null) {
@@ -835,14 +961,6 @@ MetadataLoader.getValueForProperty = function(valueAsLabelStr, metadata,
   var fieldType = "";
   for (var i = 0; i < nestedFields.length; i++)
   {
-    fieldValue = fieldValue[nestedFields[i]];
-    // if value is to be read from a collection, then use first element
-    // TODO: define semantics for selection
-    if (fieldValue && fieldValue.length != null)
-    {
-      fieldValue = fieldValue[0];
-    }
-    
     for (var key in mmdKids)
     {
       var mmdField = mmdKids[key];
@@ -875,7 +993,7 @@ MetadataLoader.getValueForProperty = function(valueAsLabelStr, metadata,
         {
           mmdKids = mmdField["kids"];
 
-          // get the child type; as directly selecting the first child above
+          // get the child type; as directly selecting the first child below
           mmdField = mmdKids[0];
           if (mmdField.scalar)
           {
@@ -892,6 +1010,14 @@ MetadataLoader.getValueForProperty = function(valueAsLabelStr, metadata,
           break;
         }
       }      
+    }
+    
+    fieldValue = fieldValue[nestedFields[i]];
+    // if value is to be read from a collection, then use first element (if its a composite)
+    // TODO: define semantics for selection
+    if (fieldValue && fieldValue.length != null && mmdField.type)
+    {
+      fieldValue = fieldValue[0];
     }
   }
   
@@ -967,13 +1093,13 @@ MetadataLoader.concatenateField = function(field, metadataFields, mmdKids)
 /**
  *
  */
-MetadataLoader.getImageSource = function(mmdField)
+MetadataLoader.getImageSource = function(metadataViewModel)
 {
-  for (var i = 0; i < mmdField.length; i++)
+  for (var i = 0; i < metadataViewModel.length; i++)
   {
-    if (mmdField[i].name == "location")
+    if (metadataViewModel[i].name == "location")
     {
-      return mmdField[i].value;
+      return metadataViewModel[i].value;
     }
   }
   return null;

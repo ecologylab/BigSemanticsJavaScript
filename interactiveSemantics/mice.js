@@ -7,7 +7,7 @@ MICE.documentMap = [];
 // deprecated
 var WWWStudy;
 
-
+var isExtension = (typeof chrome !== "undefined" && typeof chrome.extension !== "undefined");
 
 /**
  * Initializes MICE. Gets the containers and locations from the original document.  
@@ -92,7 +92,16 @@ MICE.render = function(task, metadataFields, styleInfo){
 /**
  * Needs further separation 
  */
-MICE.addMetadataDisplay = function(container, url, isRoot, clipping, reloadMD){
+
+/**
+ * add metadata display to the container.
+ * @param container, the HTML object to which the metadata rendering will be appended
+ * @param url, url of the target document
+ * @param isRoot, is this the root metadata for the rendering (currently used for removing existing children)
+ * @param requestMD, true if the function should request metadata from service, else false
+ * @param reloadMD, true if the metadata should be extracted afresh, else false 
+ */
+MICE.addMetadataDisplay = function(container, url, isRoot, clipping, requestMD, reloadMD){
 	// Add the rendering task to the queue
 	var task = new RenderingTask(url, container, isRoot, clipping, MICE.render)
 	MetadataLoader.queue.push(task);	
@@ -104,8 +113,11 @@ MICE.addMetadataDisplay = function(container, url, isRoot, clipping, reloadMD){
 	}
 	else
 	{	
+		var requestMetadata = (typeof requestMD === "undefined") || requestMD == true;
+		
 		// Fetch the metadata from the service
-		MetadataLoader.getMetadata(url, "MetadataLoader.setMetadata", reloadMD);	
+		if(!isExtension && requestMetadata)
+			MetadataLoader.getMetadata(url, "MetadataLoader.setMetadata", reloadMD);	
 	}
 }
 
@@ -403,8 +415,29 @@ MICE.downloadAndDisplayDocument = function(event)
 		
 		// Add a loadingRow for visual feedback that the metadata is being downloaded / parsed
 		table.appendChild(MICE.createLoadingRow(styleInfo));
-	    MetadataLoader.render(MICE.render, table.parentElement, location, false)	;
+
+		var requestMD = MetadataLoader.toRequestMetadataFromService(location);
+	    //MetadataLoader.render(MICE.render, table.parentElement, location, false)	;
 		//MICE.addMetadataDisplay(table.parentElement, location, false);
+		MICE.addMetadataDisplay(table.parentElement, location, false, null, requestMD, false, button);
+		if (!requestMD)
+		{
+			//document.dispatchEvent(new Event("tweetbubbleExternal"));
+			var message = {
+				type : "extractionRequest",
+				sender : table.parentElement,
+				detail : {
+					url : location
+				}
+			};
+			ExtensionInterface.dispatchMessage(message);
+			console.log("requested extension for metadata: " + location);
+			
+			window.setTimeout(function()
+			{
+				MetadataLoader.checkForMetadataFromExtension();
+			}, 3000);
+		}
 	}
 	// If there was no document location then the table must be a non-document composite in which case just expand
 	else
@@ -961,12 +994,13 @@ MICE.buildMetadataTable = function(table, isChildTable, isRoot, metadataFields, 
  */
 MICE.buildMetadataField = function(metadataField, isChildTable, fieldCount, row, styleInfo)
 {
+	var imageLabel = (metadataField.value_as_label == "") ?	false : metadataField.value_as_label.type == "image";
 	
 	var nameCol = document.createElement('div');
 	if (!metadataField.show_expanded_always ){	
 		nameCol.className = styleInfo.styles.labelCol;
 	}
-	else if(metadataField.composite_type != null && metadataField.composite_type != "image"){
+	else if(metadataField.composite_type != null && metadataField.composite_type != "image" && !imageLabel){
 		nameCol.className = styleInfo.styles.labelCol;
 		nameCol.style.display = "none";
 	}
@@ -974,7 +1008,7 @@ MICE.buildMetadataField = function(metadataField, isChildTable, fieldCount, row,
 	
 		valueCol.className = styleInfo.styles.valueCol;
 	
-	if(metadataField.composite_type != null && metadataField.composite_type != "image"){
+	if(metadataField.composite_type != null && metadataField.composite_type != "image" && !imageLabel){
 		valueCol.className = styleInfo.styles.valueCol;
 		valueCol.style.position = "relative";
 		valueCol.style.left = "-9px";
@@ -994,22 +1028,21 @@ MICE.buildMetadataField = function(metadataField, isChildTable, fieldCount, row,
 				var fieldLabelDiv = document.createElement('div');
 					fieldLabelDiv.className = styleInfo.styles.fieldLabelContainerUnhighlight;
 					
-				var label = (metadataField.value_as_label == "" || (metadataField.value_as_label.type != "scalar"
-					&& metadataField.value_as_label.type != "image"))? metadataField.name : metadataField.value_as_label.value;
-				if (metadataField.value_as_label == "" || metadataField.value_as_label.type != "image")
+				var label = MICE.getFieldLabel(metadataField);
+				if (label.type == "scalar")
 				{
 					var fieldLabel = document.createElement('p');
 						fieldLabel.className = styleInfo.styles.fieldLabel;
-						fieldLabel.innerText = MetadataLoader.toDisplayCase(label);
-						fieldLabel.textContent = MetadataLoader.toDisplayCase(label);
+						fieldLabel.innerText = MetadataLoader.toDisplayCase(label.value);
+						fieldLabel.textContent = MetadataLoader.toDisplayCase(label.value);
 						
 					fieldLabelDiv.appendChild(fieldLabel);	
 				}
-				else if (metadataField.value_as_label.type == "image")
+				else if (label.type == "image")
 				{
 					var img = document.createElement('img');
 						img.className = styleInfo.styles.fieldLabelImage;
-						img.src = MetadataLoader.getImageSource(label);
+						img.src = MetadataLoader.getImageSource(label.value);
 						
 					fieldLabelDiv.appendChild(img);	
 				}			
@@ -1032,7 +1065,7 @@ MICE.buildMetadataField = function(metadataField, isChildTable, fieldCount, row,
 				aTag.href = metadataField.value;
 				aTag.onclick = MICE.logNavigate;
 				
-				aTag.className = "fieldValue";
+				aTag.className = styleInfo.styles.fieldValue;
 						
 				if(metadataField.style_name != null && metadataField.style_name != "")
 					aTag.classList.add(metadataField.style_name);
@@ -1117,22 +1150,21 @@ MICE.buildMetadataField = function(metadataField, isChildTable, fieldCount, row,
 			var fieldLabelDiv = document.createElement('div');
 				fieldLabelDiv.className = styleInfo.styles.fieldLabelContainerUnhighlight;
 			
-			var label = (metadataField.value_as_label == "" || (metadataField.value_as_label.type != "scalar"
-				&& metadataField.value_as_label.type != "image"))? metadataField.name : metadataField.value_as_label.value;
-			if (metadataField.value_as_label == "" || metadataField.value_as_label.type != "image")
+			var label = MICE.getFieldLabel(metadataField);
+			if (label.type == "scalar")
 			{
 				var fieldLabel = document.createElement('p');
 					fieldLabel.className = styleInfo.styles.fieldLabel;
-					fieldLabel.innerText = MetadataLoader.toDisplayCase(label);
-					fieldLabel.textContent = MetadataLoader.toDisplayCase(label);
+					fieldLabel.innerText = MetadataLoader.toDisplayCase(label.value);
+					fieldLabel.textContent = MetadataLoader.toDisplayCase(label.value);
 				
 				fieldLabelDiv.appendChild(fieldLabel);	
 			}
-			else if (metadataField.value_as_label.type == "image")
+			else if (label.type == "image")
 			{
 				var img = document.createElement('img');
 					img.className = styleInfo.styles.fieldLabelImage;
-					img.src = MetadataLoader.getImageSource(label);
+					img.src = MetadataLoader.getImageSource(label.value);
 
 				fieldLabelDiv.appendChild(img);
 			}		
@@ -1206,27 +1238,25 @@ MICE.buildMetadataField = function(metadataField, isChildTable, fieldCount, row,
 		
 		if(metadataField.name)
 		{												
-			var imageLabel = (metadataField.value_as_label == "") ?	false : metadataField.value_as_label.type == "image";
+			var label = MICE.getFieldLabel(metadataField);
+
 			//If the table isn't a child table then display the label for the composite
-			
-			if((!isChildTable || imageLabel) && !metadataField.hide_label)
+			if((!isChildTable || label.type == "image") && !metadataField.hide_label)
 			{				
-				var label = (metadataField.value_as_label == "" || (metadataField.value_as_label.type != "scalar"
-					&& metadataField.value_as_label.type != "image"))? metadataField.name : metadataField.value_as_label.value;
-				if (metadataField.value_as_label == "" || metadataField.value_as_label.type != "image")
+				if (label.type == "scalar")
 				{
 					var fieldLabel = document.createElement('p');
 						fieldLabel.className = styleInfo.styles.fieldLabel;
-						fieldLabel.innerText = MetadataLoader.toDisplayCase(label);
-						fieldLabel.textContent = MetadataLoader.toDisplayCase(label);
+						fieldLabel.innerText = MetadataLoader.toDisplayCase(label.value);
+						fieldLabel.textContent = MetadataLoader.toDisplayCase(label.value);
 					
 					fieldLabelDiv.appendChild(fieldLabel);
 				}
-				else if (metadataField.value_as_label.type == "image")
+				else if (label.type == "image")
 				{
 					var img = document.createElement('img');
 						img.className = styleInfo.styles.fieldLabelImage;
-						img.src = MetadataLoader.getImageSource(label);
+						img.src = MetadataLoader.getImageSource(label.value);
 
 					fieldLabelDiv.appendChild(img);
 				}
@@ -1316,23 +1346,22 @@ MICE.buildMetadataField = function(metadataField, isChildTable, fieldCount, row,
 				fieldLabelDiv.appendChild(expandButton);
 			}
 			
-			var label = (metadataField.value_as_label == "" || (metadataField.value_as_label.type != "scalar"
-				&& metadataField.value_as_label.type != "image"))? metadataField.name : metadataField.value_as_label.value;
-			if (metadataField.value_as_label == "" || metadataField.value_as_label.type != "image")
+			var label = MICE.getFieldLabel(metadataField);
+			if (label.type == "scalar")
 			{
 				var fieldLabel = document.createElement('p');
 					fieldLabel.className = styleInfo.styles.fieldLabel;
-					fieldLabel.innerText = MetadataLoader.toDisplayCase(label) + "(" + metadataField.value.length + ")";
-					fieldLabel.textContent = MetadataLoader.toDisplayCase(label) + "(" + metadataField.value.length + ")";
+					fieldLabel.innerText = MetadataLoader.toDisplayCase(label.value) + "(" + metadataField.value.length + ")";
+					fieldLabel.textContent = MetadataLoader.toDisplayCase(label.value) + "(" + metadataField.value.length + ")";
 					
 				if (!metadataField.hide_label)
 					fieldLabelDiv.appendChild(fieldLabel);
 			}
-			else if (metadataField.value_as_label.type == "image")
+			else if (label.type == "image")
 			{
 				var img = document.createElement('img');
 					img.className = styleInfo.styles.fieldLabelImage;
-					img.src = MetadataLoader.getImageSource(label);
+					img.src = MetadataLoader.getImageSource(label.value);
 
 				if (!metadataField.hide_label)
 					fieldLabelDiv.appendChild(img);
@@ -1364,6 +1393,34 @@ MICE.buildMetadataField = function(metadataField, isChildTable, fieldCount, row,
 	return {name_col: nameCol, value_col: valueCol, count: fieldCount, expand_button: expandButton};
 }
 
+MICE.getFieldLabel = function(metadataField)
+{
+	var label = {};
+	if (metadataField.value_as_label != "")
+	{
+		if (metadataField.value_as_label.type == "scalar" && metadataField.value_as_label.value.trim() != "")
+		{
+			label.type = "scalar";
+			label.value = metadataField.value_as_label.value;
+		}
+		else if (metadataField.value_as_label.type == "image" && MetadataLoader.getImageSource(metadataField.value_as_label.value))
+		{
+			label.type = "image";
+			label.value = metadataField.value_as_label.value;
+		}
+		else
+		{
+			label.type = "scalar";
+			label.value = metadataField.name;
+		}
+	}
+	else
+	{
+		label.type = "scalar";
+		label.value = metadataField.name;
+	}
+	return label;
+}
 
 MICE.logNavigate = function(event)
 {
