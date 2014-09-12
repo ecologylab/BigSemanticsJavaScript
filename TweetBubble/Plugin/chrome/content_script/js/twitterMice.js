@@ -802,22 +802,21 @@ MetadataRenderer.buildMetadataField = function(metadataField, isChildTable, fiel
 				if (bgColorObj && bgColorObj.bFirstField)
 					fieldLabelDiv.style.background = bgColorObj.color;
 					
-				var label = (metadataField.value_as_label == "" || (metadataField.value_as_label.type != "scalar"
-					&& metadataField.value_as_label.type != "image"))? metadataField.name : metadataField.value_as_label.value;
-				if (metadataField.value_as_label == "" || metadataField.value_as_label.type != "image")
+				var label = MetadataRenderer.getFieldLabel(metadataField);
+				if (label.type == "scalar")
 				{
 					var fieldLabel = document.createElement('p');
 						fieldLabel.className = styleInfo.styles.fieldLabel;
-						fieldLabel.innerText = MetadataLoader.toDisplayCase(label);
-						fieldLabel.textContent = MetadataLoader.toDisplayCase(label);
+						fieldLabel.innerText = MetadataLoader.toDisplayCase(label.value);
+						fieldLabel.textContent = MetadataLoader.toDisplayCase(label.value);
 						
 					fieldLabelDiv.appendChild(fieldLabel);	
 				}
-				else if (metadataField.value_as_label.type == "image")
+				else if (label.type == "image")
 				{
 					var img = document.createElement('img');
 						img.className = styleInfo.styles.fieldLabelImage;
-						img.src = MetadataLoader.getImageSource(label);
+						img.src = MetadataLoader.getImageSource(label.value);
 						
 					fieldLabelDiv.appendChild(img);	
 				}			
@@ -943,22 +942,21 @@ MetadataRenderer.buildMetadataField = function(metadataField, isChildTable, fiel
 			if (bgColorObj && bgColorObj.bFirstField)
 				fieldLabelDiv.style.background = bgColorObj.color;
 			
-			var label = (metadataField.value_as_label == "" || (metadataField.value_as_label.type != "scalar"
-				&& metadataField.value_as_label.type != "image"))? metadataField.name : metadataField.value_as_label.value;
-			if (metadataField.value_as_label == "" || metadataField.value_as_label.type != "image")
+			var label = MetadataRenderer.getFieldLabel(metadataField);
+			if (label.type == "scalar")
 			{
 				var fieldLabel = document.createElement('p');
 					fieldLabel.className = styleInfo.styles.fieldLabel;
-					fieldLabel.innerText = MetadataLoader.toDisplayCase(label);
-					fieldLabel.textContent = MetadataLoader.toDisplayCase(label);
+					fieldLabel.innerText = MetadataLoader.toDisplayCase(label.value);
+					fieldLabel.textContent = MetadataLoader.toDisplayCase(label.value);
 				
 				fieldLabelDiv.appendChild(fieldLabel);	
 			}
-			else if (metadataField.value_as_label.type == "image")
+			else if (label.type == "image")
 			{
 				var img = document.createElement('img');
 					img.className = styleInfo.styles.fieldLabelImage;
-					img.src = MetadataLoader.getImageSource(label);
+					img.src = MetadataLoader.getImageSource(label.value);
 
 				fieldLabelDiv.appendChild(img);
 			}		
@@ -1032,26 +1030,25 @@ MetadataRenderer.buildMetadataField = function(metadataField, isChildTable, fiel
 		
 		if(metadataField.name)
 		{			
-			var imageLabel = (metadataField.value_as_label == "") ?	false : metadataField.value_as_label.type == "image";
+			var label = MetadataRenderer.getFieldLabel(metadataField);
+			
 			//If the table isn't a child table then display the label for the composite
-			if((!isChildTable || imageLabel) && !metadataField.hide_label)
+			if((!isChildTable || label.type == "image") && !metadataField.hide_label)
 			{				
-				var label = (metadataField.value_as_label == "" || (metadataField.value_as_label.type != "scalar"
-					&& metadataField.value_as_label.type != "image"))? metadataField.name : metadataField.value_as_label.value;
-				if (metadataField.value_as_label == "" || metadataField.value_as_label.type != "image")
+				if (label.type == "scalar")
 				{
 					var fieldLabel = document.createElement('p');
 						fieldLabel.className = styleInfo.styles.fieldLabel;
-						fieldLabel.innerText = MetadataLoader.toDisplayCase(label);
-						fieldLabel.textContent = MetadataLoader.toDisplayCase(label);
+						fieldLabel.innerText = MetadataLoader.toDisplayCase(label.value);
+						fieldLabel.textContent = MetadataLoader.toDisplayCase(label.value);
 					
 					fieldLabelDiv.appendChild(fieldLabel);
 				}
-				else if (metadataField.value_as_label.type == "image")
+				else if (label.type == "image")
 				{
 					var img = document.createElement('img');
 						img.className = styleInfo.styles.fieldLabelImage;
-						img.src = MetadataLoader.getImageSource(label);
+						img.src = MetadataLoader.getImageSource(label.value);
 
 					fieldLabelDiv.appendChild(img);
 				}
@@ -1145,23 +1142,22 @@ MetadataRenderer.buildMetadataField = function(metadataField, isChildTable, fiel
 				fieldLabelDiv.appendChild(expandButton);
 			}
 			
-			var label = (metadataField.value_as_label == "" || (metadataField.value_as_label.type != "scalar"
-				&& metadataField.value_as_label.type != "image"))? metadataField.name : metadataField.value_as_label.value;
-			if (metadataField.value_as_label == "" || metadataField.value_as_label.type != "image")
+			var label = MetadataRenderer.getFieldLabel(metadataField);
+			if (label.type == "scalar")
 			{
 				var fieldLabel = document.createElement('p');
 					fieldLabel.className = styleInfo.styles.fieldLabel;
-					fieldLabel.innerText = MetadataLoader.toDisplayCase(label) + "(" + metadataField.value.length + ")";
-					fieldLabel.textContent = MetadataLoader.toDisplayCase(label) + "(" + metadataField.value.length + ")";
+					fieldLabel.innerText = MetadataLoader.toDisplayCase(label.value) + "(" + metadataField.value.length + ")";
+					fieldLabel.textContent = MetadataLoader.toDisplayCase(label.value) + "(" + metadataField.value.length + ")";
 					
 				if (!metadataField.hide_label)
 					fieldLabelDiv.appendChild(fieldLabel);
 			}
-			else if (metadataField.value_as_label.type == "image")
+			else if (label.type == "image")
 			{
 				var img = document.createElement('img');
 					img.className = styleInfo.styles.fieldLabelImage;
-					img.src = MetadataLoader.getImageSource(label);
+					img.src = MetadataLoader.getImageSource(label.value);
 
 				if (!metadataField.hide_label)
 					fieldLabelDiv.appendChild(img);
