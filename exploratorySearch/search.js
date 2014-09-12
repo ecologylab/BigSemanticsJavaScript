@@ -2,7 +2,10 @@ var MAX_RELATED = 9;
 function onlyUnique(value, index, self) { 
     return self.indexOf(value) === index;
 }
-
+/*
+ * The seach class is used as a convenient way to create usable groups of search results.
+ * 
+ */
 function Search(query, type, location, result_locations, searchResults){
 	this.query = query;
 	this.type = type;

@@ -19,46 +19,42 @@ Object.defineProperty( Array.prototype, "equals", {
       this.every( function(this_i,i) { return this_i == array[i] } )  
   }
 } );
-function SearchSet(query, searches, parentSetID){
+function SearchSet(query, resultList, parentSetID){
 	this.query = query;
-	this.searches = searches;
+	//this.searches = searches;
+	this.searchResults = resultList;
 	this.id = query + ssidIndex.toString();
 	ssidIndex++;
 	this.expansionState = null;
 	this.parent = null;
 	this.engines = [];
 	this.parentSetID = parentSetID;
-	for(var i = 0; i < searches.length; i++){
-		this.engines.push(searches[i].type);
+
+	for(var i = 0; i < this.searchResults.length; i++){
+		if(engines.indexOf(this.searchResults[i]) < 0){
+			this.engines.push(this.searchResults[i].type);
+		}
+		
 	}
 	this.filters = [];
 	this.engines.sort();
 	
 }
-
-SearchSet.prototype.sameSet = function(query, engineList, parentID){
-	// SS's are equal if same engines and query
-	// Don't bother sorting engine list unless needed
-	
-	if(parentID != null){
-		if (this.query == query && this.parentSetID == parentID){
-			return true;
-		}
-		else{
-			return false;
-		}
-	}
-	else if (this.query == query && engineList.equals(this.engines)){
-		return true;
-	}
-	else{
-		return false;
+SearchSet.prototype.addResults = function(resultList){
+	for (var i = 0; i < resultList.length; i++){
+		this.searchResults.push(resultList[i]);
 	}
 }
 SearchSet.prototype.addFilter = function(filter){
 	this.filters.push(filter);
 }
-
+SearchSet.prototype.removeTypeFilter = function(){
+	for (filter in this.filters){
+		if (filter.filterType = "typeFilter"){
+			this.filters.splice(this.filters.indexOf(filter), 1);
+		}
+	}
+}
 SearchSet.prototype.removeFilter = function(filterId){
 	for(var i = 0; i < this.filters.length; i++){
 		if (this.filters[i].id == filterId){
@@ -106,19 +102,21 @@ SearchSet.prototype.buildQueryRow = function(query, filters, parent){
 
 SearchSet.prototype.buildFilterDisplay = function(filters, parent){
 	for(var i = filters.length - 1; i > -1; i--){
-		var filter = document.createElement('span');
-		filter.className = "filter";
-		var filterLabel = document.createElement('span');
-		filterLabel.className = 'filterLabel';
-		filterLabel.innerHTML = filters[i].term;
-		var filterRemove = document.createElement('span');
-		filterRemove.className = "filterRemove";
-		filterRemove.innerHTML = "<i class='icon-remove';'></i>";
-		filter.setAttribute('onclick', 'ExpSearchApp.removeFilter(event)');
-		filter.appendChild(filterLabel);
-		filter.appendChild(filterRemove);
-		filter.setAttribute('filterid', filters[i].id);
-		parent.appendChild(filter);
+		if(filters[i].filterType == "termFilter"){
+			var filter = document.createElement('span');
+			filter.className = "filter";
+			var filterLabel = document.createElement('span');
+			filterLabel.className = 'filterLabel';
+			filterLabel.innerHTML = filters[i].term;
+			var filterRemove = document.createElement('span');
+			filterRemove.className = "filterRemove";
+			filterRemove.innerHTML = "<i class='icon-remove';'></i>";
+			filter.setAttribute('onclick', 'ExpSearchApp.removeFilter(event)');
+			filter.appendChild(filterLabel);
+			filter.appendChild(filterRemove);
+			filter.setAttribute('filterid', filters[i].id);
+			parent.appendChild(filter);
+		}
 	}
 }
 SearchSet.prototype.buildComparisonUI = function(query, parent, entryID){
@@ -156,7 +154,9 @@ SearchSet.prototype.addSearch = function(search){
 	this.engines.sort();
 	//this.addResultSetDisplay(this, this.parent);
 }
-
+SearchSet.prototype.sortResults = function(){
+	this.searchResults.sort(function(a, b){return b.rank-a.rank});
+}
 SearchSet.prototype.buildExpandButton
 /*
  * Builds the query row and asks Search to please build its own search objects. If isComparison, builds
@@ -165,8 +165,8 @@ SearchSet.prototype.buildExpandButton
 
 
 SearchSet.prototype.addResultSetDisplay = function(SearchSetX, parent, isComparison, entryID){
-	
 	//Builds the row where the query is displayed
+	SearchSetX.sortResults();
 	SearchSetX.parent = parent;
 	if(isComparison){
 		SearchSet.prototype.buildComparisonUI(SearchSetX.query, parent, entryID)
@@ -175,12 +175,54 @@ SearchSet.prototype.addResultSetDisplay = function(SearchSetX, parent, isCompari
 	else{
 		SearchSet.prototype.buildQueryRow(SearchSetX.query, SearchSetX.filters, parent);
 	}
-
-	//To-do: add logic to get for which search's should be expanded
+	var searchResultsContainer = document.createElement('div');
+	searchResultsContainer.className = 'searchResultsContainer';
+	searchResultsContainer.setAttribute('searchsetid', SearchSetX.id);
+	parent.appendChild(searchResultsContainer);
 	
-	//Right now, searches don't know about being expanded or not.
-	//Only SearchSets handle that
-	console.log(SearchSetX);
+	//Code to handle the filtering of search results
+	//Alright, we need a new set of filters dictacted by the whims of the all powerful Toggle Boxes!!!
+	var filteredResults = [];
+	for(var i = 0; i <SearchSetX.searchResults.length; i++){
+		filteredResults.push(SearchSetX.searchResults[i]);
+	}
+	var filters = SearchSetX.filters;
+	
+	if (filters.length > 0){
+		for(var i = 0; i < SearchSetX.searchResults.length; i++){
+			for(var j = 0; j < filters.length; j++){
+				var ids = filters[j].filteredResultIds;
+				var doesItPass = false;
+				for (var k = 0; k < ids.length; k++){
+					if(SearchSetX.searchResults[i] == null){
+						console.log('eww');
+					}
+					if (SearchSetX.searchResults[i].id == ids[k]){
+						doesItPass = true;
+					}
+				}
+				if(!doesItPass){
+					var index = filteredResults.indexOf(SearchSetX.searchResults[i]);
+					if (index > -1) {
+					    filteredResults.splice(index, 1);
+					}
+	
+				}
+			}
+		}
+	}
+	
+	
+	
+	
+	
+	
+	for (var i = 0; i < filteredResults.length; i++){
+		SearchResult.prototype.addSearchResultDisplay(filteredResults[i], searchResultsContainer);
+	}
+	
+	/*
+	 * Old code for rendering searches
 	for(var i = 0; i < SearchSetX.searches.length; i++){
 		
 		var searchRendering = document.createElement('div');
@@ -199,7 +241,7 @@ SearchSet.prototype.addResultSetDisplay = function(SearchSetX, parent, isCompari
 		
 		
 		parent.appendChild(searchRendering);
-	}
+	}*/
 	
 				
 }

@@ -43,7 +43,7 @@ ExploratorySearch.prototype.currentUrl = function(){
 
 ExploratorySearch.prototype.isSetAdded = function(searchSet){
 	for(var i = 0; i < this.history.entryList.length; i++){
-		if (searchSet.sameSet(this.history.entryList[i].SearchSet)){
+		if (searchSet.query == this.history.entryList[i].SearchSet.query){
 			console.log(this.history.entryList[i].entryID);
 			return this.history.entryList[i].entryID;
 			

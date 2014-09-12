@@ -32,6 +32,7 @@ body{
 }
 .metadataRendering{
 	display: inline-block;
+	border-radius: 0px 0px 4px 4px;
 }
 .comparisonDismissButton{
 	float: right;
@@ -459,6 +460,8 @@ body{
     height: 32px;
 }
 .rootEntryContainer{
+	margin-top: 4px;
+
 	}
 .buttonContainer{
 	width: 20px;
@@ -760,19 +763,53 @@ body{
 }
 .metadataRendering{
 	margin-left: 0px;
-	border-radius: 0 4px 4px 0px;
+	margin-right: 0px;
+	border-radius: 0 0px 4px 4px;
 	max-width: 705px;
+	min-width:705px;
 	overflow: auto;
 	min-height: 20px;
 	
 }
+.searchResultFavicon{
+	max-height: 20px;
+	max-width: 20px;
+	width: 20px;
+	height:20px;
+	margin-left: 4px;
+	margin-right: 4px;
+	margin-top: 4px;
+	margin-bottom: 4px;
+}
+.faviconBar{
+	margin-left:0;;
+	margin-right:auto;
+}
+.searchResultSideBar{
+display: inline-block;
+position: relative;
+vertical-align: top;
+}
+.searchResultRightBar{
+	display: inline-block;
+vertical-align: top;
+border-style: solid;
+border-width: 1px 1px 1px 0px;
+border-color: gray;
+border-radius: 0px 4px 4px 0px;
+margin-left: px;
+
+margin-top: 8px;
+}
 a{
+	
 	color:white;
 }
 img{
 	max-width: 400px;
 	max-height: 150px;
 }
+
 iframe{
 	height: 100%;
 	width: 100%;

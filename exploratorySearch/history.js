@@ -66,15 +66,6 @@ History.prototype.buildEntry = function(entry, parent, depth){
 		buttonContainer.appendChild(entryCollapseButton);
 	}
 	
-	
-	//Favicons
-	var engines = entry.SearchSet.engines;
-	for (var i = 0; i < engines.length; i++){
-		var favicon = document.createElement('img');
-		favicon.className = "faviconICE";
-		favicon.src = "https://plus.google.com/_/favicon?domain_url=" + engineURL(engines[i]);
-		historyEntry.appendChild(favicon);
-	}
 	//Query
 	var historyText = document.createElement('span');
 	historyText.className = "entryQuery";
@@ -139,19 +130,19 @@ History.prototype.addHistoryDisplay = function(){
 	//Remove all current nodes
 	
 	
-	while (exploratorySearches.last().history.container.hasChildNodes())
-		exploratorySearches.last().history.container.removeChild(exploratorySearches.last().history.container.lastChild);
+	while (currentExpSearch.history.container.hasChildNodes())
+		currentExpSearch.history.container.removeChild(exploratorySearches.last().history.container.lastChild);
 	
-	var rootEntries = exploratorySearches.last().history.rootEntries;
+	var rootEntries = currentExpSearch.history.rootEntries;
 	//Add in the new ones :)
 	for (var i = 0; i < rootEntries.length; i++){
 		
 		var rootEntryContainer = document.createElement('div');
 		rootEntryContainer.className = "rootEntryContainer";
 		
-		exploratorySearches.last().history.buildEntry(rootEntries[i], rootEntryContainer, 0);
+		currentExpSearch.history.buildEntry(rootEntries[i], rootEntryContainer, 0);
 		
-		exploratorySearches.last().history.container.appendChild(rootEntryContainer);
+		currentExpSearch.history.container.appendChild(rootEntryContainer);
 	}
 	
 	
@@ -163,8 +154,8 @@ History.prototype.addEntry = function(entry){
 	
 	this.sortRootEntryList();
 	//Deactivates previous entries
-	for (var i = 0; i < exploratorySearches.last().history.entryList.length; i++){
-		exploratorySearches.last().history.entryList[i].active = false;
+	for (var i = 0; i < currentExpSearch.history.entryList.length; i++){
+		currentExpSearch.history.entryList[i].active = false;
 	}
 	//If a child entry, adds to the correct parent
 	if (entry.rootEntry){

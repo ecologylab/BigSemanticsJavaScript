@@ -4,22 +4,41 @@
 var filterID = 0;
 function Filter(term, ssId){
 	
-	var searches = currentExpSearch.currentSearchSet().searches;
-	var searchResults = [];
-	for (var k = 0; k < searches.length; k++){
-		for (var i = 0; i < searches[k].searchResults.length; i++){
-			searchResults.push(searches[k].searchResults[i]);
-		}
-	}
+	var searchResults = currentExpSearch.currentSearchSet().searchResults;
+	this.filterType = "termFilter";
 	//List of ids for results that pass through the filter
-	this.filteredResultIds = filterList(term, searchResults);
+	this.filteredResultIds = filterListByTerm(term, searchResults);
 	this.term = term;
 	this.id = 'filter' + filterID.toString();
-	this.searchSetId = ssId;
+	this.searchSetId = currentExpSearch.currentSearchSet().id;
 	filterID++;
 }
+//Filters out anything that does not have one of the specified types
+function TypeFilter(typeList, ssId){
+	var searchResults = currentExpSearch.currentSearchSet().searchResults;
+	this.filteredResultIds = filterByType(typeList, searchResults);
+	this.filterType = "typeFilter";
+	this.id = 'filter' + filterID.toString();
+	this.searchSetId = currentExpSearch.currentSearchSet().id;
+	for (var i = 0; i < typeList.length; i++){
+		
+	}
+}
+function filterByType(typeList, searchResults){
+	var filteredIds = [];
+	for (var i = 0; i < typeList.length; i++){
+		for (var k = 0; k < searchResults.length; k++){
+			if (searchResults[k].type == typeList[i]){
+				filteredIds.push(searchResults[k].id);
+			}
+			
+		}
+		
+	}
+	return filteredIds;
+}
 
-function filterList(term, list){
+function filterListByTerm(term, list){
 	var filteredId = [];
 	for(var i = 0; i < list.length; i++){
 		var metadataRendering = document.getElementById(list[i].id);

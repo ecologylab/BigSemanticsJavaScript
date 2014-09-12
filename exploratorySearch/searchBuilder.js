@@ -71,7 +71,7 @@ searchBuilder.searchFromMetadata = function(metadataFields){
 				var searchResults = [];
 				
 				for(var k = 0; (k < result_locations.length)  && k <MAX_RESULTS; k++){
-					var result = new SearchResult(result_locations[k], type);
+					var result = new SearchResult(result_locations[k], type, k);
 					searchResults.push(result);
 				}
 				search = new Search(query, type, search_location, result_locations, searchResults);
@@ -83,7 +83,7 @@ searchBuilder.searchFromMetadata = function(metadataFields){
 				var searchResults = [];
 				
 				for(var k = 0; (k < result_locations.length)  && k <MAX_RESULTS && k<result_metadata.length; k++){
-					var result = new SearchResult(result_locations[k], type, result_metadata[k]);
+					var result = new SearchResult(result_locations[k], type, k, result_metadata[k]);
 					searchResults.push(result);
 				}
 				search = new Search(query, type, search_location, result_locations, searchResults);

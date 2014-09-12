@@ -4,7 +4,8 @@ var MAX_RESULTS = 5;
 var exploratorySearches = [];
 var currentExpSearch = null;
 var LOG_SERVICE_URL = "ecoarray0:3801/i/event_log/";
-var ALL_ENGINES = ["google_search","google_scholar_search","acm_portal_search","research_gate", "bing_search_xpath"];
+var ALL_ENGINES = ["google_search","google_scholar_search","acm_portal_search","research_gate_search", "bing_search_xpath"];
+ExpSearchApp.toggledEngines = [];
 /*
  * Collection of functions to render 
  */
@@ -48,6 +49,7 @@ ExpSearchApp.initialize = function(){
 		FatherTime.init();
 	}
 	
+	ExpSearchApp.updateToggledEngines();
 	var expRenderings = document.getElementsByClassName('expRendering');
 	for (var i = 0; i < expRenderings.length; i++){
 		var query = expRenderings[i].getElementsByTagName('a')[0].getAttribute("query");
@@ -58,12 +60,23 @@ ExpSearchApp.initialize = function(){
 		
 		exploratorySearches.push(expSearch);
 		currentExpSearch = expSearch;
-			
+		
 		ExpSearchApp.addQuery(query);
 	}
 	
 }
 
+ExpSearchApp.updateToggledEngines = function(){
+	//Check for which searches are toggled
+	var checkboxes = document.getElementsByClassName('searchToggle');
+	var engines = [];
+	for (var i = 0; i < checkboxes.length; i++){
+		if (checkboxes[i].checked){
+			engines.push(checkboxes[i].name);
+		}
+	}
+	ExpSearchApp.toggledEngines = engines;
+}
 function toGoogleUrl(searchString){
     
     
@@ -172,7 +185,7 @@ ExpSearchApp.prepareUrls = function(query){
     	}
     	else if (ALL_ENGINES[i] == "google_scholar_search"){
     		url = toGScholarUrl(query);
-    	}else if (ALL_ENGINES[i] == "research_gate"){
+    	}else if (ALL_ENGINES[i] == "research_gate_search"){
     		url = toResearchGateUrl(query);
     	}
     	
@@ -189,7 +202,7 @@ ExpSearchApp.addQuery = function(query, parentSearchSetID){
 	}
 	var searchSet;
 	var urlList = ExpSearchApp.prepareUrls(query);
-	var parentID;
+	var parentID = parentSearchSetID;
 	console.log(query);
 
 	
@@ -200,7 +213,7 @@ ExpSearchApp.addQuery = function(query, parentSearchSetID){
 	
 	
 	for (var i = 0; i < currentExpSearch.SearchSets.length; i++){
-		if (currentExpSearch.SearchSets[i].sameSet(query, ALL_ENGINES, parentSearchSetID)){
+		if (currentExpSearch.SearchSets[i].query == query){
 			currentExpSearch.history.restoreEntry(currentExpSearch.SearchSets[i].id);
 			return;
 		}
@@ -221,7 +234,7 @@ ExpSearchApp.addQuery = function(query, parentSearchSetID){
 
 	currentExpSearch.addSearchSet(ss);
 	ss.engines = [];
-
+	
 	for (var i = 0; i < ALL_ENGINES.length ; i++){
 		MetadataLoader.render(ExpSearchApp.renderNewMultipleSearch, visual, urlList[i], true, null);
 	}
@@ -267,7 +280,8 @@ ExpSearchApp.renderNewMultipleSearch = function(task, metadataFields){
 		var newSearch = searchBuilder.searchFromMetadata(metadataFields);
 		if (currentExpSearch.currentSearchSet().query == newSearch.query){
 			
-			currentExpSearch.currentSearchSet().addSearch(newSearch);
+			currentExpSearch.currentSearchSet().addResults(newSearch.searchResults);
+			ExpSearchApp.filterByType(currentExpSearch.currentSearchSet().id);
 			ExpSearchApp.displaySearchSet(currentExpSearch);
 
 		}
@@ -289,15 +303,16 @@ ExpSearchApp.renderNewMultipleSearch = function(task, metadataFields){
 ExpSearchApp.renderNewSingleSearch= function(task, metadataFields){
 	var newSearch = searchBuilder.searchFromMetadata(metadataFields);
 	
-	var newSS = new SearchSet(newSearch.query, [newSearch]);
+	var newSS = new SearchSet(newSearch.query, newSearch.searchResults);
 	currentExpSearch.addSearchSet(newSS);
 	ExpSearchApp.displaySearchSet(currentExpSearch);
 	MetadataLoader.queue.splice(MetadataLoader.queue.indexOf(task), 1);
 }
 
 ExpSearchApp.initialRender = function(task, metadataFields){
-	var searchList = [searchBuilder.searchFromMetadata(metadataFields)];
-	var searchSet = new SearchSet(searchList[0].query ,searchList);
+	var search = searchBuilder.searchFromMetadata(metadataFields).searchResults;
+	
+	var searchSet = new SearchSet(search.query, search.searchResults);
 	
 	if (searchSet != null){
 		var expSearch = new ExploratorySearch()
@@ -681,7 +696,7 @@ ExpSearchApp.entrySearch = function(event){
 	      container.removeChild(event.target);
 	      
 	      container.parentNode.removeChild(container);
-	      ExpSearchApp.addQuery(query, ExpSearchApp.getEngines(), id);
+	      ExpSearchApp.addQuery(query, id);
 	      //Logging event builder
 	      
 	      var depth = 1 + currentExpSearch.history.getSearchSetDepth(id);
@@ -985,11 +1000,35 @@ ExpSearchApp.newExpSearch = function(){
 
 ExpSearchApp.onEnterFilter = function (event){
 	 if(event.keyCode == 13){
-		 var ssContainer = document.getElementsByClassName('searchSetContainer')[0];
+		 var ssContainer = document.getElementsByClassName('searchResultsContainer')[0];
 		 var id = ssContainer.getAttribute('searchsetid');
 		 ExpSearchApp.buildFilter(document.getElementById('filterInput').value, id);
 	 }
 	
+}
+ExpSearchApp.onToggleFilter = function(event){
+	 var ssContainer = document.getElementsByClassName('searchResultsContainer')[0];
+	 var id = ssContainer.getAttribute('searchsetid');
+	 
+	 if (event.target.className != "searchToggle"){
+		 return false;
+	 }
+	 else{
+		 ExpSearchApp.filterByType(id);
+	 }
+}
+ExpSearchApp.filterByType = function(ssId){
+	 ExpSearchApp.updateToggledEngines();
+		var filter = new TypeFilter(ExpSearchApp.toggledEngines, ssId);
+		var searchSet;
+		for (var i = 0; i < currentExpSearch.SearchSets.length; i++){
+			if (currentExpSearch.SearchSets[i].id == ssId){
+				searchSet = currentExpSearch.SearchSets[i];
+			}
+		}
+		searchSet.removeTypeFilter();
+		searchSet.addFilter(filter);
+		ExpSearchApp.displaySearchSet(currentExpSearch);
 }
 ExpSearchApp.buildFilter = function(term, ssId){
 	var filter = new Filter(term, ssId);

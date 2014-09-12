@@ -3,14 +3,25 @@
  */
 
 var filterIdIndex = 0;
+//Uses types as keys
+var locationDictionary = {}
+locationDictionary['google_search'] = "http://www.google.com";
+locationDictionary['bing_search_xpath'] = "http://www.bing.com";
+locationDictionary['acm_portal_search'] = "http://dl.acm.org/";
+locationDictionary['research_gate_search'] = "http://www.researchgate.net/";
+locationDictionary['google_scholar_search'] = "http://scholar.google.com";
 
-function SearchResult(location, type, metadata){
+function SearchResult(location, type, rank, metadata){
+	
 	this.location = location;
+	//If a searchResult appears multiple time, then the type
+	//of the other search(es) is recorded here.
+	this.additionTypes = [];
 	this.type = type;
 	this.metadata = metadata;
 	this.id = "result" + filterIdIndex.toString();
+	this.rank = rank;
 	filterIdIndex++;
-	//this.title = title;
 }
 
 SearchResult.prototype.addSearchResultExpandCollapseButton = function(searchResultX){
@@ -52,14 +63,61 @@ SearchResult.prototype.addSearchHandle = function(searchResultX){
 	return searchHandle;
 }
 
+SearchResult.prototype.getParentSearchLocations = function(){
+	var listOfLocations = [];
+	var mainLocation = locationDictionary[this.type];
+	listOfLocations.push(mainLocation);
+	for (var i = 0; i < this.additionTypes.length; i++){
+		var location = locationDictionary(this.additionalLocation[i]);
+		listOfLocations.push(location);
+	}
+	return listOfLocations;
+}
+SearchResult.prototype.addFaviconBar = function(searchResult, parent){
+	var faviconBar = document.createElement('div');
+	faviconBar.className = "faviconBar";
+	var iconLocations = searchResult.getParentSearchLocations();
+
+	var faviconRow;
+	for (var i = 0; i < iconLocations.length; i++){
+		if (i % 2 == 0){
+			faviconRow = document.createElement('div');
+			faviconRow.className="faviconRow";
+			searchResult.addFavicon(iconLocations[i], faviconRow);
+			faviconBar.appendChild(faviconRow);
+		}
+		else{
+			searchResult.addFavicon(iconLocations[i], faviconRow);
+		}
+		
+	}
+	parent.appendChild(faviconBar);
+}
+SearchResult.prototype.addFavicon = function(location, parent){
+	
+	var favicon = document.createElement('img');
+	favicon.className = "searchResultFavicon";
+	favicon.src = "http://g.etfv.co/" + location;
+	parent.appendChild(favicon);
+	
+}
 SearchResult.prototype.addSearchResultDisplay = function(searchResultX, parent){
 	var newSearchDisplay = document.createElement('div');
 	//newSearchDisplay.setAttribute('draggable', true);
 	newSearchDisplay.setAttribute('dragstart', 'clippingDragStart(event)');
 	newSearchDisplay.className = "indResultContainer";
+	
 	//recursiveDragEventInjector(newSearchDisplay, clippingDragStart);
-
+	
 	parent.appendChild(newSearchDisplay);
+
+	var sideBar = document.createElement('div');
+	sideBar.className = 'searchResultSideBar';
+	newSearchDisplay.appendChild(sideBar);
+	
+	sideBar.appendChild(SearchResult.prototype.addSearchHandle(searchResultX));
+	
+	
 	
 	var rendering = document.createElement('div');
 	rendering.className="metadataRendering";
@@ -93,7 +151,7 @@ SearchResult.prototype.addSearchResultDisplay = function(searchResultX, parent){
 						
 		}
 		
-		newSearchDisplay.appendChild(SearchResult.prototype.addSearchHandle(searchResultX));
+
 		newSearchDisplay.appendChild(rendering);
 		/*rendering.setAttribute('onmousedown', 'ExpSearchApp.removeQuerySearchBox(event)')
 		rendering.setAttribute('onmouseup', 'ExpSearchApp.textSelected(event)');
@@ -110,7 +168,7 @@ SearchResult.prototype.addSearchResultDisplay = function(searchResultX, parent){
 	else{
 		var miceContainer = document.createElement('div');
 		miceContainer.className = "metadataRendering";
-		newSearchDisplay.appendChild(SearchResult.prototype.addSearchHandle(searchResultX));
+
 		newSearchDisplay.appendChild(miceContainer);
 		
 		MetadataLoader.render(MICE.render, miceContainer, searchResultX.location, true);
@@ -125,5 +183,8 @@ SearchResult.prototype.addSearchResultDisplay = function(searchResultX, parent){
 			});
 		miceContainer.setAttribute('id', searchResultX.id);
 	}
-
+	var rightBar = document.createElement('div');
+	rightBar.className = "searchResultRightBar";
+	searchResultX.addFaviconBar(searchResultX, rightBar);
+	newSearchDisplay.appendChild(rightBar);
 }

@@ -101,29 +101,29 @@
                 <div class = "checkBoxGroup">
 	                <div class="checkbox ">
 	                  <label>
-	                    <input type="checkbox" class="searchToggle" name="google_search" checked="true" value="true" onclick="logEngineToggle(event)"> Google
+	                    <input type="checkbox" class="searchToggle" name="google_search" checked="true" value="true" onclick="ExpSearchApp.onToggleFilter(event)"> Google
 	                    
 	                 </label>
 	                </div>
 	                <div class="checkbox ">
 	                  <label>
-	                    <input type="checkbox" class="searchToggle" name="bing_search_xpath" value="true" onclick="logEngineToggle(event)"> Bing
+	                    <input type="checkbox" class="searchToggle" name="bing_search_xpath" value="true" onclick="ExpSearchApp.onToggleFilter(event)"> Bing
 	                 </label>
 	                </div>
 	                 <div class="checkbox ">
                       <label>
-                        <input type="checkbox" class="searchToggle" name="acm_portal_search" value="true" onclick="logEngineToggle(event)"> ACM
+                        <input type="checkbox" class="searchToggle" name="acm_portal_search" value="true" onclick="ExpSearchApp.onToggleFilter(event)"> ACM
                      </label>
                     </div>
                     <div class="checkbox ">
                       <label>
-                        <input type="checkbox" class="searchToggle" name="google_scholar_search" value="true" onclick="logEngineToggle(event)"> Google Scholar
+                        <input type="checkbox" class="searchToggle" name="google_scholar_search" value="true" onclick="ExpSearchApp.onToggleFilter(event)"> Google Scholar
                         
                      </label>
                     </div>
                     <div class="checkbox ">
                       <label>
-                        <input type="checkbox" class="searchToggle" name="research_gate" value="true" onclick="logEngineToggle(event)"> ResearchGate
+                        <input type="checkbox" class="searchToggle" name="research_gate_search" value="true" onclick="ExpSearchApp.onToggleFilter(event)"> ResearchGate
                         
                      </label>
                     </div>
@@ -148,21 +148,13 @@
 		  <div class="historyContainer"></div> 
 		</div>
 		
-		<div class="column" style="width: 35%; float: left">
+		<div class="column" style="width: 70%; float: left">
           <div id="content" class="expRendering">
           
         <a href="https://www.google.com/search?q=search" engine ="google_search" query="search"> </a>     
           </div>
         </div>
-          <div class="column comparison" id="comp" style="width: 35%">
-          <div class="comparisonContainer" ondragover="comparisonDragOver(event)" ondrop="comparisonDrop(event)" ondragenter="comparisonDragEnter(event)" ondragleave="comparisonDragLeave(event)">
-          <span class="dragCenteringMechanism">
-            <span class="dragHint">Drag a history entry here</span>
-          </span>
-             
-      
-          </div>
-        </div>
+         
        
         </div>
 	
