@@ -223,7 +223,11 @@ body{
 }
 .column{
 	display: inline-block;
-	
+
+	max-width: 800px;
+	}
+	.history{
+			max-width: 454px;
 	}
 .comparison{
 	border-left: solid;
