@@ -341,25 +341,29 @@ MetadataRenderer.downloadAndDisplayDocument = function(event)
 		MetadataRenderer.addMetadataDisplay(table.parentElement, location, false, null, requestMD, false, button);
 		if (!requestMD)
 		{
-			//document.dispatchEvent(new Event("tweetbubbleExternal"));
-			var message = {
-				type : "extractionRequest",
-				sender : table.parentElement,
-				detail : {
-					url : location
-				}
-			};
-			ExtensionInterface.dispatchMessage(message);
-			console.log("requested extension for metadata: " + location);
-
-			window.setTimeout(function()
+			if (!isExtension)
 			{
-				MetadataLoader.checkForMetadataFromExtension();
-			}, 3000);
+				//document.dispatchEvent(new Event("tweetbubbleExternal"));
+				var message = {
+					type : "extractionRequest",
+					sender : table.parentElement,
+					detail : {
+						url : location
+					}
+				};
+				ExtensionInterface.dispatchMessage(message);
+				console.log("requested extension for metadata: " + location);
+	
+				window.setTimeout(function()
+				{
+					MetadataLoader.checkForMetadataFromExtension();
+				}, 3000);
+			}
+			else if (requestDocumentDownload)
+			{
+				requestDocumentDownload(location);
+			}
 		}
-
-		//if (requestDocumentDownload)
-			//requestDocumentDownload(location);
 	}
 	// If there was no document location then the table must be a non-document composite in which case just expand
 	else
