@@ -139,7 +139,7 @@ function extractMetadata(targetDoc, mmd) {
 	    	metadata['location'] = locationField;  
 	    }
 	    
-	    metadata['mm_name'] = mmd.name;
+	    metadata['meta_metadata_name'] = mmd.name;
 	    
 	    return metadata;
    }
@@ -389,8 +389,8 @@ function extractComposite(mmdCompositeField, contextNode, metadata, fieldParserC
     compositeMetadata = recursivelyExtractMetadata(mmdCompositeField, thisNode, compositeMetadata, thisFieldParserContext);
 
     if (!isEmpty(compositeMetadata)) {
-        if (mmdCompositeField.hasOwnProperty('mm_name'))
-            compositeMetadata['mm_name'] = mmdCompositeField.mm_name;
+        if (mmdCompositeField.hasOwnProperty('meta_metadata_name'))
+            compositeMetadata['meta_metadata_name'] = mmdCompositeField.meta_metadata_name;
 //        console.log("Composite Recursive Result ---------- : ");
 //        console.info(compositeMetadata);
 

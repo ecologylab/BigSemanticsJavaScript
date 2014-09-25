@@ -1387,7 +1387,7 @@ MICE.buildMetadataField = function(metadataField, isChildTable, fieldCount, row,
 
 MICE.getFieldLabel = function(metadataField)
 {
-	var label = null;
+	var label = {};
 	if (metadataField.value_as_label != "")
 	{
 		if (metadataField.value_as_label.type == "scalar" && metadataField.value_as_label.value.trim() != "")
@@ -1411,6 +1411,7 @@ MICE.getFieldLabel = function(metadataField)
 		label.type = "scalar";
 		label.value = metadataField.name;
 	}
+	return label;
 }
 
 MICE.logNavigate = function(event)

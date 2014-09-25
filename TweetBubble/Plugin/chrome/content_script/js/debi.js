@@ -129,7 +129,7 @@ MetadataLoader.setMetadata = function(rawMetadata, requestMmd)
     if (i != "simpl.id" && i != "simpl.ref" && i != "deserialized")
     {
       metadata = rawMetadata[i];    
-      // metadata.mm_name = i;
+      // metadata.meta_metadata_name = i;
     }
     
     if (i == "deserialized")
@@ -173,7 +173,7 @@ MetadataLoader.setMetadata = function(rawMetadata, requestMmd)
     }
     
     queueTask.metadata = metadata;
-    queueTask.mmdType = metadata.mm_name;
+    queueTask.mmdType = metadata.meta_metadata_name;
   
     if (queueTask.clipping != null)
     {
@@ -613,7 +613,7 @@ MetadataLoader.getScalarMetadataViewModel = function(metadataViewModel,
       }
                 
       field.scalar_type = mmdField.scalar_type;
-      field.parentMDType = metadata.mm_name;  
+      field.parentMDType = metadata.meta_metadata_name;  
             
       // Does the field have a navigation link?
       if (mmdField.navigates_to != null)
@@ -683,7 +683,7 @@ MetadataLoader.getCompositeMetadataViewModel = function(metadataViewModel,
           }
           
           field.composite_type = mmdField.type;
-          field.parentMDType = metadata.mm_name;
+          field.parentMDType = metadata.meta_metadata_name;
           MetadataLoader.checkAndSetShowExpanded(parentField, field);
           
           metadataViewModel.push(field);
@@ -714,7 +714,7 @@ MetadataLoader.getCompositeMetadataViewModel = function(metadataViewModel,
         }
         
         field.composite_type = mmdField.type;
-        field.parentMDType = metadata.mm_name;
+        field.parentMDType = metadata.meta_metadata_name;
         MetadataLoader.checkAndSetShowExpanded(parentField, field);
         
         metadataViewModel.push(field);
@@ -756,7 +756,7 @@ MetadataLoader.getCollectionMetadataViewModel = function(metadataViewModel,
       
       field.child_type = (mmdField.child_tag != null) ? mmdField.child_tag
                                                       : mmdField.child_type;
-      field.parentMDType = metadata.mm_name;
+      field.parentMDType = metadata.meta_metadata_name;
                   
       // If scalar collection
       if (mmdField.child_scalar_type != null)
