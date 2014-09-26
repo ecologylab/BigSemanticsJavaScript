@@ -454,7 +454,7 @@ function MetadataViewModel(mmdField)
   }
   this.extract_as_html = mmdField.extract_as_html;
 
-  if (mmdField.show_expanded_initially != null)
+  if (mmdField.dont_show_expanded_initially != "true" && mmdField.show_expanded_initially != null)
   {
     this.show_expanded_initially = mmdField.show_expanded_initially;
   }

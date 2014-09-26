@@ -1,3 +1,5 @@
+var application_name = "tweetbubble";
+
 var Util = {};
 
 Util.YES = "yes";

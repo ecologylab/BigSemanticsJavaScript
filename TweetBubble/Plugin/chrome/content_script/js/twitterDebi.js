@@ -20,7 +20,7 @@ MetadataLoader.setMetadata = function(rawMetadata)
 //		if(i != "simpl.id" && i != "simpl.ref" && i != "deserialized")
 //		{
 //			metadata = rawMetadata[i];		
-//			metadata.mm_name = i;
+//			metadata.meta_metadata_name = i;
 //		}
 //		
 //		if(i == "deserialized")
@@ -62,7 +62,7 @@ MetadataLoader.setMetadata = function(rawMetadata)
 		}
 		
 		queueTask.metadata = metadata;
-		queueTask.mmdType = metadata.mm_name;
+		queueTask.mmdType = metadata.meta_metadata_name;
 	
 		if(queueTask.clipping != null)
 			queueTask.clipping.rawMetadata = rawMetadata;
