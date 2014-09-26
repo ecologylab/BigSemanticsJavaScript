@@ -10,6 +10,7 @@ function extractMetadata(mmd) {
 	var extractedMeta = { };
 	mmd = mmd['meta_metadata'];
 	mmdKids = mmd['kids'];
+	mmdKids = sortKids(mmdKids);
 	var contextNode = document;
 	var type = mmd['type'];
 	var name = mmd['name'];
@@ -17,19 +18,18 @@ function extractMetadata(mmd) {
 	if (mmd.hasOwnProperty('def_vars')) 
 	{
 		for (var i = 0; i < mmd.def_vars.length; i++) {
-			var def = mmd.def_vars[i];
-			var path = def.xpaths[0];
-			console.log(path);
-			var nodes = document.evaluate(path, document, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
-			console.log(nodes);
-			if (nodes.snapshotLength != null)
-			{
-				var n = def['name'];
-				var snap = nodes.snapshotItem(0);
-				defVars[n] = snap;
+			if (typeof mmd.def_vars[i].xpaths !== 'undefined'){ //in case someone writes a wrapper and doesn't define an xpath
+				var def = mmd.def_vars[i];
+				var path = def.xpaths[0];
+				var nodes = document.evaluate(path, document, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
+				if (nodes.snapshotLength != null)
+				{
+					var n = def['name'];
+					var snap = nodes.snapshotItem(0);
+					defVars[n] = snap;
+				}
 			}
 		}
-		console.log(defVars);
 	}
 	
 	if (type != undefined) 
@@ -42,7 +42,6 @@ function extractMetadata(mmd) {
 		extractedMeta[name]['download_status'] = "DOWNLOAD_DONE";
 		extractedMeta[name]['mm_name'] = mmd.name;
 	}
-	//console.log(extractedMeta);
 	return extractedMeta;
 }
 
@@ -59,17 +58,12 @@ function dataFromKids(mmdKids,contextNode,recurse,parserContext)
 		var name;
 		var obj;
 		var tag;
-		
-		//console.log("recurse: " + recurse);
-		
+				
 		if(field.scalar) 
 		{
 			field = field.scalar;
 			name = field.name;
-			
-			//console.log(name + ": scalar");
-			//console.log(field);
-			
+
 			if (field.hasOwnProperty('context_node'))
 			{
 				if (defVars[field.context_node] != null)
@@ -88,22 +82,17 @@ function dataFromKids(mmdKids,contextNode,recurse,parserContext)
 				e = false;
 				if (tag != undefined){
 					d[tag] = obj;
-					//scalars[tag] = obj;
 					if (recurse) {
 						upperLevel[tag] = obj;
 					}
 				} else {
 					d[name] = obj;
-					//scalars[name] = obj;
 					if (recurse) {
 						upperLevel[name] = obj;
 					}
 				}
 				
 			}
-
-			//console.log("scalar: " + obj);
-			//console.log("string: " + string);
 			
 			if (!recurse && field.name == 'location' && obj != null && obj != url) {
 				break;
@@ -114,9 +103,6 @@ function dataFromKids(mmdKids,contextNode,recurse,parserContext)
 			field = field.composite;
 			name = field.name;
 			
-			//console.log(name + ": composite");
-			//console.log(field);
-			
 			if (field.hasOwnProperty('context_node'))
 			{
 				contextNode = defVars[field.context_node];
@@ -125,23 +111,22 @@ function dataFromKids(mmdKids,contextNode,recurse,parserContext)
 			obj = getCompositeD(field,contextNode,recurse,parserContext);
 
 			if(!isObjEmpty(obj,recurse))
-			if(obj != null)
 			{
-				e = false;
-				if (tag != undefined){
-					d[tag] = obj;
-				} else {
-					d[name] = obj;
-				}			
+				if(obj != null)
+				{
+					e = false;
+					if (tag != undefined){
+						d[tag] = obj;
+					} else {
+						d[name] = obj;
+					}			
+				}
 			}
 		}
 		else if (field.collection)
 		{
 			field = field.collection;
 			name = field.name;
-			
-			//console.log(name + ": collection");
-			//console.log(field);
 			
 			if (field.hasOwnProperty('context_node'))
 			{
@@ -157,7 +142,6 @@ function dataFromKids(mmdKids,contextNode,recurse,parserContext)
 				} else {
 					d[name] = obj;
 				}
-				//console.log(obj);
 			}			
 		}
 	}
@@ -187,35 +171,28 @@ function getScalarD(field,contextNode,recurse,parserContext)
 	
 	// var fieldParserKey = field['field_parser_key'];
 	// if (fieldParserKey != null) {
-		// console.log("poop");
 		// data = getFieldParserValueByKey(parserContext,fieldParserKey);
-		// console.log(data);
 	// }
 	
 	if (field["xpaths"] != null && field["xpaths"].length > 0)
 	{
 		var fieldx = field["xpaths"];
 		for (var j = 0; j < fieldx.length; j++) {
-			//console.log(fieldx[j]);
 			var x = getScalarString(field,fieldx[j],contextNode);
 			if (x != null && x != "") {
-				data = x;			
+				data = x;
+				break;			
 			}
 
 		}
 				
 	}
 	
-	//console.log(field.name + " final data: " + data);
-	//console.log(data);
-	
 	if(data != null)
 	{			
-		var data = prettifyText(data).replace(new RegExp('\n', 'g'), "");
 		data = data.trim();
 		if (field['field_ops'] != null)
 		{
-			//console.log(field['field_ops'].length);
 			for (var i = 0; i < field['field_ops'].length; i++)
 			{
 				var regexOps = field.field_ops[i].regex_op;
@@ -225,7 +202,6 @@ function getScalarD(field,contextNode,recurse,parserContext)
 				data = data.replace(new RegExp(regex, 'g'),replace);
 			}
 		}
-		//console.log(data);
 		return data;
 	} 
 	return null;
@@ -253,9 +229,7 @@ function getCompositeD(field,contextNode,recurse,parserContext)
 		
 	} else if (recurse)
 	{
-		//console.log("recursing");
 		data = dataFromKids(kids,contextNode,false,null);
-		//console.log(data);
 	}  
 	
 	if(data != null)
@@ -265,11 +239,8 @@ function getCompositeD(field,contextNode,recurse,parserContext)
 			data['mm_name'] = field.type;
 		} else {
 			data['mm_name'] = field.name;
-		}
-		
-		//console.log(data);
+		}	
 		return data;
-		
 	}	
 	return null;		
 }
@@ -292,18 +263,13 @@ function getCollectionD(field,contextNode,recurse,parserContext)
 	{
 		var fieldx = field["xpaths"];
 		for (var j = 0; j < fieldx.length; j++) {
-			//console.log(fieldx[j]);
 			var x = getCollectionData(field,fieldx[j],contextNode);
-			//console.log(x);
 			if (x != null && x != "") {
 				data = x;
 			}
 		}
 	}	
-	
-	//console.log(field.name);		
-	//console.log(data);
-	
+
 	if(data != null)
 	{	
 		return data;
@@ -313,14 +279,11 @@ function getCollectionD(field,contextNode,recurse,parserContext)
 
 function getScalarString(field,xpath,contextNode)
 {
-	//console.log(xpath);
-	//console.log(contextNode);
 	try {
 		var data = document.evaluate(xpath, contextNode, null, XPathResult.STRING_TYPE, null);
 	} catch (err) {
 		return null;
 	}
-	//console.log(data);
 	string = data.stringValue;
 	
 	if (field.scalar_type == "ParsedURL") 
@@ -329,21 +292,16 @@ function getScalarString(field,xpath,contextNode)
 		{
 			if (string.charAt(1) != "/") {
 				string = baseURL.concat(string);
-				//console.log(string);	
 			} else {
 				var h = "http:";
-				string = h.concat(string);			
-				//console.log(string);		
+				string = h.concat(string);				
 			}
 		} else if (string.indexOf("@") > -1)
 		{
-			//console.log(string);
 			return null;
 		}
 		
 	}
-	
-	//console.log(string);
 	return string;
 }
 
@@ -359,15 +317,12 @@ function getCompositeObject(xpath)
 	if (size == 0) {
 		return null;
 	}
-	
-	//console.log(stuff);	
+
 	var node = nodes.snapshotItem(0);
-	//console.log(node);
-	//console.log(node.textContent);
+
 	if (node.textContent != null) {
 		return node;
 	}
-	//console.log(node.getTextContent);
 	return null;
 }
 
@@ -394,10 +349,8 @@ function getCollectionData(field,xpath,contextNode,recurse)
 	
 	// if (field.hasOwnProperty('field_parser'))   //field parsers are not currently handled
 	// {
-		// console.log(field['field_parser'].name);
 		// var fieldName = fieldParserEl.name;
 		// var fieldParser = getFieldParserFactory()[fieldName];
-		// console.log(fieldParser);
 		// var contextList = [];
 		// for (var i = 0; i < size; i++)
 		// {
@@ -409,7 +362,6 @@ function getCollectionData(field,xpath,contextNode,recurse)
 				// contextList.push(c);
 			// }
 		// }
-		// console.log(contextList);
 // 		
 		// if (contextList != null)
 		// {
@@ -419,9 +371,6 @@ function getCollectionData(field,xpath,contextNode,recurse)
 				// context = contextList[i];
 				// if (context)
 				// {
-					// console.log(field.kids[0].composite.kids);
-					// console.log(nodes.snapshotItem(i));
-					// console.log(context);
 					// var data = dataFromKids(field.kids[0].composite.kids,nodes.snapshotItem(i),false,context);
 					// if (data != null) 
 					// {
@@ -436,18 +385,12 @@ function getCollectionData(field,xpath,contextNode,recurse)
 	{
 		d = [];
 		var f = field.kids[0].composite;
-		//console.log(f);
 		var kids = f.kids;
 		
 		for (var i = 0; i < size; i++) {
-			//console.log(i);
 			var newNode = nodes.snapshotItem(i);
-			//console.log(newNode.textContent);
-			//console.log(newNode);
-			
 			var obj = dataFromKids(kids,newNode,false,null);
-			//console.log(obj);
-			
+
 			if (obj != null)
 			{
 			if (f.hasOwnProperty('type')) {
@@ -466,7 +409,6 @@ function getCollectionData(field,xpath,contextNode,recurse)
 		for (var i = 0; i < size; i++) {
 			var data = nodes.snapshotItem(i).textContent;
 			
-			var data = prettifyText(data).replace(new RegExp('\n', 'g'), "");
 			data = data.trim();
 			if (field['field_ops'] != null)
 			{
@@ -483,10 +425,8 @@ function getCollectionData(field,xpath,contextNode,recurse)
 				}
 			}
 			d.push(data);
-			//d[i] = data;
 		}
 	}
-	//console.log(d);
 	return d;
 }
 
@@ -495,23 +435,16 @@ function getCollectionData(field,xpath,contextNode,recurse)
  */
 function concatValues(concatList)
 {
-	//console.log("listy");
-	//console.log(concatList);
 	
-	var string = "";
+	var concatString = "";
 	
 	for (var i = 0; i < concatList.length; i++)
 	{
 		var concat = concatList[i];
-		//console.log(concat.value);
 		if (concat.hasOwnProperty("from_scalar"))
 		{
-			//console.log(concat);
 			var x = concat.from_scalar;
-			//console.log(x);
-			//console.log(scalars[x]);
-			string = string + scalars[x];
-			//console.log("string: " + string);
+			concatString = concatString + scalars[x];
 		}
 	}
 }
@@ -527,31 +460,18 @@ function isObjEmpty(o)
 	var size = 0;
 	var matches = 0;
 
-	console.log(upperLevel);
-	console.log(o);
-	
 	for (x in o) {
 		
-		if (x == "title" || x =="description" || x == 'site_name' || x == "mm_name" || x == "download_status") {continue;}
-		
-		// console.log(x);
-		// console.log(o[x]);
-		// console.log(upperLevel[x]);
+		if (x == 'site_name' || x == "mm_name" || x == "download_status") {continue;}
 		
 		size++;
 		if (upperLevel.hasOwnProperty(x)) {
-			
 			if (o[x] == upperLevel[x]) {
-				// console.log('asdf');
 				matches++;
 			}
 		}
 	}
 	
-	console.log("size: " + size);
-	console.log("matches: " + matches);
-	
-	//if (matches == size) {
 	if (matches == size) {
 		return true;
 	}
@@ -573,14 +493,16 @@ function getFieldParserValueByKey(fieldParserContext, fieldParserKey) {
     return null;
 }
 
-function prettifyText(str)
-{
-	// replaces '_' with spaces
-	try 
-	{
-		str = str.replace('_', " ");
-		//str = str.replace(/&lt;br&gt;/g," ");
-	} catch (e) { }
-	
-	return str;
+/*
+ * recursion recuires that scalars be evaluated first
+ */
+function sortKids(mmdKidsList) {
+	var sortedList = [];
+    for (var i = 0; i < mmdKidsList.length; i++)
+		if (mmdKidsList[i].scalar)
+			sortedList.push(mmdKidsList[i])
+    for (var i = 0; i < mmdKidsList.length; i++)
+		if (!mmdKidsList[i].scalar)
+			sortedList.push(mmdKidsList[i])
+    return sortedList;
 }

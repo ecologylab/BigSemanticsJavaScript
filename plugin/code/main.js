@@ -38,7 +38,6 @@ function getMMD(pageURL, callback)
 	
 	baseURL = url.substring(0,getPosition(url,"/",3));
 	
-	console.log(url);
 	var serviceURL = "http://ecology-service.cse.tamu.edu/BigSemanticsService/mmd.json?url="; //settings.serviceUrl;
 	serviceURL += url;
 	
@@ -54,14 +53,12 @@ function getMMD(pageURL, callback)
 			if (request.status == 200) {
 				// if the request succeeds, call the callback function with the mmd as the param
 				ans = request.responseText;
-				//console.log(ans);
 				callback(ans);
 
 			} else {
 				// if the request fails, call the callback function with an error message
 				// and log an error to the console
 				var errormes = "Error! XMLHttpRequest failed.";
-				console.log(errormes);
 				handleMMD(errormes);
 			}
 		}	
@@ -79,12 +76,10 @@ function handleMMD(mmd)
 {
 	// deserialize
 	mmd = JSON.parse(mmd);
+
 	//console.log(mmd);
 
-	console.log(mmd);
-
 	simplDeserialize(mmd);	
-	//console.log(mmd['meta_metadata']);
 	MMD = mmd;
 	callService(mmd);
 }
@@ -95,19 +90,16 @@ function handleMMD(mmd)
 function callService(mmd)
 {
 	var parser = mmd.meta_metadata.parser;
-	console.log(parser);
 		
 	if (browserExtraction && parser == "xpath")
 	{
 		var metadataObject;
 		metadataObject = extractMetadata(mmd);
-		//handleMetadata(mmd,metadataObject,url);
 	}
 	if (!browserExtraction || serviceCall || parser != "xpath") // service extraction
 	{
 		return getMetadataFromService(mmd);
 	}
-	console.log("Extracted Metadata from Broswer");
 	handleMetadata(mmd,metadataObject,url);
 }
 
@@ -127,11 +119,7 @@ function getMetadataFromService(mmd)
 	request.onreadystatechange = function ()
 	{
 		if(request.readyState == 4 && request.status == 200) {
-			//console.log(request.responseText);
-			//var ans = JSON.parse(JSON.stringify(request.responseText));
 			var ans = JSON.parse(request.responseText);
-			//console.log(ans);
-			console.log("Recieved Metadata from Service");
 			handleMetadata(mmd,ans);
 		}
 	};
@@ -144,11 +132,7 @@ function getMetadataFromService(mmd)
  */
 function handleMetadata(mmd,meta)
 {
-	console.log("mmd: ");
-	console.log(mmd);	
-	console.log("metadata: ");
-	console.log(meta);
-	
+	console.log(JSON.stringify(meta));
 	for (i in meta) {
 		var meta2 = meta[i];
 	}
@@ -156,7 +140,7 @@ function handleMetadata(mmd,meta)
 	if (display) {
 		var task = new RenderingTask(url,slideOutVisual,true);	
 		var fields = MetadataLoader.createMetadata(true,mmd,meta2,url);
-		console.log(fields);
+		//console.log(fields);
 		MICE.render(task,fields);		
 	}
 	// var task = new RenderingTask(url,slideOutVisual,true);	
@@ -187,6 +171,5 @@ function serialize(meta)
 function reset(){
 	var defVars = { };
 	var serviceCall = false;
-	//var serializedMeta = null;
 }
 
