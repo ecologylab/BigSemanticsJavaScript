@@ -23,6 +23,7 @@ function TypeFilter(typeList, ssId){
 	for (var i = 0; i < typeList.length; i++){
 		
 	}
+filterID++;
 }
 function filterByType(typeList, searchResults){
 	var filteredIds = [];

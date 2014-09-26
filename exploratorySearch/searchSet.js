@@ -49,9 +49,9 @@ SearchSet.prototype.addFilter = function(filter){
 	this.filters.push(filter);
 }
 SearchSet.prototype.removeTypeFilter = function(){
-	for (filter in this.filters){
-		if (filter.filterType = "typeFilter"){
-			this.filters.splice(this.filters.indexOf(filter), 1);
+	for (var i = 0; i < this.filters.length; i++){
+		if (this.filters[i].filterType = "typeFilter"){
+			this.filters.splice(i, 1);
 		}
 	}
 }
