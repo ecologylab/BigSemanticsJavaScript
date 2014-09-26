@@ -463,14 +463,14 @@ ExpSearchApp.expandCollapseSearchResult = function(event){
 	button.className += searchType;
 	
 	//finds the first value in the associated metadataRendering
-	var preTitle= button.parentNode.nextSibling.childNodes[0].childNodes[0].childNodes[0].childNodes[1].childNodes[0]
+	var preTitle= button.parentNode.parentNode.nextSibling.childNodes[0].childNodes[0].childNodes[0].childNodes[1].childNodes[0]
 	var title;
 	if(preTitle.childNodes[1] != null){
 		title = preTitle.childNodes[1].innerHTML;
 	}else{
 		title = preTitle.childNodes[0].innerHTML;
 	}
-	var type = button.parentNode.nextSibling.childNodes[0].getAttribute('mdtype');
+	var type = button.parentNode.parentNode.nextSibling.childNodes[0].getAttribute('mdtype');
 	
 	
 	/*
@@ -482,7 +482,7 @@ ExpSearchApp.expandCollapseSearchResult = function(event){
 		button.className = "searchResultCollapseButton ";
 		if(searchType != null)
 		
-		var rendering = button.parentNode.nextSibling.childNodes[0];
+		var rendering = button.parentNode.parentNode.nextSibling.childNodes[0];
 		var tableDiv = rendering.childNodes[0];
 		var tableRows = tableDiv.childNodes;
 		for (var i = 1; i < tableRows.length; i++){
@@ -509,7 +509,7 @@ ExpSearchApp.expandCollapseSearchResult = function(event){
 		if(searchType != null)
 			button.className += searchType;
 	
-		var rendering = button.parentNode.nextSibling.childNodes[0];
+		var rendering = button.parentNode.parentNode.nextSibling.childNodes[0];
 		var tableDiv = rendering.childNodes[0];
 		var tableRows = tableDiv.childNodes;
 		for (var i = 1; i < tableRows.length; i++){
