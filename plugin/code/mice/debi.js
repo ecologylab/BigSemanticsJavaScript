@@ -1031,8 +1031,15 @@ MetadataLoader.getHost = function(url)
 {
   if (url)
   {
-    var host = url.match(/:\/\/(www\.)?(.[^/:]+)/)[2];
-    return "http://www." + host;
+  	//to account for interal links not being full URLS
+  	if (url.indexOf("http") > -1){
+    	var host = url.match(/:\/\/(www\.)?(.[^/:]+)/)[2];
+    	return "http://www." + host;
+   	}
+   	else {
+   		var host = document.URL.match(/:\/\/(www\.)?(.[^/:]+)/)[2];
+    	return "http://www." + host;
+   	}
   }
 };
 
