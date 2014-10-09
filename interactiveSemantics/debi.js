@@ -24,6 +24,8 @@ MetadataLoader.logger = function(message) { /* null default implementation */ };
 
 MetadataLoader.extensionMetadataDomains = ["twitter.com"];
 
+MetadataLoader.loadCallbackForQuestionableClipping = function(message) { /* null default implementation */ };
+
 /**
  * Requests metadata of the given URL and the corresponding meta-metadata from
  * the BigSemantics service, then calls the given callback for rendering.
@@ -192,6 +194,14 @@ MetadataLoader.setMetadata = function(rawMetadata, requestMmd)
     if (queueTask.clipping != null)
     {
       queueTask.clipping.rawMetadata = rawMetadata;
+      
+      //Update clipping with better metadata
+      if( queueTask.clipping.questionable ){
+      	console.log("Fixing questionable metadata");
+      	MetadataLoader.loadCallbackForQuestionableClipping();
+      	
+      }
+      
     }
     
     if (typeof requestMmd === "undefined" || requestMmd == true) 
