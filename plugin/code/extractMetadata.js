@@ -32,6 +32,8 @@ function extractMetadata(mmd) {
 		}
 	}
 	
+	//console.log(mmd);
+	
 	if (type != undefined) 
 	{
 		extractedMeta[type] = dataFromKids(mmdKids,contextNode,true,null);
@@ -52,7 +54,7 @@ function dataFromKids(mmdKids,contextNode,recurse,parserContext)
 {
 	var d = { };
 	var e = true; //if object is empty
-	
+
 	for (var i = 0; i < mmdKids.length; i++) {
 		var field = mmdKids[i];
 		var name;
@@ -94,9 +96,10 @@ function dataFromKids(mmdKids,contextNode,recurse,parserContext)
 				
 			}
 			
-			if (!recurse && field.name == 'location' && obj != null && obj != url) {
-				break;
-			}
+			//not sure what this did. was causing errors with composites
+			//if (!recurse && field.name == 'location' && obj != null && obj != url) {
+			//	break;
+			//}
 		}
 		else if (field.composite) 
 		{
@@ -109,9 +112,16 @@ function dataFromKids(mmdKids,contextNode,recurse,parserContext)
 			}			
 			
 			obj = getCompositeD(field,contextNode,recurse,parserContext);
-
+			
 			if(!isObjEmpty(obj,recurse))
 			{
+			//cludge in case composite contains both location and and unique scalars
+			//MICE overrides scalars with expanded location, for now we just ignore location
+				for (key in obj){
+					if (key != "download_status" || key != "location" || key != "title" || key != "mm_name" && obj["location"] != null){
+						delete obj["location"];
+					}
+				}
 				if(obj != null)
 				{
 					e = false;
@@ -149,8 +159,7 @@ function dataFromKids(mmdKids,contextNode,recurse,parserContext)
 	//if object is empty just return null
 	if (e) { 
 		return null;
-	}
-	
+	}	
 	return d;
 }
 
@@ -169,17 +178,16 @@ function getScalarD(field,contextNode,recurse,parserContext)
 		return null;
 	}
 	
-	// var fieldParserKey = field['field_parser_key'];
-	// if (fieldParserKey != null) {
-		// data = getFieldParserValueByKey(parserContext,fieldParserKey);
-	// }
-	
-	if (field["xpaths"] != null && field["xpaths"].length > 0)
+	var fieldParserKey = field['field_parser_key'];
+	if (fieldParserKey != null) {
+		data = getFieldParserValueByKey(parserContext,fieldParserKey);
+	}
+	else if (field["xpaths"] != null && field["xpaths"].length > 0)
 	{
 		var fieldx = field["xpaths"];
 		for (var j = 0; j < fieldx.length; j++) {
 			var x = getScalarString(field,fieldx[j],contextNode);
-			if (x != null && x != "") {
+			if (x != null && x != "" && x != "\n") {
 				data = x;
 				break;			
 			}
@@ -212,36 +220,57 @@ function getCompositeD(field,contextNode,recurse,parserContext)
 	var x = null;
 	var data = null;
 	var kids = field['kids'];
+	var recurseNeeded = false;
+	
+	//in case of nested composites
+	for (kid in kids){
+		if (kids[kid].hasOwnProperty("composite"))
+			if (!kids[kid].composite.hasOwnProperty("declaring_mmd"))
+				recurseNeeded=true;
+	}
 	
 	if (field["xpaths"] != null)
 	{
 		var fieldx = field["xpaths"];
 		for (var j = 0; j < fieldx.length; j++) {
-			var x = getCompositeObject(fieldx[j]);
-			if (x != null && x != "") {
+			var x = getCompositeObject(field, fieldx[j], contextNode);
+			// if the result is not a node, assume there was a field parser that manually got data for us and return that data
+			if (x != null && !x.hasOwnProperty("id")){
+				return x;
+			}
+			else if (x != null && x != "") {
 				contextNode = x;
 			}
 		}
-		
-		if (contextNode != null && recurse) {
-			data = dataFromKids(kids,contextNode,false,null);
+
+		if (contextNode != null && recurse && recurseNeeded) {
+			data = dataFromKids(kids,contextNode,recurse,parserContext);
+		}
+		else if (contextNode != null && recurse) {
+			data = dataFromKids(kids,contextNode,false,parserContext);
 		}
 		
 	} else if (recurse)
 	{
-		data = dataFromKids(kids,contextNode,false,null);
+		data = dataFromKids(kids,contextNode,false,parserContext);
 	}  
 	
 	if(data != null)
 	{	
 		data['download_status'] = "UNPROCESSED";
+		
+		if(field.hasOwnProperty('polymorphic_scope')){
+			var polydata = {};
+			polydata[field.type] = data;
+			data = polydata;
+		}	
 		if (field.hasOwnProperty('type')) {
 			data['mm_name'] = field.type;
 		} else {
 			data['mm_name'] = field.name;
 		}	
 		return data;
-	}	
+	}
 	return null;		
 }
 
@@ -305,10 +334,12 @@ function getScalarString(field,xpath,contextNode)
 	return string;
 }
 
-function getCompositeObject(xpath)
+function getCompositeObject(field,xpath,contextNode)
 {
+	var fieldParserEl = field['field_parser'];
+
 	try {
-		var nodes = document.evaluate(xpath, document, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);		
+		var nodes = document.evaluate(xpath, contextNode, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);		
 	} catch (e) {
 		return null;
 	}
@@ -317,6 +348,55 @@ function getCompositeObject(xpath)
 	if (size == 0) {
 		return null;
 	}
+
+	if (field.hasOwnProperty('field_parser'))   
+	{
+		var fieldName = fieldParserEl.name;
+		var fieldParser = getFieldParserFactory()[fieldName];
+		var contextList = [];
+		for (var i = 0; i < size; i++)
+		{
+			var node = nodes.snapshotItem(i);
+			var string = node.textContent;
+			if (string != null) 
+			{
+				var fieldParserResults;
+				if (fieldName == "regex_find")
+				{
+					fieldParserResults = fieldParser.getKeyValuePairResult(fieldParserEl,string.trim());
+				}
+				else
+				{
+					fieldParserResults = fieldParser.getKeyValuePairResult(fieldName,string.trim());
+				}
+				for (i in fieldParserResults)
+				{
+					var newObj = {};
+					newObj[i] = fieldParserResults[i];
+					contextList.push(newObj);
+				}
+			}
+		}
+		if (contextList != null)
+		{
+			d = {};
+			for (var i = 0; i < contextList.length; i++)
+			{
+				context = contextList[i];
+				if (context)
+				{
+					var data = dataFromKids(field.kids,nodes.snapshotItem(i),false,context);
+					if (data != null && !isObjEmpty(data)) 
+					{
+						for (key in data){
+							d[key]=data[key];
+						}
+					}
+				}
+			}
+		}
+		return d;	
+	} 
 
 	var node = nodes.snapshotItem(0);
 
@@ -340,48 +420,51 @@ function getCollectionData(field,xpath,contextNode,recurse)
 		return null;
 	}
 	
-	if (field.hasOwnProperty('field_parser'))
+	if (field.hasOwnProperty('field_parser'))   //field parsers are not currently handled
 	{
-		serviceCall = true;
-		console.log("Calling service for metadata, something went wrong");
-		return null; //for now until we get field parsers handled
-	}
-	
-	// if (field.hasOwnProperty('field_parser'))   //field parsers are not currently handled
-	// {
-		// var fieldName = fieldParserEl.name;
-		// var fieldParser = getFieldParserFactory()[fieldName];
-		// var contextList = [];
-		// for (var i = 0; i < size; i++)
-		// {
-			// var node = nodes.snapshotItem(i);
-			// var string = node.textContent;
-			// if (string != null) 
-			// {
-				// var c = fieldParser.getKeyValuePairResult(fieldName,string.trim());
-				// contextList.push(c);
-			// }
-		// }
-// 		
-		// if (contextList != null)
-		// {
-			// d = [];
-			// for (var i = 0; i < size; i++)
-			// {
-				// context = contextList[i];
-				// if (context)
-				// {
-					// var data = dataFromKids(field.kids[0].composite.kids,nodes.snapshotItem(i),false,context);
-					// if (data != null) 
-					// {
-						// d.push(data);
-					// }
-				// }
-			// }
-		// }
-// 		
-	// } 
-	if (field['kids'].length > 0)
+		var fieldName = fieldParserEl.name;
+		var fieldParser = getFieldParserFactory()[fieldName];
+		var contextList = [];
+		for (var i = 0; i < size; i++)
+		{
+			var node = nodes.snapshotItem(i);
+			var string = node.textContent;
+			if (string != null) 
+			{
+				var fieldParserResults;
+				if (fieldName == "regex_split")
+				{
+					fieldParserResults = fieldParser.getCollectionResult(fieldParserEl,string.trim());
+				}
+				else
+				{
+					fieldParserResults = fieldParser.getKeyValuePairResult(fieldName,string.trim());
+				}
+				for (var i = 0; i < fieldParserResults.length; i++)
+				{
+					contextList.push(fieldParserResults[i]);
+				}
+			}
+		}
+		
+		if (contextList != null)
+		{
+			d = [];
+			for (var i = 0; i < contextList.length; i++)
+			{
+				context = contextList[i];
+				if (context)
+				{
+					var data = dataFromKids(field.kids[0].composite.kids,nodes.snapshotItem(i),false,context);
+					if (data != null &&!isObjEmpty(data)) 
+					{
+						d.push(data);
+					}
+				}
+			}
+		}	
+	} 	
+	else if (field['kids'].length > 0)
 	{
 		d = [];
 		var f = field.kids[0].composite;
@@ -405,7 +488,7 @@ function getCollectionData(field,xpath,contextNode,recurse)
 		}
 	} else if (size > 0) 
 	{
-		
+		d = [];
 		for (var i = 0; i < size; i++) {
 			var data = nodes.snapshotItem(i).textContent;
 			
@@ -426,7 +509,16 @@ function getCollectionData(field,xpath,contextNode,recurse)
 			}
 			d.push(data);
 		}
-	}
+	}	
+	if(field.hasOwnProperty('polymorphic_scope')){
+		var polyd = [];
+		for (data in d){
+			var polydata = {};
+			polydata[field['child_type']] = d[data];
+			polyd.push(polydata);
+		}
+		return polyd;
+	}	
 	return d;
 }
 
@@ -466,7 +558,13 @@ function isObjEmpty(o)
 		
 		size++;
 		if (upperLevel.hasOwnProperty(x)) {
+			//if the upperLevel has the same value as a property we deem it not significant
 			if (o[x] == upperLevel[x]) {
+				matches++;
+			}
+			//or if the only the title is different, and it is just the page title we deem it not significant
+			//we might want to include title with this 
+			else if (x == "title" && o[x] == document.title) {
 				matches++;
 			}
 		}
@@ -479,18 +577,11 @@ function isObjEmpty(o)
 	return false;
 }
 
-/*
- * supposed to help handle field parsers ?
- */
 function getFieldParserValueByKey(fieldParserContext, fieldParserKey) {
-    var pos = fieldParserKey.indexOf('|');
-    if (pos < 0)
-        return fieldParserContext[fieldParserKey];
-    var keys = fieldParserKey.split('|');
-    for (var key in keys)
-        if (fieldParserContext.hasOwnProperty(key))
-            return fieldParserContext[key];
-    return null;
+    if (fieldParserContext === null)
+    	return null;
+    else
+    	return fieldParserContext[fieldParserKey];
 }
 
 /*

@@ -24,6 +24,8 @@ MetadataLoader.logger = function(message) { /* null default implementation */ };
 
 MetadataLoader.extensionMetadataDomains = ["twitter.com"];
 
+MetadataLoader.onloadCallback = function(urls, url) { /* null default implementation */ };
+
 /**
  * Requests metadata of the given URL and the corresponding meta-metadata from
  * the BigSemantics service, then calls the given callback for rendering.
@@ -191,7 +193,11 @@ MetadataLoader.setMetadata = function(rawMetadata, requestMmd)
   
     if (queueTask.clipping != null)
     {
-      queueTask.clipping.rawMetadata = rawMetadata;
+    	
+      	queueTask.clipping.rawMetadata = rawMetadata;
+      
+      	MetadataLoader.onloadCallback(queueTask.additionalUrls, queueTask.url);
+      
     }
     
     if (typeof requestMmd === "undefined" || requestMmd == true) 
