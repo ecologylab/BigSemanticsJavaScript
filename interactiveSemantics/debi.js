@@ -283,6 +283,7 @@ MetadataLoader.createMetadata = function(isRoot, mmd, metadata, taskUrl)
   var metadataFields =
     MetadataLoader.getMetadataViewModel(mmd["meta_metadata"], mmd["meta_metadata"]["kids"], metadata,
                                         0, null, taskUrl);
+  
   return metadataFields;
 }
 
@@ -753,7 +754,9 @@ MetadataLoader.getCollectionMetadataViewModel = function(metadataViewModel,
                                                          taskUrl)
 {
   mmdField = mmdField.collection;  
-  
+  if(mmdField.name == "companion_products"){
+	  
+  }
   // Is this a visible field?
   if (MetadataLoader.isFieldVisible(mmdField, metadata, taskUrl, parentField))
   {    
@@ -836,12 +839,22 @@ MetadataLoader.getCollectionMetadataViewModel = function(metadataViewModel,
           MetadataLoader.getValueForProperty(mmdField.use_value_as_label,
                                              metadata, mmdKids);
       }
-      
+      //Dummy call for facet information
+      var facetList = MetadataLoader.getFacets(taskUrl, mmdField);
+      field.facets = facetList;
       metadataViewModel.push(field);
     }
   }
 }
 
+MetadataLoader.getFacets = function(parentUrl, mmdField){
+	//Some service call in the real version, but for now:
+	if(mmdField.is_facet == "true"){
+			return ['url'];
+	}
+	return [];
+	
+}
 MetadataLoader.collapseEmptyLabelSet = function(metadataViewModel, parentField)
 {
 	var deleteLabelCol = true;
@@ -1175,4 +1188,22 @@ MetadataLoader.getHost = function(url)
     return "http://www." + host;
   }
 }
+function Facet(fieldName, isFilter, isSort ){
+	this.field = fieldName;
+	this.isFilter = isFilter;
+	this.isSort = isSort
+}
+MetadataLoader.setFilterAndSortCall = function(facetedCollection, callback){
+	//Later we will make an appropriate call to the service
+	//For now we are just going to call a dummy function
+	return MICE.dummyUrlList;
+}
+function compareFacetedCollection(a,b) {
+	  if (a.last_nom < b.last_nom)
+	     return -1;
+	  if (a.last_nom > b.last_nom)
+	    return 1;
+	  return 0;
+	}
+
 
