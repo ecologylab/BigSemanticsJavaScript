@@ -40,7 +40,7 @@ MetadataRenderer.render = function(task, metadataFields, styleInfo)
 	MetadataLoader.currentDocumentLocation = task.url;
 	var bgColor = null;
 	var bgColorObj = null;
-	if (task.url.indexOf("twitter.com") != -1)
+	if (task.url.indexOf("twitter.com") != -1 || application_name == "tweetbubble")
 	{
 		bgColor = MetadataRenderer.getNextColor(task.container);
 		bgColorObj = {color: bgColor, bFirstField: true};
@@ -938,7 +938,9 @@ MetadataRenderer.buildMetadataField = function(metadataField, isChildTable, fiel
 	
 	else if (metadataField.composite_type != null && metadataField.composite_type == "image")
 	{
-		if(metadataField.name && !metadataField.hide_label)
+		var label = MetadataRenderer.getFieldLabel(metadataField);
+		
+		if(metadataField.name && !metadataField.hide_label && (!isChildTable || label.type == "image"))
 		{
 			var fieldLabelDiv = document.createElement('div');
 				fieldLabelDiv.className = styleInfo.styles.fieldLabelContainerUnhighlight;
@@ -946,7 +948,6 @@ MetadataRenderer.buildMetadataField = function(metadataField, isChildTable, fiel
 			if (bgColorObj && bgColorObj.bFirstField)
 				fieldLabelDiv.style.background = bgColorObj.color;
 			
-			var label = MetadataRenderer.getFieldLabel(metadataField);
 			if (label.type == "scalar")
 			{
 				var fieldLabel = document.createElement('p');

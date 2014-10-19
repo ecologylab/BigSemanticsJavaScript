@@ -93,6 +93,9 @@ var InterfaceStyle = {};
 
 InterfaceStyle.getMiceStyleDictionary = function(type)
 {
+	if (application_name == "tweetbubble")
+		return TWITTER_MICE_STYLE.styles;
+	
 	for (var i = 0; i < miceStyles.length; i++)
 	{
 		var types = miceStyles[i].types;
