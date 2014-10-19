@@ -8,7 +8,8 @@ this.expandableItemsXPath2 = ".//a[@class='twitter-atreply pretty-link'] | " +
 							 ".//a[@class='twitter-hashtag pretty-link js-nav'] | " + 
 							 ".//a[@class='account-group js-account-group js-action-profile js-user-profile-link js-nav'] | " + 
 							 ".//a[@class='pretty-link js-user-profile-link js-action-profile-name'] | " +
-							 ".//a[@class='ProfileTweet-originalAuthorLink u-linkComplex js-nav js-user-profile-link']/span";
+							 ".//a[@class='ProfileTweet-originalAuthorLink u-linkComplex js-nav js-user-profile-link']/span | " +
+							 ".//a[@class='twitter-timeline-link']";
 
 this.tweetsXPath = "//ol[@id='stream-items-id']/li/div | " +
 					"//div[@class='GridTimeline-items']/div[@class='Grid']//div[@class='StreamItem js-stream-item']";
