@@ -111,7 +111,8 @@ MetadataRenderer.render = function(task, metadataFields, styleInfo)
  * 		needed because styling is slightly different for the root metadata rendering
  */
 MetadataRenderer.addMetadataDisplay = function(container, url, isRoot, clipping, requestMD, reloadMD, expandedItem)
-{	
+{
+	url = MetadataLoader.stripHashtagAnchors(url);
 	// Add the rendering task to the queue
 	var task = new RenderingTask(url, container, isRoot, clipping, MetadataRenderer.render, expandedItem);
 	MetadataLoader.queue.push(task);	

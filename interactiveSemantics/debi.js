@@ -26,6 +26,18 @@ MetadataLoader.extensionMetadataDomains = ["twitter.com"];
 
 MetadataLoader.onloadCallback = function(urls, url) { /* null default implementation */ };
 
+MetadataLoader.stripHashtagAnchors = function(url){
+	if (url.indexOf('#') > -1){
+		var newurl = url.substring(0, url.indexOf('#'));
+
+	}
+	else{
+		var newurl = url;
+	}
+	return newurl;
+	
+}
+
 /**
  * Requests metadata of the given URL and the corresponding meta-metadata from
  * the BigSemantics service, then calls the given callback for rendering.
@@ -40,18 +52,6 @@ MetadataLoader.onloadCallback = function(urls, url) { /* null default implementa
  * @param clipping:
  *     Used to specify special clipping structure for special use.
  */
-
-MetadataLoader.stripHashtagAnchors = function(url){
-	if (url.indexOf('#') > -1){
-		var newurl = url.substring(0, url.indexOf('#'));
-
-	}
-	else{
-		var newurl = url;
-	}
-	return newurl;
-	
-}
 MetadataLoader.render = function(renderer, container, url, isRoot, clipping)
 {
   // Add the rendering task to the queue
