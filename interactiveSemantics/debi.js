@@ -42,7 +42,13 @@ MetadataLoader.onloadCallback = function(urls, url) { /* null default implementa
  */
 
 MetadataLoader.stripHashtagAnchors = function(url){
-	var newurl = url.replace('#.*$', '');
+	if (url.indexOf('#') > -1){
+		var newurl = url.substring(0, url.indexOf('#'));
+
+	}
+	else{
+		var newurl = url;
+	}
 	return newurl;
 	
 }
