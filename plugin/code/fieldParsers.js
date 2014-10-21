@@ -54,7 +54,6 @@ FieldParserForRegexFind.prototype.getKeyValuePairResult = function(parserElement
 	return rst;
 };
 
-
 var FieldParserForRegexSplit = function() {
 };
 FieldParserForRegexSplit.prototype.getCollectionResult = function(parserElement, input) { 
@@ -245,7 +244,7 @@ FieldParserForBibTeX.prototype.getKeyValuePairResult = function(parserElement, i
 		var tags = regex_split('\\s*,\\s*', content);
 		if (tags.length > 0) {
 			var entryId = tags[0].trim();
-			rst.put('@key', entryId);
+			rst['@key'] = entryId;
 			for (var i = 1; i < tags.length; ++i) {
 				var tag = tags[i];
 				var parts = regex_split('\\s*=\\s*', tag);
