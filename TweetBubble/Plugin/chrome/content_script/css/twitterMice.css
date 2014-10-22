@@ -94,7 +94,7 @@
 	font-size: 14px;
 }
 
-.twMetadataContainer .teMetadataTableDiv .twMetadata_h1{
+.twMetadataContainer .twMetadataTableDiv .twMetadata_h1{
     font-weight: 700;
 }
 
@@ -125,11 +125,15 @@
 }
 
 .twMetadataContainer a.twFieldValue{
-    white-space: normal;
     text-align: left;
-    text-overflow: ellipsis;
     text-decoration: underline;
-
+    
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    display: inline-block;
+    max-width: 350px;
+    
     line-height: 19px;
     position: absolute;
     margin-top: -3px;
