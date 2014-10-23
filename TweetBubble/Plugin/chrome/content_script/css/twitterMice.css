@@ -249,6 +249,11 @@
     height: auto;
 }
 
+.twMetadataContainer .twFieldValueImage{
+	width: auto;
+	max-height: 250px;
+}
+
 .twMetadataContainer .twFieldChildContainer{
 	
 	/*border-top-right-radius: 8px;

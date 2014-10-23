@@ -972,6 +972,7 @@ MetadataRenderer.buildMetadataField = function(metadataField, isChildTable, fiel
 		
 		var img1 = document.createElement('img');
 			img1.src = MetadataLoader.getImageSource(metadataField.value);
+			img1.className = styleInfo.styles.fieldValueImage;
 		
 		var fieldValueDiv = document.createElement('div');
 			fieldValueDiv.className = styleInfo.styles.fieldValueContainer;

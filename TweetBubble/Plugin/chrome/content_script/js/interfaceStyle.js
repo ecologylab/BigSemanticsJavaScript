@@ -37,7 +37,8 @@ var DEFAULT_MICE_STYLE = {
 	    bigLineCanvas : "bigLineCanvas",
 	    hidden : "hidden",
 	    moreButton : "moreButton",
-	    tabLabel : "tabLabel"
+	    tabLabel : "tabLabel",
+	    fieldValueImage : "fieldValueImage"
 	}	
 };
 
@@ -83,7 +84,8 @@ var TWITTER_MICE_STYLE = {
 	    fieldCompositeContainerHighlightTweet : "twFieldCompositeContainer highlightTweet",
 	    tweetSemantics : "tweetSemantics",
 	    tweetSemanticsRow : "tweetSemanticsRow",
-	    tweetSemanticsDiv : "tweetSemanticsDiv"
+	    tweetSemanticsDiv : "tweetSemanticsDiv",
+	    fieldValueImage : "twFieldValueImage"
 	}
 };
 
