@@ -25,6 +25,17 @@ MetadataLoader.logger = function(message) { /* null default implementation */ };
 
 MetadataLoader.extensionMetadataDomains = ["twitter.com"];
 
+MetadataLoader.stripHashtagAnchors = function(url){
+	if (url.indexOf('#') > -1){
+		var newurl = url.substring(0, url.indexOf('#'));
+
+	}
+	else{
+		var newurl = url;
+	}
+	return newurl;
+}
+
 /**
  * Requests metadata of the given URL and the corresponding meta-metadata from
  * the BigSemantics service, then calls the given callback for rendering.
@@ -41,6 +52,8 @@ MetadataLoader.extensionMetadataDomains = ["twitter.com"];
  */
 MetadataLoader.render = function(renderer, container, url, isRoot, clipping)
 {
+  url = MetadataLoader.stripHashtagAnchors(url);
+	
   // Add the rendering task to the queue
   var task = new RenderingTask(url, container, isRoot, clipping, renderer)
   MetadataLoader.queue.push(task);  

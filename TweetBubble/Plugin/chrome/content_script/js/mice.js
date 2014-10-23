@@ -97,6 +97,7 @@ MICE.render = function(task, metadataFields, styleInfo){
  * @param reloadMD, true if the metadata should be extracted afresh, else false 
  */
 MICE.addMetadataDisplay = function(container, url, isRoot, clipping, requestMD, reloadMD){
+	url = MetadataLoader.stripHashtagAnchors(url);
 	// Add the rendering task to the queue
 	var task = new RenderingTask(url, container, isRoot, clipping, MICE.render)
 	MetadataLoader.queue.push(task);	
