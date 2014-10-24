@@ -27,12 +27,12 @@ MetadataLoader.extensionMetadataDomains = ["twitter.com"];
 MetadataLoader.onloadCallback = function(urls, url) { /* null default implementation */ };
 
 MetadataLoader.stripHashtagAnchors = function(url){
+	var newurl;
 	if (url.indexOf('#') > -1){
-		var newurl = url.substring(0, url.indexOf('#'));
-
+		newurl = url.substring(0, url.indexOf('#'));
 	}
 	else{
-		var newurl = url;
+		newurl = url;
 	}
 	return newurl;
 	
