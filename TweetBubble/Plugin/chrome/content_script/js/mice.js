@@ -418,6 +418,8 @@ MICE.downloadAndDisplayDocument = function(event)
 		MICE.addMetadataDisplay(table.parentElement, location, false, null, requestMD, false, button);
 		if (!requestMD)
 		{
+			if (!isExtension)
+			{
 			//document.dispatchEvent(new Event("tweetbubbleExternal"));
 			var message = {
 				type : "extractionRequest",
@@ -433,6 +435,11 @@ MICE.downloadAndDisplayDocument = function(event)
 			{
 				MetadataLoader.checkForMetadataFromExtension();
 			}, 3000);
+		}
+			else if (requestDocumentDownload)
+			{
+				requestDocumentDownload(location);
+			}
 		}
 	}
 	// If there was no document location then the table must be a non-document composite in which case just expand
@@ -1170,6 +1177,7 @@ MICE.buildMetadataField = function(metadataField, isChildTable, fieldCount, row,
 		
 		var img1 = document.createElement('img');
 			img1.src = MetadataLoader.getImageSource(metadataField.value);
+			img1.className = styleInfo.styles.fieldValueImage;
 		
 		var fieldValueDiv = document.createElement('div');
 			fieldValueDiv.className = styleInfo.styles.fieldValueContainer;
