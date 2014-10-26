@@ -14,7 +14,7 @@ this.expandableItemsXPath2 = ".//a[@class='twitter-atreply pretty-link'] | " +
 this.tweetsXPath = "//ol[@id='stream-items-id']/li/div | " +
 					"//div[@class='GridTimeline-items']/div[@class='Grid']//div[@class='StreamItem js-stream-item']";
 
-this.externalURLsXPath = ".//a[@class='twitter-timeline-link']";
+this.externalURLsXPath = ".//a[@class='pretty-link twitter-timeline-link']";
 
 this.replyXPath = "//li[@class='action-reply-container']/a";
 
@@ -91,7 +91,11 @@ this.setExpandableItemProcessed = function(elt) {
 		elt.parentNode.setAttribute("class", "ProfileTweet-originalAuthorLink u-linkComplex js-user-profile-link js-nav");
 		//elt.setAttribute("class", "fullname"); //initial is 'fullname js-action-profile-name'
 	}
-	else 
+	else if (eltClass.indexOf("twitter-timeline-link") == 0)
+	{
+		elt.setAttribute("class", "pretty-link twitter-timeline-link");
+	}
+	else
 		elt.setAttribute("class", "pretty-link");
 };
 
