@@ -89,9 +89,15 @@ function isUrlRedirect(response, sendResponse, additionalUrls)
 					{	
 						additionalUrls = [];
 					}
-					additionalUrls.push(response.URL);
-					loadWebpage(url[1], sendResponse, additionalUrls);
-					return true;
+					// precautionary conditions to avoid loops
+					if (url[1] != response.URL)
+					{
+						if (additionalUrls.indexOf(response.URL) == -1)
+							additionalUrls.push(response.URL);
+						if (additionalUrls.indexOf(url[1]) == -1)
+							loadWebpage(url[1], sendResponse, additionalUrls);
+						return true;
+					}
 				}
 			}
 		}
