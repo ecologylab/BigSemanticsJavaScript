@@ -90,6 +90,11 @@ function handleMMD(mmd)
 function callService(mmd)
 {
 	var parser = mmd.meta_metadata.parser;
+	
+	if (mmd["meta_metadata"]["extract_with"] == "service"){
+		browserExtraction = false;
+		serviceCall = true;
+	}
 		
 	if (browserExtraction && parser == "xpath")
 	{

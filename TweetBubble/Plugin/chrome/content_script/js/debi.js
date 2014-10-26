@@ -26,12 +26,12 @@ MetadataLoader.logger = function(message) { /* null default implementation */ };
 MetadataLoader.extensionMetadataDomains = ["twitter.com"];
 
 MetadataLoader.stripHashtagAnchors = function(url){
+	var newurl;
 	if (url.indexOf('#') > -1){
-		var newurl = url.substring(0, url.indexOf('#'));
-
+		newurl = url.substring(0, url.indexOf('#'));
 	}
 	else{
-		var newurl = url;
+		newurl = url;
 	}
 	return newurl;
 }
@@ -161,6 +161,7 @@ MetadataLoader.setMetadata = function(rawMetadata, requestMmd)
   
   if (metadata.location)
   {
+	metadata.location = MetadataLoader.stripHashtagAnchors(metadata.location);
     queueTasks = MetadataLoader.getTasksFromQueueByUrl(metadata.location);
   }
 
@@ -169,6 +170,7 @@ MetadataLoader.setMetadata = function(rawMetadata, requestMmd)
   {
     for (var i = 0; i < metadata["additional_locations"].length; i++)
     {
+      metadata["additional_locations"][i] = MetadataLoader.stripHashtagAnchors(metadata["additional_locations"][i]);
       var additional_location = metadata["additional_locations"][i];
       var tasks = MetadataLoader.getTasksFromQueueByUrl(additional_location);
       queueTasks = queueTasks.concat(tasks);      
