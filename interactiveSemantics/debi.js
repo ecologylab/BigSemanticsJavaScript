@@ -105,10 +105,10 @@ MetadataLoader.getMetadata = function(url, callback, reload)
  * @param url, the URL of the document the requested meta-metadata is for.
  * @param callback, name of the function to be called from the JSON-p call
  */
-MetadataLoader.getMMD = function(url, callback)
+MetadataLoader.getMMD = function(name, callback)
 {
   var serviceURL = SEMANTIC_SERVICE_URL + "mmd.jsonp?reload=true&callback=" + callback
-      + "&url=" + encodeURIComponent(url) + "&withurl";
+      + "&name=" + name;
 	
   
   MetadataLoader.doJSONPCall(serviceURL);
@@ -209,7 +209,7 @@ MetadataLoader.setMetadata = function(rawMetadata, requestMmd)
     }
     
     if (typeof requestMmd === "undefined" || requestMmd == true) 
-    	MetadataLoader.getMMD(metadata.location, "MetadataLoader.setMetaMetadata");
+    	MetadataLoader.getMMD(queueTask.mmdType, "MetadataLoader.setMetaMetadata");
   }
   
   if (queueTasks.length < 0)
@@ -226,17 +226,9 @@ MetadataLoader.setMetadata = function(rawMetadata, requestMmd)
  *
  * @param mmd, raw meta-metadata json returned from the service
  */
-MetadataLoader.setMetaMetadata = function (url, mmd)
+MetadataLoader.setMetaMetadata = function (mmd)
 {
-  console.log("Received url: " + url);
   console.log("Received mmd: " + mmd);
-
-  // For temporary backward compatibility:
-  if (url && !mmd)
-  {
-    mmd = url;
-    url = undefined;
-  }
 
   // TODO move MDC related code to mdc.js
   if (typeof MDC_rawMMD != "undefined")
@@ -246,16 +238,7 @@ MetadataLoader.setMetaMetadata = function (url, mmd)
   
   simplDeserialize(mmd);
   
-  var tasks = [];
-  if (typeof url != "undefined")
-  {
-    tasks = MetadataLoader.getTasksFromQueueByUrl(url);
-  }
-  else
-  {
-    // For temporary backward compatibility:
-    tasks = MetadataLoader.getTasksFromQueueByType(mmd["meta_metadata"].name);
-  }
+  var tasks = MetadataLoader.getTasksFromQueueByType(mmd["meta_metadata"].name);
   
   if (tasks.length > 0)
   {
