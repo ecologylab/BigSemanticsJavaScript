@@ -52,6 +52,7 @@ MetadataLoader.stripHashtagAnchors = function(url){
  * @param clipping:
  *     Used to specify special clipping structure for special use.
  */
+
 MetadataLoader.render = function(renderer, container, url, isRoot, clipping)
 {
   // Add the rendering task to the queue
@@ -60,7 +61,8 @@ MetadataLoader.render = function(renderer, container, url, isRoot, clipping)
   //We strip '#' anchors out - the service does this already
   //and we do this here so that the task matches what trhe service returns
 	
-  url = MetadataLoader.stripHashtagAnchors(url);	 
+ 
+  
   var task = new RenderingTask(url, container, isRoot, clipping, renderer)
   MetadataLoader.queue.push(task);  
   
@@ -105,10 +107,10 @@ MetadataLoader.getMetadata = function(url, callback, reload)
  * @param url, the URL of the document the requested meta-metadata is for.
  * @param callback, name of the function to be called from the JSON-p call
  */
-MetadataLoader.getMMD = function(url, callback)
+MetadataLoader.getMMD = function(name, callback)
 {
   var serviceURL = SEMANTIC_SERVICE_URL + "mmd.jsonp?reload=true&callback=" + callback
-      + "&url=" + encodeURIComponent(url) + "&withurl";
+      + "&name=" + name;
 	
   
   MetadataLoader.doJSONPCall(serviceURL);
@@ -209,7 +211,7 @@ MetadataLoader.setMetadata = function(rawMetadata, requestMmd)
     }
     
     if (typeof requestMmd === "undefined" || requestMmd == true) 
-    	MetadataLoader.getMMD(metadata.location, "MetadataLoader.setMetaMetadata");
+    	MetadataLoader.getMMD(queueTask.mmdType, "MetadataLoader.setMetaMetadata");
   }
   
   if (queueTasks.length < 0)
@@ -226,17 +228,9 @@ MetadataLoader.setMetadata = function(rawMetadata, requestMmd)
  *
  * @param mmd, raw meta-metadata json returned from the service
  */
-MetadataLoader.setMetaMetadata = function (url, mmd)
+MetadataLoader.setMetaMetadata = function (mmd)
 {
-  console.log("Received url: " + url);
   console.log("Received mmd: " + mmd);
-
-  // For temporary backward compatibility:
-  if (url && !mmd)
-  {
-    mmd = url;
-    url = undefined;
-  }
 
   // TODO move MDC related code to mdc.js
   if (typeof MDC_rawMMD != "undefined")
@@ -246,16 +240,7 @@ MetadataLoader.setMetaMetadata = function (url, mmd)
   
   simplDeserialize(mmd);
   
-  var tasks = [];
-  if (typeof url != "undefined")
-  {
-    tasks = MetadataLoader.getTasksFromQueueByUrl(url);
-  }
-  else
-  {
-    // For temporary backward compatibility:
-    tasks = MetadataLoader.getTasksFromQueueByType(mmd["meta_metadata"].name);
-  }
+  var tasks = MetadataLoader.getTasksFromQueueByType(mmd["meta_metadata"].name);
   
   if (tasks.length > 0)
   {
@@ -297,6 +282,7 @@ MetadataLoader.createMetadata = function(isRoot, mmd, metadata, taskUrl)
   var metadataFields =
     MetadataLoader.getMetadataViewModel(mmd["meta_metadata"], mmd["meta_metadata"]["kids"], metadata,
                                         0, null, taskUrl);
+  
   return metadataFields;
 }
 
@@ -767,7 +753,9 @@ MetadataLoader.getCollectionMetadataViewModel = function(metadataViewModel,
                                                          taskUrl)
 {
   mmdField = mmdField.collection;  
-  
+  if(mmdField.name == "companion_products"){
+	  
+  }
   // Is this a visible field?
   if (MetadataLoader.isFieldVisible(mmdField, metadata, taskUrl, parentField))
   {    
@@ -850,12 +838,22 @@ MetadataLoader.getCollectionMetadataViewModel = function(metadataViewModel,
           MetadataLoader.getValueForProperty(mmdField.use_value_as_label,
                                              metadata, mmdKids);
       }
-      
+      //Dummy call for facet information
+      var facetList = MetadataLoader.getFacets(taskUrl, mmdField);
+      field.facets = facetList;
       metadataViewModel.push(field);
     }
   }
 }
 
+MetadataLoader.getFacets = function(parentUrl, mmdField){
+	//Some service call in the real version, but for now:
+	if(mmdField.is_facet == "true"){
+			return ['url'];
+	}
+	return [];
+	
+}
 MetadataLoader.collapseEmptyLabelSet = function(metadataViewModel, parentField)
 {
 	var deleteLabelCol = true;
@@ -1195,4 +1193,22 @@ MetadataLoader.getHost = function(url)
     return "http://www." + host;
   }
 }
+function Facet(fieldName, isFilter, isSort ){
+	this.field = fieldName;
+	this.isFilter = isFilter;
+	this.isSort = isSort
+}
+MetadataLoader.setFilterAndSortCall = function(facetedCollection, callback){
+	//Later we will make an appropriate call to the service
+	//For now we are just going to call a dummy function
+	return MICE.dummyUrlList;
+}
+function compareFacetedCollection(a,b) {
+	  if (a.last_nom < b.last_nom)
+	     return -1;
+	  if (a.last_nom > b.last_nom)
+	    return 1;
+	  return 0;
+	}
+
 

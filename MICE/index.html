@@ -10,9 +10,9 @@
     <link href="css/bootstrap.min.css" rel="stylesheet" media="screen">
 
     <link href="css/prettify.css" type="text/css" rel="stylesheet" />
+    
     <link href="css/mdc.css" rel="stylesheet" media="screen">
     <link href="../interactiveSemantics/metadataRenderer.css" rel="stylesheet" type="text/css">
-	<link href="../TweetBubble/Plugin/chrome/content_script/css/twitterMice.css" rel="stylesheet" type="text/css">
 
     <!-- Scripts! -->
     <script src="http://code.jquery.com/jquery-latest.js"></script>
@@ -30,9 +30,17 @@
    -->
 
    <script type="text/javascript" src="../interactiveSemantics/interfaceStyle.js"></script>
-   <script type="text/javascript" src="../interactiveSemantics/extensionInterface.js"></script>
+   <script type="text/javascript" src="../interactiveSemantics/facetedCollection.js"></script>
+   
+   <script type="text/javascript" src="../interactiveSemantics/hashmap.js"></script>
+      <script type="text/javascript" src="../interactiveSemantics/hashmap.js"></script>
+   
    <script type="text/javascript" src="../interactiveSemantics/debi.js"></script>   
    <script type="text/javascript" src="../interactiveSemantics/mice.js"></script>
+
+   <script type="text/javascript" src="../interactiveSemantics/micePlusPlus.js"></script>
+
+
    <script type="text/javascript" src="../TweetBubble/Plugin/chrome/content_script/js/twitterMice.js"></script>
    <script type="text/javascript" src="../TweetBubble/Plugin/chrome/content_script/js/twitterICE.js"></script>
   <script type="text/javascript" src="../TweetBubble/Plugin/chrome/content_script/js/ICE.js"></script>
@@ -50,10 +58,10 @@
     <script type="text/javascript" src="../semantics/testRepository.js"></script>
     <script>
        </script>
-
+	<link rel="stylesheet" href="../interactiveSemantics/jquery-ui-1.11.1.custom/jquery-ui.min.css">
+	<script src="../interactiveSemantics/jquery-ui-1.11.1.custom/jquery-ui.min.js"></script>
   </head>
   <body onload="onBodyLoad()">
-
     <!-- Loading Modal - Doesn't work yet -->
     <div id="loadingModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
       <div class="modal-body">
@@ -203,7 +211,7 @@ The wrapper shown here contains nested structures inherited from its base types;
         </div>
       </div> 
       
-    </div>
+       </div>
 
     <script>
     MICE.initialize();

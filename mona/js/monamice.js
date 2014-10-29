@@ -823,7 +823,7 @@ MICE.buildMetadataTable = function(table, isChildTable, isRoot, metadataFields, 
 		var k = 0;
 		for(i in metadataFields2){
 			var value = metadataFields2[i]["value"];
-			if (value instanceof Array && metadataFields2[i]["child_type"] != "rich_document"){
+			if (value instanceof Array && nestedHasNavTo(value)){// && metadataFields2[i]["child_type"] != "rich_document"){
 				metadataFields.splice(k,1);
 				k--;
 			}

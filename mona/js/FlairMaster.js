@@ -1,6 +1,7 @@
 imagePairs = {
 	"document" : "img/flair/document.png",
 	"acm_portal" : "img/flair/document.png",
+	"acm_portal_author" : "img/flair/person.png",
 	"amazon_product" : "img/flair/shopping.png",
 	"unknown" : "img/flair/unknown.png"
 }
@@ -16,22 +17,10 @@ FlairMaster.preload = function(){
 
 FlairMaster.getFlairImage = function(metadataType)
 {
-	if(metadataType != null)
-	{
-		switch(metadataType)
-		{
-			case "unknown": 			return this.images[metadataType];
-			
-			case "acm_portal": 			return this.images[metadataType];
-			
-			case "document": 			return this.images[metadataType];
-			
-			case "amazon_product": 		return this.images[metadataType];
-			
-			default:					return this.images["unknown"];
-		}
+	if(this.images[metadataType] != null){
+	   return this.images[metadataType];
 	}
-	return this.images["unknown"];
+	else return this.images["unknown"];
 }
 
 FlairMaster.images = {};
