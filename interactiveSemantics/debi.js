@@ -41,11 +41,7 @@ MetadataLoader.onloadCallback = function(urls, url) { /* null default implementa
  *     Used to specify special clipping structure for special use.
  */
 
-MetadataLoader.stripHashtagAnchors = function(url){
-	var newurl = url.replace('#.*$', '');
-	return newurl;
-	
-}
+
 MetadataLoader.render = function(renderer, container, url, isRoot, clipping)
 {
   // Add the rendering task to the queue
@@ -54,7 +50,8 @@ MetadataLoader.render = function(renderer, container, url, isRoot, clipping)
   //We strip '#' anchors out - the service does this already
   //and we do this here so that the task matches what trhe service returns
 	
-  url = MetadataLoader.stripHashtagAnchors(url);	 
+ 
+  
   var task = new RenderingTask(url, container, isRoot, clipping, renderer)
   MetadataLoader.queue.push(task);  
   

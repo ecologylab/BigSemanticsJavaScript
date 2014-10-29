@@ -1,8 +1,14 @@
+
+
 //MICE renders the metaData for the MICE interface
 var MICE = {};
 
 // The documentMap contains a list of DocumentContainers for each found metadata object, both retrieved and not.
 MICE.documentMap = [];
+
+//This is an extremely basic and garanteed to be buggy protype version of the hashmap of metadataRows. God save the queen.
+
+
 
 // deprecated
 var WWWStudy;
@@ -96,14 +102,13 @@ MICE.render = function(task, metadataFields, styleInfo){
 /**
  * add metadata display to the container.
  * @param container, the HTML object to which the metadata rendering will be appended
- * @param url, url of the target document
+ * @param url, url of the  document
  * @param isRoot, is this the root metadata for the rendering (currently used for removing existing children)
  * @param requestMD, true if the function should request metadata from service, else false
  * @param reloadMD, true if the metadata should be extracted afresh, else false 
  */
 MICE.addMetadataDisplay = function(container, url, isRoot, clipping, requestMD, reloadMD){
 	
-	url = MetadataLoader.stripHashtagAnchors(url);
 	// Add the rendering task to the queue
 	var task = new RenderingTask(url, container, isRoot, clipping, MICE.render)
 	MetadataLoader.queue.push(task);	
@@ -819,8 +824,13 @@ MICE.buildMetadataTable = function(table, isChildTable, isRoot, metadataFields, 
 	{			
 		var row = document.createElement('div');
 		row.className = styleInfo.styles.metadataRow;
-					
+		if(metadataFields[i].composite_type != null){
+			var childUrl = metadataFields[i].value[0].navigatesTo;
+			//Should we add to map?
+			
+		}			
 		// if the maximum number of fields have been rendered then stop rendering and add a "More" expander
+		/*
 		if(fieldCount <= 0)
 		{
 			var nameCol = document.createElement('div');
@@ -859,7 +869,7 @@ MICE.buildMetadataTable = function(table, isChildTable, isRoot, metadataFields, 
 			
 			break;
 		} 
-			
+			*/
 		var metadataField = metadataFields[i];
 		
 		if(metadataField.value)
@@ -872,7 +882,7 @@ MICE.buildMetadataTable = function(table, isChildTable, isRoot, metadataFields, 
 				continue;
 			
 			var expandButton = null;
-			var fieldObj = MICE.buildMetadataField(metadataField, isChildTable, fieldCount, row, styleInfo);
+			var fieldObj = MICE.buildMetadataField(metadataField, isChildTable, fieldCount, row, styleInfo, metadataFields[0].navigatesTo);
 			expandButton = fieldObj.expand_button;
 
 			var fieldObjs = [];
@@ -889,7 +899,7 @@ MICE.buildMetadataTable = function(table, isChildTable, isRoot, metadataFields, 
 			
 			for (var j = 0; j < metadataField.concatenates.length; j++)
 			{
-				fieldObj = MICE.buildMetadataField(metadataField.concatenates[j], isChildTable, fieldCount, row, styleInfo);
+				fieldObj = MICE.buildMetadataField(metadataField.concatenates[j], isChildTable, fieldCount, row, styleInfo, metadataFields[0].navigatesTo);
 				fieldObjs.push(fieldObj);
 			}
 			
@@ -994,7 +1004,7 @@ MICE.buildMetadataTable = function(table, isChildTable, isRoot, metadataFields, 
  * @param row, the containing element
  * @return HTML representation of the metadata field, and related properties
  */
-MICE.buildMetadataField = function(metadataField, isChildTable, fieldCount, row, styleInfo)
+MICE.buildMetadataField = function(metadataField, isChildTable, fieldCount, row, styleInfo, parentUrl)
 {
 	var imageLabel = (metadataField.value_as_label == "") ?	false : metadataField.value_as_label.type == "image";
 	
@@ -1183,7 +1193,7 @@ MICE.buildMetadataField = function(metadataField, isChildTable, fieldCount, row,
 		fieldValueDiv.appendChild(img1);
 		valueCol.appendChild(fieldValueDiv);
 	}
-	
+	//We're going to focus on non-composite images that have a location
 	else if(metadataField.composite_type != null && metadataField.composite_type != "image")
 	{
 		/** Label Column **/
@@ -1193,6 +1203,7 @@ MICE.buildMetadataField = function(metadataField, isChildTable, fieldCount, row,
 			fieldLabelDiv.className = styleInfo.styles.fieldLabelContainerUnhighlight;
 			fieldLabelDiv.style.minWidth = "30px";					
 			
+	
 		// Is the document already rendered?								
 		if(childUrl != "" && MICE.isRenderedDocument(childUrl) )
 		{
@@ -1316,6 +1327,8 @@ MICE.buildMetadataField = function(metadataField, isChildTable, fieldCount, row,
 	
 	else if(metadataField.child_type != null)
 	{		
+
+
 		if(metadataField.name != null)
 		{
 			var fieldLabelDiv = document.createElement('div');
@@ -1358,6 +1371,7 @@ MICE.buildMetadataField = function(metadataField, isChildTable, fieldCount, row,
 					
 				if (!metadataField.hide_label)
 					fieldLabelDiv.appendChild(fieldLabel);
+				
 			}
 			else if (label.type == "image")
 			{
@@ -1369,18 +1383,28 @@ MICE.buildMetadataField = function(metadataField, isChildTable, fieldCount, row,
 					fieldLabelDiv.appendChild(img);
 			}		
 			
+		
 			nameCol.appendChild(fieldLabelDiv);
 		}
+		
+		
 			
 		var fieldValueDiv = document.createElement('div');
 			fieldValueDiv.className = styleInfo.styles.fieldChildContainer;
 		
 		var childTable =  MICE.buildMetadataTable(null, true, false, metadataField.value, 1, styleInfo);
+	
+		
+			//var collection = new facetedCollection(childUrl, row);
+			
+		
+		/*
+		 * We are gonna temporarily not collpse to make my life easier
 		if(metadataField.value.length >= 1)
 		{
 			MICE.collapseTable(childTable, styleInfo);			
 		}					
-			
+			*/
 		var nestedPad = document.createElement('div');
 			nestedPad.className = styleInfo.styles.nestedPad;
 		
@@ -1391,8 +1415,26 @@ MICE.buildMetadataField = function(metadataField, isChildTable, fieldCount, row,
 		valueCol.appendChild(fieldValueDiv);
 
 		fieldCount--;
+		//Function to be overwritten by MICE extensions
+		MICE.buildMetadataFieldCollectionHook(parentUrl, metadataField, row, childTable, fieldLabelDiv);
+
+
 	}
 	return {name_col: nameCol, value_col: valueCol, count: fieldCount, expand_button: expandButton};
+}
+
+
+/*
+ * Hooks - this functions will be called at specific points in MICE's execution.
+ * Extensions to MICE can overwrite them to add functionality, but they should keep a common parameter patter
+ */
+
+MICE.buildMetadataFieldCollectionHook = function(parentUrl, metataField, row, childTable, fieldLabelDiv){};
+
+MICE.getUrlList = function (parentUrl, collectionName, urlList){
+	//Should make a request for debi to do some srs sorting
+	//But for now it's just going to call a dummy function
+	
 }
 
 MICE.getFieldLabel = function(metadataField)
