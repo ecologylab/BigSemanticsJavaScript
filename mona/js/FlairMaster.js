@@ -1,0 +1,27 @@
+imagePairs = {
+	"document" : "img/flair/document.png",
+	"acm_portal" : "img/flair/document.png",
+	"acm_portal_author" : "img/flair/person.png",
+	"amazon_product" : "img/flair/shopping.png",
+	"unknown" : "img/flair/unknown.png"
+}
+
+var FlairMaster = {};
+
+FlairMaster.preload = function(){
+	for (key in imagePairs){
+		this.images[key] = new Image();
+		this.images[key].src = imagePairs[key];
+	}
+}
+
+FlairMaster.getFlairImage = function(metadataType)
+{
+	if(this.images[metadataType] != null){
+	   return this.images[metadataType];
+	}
+	else return this.images["unknown"];
+}
+
+FlairMaster.images = {};
+FlairMaster.preload();

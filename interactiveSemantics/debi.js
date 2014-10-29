@@ -26,6 +26,18 @@ MetadataLoader.extensionMetadataDomains = ["twitter.com"];
 
 MetadataLoader.onloadCallback = function(urls, url) { /* null default implementation */ };
 
+MetadataLoader.stripHashtagAnchors = function(url){
+	var newurl;
+	if (url.indexOf('#') > -1){
+		newurl = url.substring(0, url.indexOf('#'));
+	}
+	else{
+		newurl = url;
+	}
+	return newurl;
+	
+}
+
 /**
  * Requests metadata of the given URL and the corresponding meta-metadata from
  * the BigSemantics service, then calls the given callback for rendering.
@@ -40,7 +52,6 @@ MetadataLoader.onloadCallback = function(urls, url) { /* null default implementa
  * @param clipping:
  *     Used to specify special clipping structure for special use.
  */
-
 
 MetadataLoader.render = function(renderer, container, url, isRoot, clipping)
 {
@@ -96,10 +107,10 @@ MetadataLoader.getMetadata = function(url, callback, reload)
  * @param url, the URL of the document the requested meta-metadata is for.
  * @param callback, name of the function to be called from the JSON-p call
  */
-MetadataLoader.getMMD = function(url, callback)
+MetadataLoader.getMMD = function(name, callback)
 {
   var serviceURL = SEMANTIC_SERVICE_URL + "mmd.jsonp?reload=true&callback=" + callback
-      + "&url=" + encodeURIComponent(url) + "&withurl";
+      + "&name=" + name;
 	
   
   MetadataLoader.doJSONPCall(serviceURL);
@@ -161,6 +172,7 @@ MetadataLoader.setMetadata = function(rawMetadata, requestMmd)
   
   if (metadata.location)
   {
+	metadata.location = MetadataLoader.stripHashtagAnchors(metadata.location);
     queueTasks = MetadataLoader.getTasksFromQueueByUrl(metadata.location);
   }
 
@@ -169,6 +181,7 @@ MetadataLoader.setMetadata = function(rawMetadata, requestMmd)
   {
     for (var i = 0; i < metadata["additional_locations"].length; i++)
     {
+      metadata["additional_locations"][i] = MetadataLoader.stripHashtagAnchors(metadata["additional_locations"][i]);
       var additional_location = metadata["additional_locations"][i];
       var tasks = MetadataLoader.getTasksFromQueueByUrl(additional_location);
       queueTasks = queueTasks.concat(tasks);      
@@ -198,7 +211,7 @@ MetadataLoader.setMetadata = function(rawMetadata, requestMmd)
     }
     
     if (typeof requestMmd === "undefined" || requestMmd == true) 
-    	MetadataLoader.getMMD(metadata.location, "MetadataLoader.setMetaMetadata");
+    	MetadataLoader.getMMD(queueTask.mmdType, "MetadataLoader.setMetaMetadata");
   }
   
   if (queueTasks.length < 0)
@@ -215,17 +228,9 @@ MetadataLoader.setMetadata = function(rawMetadata, requestMmd)
  *
  * @param mmd, raw meta-metadata json returned from the service
  */
-MetadataLoader.setMetaMetadata = function (url, mmd)
+MetadataLoader.setMetaMetadata = function (mmd)
 {
-  console.log("Received url: " + url);
   console.log("Received mmd: " + mmd);
-
-  // For temporary backward compatibility:
-  if (url && !mmd)
-  {
-    mmd = url;
-    url = undefined;
-  }
 
   // TODO move MDC related code to mdc.js
   if (typeof MDC_rawMMD != "undefined")
@@ -235,16 +240,7 @@ MetadataLoader.setMetaMetadata = function (url, mmd)
   
   simplDeserialize(mmd);
   
-  var tasks = [];
-  if (typeof url != "undefined")
-  {
-    tasks = MetadataLoader.getTasksFromQueueByUrl(url);
-  }
-  else
-  {
-    // For temporary backward compatibility:
-    tasks = MetadataLoader.getTasksFromQueueByType(mmd["meta_metadata"].name);
-  }
+  var tasks = MetadataLoader.getTasksFromQueueByType(mmd["meta_metadata"].name);
   
   if (tasks.length > 0)
   {

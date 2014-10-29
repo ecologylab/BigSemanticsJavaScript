@@ -169,7 +169,7 @@ function getScalarD(field,contextNode,recurse,parserContext)
 	var data = null;
 	
 	if (field.hasOwnProperty("concatenate_values")) { 	//calls the service when there is concatenate_values in the fields
-		data = concatValues(field.concatenate_values);	//temporary until there is javascript code for concatenate_values
+		//data = concatValues(field.concatenate_values);	//temporary until there is javascript code for concatenate_values
 		if (!recurse) {
 			return null;
 		}

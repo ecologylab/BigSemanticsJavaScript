@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>MONA</title>
+    <script>
+    	var application_name = "mona";
+    	var MDC_rawMetadata = "";
+		var MDC_rawMMD = "";
+    </script>
+    
+    <!-- CSS! -->
+    <link href="css/bootstrap.min.css" rel="stylesheet" media="screen">
+
+    <link href="css/mdc.css" rel="stylesheet" media="screen">
+    <link href="../interactiveSemantics/metadataRenderer.css" rel="stylesheet" type="text/css">
+
+    <!-- Scripts! -->
+    <script src="http://code.jquery.com/jquery-latest.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+
+    <script type="text/javascript" src="js/utility.js"></script>
+
+
+   <script type="text/javascript" src="../interactiveSemantics/interfaceStyle.js"></script>
+   <script type="text/javascript" src="../interactiveSemantics/extensionInterface.js"></script>
+   <script type="text/javascript" src="../interactiveSemantics/debi.js"></script>   
+   <script type="text/javascript" src="js/monamice.js"></script>
+
+
+	<script type="text/javascript" src="../simpl/simplDeserializer.js"></script>
+	<script type="text/javascript" src="../simpl/simplFieldTypes.js"></script>
+	<script type="text/javascript" src="../simpl/simplGraphCollapse.js"></script>
+	<script type="text/javascript" src="../simpl/simplGraphExpand.js"></script>
+	<script type="text/javascript" src="../simpl/simplTypeScope.js"></script>
+	<script type="text/javascript" src="../simpl/simplTypeScopeDeserialize.js"></script>
+	<script type="text/javascript" src="../simpl/simplTypeScopeSerialize.js"></script>
+
+    <script type="text/javascript" src="js/FlairMaster.js"></script>
+    <script type="text/javascript" src="js/mdc.js"></script>
+    <script type="text/javascript" src="js/mona.js"></script>
+    
+    <script type="text/javascript" src="../semantics/MetaMetadataRepositoryLibrary.js"></script>
+    <script type="text/javascript" src="../semantics/testRepository.js"></script>
+    <script>
+       </script>
+
+  </head>
+  <body onload="onBodyLoad()">
+
+    <!-- Navbar -->
+    <div class="navbar navbar-inverse navbar-fixed-top">
+      <div class="navbar-inner form-inline">
+        <div class="container">
+						
+            <form class="navbar-form pull-right" action="" onsubmit="return false;">
+              
+              <input type="text" size="500" class="span5" id="targetURL" value="http://dl.acm.org/citation.cfm?id=1125696"/>
+              <button type="button" class="btn" onclick="showMetadata();MONA.initialize();">Go!</button>
+            	
+            </form>	                
+        </div>
+      </div>
+    </div>
+
+    <!-- Content -->
+    <div class ="container" id="vizArea">
+      <svg id="lineSVG" height="1000" width="1000"></svg>
+      <div class="row">
+        <div class="span9 content" id="mdcIce"></div>
+      </div>
+      <div id="typeArea"></div>
+      <div id="graphArea"></div>
+      <div id="nodeMDArea"></div>
+    </div>
+
+    <script>
+    MICE.initialize();
+    MONA.initialize();
+    </script>
+
+  </body>
+</html>
