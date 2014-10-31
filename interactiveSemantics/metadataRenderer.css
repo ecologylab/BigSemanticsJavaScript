@@ -6,7 +6,9 @@
     padding: 8px;
     min-width: 640px;
 }
-
+.facetLabel{
+	float:left;
+}
 .metadataContainer {
 
     font-size: 10px;
