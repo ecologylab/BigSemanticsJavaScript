@@ -12,7 +12,7 @@
     <link href="css/bootstrap.min.css" rel="stylesheet" media="screen">
 
     <link href="css/mdc.css" rel="stylesheet" media="screen">
-    <link href="../interactiveSemantics/metadataRenderer.css" rel="stylesheet" type="text/css">
+    <link href="../interactiveSemantics/metadataRenderer.css" rel="stylesheet" type="text/css"> 
 
     <!-- Scripts! -->
     <script src="http://code.jquery.com/jquery-latest.js"></script>
@@ -49,22 +49,24 @@
 
     <!-- Navbar -->
     <div class="navbar navbar-inverse navbar-fixed-top">
-      <div class="navbar-inner form-inline">
-        <div class="container">
-						
-            <form class="navbar-form pull-right" action="" onsubmit="return false;">
-              
-              <input type="text" size="500" class="span5" id="targetURL" value="http://dl.acm.org/citation.cfm?id=1125696"/>
-              <button type="button" class="btn" onclick="showMetadata();MONA.initialize();">Go!</button>
-            	
-            </form>	                
-        </div>
+      <div class="navbar-inner form-inline">			
+        <form class="navbar-form" action="" onsubmit="return false;"> 
+          <input type="text" size="500" class="span5" id="targetURL" value="http://dl.acm.org/citation.cfm?id=1125696"/>
+          <button type="button" class="btn" onclick="showMetadata();MONA.initialize();">Go!</button>	
+        </form>	                
       </div>
     </div>
 
     <!-- Content -->
     <div class ="container" id="vizArea">
-      <svg id="lineSVG" height="1000" width="1000"></svg>
+      <div id="historyWrapper">
+        <p>History</p>
+        <div id="historyArea">
+        
+        </div>
+      </div>
+
+      <svg id="lineSVG" height="1000" width="1300"></svg>
       <div class="row">
         <div class="span9 content" id="mdcIce"></div>
       </div>

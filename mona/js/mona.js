@@ -1,20 +1,23 @@
-/*global waitForNewMMD, MDC_rawMMD, getNodes, allNodeMDLoaded, document, setTimeout, MetadataLoader, console, hexToRgb, FlairMaster, sortNumber, median, MDC_rawMetadata, showMetadata*/
+/*global getLabel, simplDeserialize, waitForNewMMD, MDC_rawMMD, getNodes, allNodeMDLoaded, document, setTimeout, MetadataLoader, console, hexToRgb, FlairMaster, sortNumber, median, MDC_rawMetadata, showMetadata*/
 
-var MONA = {};
-var cachedMMD = "";
-var cachedNodeMetadata = {};
-var nodeColors = {};
-var nodes = {};
-var nodeMetadata = {};
-var nodePositions = {};
-var typePositions = {};
-var colorCount = 0;
-var requestsMade = 0;
-var tier4size = 10;
-var tier3size = 20;
-var tier2size = 30;
-var tier1size = 40;
-var colorArray = ["#009933", "#006699", "#CC9900", "#CC0000", "#CC00CC"];
+var MONA = {},
+    cachedMMD = "",
+    cachedNodeMetadata = {},
+    nodeColors = {},
+    nodes = {},
+    secondaryNodes = {},
+    nodeMetadata = {},
+    nodePositions = {},
+    typePositions = {},
+    colorCount = 0,
+    requestsMade = 0,
+    tier4size = 10,
+    tier3size = 20,
+    tier2size = 30,
+    tier1size = 40,
+    colorArray = ["#009933", "#006699", "#CC9900", "#CC0000", "#CC00CC"],
+    historyNodes = [];
+
 
 function Node(type, title, location, mmdName){
 	this.type = type;
@@ -77,6 +80,12 @@ function waitForNewMMD(){
 }
 
 function waitForNodeMDLoaded(){
+
+    var loading = document.getElementById("loadingBar");
+    if (loading !== null){
+        loading.innerHTML= Object.keys(nodeMetadata).length + " of " + requestsMade + " loaded";
+    }
+    
 	//if url is 404, then we get an http error 500 from the service and get stuck
 	//there are some other cases where we get a service error and get stuch
 	//make it greater than one to account for not getting 404s
@@ -98,8 +107,18 @@ function populateNodeMetadata(){
 			requestsMade++;
 		}
 	}
+    
+    //start the loading bar
+    var loadingElement = document.getElementById("nodeMDArea");
+	while (loadingElement.firstChild){
+        loadingElement.removeChild(loadingElement.firstChild);
+	}
+    var loading = document.createElement('p');
+    loading.id="loadingBar";
+    loading.innerHTML= "0 of " + requestsMade + " loaded";
+    loadingElement.appendChild(loading);
 	
-	waitForNodeMDLoaded();
+    waitForNodeMDLoaded();
 }
 
 function storeNodeMD(rawMetadata, requestMmd){
@@ -115,6 +134,7 @@ function storeNodeMD(rawMetadata, requestMmd){
 			}
 		}
 	}
+    getSecondaryNodes(rawMetadata);
 }
 
 function nodeMDLoaded(nodeKey){
@@ -123,7 +143,6 @@ function nodeMDLoaded(nodeKey){
 	var div = document.getElementById(nodeKey);
 	div.style.color = "rgba(" + rgb.r + "," + rgb.g + "," + rgb.b + ",1)";
 	
-	var x = nodeMetadata[nodeKey];
 	//if incoming metadata is of a different type than we expected update the image
 	//FIXME not sure if it works
 	if (!nodeMetadata[nodeKey].hasOwnProperty(nodes[nodeKey].mmdName)){
@@ -137,13 +156,9 @@ function nodeMDLoaded(nodeKey){
 			curImg = img;
 		}
 	}
-	//var img = FlairMaster.getFlairImage(nodes[nodeKey].mmdName).cloneNode(true);
-	//img.setAttribute('height',tier2size+'px');
-	//img.setAttribute('width',tier2size+'px');
 }
 
 function allNodeMDLoaded(){
-    "use strict";
 	var loadingElement = document.getElementById("nodeMDArea");
 	while (loadingElement.firstChild) {
     	loadingElement.removeChild(loadingElement.firstChild);
@@ -153,20 +168,52 @@ function allNodeMDLoaded(){
 	updateLines();
 }
 
+//FIXME work on
+function addToHistory(MDC_rawMetadata){
+    var newNode;
+    for (var mmdType in MDC_rawMetadata){
+        newNode = new Node(mmdType, MDC_rawMetadata[mmdType].title, MDC_rawMetadata[mmdType].location, MDC_rawMetadata[mmdType].meta_metadata_name);
+        historyNodes.push(newNode);
+    }
+    var historyElement = document.getElementById("historyArea");
+    var div = document.createElement('div');
+    
+    if (newNode.location !== undefined){
+        div.style.cursor = "pointer";
+		div.setAttribute('onclick','onNodeClick("'+newNode.location+'")');
+    }
+
+    var nodeText = "";
+    if(MDC_rawMetadata[mmdType].title.length > 30)
+        nodeText = newNode.abbrevTitle;//trim this
+    else
+        nodeText = newNode.title;
+    var nodePara = document.createElement('p');
+    nodePara.innerHTML = nodeText;
+    nodePara.className = "nodeText";
+    
+    //images are preloaded so we make copies of them		
+    var img = FlairMaster.getFlairImage(newNode.mmdName).cloneNode(true);
+    img.setAttribute('height',tier2size+'px');
+    img.setAttribute('width',tier2size+'px');
+
+    div.appendChild(img);
+    div.appendChild(nodePara);
+    historyElement.insertBefore(div, historyElement.firstChild);
+}
 
 function updateImgSizes(mmdType){
-    "use strict";
 	var citationCountList = [];
 	var foundOne = false;
 	for (var nodeKey in nodeMetadata){
-		if (nodeMetadata[nodeKey][mmdType] !== null){
+		if (nodeMetadata[nodeKey][mmdType] !== undefined){
 			foundOne = true;
-			if (mmdType == "acm_portal" && nodeMetadata[nodeKey].acm_portal.citations !== null){
+			if (mmdType == "acm_portal" && nodeMetadata[nodeKey].acm_portal !== undefined && nodeMetadata[nodeKey].acm_portal.citations !== undefined){
 				citationCountList.push(nodeMetadata[nodeKey].acm_portal.citations.length);
 			}
 			//currently ranks by total citations
 			//up for debate if this is best
-			else if (mmdType == "acm_portal_author" && nodeMetadata[nodeKey].acm_portal_author.publication_detail.citation_count !== null){
+			else if (mmdType == "acm_portal_author" && nodeMetadata[nodeKey].acm_portal_author.publication_detail.citation_count !== undefined){
 				citationCountList.push(parseInt(nodeMetadata[nodeKey].acm_portal_author.publication_detail.citation_count));
 			}
 			else { 
@@ -179,6 +226,7 @@ function updateImgSizes(mmdType){
 	
 	//maybe move entirely into utility?
 	citationCountList = citationCountList.sort(sortNumber).reverse();
+    console.log(citationCountList);
 	var midMedian = median(citationCountList);
 	var halfLength = Math.ceil(citationCountList.length / 2);    
 	var leftSide = citationCountList.splice(0,halfLength);
@@ -187,15 +235,15 @@ function updateImgSizes(mmdType){
 	var bottomMedian = median(rightSide);
 		
 	for (nodeKey in nodes){
-		if (nodeMetadata.hasOwnProperty(nodeKey) && nodeMetadata[nodeKey][mmdType] !== null) {
+		if (nodeMetadata.hasOwnProperty(nodeKey) && nodeMetadata[nodeKey][mmdType] !== undefined) {
 			var citationCount = 0;
 			if (mmdType == "acm_portal"){
-				if (nodeMetadata[nodeKey].acm_portal.citations !== null) {
+				if (nodeMetadata[nodeKey].acm_portal.citations !== undefined) {
 					citationCount = nodeMetadata[nodeKey].acm_portal.citations.length;
 				}
 			}
 			else if (mmdType == "acm_portal_author"){
-				if (nodeMetadata[nodeKey].acm_portal_author.publication_detail.citation_count !== null){
+				if (nodeMetadata[nodeKey].acm_portal_author.publication_detail.citation_count !== undefined){
 					citationCount = nodeMetadata[nodeKey].acm_portal_author.publication_detail.citation_count;
 				}
 			}
@@ -222,10 +270,11 @@ function updateImgSizes(mmdType){
 }
 
 function getNodes(){
-    "use strict";
 	console.log(MDC_rawMetadata);
-	console.log(MDC_rawMMD);
-	for (var metadataType in MDC_rawMetadata){
+    simplDeserialize(MDC_rawMMD);
+    console.log(MDC_rawMMD);
+
+    for (var metadataType in MDC_rawMetadata){
 		
 		for (var key in MDC_rawMetadata[metadataType]){
             var newNode;
@@ -233,11 +282,14 @@ function getNodes(){
 			if (currentField instanceof Array){
 				if (currentField[0].hasOwnProperty("meta_metadata_name")){
 					if (currentField[0].meta_metadata_name != "rich_document" && currentField[0].meta_metadata_name != "image"){
+                        key = getLabel(key);
 						nodeColors[key] = colorArray[colorCount];
 						colorCount++;
 						for (var i = 0;  i < currentField.length; i++){
-							newNode = new Node(key, currentField[i].title, currentField[i].location, currentField[i].meta_metadata_name);
-							nodes[currentField[i].title] = newNode;
+							if (currentField[i].hasOwnProperty('title')){
+                                newNode = new Node(key, currentField[i].title, currentField[i].location, currentField[i].meta_metadata_name);
+                                nodes[currentField[i].title] = newNode;
+                            }
 						}
 					}
 				}
@@ -245,11 +297,14 @@ function getNodes(){
 					for (var key2 in currentField[0]){
 						if (currentField[0][key2].hasOwnProperty("meta_metadata_name")){
 							if (currentField[0][key2].meta_metadata_name != "rich_document" && currentField[0][key2].meta_metadata_name != "image"){
-								nodeColors[key] = colorArray[colorCount];
+								key = getLabel(key);
+                                nodeColors[key] = colorArray[colorCount];
 								colorCount++;				
 								for (var j = 0;  j < currentField.length; j++){
-									newNode = new Node(key, currentField[j][key2].title, currentField[j][key2].location, currentField[j][key2].meta_metadata_name);
-									nodes[currentField[j][key2].title] = newNode;
+                                    if (currentField[j][key2].hasOwnProperty('title')){
+									   newNode = new Node(key, currentField[j][key2].title, currentField[j][key2].location, currentField[j][key2].meta_metadata_name);
+									   nodes[currentField[j][key2].title] = newNode;
+                                    }
 								}			
 							}
 						}
@@ -259,7 +314,8 @@ function getNodes(){
 			if (currentField instanceof Object){
 				if (currentField.hasOwnProperty("meta_metadata_name") && currentField.hasOwnProperty("location")){
 					if (currentField.meta_metadata_name != "rich_document" && currentField.meta_metadata_name != "image"){
-						nodeColors[key] = colorArray[colorCount];
+				        key = getLabel(key);
+                        nodeColors[key] = colorArray[colorCount];
 						colorCount++;
 						newNode = new Node(key, currentField.title, currentField.location, currentField.meta_metadata_name);
 						nodes[currentField.title] = newNode;
@@ -274,9 +330,68 @@ function getNodes(){
 	drawLines();
 }
 
+//maybe combine with getNodes
+function getSecondaryNodes(nodeMMD){
+    for (var metadataType in nodeMMD){
+		
+		for (var key in nodeMMD[metadataType]){
+            var newNode;
+			var currentField = nodeMMD[metadataType][key];
+			if (currentField instanceof Array){
+				if (currentField[0].hasOwnProperty("meta_metadata_name")){
+					if (currentField[0].meta_metadata_name != "rich_document" && currentField[0].meta_metadata_name != "image"){
+                        key = getLabel(key);
+						for (var i = 0;  i < currentField.length; i++){
+                            if (currentField[i].hasOwnProperty('title')){
+                                newNode = new Node(key, currentField[i].title, currentField[i].location, currentField[i].meta_metadata_name);
+                            }
+                            if (!secondaryNodes.hasOwnProperty(currentField[i].title)){
+                                secondaryNodes[currentField[i].title] = newNode;
+                            }
+						}
+					}
+				}
+				else {
+					for (var key2 in currentField[0]){
+						if (currentField[0][key2].hasOwnProperty("meta_metadata_name")){
+							if (currentField[0][key2].meta_metadata_name != "rich_document" && currentField[0][key2].meta_metadata_name != "image"){
+								key = getLabel(key);				
+								for (var j = 0;  j < currentField.length; j++){
+                                    if (currentField[j][key2].hasOwnProperty('title')){
+								        newNode = new Node(key, currentField[j][key2].title, currentField[j][key2].location, currentField[j][key2].meta_metadata_name);
+                                    }
+                                    if (secondaryNodes.hasOwnProperty(currentField[j][key2].title)){
+                                        secondaryNodes[currentField[j][key2].title] = newNode;
+                                    }
+                                }			
+							}
+						}
+					}
+				}
+			}
+			if (currentField instanceof Object){
+				if (currentField.hasOwnProperty("meta_metadata_name") && currentField.hasOwnProperty("location")){
+					if (currentField.meta_metadata_name != "rich_document" && currentField.meta_metadata_name != "image"){
+				        key = getLabel(key);
+						newNode = new Node(key, currentField.title, currentField.location, currentField.meta_metadata_name);
+				        if (!secondaryNodes.hasOwnProperty(currentField.title)){
+                            secondaryNodes[currentField.title] = newNode;
+                        }
+					}
+				}
+			}
+		}
+	}
+	//populateNodeMetadata();
+	drawSecondaryNodes();
+	//drawTypes();
+	//drawLines();
+}
+
 function onNodeClick(location){
 	document.getElementById("targetURL").value = location;
 	showMetadata();
+    addToHistory(MDC_rawMetadata);
 	MONA.initialize();
 }
 
@@ -285,10 +400,11 @@ function onNodeMouseover(nodeKey){
 	var rgb = hexToRgb(nodeColors[nodes[nodeKey].type]);
 	line.style.stroke = "rgba(" + rgb.r + "," + rgb.g + "," + rgb.b + ",.7)";
 
-	var div = document.getElementById(nodeKey);
-	var pArray = div.getElementsByTagName('p');
+	var nodeDiv = document.getElementById(nodeKey);    
+    var pArray = nodeDiv.getElementsByTagName('p');
 	var p = pArray[0];
 	p.innerHTML = nodes[nodeKey].title;
+    
 	updateLines();
 }
 
@@ -298,9 +414,9 @@ function onNodeMouseout(nodeKey){
 		var rgb = hexToRgb(nodeColors[nodes[nodeKey].type]);
 		line.style.stroke = "rgba(" + rgb.r + "," + rgb.g + "," + rgb.b + ",.2)";
 	
+		var nodeDiv = document.getElementById(nodeKey);        
 		if(nodeKey.length > 30){
-			var div = document.getElementById(nodeKey);
-			var pArray = div.getElementsByTagName('p');
+			var pArray = nodeDiv.getElementsByTagName('p');
 			var p = pArray[0];
 			p.innerHTML = nodes[nodeKey].abbrevTitle;
 		}
@@ -362,6 +478,49 @@ function drawNodes(){
 		div.appendChild(nodePara);
 		graphElement.appendChild(div);
 		nodePositions[nodeKey] = div.getBoundingClientRect();
+	}
+}
+
+function drawSecondaryNodes(){
+	for (var nodeKey in secondaryNodes){
+        if (document.getElementById(nodeKey) === null){
+            var graphElement = document.getElementById("nodeMDArea");
+            var div = document.createElement('div');
+
+            if (secondaryNodes[nodeKey].location !== undefined){//visualize this
+                div.style.cursor = "pointer";
+                div.setAttribute('onclick','onNodeClick("'+secondaryNodes[nodeKey].location+'")');
+            }
+            div.setAttribute('onmouseover','onNodeMouseover("'+nodeKey+'")');
+            div.setAttribute('onmouseout','onNodeMouseout("'+nodeKey+'")');
+            div.id = nodeKey;
+
+            var nodeText = "";
+            if(nodeKey.length > 30)
+                nodeText = secondaryNodes[nodeKey].abbrevTitle;
+            else
+                nodeText = nodeKey;
+            var nodePara = document.createElement('p');
+            nodePara.innerHTML = nodeText;
+            nodePara.className = "nodeText";
+
+            for (var nodeType in nodeColors)
+                if (secondaryNodes[nodeKey].type == nodeType){
+                    div.className=nodeType;
+                    var rgb = hexToRgb(nodeColors[nodeType]);
+                    div.style.color = "rgba(" + rgb.r + "," + rgb.g + "," + rgb.b + ",.5)";
+                }
+
+            //FIXME currently breaks? Not sure what is up		
+            var img = FlairMaster.getFlairImage(secondaryNodes[nodeKey].mmdName).cloneNode(true);
+            img.setAttribute('height',tier2size+'px');
+            img.setAttribute('width',tier2size+'px');
+
+            div.appendChild(img);
+            div.appendChild(nodePara);
+            graphElement.appendChild(div);
+            nodePositions[nodeKey] = div.getBoundingClientRect();
+        }
 	}
 }
 
