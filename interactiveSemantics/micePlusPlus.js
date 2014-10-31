@@ -54,12 +54,17 @@ MICE.buildFacets = function (parentUrl, collectionName, facetName){
 	var facetCheckBoxInput = document.createElement('input');
 	facetCheckBoxInput.setAttribute('type', 'checkbox');
 	
+	
 	facetCheckBoxInput.setAttribute('name', facetName);
 	facetCheckBoxInput.setAttribute('id',  facetID.toString());
 	facetCheckBoxInput.setAttribute('parenturl', parentUrl);
 	facetCheckBoxInput.setAttribute('collectionname', collectionName);
 	facetCheckBoxInput.setAttribute('onclick', "MICE.sortFacet()");
+	var checkBoxLabel = document.createElement('span');
+	checkBoxLabel.innerHTML = 'Order: ';
+	facetCheckBox.appendChild(checkBoxLabel);
 	facetCheckBox.appendChild(facetCheckBoxInput);
+	
 	var mySlider = document.createElement('div');
 	document.body.appendChild(mySlider);
 	mySlider.setAttribute('id', facetID.toString());
@@ -72,14 +77,20 @@ MICE.buildFacets = function (parentUrl, collectionName, facetName){
 	maxLabel.setAttribute('for', 'maxValue' + facetID.toString());
 	minLabel.innerHTML = "Min: ";
 	maxLabel.innerHTML = "Max: ";
+	minLabel.className = "facetLabel";
+	maxLabel.className = "facetLabel";
+		checkBoxLabel.className = "facetLabel";
 	var minValue = document.createElement('input');
 	minValue.setAttribute('type', 'text');
 	minValue.setAttribute('id', 'minValue' + facetID.toString());
 	minValue.value='a';
+	minValue.setAttribute('onkeydown', "MICE.setSliderMinValue()");
+
 	var maxValue = document.createElement('input');
 	maxValue.setAttribute('type', 'text');
 	maxValue.setAttribute('id', 'maxValue' + facetID.toString());
 	maxValue.value='z';
+	maxValue.setAttribute('onkeydown', "MICE.setSliderMaxValue()");
 	mySlider.setAttribute('name', facetName);
 	mySlider.setAttribute('parenturl', parentUrl);
 	mySlider.setAttribute('collectionname', collectionName);
@@ -112,7 +123,12 @@ MICE.buildFacets = function (parentUrl, collectionName, facetName){
 
 	return facet;
 }
-
+MICE.manualStartFilteringProcess = function(target, values){
+	var name = target.getAttribute('name');
+	var parent = target.getAttribute('parenturl');
+	var collection = target.getAttribute('collectionname');
+	MICE.filter(values[0], values[1], name, parent, collection)
+}
 MICE.sortFacet = function(){
 	var checkbox = event.target;
 	var parent = checkbox.getAttribute('parenturl');
@@ -226,6 +242,51 @@ MICE.displayNewUrlList = function(urls, parentContainer){
 
 	}
 }
+
+MICE.setSliderMinValue = function(){
+	if(event.keyCode == 13){
+		var value = event.target.value;
+		//Is the value valid?
+		if (alphabet.indexOf(value) >= 0){
+			var curMax = $( event.target.parentNode.childNodes[0] ).slider( "option", "values")[1];
+			if (curMax<alphabet.indexOf(value)){
+				alert("Min must be higher than max");
+
+			}else{
+				$( event.target.parentNode.childNodes[0] ).slider( "option", "values", [alphabet.indexOf(value), curMax] );
+	
+				MICE.manualStartFilteringProcess($( event.target.parentNode.childNodes[0] )[0], $( event.target.parentNode.childNodes[0] ).slider( "option", "values"));
+			}
+			
+		}
+		//Display error of some kind
+		else{
+			alert("Enter value in range 'a' - 'z'");
+		}
+	}
+}
+MICE.setSliderMaxValue = function(){
+	if(event.keyCode == 13){
+		var value = event.target.value;
+		//Is the value valid?
+		if (alphabet.indexOf(value) >= 0){
+			var curMin = $( event.target.parentNode.childNodes[0] ).slider( "option", "values")[0];
+			if (curMin>alphabet.indexOf(value)){
+				alert("Max must be lower than min");
+
+			}
+			else{
+				$( event.target.parentNode.childNodes[0] ).slider( "option", "values", [curMin, alphabet.indexOf(value)] );
+				MICE.manualStartFilteringProcess($( event.target.parentNode.childNodes[0] )[0], $( event.target.parentNode.childNodes[0] ).slider( "option", "values"));
+
+			}
+			
+		}
+		//Display error of some kind
+		else{
+			alert("Enter value in range 'a' - 'z'");
+		}
+	}}
 
 
 
