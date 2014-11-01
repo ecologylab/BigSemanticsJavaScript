@@ -31,8 +31,10 @@ var MetadataRenderer = MICE;
  */
 MetadataRenderer.render = function(task, metadataFields, styleInfo)
 {	
+	var bRenderedInitial = false;
 	if (task.visual)
 	{
+		bRenderedInitial = true;
 		// remove the initial table containing title and loading rows
 		while (task.visual.hasChildNodes())
 			task.visual.removeChild(task.visual.lastChild);
@@ -68,8 +70,9 @@ MetadataRenderer.render = function(task, metadataFields, styleInfo)
 		task.visual.appendChild(metadataTable);
 		task.visual.appendChild(canvas);
 		
-		// Add the interior container to the root contianer
-		task.container.appendChild(task.visual);
+		// Add the interior container to the root container
+		if (!bRenderedInitial)
+			task.container.appendChild(task.visual);
 		
 		if (metadataProcessor)
 			metadataProcessor(task.visual);
@@ -113,12 +116,15 @@ MetadataRenderer.render = function(task, metadataFields, styleInfo)
  */
 MetadataRenderer.addMetadataDisplay = function(container, url, isRoot, clipping, requestMD, reloadMD, expandedItem)
 {
-	url = MetadataLoader.stripHashtagAnchors(url);
-	
 	var visual = null;
-	if ((url.indexOf("twitter.com") != -1 || application_name == "tweetbubble") && isRoot)
+	if ((url.indexOf("twitter.com") != -1 || application_name == "tweetbubble"))
 	{
-		visual = MetadataRenderer.renderInitial(container, url, isRoot, expandedItem);
+		var bgColor = MetadataRenderer.getNextColor(container);
+		var bgColorObj = {color: bgColor, bFirstField: true};
+		expandedItem.bgColorObj = bgColorObj;
+		
+		if (isRoot)
+			visual = MetadataRenderer.renderInitial(container, url, isRoot, expandedItem, bgColorObj);
 	}
 	
 	// Add the rendering task to the queue
@@ -140,13 +146,8 @@ MetadataRenderer.addMetadataDisplay = function(container, url, isRoot, clipping,
 	}
 }
 
-MetadataRenderer.renderInitial = function(container, url, isRoot, expandedItem)
+MetadataRenderer.renderInitial = function(container, url, isRoot, expandedItem, bgColorObj)
 {
-	var bgColor = MetadataRenderer.getNextColor(container);
-	var bgColorObj = {color: bgColor, bFirstField: true};
-	
-	expandedItem.bgColorObj = bgColorObj;
-	
 	var miceStyles = InterfaceStyle.getMiceStyleDictionary(null);
 	var styleInfo = {styles: miceStyles, type: null};
 		
@@ -169,8 +170,8 @@ MetadataRenderer.renderInitial = function(container, url, isRoot, expandedItem)
 		// Add the interior container to the root contianer
 		container.appendChild(visual);
 		
-		if (expandedItem && bgColor)
-			expandedItem.style.background = bgColor;
+		if (expandedItem && bgColorObj.color)
+			expandedItem.style.background = bgColorObj.color;
 	}
 	
 	return visual;

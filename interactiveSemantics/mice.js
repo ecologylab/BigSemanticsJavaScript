@@ -824,8 +824,11 @@ MICE.buildMetadataTable = function(table, isChildTable, isRoot, metadataFields, 
 	{			
 		var row = document.createElement('div');
 		row.className = styleInfo.styles.metadataRow;
-		if(metadataFields[i].composite_type != null){
-			var childUrl = metadataFields[i].value[0].navigatesTo;
+		if(metadataFields[i].composite_type != null && metadataFields[i].composite_type != undefined && metadataFields[i].value.length > 0){
+			var field = metadataFields[i];
+			var value = field.value[0];
+			var link = value.navigatesTo;
+			var childUrl = link;
 			//Should we add to map?
 			
 		}			

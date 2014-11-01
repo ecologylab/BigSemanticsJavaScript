@@ -26,17 +26,6 @@ MetadataLoader.extensionMetadataDomains = ["twitter.com"];
 
 MetadataLoader.onloadCallback = function(urls, url) { /* null default implementation */ };
 
-MetadataLoader.stripHashtagAnchors = function(url){
-	var newurl;
-	if (url.indexOf('#') > -1){
-		newurl = url.substring(0, url.indexOf('#'));
-	}
-	else{
-		newurl = url;
-	}
-	return newurl;
-	
-}
 
 /**
  * Requests metadata of the given URL and the corresponding meta-metadata from
@@ -57,12 +46,7 @@ MetadataLoader.render = function(renderer, container, url, isRoot, clipping)
 {
   // Add the rendering task to the queue
   
-	
-  //We strip '#' anchors out - the service does this already
-  //and we do this here so that the task matches what trhe service returns
-	
- 
-  
+
   var task = new RenderingTask(url, container, isRoot, clipping, renderer)
   MetadataLoader.queue.push(task);  
   
@@ -172,7 +156,6 @@ MetadataLoader.setMetadata = function(rawMetadata, requestMmd)
   
   if (metadata.location)
   {
-	metadata.location = MetadataLoader.stripHashtagAnchors(metadata.location);
     queueTasks = MetadataLoader.getTasksFromQueueByUrl(metadata.location);
   }
 
@@ -181,7 +164,6 @@ MetadataLoader.setMetadata = function(rawMetadata, requestMmd)
   {
     for (var i = 0; i < metadata["additional_locations"].length; i++)
     {
-      metadata["additional_locations"][i] = MetadataLoader.stripHashtagAnchors(metadata["additional_locations"][i]);
       var additional_location = metadata["additional_locations"][i];
       var tasks = MetadataLoader.getTasksFromQueueByUrl(additional_location);
       queueTasks = queueTasks.concat(tasks);      

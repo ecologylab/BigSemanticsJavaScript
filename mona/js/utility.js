@@ -21,11 +21,11 @@ function median(values) {
 }
 
 function nestedHasNavTo (array){
-	for (i in array){
+	for (var i in array){
 		if (array[i].hasOwnProperty('navigatesTo')) return true;
 		
-		for (j in array[i]['value']){
-			if (array[i]['value'][j].hasOwnProperty('navigatesTo')) return true;
+		for (var j in array[i].value){
+			if (array[i].value[j].hasOwnProperty('navigatesTo')) return true;
 		}
 	}
 	return false;
@@ -33,4 +33,21 @@ function nestedHasNavTo (array){
 
 function sortNumber(a,b) {
     return a - b;
+}
+
+function getLabel(key){
+    for (var i in MDC_rawMMD.meta_metadata.kids){
+        var kid = MDC_rawMMD.meta_metadata.kids[i];
+        for (var type in kid){
+            if (key == kid[type].name){
+                if (kid[type].label !== undefined){
+                    return kid[type].label.replace(/_/g," ");
+                }
+                else{ 
+                    return key.replace(/_/g," ");
+                }
+            }
+        }
+    }
+    return key.replace(/_/g," ");
 }
