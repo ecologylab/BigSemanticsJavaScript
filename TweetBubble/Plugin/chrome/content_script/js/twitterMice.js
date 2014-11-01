@@ -115,7 +115,11 @@ MetadataRenderer.addMetadataDisplay = function(container, url, isRoot, clipping,
 {
 	url = MetadataLoader.stripHashtagAnchors(url);
 	
-	var visual = MetadataRenderer.renderInitial(container, url, isRoot, expandedItem);
+	var visual = null;
+	if ((url.indexOf("twitter.com") != -1 || application_name == "tweetbubble") && isRoot)
+	{
+		visual = MetadataRenderer.renderInitial(container, url, isRoot, expandedItem);
+	}
 	
 	// Add the rendering task to the queue
 	var task = new RenderingTask(url, container, isRoot, clipping, MetadataRenderer.render, expandedItem, visual);
@@ -138,14 +142,10 @@ MetadataRenderer.addMetadataDisplay = function(container, url, isRoot, clipping,
 
 MetadataRenderer.renderInitial = function(container, url, isRoot, expandedItem)
 {
-	var bgColor = null;
-	var bgColorObj = null;
-	if (url.indexOf("twitter.com") != -1 || application_name == "tweetbubble")
-	{
-		bgColor = MetadataRenderer.getNextColor(container);
-		bgColorObj = {color: bgColor, bFirstField: true};
-		expandedItem.bgColorObj = bgColorObj;
-	}
+	var bgColor = MetadataRenderer.getNextColor(container);
+	var bgColorObj = {color: bgColor, bFirstField: true};
+	
+	expandedItem.bgColorObj = bgColorObj;
 	
 	var miceStyles = InterfaceStyle.getMiceStyleDictionary(null);
 	var styleInfo = {styles: miceStyles, type: null};
