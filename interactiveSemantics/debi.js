@@ -829,8 +829,16 @@ MetadataLoader.getCollectionMetadataViewModel = function(metadataViewModel,
 }
 
 MetadataLoader.getFacets = function(parentUrl, mmdField){
-	//Some service call in the real version, but for now:
-	if(mmdField.is_facet == "true"){
+	//The current iteration of this is quite dumb: it literally goes into a collection and scans the kid's kid's for any hint of a facet
+	//and then goes cha-raazy!
+	var facetFlag = false;
+	for(var i = 0; i < mmdField.kids[0].composite.type_mmd.kids.length; i++){
+		if ( mmdField.kids[0].composite.type_mmd.kids[i].facet_type != null && mmdField.kids[0].composite.type_mmd.kids[i].facet_type != ""){
+			facetFlag = true;
+		}
+	}
+	
+	if(facetFlag){
 			return ['url'];
 	}
 	return [];
