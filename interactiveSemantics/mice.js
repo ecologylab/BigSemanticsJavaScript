@@ -833,7 +833,7 @@ MICE.buildMetadataTable = function(table, isChildTable, isRoot, metadataFields, 
 			
 		}			
 		// if the maximum number of fields have been rendered then stop rendering and add a "More" expander
-		/*
+		
 		if(fieldCount <= 0)
 		{
 			var nameCol = document.createElement('div');
@@ -872,7 +872,7 @@ MICE.buildMetadataTable = function(table, isChildTable, isRoot, metadataFields, 
 			
 			break;
 		} 
-			*/
+			
 		var metadataField = metadataFields[i];
 		
 		if(metadataField.value)
