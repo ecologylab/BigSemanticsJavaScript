@@ -861,14 +861,7 @@ ExpSearchApp.removeQuerySearchBox = function(event){
 				queryBox.parentNode.removeChild(queryBox);
 			}
 		}
-		else{
-			draggedElement = event.target;
-			var t = event.target;
-			while (t.className != "indResultContainer"){
-				t = t.parentNode;
-			}
-			t.draggable=true;
-		}
+		
 		
 	}
 	

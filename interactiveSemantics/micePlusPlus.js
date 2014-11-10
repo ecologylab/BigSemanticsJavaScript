@@ -13,7 +13,7 @@ var alphabet = ['a', 'b', 'c','d', 'e', 'f', 'g', 'h', 'i', 'j',
                 'u', 'v', 'w', 'x', 'y', 'z', '{'];
 
 
-
+MICE.hardCodedAuthors = new Map;
 
 
 
@@ -24,8 +24,14 @@ MICE.buildMetadataFieldCollectionHook = function(parentUrl, metadataField, row, 
 	var facets = document.createElement('div');
 	facets.className = "facetContainer";
 	for (var i = 0; i < metadataField.facets.length; i++){
-		var facetDiv = MICE.buildFacets(parentUrl, metadataField.mmdName, metadataField.facets[i], false);
-		facets.appendChild(facetDiv);
+		/*
+		 * For the sake of PROTOTYPE 1 , we're takign some shortcuts
+		*/
+		if(metadataField.facets[i].name == "authors"){
+			var facetDiv = MICE.buildFacets(parentUrl, metadataField.mmdName, metadataField.facets[i], false);
+			facets.appendChild(facetDiv);
+		}
+	
 	}
 	
 	fieldLabelDiv.appendChild(facets);
@@ -47,7 +53,7 @@ MICE.buildMetadataFieldCollectionHook = function(parentUrl, metadataField, row, 
 };
 
 
-MICE.buildFacets = function (parentUrl, collectionName, facetName){
+MICE.buildFacets = function (parentUrl, collectionName, facetObj){
 	/*build the sort version of the facet*/
 	var facet = document.createElement('div');
 	facet.className = 'facet';
@@ -55,9 +61,11 @@ MICE.buildFacets = function (parentUrl, collectionName, facetName){
 	facetCheckBox.className = "facetCheckBox";
 	var facetCheckBoxInput = document.createElement('input');
 	facetCheckBoxInput.setAttribute('type', 'checkbox');
+	var facetHeader = document.createElement('div');
+	facetHeader.className="facetHeader";
+	facetHeader.innerHTML = facetObj.name;
 	
-	
-	facetCheckBoxInput.setAttribute('name', facetName);
+	facetCheckBoxInput.setAttribute('name', facetObj.name);
 	facetCheckBoxInput.setAttribute('id',  facetID.toString());
 	facetCheckBoxInput.setAttribute('parenturl', parentUrl);
 	facetCheckBoxInput.setAttribute('collectionname', collectionName);
@@ -93,7 +101,7 @@ MICE.buildFacets = function (parentUrl, collectionName, facetName){
 	maxValue.setAttribute('id', 'maxValue' + facetID.toString());
 	maxValue.value='z';
 	maxValue.setAttribute('onkeydown', "MICE.setSliderMaxValue()");
-	mySlider.setAttribute('name', facetName);
+	mySlider.setAttribute('name', facetObj.name);
 	mySlider.setAttribute('parenturl', parentUrl);
 	mySlider.setAttribute('collectionname', collectionName);
 	$( "#" + facetID.toString() ).slider({ range: true, values: [0, 25], min:0 , max: 25,
@@ -113,13 +121,14 @@ MICE.buildFacets = function (parentUrl, collectionName, facetName){
 		
 	});
 
-
+	facet.appendChild(facetHeader);
 	facet.appendChild(mySlider);
 	facet.appendChild(minLabel);
 	facet.appendChild(minValue);
 	facet.appendChild(maxLabel);
 	facet.appendChild(maxValue);
 	facet.appendChild(facetCheckBox);
+
 	facetID++;
 
 
@@ -194,6 +203,18 @@ MICE.filter = function(min, max, name, parent, collection){
 	
 }
 
+
+MICE.giveMeAuthorValues = function(task, metadataFields, styleInfo){
+	
+	for(var i = 0; i < metadataFields.length; i++){
+		
+	}
+	
+	MetadataLoader.queue.splice(MetadataLoader.queue.indexOf(task), 1);
+
+}
+
+
 //This function's code is meant to imitate future debi functions. Please look forward to it!
 MICE.applyFilterSortRequest = function(request){
 	var collection = request.target_collection.collectionName;
@@ -215,11 +236,19 @@ MICE.applyFilterSortRequest = function(request){
 				for(var j = 0; j < newUrlList.length; j++){
 					//Here, I'm going to implement something super specific to the amazon.com example - this
 					//has nothing to do with final implementation and is strictly for my sanity.
-					var pattern = "https://www\.amazon\.com/";
 					var immediateUrl = newUrlList[j];
+
+					/*var pattern = "https://www\.amazon\.com/";
 					var re = new RegExp("http://www\.amazon\.com/");
 					immediateUrl = immediateUrl.replace(re, "");
-					immediateUrl = immediateUrl.toLowerCase();
+					immediateUrl = immediateUrl.toLowerCase();*/
+					
+					/*PROTOTYPE 1 SPECIFIC STUFF FOLLOWs*/
+					
+					
+					
+					
+					
 					if(!((immediateUrl >= request.filter[i].lower_limit) && (immediateUrl < request.filter[i].upper_limit))){
 						//remove
 						newUrlList.splice(j, 1);

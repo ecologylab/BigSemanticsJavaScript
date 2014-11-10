@@ -823,6 +823,7 @@ MetadataLoader.getCollectionMetadataViewModel = function(metadataViewModel,
       //Dummy call for facet information
       var facetList = MetadataLoader.getFacets(taskUrl, mmdField);
       field.facets = facetList;
+    
       metadataViewModel.push(field);
     }
   }
@@ -843,10 +844,43 @@ MetadataLoader.getFacets = function(parentUrl, mmdField){
 			return ['url'];
 	}
 	return [];*/
-	if(mmdField.label=="people_buy_with"){
-		return ['url']
+	/*
+	 * */
+	var facetList= [];
+
+	var children = mmdField.kids[0].composite.kids;
+	if(children!=null){
+		for(var i = 0; i < children.length; i++){
+			
+			if(children[i].collection!=null){
+				var field = children[i].collection;
+				if(field.facet_type != null && field.facet_type!=""){
+					var obj = {}
+					obj.name = field.name;
+					obj.facet_type = field.facet_type;
+					facetList.push(obj);				}
+			}
+			else if (children[i].composite!=null){
+				var field = children[i].composite;
+				if(field.facet_type != null && field.facet_type!=""){
+					var obj = {}
+					obj.name = field.name;
+					obj.facet_type = field.facet_type;
+					facetList.push(obj);					}
+			}
+			else if(children[i].scalar!=null){
+				var field = children[i].scalar;
+				if(field.facet_type != null && field.facet_type!=""){
+					var obj = {}
+					obj.name = field.name;
+					obj.facet_type = field.facet_type;
+					facetList.push(obj);					}
+			}	
+		}
+
 	}
-	return [];
+	
+	return facetList;
 	
 }
 MetadataLoader.collapseEmptyLabelSet = function(metadataViewModel, parentField)
