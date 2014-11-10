@@ -104,7 +104,7 @@ SearchResult.prototype.addFavicon = function(location, parent){
 SearchResult.prototype.addSearchResultDisplay = function(searchResultX, parent){
 	var newSearchDisplay = document.createElement('div');
 	//newSearchDisplay.setAttribute('draggable', true);
-	newSearchDisplay.setAttribute('dragstart', 'clippingDragStart(event)');
+	//newSearchDisplay.setAttribute('dragstart', 'clippingDragStart(event)');
 	newSearchDisplay.className = "indResultContainer";
 	
 	//recursiveDragEventInjector(newSearchDisplay, clippingDragStart);
