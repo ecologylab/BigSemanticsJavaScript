@@ -291,7 +291,8 @@ ExpSearchApp.renderNewMultipleSearch = function(task, metadataFields){
 			ExpSearchApp.displaySearchSet(currentExpSearch);
 
 		}
-	
+		MetadataLoader.queue.splice(MetadataLoader.queue.indexOf(task), 1);
+
 
 	
 	
@@ -850,7 +851,6 @@ function getSelectionHtml() {
 ExpSearchApp.removeQuerySearchBox = function(event){
 	if(event != null){
 		if(event.target.className == "toQueryBox" || event.target.className == "icon-search toQueryIcon"){
-			return;
 		}
 	}
 	if(event!=null){
@@ -861,15 +861,13 @@ ExpSearchApp.removeQuerySearchBox = function(event){
 				queryBox.parentNode.removeChild(queryBox);
 			}
 		}
-		else{
-			draggedElement = event.target;
-			var t = event.target;
-			while (t.className != "indResultContainer"){
-				t = t.parentNode;
-			}
-			t.draggable=true;
-		}
 		
+		
+	}else{
+		var queryBox = document.getElementById('toQueryBox');
+		if (queryBox != null){
+			queryBox.parentNode.removeChild(queryBox);
+		}
 	}
 	
 	
@@ -909,7 +907,7 @@ ExpSearchApp.textSelected = function(event){
 	   toQueryBox.style.left = ((oRect.left + oRect.right )/ 2) - 20; 
 	   toQueryBox.id = "toQueryBox";
 	   //needs to know which search is its parent
-	   var ssc = document.getElementsByClassName('searchSetContainer')[0];
+	   var ssc = document.getElementsByClassName('searchResultsContainer')[0];
 	   var parent = ssc.getAttribute('searchsetid');
 	   
 	   var textToQuery = 'ExpSearchApp.textToQuery("' + ExpSearchApp.cleanQuery(sel.toString()) + '", "' + parent + '")';
@@ -939,7 +937,7 @@ ExpSearchApp.textToQuery = function(query, id){
 	//Removes textToQueryBox
 	ExpSearchApp.removeQuerySearchBox();
 	//Adds query
-	ExpSearchApp.addQuery(query, ExpSearchApp.getEngines(), id);
+	ExpSearchApp.addQuery(query, id);
 	//logging
 	var time = new Date().getTime();
 	var engines = ExpSearchApp.getEngines();
@@ -953,6 +951,7 @@ ExpSearchApp.textToQuery = function(query, id){
 	  	}
 	 };
 	 TheRecord.addEvent(eventObj);
+	 ExpSearchApp.removeQuerySearchBox();
 
 }
 ExpSearchApp.buildMetadataToQueryButton = function(parent, query){
