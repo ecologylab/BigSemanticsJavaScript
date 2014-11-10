@@ -1,3 +1,5 @@
+/*global MDC_rawMMD, MDC_rawMetadata, console*/
+
 /* source: http://stackoverflow.com/questions/5623838/rgb-to-hex-and-hex-to-rgb */
 // might be faster to hash these
 function hexToRgb(hex) {
@@ -6,7 +8,21 @@ function hexToRgb(hex) {
         r: parseInt(result[1], 16),
         g: parseInt(result[2], 16),
         b: parseInt(result[3], 16)
-    } : null;
+    } : {
+        r: 0,
+        g: 0,
+        b: 0
+    };
+}
+
+// ex; rgba(0, 0, 0, 0.2)
+function rgbToRgbObj(string) {
+    var rgb = string.substring(5, string.length-6).replace(/ /g, '').split(',');
+    return {
+        r: rgb[0],
+        g: rgb[1],
+        b: rgb[2]
+    };
 }
 
 /* source: http://caseyjustus.com/finding-the-median-of-an-array-with-javascript */
@@ -50,4 +66,9 @@ function getLabel(key){
         }
     }
     return key.replace(/_/g," ");
+}
+
+//sanitize input
+function fixWhiteSpace(string){
+    return string.replace(/\s+/g,' ');
 }

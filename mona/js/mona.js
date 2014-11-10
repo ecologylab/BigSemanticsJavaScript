@@ -1,4 +1,4 @@
-/*global getLabel, simplDeserialize, waitForNewMMD, MDC_rawMMD, getNodes, allNodeMDLoaded, document, setTimeout, MetadataLoader, console, hexToRgb, FlairMaster, sortNumber, median, MDC_rawMetadata, showMetadata*/
+/*global fixWhiteSpace, rgbToRgbObj, getLabel, simplDeserialize, waitForNewMMD, MDC_rawMMD, getNodes, allNodeMDLoaded, document, setTimeout, MetadataLoader, console, hexToRgb, FlairMaster, sortNumber, median, MDC_rawMetadata, showMetadata*/
 
 var MONA = {},
     cachedMMD = "",
@@ -25,8 +25,10 @@ function Node(type, title, location, mmdName){
 	this.abbrevTitle = title.substring(0, 29) + "...";
 	this.location = location;
 	this.mmdName = mmdName;
+    this.children = [];
 }
 
+//rev your engines
 MONA.initialize = function (){
 	cachedNodeMetadata = {};
 	nodeColors = {};
@@ -79,23 +81,7 @@ function waitForNewMMD(){
     getNodes();
 }
 
-function waitForNodeMDLoaded(){
-
-    var loading = document.getElementById("loadingBar");
-    if (loading !== null){
-        loading.innerHTML= Object.keys(nodeMetadata).length + " of " + requestsMade + " loaded";
-    }
-    
-	//if url is 404, then we get an http error 500 from the service and get stuck
-	//there are some other cases where we get a service error and get stuch
-	//make it greater than one to account for not getting 404s
-    if (Object.keys(nodeMetadata).length === 0 || requestsMade - (Object.keys(nodeMetadata).length) > 1) {
-        setTimeout(waitForNodeMDLoaded, 100);
-        return;
-    }
-	allNodeMDLoaded();
-}
-
+//make requests for all the node metadata
 function populateNodeMetadata(){
 	//for now don't try to load mmd if there is more than 30 nodes
 	if (Object.keys(nodes).length > 20) {
@@ -115,12 +101,31 @@ function populateNodeMetadata(){
 	}
     var loading = document.createElement('p');
     loading.id="loadingBar";
-    loading.innerHTML= "0 of " + requestsMade + " loaded";
+    loading.innerHTML= "0 of " + requestsMade + " node metadata loaded";
     loadingElement.appendChild(loading);
 	
     waitForNodeMDLoaded();
 }
 
+//update loading bar while we wait on all the node metadata to come in
+function waitForNodeMDLoaded(){
+
+    var loading = document.getElementById("loadingBar");
+    if (loading !== null){
+        loading.innerHTML= Object.keys(nodeMetadata).length + " of " + requestsMade + " loaded";
+    }
+    
+	//if url is 404, then we get an http error 500 from the service and get stuck
+	//there are some other cases where we get a service error and get stuch
+	//make it greater than one to account for not getting 404s
+    if (Object.keys(nodeMetadata).length === 0 || requestsMade - (Object.keys(nodeMetadata).length) > 1) {
+        setTimeout(waitForNodeMDLoaded, 100);
+        return;
+    }
+	allNodeMDLoaded();
+}
+
+//store the metadata for a node once it comes in
 function storeNodeMD(rawMetadata, requestMmd){
 	//innifecient could be improved
 	for (var key in rawMetadata){
@@ -131,12 +136,13 @@ function storeNodeMD(rawMetadata, requestMmd){
 				//show node as loaded
 				nodeMetadata[nodeKey] = rawMetadata;
 				nodeMDLoaded(nodeKey);
+                getSecondaryNodes(rawMetadata, nodeKey);
 			}
 		}
 	}
-    getSecondaryNodes(rawMetadata);
 }
 
+//when a single node's metadata is loaded update its colors
 function nodeMDLoaded(nodeKey){
 	//update color
 	var rgb = hexToRgb(nodeColors[nodes[nodeKey].type]);
@@ -158,17 +164,16 @@ function nodeMDLoaded(nodeKey){
 	}
 }
 
+//when all node metadata is loaded update image sizes
 function allNodeMDLoaded(){
 	var loadingElement = document.getElementById("nodeMDArea");
-	while (loadingElement.firstChild) {
-    	loadingElement.removeChild(loadingElement.firstChild);
-	}
+    loadingElement.removeChild(loadingElement.firstChild);
 	updateImgSizes("acm_portal");
 	updateImgSizes("acm_portal_author");
 	updateLines();
 }
 
-//FIXME work on
+//when we navigate add the old one to the history
 function addToHistory(MDC_rawMetadata){
     var newNode;
     for (var mmdType in MDC_rawMetadata){
@@ -202,6 +207,7 @@ function addToHistory(MDC_rawMetadata){
     historyElement.insertBefore(div, historyElement.firstChild);
 }
 
+//make more important nodes bigger
 function updateImgSizes(mmdType){
 	var citationCountList = [];
 	var foundOne = false;
@@ -269,6 +275,7 @@ function updateImgSizes(mmdType){
 	}
 }
 
+//extract what will be nodes from the focus's metadata
 function getNodes(){
 	console.log(MDC_rawMetadata);
     simplDeserialize(MDC_rawMMD);
@@ -287,7 +294,7 @@ function getNodes(){
 						colorCount++;
 						for (var i = 0;  i < currentField.length; i++){
 							if (currentField[i].hasOwnProperty('title')){
-                                newNode = new Node(key, currentField[i].title, currentField[i].location, currentField[i].meta_metadata_name);
+                                newNode = new Node(key, currentField[i].title, currentField[i].location, currentField[i].meta_metadata_name, null);
                                 nodes[currentField[i].title] = newNode;
                             }
 						}
@@ -302,7 +309,7 @@ function getNodes(){
 								colorCount++;				
 								for (var j = 0;  j < currentField.length; j++){
                                     if (currentField[j][key2].hasOwnProperty('title')){
-									   newNode = new Node(key, currentField[j][key2].title, currentField[j][key2].location, currentField[j][key2].meta_metadata_name);
+									   newNode = new Node(key, currentField[j][key2].title, currentField[j][key2].location, currentField[j][key2].meta_metadata_name, null);
 									   nodes[currentField[j][key2].title] = newNode;
                                     }
 								}			
@@ -317,7 +324,7 @@ function getNodes(){
 				        key = getLabel(key);
                         nodeColors[key] = colorArray[colorCount];
 						colorCount++;
-						newNode = new Node(key, currentField.title, currentField.location, currentField.meta_metadata_name);
+						newNode = new Node(key, currentField.title, currentField.location, currentField.meta_metadata_name, null);
 						nodes[currentField.title] = newNode;
 					}
 				}
@@ -330,8 +337,11 @@ function getNodes(){
 	drawLines();
 }
 
-//maybe combine with getNodes
-function getSecondaryNodes(nodeMMD){
+//extract what will be secondary nodes from an existing node's metadata
+function getSecondaryNodes(nodeMMD, parent){
+    simplDeserialize(nodeMMD);
+    //this is passed to our line drawing function so it can 
+    var currentNodes = {};
     for (var metadataType in nodeMMD){
 		
 		for (var key in nodeMMD[metadataType]){
@@ -344,9 +354,12 @@ function getSecondaryNodes(nodeMMD){
 						for (var i = 0;  i < currentField.length; i++){
                             if (currentField[i].hasOwnProperty('title')){
                                 newNode = new Node(key, currentField[i].title, currentField[i].location, currentField[i].meta_metadata_name);
+                                nodes[parent].children.push(currentField[i].title);
                             }
-                            if (!secondaryNodes.hasOwnProperty(currentField[i].title)){
+                            //if the node doesn't already exist create it. also currently bounded at 100 
+                            if (!secondaryNodes.hasOwnProperty(currentField[i].title) && !nodes.hasOwnProperty(currentField[i].title) && Object.keys(secondaryNodes).length < 100){
                                 secondaryNodes[currentField[i].title] = newNode;
+                                //currentNodes[currentField[i].title] = true;
                             }
 						}
 					}
@@ -359,9 +372,11 @@ function getSecondaryNodes(nodeMMD){
 								for (var j = 0;  j < currentField.length; j++){
                                     if (currentField[j][key2].hasOwnProperty('title')){
 								        newNode = new Node(key, currentField[j][key2].title, currentField[j][key2].location, currentField[j][key2].meta_metadata_name);
+                                        nodes[parent].children.push(currentField[j][key2].title);
                                     }
-                                    if (secondaryNodes.hasOwnProperty(currentField[j][key2].title)){
+                                    if (!secondaryNodes.hasOwnProperty(currentField[j][key2].title) && !nodes.hasOwnProperty(currentField[j][key2].title) && Object.keys(secondaryNodes).length < 100){
                                         secondaryNodes[currentField[j][key2].title] = newNode;
+                                        //currentNodes[currentField[j][key2].title] = true;
                                     }
                                 }			
 							}
@@ -374,8 +389,10 @@ function getSecondaryNodes(nodeMMD){
 					if (currentField.meta_metadata_name != "rich_document" && currentField.meta_metadata_name != "image"){
 				        key = getLabel(key);
 						newNode = new Node(key, currentField.title, currentField.location, currentField.meta_metadata_name);
-				        if (!secondaryNodes.hasOwnProperty(currentField.title)){
+                        nodes[parent].children.push(currentField.title);
+				        if (!secondaryNodes.hasOwnProperty(currentField.title) && !nodes.hasOwnProperty(currentField.title) && Object.keys(secondaryNodes).length < 100){
                             secondaryNodes[currentField.title] = newNode;
+                            //currentNodes[currentField.title] = true;
                         }
 					}
 				}
@@ -384,8 +401,7 @@ function getSecondaryNodes(nodeMMD){
 	}
 	//populateNodeMetadata();
 	drawSecondaryNodes();
-	//drawTypes();
-	//drawLines();
+    drawSecondaryLines(parent);
 }
 
 function onNodeClick(location){
@@ -403,8 +419,15 @@ function onNodeMouseover(nodeKey){
 	var nodeDiv = document.getElementById(nodeKey);    
     var pArray = nodeDiv.getElementsByTagName('p');
 	var p = pArray[0];
+    p.style.backgroundColor = nodeDiv.style.color;
+    p.style.color = "white";
 	p.innerHTML = nodes[nodeKey].title;
     
+    var lines = document.getElementsByClassName(nodes[nodeKey].title+"Line");
+	for (var i=0; i<lines.length; i++){
+        rgb = rgbToRgbObj(lines[i].style.stroke);
+		lines[i].style.stroke = "rgba(" + rgb.r + "," + rgb.g + "," + rgb.b + ",.7)";
+	}
 	updateLines();
 }
 
@@ -415,11 +438,19 @@ function onNodeMouseout(nodeKey){
 		line.style.stroke = "rgba(" + rgb.r + "," + rgb.g + "," + rgb.b + ",.2)";
 	
 		var nodeDiv = document.getElementById(nodeKey);        
-		if(nodeKey.length > 30){
-			var pArray = nodeDiv.getElementsByTagName('p');
-			var p = pArray[0];
+        var pArray = nodeDiv.getElementsByTagName('p');
+        var p = pArray[0];
+        if(nodeKey.length > 30){
 			p.innerHTML = nodes[nodeKey].abbrevTitle;
 		}
+        p.style.color = p.style.backgroundColor;
+        p.style.backgroundColor = "transparent";
+        
+        var lines = document.getElementsByClassName(nodes[nodeKey].title+"Line");
+        for (var i=0; i<lines.length; i++){
+            rgb = rgbToRgbObj(lines[i].style.stroke);
+            lines[i].style.stroke = "rgba(" + rgb.r + "," + rgb.g + "," + rgb.b + ",.2)";
+        }
 	}
 	updateLines();
 }
@@ -440,6 +471,7 @@ function onTypeMouseout(type){
 	}
 }
 
+//create divs for first layer of nodes
 function drawNodes(){
 	for (var nodeKey in nodes){
 		var graphElement = document.getElementById("graphArea");
@@ -481,6 +513,7 @@ function drawNodes(){
 	}
 }
 
+//create divs for second layer of nodes
 function drawSecondaryNodes(){
 	for (var nodeKey in secondaryNodes){
         if (document.getElementById(nodeKey) === null){
@@ -562,6 +595,32 @@ function drawLines(){
 	}	
 }
 
+//draws lines for one chunk of secondary nodes
+function drawSecondaryLines(parent){
+	var lineElement = document.getElementById("lineSVG");
+	
+    for (var i in nodes[parent].children){
+        var nodeKey = nodes[parent].children[i];
+        //FIXME make it look through first level as well
+        if (secondaryNodes[nodeKey] !== undefined && document.getElementById(secondaryNodes[nodeKey].title+"Line") !== undefined){
+            var line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            //bit of a hack for now. Need to decide how to approach this
+            line.setAttribute('class', secondaryNodes[nodeKey].parent+"Line");
+            line.setAttribute('id', secondaryNodes[nodeKey].title+"Line");
+            line.setAttribute('x1', nodePositions[nodeKey].left);
+            line.setAttribute('x2', nodePositions[parent].left+2);
+            line.setAttribute('y1', nodePositions[nodeKey].top+nodePositions[nodeKey].height/2);
+            line.setAttribute('y2', nodePositions[parent].top+10);
+            var rgb = hexToRgb(nodeColors[secondaryNodes[nodeKey].type]);
+            line.style.stroke = "rgba(" + rgb.r + "," + rgb.g + "," + rgb.b + ",.2)";
+            line.setAttribute('stroke-width', 1);
+            lineElement.appendChild(line);
+        }
+	}	
+
+}
+
+//maybe make this work for all lines
 function updateLines(){
 	for (var nodeKey in nodes){
 		//update line ends
@@ -570,5 +629,27 @@ function updateLines(){
 		var line = document.getElementById(nodes[nodeKey].title+"Line");
 		line.setAttribute('x1', nodePositions[nodeKey].left);
 		line.setAttribute('y1', nodePositions[nodeKey].top+nodePositions[nodeKey].height/2);
+        
+        //Bug occurs within this loop!
+        for (var i in nodes[nodeKey].children){
+            var childKey = nodes[nodeKey].children[i];
+            //update line ends
+            //Change How lines work so you can have many to many
+            var div2 = document.getElementById(childKey);
+            if (div2 !== null){
+                nodePositions[childKey] = div2.getBoundingClientRect();
+                var line2 = {};
+                if (secondaryNodes[childKey] !== undefined){
+                    line2 = document.getElementById(secondaryNodes[childKey].title+"Line");
+                }
+                else if (nodes[childKey] !== undefined){
+                    line2 = document.getElementById(nodes[childKey].title+"Line");
+                }
+                line2.setAttribute('x1', nodePositions[childKey].left);
+                line2.setAttribute('x2', nodePositions[nodeKey].left+2);
+                line2.setAttribute('y1', nodePositions[childKey].top+nodePositions[childKey].height/2);
+                line2.setAttribute('y2', nodePositions[nodeKey].top+10);
+            }
+        }
 	}
 }
