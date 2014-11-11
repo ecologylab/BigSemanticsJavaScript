@@ -3,6 +3,7 @@
 var MONA = {},
     cachedMMD = "",
     cachedNodeMetadata = {},
+    focusTitle = "",
     nodeColors = {},
     nodes = {},
     secondaryNodes = {},
@@ -19,13 +20,14 @@ var MONA = {},
     historyNodes = [];
 
 
-function Node(type, title, location, mmdName){
+function Node(type, title, location, mmdName, parent){
 	this.type = type;
 	this.title = title;
 	this.abbrevTitle = title.substring(0, 29) + "...";
 	this.location = location;
 	this.mmdName = mmdName;
     this.children = [];
+    this.parents = [parent];
 }
 
 //rev your engines
@@ -284,6 +286,10 @@ function getNodes(){
     for (var metadataType in MDC_rawMetadata){
 		
 		for (var key in MDC_rawMetadata[metadataType]){
+            //globaly store the title of the in-focus node
+            if (key == "title"){
+                focusTitle = MDC_rawMetadata[metadataType][key];
+            }
             var newNode;
 			var currentField = MDC_rawMetadata[metadataType][key];
 			if (currentField instanceof Array){
@@ -340,10 +346,7 @@ function getNodes(){
 //extract what will be secondary nodes from an existing node's metadata
 function getSecondaryNodes(nodeMMD, parent){
     simplDeserialize(nodeMMD);
-    //this is passed to our line drawing function so it can 
-    var currentNodes = {};
     for (var metadataType in nodeMMD){
-		
 		for (var key in nodeMMD[metadataType]){
             var newNode;
 			var currentField = nodeMMD[metadataType][key];
@@ -352,14 +355,17 @@ function getSecondaryNodes(nodeMMD, parent){
 					if (currentField[0].meta_metadata_name != "rich_document" && currentField[0].meta_metadata_name != "image"){
                         key = getLabel(key);
 						for (var i = 0;  i < currentField.length; i++){
-                            if (currentField[i].hasOwnProperty('title')){
-                                newNode = new Node(key, currentField[i].title, currentField[i].location, currentField[i].meta_metadata_name);
+                            if (currentField[i].hasOwnProperty('title') && currentField[i].title !== focusTitle){
+                                newNode = new Node(key, currentField[i].title, currentField[i].location, currentField[i].meta_metadata_name, parent);
                                 nodes[parent].children.push(currentField[i].title);
                             }
                             //if the node doesn't already exist create it. also currently bounded at 100 
-                            if (!secondaryNodes.hasOwnProperty(currentField[i].title) && !nodes.hasOwnProperty(currentField[i].title) && Object.keys(secondaryNodes).length < 100){
+                            if (!secondaryNodes.hasOwnProperty(currentField[i].title) && !nodes.hasOwnProperty(currentField[i].title) && Object.keys(secondaryNodes).length < 200){
                                 secondaryNodes[currentField[i].title] = newNode;
-                                //currentNodes[currentField[i].title] = true;
+                            }
+                            //otherwise update the nodes parents
+                            else if (secondaryNodes.hasOwnProperty(currentField[i].title)){
+                                secondaryNodes[currentField[i].title].parents.push(parent);
                             }
 						}
 					}
@@ -370,13 +376,15 @@ function getSecondaryNodes(nodeMMD, parent){
 							if (currentField[0][key2].meta_metadata_name != "rich_document" && currentField[0][key2].meta_metadata_name != "image"){
 								key = getLabel(key);				
 								for (var j = 0;  j < currentField.length; j++){
-                                    if (currentField[j][key2].hasOwnProperty('title')){
-								        newNode = new Node(key, currentField[j][key2].title, currentField[j][key2].location, currentField[j][key2].meta_metadata_name);
+                                    if (currentField[j][key2].hasOwnProperty('title') && currentField[j][key2].title !== focusTitle){
+								        newNode = new Node(key, currentField[j][key2].title, currentField[j][key2].location, currentField[j][key2].meta_metadata_name, parent);
                                         nodes[parent].children.push(currentField[j][key2].title);
                                     }
-                                    if (!secondaryNodes.hasOwnProperty(currentField[j][key2].title) && !nodes.hasOwnProperty(currentField[j][key2].title) && Object.keys(secondaryNodes).length < 100){
+                                    if (!secondaryNodes.hasOwnProperty(currentField[j][key2].title) && !nodes.hasOwnProperty(currentField[j][key2].title) && Object.keys(secondaryNodes).length < 200){
                                         secondaryNodes[currentField[j][key2].title] = newNode;
-                                        //currentNodes[currentField[j][key2].title] = true;
+                                    }
+                                    else if (secondaryNodes.hasOwnProperty(currentField[j][key2].title)){
+                                        secondaryNodes[currentField[j][key2].title].parents.push(parent);
                                     }
                                 }			
 							}
@@ -388,11 +396,15 @@ function getSecondaryNodes(nodeMMD, parent){
 				if (currentField.hasOwnProperty("meta_metadata_name") && currentField.hasOwnProperty("location")){
 					if (currentField.meta_metadata_name != "rich_document" && currentField.meta_metadata_name != "image"){
 				        key = getLabel(key);
-						newNode = new Node(key, currentField.title, currentField.location, currentField.meta_metadata_name);
-                        nodes[parent].children.push(currentField.title);
-				        if (!secondaryNodes.hasOwnProperty(currentField.title) && !nodes.hasOwnProperty(currentField.title) && Object.keys(secondaryNodes).length < 100){
+                        if (currentField.title !== focusTitle){
+				            newNode = new Node(key, currentField.title, currentField.location, currentField.meta_metadata_name, parent);
+                            nodes[parent].children.push(currentField.title);
+                        }
+				        if (!secondaryNodes.hasOwnProperty(currentField.title) && !nodes.hasOwnProperty(currentField.title) && Object.keys(secondaryNodes).length < 200){
                             secondaryNodes[currentField.title] = newNode;
-                            //currentNodes[currentField.title] = true;
+                        }
+                        else if (secondaryNodes.hasOwnProperty(currentField.title)){
+                            secondaryNodes[currentField.title].parents.push(parent);
                         }
 					}
 				}
@@ -412,22 +424,24 @@ function onNodeClick(location){
 }
 
 function onNodeMouseover(nodeKey){
-	var line = document.getElementById(nodes[nodeKey].title+"Line");
-	var rgb = hexToRgb(nodeColors[nodes[nodeKey].type]);
-	line.style.stroke = "rgba(" + rgb.r + "," + rgb.g + "," + rgb.b + ",.7)";
+	if (nodes.hasOwnProperty(nodeKey)) {
+        var line = document.getElementById(nodes[nodeKey].title+"Line");
+        var rgb = hexToRgb(nodeColors[nodes[nodeKey].type]);
+        line.style.stroke = "rgba(" + rgb.r + "," + rgb.g + "," + rgb.b + ",.7)";
 
-	var nodeDiv = document.getElementById(nodeKey);    
-    var pArray = nodeDiv.getElementsByTagName('p');
-	var p = pArray[0];
-    p.style.backgroundColor = nodeDiv.style.color;
-    p.style.color = "white";
-	p.innerHTML = nodes[nodeKey].title;
-    
-    var lines = document.getElementsByClassName(nodes[nodeKey].title+"Line");
-	for (var i=0; i<lines.length; i++){
-        rgb = rgbToRgbObj(lines[i].style.stroke);
-		lines[i].style.stroke = "rgba(" + rgb.r + "," + rgb.g + "," + rgb.b + ",.7)";
-	}
+        var nodeDiv = document.getElementById(nodeKey);    
+        var pArray = nodeDiv.getElementsByTagName('p');
+        var p = pArray[0];
+        p.style.backgroundColor = nodeDiv.style.color;
+        p.style.color = "white";
+        p.innerHTML = nodes[nodeKey].title;
+
+        var lines = document.getElementsByClassName(nodes[nodeKey].title+"Line");
+        for (var i=0; i<lines.length; i++){
+            rgb = rgbToRgbObj(lines[i].style.stroke);
+            lines[i].style.stroke = "rgba(" + rgb.r + "," + rgb.g + "," + rgb.b + ",.7)";
+        }   
+    }
 	updateLines();
 }
 
@@ -451,6 +465,44 @@ function onNodeMouseout(nodeKey){
             rgb = rgbToRgbObj(lines[i].style.stroke);
             lines[i].style.stroke = "rgba(" + rgb.r + "," + rgb.g + "," + rgb.b + ",.2)";
         }
+	}
+	updateLines();
+}
+
+function onSecondaryNodeMouseover(nodeKey){
+	if (secondaryNodes.hasOwnProperty(nodeKey)) {
+        for (var i=0; i<secondaryNodes[nodeKey].parents.length; i++){
+            var line = document.getElementById(secondaryNodes[nodeKey].parents[i]+secondaryNodes[nodeKey].title+"Line");
+            var rgb = rgbToRgbObj(line.style.stroke);
+            line.style.stroke = "rgba(" + rgb.r + "," + rgb.g + "," + rgb.b + ",.7)";
+        }  
+        
+        var nodeDiv = document.getElementById(nodeKey);    
+        var pArray = nodeDiv.getElementsByTagName('p');
+        var p = pArray[0];
+        p.style.backgroundColor = nodeDiv.style.color;
+        p.style.color = "white";
+        p.innerHTML = secondaryNodes[nodeKey].title;
+    }
+	updateLines();
+}
+
+function onSecondaryNodeMouseout(nodeKey){
+	if (secondaryNodes.hasOwnProperty(nodeKey)){
+        for (var i=0; i<secondaryNodes[nodeKey].parents.length; i++){
+            var line = document.getElementById(secondaryNodes[nodeKey].parents[i]+secondaryNodes[nodeKey].title+"Line");
+            var rgb = rgbToRgbObj(line.style.stroke);
+            line.style.stroke = "rgba(" + rgb.r + "," + rgb.g + "," + rgb.b + ",.2)";
+        }
+	
+		var nodeDiv = document.getElementById(nodeKey);        
+        var pArray = nodeDiv.getElementsByTagName('p');
+        var p = pArray[0];
+        if(nodeKey.length > 30){
+			p.innerHTML = secondaryNodes[nodeKey].abbrevTitle;
+		}
+        p.style.color = p.style.backgroundColor;
+        p.style.backgroundColor = "transparent";
 	}
 	updateLines();
 }
@@ -524,8 +576,8 @@ function drawSecondaryNodes(){
                 div.style.cursor = "pointer";
                 div.setAttribute('onclick','onNodeClick("'+secondaryNodes[nodeKey].location+'")');
             }
-            div.setAttribute('onmouseover','onNodeMouseover("'+nodeKey+'")');
-            div.setAttribute('onmouseout','onNodeMouseout("'+nodeKey+'")');
+            div.setAttribute('onmouseover','onSecondaryNodeMouseover("'+nodeKey+'")');
+            div.setAttribute('onmouseout','onSecondaryNodeMouseout("'+nodeKey+'")');
             div.id = nodeKey;
 
             var nodeText = "";
@@ -537,14 +589,18 @@ function drawSecondaryNodes(){
             nodePara.innerHTML = nodeText;
             nodePara.className = "nodeText";
 
-            for (var nodeType in nodeColors)
+            for (var nodeType in nodeColors){
                 if (secondaryNodes[nodeKey].type == nodeType){
                     div.className=nodeType;
                     var rgb = hexToRgb(nodeColors[nodeType]);
                     div.style.color = "rgba(" + rgb.r + "," + rgb.g + "," + rgb.b + ",.5)";
                 }
+            }  
+            //if color is not defined make it black
+            if (div.style.color === ""){
+                div.style.color = "rgba(" + 0 + "," + 0 + "," + 0 + ",.5)";
+            }
 
-            //FIXME currently breaks? Not sure what is up		
             var img = FlairMaster.getFlairImage(secondaryNodes[nodeKey].mmdName).cloneNode(true);
             img.setAttribute('height',tier2size+'px');
             img.setAttribute('width',tier2size+'px');
@@ -605,8 +661,8 @@ function drawSecondaryLines(parent){
         if (secondaryNodes[nodeKey] !== undefined && document.getElementById(secondaryNodes[nodeKey].title+"Line") !== undefined){
             var line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
             //bit of a hack for now. Need to decide how to approach this
-            line.setAttribute('class', secondaryNodes[nodeKey].parent+"Line");
-            line.setAttribute('id', secondaryNodes[nodeKey].title+"Line");
+            line.setAttribute('class', parent+"Line");
+            line.setAttribute('id', nodes[parent].title+secondaryNodes[nodeKey].title+"Line");
             line.setAttribute('x1', nodePositions[nodeKey].left);
             line.setAttribute('x2', nodePositions[parent].left+2);
             line.setAttribute('y1', nodePositions[nodeKey].top+nodePositions[nodeKey].height/2);
@@ -640,15 +696,17 @@ function updateLines(){
                 nodePositions[childKey] = div2.getBoundingClientRect();
                 var line2 = {};
                 if (secondaryNodes[childKey] !== undefined){
-                    line2 = document.getElementById(secondaryNodes[childKey].title+"Line");
+                    line2 = document.getElementById(nodes[nodeKey].title+secondaryNodes[childKey].title+"Line");
                 }
                 else if (nodes[childKey] !== undefined){
-                    line2 = document.getElementById(nodes[childKey].title+"Line");
+                    line2 = document.getElementById(nodes[nodeKey].title+nodes[childKey].title+"Line");
                 }
-                line2.setAttribute('x1', nodePositions[childKey].left);
-                line2.setAttribute('x2', nodePositions[nodeKey].left+2);
-                line2.setAttribute('y1', nodePositions[childKey].top+nodePositions[childKey].height/2);
-                line2.setAttribute('y2', nodePositions[nodeKey].top+10);
+                if (line2 !== null){
+                    line2.setAttribute('x1', nodePositions[childKey].left);
+                    line2.setAttribute('x2', nodePositions[nodeKey].left+2);
+                    line2.setAttribute('y1', nodePositions[childKey].top+nodePositions[childKey].height/2);
+                    line2.setAttribute('y2', nodePositions[nodeKey].top+10);
+                }
             }
         }
 	}
