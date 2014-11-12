@@ -10,7 +10,7 @@ div.span9.content {
 	border: 1px solid #E1E1E8;
 	
 	position: absolute;
-  	top: 200px; 
+  	top: 400px; 
   	left: 280px;
 	overflow-y: scroll;
 	max-height: 300px;
@@ -33,7 +33,7 @@ div#historyWrapper {
 
 div#typeArea {
 	position: absolute;
-	top: 200px;
+	top: 400px;
 	left: 950px;
 }
 

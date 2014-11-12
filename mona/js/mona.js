@@ -35,6 +35,7 @@ MONA.initialize = function (){
 	cachedNodeMetadata = {};
 	nodeColors = {};
 	nodes = {};
+    secondaryNodes = {};
 	nodeMetadata = {};
 	nodePositions = {};
 	typePositions = {};
@@ -252,7 +253,7 @@ function updateImgSizes(mmdType){
 			}
 			else if (mmdType == "acm_portal_author"){
 				if (nodeMetadata[nodeKey].acm_portal_author.publication_detail.citation_count !== undefined){
-					citationCount = nodeMetadata[nodeKey].acm_portal_author.publication_detail.citation_count;
+					citationCount = parseInt(nodeMetadata[nodeKey].acm_portal_author.publication_detail.citation_count);
 				}
 			}
 			var imgs = document.getElementById(nodeKey).getElementsByTagName('img');
@@ -355,18 +356,23 @@ function getSecondaryNodes(nodeMMD, parent){
 					if (currentField[0].meta_metadata_name != "rich_document" && currentField[0].meta_metadata_name != "image"){
                         key = getLabel(key);
 						for (var i = 0;  i < currentField.length; i++){
-                            if (currentField[i].hasOwnProperty('title') && currentField[i].title !== focusTitle){
-                                newNode = new Node(key, currentField[i].title, currentField[i].location, currentField[i].meta_metadata_name, parent);
+                            // we found a valid node!
+                            if (currentField[i].hasOwnProperty('title') && currentField[i].title !== focusTitle && Object.keys(secondaryNodes).length < 200){
+                                //update the parent nodes list of children
                                 nodes[parent].children.push(currentField[i].title);
+                                
+                                //if the node doesn't already exist create it. also currently bounded at 200 
+                                if (!secondaryNodes.hasOwnProperty(currentField[i].title) && !nodes.hasOwnProperty(currentField[i].title)){
+                                    newNode = new Node(key, currentField[i].title, currentField[i].location, currentField[i].meta_metadata_name, parent);
+                                    secondaryNodes[currentField[i].title] = newNode;
+                                }
+                                
+                                //otherwise update the nodes parents
+                                else if (secondaryNodes.hasOwnProperty(currentField[i].title)){
+                                    secondaryNodes[currentField[i].title].parents.push(parent);
+                                }
                             }
-                            //if the node doesn't already exist create it. also currently bounded at 100 
-                            if (!secondaryNodes.hasOwnProperty(currentField[i].title) && !nodes.hasOwnProperty(currentField[i].title) && Object.keys(secondaryNodes).length < 200){
-                                secondaryNodes[currentField[i].title] = newNode;
-                            }
-                            //otherwise update the nodes parents
-                            else if (secondaryNodes.hasOwnProperty(currentField[i].title)){
-                                secondaryNodes[currentField[i].title].parents.push(parent);
-                            }
+
 						}
 					}
 				}
@@ -377,15 +383,16 @@ function getSecondaryNodes(nodeMMD, parent){
 								key = getLabel(key);				
 								for (var j = 0;  j < currentField.length; j++){
                                     if (currentField[j][key2].hasOwnProperty('title') && currentField[j][key2].title !== focusTitle){
-								        newNode = new Node(key, currentField[j][key2].title, currentField[j][key2].location, currentField[j][key2].meta_metadata_name, parent);
-                                        nodes[parent].children.push(currentField[j][key2].title);
+                                        nodes[parent].children.push(currentField[j][key2].title);  
+                                        if (!secondaryNodes.hasOwnProperty(currentField[j][key2].title) && !nodes.hasOwnProperty(currentField[j][key2].title) && Object.keys(secondaryNodes).length < 200){
+                                            newNode = new Node(key, currentField[j][key2].title, currentField[j][key2].location, currentField[j][key2].meta_metadata_name, parent);
+                                            secondaryNodes[currentField[j][key2].title] = newNode;
+                                        }
+                                        else if (secondaryNodes.hasOwnProperty(currentField[j][key2].title)){
+                                            secondaryNodes[currentField[j][key2].title].parents.push(parent);
+                                        }
                                     }
-                                    if (!secondaryNodes.hasOwnProperty(currentField[j][key2].title) && !nodes.hasOwnProperty(currentField[j][key2].title) && Object.keys(secondaryNodes).length < 200){
-                                        secondaryNodes[currentField[j][key2].title] = newNode;
-                                    }
-                                    else if (secondaryNodes.hasOwnProperty(currentField[j][key2].title)){
-                                        secondaryNodes[currentField[j][key2].title].parents.push(parent);
-                                    }
+
                                 }			
 							}
 						}
@@ -397,14 +404,14 @@ function getSecondaryNodes(nodeMMD, parent){
 					if (currentField.meta_metadata_name != "rich_document" && currentField.meta_metadata_name != "image"){
 				        key = getLabel(key);
                         if (currentField.title !== focusTitle){
-				            newNode = new Node(key, currentField.title, currentField.location, currentField.meta_metadata_name, parent);
                             nodes[parent].children.push(currentField.title);
-                        }
-				        if (!secondaryNodes.hasOwnProperty(currentField.title) && !nodes.hasOwnProperty(currentField.title) && Object.keys(secondaryNodes).length < 200){
-                            secondaryNodes[currentField.title] = newNode;
-                        }
-                        else if (secondaryNodes.hasOwnProperty(currentField.title)){
-                            secondaryNodes[currentField.title].parents.push(parent);
+                            if (!secondaryNodes.hasOwnProperty(currentField.title) && !nodes.hasOwnProperty(currentField.title) && Object.keys(secondaryNodes).length < 200){
+                                newNode = new Node(key, currentField.title, currentField.location, currentField.meta_metadata_name, parent);
+                                secondaryNodes[currentField.title] = newNode;
+                            }
+                            else if (secondaryNodes.hasOwnProperty(currentField.title)){
+                                secondaryNodes[currentField.title].parents.push(parent);
+                            }
                         }
 					}
 				}
@@ -463,7 +470,7 @@ function onNodeMouseout(nodeKey){
         var lines = document.getElementsByClassName(nodes[nodeKey].title+"Line");
         for (var i=0; i<lines.length; i++){
             rgb = rgbToRgbObj(lines[i].style.stroke);
-            lines[i].style.stroke = "rgba(" + rgb.r + "," + rgb.g + "," + rgb.b + ",.2)";
+            lines[i].style.stroke = "rgba(" + rgb.r + "," + rgb.g + "," + rgb.b + ",.1)";
         }
 	}
 	updateLines();
@@ -645,7 +652,7 @@ function drawLines(){
 		line.setAttribute('y1', nodePositions[nodeKey].top+nodePositions[nodeKey].height/2);
 		line.setAttribute('y2', typePositions[nodes[nodeKey].type].top+10);
 		var rgb = hexToRgb(nodeColors[nodes[nodeKey].type]);
-		line.style.stroke = "rgba(" + rgb.r + "," + rgb.g + "," + rgb.b + ",.2)";
+		line.style.stroke = "rgba(" + rgb.r + "," + rgb.g + "," + rgb.b + ",.1)";
 		line.setAttribute('stroke-width', 1);
 		typeElement.appendChild(line);
 	}	
@@ -668,7 +675,7 @@ function drawSecondaryLines(parent){
             line.setAttribute('y1', nodePositions[nodeKey].top+nodePositions[nodeKey].height/2);
             line.setAttribute('y2', nodePositions[parent].top+10);
             var rgb = hexToRgb(nodeColors[secondaryNodes[nodeKey].type]);
-            line.style.stroke = "rgba(" + rgb.r + "," + rgb.g + "," + rgb.b + ",.2)";
+            line.style.stroke = "rgba(" + rgb.r + "," + rgb.g + "," + rgb.b + ",.1)";
             line.setAttribute('stroke-width', 1);
             lineElement.appendChild(line);
         }
