@@ -7,7 +7,7 @@ function buildSlideOut(document)
 	slideOutVisual = document.createElement("div");
 	
 	// assign propertyies and default styling
-	slideOutVisual.className = "slide";
+	slideOutVisual.className = "ideaMache_slide";
 	
 	// add new div to the page
 	document.body.appendChild(slideOutVisual);
