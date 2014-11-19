@@ -1147,7 +1147,7 @@ MICE.buildMetadataField = function(metadataField, isChildTable, fieldCount, row,
 	
 	else if (metadataField.composite_type != null && metadataField.composite_type == "image")
 	{
-		var label = MetadataRenderer.getFieldLabel(metadataField);
+		var label = MICE.getFieldLabel(metadataField);
 		
 		if(metadataField.name && !metadataField.hide_label && (!isChildTable || label.type == "image"))
 		{
