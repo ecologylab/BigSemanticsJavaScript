@@ -833,7 +833,7 @@ MICE.buildMetadataTable = function(table, isChildTable, isRoot, metadataFields, 
 			
 		}			
 		// if the maximum number of fields have been rendered then stop rendering and add a "More" expander
-		/*
+		
 		if(fieldCount <= 0)
 		{
 			var nameCol = document.createElement('div');
@@ -872,7 +872,7 @@ MICE.buildMetadataTable = function(table, isChildTable, isRoot, metadataFields, 
 			
 			break;
 		} 
-			*/
+			
 		var metadataField = metadataFields[i];
 		
 		if(metadataField.value)
@@ -1401,14 +1401,12 @@ MICE.buildMetadataField = function(metadataField, isChildTable, fieldCount, row,
 		
 			//var collection = new facetedCollection(childUrl, row);
 			
-		
-		/*
-		 * We are gonna temporarily not collpse to make my life easier
+	
 		if(metadataField.value.length >= 1)
 		{
 			MICE.collapseTable(childTable, styleInfo);			
 		}					
-			*/
+			
 		var nestedPad = document.createElement('div');
 			nestedPad.className = styleInfo.styles.nestedPad;
 		

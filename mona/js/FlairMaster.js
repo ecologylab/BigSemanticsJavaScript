@@ -20,10 +20,12 @@ FlairMaster.preload = function(){
 
 FlairMaster.getFlairImage = function(metadataType)
 {
-	if(this.images[metadataType] !== null){
+	if(this.images[metadataType] !== undefined){
 	   return this.images[metadataType];
 	}
-	else return this.images.unknown;
+	else {
+        return this.images.unknown;
+    }
 };
 
 FlairMaster.images = {};
