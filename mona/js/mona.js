@@ -1,4 +1,4 @@
-/*global fixWhiteSpace, rgbToRgbObj, getLabel, simplDeserialize, waitForNewMMD, MDC_rawMMD, getNodes, allNodeMDLoaded, document, setTimeout, MetadataLoader, console, hexToRgb, FlairMaster, sortNumber, median, MDC_rawMetadata, showMetadata*/
+/*global window, doc, fixWhiteSpace, rgbToRgbObj, getLabel, simplDeserialize, waitForNewMMD, MDC_rawMMD, getNodes, allNodeMDLoaded, document, setTimeout, MetadataLoader, console, hexToRgb, FlairMaster, sortNumber, median, MDC_rawMetadata, showMetadata*/
 
 var MONA = {},
     cachedMMD = "",
@@ -12,10 +12,10 @@ var MONA = {},
     typePositions = {},
     colorCount = 0,
     requestsMade = 0,
-    tier4size = 10,
-    tier3size = 20,
-    tier2size = 30,
-    tier1size = 40,
+    tier4size = 15,
+    tier3size = 20, 
+    tier2size = 25, //also the base size
+    tier1size = 30,
     colorArray = ["#009933", "#006699", "#CC9900", "#CC0000", "#CC00CC"],
     historyNodes = [];
 
@@ -28,6 +28,7 @@ function Node(type, title, location, mmdName, parent){
 	this.mmdName = mmdName;
     this.children = [];
     this.parents = [parent];
+    this.rendered = true;
 }
 
 //rev your engines
@@ -87,7 +88,7 @@ function waitForNewMMD(){
 //make requests for all the node metadata
 function populateNodeMetadata(){
 	//for now don't try to load mmd if there is more than 30 nodes
-	if (Object.keys(nodes).length > 20) {
+	if (Object.keys(nodes).length > 30) {
 		return;
 	}
 	for (var nodeKey in nodes) {
@@ -357,7 +358,7 @@ function getSecondaryNodes(nodeMMD, parent){
                         key = getLabel(key);
 						for (var i = 0;  i < currentField.length; i++){
                             // we found a valid node!
-                            if (currentField[i].hasOwnProperty('title') && currentField[i].title !== focusTitle && Object.keys(secondaryNodes).length < 200){
+                            if (currentField[i].hasOwnProperty('title') && currentField[i].title !== focusTitle && Object.keys(secondaryNodes).length < 400){
                                 //update the parent nodes list of children
                                 nodes[parent].children.push(currentField[i].title);
                                 
@@ -384,7 +385,7 @@ function getSecondaryNodes(nodeMMD, parent){
 								for (var j = 0;  j < currentField.length; j++){
                                     if (currentField[j][key2].hasOwnProperty('title') && currentField[j][key2].title !== focusTitle){
                                         nodes[parent].children.push(currentField[j][key2].title);  
-                                        if (!secondaryNodes.hasOwnProperty(currentField[j][key2].title) && !nodes.hasOwnProperty(currentField[j][key2].title) && Object.keys(secondaryNodes).length < 200){
+                                        if (!secondaryNodes.hasOwnProperty(currentField[j][key2].title) && !nodes.hasOwnProperty(currentField[j][key2].title) && Object.keys(secondaryNodes).length < 400){
                                             newNode = new Node(key, currentField[j][key2].title, currentField[j][key2].location, currentField[j][key2].meta_metadata_name, parent);
                                             secondaryNodes[currentField[j][key2].title] = newNode;
                                         }
@@ -405,7 +406,7 @@ function getSecondaryNodes(nodeMMD, parent){
 				        key = getLabel(key);
                         if (currentField.title !== focusTitle){
                             nodes[parent].children.push(currentField.title);
-                            if (!secondaryNodes.hasOwnProperty(currentField.title) && !nodes.hasOwnProperty(currentField.title) && Object.keys(secondaryNodes).length < 200){
+                            if (!secondaryNodes.hasOwnProperty(currentField.title) && !nodes.hasOwnProperty(currentField.title) && Object.keys(secondaryNodes).length < 400){
                                 newNode = new Node(key, currentField.title, currentField.location, currentField.meta_metadata_name, parent);
                                 secondaryNodes[currentField.title] = newNode;
                             }
@@ -447,9 +448,12 @@ function onNodeMouseover(nodeKey){
         for (var i=0; i<lines.length; i++){
             rgb = rgbToRgbObj(lines[i].style.stroke);
             lines[i].style.stroke = "rgba(" + rgb.r + "," + rgb.g + "," + rgb.b + ",.7)";
-        }   
+        }
+        //if something changed update the lines
+        if (nodePositions[nodeKey].height != nodeDiv.getBoundingClientRect().height){
+            updateLines();
+        }
     }
-	updateLines();
 }
 
 function onNodeMouseout(nodeKey){
@@ -472,8 +476,11 @@ function onNodeMouseout(nodeKey){
             rgb = rgbToRgbObj(lines[i].style.stroke);
             lines[i].style.stroke = "rgba(" + rgb.r + "," + rgb.g + "," + rgb.b + ",.1)";
         }
+        //if something changed update the lines
+        if (nodePositions[nodeKey].height != nodeDiv.getBoundingClientRect().height){
+            updateLines();
+        }
 	}
-	updateLines();
 }
 
 function onSecondaryNodeMouseover(nodeKey){
@@ -490,8 +497,11 @@ function onSecondaryNodeMouseover(nodeKey){
         p.style.backgroundColor = nodeDiv.style.color;
         p.style.color = "white";
         p.innerHTML = secondaryNodes[nodeKey].title;
+        //if something changed update the lines
+        if (nodePositions[nodeKey].height != nodeDiv.getBoundingClientRect().height){
+            updateLines();
+        }
     }
-	updateLines();
 }
 
 function onSecondaryNodeMouseout(nodeKey){
@@ -510,8 +520,11 @@ function onSecondaryNodeMouseout(nodeKey){
 		}
         p.style.color = p.style.backgroundColor;
         p.style.backgroundColor = "transparent";
+        //if something changed update the lines
+        if (nodePositions[nodeKey].height != nodeDiv.getBoundingClientRect().height){
+            updateLines();
+        }        
 	}
-	updateLines();
 }
 
 function onTypeMouseover(type){
@@ -572,13 +585,48 @@ function drawNodes(){
 	}
 }
 
+//decide which nodes to render
+//might need to change this if asynchro gives trouble
+function markNodesToRender(){
+    var upperBound = 100;
+//mark them all not to be rendered at first
+    for (var nodeKey in secondaryNodes){
+        secondaryNodes[nodeKey].rendered = false;
+    }  
+    //if we have less than the upper bound render them all
+    if (Object.keys(secondaryNodes).length < upperBound){
+        for (var nodeKey2 in secondaryNodes){
+            secondaryNodes[nodeKey2].rendered = true;
+        }
+    }
+    //else only render those with more than 1 parent
+    //will need to be made more robust
+    else {
+        for (var nodeKey3 in secondaryNodes){
+            if (secondaryNodes[nodeKey3].parents.length > 1){
+                secondaryNodes[nodeKey3].rendered = true;
+            }
+            // else if the node is already drawn we need to erase it and its lines
+            else if (document.getElementById(nodeKey) !== null){
+                for (var p in secondaryNodes[nodeKey3].parents){
+                    var parent = secondaryNodes[nodeKey3].parents[p];
+                }
+            }
+        }
+    }
+}
+
 //create divs for second layer of nodes
 function drawSecondaryNodes(){
+    
+    //only render the top 200
+    //markNodesToRender();
+    
 	for (var nodeKey in secondaryNodes){
-        if (document.getElementById(nodeKey) === null){
+        if (document.getElementById(nodeKey) === null && secondaryNodes[nodeKey].rendered){
             var graphElement = document.getElementById("nodeMDArea");
             var div = document.createElement('div');
-
+            
             if (secondaryNodes[nodeKey].location !== undefined){//visualize this
                 div.style.cursor = "pointer";
                 div.setAttribute('onclick','onNodeClick("'+secondaryNodes[nodeKey].location+'")');
@@ -673,7 +721,7 @@ function drawSecondaryLines(parent){
             line.setAttribute('x1', nodePositions[nodeKey].left);
             line.setAttribute('x2', nodePositions[parent].left+2);
             line.setAttribute('y1', nodePositions[nodeKey].top+nodePositions[nodeKey].height/2);
-            line.setAttribute('y2', nodePositions[parent].top+10);
+            line.setAttribute('y2', nodePositions[parent].top+nodePositions[parent].height/2);
             var rgb = hexToRgb(nodeColors[secondaryNodes[nodeKey].type]);
             line.style.stroke = "rgba(" + rgb.r + "," + rgb.g + "," + rgb.b + ",.1)";
             line.setAttribute('stroke-width', 1);
@@ -683,17 +731,19 @@ function drawSecondaryLines(parent){
 
 }
 
-//maybe make this work for all lines
+//FIXME make more efiicient by only updating changed ones
 function updateLines(){
 	for (var nodeKey in nodes){
-		//update line ends
+        var doc = document.documentElement;
+		var topOffset = (window.pageYOffset || doc.scrollTop)  - (doc.clientTop || 0);
+        
+        //update line ends
 		var div = document.getElementById(nodeKey);
 		nodePositions[nodeKey] = div.getBoundingClientRect();
 		var line = document.getElementById(nodes[nodeKey].title+"Line");
 		line.setAttribute('x1', nodePositions[nodeKey].left);
-		line.setAttribute('y1', nodePositions[nodeKey].top+nodePositions[nodeKey].height/2);
+		line.setAttribute('y1', nodePositions[nodeKey].top+nodePositions[nodeKey].height/2 + topOffset);
         
-        //Bug occurs within this loop!
         for (var i in nodes[nodeKey].children){
             var childKey = nodes[nodeKey].children[i];
             //update line ends
@@ -711,8 +761,8 @@ function updateLines(){
                 if (line2 !== null){
                     line2.setAttribute('x1', nodePositions[childKey].left);
                     line2.setAttribute('x2', nodePositions[nodeKey].left+2);
-                    line2.setAttribute('y1', nodePositions[childKey].top+nodePositions[childKey].height/2);
-                    line2.setAttribute('y2', nodePositions[nodeKey].top+10);
+                    line2.setAttribute('y1', nodePositions[childKey].top + nodePositions[childKey].height/2 + topOffset);
+                    line2.setAttribute('y2', nodePositions[nodeKey].top + nodePositions[nodeKey].height/2 + topOffset);
                 }
             }
         }
