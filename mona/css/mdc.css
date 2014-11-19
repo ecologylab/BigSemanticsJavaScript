@@ -38,30 +38,36 @@ div#typeArea {
 	left: 950px;
 }
 
-div#graphArea {
+div#level1Nodes {
 	position: absolute;
 	top: 300px;
 	left: 1150px;
 }
 
-div#graphArea div {
-    clear: both;
-}
-
-div#graphArea div:hover p {
-    font-size: 120%;
-    z-index: 10;
-}
-
-div#graphArea div p {
-    overflow: hidden;
-}
-
-div#nodeMDArea {
+div#level2Nodes {
 	position: absolute;
 	top: 80px;
 	left: 1500px;
 }
+
+div .nodes img {
+    float: left;
+}
+
+div .nodes div {
+    clear: both;
+}
+
+div .nodes div:hover p {
+    font-size: 120%;
+    z-index: 10;
+}
+
+div .nodes div p {
+    padding: 2px 3px 2px 3px;
+    border-radius: 3px;
+}
+
 
 svg {
 	position: absolute;

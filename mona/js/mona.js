@@ -23,7 +23,7 @@ var MONA = {},
 function Node(type, title, location, mmdName, parent){
 	this.type = type;
 	this.title = title;
-	this.abbrevTitle = title.substring(0, 29) + "...";
+	this.abbrevTitle = title.substring(0, 40) + "...";
 	this.location = location;
 	this.mmdName = mmdName;
     this.children = [];
@@ -42,10 +42,10 @@ MONA.initialize = function (){
 	typePositions = {};
 	colorCount = 0;
 	requestsMade = 0;
-	var graphElement = document.getElementById("graphArea"),
+	var graphElement = document.getElementById("level1Nodes"),
         typeElement = document.getElementById("typeArea"),
         linesElement = document.getElementById("lineSVG"),
-        loadingElement = document.getElementById("nodeMDArea"),
+        loadingElement = document.getElementById("level2Nodes"),
         nodesLoading = document.createElement('div'),
         nodeMDLoading = document.createElement('div');
 	
@@ -78,7 +78,7 @@ function waitForNewMMD(){
         return;
     }
     cachedMMD = MDC_rawMMD;
-    var graphElement = document.getElementById("graphArea");
+    var graphElement = document.getElementById("level1Nodes");
 	while (graphElement.firstChild){
         graphElement.removeChild(graphElement.firstChild);
 	}
@@ -99,7 +99,7 @@ function populateNodeMetadata(){
 	}
     
     //start the loading bar
-    var loadingElement = document.getElementById("nodeMDArea");
+    var loadingElement = document.getElementById("level2Nodes");
 	while (loadingElement.firstChild){
         loadingElement.removeChild(loadingElement.firstChild);
 	}
@@ -170,7 +170,7 @@ function nodeMDLoaded(nodeKey){
 
 //when all node metadata is loaded update image sizes
 function allNodeMDLoaded(){
-	var loadingElement = document.getElementById("nodeMDArea");
+	var loadingElement = document.getElementById("level2Nodes");
     loadingElement.removeChild(loadingElement.firstChild);
 	updateImgSizes("acm_portal");
 	updateImgSizes("acm_portal_author");
@@ -546,7 +546,7 @@ function onTypeMouseout(type){
 //create divs for first layer of nodes
 function drawNodes(){
 	for (var nodeKey in nodes){
-		var graphElement = document.getElementById("graphArea");
+		var graphElement = document.getElementById("level1Nodes");
 		var div = document.createElement('div');
 		
 		if (nodes[nodeKey].location !== undefined){//visualize this
@@ -624,7 +624,7 @@ function drawSecondaryNodes(){
     
 	for (var nodeKey in secondaryNodes){
         if (document.getElementById(nodeKey) === null && secondaryNodes[nodeKey].rendered){
-            var graphElement = document.getElementById("nodeMDArea");
+            var graphElement = document.getElementById("level2Nodes");
             var div = document.createElement('div');
             
             if (secondaryNodes[nodeKey].location !== undefined){//visualize this
