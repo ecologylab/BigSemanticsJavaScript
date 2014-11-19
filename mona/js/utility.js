@@ -68,7 +68,17 @@ function getLabel(key){
     return key.replace(/_/g," ");
 }
 
-//sanitize input
-function fixWhiteSpace(string){
-    return string.replace(/\s+/g,' ');
+function Vector(items)
+{
+	this.items = items;
 }
+
+Vector.prototype.add = function(other)
+{
+	var result = [];
+    for(var i = 0; i < this.items.length; i++) {
+        result.push( this.items[i] + other.items[i]);
+    }
+    
+    return new Vector(result);
+};
