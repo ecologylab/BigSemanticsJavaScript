@@ -84,7 +84,7 @@ MetadataLoader.setMetadata = function(rawMetadata)
  * @param isRoot, true if this is the root document for a metadataRendering
  * @param expandedItem, a non-metadata item for which the display was constructed
  */
-function RenderingTask(url, container, isRoot, clipping, renderer, expandedItem)
+function RenderingTask(url, container, isRoot, clipping, renderer, expandedItem, visual)
 {
 	if(url != null)
 		this.url = url.toLowerCase();
@@ -99,6 +99,7 @@ function RenderingTask(url, container, isRoot, clipping, renderer, expandedItem)
 	
 	this.renderer = renderer;
 	this.expandedItem = expandedItem;
+	this.visual = visual;
 }
 
 /**

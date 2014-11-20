@@ -81,7 +81,7 @@ function extractMetadataFromUrl(purl, targetDoc, callback) {
 	}
 }
 
-function extractMetadata(targetDoc, mmd) {
+function extractMetadata(targetDoc, mmd, additionalUrls) {
 	
 	
 	doc = targetDoc;
@@ -140,6 +140,7 @@ function extractMetadata(targetDoc, mmd) {
 	    }
 	    
 	    metadata['meta_metadata_name'] = mmd.name;
+	    metadata['additional_locations'] = additionalUrls;
 	    
 	    return metadata;
    }

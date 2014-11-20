@@ -239,6 +239,9 @@
     height: auto;
 }
 
+.metadataContainer .fieldValueImage{
+	height: auto;
+}
 
 .metadataContainer .fieldChildContainer{
         

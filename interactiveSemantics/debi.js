@@ -850,8 +850,14 @@ MetadataLoader.collapseEmptyLabelSet = function(metadataViewModel, parentField)
 			}
 			else if (field.composite_type || field.child_type)
 			{
-				if (field.value.length > 0)
+				if (field.value.length > 0) 
+				{
 					metadataViewModel[i] = field.value[0];
+					
+					// as we are currently hiding labels of collection children
+					if (field.child_type)
+						metadataViewModel[i].hide_label = true;
+				}
 			}
 		}
 	}

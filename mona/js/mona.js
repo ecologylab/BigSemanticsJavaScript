@@ -1,4 +1,4 @@
-/*global fixWhiteSpace, rgbToRgbObj, getLabel, simplDeserialize, waitForNewMMD, MDC_rawMMD, getNodes, allNodeMDLoaded, document, setTimeout, MetadataLoader, console, hexToRgb, FlairMaster, sortNumber, median, MDC_rawMetadata, showMetadata*/
+/*global window, doc, Image, fixWhiteSpace, rgbToRgbObj, getLabel, simplDeserialize, waitForNewMMD, MDC_rawMMD, getNodes, allNodeMDLoaded, document, setTimeout, MetadataLoader, console, hexToRgb, FlairMaster, sortNumber, median, MDC_rawMetadata, showMetadata, setInterval, clearInterval, Vector*/
 
 var MONA = {},
     cachedMMD = "",
@@ -6,28 +6,39 @@ var MONA = {},
     focusTitle = "",
     nodeColors = {},
     nodes = {},
+    nodeList =[],
     secondaryNodes = {},
+    secondaryNodesList = [],
     nodeMetadata = {},
     nodePositions = {},
     typePositions = {},
     colorCount = 0,
     requestsMade = 0,
-    tier4size = 10,
-    tier3size = 20,
-    tier2size = 30,
-    tier1size = 40,
+    tier4size = 15,
+    tier3size = 20, 
+    tier2size = 25, //also the base size
+    tier1size = 30,
     colorArray = ["#009933", "#006699", "#CC9900", "#CC0000", "#CC00CC"],
     historyNodes = [];
 
 
 function Node(type, title, location, mmdName, parent){
+    this.x = 0;
+    this.y = 0;
+    
 	this.type = type;
 	this.title = title;
-	this.abbrevTitle = title.substring(0, 29) + "...";
+	this.abbrevTitle = title.substring(0, 40) + "...";
 	this.location = location;
 	this.mmdName = mmdName;
     this.children = [];
-    this.parents = [parent];
+    if (parent !== null){
+        this.parents = [parent];
+    }
+    else {
+        this.parents = [];
+    }
+    this.rendered = true;
 }
 
 //rev your engines
@@ -41,10 +52,10 @@ MONA.initialize = function (){
 	typePositions = {};
 	colorCount = 0;
 	requestsMade = 0;
-	var graphElement = document.getElementById("graphArea"),
+	var graphElement = document.getElementById("level1Nodes"),
         typeElement = document.getElementById("typeArea"),
         linesElement = document.getElementById("lineSVG"),
-        loadingElement = document.getElementById("nodeMDArea"),
+        loadingElement = document.getElementById("level2Nodes"),
         nodesLoading = document.createElement('div'),
         nodeMDLoading = document.createElement('div');
 	
@@ -77,7 +88,7 @@ function waitForNewMMD(){
         return;
     }
     cachedMMD = MDC_rawMMD;
-    var graphElement = document.getElementById("graphArea");
+    var graphElement = document.getElementById("level1Nodes");
 	while (graphElement.firstChild){
         graphElement.removeChild(graphElement.firstChild);
 	}
@@ -86,9 +97,17 @@ function waitForNewMMD(){
 
 //make requests for all the node metadata
 function populateNodeMetadata(){
-	//for now don't try to load mmd if there is more than 30 nodes
-	if (Object.keys(nodes).length > 20) {
+	//for now don't try to load mmd if there is more than 30
+	if (Object.keys(nodes).length > 30) {
 		return;
+	}
+    //if there are no nodes display nothing
+    if (Object.keys(nodes).length === 0) {
+        var loadingElementClear = document.getElementById("level2Nodes");
+        while (loadingElementClear.firstChild){
+            loadingElementClear.removeChild(loadingElementClear.firstChild);
+        }
+        return;
 	}
 	for (var nodeKey in nodes) {
 		if (nodes[nodeKey].location !== undefined) {
@@ -98,22 +117,30 @@ function populateNodeMetadata(){
 	}
     
     //start the loading bar
-    var loadingElement = document.getElementById("nodeMDArea");
+    var loadingElement = document.getElementById("level2Nodes");
 	while (loadingElement.firstChild){
         loadingElement.removeChild(loadingElement.firstChild);
 	}
-    var loading = document.createElement('p');
-    loading.id="loadingBar";
-    loading.innerHTML= "0 of " + requestsMade + " node metadata loaded";
-    loadingElement.appendChild(loading);
-	
+    var loadingDiv = document.createElement('div');
+    var loadingText = document.createElement('p');
+    loadingText.id="loadingText";
+    
+    var spinner = new Image(24,24);
+    spinner.src = "img/spinner.gif";
+    loadingDiv.appendChild(spinner);
+    
+    loadingText.innerHTML= "0 of " + requestsMade + " node metadata loaded";
+    loadingDiv.appendChild(loadingText);
+    
+    loadingElement.appendChild(loadingDiv);
+    
     waitForNodeMDLoaded();
 }
 
 //update loading bar while we wait on all the node metadata to come in
 function waitForNodeMDLoaded(){
 
-    var loading = document.getElementById("loadingBar");
+    var loading = document.getElementById("loadingText");
     if (loading !== null){
         loading.innerHTML= Object.keys(nodeMetadata).length + " of " + requestsMade + " loaded";
     }
@@ -169,11 +196,15 @@ function nodeMDLoaded(nodeKey){
 
 //when all node metadata is loaded update image sizes
 function allNodeMDLoaded(){
-	var loadingElement = document.getElementById("nodeMDArea");
+	var loadingElement = document.getElementById("level2Nodes");
     loadingElement.removeChild(loadingElement.firstChild);
 	updateImgSizes("acm_portal");
 	updateImgSizes("acm_portal_author");
 	updateLines();
+    for (var nodeKey in secondaryNodes){
+        secondaryNodesList.push(secondaryNodes[nodeKey]);
+    }
+    doPhysical();
 }
 
 //when we navigate add the old one to the history
@@ -302,7 +333,7 @@ function getNodes(){
 						for (var i = 0;  i < currentField.length; i++){
 							if (currentField[i].hasOwnProperty('title')){
                                 newNode = new Node(key, currentField[i].title, currentField[i].location, currentField[i].meta_metadata_name, null);
-                                nodes[currentField[i].title] = newNode;
+                                nodes[currentField[i].location] = newNode;
                             }
 						}
 					}
@@ -317,7 +348,7 @@ function getNodes(){
 								for (var j = 0;  j < currentField.length; j++){
                                     if (currentField[j][key2].hasOwnProperty('title')){
 									   newNode = new Node(key, currentField[j][key2].title, currentField[j][key2].location, currentField[j][key2].meta_metadata_name, null);
-									   nodes[currentField[j][key2].title] = newNode;
+									   nodes[currentField[j][key2].location] = newNode;
                                     }
 								}			
 							}
@@ -332,7 +363,7 @@ function getNodes(){
                         nodeColors[key] = colorArray[colorCount];
 						colorCount++;
 						newNode = new Node(key, currentField.title, currentField.location, currentField.meta_metadata_name, null);
-						nodes[currentField.title] = newNode;
+						nodes[currentField.location] = newNode;
 					}
 				}
 			}
@@ -357,19 +388,19 @@ function getSecondaryNodes(nodeMMD, parent){
                         key = getLabel(key);
 						for (var i = 0;  i < currentField.length; i++){
                             // we found a valid node!
-                            if (currentField[i].hasOwnProperty('title') && currentField[i].title !== focusTitle && Object.keys(secondaryNodes).length < 200){
+                            if (currentField[i].hasOwnProperty('title') && currentField[i].title !== focusTitle && Object.keys(secondaryNodes).length < 400){
                                 //update the parent nodes list of children
-                                nodes[parent].children.push(currentField[i].title);
+                                nodes[parent].children.push(currentField[i].location);
                                 
                                 //if the node doesn't already exist create it. also currently bounded at 200 
-                                if (!secondaryNodes.hasOwnProperty(currentField[i].title) && !nodes.hasOwnProperty(currentField[i].title)){
+                                if (!secondaryNodes.hasOwnProperty(currentField[i].location) && !nodes.hasOwnProperty(currentField[i].location)){
                                     newNode = new Node(key, currentField[i].title, currentField[i].location, currentField[i].meta_metadata_name, parent);
-                                    secondaryNodes[currentField[i].title] = newNode;
+                                    secondaryNodes[currentField[i].location] = newNode;
                                 }
-                                
+            
                                 //otherwise update the nodes parents
-                                else if (secondaryNodes.hasOwnProperty(currentField[i].title)){
-                                    secondaryNodes[currentField[i].title].parents.push(parent);
+                                else if (secondaryNodes.hasOwnProperty(currentField[i].location)){
+                                    secondaryNodes[currentField[i].location].parents.push(parent);
                                 }
                             }
 
@@ -383,13 +414,13 @@ function getSecondaryNodes(nodeMMD, parent){
 								key = getLabel(key);				
 								for (var j = 0;  j < currentField.length; j++){
                                     if (currentField[j][key2].hasOwnProperty('title') && currentField[j][key2].title !== focusTitle){
-                                        nodes[parent].children.push(currentField[j][key2].title);  
-                                        if (!secondaryNodes.hasOwnProperty(currentField[j][key2].title) && !nodes.hasOwnProperty(currentField[j][key2].title) && Object.keys(secondaryNodes).length < 200){
+                                        nodes[parent].children.push(currentField[j][key2].location);  
+                                        if (!secondaryNodes.hasOwnProperty(currentField[j][key2].location) && !nodes.hasOwnProperty(currentField[j][key2].location) && Object.keys(secondaryNodes).length < 400){
                                             newNode = new Node(key, currentField[j][key2].title, currentField[j][key2].location, currentField[j][key2].meta_metadata_name, parent);
-                                            secondaryNodes[currentField[j][key2].title] = newNode;
+                                            secondaryNodes[currentField[j][key2].location] = newNode;
                                         }
-                                        else if (secondaryNodes.hasOwnProperty(currentField[j][key2].title)){
-                                            secondaryNodes[currentField[j][key2].title].parents.push(parent);
+                                        else if (secondaryNodes.hasOwnProperty(currentField[j][key2].location)){
+                                            secondaryNodes[currentField[j][key2].location].parents.push(parent);
                                         }
                                     }
 
@@ -404,13 +435,13 @@ function getSecondaryNodes(nodeMMD, parent){
 					if (currentField.meta_metadata_name != "rich_document" && currentField.meta_metadata_name != "image"){
 				        key = getLabel(key);
                         if (currentField.title !== focusTitle){
-                            nodes[parent].children.push(currentField.title);
-                            if (!secondaryNodes.hasOwnProperty(currentField.title) && !nodes.hasOwnProperty(currentField.title) && Object.keys(secondaryNodes).length < 200){
+                            nodes[parent].children.push(currentField.location);
+                            if (!secondaryNodes.hasOwnProperty(currentField.location) && !nodes.hasOwnProperty(currentField.location) && Object.keys(secondaryNodes).length < 400){
                                 newNode = new Node(key, currentField.title, currentField.location, currentField.meta_metadata_name, parent);
-                                secondaryNodes[currentField.title] = newNode;
+                                secondaryNodes[currentField.location] = newNode;
                             }
-                            else if (secondaryNodes.hasOwnProperty(currentField.title)){
-                                secondaryNodes[currentField.title].parents.push(parent);
+                            else if (secondaryNodes.hasOwnProperty(currentField.location)){
+                                secondaryNodes[currentField.location].parents.push(parent);
                             }
                         }
 					}
@@ -432,7 +463,7 @@ function onNodeClick(location){
 
 function onNodeMouseover(nodeKey){
 	if (nodes.hasOwnProperty(nodeKey)) {
-        var line = document.getElementById(nodes[nodeKey].title+"Line");
+        var line = document.getElementById(nodes[nodeKey].location+"Line");
         var rgb = hexToRgb(nodeColors[nodes[nodeKey].type]);
         line.style.stroke = "rgba(" + rgb.r + "," + rgb.g + "," + rgb.b + ",.7)";
 
@@ -443,18 +474,21 @@ function onNodeMouseover(nodeKey){
         p.style.color = "white";
         p.innerHTML = nodes[nodeKey].title;
 
-        var lines = document.getElementsByClassName(nodes[nodeKey].title+"Line");
+        var lines = document.getElementsByClassName(nodes[nodeKey].location+"Line");
         for (var i=0; i<lines.length; i++){
             rgb = rgbToRgbObj(lines[i].style.stroke);
             lines[i].style.stroke = "rgba(" + rgb.r + "," + rgb.g + "," + rgb.b + ",.7)";
-        }   
+        }
+        //if something changed update the lines
+        if (nodePositions[nodeKey].height != nodeDiv.getBoundingClientRect().height){
+            updateLines();
+        }
     }
-	updateLines();
 }
 
 function onNodeMouseout(nodeKey){
 	if (nodes.hasOwnProperty(nodeKey)){
-		var line = document.getElementById(nodes[nodeKey].title+"Line");
+		var line = document.getElementById(nodes[nodeKey].location+"Line");
 		var rgb = hexToRgb(nodeColors[nodes[nodeKey].type]);
 		line.style.stroke = "rgba(" + rgb.r + "," + rgb.g + "," + rgb.b + ",.2)";
 	
@@ -467,19 +501,22 @@ function onNodeMouseout(nodeKey){
         p.style.color = p.style.backgroundColor;
         p.style.backgroundColor = "transparent";
         
-        var lines = document.getElementsByClassName(nodes[nodeKey].title+"Line");
+        var lines = document.getElementsByClassName(nodes[nodeKey].location+"Line");
         for (var i=0; i<lines.length; i++){
             rgb = rgbToRgbObj(lines[i].style.stroke);
             lines[i].style.stroke = "rgba(" + rgb.r + "," + rgb.g + "," + rgb.b + ",.1)";
         }
+        //if something changed update the lines
+        if (nodePositions[nodeKey].height != nodeDiv.getBoundingClientRect().height){
+            updateLines();
+        }
 	}
-	updateLines();
 }
 
 function onSecondaryNodeMouseover(nodeKey){
 	if (secondaryNodes.hasOwnProperty(nodeKey)) {
         for (var i=0; i<secondaryNodes[nodeKey].parents.length; i++){
-            var line = document.getElementById(secondaryNodes[nodeKey].parents[i]+secondaryNodes[nodeKey].title+"Line");
+            var line = document.getElementById(secondaryNodes[nodeKey].parents[i]+secondaryNodes[nodeKey].location+"Line");
             var rgb = rgbToRgbObj(line.style.stroke);
             line.style.stroke = "rgba(" + rgb.r + "," + rgb.g + "," + rgb.b + ",.7)";
         }  
@@ -490,14 +527,17 @@ function onSecondaryNodeMouseover(nodeKey){
         p.style.backgroundColor = nodeDiv.style.color;
         p.style.color = "white";
         p.innerHTML = secondaryNodes[nodeKey].title;
+        //if something changed update the lines
+        if (nodePositions[nodeKey].height != nodeDiv.getBoundingClientRect().height){
+            updateLines();
+        }
     }
-	updateLines();
 }
 
 function onSecondaryNodeMouseout(nodeKey){
 	if (secondaryNodes.hasOwnProperty(nodeKey)){
         for (var i=0; i<secondaryNodes[nodeKey].parents.length; i++){
-            var line = document.getElementById(secondaryNodes[nodeKey].parents[i]+secondaryNodes[nodeKey].title+"Line");
+            var line = document.getElementById(secondaryNodes[nodeKey].parents[i]+secondaryNodes[nodeKey].location+"Line");
             var rgb = rgbToRgbObj(line.style.stroke);
             line.style.stroke = "rgba(" + rgb.r + "," + rgb.g + "," + rgb.b + ",.2)";
         }
@@ -510,8 +550,11 @@ function onSecondaryNodeMouseout(nodeKey){
 		}
         p.style.color = p.style.backgroundColor;
         p.style.backgroundColor = "transparent";
+        //if something changed update the lines
+        if (nodePositions[nodeKey].height != nodeDiv.getBoundingClientRect().height){
+            updateLines();
+        }        
 	}
-	updateLines();
 }
 
 function onTypeMouseover(type){
@@ -533,16 +576,21 @@ function onTypeMouseout(type){
 //create divs for first layer of nodes
 function drawNodes(){
 	for (var nodeKey in nodes){
-		var graphElement = document.getElementById("graphArea");
-		var div = document.createElement('div');
-		
-		if (nodes[nodeKey].location !== undefined){//visualize this
-			div.style.cursor = "pointer";
-			div.setAttribute('onclick','onNodeClick("'+nodes[nodeKey].location+'")');
+		var graphElement = document.getElementById("level1Nodes");
+			
+        var node = nodes[nodeKey];
+        
+        node.visual = document.createElement('div');
+        //n.visual.className = 'node';
+        node.visual.style.webkitTransform = "translate("+node.x+"px, "+node.y+"px)";
+        
+		if (node.location !== undefined){//visualize this
+			node.visual.style.cursor = "pointer";
+			node.visual.setAttribute('onclick','onNodeClick("'+nodes[nodeKey].location+'")');
 		}
-		div.setAttribute('onmouseover','onNodeMouseover("'+nodeKey+'")');
-		div.setAttribute('onmouseout','onNodeMouseout("'+nodeKey+'")');
-		div.id = nodeKey;
+		node.visual.setAttribute('onmouseover','onNodeMouseover("'+nodeKey+'")');
+		node.visual.setAttribute('onmouseout','onNodeMouseout("'+nodeKey+'")');
+		node.visual.id = nodeKey;
 		
 		var nodeText = "";
 		if(nodeKey.length > 30)
@@ -555,9 +603,9 @@ function drawNodes(){
 		
 		for (var nodeType in nodeColors)
 			if (nodes[nodeKey].type == nodeType){
-				div.className=nodeType;
+				node.visual.className=nodeType;
 				var rgb = hexToRgb(nodeColors[nodeType]);
-				div.style.color = "rgba(" + rgb.r + "," + rgb.g + "," + rgb.b + ",.5)";
+				node.visual.style.color = "rgba(" + rgb.r + "," + rgb.g + "," + rgb.b + ",.5)";
 			}
 		
 		//images are preloaded so we make copies of them		
@@ -565,27 +613,65 @@ function drawNodes(){
 		img.setAttribute('height',tier2size+'px');
 		img.setAttribute('width',tier2size+'px');
 		
-		div.appendChild(img);
-		div.appendChild(nodePara);
-		graphElement.appendChild(div);
-		nodePositions[nodeKey] = div.getBoundingClientRect();
+		node.visual.appendChild(img);
+		node.visual.appendChild(nodePara);
+		graphElement.appendChild(node.visual);
+		nodePositions[nodeKey] = node.visual.getBoundingClientRect();
 	}
+}
+
+//decide which nodes to render
+//might need to change this if asynchro gives trouble
+function markNodesToRender(){
+    var upperBound = 100;
+//mark them all not to be rendered at first
+    for (var nodeKey in secondaryNodes){
+        secondaryNodes[nodeKey].rendered = false;
+    }  
+    //if we have less than the upper bound render them all
+    if (Object.keys(secondaryNodes).length < upperBound){
+        for (var nodeKey2 in secondaryNodes){
+            secondaryNodes[nodeKey2].rendered = true;
+        }
+    }
+    //else only render those with more than 1 parent
+    //will need to be made more robust
+    else {
+        for (var nodeKey3 in secondaryNodes){
+            if (secondaryNodes[nodeKey3].parents.length > 1){
+                secondaryNodes[nodeKey3].rendered = true;
+            }
+            // else if the node is already drawn we need to erase it and its lines
+            else if (document.getElementById(nodeKey) !== null){
+                for (var p in secondaryNodes[nodeKey3].parents){
+                    var parent = secondaryNodes[nodeKey3].parents[p];
+                }
+            }
+        }
+    }
 }
 
 //create divs for second layer of nodes
 function drawSecondaryNodes(){
+    
+    //only render the top 200
+    //markNodesToRender();
+    
 	for (var nodeKey in secondaryNodes){
-        if (document.getElementById(nodeKey) === null){
-            var graphElement = document.getElementById("nodeMDArea");
-            var div = document.createElement('div');
-
-            if (secondaryNodes[nodeKey].location !== undefined){//visualize this
-                div.style.cursor = "pointer";
-                div.setAttribute('onclick','onNodeClick("'+secondaryNodes[nodeKey].location+'")');
+        if (document.getElementById(nodeKey) === null && secondaryNodes[nodeKey].rendered){
+            var graphElement = document.getElementById("level2Nodes");
+            
+            var node = secondaryNodes[nodeKey];
+            
+            node.visual = document.createElement('div');
+            
+            if (node.location !== undefined){//visualize this
+                node.visual.style.cursor = "pointer";
+                node.visual.setAttribute('onclick','onNodeClick("'+secondaryNodes[nodeKey].location+'")');
             }
-            div.setAttribute('onmouseover','onSecondaryNodeMouseover("'+nodeKey+'")');
-            div.setAttribute('onmouseout','onSecondaryNodeMouseout("'+nodeKey+'")');
-            div.id = nodeKey;
+            node.visual.setAttribute('onmouseover','onSecondaryNodeMouseover("'+nodeKey+'")');
+            node.visual.setAttribute('onmouseout','onSecondaryNodeMouseout("'+nodeKey+'")');
+            node.visual.id = nodeKey;
 
             var nodeText = "";
             if(nodeKey.length > 30)
@@ -598,24 +684,24 @@ function drawSecondaryNodes(){
 
             for (var nodeType in nodeColors){
                 if (secondaryNodes[nodeKey].type == nodeType){
-                    div.className=nodeType;
+                    node.visual.className=nodeType;
                     var rgb = hexToRgb(nodeColors[nodeType]);
-                    div.style.color = "rgba(" + rgb.r + "," + rgb.g + "," + rgb.b + ",.5)";
+                    node.visual.style.color = "rgba(" + rgb.r + "," + rgb.g + "," + rgb.b + ",.5)";
                 }
             }  
             //if color is not defined make it black
-            if (div.style.color === ""){
-                div.style.color = "rgba(" + 0 + "," + 0 + "," + 0 + ",.5)";
+            if (node.visual.style.color === ""){
+                node.visual.style.color = "rgba(" + 0 + "," + 0 + "," + 0 + ",.5)";
             }
 
             var img = FlairMaster.getFlairImage(secondaryNodes[nodeKey].mmdName).cloneNode(true);
             img.setAttribute('height',tier2size+'px');
             img.setAttribute('width',tier2size+'px');
 
-            div.appendChild(img);
-            div.appendChild(nodePara);
-            graphElement.appendChild(div);
-            nodePositions[nodeKey] = div.getBoundingClientRect();
+            node.visual.appendChild(img);
+            node.visual.appendChild(nodePara);
+            graphElement.appendChild(node.visual);
+            nodePositions[nodeKey] = node.visual.getBoundingClientRect();
         }
 	}
 }
@@ -646,7 +732,7 @@ function drawLines(){
 	for (var nodeKey in nodes){
 		var line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
 		line.setAttribute('class', nodes[nodeKey].type+"Line");
-		line.setAttribute('id', nodes[nodeKey].title+"Line");
+		line.setAttribute('id', nodes[nodeKey].location+"Line");
 		line.setAttribute('x1', nodePositions[nodeKey].left);
 		line.setAttribute('x2', typePositions[nodes[nodeKey].type].right+2);
 		line.setAttribute('y1', nodePositions[nodeKey].top+nodePositions[nodeKey].height/2);
@@ -658,22 +744,20 @@ function drawLines(){
 	}	
 }
 
-//draws lines for one chunk of secondary nodes
+//draws lines for children of one primary node
 function drawSecondaryLines(parent){
 	var lineElement = document.getElementById("lineSVG");
 	
     for (var i in nodes[parent].children){
         var nodeKey = nodes[parent].children[i];
-        //FIXME make it look through first level as well
-        if (secondaryNodes[nodeKey] !== undefined && document.getElementById(secondaryNodes[nodeKey].title+"Line") !== undefined){
+        if (secondaryNodes[nodeKey] !== undefined && document.getElementById(secondaryNodes[nodeKey].location+"Line") !== undefined){
             var line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-            //bit of a hack for now. Need to decide how to approach this
             line.setAttribute('class', parent+"Line");
-            line.setAttribute('id', nodes[parent].title+secondaryNodes[nodeKey].title+"Line");
+            line.setAttribute('id', nodes[parent].location+secondaryNodes[nodeKey].location+"Line");
             line.setAttribute('x1', nodePositions[nodeKey].left);
             line.setAttribute('x2', nodePositions[parent].left+2);
             line.setAttribute('y1', nodePositions[nodeKey].top+nodePositions[nodeKey].height/2);
-            line.setAttribute('y2', nodePositions[parent].top+10);
+            line.setAttribute('y2', nodePositions[parent].top+nodePositions[parent].height/2);
             var rgb = hexToRgb(nodeColors[secondaryNodes[nodeKey].type]);
             line.style.stroke = "rgba(" + rgb.r + "," + rgb.g + "," + rgb.b + ",.1)";
             line.setAttribute('stroke-width', 1);
@@ -683,38 +767,220 @@ function drawSecondaryLines(parent){
 
 }
 
-//maybe make this work for all lines
+//maybe make more efficient by only updating changed ones
 function updateLines(){
 	for (var nodeKey in nodes){
-		//update line ends
+        var doc = document.documentElement;
+		var topOffset = (window.pageYOffset || doc.scrollTop)  - (doc.clientTop || 0);
+        
+        //update line ends
 		var div = document.getElementById(nodeKey);
 		nodePositions[nodeKey] = div.getBoundingClientRect();
-		var line = document.getElementById(nodes[nodeKey].title+"Line");
+		var line = document.getElementById(nodes[nodeKey].location+"Line");
 		line.setAttribute('x1', nodePositions[nodeKey].left);
-		line.setAttribute('y1', nodePositions[nodeKey].top+nodePositions[nodeKey].height/2);
+		line.setAttribute('y1', nodePositions[nodeKey].top+nodePositions[nodeKey].height/2 + topOffset);
         
-        //Bug occurs within this loop!
         for (var i in nodes[nodeKey].children){
             var childKey = nodes[nodeKey].children[i];
             //update line ends
-            //Change How lines work so you can have many to many
             var div2 = document.getElementById(childKey);
             if (div2 !== null){
                 nodePositions[childKey] = div2.getBoundingClientRect();
                 var line2 = {};
                 if (secondaryNodes[childKey] !== undefined){
-                    line2 = document.getElementById(nodes[nodeKey].title+secondaryNodes[childKey].title+"Line");
+                    line2 = document.getElementById(nodes[nodeKey].location+secondaryNodes[childKey].location+"Line");
                 }
                 else if (nodes[childKey] !== undefined){
-                    line2 = document.getElementById(nodes[nodeKey].title+nodes[childKey].title+"Line");
+                    line2 = document.getElementById(nodes[nodeKey].location+nodes[childKey].location+"Line");
                 }
                 if (line2 !== null){
                     line2.setAttribute('x1', nodePositions[childKey].left);
                     line2.setAttribute('x2', nodePositions[nodeKey].left+2);
-                    line2.setAttribute('y1', nodePositions[childKey].top+nodePositions[childKey].height/2);
-                    line2.setAttribute('y2', nodePositions[nodeKey].top+10);
+                    line2.setAttribute('y1', nodePositions[childKey].top + nodePositions[childKey].height/2 + topOffset);
+                    line2.setAttribute('y2', nodePositions[nodeKey].top + nodePositions[nodeKey].height/2 + topOffset);
                 }
             }
         }
+	}
+}
+
+/* ================================================================== Let's render it! */
+
+var MAX_STEP = 0;
+var STEP_COUNT = 0;
+var physicalInterval;
+var NODE_RENDER_TIMER = 400;
+
+function doPhysical(n)
+{
+	MAX_STEP = n;
+	STEP_COUNT = 0;
+	
+	//while(STEP_COUNT < MAX_STEP)
+	//	stepPhyscial();
+	
+	physicalInterval = setInterval(stepPhyscial, NODE_RENDER_TIMER);
+}
+
+var BEAUTY = 10;
+var UGLY = -50;
+var TOUCH_DISTANCE = 120;
+
+var width = 0;
+var height = 0;
+var nodeCounter = 0;
+
+function stepPhyscial()
+{
+	//console.log(STEP_COUNT);
+	
+	if(STEP_COUNT == MAX_STEP)
+		clearInterval(physicalInterval);
+		
+	STEP_COUNT++;
+	
+	//resetLines();
+	
+    var n, node, p, pDist, pSpeed, pX, pY;
+	// calculate attractive forces
+	for(n = 0; n < secondaryNodesList.length; n++)
+	{
+		node = secondaryNodesList[n];
+		node.vector = new Vector([0,0,0]);
+		
+		for(p = 0; p < node.parents.length; p++)
+		{
+			var parent = node.parents[p];
+			pDist = Math.sqrt( Math.pow((parent.x - node.x), 2) + Math.pow((parent.y - node.y), 2) );
+			
+			if(pDist > TOUCH_DISTANCE-0)
+			{
+				pX = (parent.x - node.x) / pDist;
+				pY = (parent.y - node.y) / pDist;
+				
+				var power = Math.sqrt(Math.pow(nodes.length - n, 2));
+				
+				pSpeed = (pDist / width) * BEAUTY * power; 
+				
+				pX *= pSpeed;
+				pY *= pSpeed;
+				
+				node.vector = node.vector.add(new Vector([pX, pY, 0]));
+			}
+		}
+	}	
+	
+	// add in replusive forces
+	
+	for(n = 0; n < secondaryNodesList.length; n++)
+	{
+		node = secondaryNodesList[n];
+		
+		var replusionVector = new Vector([0,0,0]);
+		
+		for(p = 0; p <nodes.length; p++)
+		{
+			
+			if(n != p)
+			{
+				var other = nodes[p];
+				pDist = Math.sqrt( Math.pow((other.x - node.x), 2) + Math.pow((other.y - node.y), 2) );
+				
+				if(pDist < TOUCH_DISTANCE)
+				{
+					pX = (other.x - node.x) / pDist;
+					pY = (other.y - node.y) / pDist;
+					
+					pSpeed =  ((TOUCH_DISTANCE - pDist) / TOUCH_DISTANCE) * UGLY; 
+									
+					pX *= pSpeed;
+					pY *= pSpeed;
+					
+					replusionVector = replusionVector.add(new Vector([pX, pY, 0]));
+				}
+			}
+		}
+		
+		//replusionVector.items[0] /= nodes.length - 1; 
+		//replusionVector.items[1] /= nodes.length - 1;
+				
+		node.vector = node.vector.add(replusionVector);
+	}
+	
+	
+	//step through 1 tick
+	
+	
+	for(n = 1; n < secondaryNodesList.length; n++)
+	{
+		node = secondaryNodesList[n];
+		
+		if(!isNaN(node.vector.items[0]))
+		{
+			node.x += node.vector.items[0];
+		}
+		
+		if(!isNaN(node.vector.items[1]))
+		{
+			node.y += node.vector.items[1];
+		}
+		
+		if(node.x < 10)
+			node.x = 10;
+		else if(node.x > width-10)
+			node.x = width-10;
+			
+		if(node.y < 10)
+			node.y = 10;
+		else if(node.y > height-10)
+			node.y = height-10;
+			
+		/*
+		if( node.first)
+		{
+			if(node.x < 500)
+				node.x = 500;
+			else if(node.x > 700)
+				node.x = 700;
+		}
+		else
+		{
+			if(node.x < 700)
+				node.x = 700;
+			else if(node.x > width - 10)
+				node.x = width -10;
+		}
+		*/
+	}
+	
+	nodeCounter = 0;
+	
+	
+	//setTimeout(moveNextNode, NODE_RENDER_TIMER);
+	moveNextNode();
+}
+
+function moveNode(n)
+{
+	//console.log("moving node: "+n.parents.length);
+	n.visual.style.webkitTransform = "translate("+n.x+"px, "+n.y+"px)";
+    
+	for(var i = 0; i < n.parents.length; i++)
+	{
+		updateLines();
+        //drawLine(n.x, n.y, n.parents[i].x, n.parents[i].y);
+	}
+}
+
+function moveNextNode()
+{
+	//console.log("moving next node");
+	moveNode(secondaryNodesList[nodeCounter]);
+	nodeCounter++;	
+	
+	if(nodeCounter < secondaryNodesList.length)
+	{	
+		//setTimeout(moveNextNode, NODE_RENDER_TIMER);
+		moveNextNode();
 	}
 }

@@ -101,7 +101,8 @@ function expandCollapseItem(event)
 			
 			// this refers to the element from which event handler was fired
 			var expandableItemUrl = instance.getExpandableItemUrl(item);
-			expandableItemUrl = urlPrefix + expandableItemUrl;
+			if (expandableItemUrl.indexOf("http") != 0)
+				expandableItemUrl = urlPrefix + expandableItemUrl;
 			console.log(expandableItemUrl);
 			
 			// relegate task of selecting apt parent to specific instance 
