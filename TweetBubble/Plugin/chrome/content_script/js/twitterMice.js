@@ -49,8 +49,11 @@ MetadataRenderer.render = function(task, metadataFields, styleInfo)
 
 	// Build the HTML table for the metadata
 	MetadataLoader.currentDocumentLocation = task.url;
-		
-	var metadataTable =  MetadataRenderer.buildMetadataTable(task.table, false, task.isRoot, metadataFields, FIRST_LEVEL_FIELDS, styleInfo, task.expandedItem.bgColorObj, true);
+	
+	var bgColorObj = null;
+	if (task.expandedItem)
+		bgColorObj = task.expandedItem.bgColorObj;
+	var metadataTable =  MetadataRenderer.buildMetadataTable(task.table, false, task.isRoot, metadataFields, FIRST_LEVEL_FIELDS, styleInfo, bgColorObj, true);
 	//MetadataRenderer.buildMetadataDisplay(task.isRoot, task.mmd, task.metadata, task.url, bgColor)
 	
 	if(metadataTable)
@@ -121,7 +124,8 @@ MetadataRenderer.addMetadataDisplay = function(container, url, isRoot, clipping,
 	{
 		var bgColor = MetadataRenderer.getNextColor(container);
 		var bgColorObj = {color: bgColor, bFirstField: true};
-		expandedItem.bgColorObj = bgColorObj;
+		if (expandedItem)
+			expandedItem.bgColorObj = bgColorObj;
 		
 		if (isRoot)
 			visual = MetadataRenderer.renderInitial(container, url, isRoot, expandedItem, bgColorObj);
