@@ -25,49 +25,55 @@ body {
     margin-left: 10px;
 }
 
-div#historyWrapper {
+#historyWrapper {
 	position: absolute;
 	top: 60px;
 	left: 10px;
     z-index: 10;
 }
 
-div#typeArea {
+#typeArea {
 	position: absolute;
 	top: 500px;
 	left: 950px;
 }
 
-div#level1Nodes {
+#graphArea {
 	position: absolute;
-	top: 300px;
+	top: 60px;
 	left: 1150px;
+	right: 0px;
+	bottom: 0px;
 }
 
-div#level2Nodes {
+#loadingBar {
 	position: absolute;
 	top: 80px;
 	left: 1500px;
 }
 
-div .nodes img {
+.nodes div {
+    position: absolute;
+    white-space: nowrap;
+    z-index: 1;
+    transition: .2s;
+}
+
+.nodes div img {
     float: left;
+    z-index: 1
 }
 
-div .nodes div {
-    clear: both;
-}
-
-div .nodes div:hover p {
-    font-size: 120%;
-    z-index: 10;
-}
-
-div .nodes div p {
+.nodeText {
+	display: inline-;
     padding: 2px 3px 2px 3px;
     border-radius: 3px;
 }
 
+.nodes div:hover .nodeText {
+    font-size: 120%;
+    z-index: 10;
+}
 
 svg {
 	position: absolute;
@@ -76,6 +82,4 @@ svg {
     z-index: -10;
 }
 
-p.nodeText {
-	display: inline;
-}
+

@@ -68,6 +68,10 @@ function getLabel(key){
     return key.replace(/_/g," ");
 }
 
+function getRandomArbitrary(min, max) {
+  return Math.random() * (max - min) + min;
+}
+
 function Vector(items)
 {
 	this.items = items;

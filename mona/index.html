@@ -6,6 +6,15 @@
     	var application_name = "mona";
     	var MDC_rawMetadata = "";
 		var MDC_rawMMD = "";
+        var graphWidth;
+        var graphHeight;
+        var primaryNodes = {};
+        var nodeList =[];
+        var secondaryNodes = {};
+        var secondaryNodesList = [];
+        var unrenderedNodesList = [];
+        var renderedNodesList = [];
+        var nodePositions = {};
     </script>
     
     <!-- CSS! -->
@@ -31,9 +40,11 @@
 	<script type="text/javascript" src="../simpl/simplTypeScopeDeserialize.js"></script>
 	<script type="text/javascript" src="../simpl/simplTypeScopeSerialize.js"></script>
     
+      
     <script type="text/javascript" src="js/utility.js"></script>
     <script type="text/javascript" src="js/FlairMaster.js"></script>
     <script type="text/javascript" src="js/mdc.js"></script>
+    <script type="text/javascript" src="js/grapher.js"></script>
     <script type="text/javascript" src="js/mona.js"></script>
     
     <script type="text/javascript" src="../semantics/MetaMetadataRepositoryLibrary.js"></script>
@@ -64,13 +75,13 @@
         </div>
       </div>
 
-      <svg id="lineSVG" height="2600" width="1600"></svg>
+      <svg id="lineSVG" height="2600" width="2600"></svg>
       <div class="row">
         <div class="span9 content" id="mdcIce"></div>
       </div>
       <div id="typeArea"></div>
-      <div id="level1Nodes" class="nodes"></div>
-      <div id="level2Nodes" class="nodes"></div>
+      <div id="graphArea" class="nodes"></div>
+      <div id="loadingBar"></div>
     </div>
 
     <script>
