@@ -24,7 +24,8 @@
 	    	"code/fieldParsers.js",
 	    	"code/mice/simplDeserializer.js",
 	    	"code/extractMetadata.js",
-	    	"code/dragEvents.js"
+	    	"code/dragEvents.js",
+	    	"code/clipboard.js"
 	    ],
 	    "css": [
 	    	"code/style.css",
@@ -33,7 +34,8 @@
   	}],
   "background": {
     "scripts": [
-    	"code/background.js"
+    	"code/background.js",
+    	"code/clipboardBackground.js"
     ]
   },
   "browser_action": {

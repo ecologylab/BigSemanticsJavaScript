@@ -1160,12 +1160,13 @@ MICE.buildMetadataField = function(metadataField, isChildTable, fieldCount, row,
 	
 	else if (metadataField.composite_type != null && metadataField.composite_type == "image")
 	{
-		if(metadataField.name && !metadataField.hide_label)
+		var label = MICE.getFieldLabel(metadataField);
+		
+		if(metadataField.name && !metadataField.hide_label && (!isChildTable || label.type == "image"))
 		{
 			var fieldLabelDiv = document.createElement('div');
 				fieldLabelDiv.className = styleInfo.styles.fieldLabelContainerUnhighlight;
 			
-			var label = MICE.getFieldLabel(metadataField);
 			if (label.type == "scalar")
 			{
 				var fieldLabel = document.createElement('p');
@@ -1189,6 +1190,7 @@ MICE.buildMetadataField = function(metadataField, isChildTable, fieldCount, row,
 		
 		var img1 = document.createElement('img');
 			img1.src = MetadataLoader.getImageSource(metadataField.value);
+			img1.className = styleInfo.styles.fieldValueImage;
 		
 		var fieldValueDiv = document.createElement('div');
 			fieldValueDiv.className = styleInfo.styles.fieldValueContainer;

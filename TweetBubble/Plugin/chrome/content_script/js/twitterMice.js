@@ -31,21 +31,29 @@ var MetadataRenderer = MICE;
  */
 MetadataRenderer.render = function(task, metadataFields, styleInfo)
 {	
-	// Create the interior HTML container
-	task.visual = document.createElement('div');
-	task.visual.className = styleInfo.styles.metadataContainer;
+	var bRenderedInitial = false;
+	if (task.visual)
+	{
+		bRenderedInitial = true;
+		// remove the initial table containing title and loading rows
+		while (task.visual.hasChildNodes())
+			task.visual.removeChild(task.visual.lastChild);
+	}
+	else
+	{
+		// Create the interior HTML container
+		task.visual = document.createElement('div');
+		task.visual.className = styleInfo.styles.metadataContainer;
+	}
 	task.visual.setAttribute('mdType', metadataFields[0].parentMDType);
 
 	// Build the HTML table for the metadata
 	MetadataLoader.currentDocumentLocation = task.url;
-	var bgColor = null;
+	
 	var bgColorObj = null;
-	if (task.url.indexOf("twitter.com") != -1)
-	{
-		bgColor = MetadataRenderer.getNextColor(task.container);
-		bgColorObj = {color: bgColor, bFirstField: true};
-	}
-	var metadataTable =  MetadataRenderer.buildMetadataTable(null, false, task.isRoot, metadataFields, FIRST_LEVEL_FIELDS, styleInfo, bgColorObj, true);
+	if (task.expandedItem)
+		bgColorObj = task.expandedItem.bgColorObj;
+	var metadataTable =  MetadataRenderer.buildMetadataTable(task.table, false, task.isRoot, metadataFields, FIRST_LEVEL_FIELDS, styleInfo, bgColorObj, true);
 	//MetadataRenderer.buildMetadataDisplay(task.isRoot, task.mmd, task.metadata, task.url, bgColor)
 	
 	if(metadataTable)
@@ -65,10 +73,9 @@ MetadataRenderer.render = function(task, metadataFields, styleInfo)
 		task.visual.appendChild(metadataTable);
 		task.visual.appendChild(canvas);
 		
-		// Add the interior container to the root contianer
-		task.container.appendChild(task.visual);
-		if (task.expandedItem && bgColor)
-			task.expandedItem.style.background = bgColor;
+		// Add the interior container to the root container
+		if (!bRenderedInitial)
+			task.container.appendChild(task.visual);
 		
 		if (metadataProcessor)
 			metadataProcessor(task.visual);
@@ -112,8 +119,20 @@ MetadataRenderer.render = function(task, metadataFields, styleInfo)
  */
 MetadataRenderer.addMetadataDisplay = function(container, url, isRoot, clipping, requestMD, reloadMD, expandedItem)
 {
+	var visual = null;
+	if ((url.indexOf("twitter.com") != -1 || application_name == "tweetbubble"))
+	{
+		var bgColor = MetadataRenderer.getNextColor(container);
+		var bgColorObj = {color: bgColor, bFirstField: true};
+		if (expandedItem)
+			expandedItem.bgColorObj = bgColorObj;
+		
+		if (isRoot)
+			visual = MetadataRenderer.renderInitial(container, url, isRoot, expandedItem, bgColorObj);
+	}
+	
 	// Add the rendering task to the queue
-	var task = new RenderingTask(url, container, isRoot, clipping, MetadataRenderer.render, expandedItem);
+	var task = new RenderingTask(url, container, isRoot, clipping, MetadataRenderer.render, expandedItem, visual);
 	MetadataLoader.queue.push(task);	
 	
 	if(clipping != null && clipping.rawMetadata != null)
@@ -129,6 +148,71 @@ MetadataRenderer.addMetadataDisplay = function(container, url, isRoot, clipping,
 		if(!isExtension && requestMetadata)
 			MetadataLoader.getMetadata(url, "MetadataLoader.setMetadata", reloadMD);	
 	}
+}
+
+MetadataRenderer.renderInitial = function(container, url, isRoot, expandedItem, bgColorObj)
+{
+	var miceStyles = InterfaceStyle.getMiceStyleDictionary(null);
+	var styleInfo = {styles: miceStyles, type: null};
+		
+	// Create the interior HTML container
+	var visual = document.createElement('div');
+		visual.className = styleInfo.styles.metadataContainer;
+	
+	// render initial placeholder w only title string and loading row
+	var table = MetadataRenderer.buildInitialTable(container, url, expandedItem, isRoot, styleInfo, bgColorObj);
+	if (table)
+	{
+		// Add the HTML5 canvas for the drawing of connection lines
+		var canvas = document.createElement("canvas");
+			canvas.className = styleInfo.styles.lineCanvas;
+		
+		// Add the table and canvas to the interior container
+		visual.appendChild(table);
+		visual.appendChild(canvas);
+		
+		// Add the interior container to the root contianer
+		container.appendChild(visual);
+		
+		if (expandedItem && bgColorObj.color)
+			expandedItem.style.background = bgColorObj.color;
+	}
+	
+	return visual;
+}
+
+MetadataRenderer.buildInitialTable = function(container, url, expandedItem, isRoot, styleInfo, bgColorObj)
+{
+	var metadataFields = [];
+	var table = MetadataRenderer.buildMetadataTable(null, false, isRoot, metadataFields, 0, styleInfo, bgColorObj, true);
+	if (table)
+	{
+		var text = (expandedItem && expandedItem.innerText)? expandedItem.innerText : url;
+		table.appendChild(MetadataRenderer.createInitialTitleRow(text, url, styleInfo));
+		table.appendChild(MetadataRenderer.createLoadingRow(styleInfo));
+	}
+	return table;
+}
+
+MetadataRenderer.createInitialTitleRow = function(text, url, styleInfo)
+{
+	var row = document.createElement('tr');
+	
+	var titleDiv = document.createElement('div');
+		titleDiv.className = styleInfo.styles.fieldValueContainer;
+		
+	var aTag = document.createElement('a');
+		aTag.innerText = MetadataLoader.removeLineBreaksAndCrazies(text);
+		aTag.textContent = MetadataLoader.removeLineBreaksAndCrazies(text);
+		aTag.href = url;
+		aTag.target = "_blank";
+		aTag.onclick = MetadataRenderer.logNavigate;
+		aTag.className = styleInfo.styles.fieldValue;
+				
+	titleDiv.appendChild(aTag);
+	row.appendChild(titleDiv);
+
+	return row;
 }
 
 /**
@@ -938,7 +1022,9 @@ MetadataRenderer.buildMetadataField = function(metadataField, isChildTable, fiel
 	
 	else if (metadataField.composite_type != null && metadataField.composite_type == "image")
 	{
-		if(metadataField.name && !metadataField.hide_label)
+		var label = MetadataRenderer.getFieldLabel(metadataField);
+		
+		if(metadataField.name && !metadataField.hide_label && (!isChildTable || label.type == "image"))
 		{
 			var fieldLabelDiv = document.createElement('div');
 				fieldLabelDiv.className = styleInfo.styles.fieldLabelContainerUnhighlight;
@@ -946,7 +1032,6 @@ MetadataRenderer.buildMetadataField = function(metadataField, isChildTable, fiel
 			if (bgColorObj && bgColorObj.bFirstField)
 				fieldLabelDiv.style.background = bgColorObj.color;
 			
-			var label = MetadataRenderer.getFieldLabel(metadataField);
 			if (label.type == "scalar")
 			{
 				var fieldLabel = document.createElement('p');
@@ -970,6 +1055,7 @@ MetadataRenderer.buildMetadataField = function(metadataField, isChildTable, fiel
 		
 		var img1 = document.createElement('img');
 			img1.src = MetadataLoader.getImageSource(metadataField.value);
+			img1.className = styleInfo.styles.fieldValueImage;
 		
 		var fieldValueDiv = document.createElement('div');
 			fieldValueDiv.className = styleInfo.styles.fieldValueContainer;
