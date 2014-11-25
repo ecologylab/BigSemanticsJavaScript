@@ -15,10 +15,10 @@ function doPhysical(n){
     physicalInterval = setInterval(stepPhysical, NODE_RENDER_TIMER);
 }
 
-var ATTRACTION_FORCE = 20;
-var REPULSE_FORCE = -10;
+var ATTRACTION_FORCE = 10;
+var REPULSE_FORCE = -1;
 var TOUCH_DISTANCE = 100;
-var Y_TOUCH_DISTANCE = 30;
+var Y_TOUCH_DISTANCE = 40;
 
 var nodeCounter = 0;
 

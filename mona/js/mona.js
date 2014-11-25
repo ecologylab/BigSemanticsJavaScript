@@ -15,7 +15,8 @@ var MONA = {},
     tier1size = 30,
     NUM_STEPS = 50,
     colorArray = ["#009933", "#006699", "#CC9900", "#CC0000", "#CC00CC"],
-    historyNodes = [];
+    historyNodes = [],
+    renderInterval;
 
 
 function Node(type, title, location, mmdName, parent){
@@ -688,15 +689,25 @@ function drawSecondaryNodes(){
 
             node.visual.appendChild(img);
             node.visual.appendChild(nodePara);
-            graphElement.appendChild(node.visual);
-            nodePositions[nodeKey] = node.visual.getBoundingClientRect();
-            renderedNodesList.push(node);
-            //unrenderedNodesList.push(node);
+            //graphElement.appendChild(node.visual);
+            //nodePositions[nodeKey] = node.visual.getBoundingClientRect();
+            //renderedNodesList.push(node);
+            unrenderedNodesList.push(node);
+            setInterval();
         }
 	}
-    doPhysical(NUM_STEPS);
+    clearInterval(renderInterval);
+    renderInterval = setInterval(renderNode, 2000);
 }
 
+function renderNode(){
+    var graphElement = document.getElementById("graphArea");
+    var node = unrenderedNodesList.pop();
+    renderedNodesList.push(node);
+    graphElement.appendChild(node.visual);
+    nodePositions[node.location] = node.visual.getBoundingClientRect();
+    doPhysical(NUM_STEPS);
+}
 
 function drawTypes(){
 	var typeElement = document.getElementById("typeArea");
