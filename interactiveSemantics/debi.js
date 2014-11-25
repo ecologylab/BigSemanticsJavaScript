@@ -16,6 +16,9 @@ var MetadataLoader = {};
 // meta-metadata from the service.
 MetadataLoader.queue = [];
 
+MetadataLoader.repoIsLoading = false;
+MetadataLoader.repo = null;
+
 // The URL for the document being loaded.
 MetadataLoader.currentDocumentLocation = "";
 
@@ -60,7 +63,7 @@ MetadataLoader.render = function(renderer, container, url, isRoot, clipping)
     // Fetch the metadata from the service
     MetadataLoader.getMetadata(url, "MetadataLoader.setMetadata");  
   }
-}
+};
 
 /**
  * Retrieves the metadata from the service using a JSON-p call.
@@ -82,7 +85,7 @@ MetadataLoader.getMetadata = function(url, callback, reload)
 	}
   MetadataLoader.doJSONPCall(serviceURL);
   console.log("requesting semantics service for metadata: " + serviceURL);
-}
+};
 
 /**
  * Retrieves the meta-metadata from the service using a JSON-p call.
@@ -93,13 +96,25 @@ MetadataLoader.getMetadata = function(url, callback, reload)
  */
 MetadataLoader.getMMD = function(name, callback)
 {
-  var serviceURL = SEMANTIC_SERVICE_URL + "mmd.jsonp?reload=true&callback=" + callback
-      + "&name=" + name;
+	if(MetadataLoader.repo != null)
+	{
+		MetadataLoader.getMMDFromRepo(name);
+	}
+	else if(MetadataLoader.repoIsLoading == false)
+	{
+		MetadataLoader.repoIsLoading = true;
+		MetadataLoader.loadMMDRepo();
+	}
+};	
 	
-  
-  MetadataLoader.doJSONPCall(serviceURL);
-  console.log("requesting semantics service for mmd: " + serviceURL);
-}
+MetadataLoader.loadMMDRepo = function()
+{	
+	var callback = "MetadataLoader.initMetaMetadataRepo";
+	var serviceURL = SEMANTIC_SERVICE_URL + "mmdrepository.jsonp?reload=true&callback=" + callback;
+	  
+	MetadataLoader.doJSONPCall(serviceURL);
+	console.log("requesting semantics service for mmd repository");
+};
 
 /**
  * Do a JSON-P call by appending the jsonP url as a scrip object.
@@ -110,7 +125,38 @@ MetadataLoader.doJSONPCall = function(jsonpURL)
   var script = document.createElement('script');
   script.src = jsonpURL;
   document.head.appendChild(script);
-}
+};
+
+MetadataLoader.initMetaMetadataRepo = function(jsonRepo)
+{
+	simplDeserialize(jsonRepo);
+	
+	var mmdByName = jsonRepo["meta_metadata_repository"]["repository_by_name"];
+		
+	MetadataLoader.repo = {};
+	
+	//go through all mmd and construct mmd dictionary
+	for (var i = 0; i < mmdByName.length; i++)
+	{
+		var mmd = mmdByName[i];
+		
+		MetadataLoader.repo[mmd.name] = mmd;
+	}
+	
+	//go through all tasks and set their metadata
+	for (var i = 0; i < MetadataLoader.queue.length; i++)
+	{
+		var task = MetadataLoader.queue[i];
+		if (task.mmdType) 
+    		MetadataLoader.getMMDFromRepo(task.mmdType);  
+	}	
+};
+
+MetadataLoader.getMMDFromRepo = function(name)
+{
+	var mmd = MetadataLoader.repo[name];
+	MetadataLoader.setMetaMetadata(mmd);
+};
 
 /**
  * Deserializes the metadata from the service and matches the metadata with a
@@ -181,7 +227,7 @@ MetadataLoader.setMetadata = function(rawMetadata, requestMmd)
     }
     
     queueTask.metadata = metadata;
-    queueTask.mmdType = metadata.meta_metadata_name;
+    queueTask.mmdType = metadata.mm_name;
   
     if (queueTask.clipping != null)
     {
@@ -193,7 +239,14 @@ MetadataLoader.setMetadata = function(rawMetadata, requestMmd)
     }
     
     if (typeof requestMmd === "undefined" || requestMmd == true) 
+    { 	
+    	if(queueTask.mmdType == null)
+    	{
+    		queueTask.mmdType = metadata.meta_metadata_name;
+    	}
+    	
     	MetadataLoader.getMMD(queueTask.mmdType, "MetadataLoader.setMetaMetadata");
+    }
   }
   
   if (queueTasks.length < 0)
@@ -212,17 +265,15 @@ MetadataLoader.setMetadata = function(rawMetadata, requestMmd)
  */
 MetadataLoader.setMetaMetadata = function (mmd)
 {
-  console.log("Received mmd: " + mmd);
-
   // TODO move MDC related code to mdc.js
   if (typeof MDC_rawMMD != "undefined")
   {
+  	simplGraphCollapse(mmd);
     MDC_rawMMD = JSON.parse(JSON.stringify(mmd));
+    simplDeserialize(mmd);
   }
   
-  simplDeserialize(mmd);
-  
-  var tasks = MetadataLoader.getTasksFromQueueByType(mmd["meta_metadata"].name);
+  var tasks = MetadataLoader.getTasksFromQueueByType(mmd.name);
   
   if (tasks.length > 0)
   {
@@ -241,20 +292,20 @@ MetadataLoader.setMetaMetadata = function (mmd)
         if (MetadataLoader.hasVisibleMetadata(metadataFields))
         {	
           // If so, then build the HTML table	
-          var miceStyles = InterfaceStyle.getMiceStyleDictionary(mmd["meta_metadata"].name);	
+          var miceStyles = InterfaceStyle.getMiceStyleDictionary(mmd.name);	
          //Adds the metadata type as an attribute to the first field in the MD
-          metadataFields[0].parentMDType = mmd["meta_metadata"].name;
-          tasks[i].renderer(tasks[i], metadataFields, {styles: miceStyles, type: mmd["meta_metadata"].name});
+          metadataFields[0].parentMDType = mmd.name;
+          tasks[i].renderer(tasks[i], metadataFields, {styles: miceStyles, type: mmd.name});
         }
       }
     }
   }
   else
   {
-    console.error("Retreived meta-metadata: " + mmd["meta_metadata"].name
+    console.error("Retreived meta-metadata: " + mmd.name
                   + "  but it doesn't match a document from the queue.");
   }
-}
+};
 
 /**
  *
@@ -262,11 +313,11 @@ MetadataLoader.setMetaMetadata = function (mmd)
 MetadataLoader.createMetadata = function(isRoot, mmd, metadata, taskUrl)
 {
   var metadataFields =
-    MetadataLoader.getMetadataViewModel(mmd["meta_metadata"], mmd["meta_metadata"]["kids"], metadata,
+    MetadataLoader.getMetadataViewModel(mmd, mmd["kids"], metadata,
                                         0, null, taskUrl);
   
   return metadataFields;
-}
+};
 
 /**
  * Get a matching RenderingTask from the queue 
@@ -283,7 +334,7 @@ MetadataLoader.getTaskFromQueueByUrl = function(url)
     }
   }
   return null;
-}
+};
 
 /**
  *
