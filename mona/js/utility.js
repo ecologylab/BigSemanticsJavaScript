@@ -52,8 +52,8 @@ function sortNumber(a,b) {
 }
 
 function getLabel(key){
-    for (var i in MDC_rawMMD.meta_metadata.kids){
-        var kid = MDC_rawMMD.meta_metadata.kids[i];
+    for (var i in MDC_rawMMD.kids){
+        var kid = MDC_rawMMD.kids[i];
         for (var type in kid){
             if (key == kid[type].name){
                 if (kid[type].label !== undefined){
