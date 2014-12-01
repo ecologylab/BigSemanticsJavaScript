@@ -1,4 +1,4 @@
-/*global window, doc, Image, fixWhiteSpace, rgbToRgbObj, getLabel, simplDeserialize, waitForNewMMD, MDC_rawMMD, getNodes, allNodeMDLoaded, document, setTimeout, MetadataLoader, console, hexToRgb, FlairMaster, sortNumber, median, MDC_rawMetadata, showMetadata, setInterval, clearInterval, Vector, getRandomArbitrary, doPhysical, graphWidth:true, graphHeight:true, primaryNodes:true, secondaryNodes:true, renderedNodesList:true, secondaryNodesList:true, nodeList:true, nodePositions:true, drawSecondaryNodes, updateAllLines, unrenderedNodesList:true*/
+/*global window, doc, Image, fixWhiteSpace, rgbToRgbObj, getLabel, simplDeserialize, waitForNewMMD, MDC_rawMMD, getNodes, allNodeMDLoaded, document, setTimeout, MetadataLoader, console, hexToRgb, FlairMaster, sortNumber, median, MDC_rawMetadata, showMetadata, setInterval, clearInterval, Vector, getRandomArbitrary, doPhysical, graphWidth:true, graphHeight:true, primaryNodes:true, secondaryNodes:true, renderedNodesList:true, secondaryNodesList:true, nodeList:true, nodePositions:true, drawSecondaryNodes, updateAllLines, unrenderedNodesList:true, Heap*/
 
 
 var MONA = {},
@@ -17,8 +17,8 @@ var MONA = {},
     NUM_STEPS = 50,
     colorArray = ["#009933", "#006699", "#CC9900", "#CC0000", "#CC00CC"],
     historyNodes = [],
-    renderInterval;
-
+    renderInterval,
+    unrenderedNodesHeap;
 
 function Node(type, title, location, mmdName, parent){
 	this.type = type;
@@ -54,6 +54,9 @@ MONA.initialize = function (){
     unrenderedNodesList = [];
     secondaryNodesList = [];
     nodeList = [];
+    unrenderedNodesHeap = new Heap(function(a, b) {
+        return b.parents.length - a.parents.length;
+    });
 	colorCount = 0;
 	requestsMade = 0;
     
@@ -412,6 +415,8 @@ function getSecondaryNodes(nodeMMD, parent){
                                 else if (secondaryNodes.hasOwnProperty(currentField[i].location)){
                                     secondaryNodes[currentField[i].location].parents.push(parent);
                                     parent.children.push(secondaryNodes[currentField[i].location]);
+                                    unrenderedNodesHeap.updateItem(secondaryNodes[currentField[i].location]);
+                                    drawLine(secondaryNodes[currentField[i].location]);
                                 }
                             }
 
@@ -432,7 +437,9 @@ function getSecondaryNodes(nodeMMD, parent){
                                         }
                                         else if (secondaryNodes.hasOwnProperty(currentField[j][key2].location)){
                                             secondaryNodes[currentField[j][key2].location].parents.push(parent);
-                                            parent.children.push(secondaryNodes[currentField[j][key2].location]); 
+                                            parent.children.push(secondaryNodes[currentField[j][key2].location]);
+                                            unrenderedNodesHeap.updateItem(secondaryNodes[currentField[j][key2].location]);
+                                            drawLine(secondaryNodes[currentField[j][key2].location]);
                                         }
                                     }
 
@@ -455,6 +462,8 @@ function getSecondaryNodes(nodeMMD, parent){
                             else if (secondaryNodes.hasOwnProperty(currentField.location)){
                                 secondaryNodes[currentField.location].parents.push(parent);
                                 parent.children.push(secondaryNodes[currentField.location]);
+                                unrenderedNodesHeap.updateItem(secondaryNodes[currentField.location]);
+                                drawLine(secondaryNodes[currentField.location]);
                             }
                         }
 					}
@@ -692,6 +701,7 @@ function drawSecondaryNodes(){
             node.visual.appendChild(img);
             node.visual.appendChild(nodePara);
             unrenderedNodesList.push(node);
+            unrenderedNodesHeap.push(node);
         }
 	}
     clearInterval(renderInterval);
@@ -699,9 +709,9 @@ function drawSecondaryNodes(){
 }
 
 function renderNode(){
-    if (unrenderedNodesList.length >0 && renderedNodesList.length < 50){    
+    if (unrenderedNodesHeap.size() >0 && renderedNodesList.length < 50){    
         var graphElement = document.getElementById("graphArea");
-        var node = unrenderedNodesList.pop();
+        var node = unrenderedNodesHeap.pop();
         node.rendered = true;
         renderedNodesList.push(node);
         
@@ -781,43 +791,44 @@ function drawSecondaryLines(parent){
 
 }
 
-//draws lines for one newly rendered node
+//draws lines for one newly rendered or updated node
 function drawLine(node){
-	var lineElement = document.getElementById("lineSVG");
-	
-    var i, line, rgb;
-    for (i in node.children){
-        var child = node.children[i];
-        if (secondaryNodes[node.location] !== undefined && child.rendered){
-            line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-            line.setAttribute('class', node.location+"Line");
-            line.setAttribute('id', node.location+child.location+"Line");
-            line.setAttribute('x1', nodePositions[child.location].left);
-            line.setAttribute('x2', nodePositions[node.location].left+2);
-            line.setAttribute('y1', nodePositions[child.location].top+nodePositions[child.location].height/2);
-            line.setAttribute('y2', nodePositions[node.location].top+nodePositions[node.location].height/2);
-            rgb = hexToRgb(nodeColors[child.type]);
-            line.style.stroke = "rgba(" + rgb.r + "," + rgb.g + "," + rgb.b + ",.1)";
-            line.setAttribute('stroke-width', 1);
-            lineElement.appendChild(line);
-        }
-	}	
+    if (node.rendered){
+        var lineElement = document.getElementById("lineSVG");
 
-    for (i in node.parents){
-        var parent = node.parents[i];
-        if (secondaryNodes[node.location] !== undefined){
-            line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-            line.setAttribute('class', parent.location+"Line");
-            line.setAttribute('id', parent.location+node.location+"Line");
-            line.setAttribute('x1', nodePositions[node.location].left);
-            line.setAttribute('x2', nodePositions[parent.location].left+2);
-            line.setAttribute('y1', nodePositions[node.location].top+nodePositions[node.location].height/2);
-            line.setAttribute('y2', nodePositions[parent.location].top+nodePositions[parent.location].height/2);
-            rgb = hexToRgb(nodeColors[node.type]);
-            line.style.stroke = "rgba(" + rgb.r + "," + rgb.g + "," + rgb.b + ",.1)";
-            line.setAttribute('stroke-width', 1);
-            lineElement.appendChild(line);
-        }
-	}
-    
+        var i, line, rgb;
+        for (i in node.children){
+            var child = node.children[i];
+            if (secondaryNodes[node.location] !== undefined && child.rendered && document.getElementById(node.location+child.location+"Line") === null){
+                line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                line.setAttribute('class', node.location+"Line");
+                line.setAttribute('id', node.location+child.location+"Line");
+                line.setAttribute('x1', nodePositions[child.location].left);
+                line.setAttribute('x2', nodePositions[node.location].left+2);
+                line.setAttribute('y1', nodePositions[child.location].top+nodePositions[child.location].height/2);
+                line.setAttribute('y2', nodePositions[node.location].top+nodePositions[node.location].height/2);
+                rgb = hexToRgb(nodeColors[child.type]);
+                line.style.stroke = "rgba(" + rgb.r + "," + rgb.g + "," + rgb.b + ",.1)";
+                line.setAttribute('stroke-width', 1);
+                lineElement.appendChild(line);
+            }
+        }	
+
+        for (i in node.parents){
+            var parent = node.parents[i];
+            if (secondaryNodes[node.location] !== undefined && parent.rendered && document.getElementById(parent.location+node.location+"Line") === null){
+                line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                line.setAttribute('class', parent.location+"Line");
+                line.setAttribute('id', parent.location+node.location+"Line");
+                line.setAttribute('x1', nodePositions[node.location].left);
+                line.setAttribute('x2', nodePositions[parent.location].left+2);
+                line.setAttribute('y1', nodePositions[node.location].top+nodePositions[node.location].height/2);
+                line.setAttribute('y2', nodePositions[parent.location].top+nodePositions[parent.location].height/2);
+                rgb = hexToRgb(nodeColors[node.type]);
+                line.style.stroke = "rgba(" + rgb.r + "," + rgb.g + "," + rgb.b + ",.1)";
+                line.setAttribute('stroke-width', 1);
+                lineElement.appendChild(line);
+            }
+        } 
+    }
 }

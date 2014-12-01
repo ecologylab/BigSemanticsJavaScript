@@ -32,13 +32,15 @@ function stepPhysical(x){
         setTimeout(updateAllLines, 300);
         setTimeout(updateAllLines, 400);
     }
-		
-	STEP_COUNT++;
-  
-    var n, node, p, pDist, pSpeed, pX, pY;
-	// calculate attractive forces
-	for(n = 0; n < renderedNodesList.length; n++){
-		node = renderedNodesList[n];
+    
+    STEP_COUNT++;
+    
+    for(n = 0; n < renderedNodesList.length; n++){
+        node = renderedNodesList[n];
+    
+       
+        var n, node, p, pDist, pSpeed, pX, pY;
+        // calculate attractive forces
 		node.vector = new Vector([0,0,0]);
 		
 		for(p = 0; p < node.parents.length; p++){
@@ -62,17 +64,14 @@ function stepPhysical(x){
         
         //if node is primary pull it left and to the center
         if (primaryNodes.hasOwnProperty(node.location)){
-            pY = (node.y - graphHeight/2) / 10;
-            pSpeed = (pY / graphWidth) * ATTRACTION_FORCE;
+            pY = ((graphHeight/2 - 50) - node.y) / 10;
+            pSpeed = (Math.abs(pY) / graphWidth) * ATTRACTION_FORCE;
             pY *= pSpeed;
 
-            node.vector = node.vector.add(new Vector([-100, pY, 0]));
-        }
-	}	
+            node.vector = node.vector.add(new Vector([-5, pY, 0]));
+        }	
 	
-	// add in repulsive forces
-	for(n = 0; n < renderedNodesList.length; n++){
-		node = renderedNodesList[n];
+        // add in repulsive forces
 		
 		var repulsionVector = new Vector([0,0,0]);
         
@@ -119,12 +118,11 @@ function stepPhysical(x){
 		}
 				
 		node.vector = node.vector.add(repulsionVector);
-	}
 	
 	
 	//step through 1 tick
-	for(n = 0; n < renderedNodesList.length; n++){
-		node = renderedNodesList[n];
+	//for(n = 0; n < renderedNodesList.length; n++){
+		
 		
 		if(!isNaN(node.vector.items[0])){
 			node.x += node.vector.items[0];
@@ -147,10 +145,12 @@ function stepPhysical(x){
 		else if(node.y > graphHeight-50)
 			node.y = graphHeight-100;
         
-    }
+    //}
 	
-	nodeCounter = 0;
-	moveNextNode();
+        //nodeCounter = 0;
+        //moveNextNode();
+        moveNode(node);
+    }
 }
 
 function moveNode(n){
