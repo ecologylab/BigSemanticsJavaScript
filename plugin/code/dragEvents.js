@@ -20,6 +20,13 @@ function attachInfo(event)
 	obj.source = document.URL;
 	obj.xpath = getPath(event.target);
 	
+	if (document.URL.indexOf("https://twitter.com") == 0)
+	{
+		obj.tweetUrl = getTwitterStatusUrl(event.target);
+		if (obj.tweetUrl)
+			obj.tweetUrl = "https://twitter.com" + obj.tweetUrl;
+	}
+	
 	event.dataTransfer.setData("application/json",JSON.stringify(obj));
 }
 
@@ -50,3 +57,31 @@ function getPath(element)
 	}
 }
 
+function getTwitterStatusUrl(elt)
+{
+	var tweetUrl = null;
+	while (elt)
+	{
+		if (elt.className && (elt.className == "StreamItem js-stream-item" || elt.className == "content"))
+			break;
+		else
+			elt = elt.parentNode;
+	}
+	if (elt)
+	{
+		var tweetUrlElt = null;
+		//user profile
+		if (elt.className == "StreamItem js-stream-item")
+		{
+			tweetUrlElt = elt.getElementsByClassName("ProfileTweet-timestamp js-permalink js-nav js-tooltip")[0];
+			tweetUrl = tweetUrlElt.getAttribute("href");
+		}
+		//home feed, hashtag
+		if (elt.className == "content")
+		{
+			tweetUrlElt = elt.getElementsByClassName("tweet-timestamp js-permalink js-nav js-tooltip")[0];
+			tweetUrl = tweetUrlElt.getAttribute("href");
+		}
+	}
+	return tweetUrl;
+}
