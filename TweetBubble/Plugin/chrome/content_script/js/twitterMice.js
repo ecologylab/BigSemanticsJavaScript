@@ -24,7 +24,6 @@ var favoriteIconPath2 = isExtension? chrome.extension.getURL("content_script/img
 
 var MetadataRenderer = MICE;
 
-
 /**
  * Create the metadataRendering, add it to the HTML container, and complete the RenderingTask
  * @param task, RenderingTask to complete 
@@ -50,10 +49,7 @@ MetadataRenderer.render = function(task, metadataFields, styleInfo)
 	// Build the HTML table for the metadata
 	MetadataLoader.currentDocumentLocation = task.url;
 	
-	var bgColorObj = null;
-	if (task.expandedItem)
-		bgColorObj = task.expandedItem.bgColorObj;
-	var metadataTable =  MetadataRenderer.buildMetadataTable(task.table, false, task.isRoot, metadataFields, FIRST_LEVEL_FIELDS, styleInfo, bgColorObj, true);
+	var metadataTable =  MetadataRenderer.buildMetadataTable(task.table, false, task.isRoot, metadataFields, FIRST_LEVEL_FIELDS, styleInfo, task.bgColorObj, true);
 	//MetadataRenderer.buildMetadataDisplay(task.isRoot, task.mmd, task.metadata, task.url, bgColor)
 	
 	if(metadataTable)
@@ -120,19 +116,19 @@ MetadataRenderer.render = function(task, metadataFields, styleInfo)
 MetadataRenderer.addMetadataDisplay = function(container, url, isRoot, clipping, requestMD, reloadMD, expandedItem)
 {
 	var visual = null;
-	if ((url.indexOf("twitter.com") != -1 || application_name == "tweetbubble"))
+	var bgColor = null;
+	var bgColorObj = null;
+	if ((url.indexOf("twitter.com") != -1 || application_name == "tweetbubble") || expandedItem)
 	{
-		var bgColor = MetadataRenderer.getNextColor(container);
-		var bgColorObj = {color: bgColor, bFirstField: true};
-		if (expandedItem)
-			expandedItem.bgColorObj = bgColorObj;
-		
+		bgColor = MetadataRenderer.getNextColor(container);
+		bgColorObj = {color: bgColor, bFirstField: true};
+				
 		if (isRoot)
 			visual = MetadataRenderer.renderInitial(container, url, isRoot, expandedItem, bgColorObj);
 	}
 	
 	// Add the rendering task to the queue
-	var task = new RenderingTask(url, container, isRoot, clipping, MetadataRenderer.render, expandedItem, visual);
+	var task = new RenderingTask(url, container, isRoot, clipping, MetadataRenderer.render, expandedItem, visual, bgColorObj);
 	MetadataLoader.queue.push(task);	
 	
 	if(clipping != null && clipping.rawMetadata != null)
@@ -152,7 +148,7 @@ MetadataRenderer.addMetadataDisplay = function(container, url, isRoot, clipping,
 
 MetadataRenderer.renderInitial = function(container, url, isRoot, expandedItem, bgColorObj)
 {
-	var miceStyles = InterfaceStyle.getMiceStyleDictionary(null);
+	var miceStyles = InterfaceStyle.getMiceStyleDictionary("twitter");
 	var styleInfo = {styles: miceStyles, type: null};
 		
 	// Create the interior HTML container
