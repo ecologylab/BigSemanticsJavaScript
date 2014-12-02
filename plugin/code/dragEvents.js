@@ -1,6 +1,4 @@
-function handleDrag() {
-	document.addEventListener("dragstart", extractOnDrag);
-}
+document.addEventListener("dragstart", extractOnDrag);
 
 function extractOnDrag(event) 
 {

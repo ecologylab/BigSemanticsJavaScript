@@ -12,12 +12,6 @@ var display = true;
 
 window.onload = setup(document);
 
-
-chrome.runtime.onMessage.addListener(
-  function(request, sender, sendResponse) {
-    toggleSlideOut();
-  });
-
 /**
  * Sets up the plugin.
  * Should be called when the webpage has loaded
@@ -167,7 +161,6 @@ function getPosition(str, m, i)
 function serialize(meta)
 {
 	serializedMeta = JSON.stringify(meta);
-	handleDrag();
 }
 
 /*
