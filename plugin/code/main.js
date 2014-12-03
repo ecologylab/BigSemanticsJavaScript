@@ -32,7 +32,7 @@ function getMMD(pageURL, callback)
 	
 	baseURL = url.substring(0,getPosition(url,"/",3));
 	
-	var serviceURL = "http://ecology-service.cse.tamu.edu/BigSemanticsService/mmd.json?url="; //settings.serviceUrl;
+	var serviceURL = "//ecology-service.cse.tamu.edu/BigSemanticsService/mmd.json?url=";
 	serviceURL += url;
 	
 	//make a request to the service for the mmd for the url
@@ -50,10 +50,7 @@ function getMMD(pageURL, callback)
 				callback(ans);
 
 			} else {
-				// if the request fails, call the callback function with an error message
-				// and log an error to the console
-				var errormes = "Error! XMLHttpRequest failed.";
-				handleMMD(errormes);
+				console.log("Error! XMLHttpRequest failed.");
 			}
 		}	
 
@@ -68,14 +65,10 @@ function getMMD(pageURL, callback)
  */
 function handleMMD(mmd)
 {
-	// deserialize
-	mmd = JSON.parse(mmd);
-
-	//console.log(mmd);
-
-	simplDeserialize(mmd);	
-	MMD = mmd;
-	callService(mmd);
+   mmd = JSON.parse(mmd);
+   simplDeserialize(mmd);	
+   MMD = mmd;
+   callService(mmd);
 }
 
 /*
@@ -83,23 +76,23 @@ function handleMMD(mmd)
  */
 function callService(mmd)
 {
-	var parser = mmd.meta_metadata.parser;
-	
-	if (mmd["meta_metadata"]["extract_with"] == "service"){
-		browserExtraction = false;
-		serviceCall = true;
-	}
-		
-	if (browserExtraction && parser == "xpath")
-	{
-		var metadataObject;
-		metadataObject = extractMetadata(mmd);
-	}
-	if (!browserExtraction || serviceCall || parser != "xpath") // service extraction
-	{
-		return getMetadataFromService(mmd);
-	}
-	handleMetadata(mmd,metadataObject,url);
+    var parser = mmd.meta_metadata.parser;
+
+    if (mmd["meta_metadata"]["extract_with"] == "service"){
+        browserExtraction = false;
+        serviceCall = true;
+    }
+
+    if (browserExtraction && parser == "xpath")
+    {
+        var metadataObject;
+        metadataObject = extractMetadata(mmd);
+    }
+    if (!browserExtraction || serviceCall || parser != "xpath") // service extraction
+    {
+        return getMetadataFromService(mmd);
+    }
+    handleMetadata(mmd,metadataObject,url);
 }
 
 /*
@@ -108,7 +101,7 @@ function callService(mmd)
 function getMetadataFromService(mmd)
 {
 	//to get metadata
-	var mServiceURL = "http://ecology-service.cs.tamu.edu/BigSemanticsService/metadata.json?url=";
+	var mServiceURL = "//ecology-service.cs.tamu.edu/BigSemanticsService/metadata.json?url=";
 	mServiceURL += url;
 	
 	var request = new XMLHttpRequest();

@@ -4,7 +4,9 @@ function extractOnDrag(event)
 {
 	reset();
 	display = false;
-	callService(MMD);
+    if (MMD){
+	   callService(MMD);
+    }
 	attachInfo(event);
 }
 
