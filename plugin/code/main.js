@@ -1,6 +1,6 @@
 // GLODBAL VARIABLES
 var slideOutVisual;
-var serializedMeta;
+var serializedMeta = "{\"undefined\":{}}";
 var SLIDEOUT_WIDTH = 660; //320
 var browserExtraction = true; //service or browser extraction (blackboxing)
 var defVars = { };

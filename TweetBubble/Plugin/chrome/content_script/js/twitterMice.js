@@ -149,7 +149,7 @@ MetadataRenderer.addMetadataDisplay = function(container, url, isRoot, clipping,
 MetadataRenderer.renderInitial = function(container, url, isRoot, expandedItem, bgColorObj)
 {
 	var miceStyles = InterfaceStyle.getMiceStyleDictionary("twitter");
-	var styleInfo = {styles: miceStyles, type: null};
+	var styleInfo = {styles: miceStyles, type: "twitter"};
 		
 	// Create the interior HTML container
 	var visual = document.createElement('div');
