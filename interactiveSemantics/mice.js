@@ -324,8 +324,11 @@ MICE.expandTable = function(table, styleInfo)
 	MICE.unhighlightDocuments(null, styleInfo);
 	
 	// Check for More and expand it
-	if(table.lastChild.lastChild.lastChild.className == styleInfo.styles.moreButton)
-		MICE.morePlease({"target": table.lastChild.lastChild.lastChild});
+	if(table.lastChild!=null){
+		if(table.lastChild.lastChild.lastChild.className == styleInfo.styles.moreButton)
+			MICE.morePlease({"target": table.lastChild.lastChild.lastChild});
+	}
+	
 }
 
 /**
@@ -500,6 +503,7 @@ MICE.highlightDocuments = function(event)
 {
 	var row = event.srcElement;
 	var miceStyles = InterfaceStyle.getMiceStyleDictionary(row.mmdType);
+	
 	var styleInfo = {styles: miceStyles, type: row.mmdType};
 	
 	if(row.className == styleInfo.styles.expandButton)
@@ -833,7 +837,7 @@ MICE.buildMetadataTable = function(table, isChildTable, isRoot, metadataFields, 
 			
 		}			
 		// if the maximum number of fields have been rendered then stop rendering and add a "More" expander
-		
+		/*
 		if(fieldCount <= 0)
 		{
 			var nameCol = document.createElement('div');
@@ -872,7 +876,7 @@ MICE.buildMetadataTable = function(table, isChildTable, isRoot, metadataFields, 
 			
 			break;
 		} 
-			
+			*/
 		var metadataField = metadataFields[i];
 		
 		if(metadataField.value)
@@ -1291,10 +1295,10 @@ MICE.buildMetadataField = function(metadataField, isChildTable, fieldCount, row,
 		var childTable =  MICE.buildMetadataTable(null, false, false, metadataField.value, 1, styleInfo);
 		
 		// If the childTable has more than 1 row, collapse table
-		
+		/*
 		if(metadataField.value.length > 1 && !metadataField.show_expanded_always){
 			MICE.collapseTable(childTable, styleInfo);			
-		}
+		}*/
 		if(metadataField.show_expanded_always){
 			MICE.expandTable(childTable, styleInfo);
 		}
@@ -1400,11 +1404,7 @@ MICE.buildMetadataField = function(metadataField, isChildTable, fieldCount, row,
 		
 			//var collection = new facetedCollection(childUrl, row);
 			
-	
-		if(metadataField.value.length >= 1)
-		{
-			MICE.collapseTable(childTable, styleInfo);			
-		}					
+		
 			
 		var nestedPad = document.createElement('div');
 			nestedPad.className = styleInfo.styles.nestedPad;
@@ -1417,7 +1417,7 @@ MICE.buildMetadataField = function(metadataField, isChildTable, fieldCount, row,
 
 		fieldCount--;
 		//Function to be overwritten by MICE extensions
-		MICE.buildMetadataFieldCollectionHook(parentUrl, metadataField, row, childTable, fieldLabelDiv);
+		MICE.buildMetadataFieldCollectionHook(parentUrl, metadataField, row, childTable, fieldLabelDiv, styleInfo);
 
 
 	}

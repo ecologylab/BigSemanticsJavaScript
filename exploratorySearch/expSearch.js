@@ -861,6 +861,10 @@ ExpSearchApp.removeQuerySearchBox = function(event){
 				queryBox.parentNode.removeChild(queryBox);
 			}
 		}
+<<<<<<< HEAD
+=======
+		
+>>>>>>> 60627f83491c962ae205f350cb6d65ab5372ead0
 		
 		
 	}else{

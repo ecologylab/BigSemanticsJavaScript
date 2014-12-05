@@ -9,6 +9,18 @@
 .facetLabel{
 	float:left;
 }
+.facetHeader{
+	float: left;
+position: relative;
+top: -22px;
+font-weight: bold;
+}
+.ui-slider{
+	margin-top: 30px;
+}
+.facetContainer{
+	margin-left: 10px;
+}
 .metadataContainer {
 
     font-size: 10px;

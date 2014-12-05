@@ -1,0 +1,37 @@
+.authorNames:hover{
+	cursor: pointer;
+	color: darkgray;
+	
+}
+.authorNames{
+	border-width: 1px;
+	border-color: gray;
+    border-bottom-style: solid;
+    	text-align: center;
+    	-webkit-user-select: none;
+    
+	
+}
+.selectedAuthorNames{
+	border-width: 1px;
+	background-color: lightblue;
+	border-color: gray;
+    border-bottom-style: solid;
+    	text-align: center;
+    	-webkit-user-select: none;
+    
+	
+}
+.authorFacet{
+	line-height: 16px;
+	max-height: 250px;
+	overflow: scroll;
+	width: 180px;
+}
+
+.authorHeader{
+	text-align: center;
+	font-weight: bold;
+	font-size: 14px;
+	color: black;
+}
