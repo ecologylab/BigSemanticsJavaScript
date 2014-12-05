@@ -292,7 +292,8 @@ MetadataLoader.setMetaMetadata = function (mmd)
         if (MetadataLoader.hasVisibleMetadata(metadataFields))
         {	
           // If so, then build the HTML table	
-          var styleMmdType = tasks[i].expandedItem? "twitter" : mmd.name; 
+          var styleMmdType = (tasks[i].expandedItem && tasks[i].expandedItem.mmdType && 
+        		  					tasks[i].expandedItem.mmdType.indexOf("twitter") != -1)? "twitter" : mmd.name; 
           var miceStyles = InterfaceStyle.getMiceStyleDictionary(styleMmdType);	
          //Adds the metadata type as an attribute to the first field in the MD
           metadataFields[0].parentMDType = mmd.name;
