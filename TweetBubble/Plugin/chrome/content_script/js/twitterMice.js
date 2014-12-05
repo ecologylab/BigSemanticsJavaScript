@@ -119,11 +119,15 @@ MetadataRenderer.addMetadataDisplay = function(container, url, isRoot, clipping,
 	var bgColor = null;
 	var bgColorObj = null;
 	if ((url.indexOf("twitter.com") != -1 || application_name == "tweetbubble") || 
-			(expandedItem && expandedItem.mmdType && expandedItem.mmdType.indexOf("twitter") != -1))
+			(expandedItem && ((expandedItem.mmdType && expandedItem.mmdType.indexOf("twitter") != -1)
+							 || (expandedItem.className && expandedItem.className.indexOf("pretty-link twitter-timeline-link") != -1))))
 	{
 		bgColor = MetadataRenderer.getNextColor(container);
 		bgColorObj = {color: bgColor, bFirstField: true};
-				
+		
+		if (expandedItem)
+			expandedItem.mmdType = "twitter";
+		
 		if (isRoot)
 			visual = MetadataRenderer.renderInitial(container, url, isRoot, expandedItem, bgColorObj);
 	}
