@@ -1295,10 +1295,10 @@ MICE.buildMetadataField = function(metadataField, isChildTable, fieldCount, row,
 		var childTable =  MICE.buildMetadataTable(null, false, false, metadataField.value, 1, styleInfo);
 		
 		// If the childTable has more than 1 row, collapse table
-		/*
+		
 		if(metadataField.value.length > 1 && !metadataField.show_expanded_always){
 			MICE.collapseTable(childTable, styleInfo);			
-		}*/
+		}
 		if(metadataField.show_expanded_always){
 			MICE.expandTable(childTable, styleInfo);
 		}
@@ -1417,7 +1417,7 @@ MICE.buildMetadataField = function(metadataField, isChildTable, fieldCount, row,
 
 		fieldCount--;
 		//Function to be overwritten by MICE extensions
-		MICE.buildMetadataFieldCollectionHook(parentUrl, metadataField, row, childTable, fieldLabelDiv, styleInfo);
+		MICE.buildMetadataFieldCollectionHook(parentUrl, metadataField, row, childTable, fieldLabelDiv, styleInfo, expandButton);
 
 
 	}

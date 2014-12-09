@@ -2,13 +2,15 @@
  * 
  */MICE.urlCollections = new Map;
 MICE.htmlContainers = new Map;
+MICE.colorMap = new Map;
 
 MICE.filters = new Map;
 var htmlID = 0;
 
 var facetID = 0;
-
-
+var usedIndices = [];
+var colors = ['lightblue', '#fddee0', '#ffed7f', '#ffb74c', 'lightgreen', '#9a93aa', '#3366ff', '#c2ecb5', '#fa5d68', '#8fbc8f', '#acc3d0', '#ffa366', '#91AD74']
+var colorCounter = 0;
 var alphabet = ['a', 'b', 'c','d', 'e', 'f', 'g', 'h', 'i', 'j',
                 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't',
                 'u', 'v', 'w', 'x', 'y', 'z', '{'];
@@ -20,14 +22,14 @@ MICE.styleForRows;
 
 
 
-MICE.buildMetadataFieldCollectionHook = function(parentUrl, metadataField, row, childTable, fieldLabelDiv, styleInfo){
+MICE.buildMetadataFieldCollectionHook = function(parentUrl, metadataField, row, childTable, fieldLabelDiv, styleInfo, expandButton){
 	MICE.styleForRows = styleInfo;
 
 	var facets = document.createElement('div');
 	facets.className = "facetContainer";
 	
 
-	if(metadataField.name == "references"){
+	if(metadataField.name == "references" && parentUrl == "http://dl.acm.org/citation.cfm?id=1498819&preflayout=flat"){
 		var facetDiv = MICE.buildFacets(parentUrl, metadataField.mmdName, {name: "authors", facet_type: "ordinal"}, false);
 		facets.appendChild(facetDiv);
 		var urls = [];
@@ -51,8 +53,9 @@ MICE.buildMetadataFieldCollectionHook = function(parentUrl, metadataField, row, 
 		var urlAndTable = {};
 		urlAndTable.urls = urls;
 		urlAndTable.container = childTable;
+		urlAndTable.expandButton = expandButton;
 		MICE.urlCollections.put(metadataField.mmdName + parentUrl, urlAndTable);
-		}
+	}
 
 	MICE.collapseTable(childTable, styleInfo);			
 
@@ -62,24 +65,31 @@ MICE.buildMetadataFieldCollectionHook = function(parentUrl, metadataField, row, 
 	
 };
 MICE.filterByAuthor = function(selectedDiv, multiple){
+	 if(colorCounter > 11){
+		 colorCounter = 0;
+	 }
 	var values= [];
-	values.push(selectedDiv.innerHTML);
 	if(multiple){
 		for(var i = 0; i <selectedDiv.parentNode.childNodes.length; i++){
 			if(selectedDiv.parentNode.childNodes[i].className == ("selectedAuthorNames")){
-			values.push(selectedDiv.parentNode.childNodes[i].innerHTML);	
 			}
 
 		}
 	}else{
-		for(var i = 0; i <selectedDiv.parentNode.childNodes.length; i++){
-			selectedDiv.parentNode.childNodes[i].classList.remove("selectedAuthorNames");
-			selectedDiv.parentNode.childNodes[i].classList.add("authorNames");
+		for(var i = 1; i <selectedDiv.parentNode.childNodes.length; i++){
+			//selectedDiv.parentNode.childNodes[i].classList.remove("selectedAuthorNames");
+			//selectedDiv.parentNode.childNodes[i].classList.add("authorNames");
 
 		}
 	}
-	
 	selectedDiv.classList.add("selectedAuthorNames");
+	
+	selectedDiv.setAttribute("style", "background-color: " + colors[colorCounter]);
+	selectedDiv.setAttribute("colorindex", colorCounter);
+	MICE.colorMap.put(event.target.getAttribute('key'), colorCounter);
+
+	colorCounter++;
+
 	selectedDiv.classList.remove("authorNames");
 	var container = selectedDiv.parentNode;
 	var collection = container.getAttribute("collectionname");
@@ -98,11 +108,26 @@ MICE.filterByAuthor = function(selectedDiv, multiple){
 	}
 	
 	for(var i = 0; i < filter_sort_request.filter.length; i++){
+		
+		values.push(filter_sort_request.filter[i].value)
+
+
+		
+	}	
+	for(var i = 0; i < filter_sort_request.filter.length; i++){
 		if (filter_sort_request.filter[i].name == name){
 			filter_sort_request.filter.splice(i, 1);
 			i--;
 		}
-	}
+	
+
+		
+	}	
+	
+		values.push(selectedDiv.innerHTML);
+
+	
+
 	for(var j = 0; j < values.length; j++){
 		var facet = {}
 		facet.name = name;
@@ -119,9 +144,7 @@ MICE.currentlyBuildingFacet;
 MICE.buildAuthorFacet = function (parentUrl, collectionName, facetObj){
 	
 	/*
-	 * In theory what we really want are some service calls
-	 * But, for real yo, we're just going to load up some JSO
-	 * N, yo
+	 Add per - author paper count
 	 * */
 	
 	
@@ -153,14 +176,34 @@ MICE.buildAuthorFacet = function (parentUrl, collectionName, facetObj){
 				  }
 				  aDiv.setAttribute("key", paperAuthors[i].name);
 				  $(aDiv).click(function(event){
-					 if(event.target.className == "selectedAuthorNames"){
-							event.target.classList.remove("selectedAuthorNames");
+					 if(colorCounter > 11){
+						 colorounter = 0;
+					 }
+					  if(event.target.className == "selectedAuthorNames"){
+							var kids = event.target.parentNode.childNodes;
+							/*for(var i = 1; i < kids.length; i++){
+								kids[i].classList.remove("selectedAuthorNames");
+								kids[i].classList.add("authorNames");
+								kids[i].setAttribute("style", "");
+							}*/
+						 	event.target.classList.remove("selectedAuthorNames");
 							event.target.classList.add("authorNames");
-							var urls = MICE.urlCollections.get(collectionName + parentUrl).urls;
+							event.target.setAttribute("style", "");
+							/*var urls = MICE.urlCollections.get(collectionName + parentUrl).urls;
 							var possibleContainer = MICE.htmlContainers.get(event.target.getAttribute("key")).parentNode;
 							
 
-							MICE.displayNewUrlList(urls, possibleContainer);
+							MICE.displayNewUrlList(urls, possibleContainer, false);*/
+							//colorCounter = event.target.getAttribute('colorindex').parseInt();
+							var colPar = event.target.parentNode.getAttribute('collectionname') + event.target.parentNode.getAttribute('parenturl')
+							var filter_sort_request = MICE.filters.get(colPar);
+							for(var f = 0; f < filter_sort_request.filter.length; f++){
+								if (filter_sort_request.filter[f].value == event.target.innerHTML){
+									filter_sort_request.filter.splice(f, 1);
+									MICE.applyFilterSortRequest(filter_sort_request);
+
+								}
+							}
 
 
 					  }	  
@@ -450,10 +493,10 @@ MICE.applyFilterSortRequest = function(request){
 				}
 		}
 		if(passedFilterUrls.length > 0){
-			MICE.displayNewUrlList(passedFilterUrls, parent);
+			MICE.displayNewUrlList(passedFilterUrls, parent, true);
 
 		}else{
-			MICE.displayNewUrlList(newUrlList, parent);
+			MICE.displayNewUrlList(newUrlList, parent, true);
 
 		}
 	}
@@ -461,13 +504,22 @@ MICE.applyFilterSortRequest = function(request){
 }
 
 //This code strips down the parent Collection display and rebuilds from the rubble
-MICE.displayNewUrlList = function(urls, parentContainer){
+MICE.displayNewUrlList = function(urls, parentContainer, fancyColors){
 
 	while(parentContainer.hasChildNodes()){
 		parentContainer.removeChild(parentContainer.childNodes[0]);
 	}
 	for(var i = 0; i < urls.length; i++){
 		parentContainer.appendChild(MICE.htmlContainers.get(urls[i]));
+		if(fancyColors){
+			var cindex = MICE.colorMap.get(urls[i]);
+			MICE.htmlContainers.get(urls[i]).childNodes[1].childNodes[0].childNodes[0].childNodes[0].childNodes[0].childNodes[].setAttribute("style", "background-color: " + colors[cindex] + "; border-radius: 8px");
+
+		}
+		else{
+			MICE.htmlContainers.get(urls[i]).childNodes[1].childNodes[0].childNodes[0].childNodes[0].childNodes[0].setAttribute("style", "");
+
+		}
 
 	}
 
