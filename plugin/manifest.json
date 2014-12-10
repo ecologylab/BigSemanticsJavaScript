@@ -18,14 +18,16 @@
 	    "js": [
 	    	"code/SlideOut.js",
 	    	"code/main.js",
-	    	"code/mice/debi.js",
+            "code/mice/debi.js",
 	    	"code/mice/mice.js",
 	    	"code/mice/metadataRenderer.js",
 	    	"code/fieldParsers.js",
 	    	"code/mice/simplDeserializer.js",
 	    	"code/extractMetadata.js",
 	    	"code/dragEvents.js",
-	    	"code/clipboard.js"
+	    	"code/clipboard.js",
+            "code/PrefixCollection.js",
+            "code/getMMD.js"
 	    ],
 	    "css": [
 	    	"code/style.css",
@@ -34,6 +36,7 @@
   	}],
   "background": {
     "scripts": [
+        "code/mice/debi.js",
     	"code/background.js",
     	"code/clipboardBackground.js"
     ]
