@@ -10,7 +10,7 @@ div.span9.content {
 	border: 1px solid #E1E1E8;
 	
 	position: absolute;
-  	top: 400px; 
+  	top: 500px; 
   	left: 280px;
 	overflow-y: scroll;
 	max-height: 300px;
@@ -18,57 +18,68 @@ div.span9.content {
 
 body { 
     padding-top: 40px; 
+    font-size: 14px;
 }
 
 .navbar-form {
     margin-left: 10px;
 }
 
-div#historyWrapper {
+#historyWrapper {
 	position: absolute;
 	top: 60px;
 	left: 10px;
     z-index: 10;
 }
 
-div#typeArea {
+#typeArea {
 	position: absolute;
-	top: 400px;
+	top: 500px;
 	left: 950px;
 }
 
-div#graphArea {
+#graphArea {
 	position: absolute;
-	top: 100px;
+	top: 60px;
 	left: 1150px;
+	right: 0px;
+	bottom: 0px;
 }
 
-div#graphArea div {
-    clear: both;
+#loadingBar {
+	position: absolute;
+	top: 80px;
+	left: 1500px;
 }
 
-div#graphArea div:hover p {
+.nodes div {
+    position: absolute;
+    white-space: nowrap;
+    z-index: 1;
+    transition: .2s;
+}
+
+.nodes div img {
+    float: left;
+    z-index: 1
+}
+
+.nodeText {
+	display: inline-;
+    padding: 2px 3px 2px 3px;
+    border-radius: 3px;
+}
+
+.nodes div:hover .nodeText {
     font-size: 120%;
     z-index: 10;
-}
-
-div#graphArea div p {
-    overflow: hidden;
-}
-
-div#nodeMDArea {
-	position: absolute;
-	top: 100px;
-	left: 1500px;
 }
 
 svg {
 	position: absolute;
 	left: 0;
-	top: 0;
+    top: 0;
     z-index: -10;
 }
 
-p.nodeText {
-	display: inline;
-}
+

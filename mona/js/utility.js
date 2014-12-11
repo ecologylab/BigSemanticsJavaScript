@@ -52,8 +52,8 @@ function sortNumber(a,b) {
 }
 
 function getLabel(key){
-    for (var i in MDC_rawMMD.meta_metadata.kids){
-        var kid = MDC_rawMMD.meta_metadata.kids[i];
+    for (var i in MDC_rawMMD.kids){
+        var kid = MDC_rawMMD.kids[i];
         for (var type in kid){
             if (key == kid[type].name){
                 if (kid[type].label !== undefined){
@@ -68,7 +68,21 @@ function getLabel(key){
     return key.replace(/_/g," ");
 }
 
-//sanitize input
-function fixWhiteSpace(string){
-    return string.replace(/\s+/g,' ');
+function getRandomArbitrary(min, max) {
+  return Math.random() * (max - min) + min;
 }
+
+function Vector(items)
+{
+	this.items = items;
+}
+
+Vector.prototype.add = function(other)
+{
+	var result = [];
+    for(var i = 0; i < this.items.length; i++) {
+        result.push( this.items[i] + other.items[i]);
+    }
+    
+    return new Vector(result);
+};

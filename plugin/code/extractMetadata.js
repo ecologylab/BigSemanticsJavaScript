@@ -1,5 +1,5 @@
 var upperLevel = { }; //holds upperlevel metadata
-//var scalars = { };
+var scalars = { };
 
 /*
  * extracts metadata from metametadata
@@ -8,12 +8,12 @@ var upperLevel = { }; //holds upperlevel metadata
  */
 function extractMetadata(mmd) {
 	var extractedMeta = { };
-	mmd = mmd['meta_metadata'];
-	mmdKids = mmd['kids'];
+	mmd = mmd.meta_metadata;
+	mmdKids = mmd.kids;
 	mmdKids = sortKids(mmdKids);
 	var contextNode = document;
-	var type = mmd['type'];
-	var name = mmd['name'];
+	var type = mmd.type;
+	var name = mmd.name;
 	
 	if (mmd.hasOwnProperty('def_vars')) 
 	{
@@ -115,13 +115,12 @@ function dataFromKids(mmdKids,contextNode,recurse,parserContext)
 			
 			if(!isObjEmpty(obj,recurse))
 			{
-			//cludge in case composite contains both location and and unique scalars
-			//MICE overrides scalars with expanded location, for now we just ignore location
-				for (key in obj){
-					if (key != "download_status" || key != "location" || key != "title" || key != "mm_name" && obj["location"] != null){
-						delete obj["location"];
-					}
-				}
+			//MICE overrides scalars with expanded location, not sure what the client should do. below commented out code would just delete location
+				//for (key in obj){
+				//	if (key != "download_status" || key != "location" || key != "title" || key != "mm_name" && obj["location"] != null){
+				//		delete obj["location"];
+				//	}
+				//}
 				if(obj != null)
 				{
 					e = false;
@@ -168,14 +167,11 @@ function getScalarD(field,contextNode,recurse,parserContext)
 	var x = null;
 	var data = null;
 	
-	if (field.hasOwnProperty("concatenate_values")) { 	//calls the service when there is concatenate_values in the fields
-		//data = concatValues(field.concatenate_values);	//temporary until there is javascript code for concatenate_values
+	if (field.hasOwnProperty("concatenate_values") && field.concatenate_values.length > 1) { 	//calls the service when there is concatenate_values in the fields
+		data = concatValues(field.concatenate_values);	//temporary until there is javascript code for concatenate_values
 		if (!recurse) {
-			return null;
+			return data;
 		}
-		serviceCall = true;
-		console.log("Calling service for metadata, something went wrong");
-		return null;
 	}
 	
 	var fieldParserKey = field['field_parser_key'];
@@ -210,6 +206,7 @@ function getScalarD(field,contextNode,recurse,parserContext)
 				data = data.replace(new RegExp(regex, 'g'),replace);
 			}
 		}
+        scalars[field.name] = data;
 		return data;
 	} 
 	return null;
@@ -538,7 +535,13 @@ function concatValues(concatList)
 			var x = concat.from_scalar;
 			concatString = concatString + scalars[x];
 		}
+        else if (concat.hasOwnProperty("constant_value") && concat.constant_value !== "")
+		{
+			var x = concat.constant_value;
+			concatString = concatString + x;
+		}
 	}
+    return concatString;
 }
 
 /*

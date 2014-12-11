@@ -252,6 +252,9 @@ font-weight: bold;
     height: auto;
 }
 
+.metadataContainer .fieldValueImage{
+	height: auto;
+}
 
 .metadataContainer .fieldChildContainer{
         

@@ -6,6 +6,15 @@
     	var application_name = "mona";
     	var MDC_rawMetadata = "";
 		var MDC_rawMMD = "";
+        var graphWidth;
+        var graphHeight;
+        var primaryNodes = {};
+        var nodeList =[];
+        var secondaryNodes = {};
+        var secondaryNodesList = [];
+        var unrenderedNodesList = [];
+        var renderedNodesList = [];
+        var nodePositions = {};
     </script>
     
     <!-- CSS! -->
@@ -18,14 +27,10 @@
     <script src="http://code.jquery.com/jquery-latest.js"></script>
     <script src="js/bootstrap.min.js"></script>
 
-    <script type="text/javascript" src="js/utility.js"></script>
-
-
-   <script type="text/javascript" src="../interactiveSemantics/interfaceStyle.js"></script>
-   <script type="text/javascript" src="../interactiveSemantics/extensionInterface.js"></script>
-   <script type="text/javascript" src="../interactiveSemantics/debi.js"></script>   
-   <script type="text/javascript" src="js/monamice.js"></script>
-
+    <script type="text/javascript" src="../interactiveSemantics/interfaceStyle.js"></script>
+    <script type="text/javascript" src="../interactiveSemantics/extensionInterface.js"></script>
+    <script type="text/javascript" src="../interactiveSemantics/debi.js"></script>   
+    <script type="text/javascript" src="js/monamice.js"></script>
 
 	<script type="text/javascript" src="../simpl/simplDeserializer.js"></script>
 	<script type="text/javascript" src="../simpl/simplFieldTypes.js"></script>
@@ -34,9 +39,12 @@
 	<script type="text/javascript" src="../simpl/simplTypeScope.js"></script>
 	<script type="text/javascript" src="../simpl/simplTypeScopeDeserialize.js"></script>
 	<script type="text/javascript" src="../simpl/simplTypeScopeSerialize.js"></script>
-
+    
+    <script type="text/javascript" src="./heap.js"></script>  
+    <script type="text/javascript" src="js/utility.js"></script>
     <script type="text/javascript" src="js/FlairMaster.js"></script>
     <script type="text/javascript" src="js/mdc.js"></script>
+    <script type="text/javascript" src="js/grapher.js"></script>
     <script type="text/javascript" src="js/mona.js"></script>
     
     <script type="text/javascript" src="../semantics/MetaMetadataRepositoryLibrary.js"></script>
@@ -58,6 +66,7 @@
     </div>
 
     <!-- Content -->
+    <!--  colors literature bertem, colin ware (retinal variable) // dynamic? or continuity --> 
     <div class ="container" id="vizArea">
       <div id="historyWrapper">
         <p>History</p>
@@ -66,13 +75,13 @@
         </div>
       </div>
 
-      <svg id="lineSVG" height="1600" width="1600"></svg>
+      <svg id="lineSVG" height="2600" width="2600"></svg>
       <div class="row">
         <div class="span9 content" id="mdcIce"></div>
       </div>
       <div id="typeArea"></div>
-      <div id="graphArea"></div>
-      <div id="nodeMDArea"></div>
+      <div id="graphArea" class="nodes"></div>
+      <div id="loadingBar"></div>
     </div>
 
     <script>
