@@ -37,7 +37,8 @@
 .authorNames{
     	text-align: center;
     	-webkit-user-select: none;
-    
+        border-radius: 8px;
+  -webkit-filter: saturate(60%);   
 	
 }
 .authorNames:hover{
@@ -51,6 +52,16 @@
    
 	
 }
+.selectedAuthorNamesX{
+	/*background-color: lightblue;*/
+    	text-align: center;
+    	-webkit-user-select: none;
+    border-radius: 8px;
+-webkit-filter: grayscale(100%) ;
+color: white;  
+	
+}.selectedAuthorNamesX:hover{	cursor: pointer;}
+
 .selectedAuthorNames:hover{	cursor: pointer;}
 
 .authorFacet{
@@ -59,6 +70,7 @@
 	overflow: scroll;
 	width: 180px;
 	    overflow-x: hidden;
+	 margin-bottom: 8px;   
 	
 }
 

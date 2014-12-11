@@ -1,0 +1,327 @@
+[
+  {
+    "name": "Topic knowledge and online catalog search formulation",
+    "key": "Topic knowledge and online catalog search formulation",
+    "authors": [
+      "Allen, B. L."
+    ]
+  },
+  {
+    "name": "Important cognitive components of domain-specific search knowledge",
+    "key": "Important cognitive components of domain-specific search knowledge",
+    "authors": [
+      "Bhavnani, S. K."
+    ]
+  },
+  {
+    "name": "Statistical power analysis for the behavioral sciences (2nd ed",
+    "key": "Statistical power analysis for the behavioral sciences (2nd ed",
+    "authors": [
+      "Cohen, J."
+    ]
+  },
+  {
+    "name": "Hsieh-Yee, I. (1993). Effects of search experience and subject knowledge on the search tactics of novice and experienced searchers. JASIST, 44(3), 161--174.",
+    "key": "Hsieh-Yee, I. (1993). Effects of search experience and subject knowledge on the search tactics of novice and experienced searchers. JASIST, 44(3), 161--174.",
+    "authors": [
+      
+    ]
+  },
+  {
+    "name": "Dwiggins",
+    "key": "Dwiggins",
+    "authors": [
+      "Marchionini, G.",
+      "Lin, X."
+    ]
+  },
+  {
+    "name": "B. & Yuan",
+    "key": "B. & Yuan",
+    "authors": [
+      "Zhang, X.",
+      "Anghelescu, H. G."
+    ]
+  },
+  {
+    "name": "Models of searching and browsing: languages, studies, and applications",
+    "location": "http:\/\/dl.acm.org\/citation.cfm?id=1625716&preflayout=flat",
+    "key": "http:\/\/dl.acm.org\/citation.cfm?id=1625716&preflayout=flat",
+    "authors": [
+      "Doug Downey",
+      "Susan Dumais",
+      "Eric Horvitz"
+    ],
+    "venue": [
+      "IJCAI"
+    ],
+    "citation_count": [
+      38
+    ]
+  },
+  {
+    "name": "Enterprise search behaviour of software engineers",
+    "location": "http:\/\/dl.acm.org\/citation.cfm?id=1148297&preflayout=flat",
+    "key": "http:\/\/dl.acm.org\/citation.cfm?id=1148297&preflayout=flat",
+    "authors": [
+      "Luanne Freund",
+      "Elaine G. Toms"
+    ],
+    "venue": [
+      "SIGIR"
+    ],
+    "citation_count": [
+      5
+    ]
+  },
+  {
+    "name": "Learning user interaction models for predicting web search result preferences",
+    "location": "http:\/\/dl.acm.org\/citation.cfm?id=1148175&preflayout=flat",
+    "key": "http:\/\/dl.acm.org\/citation.cfm?id=1148175&preflayout=flat",
+    "authors": [
+      "Eugene Agichtein",
+      "Eric Brill",
+      "Susan Dumais",
+      "Robert Ragno"
+    ],
+    "venue": [
+      "SIGIR"
+    ],
+    "citation_count": [
+      141
+    ]
+  },
+  {
+    "name": "Knowledge in the head and on the web: using topic expertise to aid search",
+    "location": "http:\/\/dl.acm.org\/citation.cfm?id=1357062&preflayout=flat",
+    "key": "http:\/\/dl.acm.org\/citation.cfm?id=1357062&preflayout=flat",
+    "authors": [
+      "Geoffrey B. Duggan",
+      "Stephen J. Payne"
+    ],
+    "venue": [
+      "CHI"
+    ],
+    "citation_count": [
+      13
+    ]
+  },
+  {
+    "name": "Web search behavior of Internet experts and newbies",
+    "location": "http:\/\/dl.acm.org\/citation.cfm?id=346311&preflayout=flat",
+    "key": "http:\/\/dl.acm.org\/citation.cfm?id=346311&preflayout=flat",
+    "authors": [
+      "Christoph H??lscher",
+      "Gerhard Strube"
+    ],
+    "venue": [
+      "Computer networks"
+    ],
+    "citation_count": [
+      145
+    ]
+  },
+  {
+    "name": "The effects of topic familiarity on information search behavior",
+    "location": "http:\/\/dl.acm.org\/citation.cfm?id=544232&preflayout=flat",
+    "key": "http:\/\/dl.acm.org\/citation.cfm?id=544232&preflayout=flat",
+    "authors": [
+      "Diane Kelly",
+      "Colleen Cool"
+    ],
+    "venue": [
+      "JCDL"
+    ],
+    "citation_count": [
+      30
+    ]
+  },
+  {
+    "name": "Analysis of topic dynamics in web search",
+    "location": "http:\/\/dl.acm.org\/citation.cfm?id=1062889&preflayout=flat",
+    "key": "http:\/\/dl.acm.org\/citation.cfm?id=1062889&preflayout=flat",
+    "authors": [
+      "Xuehua Shen",
+      "Susan Dumais",
+      "Eric Horvitz"
+    ],
+    "venue": [
+      "WWW"
+    ],
+    "citation_count": [
+      19
+    ]
+  },
+  {
+    "name": "The effects of expertise and feedback on search term selection and subsequent learning: Research Articles",
+    "location": "http:\/\/dl.acm.org\/citation.cfm?id=1067082&preflayout=flat",
+    "key": "http:\/\/dl.acm.org\/citation.cfm?id=1067082&preflayout=flat",
+    "authors": [
+      "Helene A. Hembrooke",
+      "Laura A. Granka",
+      "Geraldine K. Gay",
+      "Elizabeth D. Liddy"
+    ],
+    "venue": [
+      "Journal of the American Society for Information Science and Technology"
+    ],
+    "citation_count": [
+      18
+    ]
+  },
+  {
+    "name": "Domain-specific search strategies for the effective retrieval of healthcare and shopping information",
+    "location": "http:\/\/dl.acm.org\/citation.cfm?id=506508&preflayout=flat",
+    "key": "http:\/\/dl.acm.org\/citation.cfm?id=506508&preflayout=flat",
+    "authors": [
+      "Suresh K. Bhavnani"
+    ],
+    "venue": [
+      "CHI"
+    ],
+    "citation_count": [
+      29
+    ]
+  },
+  {
+    "name": "Strategy hubs: Domain portals to help find comprehensive information",
+    "location": "http:\/\/dl.acm.org\/citation.cfm?id=1107443&preflayout=flat",
+    "key": "http:\/\/dl.acm.org\/citation.cfm?id=1107443&preflayout=flat",
+    "authors": [
+      "Suresh K. Bhavnani",
+      "Christopher K. Bichakjian",
+      "Timothy M. Johnson",
+      "Roderick J. Little",
+      "Frederick A. Peck",
+      "Jennifer L. Schwartz",
+      "Victor J. Strecher"
+    ],
+    "venue": [
+      "Journal of the American Society for Information Science and Technology"
+    ],
+    "citation_count": [
+      5
+    ]
+  },
+  {
+    "name": "Web Search: Public Searching of the Web (Information Science and Knowledge Management)",
+    "location": "http:\/\/dl.acm.org\/citation.cfm?id=1212504&preflayout=flat",
+    "key": "http:\/\/dl.acm.org\/citation.cfm?id=1212504&preflayout=flat",
+    "authors": [
+      "Amanda Spink",
+      "Bernard J. Jansen"
+    ],
+    "venue": [
+      "Book"
+    ],
+    "citation_count": [
+      48
+    ]
+  },
+  {
+    "name": "Changes of search terms and tactics while writing a research proposal A longitudinal case study",
+    "location": "http:\/\/dl.acm.org\/citation.cfm?id=782448&preflayout=flat",
+    "key": "http:\/\/dl.acm.org\/citation.cfm?id=782448&preflayout=flat",
+    "authors": [
+      "Pertti Vakkari",
+      "Mikko Pennanen",
+      "Sami Serola"
+    ],
+    "venue": [
+      "Information Processing and Management"
+    ],
+    "citation_count": [
+      44
+    ]
+  },
+  {
+    "name": "How medical expertise influences web search interaction",
+    "location": "http:\/\/dl.acm.org\/citation.cfm?id=1390506&preflayout=flat",
+    "key": "http:\/\/dl.acm.org\/citation.cfm?id=1390506&preflayout=flat",
+    "authors": [
+      "Ryen W. White",
+      "Susan Dumais",
+      "Jaime Teevan"
+    ],
+    "venue": [
+      "SIGIR"
+    ],
+    "citation_count": [
+      7
+    ]
+  },
+  {
+    "name": "Investigating the querying and browsing behavior of advanced search engine users",
+    "location": "http:\/\/dl.acm.org\/citation.cfm?id=1277787&preflayout=flat",
+    "key": "http:\/\/dl.acm.org\/citation.cfm?id=1277787&preflayout=flat",
+    "authors": [
+      "Ryen W. White",
+      "Dan Morris"
+    ],
+    "venue": [
+      "SIGIR"
+    ],
+    "citation_count": [
+      53
+    ]
+  },
+  {
+    "name": "To personalize or not to personalize: modeling queries with variation in user intent",
+    "location": "http:\/\/dl.acm.org\/citation.cfm?id=1390364&preflayout=flat",
+    "key": "http:\/\/dl.acm.org\/citation.cfm?id=1390364&preflayout=flat",
+    "authors": [
+      "Jaime Teevan",
+      "Susan T. Dumais",
+      "Daniel J. Liebling"
+    ],
+    "venue": [
+      "SIGIR"
+    ],
+    "citation_count": [
+      73
+    ]
+  },
+  {
+    "name": "The effects of domain knowledge on search tactic formulation",
+    "location": "http:\/\/dl.acm.org\/citation.cfm?id=985358&preflayout=flat",
+    "key": "http:\/\/dl.acm.org\/citation.cfm?id=985358&preflayout=flat",
+    "authors": [
+      "Barbara M. Wildemuth"
+    ],
+    "venue": [
+      "Journal of the American Society for Information Science and Technology"
+    ],
+    "citation_count": [
+      58
+    ]
+  },
+  {
+    "name": "Discriminative training methods for hidden Markov models: theory and experiments with perceptron algorithms",
+    "location": "http:\/\/dl.acm.org\/citation.cfm?id=1118694&preflayout=flat",
+    "key": "http:\/\/dl.acm.org\/citation.cfm?id=1118694&preflayout=flat",
+    "authors": [
+      "Michael Collins"
+    ],
+    "venue": [
+      "EMNLP"
+    ],
+    "citation_count": [
+      411
+    ]
+  },
+  {
+    "name": "Investigating behavioral variability in web search",
+    "location": "http:\/\/dl.acm.org\/citation.cfm?id=1242576&preflayout=flat",
+    "key": "http:\/\/dl.acm.org\/citation.cfm?id=1242576&preflayout=flat",
+    "authors": [
+      "Ryen W. White",
+      "Steven M. Drucker"
+    ],
+    "venue": [
+      "WWW"
+    ],
+    "citation_count": [
+      106
+    ]
+  }
+]

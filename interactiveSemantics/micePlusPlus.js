@@ -3,13 +3,18 @@
  */MICE.urlCollections = new Map;
 MICE.htmlContainers = new Map;
 MICE.colorMap = new Map;
-
+MICE.authorMap = new Map;
+MICE.venueMap = new Map;
 MICE.filters = new Map;
+MICE.papersFromAuthors = [];
+MICE.papersFromVenues = [];
+MICE.authorColorMap = new Map;
+MICE.authorColorOrderMap = new Map;
 var htmlID = 0;
 
 var facetID = 0;
 var usedIndices = [];
-var colors = ['lightblue', '#fddee0', '#ffed7f', '#ffb74c', 'lightgreen', '#9a93aa', '#3366ff', '#c2ecb5', '#fa5d68', '#8fbc8f', '#acc3d0', '#ffa366', '#91AD74']
+var colors = ['#F7977A', '#FDC68A', '#FFF79A', '#82CA9D', '#6ECFF6', '#7EA7D8', '#8882BE', '#BC8DBF', '#F49AC2', '#F6989D', '#605CA8', '#F06EA9', '#855FA8', undefined]
 var colorCounter = 0;
 var alphabet = ['a', 'b', 'c','d', 'e', 'f', 'g', 'h', 'i', 'j',
                 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't',
@@ -30,8 +35,11 @@ MICE.buildMetadataFieldCollectionHook = function(parentUrl, metadataField, row, 
 	
 
 	if(metadataField.name == "references" && parentUrl == "http://dl.acm.org/citation.cfm?id=1498819&preflayout=flat"){
+		var facetDiv2 = MICE.buildFacets(parentUrl, metadataField.mmdName, {name: "venue", facet_type: "ordinal"}, false);
+		facets.appendChild(facetDiv2);
 		var facetDiv = MICE.buildFacets(parentUrl, metadataField.mmdName, {name: "authors", facet_type: "ordinal"}, false);
 		facets.appendChild(facetDiv);
+		
 		var urls = [];
 		var rowWrapper;
 		var row;
@@ -71,7 +79,7 @@ MICE.filterByAuthor = function(selectedDiv, multiple){
 	var values= [];
 	if(multiple){
 		for(var i = 0; i <selectedDiv.parentNode.childNodes.length; i++){
-			if(selectedDiv.parentNode.childNodes[i].className == ("selectedAuthorNames")){
+			if(selectedDiv.parentNode.childNodes[i].className == ("selectedAuthorNamesX")){
 			}
 
 		}
@@ -82,15 +90,12 @@ MICE.filterByAuthor = function(selectedDiv, multiple){
 
 		}
 	}
-	selectedDiv.classList.add("selectedAuthorNames");
-	
-	selectedDiv.setAttribute("style", "background-color: " + colors[colorCounter]);
-	selectedDiv.setAttribute("colorindex", colorCounter);
-	MICE.colorMap.put(event.target.getAttribute('key'), colorCounter);
+	selectedDiv.classList.add("selectedAuthorNamesX");
 
-	colorCounter++;
+
 
 	selectedDiv.classList.remove("authorNames");
+	selectedDiv.style.background = 'gray';
 	var container = selectedDiv.parentNode;
 	var collection = container.getAttribute("collectionname");
 	var parent = container.getAttribute("parenturl");
@@ -108,8 +113,10 @@ MICE.filterByAuthor = function(selectedDiv, multiple){
 	}
 	
 	for(var i = 0; i < filter_sort_request.filter.length; i++){
-		
-		values.push(filter_sort_request.filter[i].value)
+		if(filter_sort_request.filter[i].name == name){
+			values.push(filter_sort_request.filter[i].value)
+
+		}
 
 
 		
@@ -140,7 +147,111 @@ MICE.filterByAuthor = function(selectedDiv, multiple){
 	
 	
 };
+
+
+MICE.filterByVenue = function(selectedDiv, multiple){
+	
+	var values= [];
+	if(multiple){
+		for(var i = 0; i <selectedDiv.parentNode.childNodes.length; i++){
+			if(selectedDiv.parentNode.childNodes[i].className == ("selectedAuthorNames")){
+			}
+
+		}
+	}else{
+		for(var i = 1; i <selectedDiv.parentNode.childNodes.length; i++){
+			//selectedDiv.parentNode.childNodes[i].classList.remove("selectedAuthorNames");
+			//selectedDiv.parentNode.childNodes[i].classList.add("authorNames");
+
+		}
+	}
+	selectedDiv.classList.add("selectedAuthorNames");
+	
+	var papers = MICE.venueMap.get(selectedDiv.innerHTML);
+	for(var i = 0; i < papers.length; i++){
+		var cList = MICE.colorMap.get(papers[i]);
+		if(cList == null){
+			
+			MICE.colorMap.put(papers[i], [colorCounter]);
+			selectedDiv.setAttribute("style", "background-color: " + colors[colorCounter]);
+			selectedDiv.setAttribute("colorindex", 	colorCounter);
+		}
+		else{
+			if(cList[0] == 13){
+				cList = [];
+				MICE.colorMap.put(papers[i], [colorCounter]);
+
+			}
+			cList.push(colorCounter);
+			selectedDiv.setAttribute("style", "background-color: " + colors[cList[0]]);
+			selectedDiv.setAttribute("colorindex", 	cList[0]);
+			//MICE.colorMap.put(papers[i], cList);
+
+		}
+
+	}
+
+
+	
+	colorCounter++;
+
+	selectedDiv.classList.remove("authorNames");
+	var container = selectedDiv.parentNode;
+	var collection = container.getAttribute("collectionname");
+	var parent = container.getAttribute("parenturl");
+	var colPar = collection + parent;
+	var name = container.getAttribute("name");
+	var filter_sort_request = MICE.filters.get(colPar);
+	if(filter_sort_request == null){
+		filter_sort_request = {};
+		var target_collection = {};
+		target_collection.parentUrls = [parent];
+		target_collection.collectionName = collection;
+		filter_sort_request.filter = [];
+		filter_sort_request.sort = {};
+		filter_sort_request.target_collection = target_collection;
+	}
+	
+	for(var i = 0; i < filter_sort_request.filter.length; i++){
+		if(filter_sort_request.filter[i].name == name){
+			values.push(filter_sort_request.filter[i].value)
+
+		}
+
+
+		
+	}	
+	
+	for(var i = 0; i < filter_sort_request.filter.length; i++){
+		if (filter_sort_request.filter[i].name == name){
+			filter_sort_request.filter.splice(i, 1);
+			i--;
+		}
+	
+
+		
+	}	
+	
+		values.push(selectedDiv.innerHTML);
+
+	
+
+	for(var j = 0; j < values.length; j++){
+		var facet = {}
+		facet.name = name;
+		facet.value = values[j];
+		filter_sort_request.filter.push(facet);
+	}
+
+	MICE.filters.put(colPar, filter_sort_request);
+	
+	MICE.applyFilterSortRequest(filter_sort_request);
+	
+	
+};
+
 MICE.currentlyBuildingFacet;
+MICE.currentVFacet;
 MICE.buildAuthorFacet = function (parentUrl, collectionName, facetObj){
 	
 	/*
@@ -151,7 +262,7 @@ MICE.buildAuthorFacet = function (parentUrl, collectionName, facetObj){
 	var facet = document.createElement('div');
 	facet.className = 'authorFacet';
 	facet.setAttribute('name', facetObj.name);
-	facet.setAttribute('id',  facetID.toString());
+	facet.setAttribute('id', 'authorFacet');
 	facet.setAttribute('parenturl', parentUrl);
 	facet.setAttribute('collectionname', collectionName);
 	
@@ -163,7 +274,7 @@ MICE.buildAuthorFacet = function (parentUrl, collectionName, facetObj){
 	
 	
 	MICE.currentlyBuildingFacet = facet;
-	$.getJSON( "../interactiveSemantics/authors.json", function( data, success, random ) {
+	$.getJSON( "../interactiveSemantics/papers.json", function( data, success, random ) {
 		  var paperAuthors = data;
 		 var divs = [];
 		  for(var i = 0; i < paperAuthors.length; i++){
@@ -174,19 +285,28 @@ MICE.buildAuthorFacet = function (parentUrl, collectionName, facetObj){
 				  if(aDiv.innerHTML == "Eugene Agichtein"){
 					  var ffff = "asas";
 				  }
-				  aDiv.setAttribute("key", paperAuthors[i].name);
+				  aDiv.setAttribute("key", paperAuthors[i].key);
+				  aDiv.setAttribute("saveme", "0");
+				  var int = MICE.authorMap.get(paperAuthors[i].authors[j]);
+				  if(int == null){
+					  MICE.authorMap.put(paperAuthors[i].authors[j], [paperAuthors[i].key]);
+				  }else{
+					  int.push(paperAuthors[i].key);
+					  MICE.authorMap.put(paperAuthors[i].authors[j], int);
+
+				  }
 				  $(aDiv).click(function(event){
 					 if(colorCounter > 11){
 						 colorounter = 0;
 					 }
-					  if(event.target.className == "selectedAuthorNames"){
+					  if(event.target.className == "selectedAuthorNamesX"){
 							var kids = event.target.parentNode.childNodes;
 							/*for(var i = 1; i < kids.length; i++){
 								kids[i].classList.remove("selectedAuthorNames");
 								kids[i].classList.add("authorNames");
 								kids[i].setAttribute("style", "");
 							}*/
-						 	event.target.classList.remove("selectedAuthorNames");
+						 	event.target.classList.remove("selectedAuthorNamesX");
 							event.target.classList.add("authorNames");
 							event.target.setAttribute("style", "");
 							/*var urls = MICE.urlCollections.get(collectionName + parentUrl).urls;
@@ -204,6 +324,16 @@ MICE.buildAuthorFacet = function (parentUrl, collectionName, facetObj){
 
 								}
 							}
+							var authorColors = MICE.authorColorMap.get(event.target.innerHTML);
+							if(authorColors!=null){
+								if(authorColors.length < 1){
+								event.target.style.background = '';
+							}else{
+								event.target.style.background = MICE.buildGradient(authorColors);
+
+							}
+							}
+							
 
 
 					  }	  
@@ -253,9 +383,294 @@ MICE.buildAuthorFacet = function (parentUrl, collectionName, facetObj){
 	
 
 }
+
+MICE.buildVenueFacet = function (parentUrl, collectionName, facetObj){
+	
+	/*
+	 Add per - author paper count
+	 * */
+	
+	
+	var facet = document.createElement('div');
+	facet.className = 'authorFacet';
+	facet.setAttribute('name', facetObj.name);
+	facet.setAttribute('id', 'venueFacet');
+	facet.setAttribute('parenturl', parentUrl);
+	facet.setAttribute('collectionname', collectionName);
+	
+	var facetLabel = document.createElement('div');
+	facetLabel.className = 'authorHeader';
+	facetLabel.innerHTML = "Venue";
+		
+	facet.appendChild(facetLabel);
+	
+	
+	MICE.currentVFacet = facet;
+	$.getJSON( "../interactiveSemantics/papers.json", function( data, success, random ) {
+		  var paperAuthors = data;
+		 var divs = [];
+		  for(var i = 0; i < paperAuthors.length; i++){
+			 if(paperAuthors[i].venue!=null){
+			  for(var j = 0; j < paperAuthors[i].venue.length; j++){
+				  var aDiv = document.createElement('div');
+				  aDiv.className = "authorNames"
+				  aDiv.innerHTML = paperAuthors[i].venue[j];
+				  var int = MICE.venueMap.get(paperAuthors[i].venue[j]);
+				  if(int == null){
+					  MICE.venueMap.put(paperAuthors[i].venue[j], [paperAuthors[i].key]);
+				  }else{
+					  int.push(paperAuthors[i].key);
+					  MICE.venueMap.put(paperAuthors[i].venue[j], int);
+
+				  }
+				  aDiv.setAttribute("key", paperAuthors[i].key);
+				  $(aDiv).click(function(event){
+					 if(colorCounter > 11){
+						 colorounter = 0;
+					 }
+					  if(event.target.className == "selectedAuthorNames"){
+							var kids = event.target.parentNode.childNodes;
+							/*for(var i = 1; i < kids.length; i++){
+								kids[i].classList.remove("selectedAuthorNames");
+								kids[i].classList.add("authorNames");
+								kids[i].setAttribute("style", "");
+							}*/
+						 	event.target.classList.remove("selectedAuthorNames");
+							event.target.classList.add("authorNames");
+							event.target.setAttribute("style", "");
+							/*var urls = MICE.urlCollections.get(collectionName + parentUrl).urls;
+							var possibleContainer = MICE.htmlContainers.get(event.target.getAttribute("key")).parentNode;
+							
+*/
+					
+
+
+
+
+/*
+							MICE.displayNewUrlList(urls, possibleContainer, false);*/
+							//colorCounter = event.target.getAttribute('colorindex').parseInt();
+							var colPar = event.target.parentNode.getAttribute('collectionname') + event.target.parentNode.getAttribute('parenturl')
+							var filter_sort_request = MICE.filters.get(colPar);
+							var restoreAuthors = true;
+						
+							
+							
+							
+							for(var f = 0; f < filter_sort_request.filter.length; f++){
+								if (filter_sort_request.filter[f].value == event.target.innerHTML){
+									filter_sort_request.filter.splice(f, 1);
+
+								}else if(filter_sort_request.filter[f].name == "venue"){
+									restoreAuthors = false;
+								}
+							}
+							
+							var authors = document.getElementById('authorFacet').childNodes;
+							  for(var i = 1; i < authors.length; i++){
+								  var authorPapers = MICE.authorMap.get(authors[i].innerHTML);
+								  var venuePapers = MICE.venueMap.get(event.target.innerHTML);
+								  var doesPass = false;
+								  for(var j = 0; j < authorPapers.length; j++){
+									  for(var k = 0; k < venuePapers.length; k++){
+										  if(authorPapers[j] == venuePapers[k]){
+											  doesPass = true;
+											  var saveAmount = parseInt(authors[i].getAttribute("saveme"));
+											  authors[i].style.background=  '';
+ 
+											  saveAmount= saveAmount-1;
+											  authors[i].setAttribute("saveme", saveAmount.toString());
+											  if(saveAmount > 0){
+												  authors[i].style.display = '';
+												  //authors[i].style.backgroundColor=  colors[colorCounter];
+												  var authorCol = MICE.authorColorMap.get(authors[i].innerHTML);
+												  if(authorCol == null){
+													  MICE.authorColorMap.put(authors[i].innerHTML, [colorCounter])
+												  }else{
+													  authorCol.push(colorCounter);
+												  }
+												  authors[i].style.background=  MICE.buildGradient(authorCol);
+												  	
+											  }else{
+												  MICE.colorMap.put(authorPapers[j], [13]);
+												   MICE.colorMap.put(venuePapers[k], [13])
+
+												  authors[i].style.display = 'none';
+											  }
+										  }
+
+									  }
+								  }
+								
+								  if(restoreAuthors){
+									  authors[i].style.display = '';
+									  authors[i].color= 'gray'; 
+	
+								  }
+							  }
+							MICE.applyFilterSortRequest(filter_sort_request, false);
+
+
+					  }	  
+					 else if(event.ctrlKey){
+
+						  var authors = document.getElementById('authorFacet').childNodes;
+						  for(var i = 1; i < authors.length; i++){
+							  var authorPapers = MICE.authorMap.get(authors[i].innerHTML);
+							  var venuePapers = MICE.venueMap.get(event.target.innerHTML);
+							  var doesPass = false;
+							  for(var j = 0; j < authorPapers.length; j++){
+								  for(var k = 0; k < venuePapers.length; k++){
+									  if(authorPapers[j] == venuePapers[k]){
+										  doesPass = true;
+										  var authorCol = MICE.authorColorMap.get(authors[i].innerHTML);
+										  if(authorCol == null){
+											  MICE.authorColorMap.put(authors[i].innerHTML, [colorCounter])
+										  }else{
+											  if(authorCol[0] == 13){
+												  authorCol = [];
+												}
+											  authorCol.push(colorCounter);
+										  }
+										  authors[i].style.background=  MICE.buildGradient(authorCol);
+									  }
+
+								  }
+							  }
+							  if(!doesPass){
+								 if(parseInt(authors[i].getAttribute("saveme")) < 1){
+									  authors[i].style.display = 'none';
+
+
+								 }else{
+									  authors[i].style.display = '';
+									  authors[i].color= '#FFFFFF'; 
+
+									  
+								 }
+							  }else{
+								  var saveAmount = parseInt(authors[i].getAttribute("saveme"));
+									 
+								  saveAmount++;
+								  authors[i].setAttribute("saveme", saveAmount.toString());
+								  authors[i].style.display = '';
+								  authors[i].color= '#FFFFFF'; 
+
+							  }
+							  
+						  }
+						 
+						 MICE.filterByVenue(event.target, true); 
+
+					  }
+					  else{
+							var filter_sort_request = MICE.filters.get(collectionName + parentUrl);
+							if(filter_sort_request != null){
+								  for(var i = 0; i < filter_sort_request.filter.length; i++){
+										if(filter_sort_request.filter[i].name == 'authors'){
+											filter_sort_request.filter.splice(i, 1);
+											i--;
+										}
+
+
+										
+									}
+							}
+						
+						  var authors = document.getElementById('authorFacet').childNodes;
+						  for(var i = 1; i < authors.length; i++){
+							  var authorPapers = MICE.authorMap.get(authors[i].innerHTML);
+							  var venuePapers = MICE.venueMap.get(event.target.innerHTML);
+							  var doesPass = false;
+							  for(var j = 0; j < authorPapers.length; j++){
+								  for(var k = 0; k < venuePapers.length; k++){
+									  if(authorPapers[j] == venuePapers[k]){
+										  
+										  
+										  doesPass = true;
+										  var authorCol = MICE.authorColorMap.get(authors[i].innerHTML);
+										  if(authorCol == null){
+											  MICE.authorColorMap.put(authors[i].innerHTML, [colorCounter])
+										  }else{
+											  if(authorCol[0] == 13){
+												  authorCol = [];
+												}
+											  authorCol.push(colorCounter);
+										  }
+										  authors[i].style.background=  MICE.buildGradient(MICE.authorColorMap.get(authors[i].innerHTML));
+
+									  }
+
+								  }
+							  }
+							  if(!doesPass){
+								 if(parseInt(authors[i].getAttribute("saveme")) < 1){
+									  authors[i].style.display = 'none';
+
+
+								 }else{
+									  authors[i].style.display = '';
+									  authors[i].color= '#FFFFFF'; 
+
+
+								 }
+							  }else{
+								  var saveAmount = parseInt(authors[i].getAttribute("saveme"));
+								 
+								  saveAmount++;
+								  authors[i].setAttribute("saveme", saveAmount.toString());
+								  authors[i].style.display = '';
+								  authors[i].color= '#FFFFFF'; 
+
+							  }
+							  
+						  }
+						  MICE.filterByVenue(event.target, false); 
+
+					  }
+				  });
+				  var pushFlag = true;
+				 for(var k = 0; k < divs.length; k++){
+					 if(divs[k].innerHTML == aDiv.innerHTML){
+						 pushFlag = false;
+					 }
+				 }
+				  if(pushFlag){
+					  divs.push(aDiv);
+
+				  }
+				  // MICE.currentlyBuildingFacet.appendChild(aDiv);
+			  }
+			 }
+		  }
+		
+		 divs.sort(function(a, b){
+				var aInner = a.innerText;
+				var bInner = b.innerText;
+				if(aInner < bInner){
+					return -1;
+				}
+				else if(aInner == bInner){
+					return 0;
+				}
+				return 1;
+			  });
+		  
+			  for(var k = 0; k < divs.length; k++){
+				  MICE.currentVFacet.appendChild(divs[k]);
+			  }
+	
+	});
+	return facet;
+	
+
+}
 MICE.buildFacets = function (parentUrl, collectionName, facetObj){
 	if(facetObj.name == "authors"){
 		return MICE.buildAuthorFacet(parentUrl, collectionName, facetObj);
+	}
+	if(facetObj.name == "venue"){
+		return MICE.buildVenueFacet(parentUrl, collectionName, facetObj);
 	}
 	
 	/*build the sort version of the facet*/
@@ -420,7 +835,7 @@ MICE.giveMeAuthorValues = function(task, metadataFields, styleInfo){
 
 
 //This function's code is meant to imitate future debi functions. Please look forward to it!
-MICE.applyFilterSortRequest = function(request){
+MICE.applyFilterSortRequest = function(request, nocolorize){
 	var collection = request.target_collection.collectionName;
 	for (var i = 0; i < request.target_collection.parentUrls.length; i++){
 		var parent = request.target_collection.parentUrls[i];
@@ -436,9 +851,20 @@ MICE.applyFilterSortRequest = function(request){
 		}
 		var newUrlList = urls;
 		passedFilterUrls = [];
-
+		MICE.papersFromAuthors = [];
+		MICE.papersFromVenues = [];
+		var authorFilters = [];
+		if(request.filter.length == 0){
+			MICE.displayNewUrlList(newUrlList, parent, nocolorize);
+				return;
+		}
 		for (var i = 0; i < request.filter.length; i++){	
-				for(var j = 0; j < newUrlList.length; j++){
+			if(request.filter[i].name=="authors"){
+				authorFilters.push(request.filter[i]);
+			
+			}
+				
+			for(var j = 0; j < newUrlList.length; j++){
 					//Here, I'm going to implement something super specific to the ACM portal example - this
 					//has nothing to do with final implementation and is strictly for my sanity.
 					var immediateUrl = newUrlList[j];
@@ -462,27 +888,20 @@ MICE.applyFilterSortRequest = function(request){
 					}
 			
 						if(request.filter[i].value != null){
-							if(immediateUrl == "http://dl.acm.org/citation.cfm?id=506508&preflayout=flat"){
-								var panic = "totes";
-							}
-							var containing = document.querySelectorAll('[key="'+immediateUrl+'"]');
-							var removeFlag = false;
-							for(var p = 0; p < containing.length; p++){
+							 if(request.filter[i].name == "venue"){
+								var papersForVenue = MICE.venueMap.get(request.filter[i].value);
+								var removeFlag = false;
 								
-								var compareVal = containing[p].innerHTML;
-								if(compareVal != request.filter[i].value){
-									removeFlag = true;
+								for(var p = 0; p < papersForVenue.length; p++){
+									
+									
+									if(papersForVenue[p] == immediateUrl){
+										MICE.papersFromVenues.push(immediateUrl);
+										passedFilterUrls.push(immediateUrl);
+									}
+									
 									
 								}
-								else{
-									passedFilterUrls.push(immediateUrl);
-								}
-								
-								
-							}
-							
-							if(removeFlag){
-								
 							}
 							
 						
@@ -492,32 +911,106 @@ MICE.applyFilterSortRequest = function(request){
 				
 				}
 		}
-		if(passedFilterUrls.length > 0){
-			MICE.displayNewUrlList(passedFilterUrls, parent, true);
+		var finalUrls = [];
 
-		}else{
-			MICE.displayNewUrlList(newUrlList, parent, true);
+		if(passedFilterUrls.length > 0){
+			if(authorFilters.length > 0){
+				for(var i = 0; i < authorFilters.length; i++){
+					for(var j = 0; j < passedFilterUrls.length; j++){
+						var papersForAuthor = MICE.authorMap.get(authorFilters[i].value);
+						var removeFlag = false;
+						
+						for(var p = 0; p < papersForAuthor.length; p++){
+							
+							
+							if(papersForAuthor[p] == passedFilterUrls[j]){
+								MICE.papersFromAuthors.push(passedFilterUrls[j]);
+								finalUrls.push(passedFilterUrls[j]);
+							}
+							
+							
+						}
+					}
+					
+				}
+			}else{
+				finalUrls = passedFilterUrls;
+
+			}
+			
 
 		}
+		else{
+			if(authorFilters.length > 0){
+				for(var i = 0; i < authorFilters.length; i++){
+					for(var j = 0; j < urls.length; j++){
+						var papersForAuthor = MICE.authorMap.get(authorFilters[i].value);
+						var removeFlag = false;
+						
+						for(var p = 0; p < papersForAuthor.length; p++){
+							
+							
+							if(papersForAuthor[p] == urls[j]){
+								MICE.papersFromAuthors.push(urls[j]);
+								passedFilterUrls.push(urls[j]);
+							}
+							
+							
+						}
+					}
+					
+				}
+				
+			}
+			finalUrls = passedFilterUrls;
+		}
 	}
+			MICE.displayNewUrlList(finalUrls, parent, nocolorize);
 
 }
-
+MICE.buildGradient = function(colorIndexList){
+	
+	var css = "linear-gradient(";
+	if(colorIndexList[0] == 13){
+		return '';
+	}
+	if(colorIndexList.length == 1){
+		css = css + colors[colorIndexList[0]] + ", " + colors[colorIndexList[0]] + ")";
+	}else{
+		for(var i = 0; i < colorIndexList.length; i++){
+			css = css + colors[colorIndexList[i]];
+			if((i+1) < colorIndexList.length){
+				css = css + ", ";
+			}else{
+				css = css + ")";
+			}
+		}
+	}
+	
+	
+	return css;
+}
 //This code strips down the parent Collection display and rebuilds from the rubble
 MICE.displayNewUrlList = function(urls, parentContainer, fancyColors){
 
 	while(parentContainer.hasChildNodes()){
+		parentContainer.childNodes[0].childNodes[1].childNodes[0].childNodes[0].childNodes[0].childNodes[0].childNodes[1].style.backgroundColor="";
 		parentContainer.removeChild(parentContainer.childNodes[0]);
 	}
 	for(var i = 0; i < urls.length; i++){
 		parentContainer.appendChild(MICE.htmlContainers.get(urls[i]));
-		if(fancyColors){
+		if(true){
 			var cindex = MICE.colorMap.get(urls[i]);
-			MICE.htmlContainers.get(urls[i]).childNodes[1].childNodes[0].childNodes[0].childNodes[0].childNodes[0].childNodes[].setAttribute("style", "background-color: " + colors[cindex] + "; border-radius: 8px");
+			if(cindex != null){
+				var gradient = MICE.buildGradient(cindex);
+				MICE.htmlContainers.get(urls[i]).childNodes[1].childNodes[0].childNodes[0].childNodes[0].childNodes[0].childNodes[1].style.background=gradient;
+				MICE.htmlContainers.get(urls[i]).childNodes[1].childNodes[0].childNodes[0].childNodes[0].childNodes[0].childNodes[1].style.borderRadius="8px";
 
+			}
+			
 		}
 		else{
-			MICE.htmlContainers.get(urls[i]).childNodes[1].childNodes[0].childNodes[0].childNodes[0].childNodes[0].setAttribute("style", "");
+			MICE.htmlContainers.get(urls[i]).childNodes[1].childNodes[0].childNodes[0].childNodes[0].childNodes[0].childNodes[1].style.background = "";
 
 		}
 
