@@ -4,10 +4,8 @@
  * An optimized data structure for managing a hierarchical collection of prefixes, automatically 
  * merging and removing entries, and providing a fast matching function.
  * 
- * @author andruid, kade
+ * @author kade, andruid (original Java implementation)
  */
-
-var childPrefixMap = {};
 
 function getHost(url){
     var urlObj = document.createElement("a");
@@ -15,18 +13,20 @@ function getHost(url){
     return urlObj.hostname;
 }
 
-//furthur testing of this needed. Not sure about subdomains
+//gets the domain. In
 function getDomain(url){
     // source: http://stackoverflow.com/questions/8498592/extract-root-domain-name-from-string
     var matches = url.match(/^https?\:\/\/([^\/?#]+)(?:[\/?#]|$)/i);
     var separate = matches[1].split('.');
     if (separate.length === 2)
          return matches[1];
-    //there is a subdomain remove it
+    //if there are subdomains remove them
     else {
-        separate.shift();
+        //a little sloppy. this is to handle things like tate.org.uk
+        while (separate.length > 2 && separate[1] != "org" && separate[1] != "com" && separate[1] != "edu" && separate[1] != "gov"){
+            separate.shift();
+        }
         return separate.join('.');
-
     }
 }
 
@@ -88,6 +88,8 @@ function extractParams(url, keepEmptyParams){
 
 
 //===================================================
+
+var childPrefixMap = {};
 
 var PrefixPhrase = function (parent, phrase){
     this.parent	= parent;
