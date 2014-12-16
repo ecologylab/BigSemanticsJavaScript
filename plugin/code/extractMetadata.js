@@ -1,5 +1,6 @@
 var upperLevel = { }; //holds upperlevel metadata
 var scalars = { };
+var baseURL = "";
 
 /*
  * extracts metadata from metametadata
@@ -7,8 +8,9 @@ var scalars = { };
  * @param mmd, meta-metadata object
  */
 function extractMetadata(mmd) {
-	var extractedMeta = { };
-	mmd = mmd.meta_metadata;
+    baseURL = document.URL.substring(0,getPosition(document.URL,"/",3));
+	
+    var extractedMeta = { };
 	mmdKids = mmd.kids;
 	mmdKids = sortKids(mmdKids);
 	var contextNode = document;

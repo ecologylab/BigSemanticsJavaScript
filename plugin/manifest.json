@@ -17,6 +17,7 @@
 	    ],
 	    "js": [
 	    	"code/SlideOut.js",
+            "code/getMMD.js",
 	    	"code/main.js",
             "code/mice/debi.js",
 	    	"code/mice/mice.js",
@@ -25,9 +26,7 @@
 	    	"code/mice/simplDeserializer.js",
 	    	"code/extractMetadata.js",
 	    	"code/dragEvents.js",
-	    	"code/clipboard.js",
-            "code/PrefixCollection.js",
-            "code/getMMD.js"
+	    	"code/clipboard.js"
 	    ],
 	    "css": [
 	    	"code/style.css",
@@ -36,7 +35,6 @@
   	}],
   "background": {
     "scripts": [
-        "code/mice/debi.js",
     	"code/background.js",
     	"code/clipboardBackground.js"
     ]
