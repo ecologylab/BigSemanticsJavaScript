@@ -1,6 +1,5 @@
 /*global window, doc, Image, fixWhiteSpace, rgbToRgbObj, getLabel, simplDeserialize, waitForNewMMD, MDC_rawMMD, getNodes, allNodeMDLoaded, document, setTimeout, MetadataLoader, console, hexToRgb, FlairMaster, sortNumber, median, MDC_rawMetadata, showMetadata, setInterval, clearInterval, Vector, getRandomArbitrary, doPhysical, graphWidth:true, graphHeight:true, primaryNodes:true, secondaryNodes:true, renderedNodesList:true, secondaryNodesList:true, nodeList:true, nodePositions:true, drawSecondaryNodes, updateAllLines, unrenderedNodesList:true, Heap*/
 
-
 var MONA = {},
     cachedMMD = "",
     cachedNodeMetadata = {},
@@ -8,10 +7,11 @@ var MONA = {},
     nodeColors = {},
     nodeMetadata = {},
     typePositions = {},
+    pageMidHeight,
     colorCount = 0,
     requestsMade = 0,
     tier4size = 15,
-    tier3size = 20, 
+    tier3size = 20,
     tier2size = 25, //also the base size
     tier1size = 30,
     NUM_STEPS = 50,
@@ -30,13 +30,13 @@ function Node(type, title, location, mmdName, parent){
     
     if (parent !== null){
         this.parents = [parent];
-        this.x = 300;
-        this.y = parent.y + getRandomArbitrary(-2,2);
+        this.x = 250;
+        this.y = parent.y + getRandomArbitrary(-2, 2);
     }
     else {
         this.parents = [];
         this.x = 100;
-        this.y = 100;          
+        this.y = pageMidHeight;          
     }
     this.rendered = false;
 }
@@ -66,12 +66,17 @@ MONA.initialize = function (){
         loadingElement = document.getElementById("loadingBar"),
         nodesLoading = document.createElement('div'),
         nodeMDLoading = document.createElement('div');
-	
+	    
     graphWidth = graphElement.getClientRects()[0].width;
 	graphHeight = graphElement.getClientRects()[0].height;
 	
 	linesElement.width = graphWidth;
 	linesElement.height = graphHeight;
+    
+    var miceElement = document.getElementById("mdcIce");
+    pageMidHeight = graphHeight/2;
+    miceElement.style.top = pageMidHeight + "px";
+    typeElement.style.top = pageMidHeight + "px";
     
     while (graphElement.firstChild){
         graphElement.removeChild(graphElement.firstChild);
@@ -224,7 +229,8 @@ function allNodeMDLoaded(){
 function addToHistory(MDC_rawMetadata){
     var newNode;
     for (var mmdType in MDC_rawMetadata){
-        newNode = new Node(mmdType, MDC_rawMetadata[mmdType].title, MDC_rawMetadata[mmdType].location, MDC_rawMetadata[mmdType].meta_metadata_name, null);
+        var mmdObj = MDC_rawMetadata[mmdType];
+        newNode = new Node(mmdType, mmdObj.title, mmdObj.location, mmdObj.meta_metadata_name, null);
         historyNodes.push(newNode);
     }
     var historyElement = document.getElementById("historyArea");
@@ -237,7 +243,7 @@ function addToHistory(MDC_rawMetadata){
 
     var nodeText = "";
     if(MDC_rawMetadata[mmdType].title.length > 30)
-        nodeText = newNode.abbrevTitle;//trim this
+        nodeText = newNode.abbrevTitle;
     else
         nodeText = newNode.title;
     var nodePara = document.createElement('p');
@@ -246,8 +252,8 @@ function addToHistory(MDC_rawMetadata){
     
     //images are preloaded so we make copies of them		
     var img = FlairMaster.getFlairImage(newNode.mmdName).cloneNode(true);
-    img.setAttribute('height',tier2size+'px');
-    img.setAttribute('width',tier2size+'px');
+    img.setAttribute('height',tier3size+'px');
+    img.setAttribute('width',tier3size+'px');
 
     div.appendChild(img);
     div.appendChild(nodePara);

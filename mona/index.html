@@ -20,8 +20,8 @@
     <!-- CSS! -->
     <link href="css/bootstrap.min.css" rel="stylesheet" media="screen">
 
-    <link href="css/mdc.css" rel="stylesheet" media="screen">
-    <link href="../interactiveSemantics/metadataRenderer.css" rel="stylesheet" type="text/css"> 
+    <link href="css/mona.css" rel="stylesheet" media="screen">
+    <link href="css/monaMetadataRenderer.css" rel="stylesheet" type="text/css"> 
 
     <!-- Scripts! -->
     <script src="http://code.jquery.com/jquery-latest.js"></script>
@@ -56,23 +56,19 @@
   <body onload="onBodyLoad()">
 
     <!-- Navbar -->
-    <div class="navbar navbar-inverse navbar-fixed-top">
-      <div class="navbar-inner form-inline">			
-        <form class="navbar-form" action="" onsubmit="return false;"> 
-          <input type="text" size="500" class="span5" id="targetURL" value="http://dl.acm.org/citation.cfm?id=1125696"/>
-          <button type="button" class="btn" onclick="showMetadata();MONA.initialize();">Go!</button>	
+    <div class="topNav">
+        <form class="urlSubmit" action="" onsubmit="return false;"> 
+          <input type="text" size="500" id="targetURL" value="http://dl.acm.org/citation.cfm?id=1125696"/>
+          <button type="button" class="btn" onclick="showMetadata();MONA.initialize();">Focus</button>	
         </form>	                
-      </div>
     </div>
 
     <!-- Content -->
     <!--  colors literature bertem, colin ware (retinal variable) // dynamic? or continuity --> 
     <div class ="container" id="vizArea">
       <div id="historyWrapper">
-        <p>History</p>
-        <div id="historyArea">
-        
-        </div>
+        <h5>History</h5>
+        <div id="historyArea" class="nodes"></div>
       </div>
 
       <svg id="lineSVG" height="2600" width="2600"></svg>
