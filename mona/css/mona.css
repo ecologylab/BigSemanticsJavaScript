@@ -63,11 +63,11 @@ body {
     position: relative;
 }
 @keyframes toHistory {
-  from {bottom: 210px;}
-  to {bottom: 0px;}
+  from {top: 200px; left: 150px; opacity: .1}
+  to {top: 0px; left: 0px; opacity: 1}
 }
 @-webkit-keyframes toHistory {
-  from {top: 200px; left: 100px; opacity: .1}
+  from {top: 200px; left: 150px; opacity: .1}
   to {top: 0px; left: 0px; opacity: 1}
 }
 
@@ -95,7 +95,7 @@ body {
     position: absolute;
     white-space: nowrap;
     z-index: 1;
-    transition: 1s;
+    transition: .5s;
 }
 
 .nodes div img {

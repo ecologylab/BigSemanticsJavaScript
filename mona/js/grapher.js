@@ -64,7 +64,7 @@ function stepPhysical(x){
         
         //if node is primary pull it left and to the center
         if (primaryNodes.hasOwnProperty(node.location)){
-            pY = ((graphHeight/2 - 50) - node.y) / 10;
+            pY = ((graphHeight/2) - node.y) / 10;
             pSpeed = (Math.abs(pY) / graphWidth) * ATTRACTION_FORCE;
             pY *= pSpeed;
 
@@ -72,10 +72,9 @@ function stepPhysical(x){
         }	
 	
         // add in repulsive forces
-		
 		var repulsionVector = new Vector([0,0,0]);
         
-        //if a node is there is a constant push right
+        //if a node is secondary there is a constant push right
         if (node.x < 100 && secondaryNodes.hasOwnProperty(node.location)){
             repulsionVector = repulsionVector.add(new Vector([30, 0, 0]));
         }
@@ -119,11 +118,6 @@ function stepPhysical(x){
 				
 		node.vector = node.vector.add(repulsionVector);
 	
-	
-	//step through 1 tick
-	//for(n = 0; n < renderedNodesList.length; n++){
-		
-		
 		if(!isNaN(node.vector.items[0])){
 			node.x += node.vector.items[0];
 		}
@@ -144,11 +138,7 @@ function stepPhysical(x){
 			node.y = 100;
 		else if(node.y > graphHeight-50)
 			node.y = graphHeight-100;
-        
-    //}
-	
-        //nodeCounter = 0;
-        //moveNextNode();
+
         moveNode(node);
     }
 }
