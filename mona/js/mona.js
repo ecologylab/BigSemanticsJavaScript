@@ -17,7 +17,10 @@ var MONA = {},
     NUM_STEPS = 100,    //number of iterations of grapher algorithm
     historyNodes = [],  //list of nodes display in history
     renderInterval,     //the rendering interval for setInterval.
-    unrenderedNodesHeap;//prior to being drawn, nodes are stored here. sorted by number of parents
+    unrenderedNodesHeap,//prior to being drawn, nodes are stored here. sorted by number of parents
+    GRAPH_ELEM,         //the html element of the graph area
+    TYPE_ELEM,          //the html element of the type area
+    LOAD_BAR_ELEM;      //the html element of the loading bar/spinner
 
 
 function Node(type, title, location, mmdName, parent){
@@ -60,31 +63,32 @@ MONA.initialize = function (){
         return b.parents.length - a.parents.length;
     });
     
-	var graphElement = document.getElementById("graphArea"),
-        typeElement = document.getElementById("typeArea"),
-        linesElement = document.getElementById("lineSVG"),
-        loadingElement = document.getElementById("loadingBar"),
+    GRAPH_ELEM = document.getElementById("graphArea");
+    TYPE_ELEM = document.getElementById("typeArea");
+    LOAD_BAR_ELEM = document.getElementById("loadingBar");
+    
+    var linesElement = document.getElementById("lineSVG"),
         miceElement = document.getElementById("mdcIce"),
         nodesLoading = document.createElement('div'),
         nodeMDLoading = document.createElement('div');
 	    
-    graphWidth = graphElement.getClientRects()[0].width;
-	graphHeight = graphElement.getClientRects()[0].height;
+    graphWidth = GRAPH_ELEM.getClientRects()[0].width;
+	graphHeight = GRAPH_ELEM.getClientRects()[0].height;
 	
 	linesElement.width = graphWidth;
 	linesElement.height = graphHeight;
     
     pageMidHeight = graphHeight/2;
     miceElement.style.top = pageMidHeight + "px";
-    typeElement.style.top = pageMidHeight + "px";
+    TYPE_ELEM.style.top = pageMidHeight + "px";
     
-    deleteChildren(graphElement, typeElement, linesElement, loadingElement);
+    deleteChildren(GRAPH_ELEM, TYPE_ELEM, linesElement, LOAD_BAR_ELEM);
     
 	nodesLoading.innerHTML = "Loading Nodes...";
-	graphElement.appendChild(nodesLoading);
+	GRAPH_ELEM.appendChild(nodesLoading);
 
     nodeMDLoading.innerHTML = "Loading Nodes Metadata...";
-	loadingElement.appendChild(nodeMDLoading);
+	LOAD_BAR_ELEM.appendChild(nodeMDLoading);
 	
     waitForNewMMD();
 };
@@ -96,22 +100,18 @@ function waitForNewMMD(){
         return;
     }
     cachedMMD = MDC_rawMMD;
-    var graphElement = document.getElementById("graphArea");
-    deleteChildren(graphElement);
+    deleteChildren(GRAPH_ELEM);
     getNodes();
 }
 
 //make requests for all the node metadata
 function populateNodeMetadata(){
-	//for now don't try to load mmd if there is more than 30. we don't want to kill the service
-	if (Object.keys(primaryNodes).length > 30) {
+    
+    deleteChildren(LOAD_BAR_ELEM);
+    
+	//for now don't try to load mmd if there is more than 30. we don't want to kill the service. also do nothing if there are no nodes
+	if (Object.keys(primaryNodes).length > 30 || Object.keys(primaryNodes).length === 0) {
 		return;
-	}
-    //if there are no nodes display nothing
-    if (Object.keys(primaryNodes).length === 0) {
-        var loadingElementClear = document.getElementById("loadingBar");
-        deleteChildren(loadingElementClear);
-        return;
 	}
     //make requests for all the first level nodes
 	for (var nodeKey in primaryNodes) {
@@ -122,9 +122,6 @@ function populateNodeMetadata(){
 	}
     
     //start the loading bar
-    var loadingElement = document.getElementById("loadingBar");
-	deleteChildren(loadingElement);
-
     var loadingDiv = document.createElement('div');
     var loadingText = document.createElement('p');
     loadingText.id="loadingText";
@@ -136,7 +133,7 @@ function populateNodeMetadata(){
     loadingText.innerHTML= "0 of " + requestsMade + " node metadata loaded";
     loadingDiv.appendChild(loadingText);
     
-    loadingElement.appendChild(loadingDiv);
+    LOAD_BAR_ELEM.appendChild(loadingDiv);
     
     waitForNodeMDLoaded();
 }
@@ -183,8 +180,7 @@ function nodeMDLoaded(nodeKey){
 
 //when all node metadata is loaded update image sizes and put the secondary nodes into the secondary nodes list
 function allNodeMDLoaded(){
-	var loadingElement = document.getElementById("loadingBar");
-    loadingElement.removeChild(loadingElement.firstChild);
+    LOAD_BAR_ELEM.removeChild(LOAD_BAR_ELEM.firstChild);
 	updateImgSizes("acm_portal");
 	updateImgSizes("acm_portal_author");
 	updateAllLines();
@@ -463,8 +459,6 @@ function onNodeClick(location){
 	MONA.initialize();
 }
 
-//TODO - optimize/refactor below this line =================================================
-
 function onNodeMouseover(nodeKey){
 	if (primaryNodes.hasOwnProperty(nodeKey)) {
         var line = document.getElementById(primaryNodes[nodeKey].location+"Line");
@@ -585,49 +579,55 @@ function onTypeMouseout(type){
 	}
 }
 
+function addVisual(node, nodeKey, nodeSet){
+    node.visual = document.createElement('div');
+           
+    if (node.location !== undefined){
+        node.visual.style.cursor = "pointer";
+        node.visual.setAttribute('onclick','onNodeClick("'+nodeSet[nodeKey].location+'")');
+    }
+    node.visual.setAttribute('onmouseover','onSecondaryNodeMouseover("'+nodeKey+'")');
+    node.visual.setAttribute('onmouseout','onSecondaryNodeMouseout("'+nodeKey+'")');
+    node.visual.id = nodeKey;
+    node.visual.style.webkitTransform = "translate("+node.x+"px, "+node.y+"px)";
+
+    var nodeText = "";
+    if(nodeKey.length > 30)
+        nodeText = nodeSet[nodeKey].abbrevTitle;
+    else
+        nodeText = nodeKey;
+    var nodePara = document.createElement('p');
+    nodePara.innerHTML = nodeText;
+    nodePara.className = "nodeText";
+
+    for (var nodeType in nodeColors){
+        if (nodeSet[nodeKey].type == nodeType){
+            node.visual.className=nodeType;
+            var rgb = hexToRgb(nodeColors[nodeType]);
+            node.visual.style.color = "rgba(" + rgb.r + "," + rgb.g + "," + rgb.b + ",.5)";
+        }
+    }  
+    //if color is not defined make it black
+    if (node.visual.style.color === ""){
+        node.visual.style.color = "rgba(" + 0 + "," + 0 + "," + 0 + ",.5)";
+    }
+
+    var img = FlairMaster.getFlairImage(nodeSet[nodeKey].mmdName).cloneNode(true);
+    img.setAttribute('height',T2_SIZE+'px');
+    img.setAttribute('width',T2_SIZE+'px');
+
+    node.visual.appendChild(img);
+    node.visual.appendChild(nodePara);
+}
+
 //create divs for first layer of nodes
 function drawNodes(){
 	for (var nodeKey in primaryNodes){
-		var graphElement = document.getElementById("graphArea");
-			
         var node = primaryNodes[nodeKey];
-        
-        node.visual = document.createElement('div');
-        //n.visual.className = 'node';
-        node.visual.style.webkitTransform = "translate("+node.x+"px, "+node.y+"px)";
-        
-		if (node.location !== undefined){//visualize this
-			node.visual.style.cursor = "pointer";
-			node.visual.setAttribute('onclick','onNodeClick("'+primaryNodes[nodeKey].location+'")');
-		}
-		node.visual.setAttribute('onmouseover','onNodeMouseover("'+nodeKey+'")');
-		node.visual.setAttribute('onmouseout','onNodeMouseout("'+nodeKey+'")');
-		node.visual.id = nodeKey;
-		
-		var nodeText = "";
-		if(nodeKey.length > 30)
-			nodeText = primaryNodes[nodeKey].abbrevTitle;
-		else
-			nodeText = nodeKey;
-		var nodePara = document.createElement('p');
-		nodePara.innerHTML = nodeText;
-		nodePara.className = "nodeText";
-		
-		for (var nodeType in nodeColors)
-			if (primaryNodes[nodeKey].type == nodeType){
-				node.visual.className=nodeType;
-				var rgb = hexToRgb(nodeColors[nodeType]);
-				node.visual.style.color = "rgba(" + rgb.r + "," + rgb.g + "," + rgb.b + ",.5)";
-			}
-		
-		//images are preloaded so we make copies of them		
-		var img = FlairMaster.getFlairImage(primaryNodes[nodeKey].mmdName).cloneNode(true);
-		img.setAttribute('height',T2_SIZE+'px');
-		img.setAttribute('width',T2_SIZE+'px');
-		
-		node.visual.appendChild(img);
-		node.visual.appendChild(nodePara);
-		graphElement.appendChild(node.visual);
+			
+        addVisual(node, nodeKey, primaryNodes);
+
+		GRAPH_ELEM.appendChild(node.visual);
         node.rendered = true;
 		nodePositions[nodeKey] = node.visual.getBoundingClientRect();
         renderedNodesList.push(node);
@@ -636,52 +636,11 @@ function drawNodes(){
 }
 
 //create divs for second layer of nodes
-function drawSecondaryNodes(){
-    
+function drawSecondaryNodes(){  
 	for (var nodeKey in secondaryNodes){
-        if (document.getElementById(nodeKey) === null){
-            var graphElement = document.getElementById("graphArea");
-            
-            var node = secondaryNodes[nodeKey];
-            
-            node.visual = document.createElement('div');
-            
-            if (node.location !== undefined){//visualize this
-                node.visual.style.cursor = "pointer";
-                node.visual.setAttribute('onclick','onNodeClick("'+secondaryNodes[nodeKey].location+'")');
-            }
-            node.visual.setAttribute('onmouseover','onSecondaryNodeMouseover("'+nodeKey+'")');
-            node.visual.setAttribute('onmouseout','onSecondaryNodeMouseout("'+nodeKey+'")');
-            node.visual.id = nodeKey;
-            node.visual.style.webkitTransform = "translate("+node.x+"px, "+node.y+"px)";
-
-            var nodeText = "";
-            if(nodeKey.length > 30)
-                nodeText = secondaryNodes[nodeKey].abbrevTitle;
-            else
-                nodeText = nodeKey;
-            var nodePara = document.createElement('p');
-            nodePara.innerHTML = nodeText;
-            nodePara.className = "nodeText";
-
-            for (var nodeType in nodeColors){
-                if (secondaryNodes[nodeKey].type == nodeType){
-                    node.visual.className=nodeType;
-                    var rgb = hexToRgb(nodeColors[nodeType]);
-                    node.visual.style.color = "rgba(" + rgb.r + "," + rgb.g + "," + rgb.b + ",.5)";
-                }
-            }  
-            //if color is not defined make it black
-            if (node.visual.style.color === ""){
-                node.visual.style.color = "rgba(" + 0 + "," + 0 + "," + 0 + ",.5)";
-            }
-
-            var img = FlairMaster.getFlairImage(secondaryNodes[nodeKey].mmdName).cloneNode(true);
-            img.setAttribute('height',T2_SIZE+'px');
-            img.setAttribute('width',T2_SIZE+'px');
-
-            node.visual.appendChild(img);
-            node.visual.appendChild(nodePara);
+        if (document.getElementById(nodeKey) === null){            
+            var node = secondaryNodes[nodeKey];            
+            addVisual(node, nodeKey, secondaryNodes);
             unrenderedNodesList.push(node);
             unrenderedNodesHeap.push(node);
         }
@@ -692,7 +651,6 @@ function drawSecondaryNodes(){
 
 function renderNode(){
     if (unrenderedNodesHeap.size() >0 && renderedNodesList.length < 50){    
-        var graphElement = document.getElementById("graphArea");
         var node = unrenderedNodesHeap.pop();
         node.rendered = true;
         renderedNodesList.push(node);
@@ -702,7 +660,7 @@ function renderNode(){
             node.visual.style.webkitTransform = "translate("+node.x+"px, "+node.y+"px)";
         }
         
-        graphElement.appendChild(node.visual);
+        GRAPH_ELEM.appendChild(node.visual);
         nodePositions[node.location] = node.visual.getBoundingClientRect();
         drawLine(node);
     }
@@ -713,7 +671,6 @@ function renderNode(){
 }
 
 function drawTypes(){
-	var typeElement = document.getElementById("typeArea");
 	for (var nodeType in nodeColors){
 		var div = document.createElement('div');
 		div.setAttribute('onmouseover','onTypeMouseover("'+nodeType+'")');
@@ -723,9 +680,9 @@ function drawTypes(){
 		div.id=nodeType;
 		div.style.color = nodeColors[nodeType];
 		div.style.textAlign = "right";
-		typeElement.appendChild(div);
+		TYPE_ELEM.appendChild(div);
 	}
-	var children = typeElement.children;
+	var children = TYPE_ELEM.children;
 	for (var i = 0; i < children.length; i++) {
 		var child = children[i];
 		typePositions[child.id] = child.getBoundingClientRect();	
@@ -734,7 +691,6 @@ function drawTypes(){
 }
 
 function drawLines(){
-	var typeElement = document.getElementById("lineSVG");
 	for (var nodeKey in primaryNodes){
 		var line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
 		line.setAttribute('class', primaryNodes[nodeKey].type+"Line");
@@ -746,71 +702,42 @@ function drawLines(){
 		var rgb = hexToRgb(nodeColors[primaryNodes[nodeKey].type]);
 		line.style.stroke = "rgba(" + rgb.r + "," + rgb.g + "," + rgb.b + ",.1)";
 		line.setAttribute('stroke-width', 1);
-		typeElement.appendChild(line);
+        var linesElement = document.getElementById("lineSVG");
+		linesElement.appendChild(line);
 	}	
-}
-
-//draws lines for children of one primary node
-function drawSecondaryLines(parent){
-	var lineElement = document.getElementById("lineSVG");
-	
-    for (var i in parent.children){
-        var node = parent.children[i];
-        if (secondaryNodes[node.location] !== undefined){
-            var line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-            line.setAttribute('class', parent.location+"Line");
-            line.setAttribute('id', parent.location+node.location+"Line");
-            line.setAttribute('x1', nodePositions[node.location].left);
-            line.setAttribute('x2', nodePositions[parent.location].left+2);
-            line.setAttribute('y1', nodePositions[node.location].top+nodePositions[node.location].height/2);
-            line.setAttribute('y2', nodePositions[parent.location].top+nodePositions[parent.location].height/2);
-            var rgb = hexToRgb(nodeColors[node.type]);
-            line.style.stroke = "rgba(" + rgb.r + "," + rgb.g + "," + rgb.b + ",.1)";
-            line.setAttribute('stroke-width', 1);
-            lineElement.appendChild(line);
-        }
-	}	
-
 }
 
 //draws lines for one newly rendered or updated node
 function drawLine(node){
     if (node.rendered){
-        var lineElement = document.getElementById("lineSVG");
+        drawRelativeLines(node, node.children, false);
+        drawRelativeLines(node, node.parents, true);
+    }
+}
 
-        var i, line, rgb;
-        for (i in node.children){
-            var child = node.children[i];
-            if (secondaryNodes[node.location] !== undefined && child.rendered && document.getElementById(node.location+child.location+"Line") === null){
-                line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+//draws either parent on child lines
+function drawRelativeLines(node, relatives, isParents){
+        var lineElement = document.getElementById("lineSVG");   
+        for (var i in relatives){
+            var relative = relatives[i];
+            if (secondaryNodes[node.location] !== undefined && relative.rendered && document.getElementById(node.location+relative.location+"Line") === null){
+                var line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
                 line.setAttribute('class', node.location+"Line");
-                line.setAttribute('id', node.location+child.location+"Line");
-                line.setAttribute('x1', nodePositions[child.location].left);
+                //line ids are in the form parent.location+child.location+"Line"
+                if (isParents){
+                    line.setAttribute('id', relative.location+node.location+"Line");
+                }
+                else {
+                    line.setAttribute('id', node.location+relative.location+"Line");
+                }
+                line.setAttribute('x1', nodePositions[relative.location].left);
                 line.setAttribute('x2', nodePositions[node.location].left+2);
-                line.setAttribute('y1', nodePositions[child.location].top+nodePositions[child.location].height/2);
+                line.setAttribute('y1', nodePositions[relative.location].top+nodePositions[relative.location].height/2);
                 line.setAttribute('y2', nodePositions[node.location].top+nodePositions[node.location].height/2);
-                rgb = hexToRgb(nodeColors[child.type]);
+                var rgb = hexToRgb(nodeColors[relative.type]);
                 line.style.stroke = "rgba(" + rgb.r + "," + rgb.g + "," + rgb.b + ",.1)";
                 line.setAttribute('stroke-width', 1);
                 lineElement.appendChild(line);
             }
         }	
-
-        for (i in node.parents){
-            var parent = node.parents[i];
-            if (secondaryNodes[node.location] !== undefined && parent.rendered && document.getElementById(parent.location+node.location+"Line") === null){
-                line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-                line.setAttribute('class', parent.location+"Line");
-                line.setAttribute('id', parent.location+node.location+"Line");
-                line.setAttribute('x1', nodePositions[node.location].left);
-                line.setAttribute('x2', nodePositions[parent.location].left+2);
-                line.setAttribute('y1', nodePositions[node.location].top+nodePositions[node.location].height/2);
-                line.setAttribute('y2', nodePositions[parent.location].top+nodePositions[parent.location].height/2);
-                rgb = hexToRgb(nodeColors[node.type]);
-                line.style.stroke = "rgba(" + rgb.r + "," + rgb.g + "," + rgb.b + ",.1)";
-                line.setAttribute('stroke-width', 1);
-                lineElement.appendChild(line);
-            }
-        } 
-    }
 }
