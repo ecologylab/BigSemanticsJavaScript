@@ -1,4 +1,4 @@
-/*global window, doc, Image, fixWhiteSpace, rgbToRgbObj, getLabel, simplDeserialize, waitForNewMMD, MDC_rawMMD, getNodes, allNodeMDLoaded, document, setTimeout, MetadataLoader, console, hexToRgb, FlairMaster, sortNumber, median, MDC_rawMetadata, showMetadata, setInterval, clearInterval, Vector, getRandomArbitrary, doPhysical, graphWidth:true, graphHeight:true, primaryNodes:true, secondaryNodes:true, renderedNodesList:true, secondaryNodesList:true, nodeList:true, nodePositions:true, drawSecondaryNodes, updateAllLines, unrenderedNodesList:true, Heap, deleteChildren*/
+/*global window, doc, Image, fixWhiteSpace, rgbToRgbObj, getLabel, simplDeserialize, waitForNewMMD, MDC_rawMMD, getNodes, allNodeMDLoaded, document, setTimeout, MetadataLoader, console, hexToRgb, FlairMaster, sortNumber, median, MDC_rawMetadata, showMetadata, setInterval, clearInterval, Vector, getRandomArbitrary, doPhysical, graphWidth:true, graphHeight:true, primaryNodes:true, secondaryNodes:true, renderedNodesList:true, secondaryNodesList:true, nodeList:true, nodePositions:true, drawSecondaryNodes, updateAllLines, Heap, deleteChildren*/
 
 var MONA = {},
     cachedMMD = "",     //the old in focus meta-metadata. used to compare against current in focus meta-metadata
@@ -53,7 +53,6 @@ MONA.initialize = function (){
 	nodePositions = {};
 	typePositions = {};
     renderedNodesList = [];
-    unrenderedNodesList = [];
     secondaryNodesList = [];
     nodeList = [];
     colorCount = 0;
@@ -638,10 +637,9 @@ function drawNodes(){
 //create divs for second layer of nodes
 function drawSecondaryNodes(){  
 	for (var nodeKey in secondaryNodes){
-        if (document.getElementById(nodeKey) === null){            
-            var node = secondaryNodes[nodeKey];            
+        var node = secondaryNodes[nodeKey];
+        if (node.visual === undefined){            
             addVisual(node, nodeKey, secondaryNodes);
-            unrenderedNodesList.push(node);
             unrenderedNodesHeap.push(node);
         }
 	}
@@ -700,7 +698,7 @@ function drawLines(){
 		line.setAttribute('y1', nodePositions[nodeKey].top+nodePositions[nodeKey].height/2);
 		line.setAttribute('y2', typePositions[primaryNodes[nodeKey].type].top+10);
 		var rgb = hexToRgb(nodeColors[primaryNodes[nodeKey].type]);
-		line.style.stroke = "rgba(" + rgb.r + "," + rgb.g + "," + rgb.b + ",.1)";
+		line.style.stroke = "rgba(" + rgb.r + "," + rgb.g + "," + rgb.b + ",.2)";
 		line.setAttribute('stroke-width', 1);
         var linesElement = document.getElementById("lineSVG");
 		linesElement.appendChild(line);
@@ -735,7 +733,7 @@ function drawRelativeLines(node, relatives, isParents){
                 line.setAttribute('y1', nodePositions[relative.location].top+nodePositions[relative.location].height/2);
                 line.setAttribute('y2', nodePositions[node.location].top+nodePositions[node.location].height/2);
                 var rgb = hexToRgb(nodeColors[relative.type]);
-                line.style.stroke = "rgba(" + rgb.r + "," + rgb.g + "," + rgb.b + ",.1)";
+                line.style.stroke = "rgba(" + rgb.r + "," + rgb.g + "," + rgb.b + ",.2)";
                 line.setAttribute('stroke-width', 1);
                 lineElement.appendChild(line);
             }

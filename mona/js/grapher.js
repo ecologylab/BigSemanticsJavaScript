@@ -38,11 +38,24 @@ function stepPhysical(x){
     for(n = 0; n < renderedNodesList.length; n++){
         node = renderedNodesList[n];
     
-       
         var n, node, p, pDist, pSpeed, pX, pY;
-        // calculate attractive forces
 		node.vector = new Vector([0,0,0]);
-		
+
+        //if node is primary pull it left and to the center
+        if (primaryNodes.hasOwnProperty(node.location)){
+            pY = ((graphHeight/2) - node.y) / 10;
+            pSpeed = (Math.abs(pY) / graphWidth) * ATTRACTION_FORCE;
+            pY *= pSpeed;
+
+            node.vector = node.vector.add(new Vector([-5, pY, 0]));
+        }	
+	
+        //if a node is secondary there is a constant push right
+        if (node.x < 100 && secondaryNodes.hasOwnProperty(node.location)){
+            repulsionVector = repulsionVector.add(new Vector([30, 0, 0]));
+        }
+        
+        // calculate attractive forces		
 		for(p = 0; p < node.parents.length; p++){
 			var parent = node.parents[p];
 			pDist = Math.sqrt( Math.pow((parent.x - node.x), 2) + Math.pow((parent.y - node.y), 2) );
@@ -61,24 +74,10 @@ function stepPhysical(x){
 				node.vector = node.vector.add(new Vector([pX, pY, 0]));
 			}        
 		}
-        
-        //if node is primary pull it left and to the center
-        if (primaryNodes.hasOwnProperty(node.location)){
-            pY = ((graphHeight/2) - node.y) / 10;
-            pSpeed = (Math.abs(pY) / graphWidth) * ATTRACTION_FORCE;
-            pY *= pSpeed;
-
-            node.vector = node.vector.add(new Vector([-5, pY, 0]));
-        }	
-	
+                
         // add in repulsive forces
 		var repulsionVector = new Vector([0,0,0]);
         
-        //if a node is secondary there is a constant push right
-        if (node.x < 100 && secondaryNodes.hasOwnProperty(node.location)){
-            repulsionVector = repulsionVector.add(new Vector([30, 0, 0]));
-        }
-            
 		for(p = 0; p <renderedNodesList.length; p++){
 			
 			if(n != p){
