@@ -18,7 +18,9 @@ function doPhysical(n){
 var ATTRACTION_FORCE = 10;
 var REPULSE_FORCE = -1;
 var TOUCH_DISTANCE = 100;
-var Y_TOUCH_DISTANCE = 40;
+var Y_TOUCH_DISTANCE = 20;
+var X_OVERLAP = 200;
+
 
 var nodeCounter = 0;
 
@@ -78,8 +80,7 @@ function stepPhysical(x){
         // add in repulsive forces
 		var repulsionVector = new Vector([0,0,0]);
         
-		for(p = 0; p <renderedNodesList.length; p++){
-			
+		for(p = 0; p <renderedNodesList.length; p++){		
 			if(n != p){
 				var other = renderedNodesList[p];
 				pDist = Math.sqrt( Math.pow((other.x - node.x), 2) + Math.pow((other.y - node.y), 2) );
@@ -106,9 +107,9 @@ function stepPhysical(x){
 					repulsionVector = repulsionVector.add(new Vector([pX, pY, 0]));
 				}
                 //if they are too close on the y move them
-                else if(Math.abs(other.y - node.y) < Y_TOUCH_DISTANCE  && Math.abs(other.x - node.x) < TOUCH_DISTANCE){					
+                else if(Math.abs(other.y - node.y) < Y_TOUCH_DISTANCE && Math.abs(other.x - node.x) < X_OVERLAP){					
 					pY = (other.y - node.y);
-					pSpeed =  ((TOUCH_DISTANCE - pY) / Y_TOUCH_DISTANCE) * REPULSE_FORCE; 
+					pSpeed =  ((Y_TOUCH_DISTANCE - pY) / Y_TOUCH_DISTANCE) * REPULSE_FORCE; 
 					pY *= pSpeed;
 					repulsionVector = repulsionVector.add(new Vector([0, pY, 0]));
 				}

@@ -111,6 +111,9 @@ body {
 
 .nodes div:hover .nodeText {
     font-size: 120%;
+}
+
+.nodes div:hover {
     z-index: 10;
 }
 

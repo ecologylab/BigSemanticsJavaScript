@@ -467,9 +467,15 @@ function onNodeMouseover(nodeKey){
         var nodeDiv = document.getElementById(nodeKey);    
         var pArray = nodeDiv.getElementsByTagName('p');
         var p = pArray[0];
+        var imgArray = nodeDiv.getElementsByTagName('img');
+        var img = imgArray[0];
         p.style.backgroundColor = nodeDiv.style.color;
         p.style.color = "white";
         p.innerHTML = primaryNodes[nodeKey].title;
+        //fix for offset issue
+        if (p.style.width < p.clientWidth + img.clientWidth){
+            p.style.width = p.clientWidth + img.clientWidth +'px';
+        }
 
         var lines = document.getElementsByClassName(primaryNodes[nodeKey].location+"Line");
         for (var i=0; i<lines.length; i++){
@@ -525,9 +531,16 @@ function onSecondaryNodeMouseover(nodeKey){
         var nodeDiv = document.getElementById(nodeKey);    
         var pArray = nodeDiv.getElementsByTagName('p');
         var p = pArray[0];
-        p.style.backgroundColor = nodeDiv.style.color;
-        p.style.color = "white";
+        var imgArray = nodeDiv.getElementsByTagName('img');
+        var img = imgArray[0];
         p.innerHTML = secondaryNodes[nodeKey].title;
+        p.style.color = "white";
+        p.style.backgroundColor = nodeDiv.style.color;
+        //fix for offset issue
+        if (p.style.width < p.clientWidth + img.clientWidth){
+            p.style.width = p.clientWidth + img.clientWidth +'px';
+        }
+        
         //if something changed update the lines
         if (nodePositions[nodeKey].height != nodeDiv.getBoundingClientRect().height){
             updateAllLines();
@@ -585,8 +598,14 @@ function addVisual(node, nodeKey, nodeSet){
         node.visual.style.cursor = "pointer";
         node.visual.setAttribute('onclick','onNodeClick("'+nodeSet[nodeKey].location+'")');
     }
-    node.visual.setAttribute('onmouseover','onSecondaryNodeMouseover("'+nodeKey+'")');
-    node.visual.setAttribute('onmouseout','onSecondaryNodeMouseout("'+nodeKey+'")');
+    if (primaryNodes.hasOwnProperty(nodeKey)){
+        node.visual.setAttribute('onmouseover','onNodeMouseover("'+nodeKey+'")');
+        node.visual.setAttribute('onmouseout','onNodeMouseout("'+nodeKey+'")');    
+    }
+    else {
+        node.visual.setAttribute('onmouseover','onSecondaryNodeMouseover("'+nodeKey+'")');
+        node.visual.setAttribute('onmouseout','onSecondaryNodeMouseout("'+nodeKey+'")');
+    }
     node.visual.id = nodeKey;
     node.visual.style.webkitTransform = "translate("+node.x+"px, "+node.y+"px)";
 
