@@ -1,4 +1,4 @@
-/*global window, doc, Image, fixWhiteSpace, rgbToRgbObj, getLabel, simplDeserialize, waitForNewMMD, MDC_rawMMD, getNodes, allNodeMDLoaded, document, setTimeout, MetadataLoader, console, hexToRgb, FlairMaster, sortNumber, median, MDC_rawMetadata, showMetadata, setInterval, clearInterval, Vector, getRandomArbitrary, doPhysical, graphWidth:true, graphHeight:true, primaryNodes:true, secondaryNodes:true, renderedNodesList:true, secondaryNodesList:true, nodeList:true, nodePositions:true, drawSecondaryNodes, updateAllLines, Heap, deleteChildren*/
+/*global window, doc, Image, fixWhiteSpace, rgbToRgbObj, getLabel, simplDeserialize, waitForNewMMD, MDC_rawMMD, getNodes, allNodeMDLoaded, document, setTimeout, MetadataLoader, console, hexToRgb, FlairMaster, sortNumber, median, MDC_rawMetadata, showMetadata, setInterval, clearInterval, Vector, getRandomArbitrary, doPhysical, graphWidth:true, graphHeight:true, primaryNodes:true, secondaryNodes:true, renderedNodesList:true, secondaryNodesList:true, nodeList:true, nodePositions:true, drawSecondaryNodes, updateAllLines, Heap, deleteChildren, setCentroid*/
 
 var MONA = {},
     cachedMMD = "",     //the old in focus meta-metadata. used to compare against current in focus meta-metadata
@@ -20,7 +20,8 @@ var MONA = {},
     unrenderedNodesHeap,//prior to being drawn, nodes are stored here. sorted by number of parents
     GRAPH_ELEM,         //the html element of the graph area
     TYPE_ELEM,          //the html element of the type area
-    LOAD_BAR_ELEM;      //the html element of the loading bar/spinner
+    LOAD_BAR_ELEM,      //the html element of the loading bar/spinner
+    MAX_NODES = 40;    //max number of nodes we want to render
 
 
 function Node(type, title, location, mmdName, parent){
@@ -78,6 +79,8 @@ MONA.initialize = function (){
 	linesElement.height = graphHeight;
     
     pageMidHeight = graphHeight/2;
+    setCentroid();
+    
     miceElement.style.top = pageMidHeight + "px";
     TYPE_ELEM.style.top = pageMidHeight + "px";
     
@@ -359,7 +362,7 @@ function getNodes(){
 }
 
 function tooManyNodes(){
-    if (Object.keys(secondaryNodes).length > 400) return true;
+    if (Object.keys(secondaryNodes).length > MAX_NODES) return true;
     else return false;
 }
 

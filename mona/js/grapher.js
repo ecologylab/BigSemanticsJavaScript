@@ -18,11 +18,38 @@ function doPhysical(n){
 var ATTRACTION_FORCE = 10;
 var REPULSE_FORCE = -1;
 var TOUCH_DISTANCE = 100;
-var Y_TOUCH_DISTANCE = 20;
+var Y_TOUCH_DISTANCE = 30;
 var X_OVERLAP = 200;
 
-
 var nodeCounter = 0;
+var centroid;
+var CENT_RADIUS = 300;
+var CENT_DIST_SQ = Math.pow(300, 2);
+var PRIMARY_CENT_DIST = Math.pow((CENT_RADIUS+20),2);
+var SECONDARY_CENT_DIST = Math.pow((CENT_RADIUS+40),2);
+
+
+function setCentroid(){
+    centroid = {
+        x : -150,
+        y : graphHeight/2
+    };
+    //draw it
+    var circle = document.createElement('div');
+    circle.style.position = "absolute";
+    var centerDivY = centroid.y - 200;
+    circle.style.top = centerDivY + "px";
+    circle.style.left = "500px";
+    circle.style.border = "3px solid red";
+    circle.style.width = "400px";
+    circle.style.height = "400px";
+    circle.style.borderRadius = "300px";
+    //document.body.appendChild(circle);
+}
+
+function centroidDistance(node){
+    return Math.pow((centroid.x - node.x), 2) + Math.pow((centroid.y - node.y), 2);
+}
 
 function stepPhysical(x){
 	
@@ -40,18 +67,39 @@ function stepPhysical(x){
     for(n = 0; n < renderedNodesList.length; n++){
         node = renderedNodesList[n];
     
-        var n, node, p, pDist, pSpeed, pX, pY;
+        var n, node, p, pDist, pSpeed, pX, pY, power;
 		node.vector = new Vector([0,0,0]);
 
-        //if node is primary pull it left and to the center
-        if (primaryNodes.hasOwnProperty(node.location)){
-            pY = ((graphHeight/2) - node.y) / 10;
-            pSpeed = (Math.abs(pY) / graphWidth) * ATTRACTION_FORCE;
+        //if node is primary pull it toward the centroid
+        var centDist = centroidDistance(node);
+        //we use PRIMARY_CENT_DIST (square the radius plus 20 to avoid having to square root
+        if (primaryNodes.hasOwnProperty(node.location) && centDist > PRIMARY_CENT_DIST){			
+            pX = (centroid.x - node.x) / centDist;
+            pY = (centroid.y - node.y) / centDist;
+
+            power = Math.sqrt(Math.pow(renderedNodesList.length - n, 2));
+
+            pSpeed = (centDist / graphWidth) * ATTRACTION_FORCE * power; 
+
+            pX *= pSpeed;
             pY *= pSpeed;
 
-            node.vector = node.vector.add(new Vector([-5, pY, 0]));
+            node.vector = node.vector.add(new Vector([pX, pY, 0]));
         }	
 	
+        if (secondaryNodes.hasOwnProperty(node.location) && centDist < SECONDARY_CENT_DIST){
+            pX = (centroid.x - node.x) / centDist;
+            pY = (centroid.y - node.y) / centDist;
+
+            pSpeed =  ((TOUCH_DISTANCE - centDist) / TOUCH_DISTANCE) * REPULSE_FORCE * -40; 
+
+            pX *= pSpeed;
+            pY *= pSpeed;
+            
+            node.vector = node.vector.add(new Vector([pX, pY, 0]));
+        }
+        
+        
         //if a node is secondary there is a constant push right
         if (node.x < 100 && secondaryNodes.hasOwnProperty(node.location)){
             repulsionVector = repulsionVector.add(new Vector([30, 0, 0]));
@@ -66,7 +114,7 @@ function stepPhysical(x){
 				pX = (parent.x - node.x) / pDist;
 				pY = (parent.y - node.y) / pDist;
 				
-				var power = Math.sqrt(Math.pow(renderedNodesList.length - n, 2));
+				power = Math.sqrt(Math.pow(renderedNodesList.length - n, 2));
 				
 				pSpeed = (pDist / graphWidth) * ATTRACTION_FORCE * power; 
 				
@@ -139,6 +187,14 @@ function stepPhysical(x){
 		else if(node.y > graphHeight-50)
 			node.y = graphHeight-100;
 
+        //if node is too close to the centroid move it
+        centDist = centroidDistance(node);
+        if (centDist < CENT_DIST_SQ){
+            //how much we need to move the node so that it will be out of the centroid
+            var xDisplace = Math.sqrt(CENT_DIST_SQ - Math.pow((node.y - centroid.y),2)) + centroid.x - node.x; 
+            node.x = node.x + xDisplace;
+        }
+        
         moveNode(node);
     }
 }

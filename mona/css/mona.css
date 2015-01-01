@@ -80,7 +80,7 @@ body {
 #graphArea {
 	position: absolute;
 	top: 0;
-	left: 1000px;
+	left: 800px;
 	right: 0;
 	bottom: 0;
 }
@@ -95,7 +95,7 @@ body {
     position: absolute;
     white-space: nowrap;
     z-index: 1;
-    transition: .5s;
+    transition: .6s;
 }
 
 .nodes div img {
