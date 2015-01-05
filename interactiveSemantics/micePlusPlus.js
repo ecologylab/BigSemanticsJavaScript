@@ -14,7 +14,7 @@ var htmlID = 0;
 
 var facetID = 0;
 var usedIndices = [];
-var colors = ['#F7977A', '#FDC68A', '#FFF79A', '#82CA9D', '#6ECFF6', '#7EA7D8', '#8882BE', '#BC8DBF', '#F49AC2', '#F6989D', '#605CA8', '#F06EA9', '#855FA8', undefined]
+var colors = ['#F7977A', '#FDC68A', '#FFF79A', '#82CA9D', '#6ECFF6', '#7EA7D8', '#C4C0DE', '#BC8DBF', '#F49AC2', '#F6989D', '#605CA8', '#F06EA9', '#CC99FF', undefined]
 var colorCounter = 0;
 var alphabet = ['a', 'b', 'c','d', 'e', 'f', 'g', 'h', 'i', 'j',
                 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't',
@@ -171,19 +171,23 @@ MICE.filterByVenue = function(selectedDiv, multiple){
 	for(var i = 0; i < papers.length; i++){
 		var cList = MICE.colorMap.get(papers[i]);
 		if(cList == null){
-			
-			MICE.colorMap.put(papers[i], [colorCounter]);
-			selectedDiv.setAttribute("style", "background-color: " + colors[colorCounter]);
+			var newColor = {colorIndex: colorCounter, venue: selectedDiv.innerHTML};
+			MICE.colorMap.put(papers[i], [newColor]);
+			selectedDiv.setAttribute("style", "background-color: " + colors[newColor.colorIndex]);
 			selectedDiv.setAttribute("colorindex", 	colorCounter);
 		}
 		else{
-			if(cList[0] == 13){
+			if(cList[0].colorIndex == 13){
 				cList = [];
-				MICE.colorMap.put(papers[i], [colorCounter]);
+				var newColor1 = {colorIndex: colorCounter, venue: selectedDiv.innerHTML};
+
+				MICE.colorMap.put(papers[i], [newColor1]);
 
 			}
-			cList.push(colorCounter);
-			selectedDiv.setAttribute("style", "background-color: " + colors[cList[0]]);
+			var aColor = {colorIndex: colorCounter, venue: selectedDiv.innerHTML};
+
+			cList.push(aColor);
+			selectedDiv.setAttribute("style", "background-color: " + colors[cList[0].colorIndex]);
 			selectedDiv.setAttribute("colorindex", 	cList[0]);
 			//MICE.colorMap.put(papers[i], cList);
 
@@ -379,6 +383,7 @@ MICE.buildAuthorFacet = function (parentUrl, collectionName, facetObj){
 			  }
 	
 	});
+	facet.style.display ='none';
 	return facet;
 	
 
@@ -481,22 +486,42 @@ MICE.buildVenueFacet = function (parentUrl, collectionName, facetObj){
 											  saveAmount= saveAmount-1;
 											  authors[i].setAttribute("saveme", saveAmount.toString());
 											  if(saveAmount > 0){
+												  
+												  
+												  
 												  authors[i].style.display = '';
 												  //authors[i].style.backgroundColor=  colors[colorCounter];
 												  var authorCol = MICE.authorColorMap.get(authors[i].innerHTML);
-												  if(authorCol == null){
-													  MICE.authorColorMap.put(authors[i].innerHTML, [colorCounter])
+												  if(authorCol == null || authorCol[0] == null){
+													  var newCol = {colorIndex: colorCounter, venue: event.target.innerHTML}
+													  MICE.authorColorMap.put(authors[i].innerHTML, [newCol])
 												  }else{
-													  authorCol.push(colorCounter);
+													  for(var l = 0; l < authorCol.length; l++){
+														  if(authorCol[l].venue == event.target.innerHTML){
+															  authorCol.splice(l, 1);
+															  l--;
+														  }
+													  }
+													  //authorCol.push(colorCounter);
 												  }
 												  authors[i].style.background=  MICE.buildGradient(authorCol);
 												  	
 											  }else{
-												  MICE.colorMap.put(authorPapers[j], [13]);
-												   MICE.colorMap.put(venuePapers[k], [13])
+												 var authorCol = MICE.authorColorMap.get(authors[i].innerHTML);
+												 if(authorCol != null){
+												 for(var l = 0; l < authorCol.length; l++){
+													  if(authorCol[l].venue == event.target.innerHTML){
+														  authorCol.splice(l, 1);
+														  l--;
+													  }
+												  }
+												 var nullCol = {venue: event.target.innerHTML, colorIndex: 13};
+												 MICE.colorMap.put(authorPapers[j], [nullCol]);
+												   MICE.colorMap.put(venuePapers[k], [nullCol])
 
 												  authors[i].style.display = 'none';
 											  }
+											}
 										  }
 
 									  }
@@ -504,8 +529,14 @@ MICE.buildVenueFacet = function (parentUrl, collectionName, facetObj){
 								
 								  if(restoreAuthors){
 									  authors[i].style.display = '';
-									  authors[i].color= 'gray'; 
-	
+									  authors[i].style.color= 'gray'; 
+									  var aF = document.getElementById('authorFacet');
+									  aF.style.display = 'none';
+									  for(var q = 1; q < aF.childNodes.length; q++){
+										  aF.childNodes[q].classList.remove("selectedAuthorNamesX");
+											
+											aF.childNodes[q].classList.add("authorNames");
+									  }
 								  }
 							  }
 							MICE.applyFilterSortRequest(filter_sort_request, false);
@@ -513,7 +544,8 @@ MICE.buildVenueFacet = function (parentUrl, collectionName, facetObj){
 
 					  }	  
 					 else if(event.ctrlKey){
-
+						 var aF = document.getElementById('authorFacet');
+						 aF.style.display = '';
 						  var authors = document.getElementById('authorFacet').childNodes;
 						  for(var i = 1; i < authors.length; i++){
 							  var authorPapers = MICE.authorMap.get(authors[i].innerHTML);
@@ -524,13 +556,16 @@ MICE.buildVenueFacet = function (parentUrl, collectionName, facetObj){
 									  if(authorPapers[j] == venuePapers[k]){
 										  doesPass = true;
 										  var authorCol = MICE.authorColorMap.get(authors[i].innerHTML);
-										  if(authorCol == null){
-											  MICE.authorColorMap.put(authors[i].innerHTML, [colorCounter])
+										  if(authorCol == null || authorCol[0] == null ){
+												 var newCol = {venue: event.target.innerHTML, colorIndex: colorCounter}
+
+											  MICE.authorColorMap.put(authors[i].innerHTML, [newCol])
 										  }else{
-											  if(authorCol[0] == 13){
+											  if(authorCol[0].colorIndex == 13){
 												  authorCol = [];
 												}
-											  authorCol.push(colorCounter);
+											  var lalaColor = {venue: event.target.innerHTML, colorIndex: colorCounter}
+											  authorCol.push(lalaColor);
 										  }
 										  authors[i].style.background=  MICE.buildGradient(authorCol);
 									  }
@@ -544,7 +579,8 @@ MICE.buildVenueFacet = function (parentUrl, collectionName, facetObj){
 
 								 }else{
 									  authors[i].style.display = '';
-									  authors[i].color= '#FFFFFF'; 
+									  authors[i].style.color= '#FFFFFF'; 
+									  authors[i].style.textShadow = '0px 0px 3px #000000';
 
 									  
 								 }
@@ -554,7 +590,8 @@ MICE.buildVenueFacet = function (parentUrl, collectionName, facetObj){
 								  saveAmount++;
 								  authors[i].setAttribute("saveme", saveAmount.toString());
 								  authors[i].style.display = '';
-								  authors[i].color= '#FFFFFF'; 
+								  authors[i].style.color= '#FFFFFF'; 
+								  authors[i].style.textShadow = '0px 0px 3px #000000';
 
 							  }
 							  
@@ -564,7 +601,9 @@ MICE.buildVenueFacet = function (parentUrl, collectionName, facetObj){
 
 					  }
 					  else{
-							var filter_sort_request = MICE.filters.get(collectionName + parentUrl);
+						  var aF = document.getElementById('authorFacet');
+							 aF.style.display = '';
+						  var filter_sort_request = MICE.filters.get(collectionName + parentUrl);
 							if(filter_sort_request != null){
 								  for(var i = 0; i < filter_sort_request.filter.length; i++){
 										if(filter_sort_request.filter[i].name == 'authors'){
@@ -589,13 +628,16 @@ MICE.buildVenueFacet = function (parentUrl, collectionName, facetObj){
 										  
 										  doesPass = true;
 										  var authorCol = MICE.authorColorMap.get(authors[i].innerHTML);
-										  if(authorCol == null){
-											  MICE.authorColorMap.put(authors[i].innerHTML, [colorCounter])
-										  }else{
-											  if(authorCol[0] == 13){
+										  if(authorCol == null || authorCol[0] == null){
+											  var newestCol = {venue: event.target.innerHTML, colorIndex: colorCounter};
+											  MICE.authorColorMap.put(authors[i].innerHTML, [newestCol]);
+										  }
+										  else{
+											  if(authorCol[0].colorIndex == 13){
 												  authorCol = [];
 												}
-											  authorCol.push(colorCounter);
+											 var newColor5 = {colorIndex: colorCounter, venue: event.target.innerHTML};
+											  authorCol.push(newColor5);
 										  }
 										  authors[i].style.background=  MICE.buildGradient(MICE.authorColorMap.get(authors[i].innerHTML));
 
@@ -610,7 +652,8 @@ MICE.buildVenueFacet = function (parentUrl, collectionName, facetObj){
 
 								 }else{
 									  authors[i].style.display = '';
-									  authors[i].color= '#FFFFFF'; 
+									  authors[i].style.color= '#FFFFFF'; 
+									  authors[i].style.textShadow = '0px 0px 3px #000000';
 
 
 								 }
@@ -620,7 +663,8 @@ MICE.buildVenueFacet = function (parentUrl, collectionName, facetObj){
 								  saveAmount++;
 								  authors[i].setAttribute("saveme", saveAmount.toString());
 								  authors[i].style.display = '';
-								  authors[i].color= '#FFFFFF'; 
+								  authors[i].style.color= '#FFFFFF'; 
+								  authors[i].style.textShadow = '0px 0px 3px #000000';
 
 							  }
 							  
@@ -970,15 +1014,15 @@ MICE.applyFilterSortRequest = function(request, nocolorize){
 }
 MICE.buildGradient = function(colorIndexList){
 	
-	var css = "linear-gradient(";
-	if(colorIndexList[0] == 13){
+	var css = "linear-gradient(to right, ";
+	if(colorIndexList[0].colorIndex == 13){
 		return '';
 	}
 	if(colorIndexList.length == 1){
-		css = css + colors[colorIndexList[0]] + ", " + colors[colorIndexList[0]] + ")";
+		css = css + colors[colorIndexList[0].colorIndex] + ", " + colors[colorIndexList[0].colorIndex] + ")";
 	}else{
 		for(var i = 0; i < colorIndexList.length; i++){
-			css = css + colors[colorIndexList[i]];
+			css = css + colors[colorIndexList[i].colorIndex];
 			if((i+1) < colorIndexList.length){
 				css = css + ", ";
 			}else{
