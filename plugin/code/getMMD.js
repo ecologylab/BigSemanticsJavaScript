@@ -181,7 +181,7 @@ PrefixCollection.prototype.getMatchingPrefix = function(url){
     var hostPrefix = this.childPhraseMap[host];
 
     // children of hostPrefix
-    var path = getPath(url);
+    var path = getURLPath(url);
     return (hostPrefix === undefined) ? null : hostPrefix.getMatchingPrefix(path, 1, this.separator);	// skip over starting '/'
 };
 
@@ -252,7 +252,7 @@ function initRepo(){
                 initializeLocationBasedMaps();
                 initializeSuffixAndMimeBasedMaps();
             } else {
-				console.log("Error! XMLHttpRequest failed.");
+				//console.log("Error! XMLHttpRequest failed.");
 			}
 		}	
 
@@ -363,7 +363,7 @@ function getDocumentMM(url) {
  
     //default to rich_document
     if (!result){
-        console.log("couldn't find for " + url);
+        //console.log("couldn't find for " + url);
         result = repositoryByName.rich_document;
     }
         
@@ -576,7 +576,7 @@ function getDomain(url){
     }
 }
 
-function getPath(url){
+function getURLPath(url){
     var urlObj = document.createElement("a");
     urlObj.href = url;
     return urlObj.pathname;
@@ -586,7 +586,7 @@ function getPath(url){
  * @return The suffix of the filename, in whatever case is found in the input string.
  */
 function getSuffix(url){
-    var path = getPath(url);
+    var path = getURLPath(url);
     var result;
     if (path)
     {
@@ -603,7 +603,7 @@ function getSuffix(url){
  * @return The directory of this, without protocol and host.
  */
 function pathDirectoryString(url){
-    var path = getPath(url);
+    var path = getURLPath(url);
 
     var lastSlash = path.lastIndexOf("/");
     var lastDot = path.lastIndexOf(".");
