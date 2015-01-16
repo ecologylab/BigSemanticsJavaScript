@@ -15,9 +15,9 @@ function doPhysical(n){
     physicalInterval = setInterval(stepPhysical, NODE_RENDER_TIMER);
 }
 
-var ATTRACTION_FORCE = 10;
-var REPULSE_FORCE = -1;
-var TOUCH_DISTANCE = 100;
+var ATTRACTION_FORCE = 8;
+var REPULSE_FORCE = -2;
+var TOUCH_DISTANCE = 60;
 var Y_TOUCH_DISTANCE = 30;
 var X_OVERLAP = 200;
 
@@ -86,23 +86,17 @@ function stepPhysical(x){
 
             node.vector = node.vector.add(new Vector([pX, pY, 0]));
         }	
-	
+	    //don't let secondary nodes get too close to centroid
         if (secondaryNodes.hasOwnProperty(node.location) && centDist < SECONDARY_CENT_DIST){
             pX = (centroid.x - node.x) / centDist;
             pY = (centroid.y - node.y) / centDist;
 
-            pSpeed =  ((TOUCH_DISTANCE - centDist) / TOUCH_DISTANCE) * REPULSE_FORCE * -40; 
+            pSpeed =  ((TOUCH_DISTANCE - Math.sqrt(centDist)) / TOUCH_DISTANCE) * REPULSE_FORCE * 2; 
 
             pX *= pSpeed;
             pY *= pSpeed;
             
             node.vector = node.vector.add(new Vector([pX, pY, 0]));
-        }
-        
-        
-        //if a node is secondary there is a constant push right
-        if (node.x < 100 && secondaryNodes.hasOwnProperty(node.location)){
-            repulsionVector = repulsionVector.add(new Vector([30, 0, 0]));
         }
         
         // calculate attractive forces		
@@ -156,8 +150,8 @@ function stepPhysical(x){
 				}
                 //if they are too close on the y move them
                 else if(Math.abs(other.y - node.y) < Y_TOUCH_DISTANCE && Math.abs(other.x - node.x) < X_OVERLAP){					
-					pY = (other.y - node.y);
-					pSpeed =  ((Y_TOUCH_DISTANCE - pY) / Y_TOUCH_DISTANCE) * REPULSE_FORCE; 
+                    pY = (other.y - node.y)  / pDist;;
+					pSpeed =  ((Y_TOUCH_DISTANCE - pDist) / Y_TOUCH_DISTANCE) * REPULSE_FORCE; 
 					pY *= pSpeed;
 					repulsionVector = repulsionVector.add(new Vector([0, pY, 0]));
 				}

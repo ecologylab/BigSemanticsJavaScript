@@ -94,19 +94,25 @@ body {
 .nodes div {
     position: absolute;
     white-space: nowrap;
-    z-index: 1;
-    transition: .6s;
+    transition: 0s;
 }
 
 .nodes div img {
     float: left;
-    z-index: 1
+    position: relative;
+    z-index: 1;
 }
 
 .nodeText {
-	display: inline-;
+	display: inline;
+    position: relative;
+    z-index: 2;
     padding: 2px 3px 2px 3px;
     border-radius: 3px;
+}
+
+.nodes div:hover img {
+    z-index: 3;
 }
 
 .nodes div:hover .nodeText {
