@@ -78,7 +78,7 @@ function dataFromKids(mmdKids,contextNode,recurse,parserContext)
 			tag = field.tag;
 			
 			if (recurse && name == 'location') {
-				obj = url;
+				obj = document.URL;
 			}
 			
 			if (obj != null)
@@ -282,10 +282,6 @@ function getCollectionD(field,contextNode,recurse,parserContext)
 
 	var x = null;
 	var data = null;
-	
-	if (field.hasOwnProperty("field_parser")) {
-		(console.log(field.name + " has a field parser"));
-	}
 	
 	if (field["xpaths"] != null)
 	{

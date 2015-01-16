@@ -23,7 +23,6 @@ function setup(document)
 	//getMMD(document.URL, handleMMD);
     
     //we are now doing it client-side
-    //the timeout is to give the mmdRepo time to load
     handleMMD(getDocumentMM(document.URL), document.URL);
 }
 
