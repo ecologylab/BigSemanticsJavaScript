@@ -1,4 +1,4 @@
-/*global window, doc, document, Image, setInterval, clearInterval, Vector, getRandomArbitrary, setTimeout, doPhysical, graphWidth:true, graphHeight:true, primaryNodes:true, secondaryNodes:true, renderedNodesList:true, secondaryNodesList:true, nodeList:true, nodePositions:true*/
+/*global window, doc, document, Image, setInterval, clearInterval, Vector, getRandomArbitrary, setTimeout, doPhysical, graphWidth:true, graphHeight:true, primaryNodes:true, secondaryNodes:true, renderedNodesList:true, secondaryNodesList:true, nodeList:true, nodePositions:true, typePositions*/
 
 /* ================================================================== Let's render it! */
 
@@ -16,7 +16,7 @@ function doPhysical(n){
 }
 
 var ATTRACTION_FORCE = 8;
-var REPULSE_FORCE = -2;
+var REPULSE_FORCE = -4;
 var TOUCH_DISTANCE = 60;
 var Y_TOUCH_DISTANCE = 30;
 var X_OVERLAP = 200;
@@ -67,7 +67,7 @@ function stepPhysical(x){
     for(n = 0; n < renderedNodesList.length; n++){
         node = renderedNodesList[n];
     
-        var n, node, p, pDist, pSpeed, pX, pY, power;
+        var n, node, p, pDist, yDist, pSpeed, pX, pY, power;
 		node.vector = new Vector([0,0,0]);
 
         //if node is primary pull it toward the centroid
@@ -85,7 +85,15 @@ function stepPhysical(x){
             pY *= pSpeed;
 
             node.vector = node.vector.add(new Vector([pX, pY, 0]));
-        }	
+        }
+        //pull towards category 
+        if (primaryNodes.hasOwnProperty(node.location)){
+            var catPos = typePositions[node.type];
+            pY = (catPos.top - node.y) / centDist;
+            pY *= pSpeed;
+            node.vector = node.vector.add(new Vector([0, pY, 0]));    
+        }
+        
 	    //don't let secondary nodes get too close to centroid
         if (secondaryNodes.hasOwnProperty(node.location) && centDist < SECONDARY_CENT_DIST){
             pX = (centroid.x - node.x) / centDist;
@@ -110,7 +118,8 @@ function stepPhysical(x){
 				
 				power = Math.sqrt(Math.pow(renderedNodesList.length - n, 2));
 				
-				pSpeed = (pDist / graphWidth) * ATTRACTION_FORCE * power; 
+                //the more you multiply graph width by, the more of the space nodes take up
+				pSpeed = (pDist / (graphWidth*40)) * ATTRACTION_FORCE * power; 
 				
 				pX *= pSpeed;
 				pY *= pSpeed;
@@ -126,7 +135,8 @@ function stepPhysical(x){
 			if(n != p){
 				var other = renderedNodesList[p];
 				pDist = Math.sqrt( Math.pow((other.x - node.x), 2) + Math.pow((other.y - node.y), 2) );
-				
+				yDist = Math.abs(other.y - node.y);
+
 				if(pDist < TOUCH_DISTANCE){
                     if(pDist < 1)
 						pDist = 1;
@@ -149,9 +159,8 @@ function stepPhysical(x){
 					repulsionVector = repulsionVector.add(new Vector([pX, pY, 0]));
 				}
                 //if they are too close on the y move them
-                else if(Math.abs(other.y - node.y) < Y_TOUCH_DISTANCE && Math.abs(other.x - node.x) < X_OVERLAP){					
-                    pY = (other.y - node.y)  / pDist;;
-					pSpeed =  ((Y_TOUCH_DISTANCE - pDist) / Y_TOUCH_DISTANCE) * REPULSE_FORCE; 
+                else if(yDist < Y_TOUCH_DISTANCE && Math.abs(other.x - node.x) < X_OVERLAP){
+					pSpeed =  ((Y_TOUCH_DISTANCE - yDist) / Y_TOUCH_DISTANCE) * REPULSE_FORCE; 
 					pY *= pSpeed;
 					repulsionVector = repulsionVector.add(new Vector([0, pY, 0]));
 				}
@@ -196,6 +205,8 @@ function stepPhysical(x){
 function moveNode(n){
     if (n !== undefined){
         n.visual.style.webkitTransform = "translate("+n.x+"px, "+n.y+"px)";
+        var z = graphWidth - n.x;
+        n.visual.style.zIndex = Math.round(z);
         updateNodeLines(n);
     }
 }

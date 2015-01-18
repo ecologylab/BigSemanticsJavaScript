@@ -75,6 +75,7 @@ body {
 	position: absolute;
 	top: 500px;
 	left: 800px;
+    z-index: 5;
 }
 
 #graphArea {
@@ -94,7 +95,8 @@ body {
 .nodes div {
     position: absolute;
     white-space: nowrap;
-    transition: 0s;
+    transition: .3s;
+    opacity: .99;
 }
 
 .nodes div img {
@@ -106,7 +108,7 @@ body {
 .nodeText {
 	display: inline;
     position: relative;
-    z-index: 2;
+    z-index: 4;
     padding: 2px 3px 2px 3px;
     border-radius: 3px;
 }

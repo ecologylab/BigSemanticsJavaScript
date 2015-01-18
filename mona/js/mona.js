@@ -1,11 +1,10 @@
-/*global window, doc, Image, fixWhiteSpace, rgbToRgbObj, getLabel, simplDeserialize, waitForNewMMD, MDC_rawMMD, getNodes, allNodeMDLoaded, document, setTimeout, MetadataLoader, console, hexToRgb, FlairMaster, sortNumber, median, MDC_rawMetadata, showMetadata, setInterval, clearInterval, Vector, getRandomArbitrary, doPhysical, graphWidth:true, graphHeight:true, primaryNodes:true, secondaryNodes:true, renderedNodesList:true, secondaryNodesList:true, nodeList:true, nodePositions:true, drawSecondaryNodes, updateAllLines, Heap, deleteChildren, setCentroid*/
+/*global window, doc, Image, fixWhiteSpace, rgbToRgbObj, getLabel, simplDeserialize, waitForNewMMD, MDC_rawMMD, getNodes, allNodeMDLoaded, document, setTimeout, MetadataLoader, console, hexToRgb, FlairMaster, sortNumber, median, MDC_rawMetadata, showMetadata, setInterval, clearInterval, Vector, getRandomArbitrary, doPhysical, graphWidth:true, graphHeight:true, primaryNodes:true, secondaryNodes:true, renderedNodesList:true, secondaryNodesList:true, nodeList:true, nodePositions:true, drawSecondaryNodes, updateAllLines, Heap, deleteChildren, setCentroid, typePositions:true*/
 
 var MONA = {},
     cachedMMD = "",     //the old in focus meta-metadata. used to compare against current in focus meta-metadata
     focusTitle = "",    //the title of the in focus node. used to avoid creating copy of focus node in graph area
     nodeColors = {},    //maps node type to a color
     nodeMetadata = {},  //maps node location to that node's metatata
-    typePositions = {}, //maps a type (reference, author, etc.), to its position on the screen
     pageMidHeight,      //the pixel vertical center of the page. used to center MICE/the graph area
     colorCount = 0,     //number of colors we have used. used to index clorArray
     COLOR_ARRAY = ["#009933", "#006699", "#CC9900", "#CC0000", "#CC00CC"], 
@@ -21,7 +20,7 @@ var MONA = {},
     GRAPH_ELEM,         //the html element of the graph area
     TYPE_ELEM,          //the html element of the type area
     LOAD_BAR_ELEM,      //the html element of the loading bar/spinner
-    MAX_NODES = 40;    //max number of nodes we want to render
+    MAX_NODES = 40;     //max number of nodes we want to render
 
 
 function Node(type, title, location, mmdName, parent){
@@ -182,7 +181,7 @@ function nodeMDLoaded(nodeKey){
 
 //when all node metadata is loaded update image sizes and put the secondary nodes into the secondary nodes list
 function allNodeMDLoaded(){
-    LOAD_BAR_ELEM.removeChild(LOAD_BAR_ELEM.firstChild);
+    if (LOAD_BAR_ELEM.firstChild) LOAD_BAR_ELEM.removeChild(LOAD_BAR_ELEM.firstChild);
 	updateImgSizes("acm_portal");
 	updateImgSizes("acm_portal_author");
 	updateAllLines();
@@ -356,8 +355,8 @@ function getNodes(){
 		}
 	}
 	populateNodeMetadata();
-	drawNodes();
 	drawTypes();
+    drawNodes();
 	drawLines();
 }
 
@@ -480,7 +479,7 @@ function onNodeMouseover(nodeKey){
             p.style.width = p.clientWidth + img.clientWidth +'px';
         }
 
-        var lines = document.getElementsByClassName(primaryNodes[nodeKey].location+"Line");
+        var lines = document.getElementsByClassName(nodeKey+"Line");
         for (var i=0; i<lines.length; i++){
             rgb = rgbToRgbObj(lines[i].style.stroke);
             lines[i].style.stroke = "rgba(" + rgb.r + "," + rgb.g + "," + rgb.b + ",.7)";
@@ -596,7 +595,10 @@ function onTypeMouseout(type){
 
 function addVisual(node, nodeKey, nodeSet){
     node.visual = document.createElement('div');
-           
+    if (primaryNodes.hasOwnProperty(nodeKey)){
+        node.x = typePositions[node.type].top;
+    }
+    
     if (node.location !== undefined){
         node.visual.style.cursor = "pointer";
         node.visual.setAttribute('onclick','onNodeClick("'+nodeSet[nodeKey].location+'")');
@@ -742,13 +744,15 @@ function drawRelativeLines(node, relatives, isParents){
             var relative = relatives[i];
             if (secondaryNodes[node.location] !== undefined && relative.rendered && document.getElementById(node.location+relative.location+"Line") === null){
                 var line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-                line.setAttribute('class', node.location+"Line");
+                //line.setAttribute('class', node.location+"Line");
                 //line ids are in the form parent.location+child.location+"Line"
                 if (isParents){
                     line.setAttribute('id', relative.location+node.location+"Line");
+                    line.setAttribute('class', relative.location+"Line");
                 }
                 else {
                     line.setAttribute('id', node.location+relative.location+"Line");
+                    line.setAttribute('class', node.location+"Line");
                 }
                 line.setAttribute('x1', nodePositions[relative.location].left);
                 line.setAttribute('x2', nodePositions[node.location].left+2);
