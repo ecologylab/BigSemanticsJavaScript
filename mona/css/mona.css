@@ -48,7 +48,7 @@ body {
 
 #historyWrapper {
 	position: absolute;
-	top: 10px;
+	top: 24px;
 	left: 10px;
     z-index: 10;
 }
