@@ -19,6 +19,7 @@ var MONA = {},
     unrenderedNodesHeap,//prior to being drawn, nodes are stored here. sorted by number of parents
     GRAPH_ELEM,         //the html element of the graph area
     TYPE_ELEM,          //the html element of the type area
+    HISTORY_ELEM,       //the html element of the history area
     LOAD_BAR_ELEM,      //the html element of the loading bar/spinner
     MAX_NODES = 40;     //max number of nodes we want to render
 
@@ -65,6 +66,7 @@ MONA.initialize = function (){
     GRAPH_ELEM = document.getElementById("graphArea");
     TYPE_ELEM = document.getElementById("typeArea");
     LOAD_BAR_ELEM = document.getElementById("loadingBar");
+    HISTORY_ELEM = document.getElementById("historyArea");
     
     var linesElement = document.getElementById("lineSVG"),
         miceElement = document.getElementById("mdcIce"),
@@ -82,6 +84,8 @@ MONA.initialize = function (){
     
     miceElement.style.top = pageMidHeight + "px";
     TYPE_ELEM.style.top = pageMidHeight + "px";
+    var histHeight = pageMidHeight - 50;
+    HISTORY_ELEM.style.height = histHeight + "px";
     
     deleteChildren(GRAPH_ELEM, TYPE_ELEM, linesElement, LOAD_BAR_ELEM);
     
@@ -198,7 +202,6 @@ function addToHistory(MDC_rawMetadata){
         newNode = new Node(mmdType, mmdObj.title, mmdObj.location, mmdObj.meta_metadata_name, null);
         historyNodes.push(newNode);
     }
-    var historyElement = document.getElementById("historyArea");
     var div = document.createElement('div');
     
     if (newNode.location !== undefined){
@@ -223,7 +226,7 @@ function addToHistory(MDC_rawMetadata){
 
     div.appendChild(img);
     div.appendChild(nodePara);
-    historyElement.insertBefore(div, historyElement.firstChild);
+    HISTORY_ELEM.insertBefore(div, HISTORY_ELEM.firstChild);
 }
 
 //make more important nodes bigger

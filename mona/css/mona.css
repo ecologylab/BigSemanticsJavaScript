@@ -10,7 +10,7 @@ div.span9.content {
 	
 	position: absolute;
   	top: 500px; 
-  	left: 280px;
+  	left: 10px;
 	overflow-y: scroll;
 	max-height: 300px;
     margin-left: 0;
@@ -55,6 +55,7 @@ body {
 
 #historyArea {
     font-size: 80%;
+    overflow-y: scroll;
 }
 
 #historyArea div {
@@ -63,25 +64,25 @@ body {
     position: relative;
 }
 @keyframes toHistory {
-  from {top: 200px; left: 150px; opacity: .1}
+  from {top: 200px; left: 100px; opacity: .1}
   to {top: 0px; left: 0px; opacity: 1}
 }
 @-webkit-keyframes toHistory {
-  from {top: 200px; left: 150px; opacity: .1}
+  from {top: 200px; left: 100px; opacity: .1}
   to {top: 0px; left: 0px; opacity: 1}
 }
 
 #typeArea {
 	position: absolute;
 	top: 500px;
-	left: 800px;
+	left: 550px;
     z-index: 5;
 }
 
 #graphArea {
 	position: absolute;
 	top: 0;
-	left: 800px;
+	left: 550px;
 	right: 0;
 	bottom: 0;
 }
@@ -89,14 +90,13 @@ body {
 #loadingBar {
 	position: absolute;
 	top: 0;
-	left: 1350px;
+	left: 1000px;
 }
 
 .nodes div {
     position: absolute;
     white-space: nowrap;
     transition: .3s;
-    opacity: .99;
 }
 
 .nodes div img {
