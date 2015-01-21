@@ -455,6 +455,10 @@
     opacity: 1.0    
 }
 
+.metadata_h1{
+	font-weight: bold;
+}
+
 .tabValue {
     
 }
