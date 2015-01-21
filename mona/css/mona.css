@@ -42,8 +42,20 @@ body {
     display: inline;
 }
 
+<<<<<<< HEAD
 #historyArea {
     overflow-y: scroll;
+=======
+.navbar-form {
+    margin-left: 10px;
+}
+
+#historyWrapper {
+	position: absolute;
+	top: 24px;
+	left: 10px;
+    z-index: 10;
+>>>>>>> 814293e291365dab097b10d6e57a190e79082065
 }
 
 form {
