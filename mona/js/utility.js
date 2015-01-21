@@ -72,13 +72,23 @@ function getRandomArbitrary(min, max) {
   return Math.random() * (max - min) + min;
 }
 
-function Vector(items)
-{
+//give a list of html elements, delete all their children
+function deleteChildren() {
+    for (var i = 0; i < arguments.length; i++) {
+        var element = arguments[i];
+        while (element.firstChild){
+            element.removeChild(element.firstChild);
+        }
+    }
+}
+
+//Vector =============================================
+
+function Vector(items){
 	this.items = items;
 }
 
-Vector.prototype.add = function(other)
-{
+Vector.prototype.add = function(other){
 	var result = [];
     for(var i = 0; i < this.items.length; i++) {
         result.push( this.items[i] + other.items[i]);

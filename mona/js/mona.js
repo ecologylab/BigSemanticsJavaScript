@@ -1,24 +1,29 @@
-/*global window, doc, Image, fixWhiteSpace, rgbToRgbObj, getLabel, simplDeserialize, waitForNewMMD, MDC_rawMMD, getNodes, allNodeMDLoaded, document, setTimeout, MetadataLoader, console, hexToRgb, FlairMaster, sortNumber, median, MDC_rawMetadata, showMetadata, setInterval, clearInterval, Vector, getRandomArbitrary, doPhysical, graphWidth:true, graphHeight:true, primaryNodes:true, secondaryNodes:true, renderedNodesList:true, secondaryNodesList:true, nodeList:true, nodePositions:true, drawSecondaryNodes, updateAllLines, unrenderedNodesList:true, Heap*/
-
+/*global window, doc, Image, fixWhiteSpace, rgbToRgbObj, getLabel, simplDeserialize, waitForNewMMD, MDC_rawMMD, getNodes, allNodeMDLoaded, document, setTimeout, MetadataLoader, console, hexToRgb, FlairMaster, sortNumber, median, MDC_rawMetadata, showMetadata, setInterval, clearInterval, Vector, getRandomArbitrary, doPhysical, graphWidth:true, graphHeight:true, primaryNodes:true, secondaryNodes:true, renderedNodesList:true, secondaryNodesList:true, nodeList:true, nodePositions:true, drawSecondaryNodes, updateAllLines, Heap, deleteChildren, setCentroid, typePositions:true*/
 
 var MONA = {},
-    cachedMMD = "",
-    cachedNodeMetadata = {},
-    focusTitle = "",
-    nodeColors = {},
-    nodeMetadata = {},
-    typePositions = {},
-    colorCount = 0,
-    requestsMade = 0,
-    tier4size = 15,
-    tier3size = 20, 
-    tier2size = 25, //also the base size
-    tier1size = 30,
-    NUM_STEPS = 50,
-    colorArray = ["#009933", "#006699", "#CC9900", "#CC0000", "#CC00CC"],
-    historyNodes = [],
-    renderInterval,
-    unrenderedNodesHeap;
+    cachedMMD = "",     //the old in focus meta-metadata. used to compare against current in focus meta-metadata
+    focusTitle = "",    //the title of the in focus node. used to avoid creating copy of focus node in graph area
+    nodeColors = {},    //maps node type to a color
+    nodeMetadata = {},  //maps node location to that node's metatata
+    nodeMetadataCache = {}, //all the metadata that has been loaded
+    pageMidHeight,      //the pixel vertical center of the page. used to center MICE/the graph area
+    colorCount = 0,     //number of colors we have used. used to index clorArray
+    COLOR_ARRAY = ["#009933", "#006699", "#CC9900", "#CC0000", "#CC00CC"], 
+    requestsMade = 0,   //number of requests for metadata made
+    T4_SIZE = 15,       //image sizes in pixels
+    T3_SIZE = 20,
+    T2_SIZE = 25,       //also the base size
+    T1_SIZE = 30,
+    NUM_STEPS = 100,    //number of iterations of grapher algorithm
+    historyNodes = [],  //list of nodes display in history
+    renderInterval,     //the rendering interval for setInterval.
+    unrenderedNodesHeap,//prior to being drawn, nodes are stored here. sorted by number of parents
+    GRAPH_ELEM,         //the html element of the graph area
+    TYPE_ELEM,          //the html element of the type area
+    HISTORY_ELEM,       //the html element of the history area
+    LOAD_BAR_ELEM,      //the html element of the loading bar/spinner
+    MAX_NODES = 40;     //max number of nodes we want to render
+
 
 function Node(type, title, location, mmdName, parent){
 	this.type = type;
@@ -30,69 +35,68 @@ function Node(type, title, location, mmdName, parent){
     
     if (parent !== null){
         this.parents = [parent];
-        this.x = 300;
-        this.y = parent.y + getRandomArbitrary(-2,2);
+        this.x = 250;
+        this.y = parent.y + getRandomArbitrary(-2, 2);
     }
     else {
         this.parents = [];
         this.x = 100;
-        this.y = 100;          
+        this.y = pageMidHeight;          
     }
     this.rendered = false;
 }
 
 //rev your engines
 MONA.initialize = function (){
-	cachedNodeMetadata = {};
 	nodeColors = {};
 	primaryNodes = {};
     secondaryNodes = {};
-	nodeMetadata = {};
 	nodePositions = {};
 	typePositions = {};
+    nodeMetadata = {};
     renderedNodesList = [];
-    unrenderedNodesList = [];
     secondaryNodesList = [];
     nodeList = [];
+    colorCount = 0;
+	requestsMade = 0;
+    
     unrenderedNodesHeap = new Heap(function(a, b) {
         return b.parents.length - a.parents.length;
     });
-	colorCount = 0;
-	requestsMade = 0;
     
-	var graphElement = document.getElementById("graphArea"),
-        typeElement = document.getElementById("typeArea"),
-        linesElement = document.getElementById("lineSVG"),
-        loadingElement = document.getElementById("loadingBar"),
+    GRAPH_ELEM = document.getElementById("graphArea");
+    TYPE_ELEM = document.getElementById("typeArea");
+    LOAD_BAR_ELEM = document.getElementById("loadingBar");
+    HISTORY_ELEM = document.getElementById("historyArea");
+    
+    var linesElement = document.getElementById("lineSVG"),
+        miceElement = document.getElementById("monaMice"),
         nodesLoading = document.createElement('div'),
         nodeMDLoading = document.createElement('div');
-	
-    graphWidth = graphElement.getClientRects()[0].width;
-	graphHeight = graphElement.getClientRects()[0].height;
+	    
+    graphWidth = GRAPH_ELEM.getClientRects()[0].width;
+	graphHeight = GRAPH_ELEM.getClientRects()[0].height;
 	
 	linesElement.width = graphWidth;
 	linesElement.height = graphHeight;
     
-    while (graphElement.firstChild){
-        graphElement.removeChild(graphElement.firstChild);
-	}
-	while (typeElement.firstChild){
-        typeElement.removeChild(typeElement.firstChild);
-	}
-	while (linesElement.firstChild){
-        linesElement.removeChild(linesElement.firstChild);
-	}
+    pageMidHeight = graphHeight/2;
+    setCentroid();
+    
+    miceElement.style.top = pageMidHeight + "px";
+    TYPE_ELEM.style.top = pageMidHeight + "px";
+    var histHeight = pageMidHeight - 70;
+    HISTORY_ELEM.style.height = histHeight + "px";
+    
+    deleteChildren(GRAPH_ELEM, TYPE_ELEM, linesElement, LOAD_BAR_ELEM);
     
 	nodesLoading.innerHTML = "Loading Nodes...";
-	graphElement.appendChild(nodesLoading);
-
-	while (loadingElement.firstChild){
-        loadingElement.removeChild(loadingElement.firstChild);
-	}
+	GRAPH_ELEM.appendChild(nodesLoading);
 
     nodeMDLoading.innerHTML = "Loading Nodes Metadata...";
-	loadingElement.appendChild(nodeMDLoading);
-	waitForNewMMD();
+	LOAD_BAR_ELEM.appendChild(nodeMDLoading);
+	
+    waitForNewMMD();
 };
 
 //waits until the new metadata comes in before updating the nodes
@@ -102,39 +106,36 @@ function waitForNewMMD(){
         return;
     }
     cachedMMD = MDC_rawMMD;
-    var graphElement = document.getElementById("graphArea");
-	while (graphElement.firstChild){
-        graphElement.removeChild(graphElement.firstChild);
-	}
+    deleteChildren(GRAPH_ELEM);
     getNodes();
 }
 
 //make requests for all the node metadata
 function populateNodeMetadata(){
-	//for now don't try to load mmd if there is more than 30. we don't want to kill the service
-	if (Object.keys(primaryNodes).length > 30) {
+    
+    deleteChildren(LOAD_BAR_ELEM);
+    
+	//for now don't try to load mmd if there is more than 30. we don't want to kill the service. also do nothing if there are no nodes
+	if (Object.keys(primaryNodes).length > 30 || Object.keys(primaryNodes).length === 0) {
 		return;
 	}
-    //if there are no nodes display nothing
-    if (Object.keys(primaryNodes).length === 0) {
-        var loadingElementClear = document.getElementById("loadingBar");
-        while (loadingElementClear.firstChild){
-            loadingElementClear.removeChild(loadingElementClear.firstChild);
-        }
-        return;
-	}
+    //make requests for all the first level nodes
 	for (var nodeKey in primaryNodes) {
-		if (primaryNodes[nodeKey].location !== undefined) {
-    		MetadataLoader.getMetadata(primaryNodes[nodeKey].location, "storeNodeMD", false);
-			requestsMade++;
+        var nodeLoc = primaryNodes[nodeKey].location;
+		if (nodeLoc !== undefined) {
+            
+            //If we already have the metadata don't request it again
+            if (nodeMetadataCache[nodeLoc] !== undefined){
+                getSecondaryNodes(nodeMetadataCache[nodeLoc], primaryNodes[nodeLoc]);
+            }
+            else{
+                MetadataLoader.getMetadata(primaryNodes[nodeKey].location, "storeNodeMD", false);
+                requestsMade++;
+            }
 		}
 	}
     
     //start the loading bar
-    var loadingElement = document.getElementById("loadingBar");
-	while (loadingElement.firstChild){
-        loadingElement.removeChild(loadingElement.firstChild);
-	}
     var loadingDiv = document.createElement('div');
     var loadingText = document.createElement('p');
     loadingText.id="loadingText";
@@ -143,10 +144,10 @@ function populateNodeMetadata(){
     spinner.src = "img/spinner.gif";
     loadingDiv.appendChild(spinner);
     
-    loadingText.innerHTML= "0 of " + requestsMade + " node metadata loaded";
+    loadingText.innerHTML= "0 of " + requestsMade + " new node metadata loadeds";
     loadingDiv.appendChild(loadingText);
     
-    loadingElement.appendChild(loadingDiv);
+    LOAD_BAR_ELEM.appendChild(loadingDiv);
     
     waitForNodeMDLoaded();
 }
@@ -156,7 +157,7 @@ function waitForNodeMDLoaded(){
 
     var loading = document.getElementById("loadingText");
     if (loading !== null){
-        loading.innerHTML= Object.keys(nodeMetadata).length + " of " + requestsMade + " loaded";
+        loading.innerHTML= Object.keys(nodeMetadata).length + " of " + requestsMade + " new node metadata loaded";
     }
     
 	//if url is 404, then we get an http error 500 from the service and get stuck
@@ -171,16 +172,15 @@ function waitForNodeMDLoaded(){
 
 //store the metadata for a node once it comes in
 function storeNodeMD(rawMetadata, requestMmd){
-	//innifecient could be improved
 	for (var key in rawMetadata){
 		console.log("got some metadata for " + rawMetadata[key].title);
-		for (var nodeKey in primaryNodes){
-			//kinda sloppy way to handle redirects
-			if (primaryNodes[nodeKey].location !== undefined && (primaryNodes[nodeKey].location.indexOf(rawMetadata[key].location) > -1 || rawMetadata[key].location.indexOf(primaryNodes[nodeKey].location) > -1)){
-				//show node as loaded
-				nodeMetadata[nodeKey] = rawMetadata;
-				nodeMDLoaded(nodeKey);
-                getSecondaryNodes(rawMetadata, primaryNodes[nodeKey]);
+		for (var location in primaryNodes){
+            var rawNodeLoc = rawMetadata[key].location;
+			if (location !== undefined && (location.indexOf(rawNodeLoc) > -1 || rawNodeLoc.indexOf(location) > -1)){
+				nodeMetadata[location] = rawMetadata;
+				nodeMetadataCache[location] = rawMetadata;
+                nodeMDLoaded(location);
+                getSecondaryNodes(rawMetadata, primaryNodes[location]);
 			}
 		}
 	}
@@ -188,30 +188,14 @@ function storeNodeMD(rawMetadata, requestMmd){
 
 //when a single node's metadata is loaded update its colors
 function nodeMDLoaded(nodeKey){
-	//update color
 	var rgb = hexToRgb(nodeColors[primaryNodes[nodeKey].type]);
 	var div = document.getElementById(nodeKey);
 	div.style.color = "rgba(" + rgb.r + "," + rgb.g + "," + rgb.b + ",1)";
-	
-	//if incoming metadata is of a different type than we expected update the image
-	//FIXME not sure if it works
-	if (!nodeMetadata[nodeKey].hasOwnProperty(primaryNodes[nodeKey].mmdName)){
-		for (var newMMDName in nodeMetadata[nodeKey]){
-			var img = FlairMaster.getFlairImage(newMMDName).cloneNode(true);
-			img.setAttribute('height',tier3size+'px');
-			img.setAttribute('width',tier3size+'px');
-			
-			var curImgArray = div.getElementsByTagName('img');
-			var curImg = curImgArray[0];
-			curImg = img;
-		}
-	}
 }
 
-//when all node metadata is loaded update image sizes
+//when all node metadata is loaded update image sizes and put the secondary nodes into the secondary nodes list
 function allNodeMDLoaded(){
-	var loadingElement = document.getElementById("loadingBar");
-    loadingElement.removeChild(loadingElement.firstChild);
+    if (LOAD_BAR_ELEM.firstChild) LOAD_BAR_ELEM.removeChild(LOAD_BAR_ELEM.firstChild);
 	updateImgSizes("acm_portal");
 	updateImgSizes("acm_portal_author");
 	updateAllLines();
@@ -224,10 +208,10 @@ function allNodeMDLoaded(){
 function addToHistory(MDC_rawMetadata){
     var newNode;
     for (var mmdType in MDC_rawMetadata){
-        newNode = new Node(mmdType, MDC_rawMetadata[mmdType].title, MDC_rawMetadata[mmdType].location, MDC_rawMetadata[mmdType].meta_metadata_name, null);
+        var mmdObj = MDC_rawMetadata[mmdType];
+        newNode = new Node(mmdType, mmdObj.title, mmdObj.location, mmdObj.meta_metadata_name, null);
         historyNodes.push(newNode);
     }
-    var historyElement = document.getElementById("historyArea");
     var div = document.createElement('div');
     
     if (newNode.location !== undefined){
@@ -237,21 +221,22 @@ function addToHistory(MDC_rawMetadata){
 
     var nodeText = "";
     if(MDC_rawMetadata[mmdType].title.length > 30)
-        nodeText = newNode.abbrevTitle;//trim this
+        nodeText = newNode.abbrevTitle;
     else
         nodeText = newNode.title;
+    
     var nodePara = document.createElement('p');
     nodePara.innerHTML = nodeText;
     nodePara.className = "nodeText";
     
     //images are preloaded so we make copies of them		
     var img = FlairMaster.getFlairImage(newNode.mmdName).cloneNode(true);
-    img.setAttribute('height',tier2size+'px');
-    img.setAttribute('width',tier2size+'px');
+    img.setAttribute('height',T3_SIZE+'px');
+    img.setAttribute('width',T3_SIZE+'px');
 
     div.appendChild(img);
     div.appendChild(nodePara);
-    historyElement.insertBefore(div, historyElement.firstChild);
+    HISTORY_ELEM.insertBefore(div, HISTORY_ELEM.firstChild);
 }
 
 //make more important nodes bigger
@@ -259,15 +244,15 @@ function updateImgSizes(mmdType){
 	var citationCountList = [];
 	var foundOne = false;
 	for (var nodeKey in nodeMetadata){
-		if (nodeMetadata[nodeKey][mmdType] !== undefined){
+        var curNode = nodeMetadata[nodeKey];
+		if (curNode[mmdType] !== undefined){
 			foundOne = true;
-			if (mmdType == "acm_portal" && nodeMetadata[nodeKey].acm_portal !== undefined && nodeMetadata[nodeKey].acm_portal.citations !== undefined){
-				citationCountList.push(nodeMetadata[nodeKey].acm_portal.citations.length);
+			if (mmdType == "acm_portal" && curNode.acm_portal !== undefined && curNode.acm_portal.citations !== undefined){
+				citationCountList.push(curNode.acm_portal.citations.length);
 			}
-			//currently ranks by total citations
-			//up for debate if this is best
-			else if (mmdType == "acm_portal_author" && nodeMetadata[nodeKey].acm_portal_author.publication_detail.citation_count !== undefined){
-				citationCountList.push(parseInt(nodeMetadata[nodeKey].acm_portal_author.publication_detail.citation_count));
+			//currently ranks by total citations. up for debate if this is best
+			else if (mmdType == "acm_portal_author" && curNode.acm_portal_author.publication_detail.citation_count !== undefined){
+				citationCountList.push(parseInt(curNode.acm_portal_author.publication_detail.citation_count));
 			}
 			else { 
 				citationCountList.push(0);
@@ -277,13 +262,13 @@ function updateImgSizes(mmdType){
 	//if no nodes of mmdType exist, just return
 	if (!foundOne) return;
 	
-	//maybe move entirely into utility?
-	citationCountList = citationCountList.sort(sortNumber).reverse();
+    //get the medians 
+    citationCountList = citationCountList.sort(sortNumber).reverse();
     console.log(citationCountList);
 	var midMedian = median(citationCountList);
 	var halfLength = Math.ceil(citationCountList.length / 2);    
 	var leftSide = citationCountList.splice(0,halfLength);
-	var rightSide = citationCountList;//.splice(halfLength,citationCountList.length);
+	var rightSide = citationCountList;
 	var topMedian = median(leftSide);
 	var bottomMedian = median(rightSide);
 		
@@ -303,20 +288,20 @@ function updateImgSizes(mmdType){
 			var imgs = document.getElementById(nodeKey).getElementsByTagName('img');
 			var img = imgs[0];
 			if (citationCount >= topMedian){
-				img.setAttribute('height',tier1size+'px');
-				img.setAttribute('width',tier1size+'px');
+				img.setAttribute('height',T1_SIZE+'px');
+				img.setAttribute('width',T1_SIZE+'px');
 			}
 			else if (citationCount < topMedian && citationCount >= midMedian){
-				img.setAttribute('height',tier2size+'px');
-				img.setAttribute('width',tier2size+'px');
+				img.setAttribute('height',T2_SIZE+'px');
+				img.setAttribute('width',T2_SIZE+'px');
 			}
 			else if (citationCount < midMedian && citationCount >= bottomMedian){
-				img.setAttribute('height',tier3size+'px');
-				img.setAttribute('width',tier3size+'px');
+				img.setAttribute('height',T3_SIZE+'px');
+				img.setAttribute('width',T3_SIZE+'px');
 			}
 			else {
-				img.setAttribute('height',tier4size+'px');
-				img.setAttribute('width',tier4size+'px');
+				img.setAttribute('height',T3_SIZE+'px');
+				img.setAttribute('width',T3_SIZE+'px');
 			}
 		}
 	}
@@ -324,44 +309,44 @@ function updateImgSizes(mmdType){
 
 //extract what will be nodes from the focus's metadata
 function getNodes(){
-	console.log(MDC_rawMetadata);
     simplDeserialize(MDC_rawMMD);
-    console.log(MDC_rawMMD);
-
-    for (var metadataType in MDC_rawMetadata){
-		
+    for (var metadataType in MDC_rawMetadata){		
 		for (var key in MDC_rawMetadata[metadataType]){
             //globaly store the title of the in-focus node
             if (key == "title"){
                 focusTitle = MDC_rawMetadata[metadataType][key];
             }
-            var newNode;
+            var newNode, curObj, firstMD;
 			var currentField = MDC_rawMetadata[metadataType][key];
-			if (currentField instanceof Array){
-				if (currentField[0].hasOwnProperty("meta_metadata_name")){
-					if (currentField[0].meta_metadata_name != "rich_document" && currentField[0].meta_metadata_name != "image"){
+			if (currentField instanceof Array && currentField[0] instanceof Object){
+                firstMD = currentField[0];
+				if ("meta_metadata_name" in firstMD){
+					if (firstMD.meta_metadata_name != "rich_document" && firstMD.meta_metadata_name != "image"){
                         key = getLabel(key);
-						nodeColors[key] = colorArray[colorCount];
+						nodeColors[key] = COLOR_ARRAY[colorCount];
 						colorCount++;
 						for (var i = 0;  i < currentField.length; i++){
-							if (currentField[i].hasOwnProperty('title')){
-                                newNode = new Node(key, currentField[i].title, currentField[i].location, currentField[i].meta_metadata_name, null);
-                                primaryNodes[currentField[i].location] = newNode;
+                            curObj = currentField[i];
+							if ("title" in curObj){
+                                newNode = new Node(key, curObj.title, curObj.location, curObj.meta_metadata_name, null);
+                                primaryNodes[curObj.location] = newNode;
                             }
 						}
 					}
 				}
 				else {
 					for (var key2 in currentField[0]){
-						if (currentField[0][key2].hasOwnProperty("meta_metadata_name")){
-							if (currentField[0][key2].meta_metadata_name != "rich_document" && currentField[0][key2].meta_metadata_name != "image"){
+                        firstMD = currentField[0][key2];
+						if ("meta_metadata_name" in firstMD){
+							if (firstMD.meta_metadata_name != "rich_document" && firstMD.meta_metadata_name != "image"){
 								key = getLabel(key);
-                                nodeColors[key] = colorArray[colorCount];
+                                nodeColors[key] = COLOR_ARRAY[colorCount];
 								colorCount++;				
 								for (var j = 0;  j < currentField.length; j++){
-                                    if (currentField[j][key2].hasOwnProperty('title')){
-									   newNode = new Node(key, currentField[j][key2].title, currentField[j][key2].location, currentField[j][key2].meta_metadata_name, null);
-									   primaryNodes[currentField[j][key2].location] = newNode;
+                                    curObj = currentField[j][key2];
+                                    if ("title" in curObj){
+									   newNode = new Node(key, curObj.title, curObj.location, curObj.meta_metadata_name, null);
+									   primaryNodes[curObj.location] = newNode;
                                     }
 								}			
 							}
@@ -369,11 +354,11 @@ function getNodes(){
 					}
 				}
 			}
-			if (currentField instanceof Object){
-				if (currentField.hasOwnProperty("meta_metadata_name") && currentField.hasOwnProperty("location")){
+			else if (currentField instanceof Object){
+				if ("meta_metadata_name" in currentField && "location" in currentField){
 					if (currentField.meta_metadata_name != "rich_document" && currentField.meta_metadata_name != "image"){
 				        key = getLabel(key);
-                        nodeColors[key] = colorArray[colorCount];
+                        nodeColors[key] = COLOR_ARRAY[colorCount];
 						colorCount++;
 						newNode = new Node(key, currentField.title, currentField.location, currentField.meta_metadata_name, null);
 						primaryNodes[currentField.location] = newNode;
@@ -383,9 +368,14 @@ function getNodes(){
 		}
 	}
 	populateNodeMetadata();
-	drawNodes();
 	drawTypes();
+    drawNodes();
 	drawLines();
+}
+
+function tooManyNodes(){
+    if (Object.keys(secondaryNodes).length > MAX_NODES) return true;
+    else return false;
 }
 
 //extract what will be secondary nodes from an existing node's metadata
@@ -393,26 +383,26 @@ function getSecondaryNodes(nodeMMD, parent){
     simplDeserialize(nodeMMD);
     for (var metadataType in nodeMMD){
 		for (var key in nodeMMD[metadataType]){
-            var newNode;
+            var newNode, curObj, firstMD;
 			var currentField = nodeMMD[metadataType][key];
-			if (currentField instanceof Array){
-				if (currentField[0].hasOwnProperty("meta_metadata_name")){
-					if (currentField[0].meta_metadata_name != "rich_document" && currentField[0].meta_metadata_name != "image"){
+			if (currentField instanceof Array && currentField[0] instanceof Object){
+                firstMD = currentField[0];
+				if ('meta_metadata_name' in firstMD){
+					if (firstMD.meta_metadata_name != "rich_document" && firstMD.meta_metadata_name != "image"){
                         key = getLabel(key);
 						for (var i = 0;  i < currentField.length; i++){
                             // we found a valid node!
-                            if (currentField[i].hasOwnProperty('title') && currentField[i].title !== focusTitle && Object.keys(secondaryNodes).length < 400){
-                                
+                            curObj = currentField[i];
+                            if (curObj.hasOwnProperty('title') && curObj.title !== focusTitle && !tooManyNodes()){
                                 //if the node doesn't already exist create it. 
-                                if (!secondaryNodes.hasOwnProperty(currentField[i].location) && !primaryNodes.hasOwnProperty(currentField[i].location)){
-                                    newNode = new Node(key, currentField[i].title, currentField[i].location, currentField[i].meta_metadata_name, parent);
-                                    secondaryNodes[currentField[i].location] = newNode;
+                                if (!(curObj.location in secondaryNodes) && !(curObj.location in primaryNodes)){
+                                    newNode = new Node(key, curObj.title, curObj.location, curObj.meta_metadata_name, parent);
+                                    secondaryNodes[curObj.location] = newNode;
                                     //update the parent nodes list of children
                                     parent.children.push(newNode);
                                 }
-            
                                 //otherwise update the nodes parents
-                                else if (secondaryNodes.hasOwnProperty(currentField[i].location)){
+                                else if (curObj.location in secondaryNodes){
                                     secondaryNodes[currentField[i].location].parents.push(parent);
                                     parent.children.push(secondaryNodes[currentField[i].location]);
                                     unrenderedNodesHeap.updateItem(secondaryNodes[currentField[i].location]);
@@ -425,21 +415,23 @@ function getSecondaryNodes(nodeMMD, parent){
 				}
 				else {
 					for (var key2 in currentField[0]){
-						if (currentField[0][key2].hasOwnProperty("meta_metadata_name")){
-							if (currentField[0][key2].meta_metadata_name != "rich_document" && currentField[0][key2].meta_metadata_name != "image"){
+                        firstMD = currentField[0][key2];
+						if ("meta_metadata_name" in firstMD){
+							if (firstMD.meta_metadata_name != "rich_document" && firstMD.meta_metadata_name != "image"){
 								key = getLabel(key);				
 								for (var j = 0;  j < currentField.length; j++){
-                                    if (currentField[j][key2].hasOwnProperty('title') && currentField[j][key2].title !== focusTitle){ 
-                                        if (!secondaryNodes.hasOwnProperty(currentField[j][key2].location) && !primaryNodes.hasOwnProperty(currentField[j][key2].location) && Object.keys(secondaryNodes).length < 400){
-                                            newNode = new Node(key, currentField[j][key2].title, currentField[j][key2].location, currentField[j][key2].meta_metadata_name, parent);
-                                            secondaryNodes[currentField[j][key2].location] = newNode;
+                                    curObj = currentField[j][key2];
+                                    if ("title" in curObj && curObj.title !== focusTitle){ 
+                                        if (!(curObj.location in secondaryNodes) && !(curObj.location in primaryNodes) && !tooManyNodes()){
+                                            newNode = new Node(key, curObj.title, curObj.location, curObj.meta_metadata_name, parent);
+                                            secondaryNodes[curObj.location] = newNode;
                                             parent.children.push(newNode); 
                                         }
-                                        else if (secondaryNodes.hasOwnProperty(currentField[j][key2].location)){
-                                            secondaryNodes[currentField[j][key2].location].parents.push(parent);
-                                            parent.children.push(secondaryNodes[currentField[j][key2].location]);
-                                            unrenderedNodesHeap.updateItem(secondaryNodes[currentField[j][key2].location]);
-                                            drawLine(secondaryNodes[currentField[j][key2].location]);
+                                        else if (curObj.location in secondaryNodes){
+                                            secondaryNodes[curObj.location].parents.push(parent);
+                                            parent.children.push(secondaryNodes[curObj.location]);
+                                            unrenderedNodesHeap.updateItem(secondaryNodes[curObj.location]);
+                                            drawLine(secondaryNodes[curObj.location]);
                                         }
                                     }
 
@@ -450,16 +442,16 @@ function getSecondaryNodes(nodeMMD, parent){
 				}
 			}
 			if (currentField instanceof Object){
-				if (currentField.hasOwnProperty("meta_metadata_name") && currentField.hasOwnProperty("location")){
+				if ("meta_metadata_name" in currentField && "location" in currentField){
 					if (currentField.meta_metadata_name != "rich_document" && currentField.meta_metadata_name != "image"){
 				        key = getLabel(key);
                         if (currentField.title !== focusTitle && currentField.title != "See all colleagues of this author"){
-                            if (!secondaryNodes.hasOwnProperty(currentField.location) && !primaryNodes.hasOwnProperty(currentField.location) && Object.keys(secondaryNodes).length < 400){
+                            if (!(currentField.location in secondaryNodes) && !(currentField.location in primaryNodes) && !tooManyNodes()){
                                 newNode = new Node(key, currentField.title, currentField.location, currentField.meta_metadata_name, parent);
                                 secondaryNodes[currentField.location] = newNode;
                                 parent.children.push(newNode);
                             }
-                            else if (secondaryNodes.hasOwnProperty(currentField.location)){
+                            else if (currentField.location in secondaryNodes){
                                 secondaryNodes[currentField.location].parents.push(parent);
                                 parent.children.push(secondaryNodes[currentField.location]);
                                 unrenderedNodesHeap.updateItem(secondaryNodes[currentField.location]);
@@ -470,14 +462,14 @@ function getSecondaryNodes(nodeMMD, parent){
 				}
 			}
 		}
-	}
-	
+	}	
 	drawSecondaryNodes();
-    //drawSecondaryLines(parent);
 }
 
 function onNodeClick(location){
 	document.getElementById("targetURL").value = location;
+    var miceElem = document.getElementById("mdcIce");
+    deleteChildren(miceElem);
 	showMetadata();
     addToHistory(MDC_rawMetadata);
 	MONA.initialize();
@@ -492,11 +484,17 @@ function onNodeMouseover(nodeKey){
         var nodeDiv = document.getElementById(nodeKey);    
         var pArray = nodeDiv.getElementsByTagName('p');
         var p = pArray[0];
+        var imgArray = nodeDiv.getElementsByTagName('img');
+        var img = imgArray[0];
         p.style.backgroundColor = nodeDiv.style.color;
         p.style.color = "white";
         p.innerHTML = primaryNodes[nodeKey].title;
+        //fix for offset issue
+        if (p.style.width < p.clientWidth + img.clientWidth){
+            p.style.width = p.clientWidth + img.clientWidth +'px';
+        }
 
-        var lines = document.getElementsByClassName(primaryNodes[nodeKey].location+"Line");
+        var lines = document.getElementsByClassName(nodeKey+"Line");
         for (var i=0; i<lines.length; i++){
             rgb = rgbToRgbObj(lines[i].style.stroke);
             lines[i].style.stroke = "rgba(" + rgb.r + "," + rgb.g + "," + rgb.b + ",.7)";
@@ -550,9 +548,16 @@ function onSecondaryNodeMouseover(nodeKey){
         var nodeDiv = document.getElementById(nodeKey);    
         var pArray = nodeDiv.getElementsByTagName('p');
         var p = pArray[0];
-        p.style.backgroundColor = nodeDiv.style.color;
-        p.style.color = "white";
+        var imgArray = nodeDiv.getElementsByTagName('img');
+        var img = imgArray[0];
         p.innerHTML = secondaryNodes[nodeKey].title;
+        p.style.color = "white";
+        p.style.backgroundColor = nodeDiv.style.color;
+        //fix for offset issue
+        if (p.style.width < p.clientWidth + img.clientWidth){
+            p.style.width = p.clientWidth + img.clientWidth +'px';
+        }
+        
         //if something changed update the lines
         if (nodePositions[nodeKey].height != nodeDiv.getBoundingClientRect().height){
             updateAllLines();
@@ -603,49 +608,69 @@ function onTypeMouseout(type){
 	}
 }
 
+function addVisual(node, nodeKey, nodeSet){
+    node.visual = document.createElement('div');
+    if (primaryNodes.hasOwnProperty(nodeKey)){
+        node.x = typePositions[node.type].top;
+    }
+    
+    if (node.location !== undefined){
+        node.visual.style.cursor = "pointer";
+        node.visual.setAttribute('onclick','onNodeClick("'+nodeSet[nodeKey].location+'")');
+    }
+    if (primaryNodes.hasOwnProperty(nodeKey)){
+        node.visual.setAttribute('onmouseover','onNodeMouseover("'+nodeKey+'")');
+        node.visual.setAttribute('onmouseout','onNodeMouseout("'+nodeKey+'")');    
+    }
+    else {
+        node.visual.setAttribute('onmouseover','onSecondaryNodeMouseover("'+nodeKey+'")');
+        node.visual.setAttribute('onmouseout','onSecondaryNodeMouseout("'+nodeKey+'")');
+    }
+    node.visual.id = nodeKey;
+    node.visual.style.webkitTransform = "translate("+node.x+"px, "+node.y+"px)";
+
+    var nodeText = "";
+    if(nodeKey.length > 30)
+        nodeText = nodeSet[nodeKey].abbrevTitle;
+    else
+        nodeText = nodeKey;
+    var nodePara = document.createElement('p');
+    nodePara.innerHTML = nodeText;
+    nodePara.className = "nodeText";
+
+    for (var nodeType in nodeColors){
+        if (nodeSet[nodeKey].type == nodeType){
+            node.visual.className=nodeType;
+            var rgb = hexToRgb(nodeColors[nodeType]);
+            if (nodeMetadataCache[nodeKey] === undefined){
+                node.visual.style.color = "rgba(" + rgb.r + "," + rgb.g + "," + rgb.b + ",.5)";
+            }
+            else {
+                node.visual.style.color = "rgba(" + rgb.r + "," + rgb.g + "," + rgb.b + ",1)";
+            }
+        }
+    }  
+    //if color is not defined make it black
+    if (node.visual.style.color === ""){
+        node.visual.style.color = "rgba(" + 0 + "," + 0 + "," + 0 + ",.5)";
+    }
+
+    var img = FlairMaster.getFlairImage(nodeSet[nodeKey].mmdName).cloneNode(true);
+    img.setAttribute('height',T2_SIZE+'px');
+    img.setAttribute('width',T2_SIZE+'px');
+
+    node.visual.appendChild(img);
+    node.visual.appendChild(nodePara);
+}
+
 //create divs for first layer of nodes
 function drawNodes(){
 	for (var nodeKey in primaryNodes){
-		var graphElement = document.getElementById("graphArea");
-			
         var node = primaryNodes[nodeKey];
-        
-        node.visual = document.createElement('div');
-        //n.visual.className = 'node';
-        node.visual.style.webkitTransform = "translate("+node.x+"px, "+node.y+"px)";
-        
-		if (node.location !== undefined){//visualize this
-			node.visual.style.cursor = "pointer";
-			node.visual.setAttribute('onclick','onNodeClick("'+primaryNodes[nodeKey].location+'")');
-		}
-		node.visual.setAttribute('onmouseover','onNodeMouseover("'+nodeKey+'")');
-		node.visual.setAttribute('onmouseout','onNodeMouseout("'+nodeKey+'")');
-		node.visual.id = nodeKey;
-		
-		var nodeText = "";
-		if(nodeKey.length > 30)
-			nodeText = primaryNodes[nodeKey].abbrevTitle;
-		else
-			nodeText = nodeKey;
-		var nodePara = document.createElement('p');
-		nodePara.innerHTML = nodeText;
-		nodePara.className = "nodeText";
-		
-		for (var nodeType in nodeColors)
-			if (primaryNodes[nodeKey].type == nodeType){
-				node.visual.className=nodeType;
-				var rgb = hexToRgb(nodeColors[nodeType]);
-				node.visual.style.color = "rgba(" + rgb.r + "," + rgb.g + "," + rgb.b + ",.5)";
-			}
-		
-		//images are preloaded so we make copies of them		
-		var img = FlairMaster.getFlairImage(primaryNodes[nodeKey].mmdName).cloneNode(true);
-		img.setAttribute('height',tier2size+'px');
-		img.setAttribute('width',tier2size+'px');
-		
-		node.visual.appendChild(img);
-		node.visual.appendChild(nodePara);
-		graphElement.appendChild(node.visual);
+			
+        addVisual(node, nodeKey, primaryNodes);
+
+		GRAPH_ELEM.appendChild(node.visual);
         node.rendered = true;
 		nodePositions[nodeKey] = node.visual.getBoundingClientRect();
         renderedNodesList.push(node);
@@ -654,53 +679,11 @@ function drawNodes(){
 }
 
 //create divs for second layer of nodes
-function drawSecondaryNodes(){
-    
+function drawSecondaryNodes(){  
 	for (var nodeKey in secondaryNodes){
-        if (document.getElementById(nodeKey) === null){
-            var graphElement = document.getElementById("graphArea");
-            
-            var node = secondaryNodes[nodeKey];
-            
-            node.visual = document.createElement('div');
-            
-            if (node.location !== undefined){//visualize this
-                node.visual.style.cursor = "pointer";
-                node.visual.setAttribute('onclick','onNodeClick("'+secondaryNodes[nodeKey].location+'")');
-            }
-            node.visual.setAttribute('onmouseover','onSecondaryNodeMouseover("'+nodeKey+'")');
-            node.visual.setAttribute('onmouseout','onSecondaryNodeMouseout("'+nodeKey+'")');
-            node.visual.id = nodeKey;
-            node.visual.style.webkitTransform = "translate("+node.x+"px, "+node.y+"px)";
-
-            var nodeText = "";
-            if(nodeKey.length > 30)
-                nodeText = secondaryNodes[nodeKey].abbrevTitle;
-            else
-                nodeText = nodeKey;
-            var nodePara = document.createElement('p');
-            nodePara.innerHTML = nodeText;
-            nodePara.className = "nodeText";
-
-            for (var nodeType in nodeColors){
-                if (secondaryNodes[nodeKey].type == nodeType){
-                    node.visual.className=nodeType;
-                    var rgb = hexToRgb(nodeColors[nodeType]);
-                    node.visual.style.color = "rgba(" + rgb.r + "," + rgb.g + "," + rgb.b + ",.5)";
-                }
-            }  
-            //if color is not defined make it black
-            if (node.visual.style.color === ""){
-                node.visual.style.color = "rgba(" + 0 + "," + 0 + "," + 0 + ",.5)";
-            }
-
-            var img = FlairMaster.getFlairImage(secondaryNodes[nodeKey].mmdName).cloneNode(true);
-            img.setAttribute('height',tier2size+'px');
-            img.setAttribute('width',tier2size+'px');
-
-            node.visual.appendChild(img);
-            node.visual.appendChild(nodePara);
-            unrenderedNodesList.push(node);
+        var node = secondaryNodes[nodeKey];
+        if (node.visual === undefined){            
+            addVisual(node, nodeKey, secondaryNodes);
             unrenderedNodesHeap.push(node);
         }
 	}
@@ -710,7 +693,6 @@ function drawSecondaryNodes(){
 
 function renderNode(){
     if (unrenderedNodesHeap.size() >0 && renderedNodesList.length < 50){    
-        var graphElement = document.getElementById("graphArea");
         var node = unrenderedNodesHeap.pop();
         node.rendered = true;
         renderedNodesList.push(node);
@@ -720,7 +702,7 @@ function renderNode(){
             node.visual.style.webkitTransform = "translate("+node.x+"px, "+node.y+"px)";
         }
         
-        graphElement.appendChild(node.visual);
+        GRAPH_ELEM.appendChild(node.visual);
         nodePositions[node.location] = node.visual.getBoundingClientRect();
         drawLine(node);
     }
@@ -731,7 +713,6 @@ function renderNode(){
 }
 
 function drawTypes(){
-	var typeElement = document.getElementById("typeArea");
 	for (var nodeType in nodeColors){
 		var div = document.createElement('div');
 		div.setAttribute('onmouseover','onTypeMouseover("'+nodeType+'")');
@@ -741,9 +722,9 @@ function drawTypes(){
 		div.id=nodeType;
 		div.style.color = nodeColors[nodeType];
 		div.style.textAlign = "right";
-		typeElement.appendChild(div);
+		TYPE_ELEM.appendChild(div);
 	}
-	var children = typeElement.children;
+	var children = TYPE_ELEM.children;
 	for (var i = 0; i < children.length; i++) {
 		var child = children[i];
 		typePositions[child.id] = child.getBoundingClientRect();	
@@ -752,7 +733,6 @@ function drawTypes(){
 }
 
 function drawLines(){
-	var typeElement = document.getElementById("lineSVG");
 	for (var nodeKey in primaryNodes){
 		var line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
 		line.setAttribute('class', primaryNodes[nodeKey].type+"Line");
@@ -762,73 +742,46 @@ function drawLines(){
 		line.setAttribute('y1', nodePositions[nodeKey].top+nodePositions[nodeKey].height/2);
 		line.setAttribute('y2', typePositions[primaryNodes[nodeKey].type].top+10);
 		var rgb = hexToRgb(nodeColors[primaryNodes[nodeKey].type]);
-		line.style.stroke = "rgba(" + rgb.r + "," + rgb.g + "," + rgb.b + ",.1)";
+		line.style.stroke = "rgba(" + rgb.r + "," + rgb.g + "," + rgb.b + ",.2)";
 		line.setAttribute('stroke-width', 1);
-		typeElement.appendChild(line);
+        var linesElement = document.getElementById("lineSVG");
+		linesElement.appendChild(line);
 	}	
-}
-
-//draws lines for children of one primary node
-function drawSecondaryLines(parent){
-	var lineElement = document.getElementById("lineSVG");
-	
-    for (var i in parent.children){
-        var node = parent.children[i];
-        if (secondaryNodes[node.location] !== undefined){
-            var line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-            line.setAttribute('class', parent.location+"Line");
-            line.setAttribute('id', parent.location+node.location+"Line");
-            line.setAttribute('x1', nodePositions[node.location].left);
-            line.setAttribute('x2', nodePositions[parent.location].left+2);
-            line.setAttribute('y1', nodePositions[node.location].top+nodePositions[node.location].height/2);
-            line.setAttribute('y2', nodePositions[parent.location].top+nodePositions[parent.location].height/2);
-            var rgb = hexToRgb(nodeColors[node.type]);
-            line.style.stroke = "rgba(" + rgb.r + "," + rgb.g + "," + rgb.b + ",.1)";
-            line.setAttribute('stroke-width', 1);
-            lineElement.appendChild(line);
-        }
-	}	
-
 }
 
 //draws lines for one newly rendered or updated node
 function drawLine(node){
     if (node.rendered){
-        var lineElement = document.getElementById("lineSVG");
+        drawRelativeLines(node, node.children, false);
+        drawRelativeLines(node, node.parents, true);
+    }
+}
 
-        var i, line, rgb;
-        for (i in node.children){
-            var child = node.children[i];
-            if (secondaryNodes[node.location] !== undefined && child.rendered && document.getElementById(node.location+child.location+"Line") === null){
-                line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-                line.setAttribute('class', node.location+"Line");
-                line.setAttribute('id', node.location+child.location+"Line");
-                line.setAttribute('x1', nodePositions[child.location].left);
+//draws either parent on child lines
+function drawRelativeLines(node, relatives, isParents){
+        var lineElement = document.getElementById("lineSVG");   
+        for (var i in relatives){
+            var relative = relatives[i];
+            if (secondaryNodes[node.location] !== undefined && relative.rendered && document.getElementById(node.location+relative.location+"Line") === null){
+                var line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                //line.setAttribute('class', node.location+"Line");
+                //line ids are in the form parent.location+child.location+"Line"
+                if (isParents){
+                    line.setAttribute('id', relative.location+node.location+"Line");
+                    line.setAttribute('class', relative.location+"Line");
+                }
+                else {
+                    line.setAttribute('id', node.location+relative.location+"Line");
+                    line.setAttribute('class', node.location+"Line");
+                }
+                line.setAttribute('x1', nodePositions[relative.location].left);
                 line.setAttribute('x2', nodePositions[node.location].left+2);
-                line.setAttribute('y1', nodePositions[child.location].top+nodePositions[child.location].height/2);
+                line.setAttribute('y1', nodePositions[relative.location].top+nodePositions[relative.location].height/2);
                 line.setAttribute('y2', nodePositions[node.location].top+nodePositions[node.location].height/2);
-                rgb = hexToRgb(nodeColors[child.type]);
-                line.style.stroke = "rgba(" + rgb.r + "," + rgb.g + "," + rgb.b + ",.1)";
+                var rgb = hexToRgb(nodeColors[relative.type]);
+                line.style.stroke = "rgba(" + rgb.r + "," + rgb.g + "," + rgb.b + ",.2)";
                 line.setAttribute('stroke-width', 1);
                 lineElement.appendChild(line);
             }
         }	
-
-        for (i in node.parents){
-            var parent = node.parents[i];
-            if (secondaryNodes[node.location] !== undefined && parent.rendered && document.getElementById(parent.location+node.location+"Line") === null){
-                line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-                line.setAttribute('class', parent.location+"Line");
-                line.setAttribute('id', parent.location+node.location+"Line");
-                line.setAttribute('x1', nodePositions[node.location].left);
-                line.setAttribute('x2', nodePositions[parent.location].left+2);
-                line.setAttribute('y1', nodePositions[node.location].top+nodePositions[node.location].height/2);
-                line.setAttribute('y2', nodePositions[parent.location].top+nodePositions[parent.location].height/2);
-                rgb = hexToRgb(nodeColors[node.type]);
-                line.style.stroke = "rgba(" + rgb.r + "," + rgb.g + "," + rgb.b + ",.1)";
-                line.setAttribute('stroke-width', 1);
-                lineElement.appendChild(line);
-            }
-        } 
-    }
 }

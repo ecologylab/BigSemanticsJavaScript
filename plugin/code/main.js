@@ -20,7 +20,10 @@ function setup(document)
 {
 	// create the the 'slide-out'
 	buildSlideOut(document);
-	getMMD(document.URL, handleMMD);
+	//getMMD(document.URL, handleMMD);
+    
+    //we are now doing it client-side
+    handleMMD(getDocumentMM(document.URL), document.URL);
 }
 
 /**
@@ -63,22 +66,25 @@ function getMMD(pageURL, callback)
  * Callback function for getMMD() 
  * @param mmd, returned mmd JSON from service
  */
-function handleMMD(mmd)
+function handleMMD(mmd, url)
 {
-   mmd = JSON.parse(mmd);
-   simplDeserialize(mmd);	
+    if (mmd === undefined){
+        setTimeout(function() {handleMMD(getDocumentMM(url), url);}, 1000);
+        return;
+    }
+   //simplDeserialize(mmd);	
    MMD = mmd;
-   callService(mmd);
+   callService(mmd, url);
 }
 
 /*
  * decides whether or not the code will call the service for the metadata
  */
-function callService(mmd)
+function callService(mmd, url)
 {
-    var parser = mmd.meta_metadata.parser;
+    var parser = mmd.parser;
 
-    if (mmd["meta_metadata"]["extract_with"] == "service"){
+    if (mmd["extract_with"] == "service"){
         browserExtraction = false;
         serviceCall = true;
     }
@@ -122,7 +128,7 @@ function getMetadataFromService(mmd)
 /*
  * sends mmd and metadata to mice display code for a mice display on the slide-out
  */
-function handleMetadata(mmd,meta)
+function handleMetadata(mmd,meta,url)
 {
 	console.log(JSON.stringify(meta));
 	for (i in meta) {
