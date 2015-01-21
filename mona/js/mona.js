@@ -84,7 +84,7 @@ MONA.initialize = function (){
     
     miceElement.style.top = pageMidHeight + "px";
     TYPE_ELEM.style.top = pageMidHeight + "px";
-    var histHeight = pageMidHeight - 50;
+    var histHeight = pageMidHeight - 60;
     HISTORY_ELEM.style.height = histHeight + "px";
     
     deleteChildren(GRAPH_ELEM, TYPE_ELEM, linesElement, LOAD_BAR_ELEM);
