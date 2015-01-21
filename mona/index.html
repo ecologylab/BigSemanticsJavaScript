@@ -58,17 +58,19 @@
     <!-- Content -->
     <div class ="container" id="vizArea">
       <div id="historyWrapper">
-        <form class="urlSubmit" action="" onsubmit="return false;"> 
-          <input type="text" size="500" id="targetURL" value="http://dl.acm.org/citation.cfm?id=1125696"/>
-          <button type="button" onclick="showMetadata();MONA.initialize();">Focus</button>	
+        <form class="urlSubmit" action="" onsubmit="return false;">
+            <span>url:</span>
+            <input type="text" size="500" id="targetURL" value="http://dl.acm.org/citation.cfm?id=1125696"/>
+            <button type="button" onclick="showMetadata();MONA.initialize();">Focus</button>	
         </form>
         <!--<h5>History</h5>-->
         <div id="historyArea" class="nodes"></div>
       </div>
 
       <svg id="lineSVG" height="2000" width="2000"></svg>
-      <div class="row">
-        <div class="span9 content" id="mdcIce"></div>
+      <div class="row" id="monaMice">
+        <div class="span9 content" id="mdcIce">
+        </div>
       </div>
       <div id="typeArea"></div>
       <div id="graphArea" class="nodes"></div>

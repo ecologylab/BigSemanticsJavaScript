@@ -5,6 +5,7 @@ var MONA = {},
     focusTitle = "",    //the title of the in focus node. used to avoid creating copy of focus node in graph area
     nodeColors = {},    //maps node type to a color
     nodeMetadata = {},  //maps node location to that node's metatata
+    nodeMetadataCache = {}, //all the metadata that has been loaded
     pageMidHeight,      //the pixel vertical center of the page. used to center MICE/the graph area
     colorCount = 0,     //number of colors we have used. used to index clorArray
     COLOR_ARRAY = ["#009933", "#006699", "#CC9900", "#CC0000", "#CC00CC"], 
@@ -50,9 +51,9 @@ MONA.initialize = function (){
 	nodeColors = {};
 	primaryNodes = {};
     secondaryNodes = {};
-	nodeMetadata = {};
 	nodePositions = {};
 	typePositions = {};
+    nodeMetadata = {};
     renderedNodesList = [];
     secondaryNodesList = [];
     nodeList = [];
@@ -69,7 +70,7 @@ MONA.initialize = function (){
     HISTORY_ELEM = document.getElementById("historyArea");
     
     var linesElement = document.getElementById("lineSVG"),
-        miceElement = document.getElementById("mdcIce"),
+        miceElement = document.getElementById("monaMice"),
         nodesLoading = document.createElement('div'),
         nodeMDLoading = document.createElement('div');
 	    
@@ -84,7 +85,7 @@ MONA.initialize = function (){
     
     miceElement.style.top = pageMidHeight + "px";
     TYPE_ELEM.style.top = pageMidHeight + "px";
-    var histHeight = pageMidHeight - 60;
+    var histHeight = pageMidHeight - 70;
     HISTORY_ELEM.style.height = histHeight + "px";
     
     deleteChildren(GRAPH_ELEM, TYPE_ELEM, linesElement, LOAD_BAR_ELEM);
@@ -120,9 +121,17 @@ function populateNodeMetadata(){
 	}
     //make requests for all the first level nodes
 	for (var nodeKey in primaryNodes) {
-		if (primaryNodes[nodeKey].location !== undefined) {
-    		MetadataLoader.getMetadata(primaryNodes[nodeKey].location, "storeNodeMD", false);
-			requestsMade++;
+        var nodeLoc = primaryNodes[nodeKey].location;
+		if (nodeLoc !== undefined) {
+            
+            //If we already have the metadata don't request it again
+            if (nodeMetadataCache[nodeLoc] !== undefined){
+                getSecondaryNodes(nodeMetadataCache[nodeLoc], primaryNodes[nodeLoc]);
+            }
+            else{
+                MetadataLoader.getMetadata(primaryNodes[nodeKey].location, "storeNodeMD", false);
+                requestsMade++;
+            }
 		}
 	}
     
@@ -135,7 +144,7 @@ function populateNodeMetadata(){
     spinner.src = "img/spinner.gif";
     loadingDiv.appendChild(spinner);
     
-    loadingText.innerHTML= "0 of " + requestsMade + " node metadata loaded";
+    loadingText.innerHTML= "0 of " + requestsMade + " new node metadata loadeds";
     loadingDiv.appendChild(loadingText);
     
     LOAD_BAR_ELEM.appendChild(loadingDiv);
@@ -148,7 +157,7 @@ function waitForNodeMDLoaded(){
 
     var loading = document.getElementById("loadingText");
     if (loading !== null){
-        loading.innerHTML= Object.keys(nodeMetadata).length + " of " + requestsMade + " loaded";
+        loading.innerHTML= Object.keys(nodeMetadata).length + " of " + requestsMade + " new node metadata loaded";
     }
     
 	//if url is 404, then we get an http error 500 from the service and get stuck
@@ -169,7 +178,8 @@ function storeNodeMD(rawMetadata, requestMmd){
             var rawNodeLoc = rawMetadata[key].location;
 			if (location !== undefined && (location.indexOf(rawNodeLoc) > -1 || rawNodeLoc.indexOf(location) > -1)){
 				nodeMetadata[location] = rawMetadata;
-				nodeMDLoaded(location);
+				nodeMetadataCache[location] = rawMetadata;
+                nodeMDLoaded(location);
                 getSecondaryNodes(rawMetadata, primaryNodes[location]);
 			}
 		}
@@ -458,6 +468,8 @@ function getSecondaryNodes(nodeMMD, parent){
 
 function onNodeClick(location){
 	document.getElementById("targetURL").value = location;
+    var miceElem = document.getElementById("mdcIce");
+    deleteChildren(miceElem);
 	showMetadata();
     addToHistory(MDC_rawMetadata);
 	MONA.initialize();
@@ -630,7 +642,12 @@ function addVisual(node, nodeKey, nodeSet){
         if (nodeSet[nodeKey].type == nodeType){
             node.visual.className=nodeType;
             var rgb = hexToRgb(nodeColors[nodeType]);
-            node.visual.style.color = "rgba(" + rgb.r + "," + rgb.g + "," + rgb.b + ",.5)";
+            if (nodeMetadataCache[nodeKey] === undefined){
+                node.visual.style.color = "rgba(" + rgb.r + "," + rgb.g + "," + rgb.b + ",.5)";
+            }
+            else {
+                node.visual.style.color = "rgba(" + rgb.r + "," + rgb.g + "," + rgb.b + ",1)";
+            }
         }
     }  
     //if color is not defined make it black
