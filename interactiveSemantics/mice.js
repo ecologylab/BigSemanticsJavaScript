@@ -1068,10 +1068,9 @@ MICE.buildMetadataField = function(metadataField, isChildTable, fieldCount, row,
 			// If the field is a URL then it should show the favicon and an A tag
 			if(metadataField.scalar_type == "ParsedURL")
 			{
-				// Uses http://getfavicon.appspot.com/ to resolve the favicon
 				var favicon = document.createElement('img');
 					favicon.className = styleInfo.styles.faviconICE;
-					favicon.src = "http://g.etfv.co/" + metadataField.value;
+					favicon.src = MetadataLoader.getFaviconURL(metadataField.value);
 					
 				var aTag = document.createElement('a');
 				aTag.innerText = MetadataLoader.removeLineBreaksAndCrazies(metadataField.value);
@@ -1096,10 +1095,9 @@ MICE.buildMetadataField = function(metadataField, isChildTable, fieldCount, row,
 			// If the field navigates to a link then it should show the favicon and an A tag
 			else if( metadataField.navigatesTo)
 			{				
-				// Uses http://getfavicon.appspot.com/ to resolve the favicon
 				var favicon = document.createElement('img');
 					favicon.className = styleInfo.styles.faviconICE;
-					favicon.src = "http://g.etfv.co/" + metadataField.navigatesTo;
+					favicon.src = MetadataLoader.getFaviconURL(metadataField.value);
 					
 				var aTag = document.createElement('a');
 					aTag.className = styleInfo.styles.fieldValue;
