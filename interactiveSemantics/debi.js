@@ -143,6 +143,17 @@ MetadataLoader.initMetaMetadataRepo = function(jsonRepo)
 		MetadataLoader.repo[mmd.name] = mmd;
 	}
 	
+	// alt names 
+	var altNames = jsonRepo["meta_metadata_repository"]["alt_names"];
+	
+	for (var i = 0; i < altNames.length; i++)
+	{
+		var mmdName = altNames[i].name;
+		var mmdObj = altNames[i].mmd;
+		
+		MetadataLoader.repo[mmdName] = mmdObj;
+	}
+	
 	//go through all tasks and set their metadata
 	for (var i = 0; i < MetadataLoader.queue.length; i++)
 	{
@@ -227,7 +238,7 @@ MetadataLoader.setMetadata = function(rawMetadata, requestMmd)
     }
     
     queueTask.metadata = metadata;
-    queueTask.mmdType = metadata.mm_name;
+    queueTask.mmdType = metadata.meta_metadata_name;
   
     if (queueTask.clipping != null)
     {
@@ -284,7 +295,8 @@ MetadataLoader.setMetaMetadata = function (mmd)
       // if the task has both metadata and meta-metadata then create and display
       // the rendering
       if (tasks[i].metadata && tasks[i].mmd)  
-      {
+      {  
+      	
         var metadataFields =
           MetadataLoader.createMetadata(tasks[i].isRoot, tasks[i].mmd,
                                         tasks[i].metadata, tasks[i].url);
@@ -292,12 +304,11 @@ MetadataLoader.setMetaMetadata = function (mmd)
         if (MetadataLoader.hasVisibleMetadata(metadataFields))
         {	
           // If so, then build the HTML table	
-          var styleMmdType = (tasks[i].expandedItem && tasks[i].expandedItem.mmdType && 
-        		  					tasks[i].expandedItem.mmdType.indexOf("twitter") != -1)? "twitter" : mmd.name; 
-          var miceStyles = InterfaceStyle.getMiceStyleDictionary(styleMmdType);	
-         //Adds the metadata type as an attribute to the first field in the MD
+			var styleMmdType = (tasks[i].expandedItem && tasks[i].expandedItem.mmdType && 
+						tasks[i].expandedItem.mmdType.indexOf("twitter") != -1)? "twitter" : mmd.name; 
+			var miceStyles = InterfaceStyle.getMiceStyleDictionary(styleMmdType);         //Adds the metadata type as an attribute to the first field in the MD
           metadataFields[0].parentMDType = mmd.name;
-          tasks[i].renderer(tasks[i], metadataFields, {styles: miceStyles, type: styleMmdType});
+          tasks[i].renderer(tasks[i], metadataFields, {styles: miceStyles, type: mmd.name});
         }
       }
     }
@@ -1214,9 +1225,26 @@ MetadataLoader.getHost = function(url)
 {
   if (url)
   {
-    var host = url.match(/:\/\/(www\.)?(.[^/:]+)/)[2];
-    return "http://www." + host;
+    if (url.match(/:\/\/(www\.)?(.[^/:]+)/) != null)
+		 return "http://www." + url.match(/:\/\/(www\.)?(.[^/:]+)/)[2];
+	else
+		return "error getting domain";
+   
   }
 }
+
+/**
+ * Gets the favicon image for a url
+ * @param url, string of target URL
+ * @return string of the favicon url
+ */
+MetadataLoader.getFaviconURL = function(url)
+{
+	return MetadataLoader.getHost(url) + "/favicon.ico";
+	
+	//return "http://g.etfv.co/" + url;
+}
+
+
 
 
