@@ -1,0 +1,202 @@
+[
+  {
+    "name": "Mobile Malware: Mobile malware - new avenues",
+    "location": "http:\/\/dl.acm.org\/citation.cfm?id=2304289&preflayout=flat",
+    "key": "http:\/\/dl.acm.org\/citation.cfm?id=2304289&preflayout=flat",
+    "authors": [
+      "David Emm"
+    ],
+    "venue": [
+      "Network Security"
+    ],
+    "citation_count": [
+      2
+    ]
+  },
+  {
+    "name": "Taming the Blue Beast: A Survey of Bluetooth Based Threats",
+    "location": "http:\/\/dl.acm.org\/citation.cfm?id=1804129&preflayout=flat",
+    "key": "http:\/\/dl.acm.org\/citation.cfm?id=1804129&preflayout=flat",
+    "authors": [
+      "John Dunning"
+    ],
+    "venue": [
+      "IEEE Security and Privacy"
+    ],
+    "citation_count": [
+      3
+    ]
+  },
+  {
+    "name": "Mobile Security Strategy: Pinning down a security policy for mobile data",
+    "location": "http:\/\/dl.acm.org\/citation.cfm?id=2304084&preflayout=flat",
+    "key": "http:\/\/dl.acm.org\/citation.cfm?id=2304084&preflayout=flat",
+    "authors": [
+      "Terry Ernest-Jones"
+    ],
+    "venue": [
+      "Network Security"
+    ],
+    "citation_count": [
+      3
+    ]
+  },
+  {
+    "name": "Technology: Why WPA standards won't protect your network",
+    "location": "http:\/\/dl.acm.org\/citation.cfm?id=2297021&preflayout=flat",
+    "key": "http:\/\/dl.acm.org\/citation.cfm?id=2297021&preflayout=flat",
+    "authors": [
+      "Steve Gold"
+    ],
+    "venue": [
+      "Infosecurity"
+    ],
+    "citation_count": [
+      2
+    ]
+  },
+  {
+    "name": "Mobile Security: Managing mobile security: How are we doing?",
+    "location": "http:\/\/dl.acm.org\/citation.cfm?id=2287412&preflayout=flat",
+    "key": "http:\/\/dl.acm.org\/citation.cfm?id=2287412&preflayout=flat",
+    "authors": [
+      "Alan Goode"
+    ],
+    "venue": [
+      "Network Security"
+    ],
+    "citation_count": [
+      1
+    ]
+  },
+  {
+    "name": "Protecting data on mobile devices: A taxonomy of security threats to mobile computing and review of applicable defenses",
+    "location": "http:\/\/dl.acm.org\/citation.cfm?id=1402714&preflayout=flat",
+    "key": "http:\/\/dl.acm.org\/citation.cfm?id=1402714&preflayout=flat",
+    "authors": [
+      "Jon Friedman",
+      "Daniel V. Hoffman"
+    ],
+    "venue": [
+      "Information-Knowledge-Systems Management - Enterprise Mobility: Applications, Technologes and Strategies"
+    ],
+    "citation_count": [
+      4
+    ]
+  },
+  {
+    "name": "Rootkits on smart phones: attacks, implications and opportunities",
+    "location": "http:\/\/dl.acm.org\/citation.cfm?id=1734596&preflayout=flat",
+    "key": "http:\/\/dl.acm.org\/citation.cfm?id=1734596&preflayout=flat",
+    "authors": [
+      "Jeffrey Bickford",
+      "Ryan O'Hare",
+      "Arati Baliga",
+      "Vinod Ganapathy",
+      "Liviu Iftode"
+    ],
+    "venue": [
+      "HotMobile '10 Proceedings of the Eleventh Workshop on Mobile Computing Systems & Applications"
+    ],
+    "citation_count": [
+      17
+    ]
+  },
+  {
+    "name": "Information Security and Ethics: Concepts, Methodologies, Tools and Applications",
+    "location": "http:\/\/dl.acm.org\/citation.cfm?id=1543546&preflayout=flat",
+    "key": "http:\/\/dl.acm.org\/citation.cfm?id=1543546&preflayout=flat",
+    "authors": [
+      "Hamid Nemati",
+      "Hamid Nemati"
+    ],
+    "venue": [
+      "Information Security and Ethics: Concepts, Methodologies, Tools and Applications"
+    ],
+    "citation_count": [
+      1
+    ]
+  },
+
+  
+  {
+    "name": "Google Android: A Comprehensive Security Assessment",
+    "location": "http:\/\/dl.acm.org\/citation.cfm?id=1804131&preflayout=flat",
+    "key": "http:\/\/dl.acm.org\/citation.cfm?id=1804131&preflayout=flat",
+    "authors": [
+      "Asaf Shabtai",
+      "Yuval Fledel",
+      "Uri Kanonov",
+      "Yuval Elovici",
+      "Shlomi Dolev",
+      "Chanan Glezer"
+    ],
+    "venue": [
+      "IEEE Security and Privacy"
+    ],
+    "citation_count": [
+      42
+    ]
+  },
+  {
+    "name": "When mobile is harder than fixed (and vice versa): demystifying security challenges in mobile environments",
+    "location": "http:\/\/dl.acm.org\/citation.cfm?id=1734595&preflayout=flat",
+    "key": "http:\/\/dl.acm.org\/citation.cfm?id=1734595&preflayout=flat",
+    "authors": [
+      "Jon Oberheide",
+      "Farnam Jahanian"
+    ],
+    "venue": [
+      "HotMobile '10 Proceedings of the Eleventh Workshop on Mobile Computing Systems & Applications"
+    ],
+    "citation_count": [
+      15
+    ]
+  },
+  {
+    "name": "Mobile Security: Mobile security risks: ever evolving",
+    "location": "http:\/\/dl.acm.org\/citation.cfm?id=2304351&preflayout=flat",
+    "key": "http:\/\/dl.acm.org\/citation.cfm?id=2304351&preflayout=flat",
+    "authors": [
+      "Bruce Potter"
+    ],
+    "venue": [
+      "Network Security"
+    ],
+    "citation_count": [
+      1
+    ]
+  },
+  {
+    "name": "Mobile interaction design: Integrating individual and organizational perspectives",
+    "location": "http:\/\/dl.acm.org\/citation.cfm?id=1402703&preflayout=flat",
+    "key": "http:\/\/dl.acm.org\/citation.cfm?id=1402703&preflayout=flat",
+    "authors": [
+      "Peter Tarasewich",
+      "Jun Gong",
+      "Fiona Fui-Hoon Nah",
+      "David Dewester"
+    ],
+    "venue": [
+      "Information-Knowledge-Systems Management - Enterprise Mobility: Applications, Technologes and Strategies"
+    ],
+    "citation_count": [
+      4
+    ]
+  },
+  {
+    "name": "Guest Editors' Introduction: Mobile Device Security",
+    "location": "http:\/\/dl.acm.org\/citation.cfm?id=1804127&preflayout=flat",
+    "key": "http:\/\/dl.acm.org\/citation.cfm?id=1804127&preflayout=flat",
+    "authors": [
+      "John Viega",
+      "Bret Michael"
+    ],
+    "venue": [
+      "IEEE Security and Privacy"
+    ],
+    "citation_count": [
+      1
+    ]
+  }
+]

@@ -11,6 +11,7 @@ locationDictionary['acm_portal_search'] = "http://dl.acm.org/";
 locationDictionary['research_gate_search'] = "http://www.researchgate.net/";
 locationDictionary['google_scholar_search'] = "http://scholar.google.com";
 
+var shouldIShow = 0;
 function SearchResult(location, type, rank, metadata){
 	
 	this.location = location;
@@ -23,7 +24,7 @@ function SearchResult(location, type, rank, metadata){
 	this.rank = rank;
 	filterIdIndex++;
 }
-
+var shouldDisplay = true;
 SearchResult.prototype.addSearchResultExpandCollapseButton = function(searchResultX){
 	var searchRCollapseButton = document.createElement('div');
 	searchRCollapseButton.className = 'searchResultCollapseButton ';
@@ -166,12 +167,24 @@ SearchResult.prototype.addSearchResultDisplay = function(searchResultX, parent){
 		rendering.setAttribute('id', searchResultX.id);
 	}
 	else{
+		if(shouldIShow == 0){
+			
+		}
+		else{
+			
+		}
 		var miceContainer = document.createElement('div');
 		miceContainer.className = "metadataRendering";
 
 		newSearchDisplay.appendChild(miceContainer);
-		
-		MetadataLoader.render(MICE.render, miceContainer, searchResultX.location, true);
+		if(shouldDisplay){
+			MetadataLoader.render(MICE.render, miceContainer, hardURLList[0], true);
+			shouldDisplay = false;
+
+		}else{
+			MetadataLoader.render(MICE.render, miceContainer, searchResultX.location, true);
+
+		}
 		/*miceContainer.setAttribute('onmousedown', 'ExpSearchApp.removeQuerySearchBox(event)')
 		miceContainer.setAttribute('onmouseup', 'ExpSearchApp.textSelected(event)');*/
 		//miceContainer.setAttribute("draggable", true);

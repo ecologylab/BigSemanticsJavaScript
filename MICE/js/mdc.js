@@ -117,9 +117,9 @@ function showMetadata()
 {
   var url = document.getElementById("targetURL").value;
   var content = document.getElementById("mdcIce");
-  if (document.URL.indexOf("http://localhost:") > -1){
-	  var hostname = window.location.hostname;
-	  var port = window.location.port;
+  if (/*document.URL.indexOf("http://localhost:") > -1*/true){
+	  var hostname = "localhost";
+	  var port = '8080';
 	  SEMANTIC_SERVICE_URL = "http://" + hostname + ":" + port + "/BigSemanticsService/";
 
   }

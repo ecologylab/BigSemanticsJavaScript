@@ -32,9 +32,11 @@ MICE.buildMetadataFieldCollectionHook = function(parentUrl, metadataField, row, 
 
 	var facets = document.createElement('div');
 	facets.className = "facetContainer";
-	
+	if(metadataField.name == "references"){
+		console.log("Hellowdy");
+	}
 
-	if(metadataField.name == "references" && parentUrl == "http://dl.acm.org/citation.cfm?id=1498819&preflayout=flat"){
+	if(metadataField.name == "references" && (parentUrl == "http://dl.acm.org/citation.cfm?id=1498819&preflayout=flat" || parentUrl == "http://dl.acm.org/citation.cfm?id=1613860&preflayout=flat"||parentUrl == "http://dl.acm.org/citation.cfm?id=1940971&preflayout=flat")){
 		var facetDiv2 = MICE.buildFacets(parentUrl, metadataField.mmdName, {name: "venue", facet_type: "ordinal"}, false);
 		facets.appendChild(facetDiv2);
 		var facetDiv = MICE.buildFacets(parentUrl, metadataField.mmdName, {name: "authors", facet_type: "ordinal"}, false);
@@ -166,8 +168,9 @@ MICE.filterByVenue = function(selectedDiv, multiple){
 		}
 	}
 	selectedDiv.classList.add("selectedAuthorNames");
-	
-	var papers = MICE.venueMap.get(selectedDiv.innerHTML);
+	  var venueCleaned = selectedDiv.innerHTML.replace("&amp;", "&");
+
+	var papers = MICE.venueMap.get(venueCleaned);
 	for(var i = 0; i < papers.length; i++){
 		var cList = MICE.colorMap.get(papers[i]);
 		if(cList == null){
@@ -235,8 +238,9 @@ MICE.filterByVenue = function(selectedDiv, multiple){
 
 		
 	}	
-	
-		values.push(selectedDiv.innerHTML);
+	  var venueCleaned = selectedDiv.innerHTML.replace("&amp;", "&");
+
+		values.push(venueCleaned);
 
 	
 
@@ -278,7 +282,17 @@ MICE.buildAuthorFacet = function (parentUrl, collectionName, facetObj){
 	
 	
 	MICE.currentlyBuildingFacet = facet;
-	$.getJSON( "../interactiveSemantics/papers.json", function( data, success, random ) {
+	var jsonUrl;
+	if(parentUrl == "http://dl.acm.org/citation.cfm?id=1498819&preflayout=flat"){
+			jsonUrl ="../interactiveSemantics/facets1.json";
+	}else if(parentUrl =="http://dl.acm.org/citation.cfm?id=1613860&preflayout=flat"){
+		jsonUrl ="../interactiveSemantics/facets2.json";
+
+	}else if(parentUrl == "http://dl.acm.org/citation.cfm?id=1940971&preflayout=flat"){
+		jsonUrl ="../interactiveSemantics/facets2.json";
+
+	}
+	$.getJSON( jsonUrl, function( data, success, random ) {
 		  var paperAuthors = data;
 		 var divs = [];
 		  for(var i = 0; i < paperAuthors.length; i++){
@@ -411,7 +425,17 @@ MICE.buildVenueFacet = function (parentUrl, collectionName, facetObj){
 	
 	
 	MICE.currentVFacet = facet;
-	$.getJSON( "../interactiveSemantics/papers.json", function( data, success, random ) {
+	var jsonUrl;
+	if(parentUrl == "http://dl.acm.org/citation.cfm?id=1498819&preflayout=flat"){
+			jsonUrl ="../interactiveSemantics/facets1.json";
+	}else if(parentUrl =="http://dl.acm.org/citation.cfm?id=1613860&preflayout=flat"){
+		jsonUrl ="../interactiveSemantics/facets2.json";
+
+	}else if(parentUrl == "http://dl.acm.org/citation.cfm?id=1940971&preflayout=flat"){
+		jsonUrl ="../interactiveSemantics/facets2.json";
+
+	}
+	$.getJSON( jsonUrl, function( data, success, random ) {
 		  var paperAuthors = data;
 		 var divs = [];
 		  for(var i = 0; i < paperAuthors.length; i++){
@@ -463,7 +487,9 @@ MICE.buildVenueFacet = function (parentUrl, collectionName, facetObj){
 							
 							
 							for(var f = 0; f < filter_sort_request.filter.length; f++){
-								if (filter_sort_request.filter[f].value == event.target.innerHTML){
+								var venueCleaned = event.target.innerHTML.replace("&amp;", "&");
+								
+								if (filter_sort_request.filter[f].value == venueCleaned){
 									filter_sort_request.filter.splice(f, 1);
 
 								}else if(filter_sort_request.filter[f].name == "venue"){
@@ -473,8 +499,10 @@ MICE.buildVenueFacet = function (parentUrl, collectionName, facetObj){
 							
 							var authors = document.getElementById('authorFacet').childNodes;
 							  for(var i = 1; i < authors.length; i++){
-								  var authorPapers = MICE.authorMap.get(authors[i].innerHTML);
-								  var venuePapers = MICE.venueMap.get(event.target.innerHTML);
+								  var authorCleaned = authors[i].innerHTML.replace("&amp;", "&");
+								  var venueCleaned = event.target.innerHTML.replace("&amp;", "&");
+								  var authorPapers = MICE.authorMap.get(authorCleaned);
+								  var venuePapers = MICE.venueMap.get(venueCleaned);
 								  var doesPass = false;
 								  for(var j = 0; j < authorPapers.length; j++){
 									  for(var k = 0; k < venuePapers.length; k++){
@@ -493,11 +521,11 @@ MICE.buildVenueFacet = function (parentUrl, collectionName, facetObj){
 												  //authors[i].style.backgroundColor=  colors[colorCounter];
 												  var authorCol = MICE.authorColorMap.get(authors[i].innerHTML);
 												  if(authorCol == null || authorCol[0] == null){
-													  var newCol = {colorIndex: colorCounter, venue: event.target.innerHTML}
-													  MICE.authorColorMap.put(authors[i].innerHTML, [newCol])
+													  var newCol = {colorIndex: colorCounter, venue: venueCleaned}
+													  MICE.authorColorMap.put(authors[i].authorCleaned, [newCol])
 												  }else{
 													  for(var l = 0; l < authorCol.length; l++){
-														  if(authorCol[l].venue == event.target.innerHTML){
+														  if(authorCol[l].venue == venueCleaned){
 															  authorCol.splice(l, 1);
 															  l--;
 														  }
@@ -507,15 +535,16 @@ MICE.buildVenueFacet = function (parentUrl, collectionName, facetObj){
 												  authors[i].style.background=  MICE.buildGradient(authorCol);
 												  	
 											  }else{
-												 var authorCol = MICE.authorColorMap.get(authors[i].innerHTML);
+												 var authorCol = MICE.authorColorMap.get(authorCleaned);
 												 if(authorCol != null){
 												 for(var l = 0; l < authorCol.length; l++){
-													  if(authorCol[l].venue == event.target.innerHTML){
+													  
+													 if(authorCol[l].venue == venueCleaned){
 														  authorCol.splice(l, 1);
 														  l--;
 													  }
 												  }
-												 var nullCol = {venue: event.target.innerHTML, colorIndex: 13};
+												 var nullCol = {venue: venueCleaned, colorIndex: 13};
 												 MICE.colorMap.put(authorPapers[j], [nullCol]);
 												   MICE.colorMap.put(venuePapers[k], [nullCol])
 
@@ -548,6 +577,7 @@ MICE.buildVenueFacet = function (parentUrl, collectionName, facetObj){
 						 aF.style.display = '';
 						  var authors = document.getElementById('authorFacet').childNodes;
 						  for(var i = 1; i < authors.length; i++){
+							  
 							  var authorPapers = MICE.authorMap.get(authors[i].innerHTML);
 							  var venuePapers = MICE.venueMap.get(event.target.innerHTML);
 							  var doesPass = false;
@@ -557,7 +587,8 @@ MICE.buildVenueFacet = function (parentUrl, collectionName, facetObj){
 										  doesPass = true;
 										  var authorCol = MICE.authorColorMap.get(authors[i].innerHTML);
 										  if(authorCol == null || authorCol[0] == null ){
-												 var newCol = {venue: event.target.innerHTML, colorIndex: colorCounter}
+												var venueCleaned = event.target.innerHTML.replace("&amp;", "&"); 
+											  var newCol = {venue: venueCleaned, colorIndex: colorCounter}
 
 											  MICE.authorColorMap.put(authors[i].innerHTML, [newCol])
 										  }else{
@@ -618,8 +649,11 @@ MICE.buildVenueFacet = function (parentUrl, collectionName, facetObj){
 						
 						  var authors = document.getElementById('authorFacet').childNodes;
 						  for(var i = 1; i < authors.length; i++){
-							  var authorPapers = MICE.authorMap.get(authors[i].innerHTML);
-							  var venuePapers = MICE.venueMap.get(event.target.innerHTML);
+							  var authorCleaned = authors[i].innerHTML.replace("&amp;", "&");
+							  var venueCleaned = event.target.innerHTML.replace("&amp;", "&");
+
+							  var authorPapers = MICE.authorMap.get(authorCleaned);
+							  var venuePapers = MICE.venueMap.get(venueCleaned);
 							  var doesPass = false;
 							  for(var j = 0; j < authorPapers.length; j++){
 								  for(var k = 0; k < venuePapers.length; k++){
@@ -629,7 +663,8 @@ MICE.buildVenueFacet = function (parentUrl, collectionName, facetObj){
 										  doesPass = true;
 										  var authorCol = MICE.authorColorMap.get(authors[i].innerHTML);
 										  if(authorCol == null || authorCol[0] == null){
-											  var newestCol = {venue: event.target.innerHTML, colorIndex: colorCounter};
+											  var venueCleaned = event.target.innerHTML.replace("&amp;", "&");
+											  var newestCol = {venue: venueCleaned, colorIndex: colorCounter};
 											  MICE.authorColorMap.put(authors[i].innerHTML, [newestCol]);
 										  }
 										  else{

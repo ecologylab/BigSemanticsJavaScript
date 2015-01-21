@@ -6,10 +6,18 @@ var currentExpSearch = null;
 var LOG_SERVICE_URL = "ecoarray0:3801/i/event_log/";
 var ALL_ENGINES = ["google_search","google_scholar_search","acm_portal_search","research_gate_search", "bing_search_xpath"];
 ExpSearchApp.toggledEngines = [];
+
+
+/*test for facets
+ * 
+ */
+var hardURLList = ["http://dl.acm.org/citation.cfm?id=1498819&preflayout=flat"]
+
+
 /*
  * Collection of functions to render 
  */
-
+var application_name = "expSearch";
 /*
  * Eventually, this should also save the open/closed state of all metadata in the enclosed search
  * Additionally, mechanisms will be added to sort history based on various criteria
@@ -861,11 +869,6 @@ ExpSearchApp.removeQuerySearchBox = function(event){
 				queryBox.parentNode.removeChild(queryBox);
 			}
 		}
-<<<<<<< HEAD
-=======
-		
->>>>>>> 60627f83491c962ae205f350cb6d65ab5372ead0
-		
 		
 	}else{
 		var queryBox = document.getElementById('toQueryBox');
