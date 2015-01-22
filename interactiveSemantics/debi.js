@@ -94,11 +94,11 @@ MetadataLoader.getMetadata = function(url, callback, reload)
  * @param url, the URL of the document the requested meta-metadata is for.
  * @param callback, name of the function to be called from the JSON-p call
  */
-MetadataLoader.getMMD = function(name, callback)
+MetadataLoader.getMMD = function(task, callback)
 {
 	if(MetadataLoader.repo != null)
 	{
-		MetadataLoader.getMMDFromRepo(name);
+		MetadataLoader.getMMDFromRepoByTaskName(task);
 	}
 	else if(MetadataLoader.repoIsLoading == false)
 	{
@@ -113,7 +113,7 @@ MetadataLoader.loadMMDRepo = function()
 	var serviceURL = SEMANTIC_SERVICE_URL + "mmdrepository.jsonp?reload=true&callback=" + callback;
 	  
 	MetadataLoader.doJSONPCall(serviceURL);
-	console.log("requesting semantics service for mmd repository");
+	//console.log("requesting semantics service for mmd repository");
 };
 
 /**
@@ -155,17 +155,34 @@ MetadataLoader.initMetaMetadataRepo = function(jsonRepo)
 	}
 	
 	//go through all tasks and set their metadata
+	var lengthSafeTaskList = [];
 	for (var i = 0; i < MetadataLoader.queue.length; i++)
 	{
 		var task = MetadataLoader.queue[i];
-		if (task.mmdType) 
-    		MetadataLoader.getMMDFromRepo(task.mmdType);  
+		lengthSafeTaskList.push(task);
+	}
+	
+	for (var i = 0; i < lengthSafeTaskList.length; i++)
+	{
+		var task = lengthSafeTaskList[i];
+		if (task.mmdType)
+		{
+    		MetadataLoader.getMMDFromRepoByTask(task); 
+    	}    	
 	}	
 };
 
-MetadataLoader.getMMDFromRepo = function(name)
+MetadataLoader.getMMDFromRepoByName = function(name)
 {
 	var mmd = MetadataLoader.repo[name];
+	MetadataLoader.setMetaMetadata(mmd);
+};
+
+MetadataLoader.getMMDFromRepoByTask = function(task)
+{
+	var mmd = MetadataLoader.repo[task.mmdType];
+	task.mmdType = mmd.name;
+	
 	MetadataLoader.setMetaMetadata(mmd);
 };
 
@@ -194,7 +211,7 @@ MetadataLoader.setMetadata = function(rawMetadata, requestMmd)
     if (i != "simpl.id" && i != "simpl.ref" && i != "deserialized")
     {
       metadata = rawMetadata[i];    
-      // metadata.meta_metadata_name = i;
+      metadata.meta_metadata_name = i;
     }
     
     if (i == "deserialized")
@@ -256,7 +273,7 @@ MetadataLoader.setMetadata = function(rawMetadata, requestMmd)
     		queueTask.mmdType = metadata.meta_metadata_name;
     	}
     	
-    	MetadataLoader.getMMD(queueTask.mmdType, "MetadataLoader.setMetaMetadata");
+    	MetadataLoader.getMMD(queueTask, "MetadataLoader.setMetaMetadata");
     }
   }
   
@@ -297,6 +314,13 @@ MetadataLoader.setMetaMetadata = function (mmd)
       if (tasks[i].metadata && tasks[i].mmd)  
       {  
       	
+      	// make sure any connected clippings have the correct meta_metadata_name
+      	if (tasks[i].clipping && tasks[i].clipping.rawMetadata ) 
+      	{
+      		MetadataLoader.setClippingMetadataType(tasks[i].clipping, tasks[i].mmd);
+      	}     	
+      	
+      	
         var metadataFields =
           MetadataLoader.createMetadata(tasks[i].isRoot, tasks[i].mmd,
                                         tasks[i].metadata, tasks[i].url);
@@ -304,9 +328,10 @@ MetadataLoader.setMetaMetadata = function (mmd)
         if (MetadataLoader.hasVisibleMetadata(metadataFields))
         {	
           // If so, then build the HTML table	
-			var styleMmdType = (tasks[i].expandedItem && tasks[i].expandedItem.mmdType && 
-						tasks[i].expandedItem.mmdType.indexOf("twitter") != -1)? "twitter" : mmd.name; 
+          var styleMmdType = (tasks[i].expandedItem && tasks[i].expandedItem.mmdType && 
+				tasks[i].expandedItem.mmdType.indexOf("twitter") != -1)? "twitter" : mmd.name; 
 			var miceStyles = InterfaceStyle.getMiceStyleDictionary(styleMmdType);         //Adds the metadata type as an attribute to the first field in the MD
+         //Adds the metadata type as an attribute to the first field in the MD
           metadataFields[0].parentMDType = mmd.name;
           tasks[i].renderer(tasks[i], metadataFields, {styles: miceStyles, type: mmd.name});
         }
@@ -318,6 +343,30 @@ MetadataLoader.setMetaMetadata = function (mmd)
     console.error("Retreived meta-metadata: " + mmd.name
                   + "  but it doesn't match a document from the queue.");
   }
+};
+
+
+MetadataLoader.setClippingMetadataType = function(clipping, mmd)
+{
+	var mmdName = mmd.name;
+	var unwrappedMetadata = MetadataLoader.getUnwrappedMetadata(clipping.rawMetadata);
+		unwrappedMetadata.meta_metadata_name = mmdName;
+	
+	var newMetadata = {};
+	newMetadata[mmdName] = unwrappedMetadata;
+
+	clipping.rawMetadata = newMetadata;
+};
+
+MetadataLoader.getUnwrappedMetadata = function(wrappedMetadata)
+{
+	for(var key in wrappedMetadata)
+	{
+		if(key != "simpl.id" && key != "simpl.ref" && key != "deserialized")
+		{
+			return wrappedMetadata[key];
+		}
+	}
 };
 
 /**
