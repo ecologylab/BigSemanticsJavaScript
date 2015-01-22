@@ -98,7 +98,7 @@ MetadataLoader.getMMD = function(task, callback)
 {
 	if(MetadataLoader.repo != null)
 	{
-		MetadataLoader.getMMDFromRepoByTaskName(task);
+		MetadataLoader.getMMDFromRepoByTask(task);
 	}
 	else if(MetadataLoader.repoIsLoading == false)
 	{
