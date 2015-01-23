@@ -1,6 +1,0 @@
-var CURATION_AUTHORS = [
-
-
-
-
-];
