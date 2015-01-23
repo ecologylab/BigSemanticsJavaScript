@@ -1633,7 +1633,7 @@ MetadataRenderer.getTweetSemanticsDiv = function(tweetId, styleInfo)
 	var a_reply = document.createElement('a');
 	a_reply.className = styleInfo.styles.tweetSemantics;
 	a_reply.setAttribute("url", "https://twitter.com/intent/tweet?in_reply_to=" + tweetId);
-	a_reply.addEventListener('click', MetadataRenderer.openUrlInNewWindow);
+	a_reply.addEventListener('click', TwitterRequests.postReply);
 	a_reply.addEventListener('mouseover', MetadataRenderer.highlightTweetSemanticsIcon);
 	a_reply.addEventListener('mouseout', MetadataRenderer.unhighlightTweetSemanticsIcon);
 	a_reply.appendChild(imgReply);
