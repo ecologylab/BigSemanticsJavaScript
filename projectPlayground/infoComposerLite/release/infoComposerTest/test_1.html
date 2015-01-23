@@ -1,0 +1,49 @@
+<html>
+	<head>
+		<title>HTML 5 InfoComposer TEST</title>
+		
+		<!-- Styles -->
+		<link href="../composer.css" rel="stylesheet" type="text/css">
+		
+		<!-- Code -->
+		<script type="text/javascript" src="../composer.js"></script>
+		
+		<script type="text/javascript" src="testComp.js"></script>
+		
+		<script>
+			function setup() {
+				var rootVisual = createCompositionVisual(compositionJSON1);
+				document.getElementById("compositionSpace").appendChild(rootVisual);
+			}
+		</script>
+		
+		<style>
+			body {
+				width: 100%;
+				height: 100%;
+				padding: 0px;
+				margin: 0px;
+				background: lightgray;
+			}
+			
+			.footer {
+				text-align: center;
+				margin-left: auto;
+				margin-right: auto;
+				padding: 10px;
+			}
+		</style>
+			
+	</head>
+	
+	<body>		
+			<div id="compositionSpace">
+				
+			</div>
+			
+			<script>
+				setup();
+			</script>
+	</body>
+	
+</html>
