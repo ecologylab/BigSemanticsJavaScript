@@ -371,6 +371,27 @@ function run_script(userid, cond)
 		{
 			window.addEventListener("scroll", onUpdateHandler);
 		}
+		
+		var params = document.URL.substr(document.URL.indexOf('?') + 1).split('&');
+		var oauth_token = null;
+		var oauth_verifier = null;
+		var oauth_token_str = "oauth_token=";
+		var oauth_verifier_str = "oauth_verifier=";
+		for (var i = 0; i < params.length; i++)
+		{
+			if (params[i].indexOf(oauth_token_str) == 0)
+			{
+				oauth_token = params[i].substr(oauth_token_str.length);
+			}
+			if (params[i].indexOf(oauth_verifier_str) == 0)
+			{
+				oauth_verifier = params[i].substr(oauth_verifier_str.length);
+			}
+		}
+		if (oauth_token && oauth_verifier)
+		{
+			TwitterOAuth.accessTokenHelper(oauth_token, oauth_verifier);
+		}
 	}
 	else
 	{
@@ -463,3 +484,25 @@ if (isExtension)
 	});
 }
 
+
+function testLoad()
+{
+	var url = "https://api.twitter.com/1.1/statuses/retweets_of_me.json?count=50&since_id=259320959964680190&max_id=259320959964680500";
+	
+	var xhr = new XMLHttpRequest();
+	//xhr.responseType = "document";
+	//xhr.followRedirects = true;
+	
+	xhr.onreadystatechange = function() {
+		
+		console.log("state: " + xhr.readyState + " status: " + xhr.status);
+		
+		if (xhr.readyState==4 && xhr.status==200)
+	    {
+			console.log(xhr.response);
+		}
+	};
+	
+	xhr.open("GET", url, true);
+	xhr.send();
+}
