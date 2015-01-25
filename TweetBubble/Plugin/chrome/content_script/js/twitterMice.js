@@ -1633,7 +1633,7 @@ MetadataRenderer.getTweetSemanticsDiv = function(tweetId, styleInfo)
 	var a_reply = document.createElement('a');
 	a_reply.className = styleInfo.styles.tweetSemantics;
 	a_reply.setAttribute("url", "https://twitter.com/intent/tweet?in_reply_to=" + tweetId);
-	a_reply.addEventListener('click', TwitterRequests.postReply);
+	a_reply.addEventListener('click', MetadataRenderer.createReplyBox);
 	a_reply.addEventListener('mouseover', MetadataRenderer.highlightTweetSemanticsIcon);
 	a_reply.addEventListener('mouseout', MetadataRenderer.unhighlightTweetSemanticsIcon);
 	a_reply.appendChild(imgReply);
@@ -1665,4 +1665,36 @@ MetadataRenderer.getTweetSemanticsDiv = function(tweetId, styleInfo)
 	twSemanticsDiv.appendChild(twSemanticsRow);
 	
 	return twSemanticsDiv;
+}
+
+MetadataRenderer.createReplyBox = function()
+{
+	if (!this.isReplyBoxVisible)
+	{
+		var miceStyles = InterfaceStyle.getMiceStyleDictionary();
+		var styleInfo = {styles: miceStyles};
+		
+		var twSemanticsValueCol = this.parentElement.parentElement.parentElement.parentElement;
+		var twSemanticsParentDiv = twSemanticsValueCol.parentElement.parentElement;	//valueCol.innerMetadataRow.outerTable
+		var twMetadataTableDiv = twSemanticsParentDiv.parentElement.parentElement.parentElement; // outerTable.td.row.table
+		
+		var nameCol = document.createElement('div');
+		nameCol.className = styleInfo.styles.labelColShowDiv;
+
+		var valueCol = document.createElement('div');
+		valueCol.className = styleInfo.styles.valueColShowDiv;
+		var replyBox = document.createElement('textarea');
+		replyBox.cols = "80";
+		valueCol.appendChild(replyBox);
+		
+		var twReplyBoxRow = document.createElement('div');
+		twReplyBoxRow.className = styleInfo.styles.metadataRow;
+		twReplyBoxRow.appendChild(nameCol);
+		twReplyBoxRow.appendChild(valueCol);
+		
+		twMetadataTableDiv.appendChild(twReplyBoxRow);
+		this.isReplyBoxVisible = true;
+		
+		//TwitterRequests.postReply();
+	}
 }
