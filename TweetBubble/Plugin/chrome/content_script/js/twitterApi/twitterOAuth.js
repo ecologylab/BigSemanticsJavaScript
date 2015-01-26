@@ -66,7 +66,7 @@ TwitterOAuth.requestToken = function()
 				{
 					if (retValues[i].indexOf(oauth_token_secret_str) == 0)
 					{
-						TwitterOAuth.storeTokenSecret(retValues[i].substr(oauth_token_secret_str.length));
+						TwitterOAuth.storeOAuthObject("oauth_token_secret", retValues[i].substr(oauth_token_secret_str.length));
 					}
 				}
 				for (var i = 0; i < retValues.length; ++i)
@@ -163,13 +163,26 @@ TwitterOAuth.getAccessToken = function(oauth_token, oauth_token_secret, oauth_ve
 			if (xhr.response)
 			{
 				var retValues = xhr.response.split('&');
+				var received_token = false;
+				var received_token_secret = false;
+				var oauth_token_str = "oauth_token=";
+				var oauth_token_secret_str = "oauth_token_secret=";
 				for (var i = 0; i < retValues.length; ++i)
 				{
-					if (retValues[i].indexOf("oauth_token=") == 0 || 
-							retValues[i].indexOf("oauth_token_secret=") == 0)
+					if (retValues[i].indexOf(oauth_token_str) == 0)
 					{
+						TwitterOAuth.storeOAuthObject("oauth_token", retValues[i].substr(oauth_token_str.length));
+						received_token = true;
 						console.log(retValues[i]);
 					}
+					if (retValues[i].indexOf(oauth_token_secret_str) == 0)
+					{
+						TwitterOAuth.storeOAuthObject("oauth_token_secret", retValues[i].substr(oauth_token_secret_str.length));
+						received_token_secret = true;
+						console.log(retValues[i]);
+					}
+					if (received_token && received_token_secret)
+						TwitterOAuth.isAuthorized = true;
 				}
 			}
 	    }
@@ -219,14 +232,14 @@ TwitterOAuth.getAccessToken = function(oauth_token, oauth_token_secret, oauth_ve
 	xhr.send();
 }
 
-TwitterOAuth.storeTokenSecret = function(oauth_token_secret)
+TwitterOAuth.storeOAuthObject = function(name, val)
 {
-	chrome.extension.sendRequest({storeOAuthTokenSecret: oauth_token_secret});
+	chrome.extension.sendRequest({storeOAuthTokenObject: {name: val}});
 }
 
 TwitterOAuth.accessTokenHelper = function(oauth_token, oauth_verifier)
 {
-	chrome.extension.sendRequest({loadOAuthTokenSecret: document.URL}, function(response) {
+	chrome.extension.sendRequest({loadOAuthTokenValues: document.URL}, function(response) {
 		if (response && response.oauth_token_secret != null)
 		{
 			TwitterOAuth.getAccessToken(oauth_token, response.oauth_token_secret, oauth_verifier);

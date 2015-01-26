@@ -4,10 +4,10 @@ chrome.extension.onRequest.addListener(
     		getStudySettings(request.loadStudySettings, sendResponse);
     	else if (request.storeStudySettings != null)
     		setStudySettings(request.storeStudySettings);
-    	else if (request.loadOAuthTokenSecret != null)
-    		getOAuthTokenSecret(request.loadOAuthTokenSecret, sendResponse);
-    	else if (request.storeOAuthTokenSecret != null)
-    		setOAuthTokenSecret(request.storeOAuthTokenSecret);
+    	else if (request.loadOAuthTokenValues != null)
+    		getOAuthTokenSecret(request.loadOAuthTokenValues, sendResponse);
+    	else if (request.storeOAuthTokenObject != null)
+    		setOAuthTokenSecret(request.storeOAuthTokenObject);
     	return true;	// async response    		
 	}
 );
@@ -67,12 +67,19 @@ function setStudySettings(options)
 	}
 }
 
-function setOAuthTokenSecret(oauth_token_secret)
+function setOAuthTokenSecret(oauth_token_object)
 {
-	localStorage["oauth_token_secret"] = oauth_token_secret;
+	for (var k in oauth_token_object)
+	{
+		if (oauth_token_object.hasOwnProperty(k))
+		{
+			var prop = k.toString();
+			localStorage[prop] = oauth_token_object[k];
+		}
+	}
 }
 
 function getOAuthTokenSecret(url, sendResponse)
 {
-	sendResponse({oauth_token_secret: localStorage["oauth_token_secret"]});
+	sendResponse({oauth_token: localStorage["oauth_token"], oauth_token_secret: localStorage["oauth_token_secret"]});
 }

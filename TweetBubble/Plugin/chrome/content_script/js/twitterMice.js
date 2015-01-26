@@ -1667,6 +1667,15 @@ MetadataRenderer.getTweetSemanticsDiv = function(tweetId, styleInfo)
 	return twSemanticsDiv;
 }
 
+MetadataRenderer.postReply = function()
+{
+	var textareaParentDiv = this.parentElement.parentElement.parentElement; // button.valueCol.row.table
+	var replyBoxTextarea = textareaParentDiv.getElementsByTagName('textarea')[0];
+	var tweetStr = replyBoxTextarea.value;	
+	
+	TwitterRequests.postReply(tweetStr);
+}
+
 MetadataRenderer.createReplyBox = function()
 {
 	if (!this.isReplyBoxVisible)
@@ -1678,11 +1687,12 @@ MetadataRenderer.createReplyBox = function()
 		var twSemanticsParentDiv = twSemanticsValueCol.parentElement.parentElement;	//valueCol.innerMetadataRow.outerTable
 		var twMetadataTableDiv = twSemanticsParentDiv.parentElement.parentElement.parentElement; // outerTable.td.row.table
 		
+		// add textarea
 		var nameCol = document.createElement('div');
 		nameCol.className = styleInfo.styles.labelColShowDiv;
-
 		var valueCol = document.createElement('div');
 		valueCol.className = styleInfo.styles.valueColShowDiv;
+
 		var replyBox = document.createElement('textarea');
 		replyBox.cols = "80";
 		valueCol.appendChild(replyBox);
@@ -1692,7 +1702,26 @@ MetadataRenderer.createReplyBox = function()
 		twReplyBoxRow.appendChild(nameCol);
 		twReplyBoxRow.appendChild(valueCol);
 		
+		// add tweet button
+		var nameCol2 = document.createElement('div');
+		nameCol.className = styleInfo.styles.labelColShowDiv;
+		var valueCol2 = document.createElement('div');
+		valueCol2.className = styleInfo.styles.valueColShowDiv;
+		
+		var twButton = document.createElement('input');
+		twButton.type = "button";
+		twButton.value = "Tweet";
+		twButton.addEventListener('click', MetadataRenderer.postReply);
+		valueCol2.appendChild(twButton);
+		var twButtonRow = document.createElement('div');
+		twButtonRow.className = styleInfo.styles.metadataRow;
+		twButtonRow.appendChild(nameCol2);
+		twButtonRow.appendChild(valueCol2);
+		
+		// add textarea and button to metadatatable
 		twMetadataTableDiv.appendChild(twReplyBoxRow);
+		twMetadataTableDiv.appendChild(twButtonRow);
+		
 		this.isReplyBoxVisible = true;
 		replyBox.focus();
 		
@@ -1709,8 +1738,5 @@ MetadataRenderer.createReplyBox = function()
 			}
 			replyBox.value = usernameStr;
 		}
-		
-		
-		//TwitterRequests.postReply();
 	}
 }
