@@ -119,7 +119,7 @@ function stepPhysical(x){
 				power = Math.sqrt(Math.pow(renderedNodesList.length - n, 2));
 				
                 //the more you multiply graph width by, the more of the space nodes take up
-				pSpeed = (pDist / (graphWidth*40)) * ATTRACTION_FORCE * power; 
+				pSpeed = (pDist / (graphWidth*100)) * ATTRACTION_FORCE * power; 
 				
 				pX *= pSpeed;
 				pY *= pSpeed;

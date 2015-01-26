@@ -16,6 +16,7 @@ var MONA = {},
     T1_SIZE = 30,
     NUM_STEPS = 100,    //number of iterations of grapher algorithm
     historyNodes = [],  //list of nodes display in history
+    historyNodeSet = {},  //set of nodes displayed in history
     renderInterval,     //the rendering interval for setInterval.
     unrenderedNodesHeap,//prior to being drawn, nodes are stored here. sorted by number of parents
     GRAPH_ELEM,         //the html element of the graph area
@@ -28,7 +29,7 @@ var MONA = {},
 function Node(type, title, location, mmdName, parent){
 	this.type = type;
 	this.title = title;
-	this.abbrevTitle = title.substring(0, 40) + "...";
+	this.abbrevTitle = title.substring(0, 30) + "...";
 	this.location = location;
 	this.mmdName = mmdName;
     this.children = [];
@@ -209,18 +210,25 @@ function addToHistory(MDC_rawMetadata){
     var newNode;
     for (var mmdType in MDC_rawMetadata){
         var mmdObj = MDC_rawMetadata[mmdType];
-        newNode = new Node(mmdType, mmdObj.title, mmdObj.location, mmdObj.meta_metadata_name, null);
+        //remove extraneous newline characters and spaces
+        var trimTitle = mmdObj.title.replace(/(\r\n|\n|\r)/gm," ");
+        trimTitle = trimTitle.replace(/\s+/g," ");
+        newNode = new Node(mmdType, trimTitle, mmdObj.location, mmdObj.meta_metadata_name, null);
         historyNodes.push(newNode);
+        historyNodeSet[newNode.location] = newNode;
     }
-    var div = document.createElement('div');
-    
+    newNode.visual = document.createElement('div');
+        
     if (newNode.location !== undefined){
-        div.style.cursor = "pointer";
-		div.setAttribute('onclick','onNodeClick("'+newNode.location+'")');
+        newNode.visual.style.cursor = "pointer";
+		newNode.visual.setAttribute('onclick','onNodeClick("'+newNode.location+'")');
     }
-
+    newNode.visual.setAttribute('onmouseover','onNodeMouseover("'+newNode.location+'")');
+    newNode.visual.setAttribute('onmouseout','onNodeMouseout("'+newNode.location+'")');  
+    newNode.visual.style.color = "black";
+    
     var nodeText = "";
-    if(MDC_rawMetadata[mmdType].title.length > 30)
+    if(newNode.title.length > 30)
         nodeText = newNode.abbrevTitle;
     else
         nodeText = newNode.title;
@@ -234,9 +242,9 @@ function addToHistory(MDC_rawMetadata){
     img.setAttribute('height',T3_SIZE+'px');
     img.setAttribute('width',T3_SIZE+'px');
 
-    div.appendChild(img);
-    div.appendChild(nodePara);
-    HISTORY_ELEM.insertBefore(div, HISTORY_ELEM.firstChild);
+    newNode.visual.appendChild(img);
+    newNode.visual.appendChild(nodePara);
+    HISTORY_ELEM.insertBefore(newNode.visual, HISTORY_ELEM.firstChild);
 }
 
 //make more important nodes bigger
@@ -473,18 +481,26 @@ function onNodeClick(location){
 	showMetadata();
     addToHistory(MDC_rawMetadata);
 	MONA.initialize();
+    for (var i in historyNodes){
+        unHighlightNode(historyNodes[i], true);
+    }
 }
 
 function onNodeMouseover(nodeKey){
     var nodeSet, node, line, rgb;
+    if (historyNodeSet.hasOwnProperty(nodeKey)){
+        node = historyNodeSet[nodeKey];
+        highlightNode(node, true, 0);
+    }
     if (primaryNodes.hasOwnProperty(nodeKey)) {
         //nodeSet = primaryNodes;
         node = primaryNodes[nodeKey];
         line = document.getElementById(node.location+"Line");
         rgb = hexToRgb(nodeColors[node.type]);
         line.style.stroke = "rgba(" + rgb.r + "," + rgb.g + "," + rgb.b + ",.7)";
+        highlightNode(node);
     }
-    else if (secondaryNodes.hasOwnProperty(nodeKey)) {    
+    if (secondaryNodes.hasOwnProperty(nodeKey)) {    
         //nodeSet = secondaryNodes;
         node = secondaryNodes[nodeKey];
         for (var i=0; i<node.parents.length; i++){
@@ -494,8 +510,11 @@ function onNodeMouseover(nodeKey){
                 line.style.stroke = "rgba(" + rgb.r + "," + rgb.g + "," + rgb.b + ",.7)";
             }  
         }
+        highlightNode(node);
     }
+}
 
+function highlightNode(node, isHistory, historyPos){
     var nodeDiv = node.visual;    
     var pArray = nodeDiv.getElementsByTagName('p');
     var p = pArray[0];
@@ -508,28 +527,38 @@ function onNodeMouseover(nodeKey){
     if (p.style.width < p.clientWidth + img.clientWidth){
         p.style.width = p.clientWidth + img.clientWidth +'px';
     }
-    var lines = document.getElementsByClassName(nodeKey+"Line");
+    var lines = document.getElementsByClassName(node.location+"Line");
     for (var j=0; j<lines.length; j++){
-        rgb = rgbToRgbObj(lines[j].style.stroke);
+        var rgb = rgbToRgbObj(lines[j].style.stroke);
         lines[j].style.stroke = "rgba(" + rgb.r + "," + rgb.g + "," + rgb.b + ",.7)";
     }
     //if something changed update the lines
-    if (nodePositions[nodeKey].height != nodeDiv.getBoundingClientRect().height){
+    if (!isHistory && nodePositions[node.location].height != nodeDiv.getBoundingClientRect().height){
         updateAllLines();
+    }
+    //highlight other occurences of this node in history
+    if (isHistory && historyPos < historyNodes.length){
+        for (var i=historyPos+1; i<historyNodes.length; i++){
+            if (historyNodes[i].location == node.location)
+                highlightNode(historyNodes[i], true, i);
+        }
     }
 }
 
 function onNodeMouseout(nodeKey){
     var nodeSet, node, line, rgb;
+    if (historyNodeSet.hasOwnProperty(nodeKey)){
+        node = historyNodeSet[nodeKey];
+        unHighlightNode(node, true, 0);
+    }
     if (primaryNodes.hasOwnProperty(nodeKey)) {
-        //nodeSet = primaryNodes;
         node = primaryNodes[nodeKey];
         line = document.getElementById(node.location+"Line");
         rgb = hexToRgb(nodeColors[node.type]);
         line.style.stroke = "rgba(" + rgb.r + "," + rgb.g + "," + rgb.b + ",.2)";
+        unHighlightNode(node);
     }
-    else if (secondaryNodes.hasOwnProperty(nodeKey)) {    
-        //nodeSet = secondaryNodes;
+    if (secondaryNodes.hasOwnProperty(nodeKey) && secondaryNodes[nodeKey].rendered) {    
         node = secondaryNodes[nodeKey];
         for (var i=0; i<node.parents.length; i++){
             line = document.getElementById(node.parents[i].location+node.location+"Line");
@@ -538,25 +567,41 @@ function onNodeMouseout(nodeKey){
                 line.style.stroke = "rgba(" + rgb.r + "," + rgb.g + "," + rgb.b + ",.2)";
             }
         }
+        unHighlightNode(node);
     }
+}
 
+function unHighlightNode(node, isHistory, historyPos){
     var nodeDiv = node.visual;        
     var pArray = nodeDiv.getElementsByTagName('p');
     var p = pArray[0];
-    if(nodeKey.length > 30){
+    if(node.title.length > 30){
         p.innerHTML = node.abbrevTitle;
     }
-    p.style.color = p.style.backgroundColor;
+    if (isHistory){
+        p.style.color = "black";
+    }
+    else{
+        p.style.color = p.style.backgroundColor;
+    }
     p.style.backgroundColor = "transparent";
 
+    
     var lines = document.getElementsByClassName(node.location+"Line");
     for (var j=0; j<lines.length; j++){
-        rgb = rgbToRgbObj(lines[j].style.stroke);
+        var rgb = rgbToRgbObj(lines[j].style.stroke);
         lines[j].style.stroke = "rgba(" + rgb.r + "," + rgb.g + "," + rgb.b + ",.1)";
     }
     //if something changed update the lines
-    if (nodePositions[nodeKey].height != nodeDiv.getBoundingClientRect().height){
+    if (!isHistory && nodePositions[node.location].height != nodeDiv.getBoundingClientRect().height){
         updateAllLines();
+    }
+    //unhighlight other occurences of this node in history
+    if (isHistory && historyPos < historyNodes.length){
+        for (var i=historyPos+1; i<historyNodes.length; i++){
+            if (historyNodes[i].location == node.location)
+                unHighlightNode(historyNodes[i], true, i);
+        }
     }
 }
 
@@ -593,10 +638,10 @@ function addVisual(node, nodeKey, nodeSet){
     node.visual.style.webkitTransform = "translate("+node.x+"px, "+node.y+"px)";
 
     var nodeText = "";
-    if(nodeKey.length > 30)
+    if(node.title.length > 30)
         nodeText = nodeSet[nodeKey].abbrevTitle;
     else
-        nodeText = nodeKey;
+        nodeText = node.title;
     var nodePara = document.createElement('p');
     nodePara.innerHTML = nodeText;
     nodePara.className = "nodeText";
