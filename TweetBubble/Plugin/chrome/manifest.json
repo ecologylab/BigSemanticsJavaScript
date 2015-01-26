@@ -41,6 +41,7 @@
         "content_script/js/interfaceStyle.js",
         "content_script/js/debi.js",
         "content_script/js/twitterDebi.js",
+        "content_script/js/renderingTask.js",
         "content_script/js/mice.js",
         "content_script/js/twitterMice.js",
         "content_script/js/twitterICE.js",
