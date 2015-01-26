@@ -1694,6 +1694,22 @@ MetadataRenderer.createReplyBox = function()
 		
 		twMetadataTableDiv.appendChild(twReplyBoxRow);
 		this.isReplyBoxVisible = true;
+		replyBox.focus();
+		
+		// TODO:change later to specific className
+		var tweetDivs = twMetadataTableDiv.getElementsByClassName("twFieldValue description_div");
+		if (tweetDivs.length > 0)
+		{
+			var tweetText = tweetDivs[0].textContent;
+			var usernameRefs = tweetText.split('@');
+			var usernameStr = "";
+			for (var i = 1; i < usernameRefs.length; i++)
+			{
+				usernameStr += '@' + usernameRefs[i].substr(0, usernameRefs[i].indexOf(' ')) + ' ';
+			}
+			replyBox.value = usernameStr;
+		}
+		
 		
 		//TwitterRequests.postReply();
 	}
