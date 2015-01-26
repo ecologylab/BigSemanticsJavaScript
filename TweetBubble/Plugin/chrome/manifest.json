@@ -12,6 +12,7 @@
   "permissions": [
     "https://twitter.com/search?q=%23*",
     "https://twitter.com/*",
+    "https://api.twitter.com/*",
     "http://ecology-service.cs.tamu.edu/",
     "http://ideamache.ecologylab.net/",
     "http://*/",
@@ -31,12 +32,16 @@
       		  "content_script/css/twitterMice.css"
       ],
       "js": [
+        "content_script/js/twitterApi/HMAC-SHA1.js",
+        "content_script/js/twitterApi/twitterOAuth.js",
+        "content_script/js/twitterApi/twitterRequests.js",
         "content_script/js/simplDeserializer.js",
         "content_script/js/util.js",
      	"content_script/js/logger.js",
         "content_script/js/interfaceStyle.js",
         "content_script/js/debi.js",
         "content_script/js/twitterDebi.js",
+        "content_script/js/renderingTask.js",
         "content_script/js/mice.js",
         "content_script/js/twitterMice.js",
         "content_script/js/twitterICE.js",

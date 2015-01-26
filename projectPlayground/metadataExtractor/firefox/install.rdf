@@ -1,0 +1,29 @@
+<?xml version="1.0"?>  
+      
+<RDF xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#"  
+    xmlns:em="http://www.mozilla.org/2004/em-rdf#">  
+      
+	<Description about="urn:mozilla:install-manifest">  
+      
+        <em:id>{09cf1f8a-8b28-4886-a1ab-ea6a4822bb5a}</em:id>  
+        <em:version>0.1.1</em:version>  
+        <em:type>2</em:type>  
+      
+        <em:targetApplication>  
+            <Description>  
+                 <em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id>  
+                 <em:minVersion>1.5</em:minVersion>  
+            	<em:maxVersion>15</em:maxVersion>  
+        	</Description>  
+        </em:targetApplication>  
+      
+        <em:name>Metadata Extractor</em:name>  
+        <em:description>Extract metadata for webpages as you browse.</em:description>
+        <em:creator>Nic Lupfer</em:creator>  
+    	<em:homepageURL>http://ecologylab.net/</em:homepageURL>  
+    	
+    	<em:optionsURL>chrome://extractor/content/options.xul</em:optionsURL>
+    	
+	</Description>  
+      
+</RDF>  
