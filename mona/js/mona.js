@@ -363,7 +363,7 @@ function getNodes(){
 				}
 			}
 			else if (currentField instanceof Object){
-				if ("meta_metadata_name" in currentField && "location" in currentField){
+				if ("meta_metadata_name" in currentField && "location" in currentField && "title" in currentField){
 					if (currentField.meta_metadata_name != "rich_document" && currentField.meta_metadata_name != "image"){
 				        key = getLabel(key);
                         nodeColors[key] = COLOR_ARRAY[colorCount];
