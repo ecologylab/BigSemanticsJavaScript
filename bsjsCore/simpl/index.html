@@ -1,0 +1,110 @@
+<html>
+	<head>
+		<title>simpl.JS</title>
+		
+		<!-- Styles -->
+		<link href="styles/simplMain.css" rel="stylesheet" type="text/css">
+		<link href="styles/renderTypeScope.css" rel="stylesheet" type="text/css">
+		<link href="styles/json.css" rel="stylesheet" type="text/css">
+		<link href="styles/de_serialize.css" rel="stylesheet" type="text/css">
+		
+		<!-- Code -->
+		<script type="text/javascript" src="helpers/syntaxHighlighting.js"></script>
+		
+		<script type="text/javascript" src="simplFieldTypes.js"></script>
+		
+		<script type="text/javascript" src="simplGraphExpand.js"></script>
+		<script type="text/javascript" src="simplGraphCollapse.js"></script>
+		
+		<script type="text/javascript" src="simplTypeScope.js"></script>	
+		<script type="text/javascript" src="simplTypeScopeDeserialize.js"></script>	
+		<script type="text/javascript" src="simplTypeScopeSerialize.js"></script>		
+		
+		
+		<script type="text/javascript" src="ui/displayTypeScope.js"></script>	
+		
+		<script type="text/javascript" src="ui/pages.js"></script>
+		<script type="text/javascript" src="ui/testSuiteViewer.js"></script>
+		<script type="text/javascript" src="ui/de_serializeTest.js"></script>
+		
+			<!-- Test Data -->
+			<script type="text/javascript" src="tests/circleTest/circleScope.js"></script>
+			<script type="text/javascript" src="tests/circleTest/circle.js"></script>
+			<script type="text/javascript" src="tests/circleTest/collectionOfCircles.js"></script>
+			<script type="text/javascript" src="tests/circleTest/collectionOfCircles_scope.js"></script>
+			<script type="text/javascript" src="tests/circleTest/collectionWrapScalar.js"></script>
+			<script type="text/javascript" src="tests/circleTest/collectionWrapScalar_scope.js"></script>
+			<script type="text/javascript" src="tests/circleTest/point.js"></script>
+			
+			<script type="text/javascript" src="tests/graphTest/classAclassB.js"></script>
+			<script type="text/javascript" src="tests/graphTest/classAclassB_scope.js"></script>
+			<script type="text/javascript" src="tests/graphTest/diamond.js"></script>
+			<script type="text/javascript" src="tests/graphTest/diamond_scope.js"></script>
+			<script type="text/javascript" src="tests/graphTest/graphCollection_scope.js"></script>
+			<script type="text/javascript" src="tests/graphTest/graphCollection.js"></script>
+			
+			<script type="text/javascript" src="tests/mapsTest/mapsWithinMaps.js"></script>
+			<script type="text/javascript" src="tests/mapsTest/mapsWithinMaps_scope.js"></script>
+			
+			<script type="text/javascript" src="tests/personTest/personDirectory.js"></script>
+			<script type="text/javascript" src="tests/personTest/personDirectory_scope.js"></script>
+			<script type="text/javascript" src="tests/personTest/student.js"></script>
+			<script type="text/javascript" src="tests/personTest/student_scope.js"></script>
+			
+			<script type="text/javascript" src="tests/testCases.js"></script>
+			
+	</head>
+	<body>
+		<div id="topbar">
+			
+			<!-- lab logo -->
+			<a href="http://ecologylab.net">
+				<img src="http://ecologylab.net/images/interfaceEcologyLabLogos7-2004-2WhiteMatte.png">
+			</a>
+			
+			<!-- simpl javascript -->
+			<a href="index.html" class="homeLink">
+				<span>simpl.JS</span>
+			</a>
+			
+			<div class="bigVertDivider"></div>
+			
+			<!-- list of simplJS Apps -->
+			<div id="appList">
+				
+				<a id="deserializeLink" href="#deserialize" class="appLink" onclick="openPage('deserialize');">
+					<span>De-Serialize</span>
+				</a>
+				
+				<div class="vertDivider"></div>
+				
+				<a id="serializeLink" href="#serialize" class="appLink" onclick="openPage('serialize');">
+					<span>Serialize</span>
+				</a>
+				
+				<div class="vertDivider"></div>
+									
+				<a id="testSuitesLink" href="#testSuites" class="appLink" onclick="openPage('testSuites');">
+					<span>Test Suites</span>
+				</a>
+
+			</div>
+			
+		</div>
+		
+		<div id="sidebar">
+		
+		</div>
+		
+		<div id="content">
+			
+			
+			
+		</div>
+		
+		<script>
+			setup();
+		</script>
+
+	</body>
+</html>

@@ -1097,7 +1097,7 @@ MICE.buildMetadataField = function(metadataField, isChildTable, fieldCount, row,
 			{				
 				var favicon = document.createElement('img');
 					favicon.className = styleInfo.styles.faviconICE;
-					favicon.src = MetadataLoader.getFaviconURL(metadataField.value);
+					favicon.src = MetadataLoader.getFaviconURL(metadataField.navigatesTo);
 					
 				var aTag = document.createElement('a');
 					aTag.className = styleInfo.styles.fieldValue;

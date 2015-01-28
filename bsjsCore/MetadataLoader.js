@@ -1,3 +1,84 @@
+/**
+ * This file handles the loading of metadata and meta-metadata for general
+ * Dynamic Exploratory Browsing Interfaces.
+ * A renderer can be passed in to render loaded metadata in customed ways.
+ */
+
+// The constant that points to the BigSemantics service.
+var SEMANTIC_SERVICE_URL = "http://ecology-service.cse.tamu.edu/BigSemanticsService/";
+
+// Constant for how deep to recurse through the metadata
+var METADATA_FIELD_MAX_DEPTH = 7;
+// The main namespace.
+var MetadataLoader = {};
+
+
+
+//The queue holds a list of containers which are waiting for metadata or
+//meta-metadata from the service.
+MetadataLoader.queue = [];
+
+
+/**
+ * Requests metadata of the given URL and the corresponding meta-metadata from
+ * the BigSemantics service, then calls the given callback for rendering.
+ *
+ * @param handler:
+ *     The callback that operates on metadata.
+ * @param url:
+ *     The URL to the requested document.
+ * @param isRoot:
+ *     Is 'true' when this metadata is a top level one in the current context.
+ * @param clipping:
+ *     Used to specify special clipping structure for special use.
+ * @param container: if a handler has an associated HTML container, this is where it goes!
+     
+ */
+
+MetadataLoader.load = function(handler, url, isRoot, clipping, container)
+{
+  // Add the rendering task to the queue
+  
+
+  var task = new Metadatatask(url, isRoot, clipping, renderer, container)
+  MetadataLoader.queue.push(task);  
+  
+  if (clipping != null && clipping.rawMetadata != null)
+  {
+    clipping.rawMetadata.deserialized = true;
+    MetadataLoader.setMetadata(clipping.rawMetadata);
+  }
+  else
+  {  
+    // Fetch the metadata from the service
+    MetadataLoader.getMetadata(url, "MetadataLoader.setMetadata");  
+  }
+};
+
+
+/**
+ * Retrieves the metadata from the service using a JSON-p call.
+ * When the service responds the callback function will be called.
+ *
+ * @param url, url of the target document
+ * @param callback, name of the function to be called from the JSON-p call
+ */
+MetadataLoader.getMetadata = function(url, callback, reload)
+{
+	var serviceURL; 
+	if(reload == true){
+		serviceURL = SEMANTIC_SERVICE_URL + "metadata.jsonp?reload=true&callback=" + callback
+        + "&url=" + encodeURIComponent(url);
+	}
+	else{
+		serviceURL = SEMANTIC_SERVICE_URL + "metadata.jsonp?callback=" + callback
+        + "&url=" + encodeURIComponent(url);
+	}
+  MetadataLoader.doJSONPCall(serviceURL);
+  console.log("requesting semantics service for metadata: " + serviceURL);
+};
+
+
 
 MetadataLoader.repoIsLoading = false;
 MetadataLoader.repo = null;
@@ -210,21 +291,80 @@ MetadataLoader.getUnwrappedMetadata = function(wrappedMetadata)
 };
 
 /**
- *
+ * @returns bool, to request extension for metadata or not
  */
-MetadataLoader.createMetadata = function(isRoot, mmd, metadata, taskUrl)
+MetadataLoader.toRequestMetadataFromService = function(location)
 {
-  var metadataFields =
-    MetadataLoader.getMetadataViewModel(mmd, mmd["kids"], metadata,
-                                        0, null, taskUrl);
-  
-  return metadataFields;
-};
+	return !MetadataLoader.isExtensionMetadataDomain(location);
+}
+
+MetadataLoader.isExtensionMetadataDomain = function(location)
+{
+	for (var i = 0; i < MetadataLoader.extensionMetadataDomains.length; i++)
+	{
+		if (location.indexOf(MetadataLoader.extensionMetadataDomains[i]) != -1)
+			return true;
+	}
+	return false;
+}
+
+MetadataLoader.checkForMetadataFromExtension = function()
+{
+	for (var i = 0; i < MetadataLoader.extensionMetadataDomains.length; i++)
+	{
+		var tasks = MetadataLoader.getTasksFromQueueByDomain(MetadataLoader.extensionMetadataDomains[i]);
+		for (var j = 0; j < tasks.length; j++)
+		{
+			MetadataLoader.getMetadata(tasks[i].url, "MetadataLoader.setMetadata");
+		}
+	}
+}
 
 /**
- * Get a matching RenderingTask from the queue 
+ * Retrieves the meta-metadata from the service using a JSON-p call.
+ * When the service responds the callback function will be called.
+ *
+ * @param url, the URL of the document the requested meta-metadata is for.
+ * @param callback, name of the function to be called from the JSON-p call
+ */
+
+MetadataLoader.getMMD = function(task, callback)
+{
+	if(MetadataLoader.repo != null)
+	{
+		MetadataLoader.getMMDFromRepoByTask(task);
+	}
+	else if(MetadataLoader.repoIsLoading == false)
+	{
+		MetadataLoader.repoIsLoading = true;
+		MetadataLoader.loadMMDRepo();
+	}
+};	
+
+
+/**
+ * Do a JSON-P call by appending the jsonP url as a scrip object.
+ * @param jsonpURL 
+ */
+MetadataLoader.doJSONPCall = function(jsonpURL)
+{
+  var script = document.createElement('script');
+  script.src = jsonpURL;
+  document.head.appendChild(script);
+};
+
+
+MetadataLoader.clearDocumentCollection = function()
+{
+  MetadataLoader.queue = [];
+  MetadataLoader.documentMap = [];
+}
+
+
+/**
+ * Get a matching MetadataTask from the queue 
  * @param url, target url to attempt to match to any tasks in the queue
- * @return a matching RenderingTask, null if no matches are found
+ * @return a matching MetadataTask, null if no matches are found
  */
 MetadataLoader.getTaskFromQueueByUrl = function(url)
 {
@@ -301,42 +441,3 @@ MetadataLoader.getTasksFromQueueByDomain = function(domain)
   }
   return tasks;
 }
-
-/**
- * @returns bool, to request extension for metadata or not
- */
-MetadataLoader.toRequestMetadataFromService = function(location)
-{
-	return !MetadataLoader.isExtensionMetadataDomain(location);
-}
-
-MetadataLoader.isExtensionMetadataDomain = function(location)
-{
-	for (var i = 0; i < MetadataLoader.extensionMetadataDomains.length; i++)
-	{
-		if (location.indexOf(MetadataLoader.extensionMetadataDomains[i]) != -1)
-			return true;
-	}
-	return false;
-}
-
-MetadataLoader.checkForMetadataFromExtension = function()
-{
-	for (var i = 0; i < MetadataLoader.extensionMetadataDomains.length; i++)
-	{
-		var tasks = MetadataLoader.getTasksFromQueueByDomain(MetadataLoader.extensionMetadataDomains[i]);
-		for (var j = 0; j < tasks.length; j++)
-		{
-			MetadataLoader.getMetadata(tasks[i].url, "MetadataLoader.setMetadata");
-		}
-	}
-}
-
-
-/* MetadataField and related functions */
-
-
-
-/**
- *
- */

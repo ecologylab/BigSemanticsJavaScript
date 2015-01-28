@@ -1,0 +1,145 @@
+*{
+	padding: 0px;
+	margin: 0px;
+	color:	#00523D;
+	
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+
+}
+
+#headband {
+	width: calc(100% - 8px);
+	height: 36px;
+	background: #1F5C3D;
+	padding: 4px;
+	position: absolute;
+}
+
+#content {
+	position: absolute;
+	top: 44px;
+	left: 0px;
+	right: 0px;
+	background: #47A375;
+	
+	min-height: calc(100% - 76px);
+	padding: 16px;
+}
+
+#controls {
+	width: calc(100% - 0px);
+	background: #70B894;	
+}
+
+#theStage {
+	background: #143D29;	
+	overflow: hidden;
+	position: absolute;
+	top: 59px;
+	bottom: 0px;
+	left: 16px;
+	right: 16px;
+}
+
+.simpleDividerLine {
+	background:black;
+	opacity: 0.72;
+	height: 0.5px;
+	width:100%;
+}
+
+.listContainer {
+	position:absolute;
+	padding: 16px;
+	overflow-y: scroll;
+	background:#1F5C3D;
+	top: 0px;
+	bottom: 0px;
+	left: 0px;
+	right: 0px;
+}
+
+.paperContainer {
+	position:absolute;
+	background: #99CCB2;
+	width: 600px;
+	min-height: 140px;
+	
+	-webkit-transition: top 0.5s; /* For Safari 3.1 to 6.0 */
+    transition: top 0.5s;
+    -webkit-transition-timing-function: ease-in-out;
+    transition-timing-function: ease-in-out;
+}
+
+.field {
+	padding:6px;
+	background: #85C2A3;
+	width: auto;
+	height: auto;
+	line-height: 30px;
+	
+	-webkit-transition: all 0.2s; /* For Safari 3.1 to 6.0 */
+    transition: all 0.2s;
+    -webkit-transition-timing-function: ease-in-out;
+    transition-timing-function: ease-in-out;
+}
+
+.field:hover {
+	background: #D6EBE0;
+	cursor: pointer;
+}
+
+.bar {
+	position:absolute;
+	background: #297A52;
+	top: 0px;
+	bottom: 0px;
+	right: 0px;
+	width: 320px;
+	z-index: 1;
+	box-shadow: -10px 0px 10px 1px #1A4C33;
+	
+	-webkit-transition: all 0.4s; /* For Safari 3.1 to 6.0 */
+    transition: all 0.4s;
+    -webkit-transition-timing-function: ease-in-out;
+    transition-timing-function: ease-in-out;
+}
+
+.bar h2 {
+	font-size: 18px;
+	background: #85C2A3;
+	padding: 4px 12px;
+
+}
+
+.bar .item {
+	position: absolute;
+	background: #85C2A3;
+
+}
+
+.bar .item:hover {
+	background: #D6EBE0;
+	cursor: pointer;
+}
+
+
+#backdrop {
+	pointer-events: none;
+	z-index: 0;
+	opacity: 0.4;
+}
+
+
+
+
+
+
+
+
+
