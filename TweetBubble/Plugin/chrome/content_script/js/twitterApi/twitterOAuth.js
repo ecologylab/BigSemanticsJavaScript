@@ -19,13 +19,13 @@ TwitterOAuth.getBaseString = function(method, url, params)
 }
 
 
-TwitterOAuth.generateNonce = function()
+TwitterOAuth.generateNonce = function(len)
 {
 	var nonce = "";
     var charSet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
     // to avoid any possible duplicate between study and normal usage
-    var len = 42;
+    //var len = 42;
     
     for (var i = 0; i < len; i++)
         nonce += charSet.charAt(Math.floor(Math.random() * charSet.length));
@@ -66,7 +66,7 @@ TwitterOAuth.requestToken = function()
 				{
 					if (retValues[i].indexOf(oauth_token_secret_str) == 0)
 					{
-						TwitterOAuth.storeOAuthObject("oauth_token_secret", retValues[i].substr(oauth_token_secret_str.length));
+						TwitterOAuth.storeOAuthObject({"oauth_token_secret": retValues[i].substr(oauth_token_secret_str.length)});
 					}
 				}
 				for (var i = 0; i < retValues.length; ++i)
@@ -86,7 +86,7 @@ TwitterOAuth.requestToken = function()
 	var params = {
 		    "oauth_callback": window.location,
 		    "oauth_consumer_key": "iMCPirVCd4ev6ttdrf7gweW86",
-		    "oauth_nonce": TwitterOAuth.generateNonce(),
+		    "oauth_nonce": TwitterOAuth.generateNonce(42),
 		    "oauth_signature_method": "HMAC-SHA1", 
 		    "oauth_timestamp": String(Math.floor(Date.now() / 1000)),
 		    "oauth_version": "1.0"
@@ -171,13 +171,13 @@ TwitterOAuth.getAccessToken = function(oauth_token, oauth_token_secret, oauth_ve
 				{
 					if (retValues[i].indexOf(oauth_token_str) == 0)
 					{
-						TwitterOAuth.storeOAuthObject("oauth_token", retValues[i].substr(oauth_token_str.length));
+						TwitterOAuth.storeOAuthObject({"oauth_token": retValues[i].substr(oauth_token_str.length)});
 						received_token = true;
 						console.log(retValues[i]);
 					}
 					if (retValues[i].indexOf(oauth_token_secret_str) == 0)
 					{
-						TwitterOAuth.storeOAuthObject("oauth_token_secret", retValues[i].substr(oauth_token_secret_str.length));
+						TwitterOAuth.storeOAuthObject({"oauth_token_secret": retValues[i].substr(oauth_token_secret_str.length)});
 						received_token_secret = true;
 						console.log(retValues[i]);
 					}
@@ -192,7 +192,7 @@ TwitterOAuth.getAccessToken = function(oauth_token, oauth_token_secret, oauth_ve
 	
 	var params = {
 		    "oauth_consumer_key": "iMCPirVCd4ev6ttdrf7gweW86",
-		    "oauth_nonce": TwitterOAuth.generateNonce(),
+		    "oauth_nonce": TwitterOAuth.generateNonce(42),
 		    "oauth_signature_method": "HMAC-SHA1", 
 		    "oauth_timestamp": String(Math.floor(Date.now() / 1000)),
 		    "oauth_token": oauth_token,
@@ -232,9 +232,9 @@ TwitterOAuth.getAccessToken = function(oauth_token, oauth_token_secret, oauth_ve
 	xhr.send();
 }
 
-TwitterOAuth.storeOAuthObject = function(name, val)
+TwitterOAuth.storeOAuthObject = function(oauth_token_obj)
 {
-	chrome.extension.sendRequest({storeOAuthTokenObject: {name: val}});
+	chrome.extension.sendRequest({storeOAuthTokenObject: oauth_token_obj});
 }
 
 TwitterOAuth.accessTokenHelper = function(oauth_token, oauth_verifier)
