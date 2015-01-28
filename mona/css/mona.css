@@ -51,10 +51,11 @@ div.span9.content::-webkit-scrollbar { width: 0 !important }
 }
 
 #historyArea {
-    overflow-y: scroll;
+    overflow-y: auto;
 }
 
-#historyArea::-webkit-scrollbar { width: 0 !important }
+#historyArea::-webkit-scrollbar { 
+}
 
 
 form {

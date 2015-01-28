@@ -245,6 +245,27 @@ function addToHistory(MDC_rawMetadata){
     newNode.visual.appendChild(img);
     newNode.visual.appendChild(nodePara);
     HISTORY_ELEM.insertBefore(newNode.visual, HISTORY_ELEM.firstChild);
+    fadeHistory();
+}
+
+//make history nodes fade out as they reach the bottom
+function fadeHistory(){
+    for (var i = historyNodes.length - 1; i >= 0; i--){
+        var node = historyNodes[i];
+        var bottom = (HISTORY_ELEM.clientHeight + HISTORY_ELEM.offsetTop) - (node.visual.getBoundingClientRect().top);
+        //ignore the first one since it will be animating
+        if (bottom > 0 && bottom < 100 && historyNodes.length - 1 != i){
+            var opac = bottom;
+            if (opac < 10) node.visual.style.opacity = '.0' + opac;
+            else node.visual.style.opacity = '.' + opac;
+        }
+        else if (bottom < 0 && historyNodes.length - 1 != i){
+            node.visual.style.opacity = '.01';
+        }
+        else{
+            node.visual.style.opacity = '1';
+        }
+    }
 }
 
 //make more important nodes bigger
@@ -493,15 +514,13 @@ function onNodeMouseover(nodeKey){
         highlightNode(node, true, 0);
     }
     if (primaryNodes.hasOwnProperty(nodeKey)) {
-        //nodeSet = primaryNodes;
         node = primaryNodes[nodeKey];
         line = document.getElementById(node.location+"Line");
         rgb = hexToRgb(nodeColors[node.type]);
         line.style.stroke = "rgba(" + rgb.r + "," + rgb.g + "," + rgb.b + ",.7)";
         highlightNode(node);
     }
-    if (secondaryNodes.hasOwnProperty(nodeKey)) {    
-        //nodeSet = secondaryNodes;
+    if (secondaryNodes.hasOwnProperty(nodeKey) && secondaryNodes[nodeKey].rendered) {    
         node = secondaryNodes[nodeKey];
         for (var i=0; i<node.parents.length; i++){
             line = document.getElementById(node.parents[i].location+node.location+"Line");
