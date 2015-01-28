@@ -16,7 +16,7 @@ var MONA = {},
     T1_SIZE = 30,
     NUM_STEPS = 100,    //number of iterations of grapher algorithm
     historyNodes = [],  //list of nodes display in history
-    historyNodeSet = {},  //set of nodes displayed in history
+    historyNodeSet = {},//set of nodes displayed in history
     renderInterval,     //the rendering interval for setInterval.
     unrenderedNodesHeap,//prior to being drawn, nodes are stored here. sorted by number of parents
     GRAPH_ELEM,         //the html element of the graph area
