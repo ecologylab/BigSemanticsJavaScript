@@ -483,26 +483,3 @@ if (isExtension)
 			processUrlChange(request.url);
 	});
 }
-
-
-function testLoad()
-{
-	var url = "https://api.twitter.com/1.1/statuses/retweets_of_me.json?count=50&since_id=259320959964680190&max_id=259320959964680500";
-	
-	var xhr = new XMLHttpRequest();
-	//xhr.responseType = "document";
-	//xhr.followRedirects = true;
-	
-	xhr.onreadystatechange = function() {
-		
-		console.log("state: " + xhr.readyState + " status: " + xhr.status);
-		
-		if (xhr.readyState==4 && xhr.status==200)
-	    {
-			console.log(xhr.response);
-		}
-	};
-	
-	xhr.open("GET", url, true);
-	xhr.send();
-}

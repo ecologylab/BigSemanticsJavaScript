@@ -18,7 +18,6 @@ TwitterOAuth.getBaseString = function(method, url, params)
 	return result;
 }
 
-
 TwitterOAuth.generateNonce = function(len)
 {
 	var nonce = "";
