@@ -2,6 +2,7 @@ body {
     padding-top: 40px;
     font-family: "Helvetica Neue", Helvetica,Arial, sans-serif;
     font-weight: 300;
+    font-size: 12px;
 }
 
 .row {
@@ -44,17 +45,20 @@ div.span9.content::-webkit-scrollbar { width: 0 !important }
     display: inline;
     width: 380px;
     margin: 5px 0 5px 0;
+    font-size: 12px;
 }
 
 .urlSubmit button{
     display: inline;
+    font-size: 12px;
 }
 
 #historyArea {
-    overflow-y: scroll;
+    overflow-y: auto;
 }
 
-#historyArea::-webkit-scrollbar { width: 0 !important }
+#historyArea::-webkit-scrollbar { 
+}
 
 
 form {

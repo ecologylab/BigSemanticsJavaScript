@@ -96,7 +96,7 @@ function callService(mmd, url)
     }
     if (!browserExtraction || serviceCall || parser != "xpath") // service extraction
     {
-        return getMetadataFromService(mmd);
+        return getMetadataFromService(mmd, url);
     }
     handleMetadata(mmd,metadataObject,url);
 }
@@ -104,7 +104,7 @@ function callService(mmd, url)
 /*
  * get metadata from service if needed
  */
-function getMetadataFromService(mmd)
+function getMetadataFromService(mmd, url)
 {
 	//to get metadata
 	var mServiceURL = "//ecology-service.cs.tamu.edu/BigSemanticsService/metadata.json?url=";

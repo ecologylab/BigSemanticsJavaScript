@@ -119,7 +119,7 @@ function stepPhysical(x){
 				power = Math.sqrt(Math.pow(renderedNodesList.length - n, 2));
 				
                 //the more you multiply graph width by, the more of the space nodes take up
-				pSpeed = (pDist / (graphWidth*40)) * ATTRACTION_FORCE * power; 
+				pSpeed = (pDist / (graphWidth*100)) * ATTRACTION_FORCE * power; 
 				
 				pX *= pSpeed;
 				pY *= pSpeed;
@@ -224,13 +224,14 @@ function moveNextNode(){
 function updateAllLines(){
 	for (var nodeKey in primaryNodes){
         var doc = document.documentElement;
-		var topOffset = (window.pageYOffset || doc.scrollTop)  - (doc.clientTop || 0);
+		var topOffset = (window.pageYOffset || doc.scrollTop) - (doc.clientTop || 0);
+        var leftOffset = (window.pageXOffset || doc.scrollLeft) - (doc.clientLeft || 0);
         
         //update line ends
 		var div = document.getElementById(nodeKey);
 		nodePositions[nodeKey] = div.getBoundingClientRect();
 		var line = document.getElementById(primaryNodes[nodeKey].location+"Line");
-		line.setAttribute('x1', nodePositions[nodeKey].left);
+		line.setAttribute('x1', nodePositions[nodeKey].left + leftOffset);
 		line.setAttribute('y1', nodePositions[nodeKey].top+nodePositions[nodeKey].height/2 + topOffset);
         
         for (var i in primaryNodes[nodeKey].children){
@@ -248,8 +249,8 @@ function updateAllLines(){
                     line2 = document.getElementById(primaryNodes[nodeKey].location+primaryNodes[childKey].location+"Line");
                 }
                 if (line2 !== null){
-                    line2.setAttribute('x1', nodePositions[childKey].left);
-                    line2.setAttribute('x2', nodePositions[nodeKey].left+2);
+                    line2.setAttribute('x1', nodePositions[childKey].left + leftOffset);
+                    line2.setAttribute('x2', nodePositions[nodeKey].left + 2 + leftOffset);
                     line2.setAttribute('y1', nodePositions[childKey].top + nodePositions[childKey].height/2 + topOffset);
                     line2.setAttribute('y2', nodePositions[nodeKey].top + nodePositions[nodeKey].height/2 + topOffset);
                 }
@@ -261,13 +262,15 @@ function updateAllLines(){
 function updateNodeLines(node){
     var doc = document.documentElement;
     var topOffset = (window.pageYOffset || doc.scrollTop)  - (doc.clientTop || 0);
+    var leftOffset = (window.pageXOffset || doc.scrollLeft) - (doc.clientLeft || 0);
+
     nodePositions[node.location] = node.visual.getBoundingClientRect();
 
     var div, line;
     
     if (primaryNodes.hasOwnProperty(node.location)){
         line = document.getElementById(node.location+"Line");
-        line.setAttribute('x1', nodePositions[node.location].left);
+        line.setAttribute('x1', nodePositions[node.location].left + leftOffset);
         line.setAttribute('y1', nodePositions[node.location].top+nodePositions[node.location].height/2 + topOffset);
     }
     
@@ -286,8 +289,8 @@ function updateNodeLines(node){
                 line = document.getElementById(node.location+primaryNodes[childKey].location+"Line");
             }
             if (line !== null){
-                line.setAttribute('x1', nodePositions[childKey].left);
-                line.setAttribute('x2', nodePositions[node.location].left+2);
+                line.setAttribute('x1', nodePositions[childKey].left + leftOffset);
+                line.setAttribute('x2', nodePositions[node.location].left + 2 + leftOffset);
                 line.setAttribute('y1', nodePositions[childKey].top + nodePositions[childKey].height/2 + topOffset);
                 line.setAttribute('y2', nodePositions[node.location].top + nodePositions[node.location].height/2 + topOffset);
             }
@@ -308,8 +311,8 @@ function updateNodeLines(node){
                 line = document.getElementById(node.location+secondaryNodes[parentKey].location+"Line");
             }
             if (line !== null){
-                line.setAttribute('x1', nodePositions[parentKey].left);
-                line.setAttribute('x2', nodePositions[node.location].left+2);
+                line.setAttribute('x1', nodePositions[parentKey].left + leftOffset);
+                line.setAttribute('x2', nodePositions[node.location].left + 2 + leftOffset);
                 line.setAttribute('y1', nodePositions[parentKey].top + nodePositions[parentKey].height/2 + topOffset);
                 line.setAttribute('y2', nodePositions[node.location].top + nodePositions[node.location].height/2 + topOffset);
             }
