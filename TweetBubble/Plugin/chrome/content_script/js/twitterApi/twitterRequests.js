@@ -13,6 +13,7 @@ TwitterRequests.postReply = function(tweetStr)
 				
 				var xhr = new XMLHttpRequest();
 				var url = "https://api.twitter.com/1.1/statuses/update.json";
+				var body = "status=" + encodeURIComponent(tweetStr);
 				
 				xhr.onreadystatechange = function() {
 					
@@ -24,7 +25,7 @@ TwitterRequests.postReply = function(tweetStr)
 				    }
 				};
 				
-				xhr.open("POST", url, true);
+				xhr.open("POST", url+'?'+body, true);
 				
 				var nonce = TwitterOAuth.generateNonce(32);
 				var ts = String(Math.floor(Date.now() / 1000));
@@ -70,13 +71,15 @@ TwitterRequests.postReply = function(tweetStr)
 			    //xhr.setRequestHeader("HOST", "api.twitter.com");
 				xhr.setRequestHeader("Accept", "*/*");
 				xhr.setRequestHeader("Authorization", auth);
+				//xhr.setRequestHeader("Content-type", "application/json; charset=utf-8");
 				
-				var body = "status=" + encodeURIComponent(tweetStr);
+				
+				//var body = JSON.stringify({status: encodeURIComponent(tweetStr)});
 				
 				console.log("command line:\n" + "curl --request 'POST' 'https://api.twitter.com/1.1/statuses/update.json' --header 'Authorization: " + auth + "' " + body);
-				xhr.send(body);
+				//xhr.send(body);
 				//console.log("command line:\n" + "curl --request 'POST' 'https://api.twitter.com/oauth/access_token' --header 'Authorization: " + auth + "' ");
-				//xhr.send();
+				xhr.send();
 			}
 		});
 	}
