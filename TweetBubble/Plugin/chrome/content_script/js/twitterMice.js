@@ -1671,9 +1671,29 @@ MetadataRenderer.postReply = function()
 {
 	var textareaParentDiv = this.parentElement.parentElement.parentElement; // button.valueCol.row.table
 	var replyBoxTextarea = textareaParentDiv.getElementsByTagName('textarea')[0];
-	var tweetStr = replyBoxTextarea.value;	
 	
+	var tweetStr = replyBoxTextarea.value;	
 	TwitterRequests.postReply(tweetStr);
+	
+	var replyBoxValueCol = replyBoxTextarea.parentElement;
+	while (replyBoxValueCol.hasChildNodes())
+		replyBoxValueCol.removeChild(replyBoxValueCol.lastChild);
+	
+	var textDiv = document.createElement("div");
+	textDiv.innerHTML = "Your reply has been posted!";
+	textDiv.textContent = "Your reply has been posted!";
+	replyBoxValueCol.appendChild(textDiv);
+	
+	var hideText = function(txtParent) {
+		while (txtParent.hasChildNodes())
+			txtParent.removeChild(txtParent.lastChild);
+	}
+	
+	window.setTimeout(hideText, 1000, replyBoxValueCol);
+
+	var replyButtonRow = replyBoxValueCol.parentElement.nextSibling;
+	var replyButtonRowParent = replyButtonRow.parentElement;
+	replyButtonRowParent.removeChild(replyButtonRow);
 }
 
 MetadataRenderer.createReplyBox = function()
@@ -1694,7 +1714,7 @@ MetadataRenderer.createReplyBox = function()
 		valueCol.className = styleInfo.styles.valueColShowDiv;
 
 		var replyBox = document.createElement('textarea');
-		replyBox.cols = "80";
+		replyBox.style.width = "93%";
 		valueCol.appendChild(replyBox);
 		
 		var twReplyBoxRow = document.createElement('div');
@@ -1711,6 +1731,8 @@ MetadataRenderer.createReplyBox = function()
 		var twButton = document.createElement('input');
 		twButton.type = "button";
 		twButton.value = "Tweet";
+		twButton.style.background = "#0084b4";
+		twButton.style.color = "white";
 		twButton.addEventListener('click', MetadataRenderer.postReply);
 		valueCol2.appendChild(twButton);
 		var twButtonRow = document.createElement('div');
