@@ -371,27 +371,6 @@ function run_script(userid, cond)
 		{
 			window.addEventListener("scroll", onUpdateHandler);
 		}
-		
-		var params = document.URL.substr(document.URL.indexOf('?') + 1).split('&');
-		var oauth_token = null;
-		var oauth_verifier = null;
-		var oauth_token_str = "oauth_token=";
-		var oauth_verifier_str = "oauth_verifier=";
-		for (var i = 0; i < params.length; i++)
-		{
-			if (params[i].indexOf(oauth_token_str) == 0)
-			{
-				oauth_token = params[i].substr(oauth_token_str.length);
-			}
-			if (params[i].indexOf(oauth_verifier_str) == 0)
-			{
-				oauth_verifier = params[i].substr(oauth_verifier_str.length);
-			}
-		}
-		if (oauth_token && oauth_verifier)
-		{
-			TwitterOAuth.accessTokenHelper(oauth_token, oauth_verifier);
-		}
 	}
 	else
 	{
@@ -420,9 +399,47 @@ function run_script(userid, cond)
 
 function processInfoSheetResponse(resp)
 {
-	chrome.extension.sendRequest({storeStudySettings: {"agreeToInformationSheet": resp}});
-	if (resp == Util.YES)
-		run_script(userid, response_condition);
+	chrome.extension.sendRequest({storeStudySettings: {"agreeToInformationSheet": resp}}, function(response) {
+		window.location.replace("https://twitter.com");
+	});
+	//if (resp == Util.YES)
+		//run_script(userid, response_condition);
+}
+
+function isAccessGranted(response)
+{
+	if (response.oauth_token && response.oauth_token_secret)
+	{
+		return true;
+	}
+	else
+	{
+		var params = document.URL.substr(document.URL.indexOf('?') + 1).split('&');
+		var oauth_token = null;
+		var oauth_verifier = null;
+		var oauth_token_str = "oauth_token=";
+		var oauth_verifier_str = "oauth_verifier=";
+		for (var i = 0; i < params.length; i++)
+		{
+			if (params[i].indexOf(oauth_token_str) == 0)
+			{
+				oauth_token = params[i].substr(oauth_token_str.length);
+			}
+			if (params[i].indexOf(oauth_verifier_str) == 0)
+			{
+				oauth_verifier = params[i].substr(oauth_verifier_str.length);
+			}
+		}
+		if (oauth_token && oauth_verifier)
+		{
+			TwitterOAuth.accessTokenHelper(oauth_token, oauth_verifier);
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
 }
 
 //run_at is document_end i.e. after DOM is complete but before images and frames are loaded
@@ -440,19 +457,26 @@ else
 			experiment_condition = response.condition;
 		else
 			experiment_condition = mice_condition;
-			  
-		if (response && response.agree == Util.YES)
-			run_script(response.userid, response.condition);
+		
+		if (response && !isAccessGranted(response))
+		{
+			Util.promptUserForAccessGrant(processInfoSheetResponse);
+		}
 		else
 		{
-			if (response && response.agree != Util.NO)
+			if (response && response.agree == Util.YES)
+				run_script(response.userid, response.condition);
+			else
 			{
-				response_condition = response.condition;
-				userid = response.userid;
-				Util.getInformationSheetResponse(processInfoSheetResponse);
+				if (response && response.agree != Util.NO)
+				{
+					response_condition = response.condition;
+					userid = response.userid;
+					Util.getInformationSheetResponse(processInfoSheetResponse);
+				}
+				//if (window.confirm(Util.info_sheet))
+					//processInfoSheetResponse(Util.YES);
 			}
-			//if (window.confirm(Util.info_sheet))
-				//processInfoSheetResponse(Util.YES);
 		}
 		
 		if (MetadataLoader.logger)

@@ -2,10 +2,10 @@ var TwitterRequests = {};
 
 TwitterRequests.postReply = function(tweetStr)
 {
-	if (!TwitterOAuth.isAuthorized)
-		TwitterOAuth.isAuthorized = TwitterOAuth.authorize();
-	else
-	{
+//	if (!TwitterOAuth.isAuthorized)
+//		TwitterOAuth.isAuthorized = TwitterOAuth.authorize();
+//	else
+//	{
 		chrome.extension.sendRequest({loadOAuthTokenValues: document.URL}, function(response) {
 			if (response && response.oauth_token != null && response.oauth_token_secret != null)
 			{
@@ -44,8 +44,12 @@ TwitterRequests.postReply = function(tweetStr)
 
 				TwitterOAuth.sendRequest(url+'?'+body, TwitterRequests.handleResponse, auth);
 			}
+			else
+			{
+				//fallback?
+			}
 		});
-	}
+//	}
 }
 
 TwitterRequests.handleResponse = function(response)
