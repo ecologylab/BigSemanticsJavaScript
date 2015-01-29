@@ -1633,6 +1633,7 @@ MetadataRenderer.getTweetSemanticsDiv = function(tweetId, styleInfo)
 	var a_reply = document.createElement('a');
 	a_reply.className = styleInfo.styles.tweetSemantics;
 	a_reply.setAttribute("url", "https://twitter.com/intent/tweet?in_reply_to=" + tweetId);
+	a_reply.setAttribute("tweetId", tweetId);
 	a_reply.addEventListener('click', MetadataRenderer.createReplyBox);
 	a_reply.addEventListener('mouseover', MetadataRenderer.highlightTweetSemanticsIcon);
 	a_reply.addEventListener('mouseout', MetadataRenderer.unhighlightTweetSemanticsIcon);
@@ -1671,9 +1672,10 @@ MetadataRenderer.postReply = function()
 {
 	var textareaParentDiv = this.parentElement.parentElement.parentElement; // button.valueCol.row.table
 	var replyBoxTextarea = textareaParentDiv.getElementsByTagName('textarea')[0];
+	var tweetId = this.getAttribute("tweetId");
 	
 	var tweetStr = replyBoxTextarea.value;	
-	TwitterRequests.postReply(tweetStr);
+	TwitterRequests.postReply(tweetStr, tweetId);
 	
 	var replyBoxValueCol = replyBoxTextarea.parentElement;
 	while (replyBoxValueCol.hasChildNodes())
@@ -1700,6 +1702,7 @@ MetadataRenderer.createReplyBox = function()
 {
 	if (!this.isReplyBoxVisible)
 	{
+		var tweetId = this.getAttribute("tweetId");
 		var miceStyles = InterfaceStyle.getMiceStyleDictionary();
 		var styleInfo = {styles: miceStyles};
 		
@@ -1734,6 +1737,7 @@ MetadataRenderer.createReplyBox = function()
 		twButton.style.background = "#0084b4";
 		twButton.style.color = "white";
 		twButton.addEventListener('click', MetadataRenderer.postReply);
+		twButton.setAttribute("tweetId", tweetId);
 		valueCol2.appendChild(twButton);
 		var twButtonRow = document.createElement('div');
 		twButtonRow.className = styleInfo.styles.metadataRow;
