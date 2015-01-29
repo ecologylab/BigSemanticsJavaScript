@@ -919,7 +919,7 @@ MetadataRenderer.buildMetadataField = function(metadataField, isChildTable, fiel
 				// Uses http://getfavicon.appspot.com/ to resolve the favicon
 				var favicon = document.createElement('img');
 					favicon.className = styleInfo.styles.faviconICE;
-					favicon.src = "http://g.etfv.co/" + metadataField.value;
+					favicon.src = MetadataLoader.getFaviconURL(metadataField.navigatesTo);
 					
 				var aTag = document.createElement('a');
 				aTag.innerText = MetadataLoader.removeLineBreaksAndCrazies(metadataField.value);
@@ -949,7 +949,7 @@ MetadataRenderer.buildMetadataField = function(metadataField, isChildTable, fiel
 				// Uses http://getfavicon.appspot.com/ to resolve the favicon
 				var favicon = document.createElement('img');
 					favicon.className = styleInfo.styles.faviconICE;
-					favicon.src = "http://g.etfv.co/" + metadataField.navigatesTo;
+					favicon.src = MetadataLoader.getFaviconURL(metadataField.navigatesTo);
 					
 				var aTag = document.createElement('a');
 					aTag.className = styleInfo.styles.fieldValue;
