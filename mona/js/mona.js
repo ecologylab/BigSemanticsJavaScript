@@ -41,7 +41,7 @@ function Node(type, title, location, mmdName, parent){
     }
     else {
         this.parents = [];
-        this.x = 100;
+        this.x = 120;
         this.y = pageMidHeight;          
     }
     this.rendered = false;
@@ -511,7 +511,7 @@ function onNodeMouseover(nodeKey){
     var nodeSet, node, line, rgb;
     if (historyNodeSet.hasOwnProperty(nodeKey)){
         node = historyNodeSet[nodeKey];
-        highlightNode(node, true, 0);
+        highlightNode(node, true, historyNodes.length-1);
     }
     if (primaryNodes.hasOwnProperty(nodeKey)) {
         node = primaryNodes[nodeKey];
@@ -556,8 +556,8 @@ function highlightNode(node, isHistory, historyPos){
         updateAllLines();
     }
     //highlight other occurences of this node in history
-    if (isHistory && historyPos < historyNodes.length){
-        for (var i=historyPos+1; i<historyNodes.length; i++){
+    if (isHistory && historyPos >= 0){
+        for (var i=historyPos-1; i >= 0; i--){
             if (historyNodes[i].location == node.location)
                 highlightNode(historyNodes[i], true, i);
         }
@@ -568,7 +568,7 @@ function onNodeMouseout(nodeKey){
     var nodeSet, node, line, rgb;
     if (historyNodeSet.hasOwnProperty(nodeKey)){
         node = historyNodeSet[nodeKey];
-        unHighlightNode(node, true, 0);
+        unHighlightNode(node, true, historyNodes.length-1);
     }
     if (primaryNodes.hasOwnProperty(nodeKey)) {
         node = primaryNodes[nodeKey];
@@ -616,8 +616,8 @@ function unHighlightNode(node, isHistory, historyPos){
         updateAllLines();
     }
     //unhighlight other occurences of this node in history
-    if (isHistory && historyPos < historyNodes.length){
-        for (var i=historyPos+1; i<historyNodes.length; i++){
+    if (isHistory && historyPos >= 0){
+        for (var i=historyPos-1; i >= 0; i--){
             if (historyNodes[i].location == node.location)
                 unHighlightNode(historyNodes[i], true, i);
         }
@@ -643,7 +643,7 @@ function onTypeMouseout(type){
 function addVisual(node, nodeKey, nodeSet){
     node.visual = document.createElement('div');
     if (primaryNodes.hasOwnProperty(nodeKey)){
-        node.x = typePositions[node.type].top;
+        node.y = typePositions[node.type].top;
     }
     
     if (node.location !== undefined){
@@ -702,7 +702,7 @@ function drawNodes(){
 		nodePositions[nodeKey] = node.visual.getBoundingClientRect();
         renderedNodesList.push(node);
 	}
-    doPhysical(20);
+    doPhysical(100);
 }
 
 //create divs for second layer of nodes
@@ -714,12 +714,16 @@ function drawSecondaryNodes(){
             unrenderedNodesHeap.push(node);
         }
 	}
+    renderInterval = setTimeout(pauseBeforeSecondary, 2000);
+}
+
+function pauseBeforeSecondary(){
     clearInterval(renderInterval);
     renderInterval = setInterval(renderNode, 2000);
 }
 
 function renderNode(){
-    if (unrenderedNodesHeap.size() >0 && renderedNodesList.length < 50){    
+    if (unrenderedNodesHeap.size() > 0 && renderedNodesList.length < 50){    
         var node = unrenderedNodesHeap.pop();
         node.rendered = true;
         renderedNodesList.push(node);

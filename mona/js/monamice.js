@@ -817,13 +817,12 @@ MICE.buildMetadataTable = function(table, isChildTable, isRoot, metadataFields, 
 	var metadataFields2 = jQuery.extend(true, {}, metadataFields);
 	
 	// filter the fields that are in graph area on first render
-	//currently filters "rich_media" such as full text. Not sure if it should do that or not.
-	//also main images get filtered
+	// can be modified to filter "rich_documents" and "rich_media"
 	if (firstRender){	
 		var k = 0;
 		for(i in metadataFields2){
 			var value = metadataFields2[i]["value"];
-			if (value instanceof Array && nestedHasNavTo(value)){// && metadataFields2[i]["child_type"] != "rich_document"){
+			if (value instanceof Array && nestedHasNavTo(value) && metadataFields2[i]["child_type"] != "rich_document"){
 				metadataFields.splice(k,1);
 				k--;
 			}

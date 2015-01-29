@@ -15,35 +15,45 @@ function doPhysical(n){
     physicalInterval = setInterval(stepPhysical, NODE_RENDER_TIMER);
 }
 
-var ATTRACTION_FORCE = 8;
-var REPULSE_FORCE = -4;
+var ATTRACTION_FORCE = 2;
+var REPULSE_FORCE = -10;
 var TOUCH_DISTANCE = 60;
 var Y_TOUCH_DISTANCE = 30;
 var X_OVERLAP = 200;
 
+//adjust these to stretch entire graph accross x/y axis
+var X_REPULSE_FACTOR = 2;
+var Y_REPULSE_FACTOR = 1;
+var X_ATTRACT_FACTOR = 0.5;
+var Y_ATTRACT_FACTOR = 1;
+
 var nodeCounter = 0;
 var centroid;
-var CENT_RADIUS = 300;
-var CENT_DIST_SQ = Math.pow(300, 2);
+var CENT_RADIUS = 350;
+var CENT_DIST_SQ = Math.pow(CENT_RADIUS, 2);
 var PRIMARY_CENT_DIST = Math.pow((CENT_RADIUS+20),2);
 var SECONDARY_CENT_DIST = Math.pow((CENT_RADIUS+40),2);
-
+var SECONDARY_CENT_DIST_ACTUAL = Math.sqrt(SECONDARY_CENT_DIST);
 
 function setCentroid(){
     centroid = {
-        x : -150,
+        x : -200,
         y : graphHeight/2
     };
+    drawCircle(CENT_RADIUS+50);
+}
+
+function drawCircle(radius){
     //draw it
     var circle = document.createElement('div');
     circle.style.position = "absolute";
-    var centerDivY = centroid.y - 200;
+    var centerDivY = centroid.y - radius;
     circle.style.top = centerDivY + "px";
-    circle.style.left = "500px";
+    circle.style.left = (300-radius) + "px";
     circle.style.border = "3px solid red";
-    circle.style.width = "400px";
-    circle.style.height = "400px";
-    circle.style.borderRadius = "300px";
+    circle.style.width = (2*radius) + "px";
+    circle.style.height = (2*radius) + "px";
+    circle.style.borderRadius = radius + "px";
     //document.body.appendChild(circle);
 }
 
@@ -67,42 +77,46 @@ function stepPhysical(x){
     for(n = 0; n < renderedNodesList.length; n++){
         node = renderedNodesList[n];
     
-        var n, node, p, pDist, yDist, pSpeed, pX, pY, power;
+        var n, node, p, pDist, yDist, pSpeed, pX, pY, power, actualCentDist;
 		node.vector = new Vector([0,0,0]);
 
         //if node is primary pull it toward the centroid
         var centDist = centroidDistance(node);
-        //we use PRIMARY_CENT_DIST (square the radius plus 20 to avoid having to square root
-        if (primaryNodes.hasOwnProperty(node.location) && centDist > PRIMARY_CENT_DIST){			
-            pX = (centroid.x - node.x) / centDist;
-            pY = (centroid.y - node.y) / centDist;
+        //we use PRIMARY_CENT_DIST (square the radius plus 20 to avoid having to square root so much
+        if (primaryNodes.hasOwnProperty(node.location) && centDist > PRIMARY_CENT_DIST){
+            actualCentDist = Math.sqrt(centDist);
+            pX = (centroid.x - node.x) / actualCentDist;
+            pY = (centroid.y - node.y) / actualCentDist;
 
-            power = Math.sqrt(Math.pow(renderedNodesList.length - n, 2));
+            power = Math.abs(renderedNodesList.length - n);
 
-            pSpeed = (centDist / graphWidth) * ATTRACTION_FORCE * power; 
+            pSpeed = ( actualCentDist /graphWidth) * ATTRACTION_FORCE * power; 
 
             pX *= pSpeed;
             pY *= pSpeed;
 
             node.vector = node.vector.add(new Vector([pX, pY, 0]));
         }
-        //pull towards category 
-        if (primaryNodes.hasOwnProperty(node.location)){
-            var catPos = typePositions[node.type];
-            pY = (catPos.top - node.y) / centDist;
-            pY *= pSpeed;
+        //pull slightly towards category while rendering primary nodes
+        if (primaryNodes.hasOwnProperty(node.location) && renderedNodesList.length == Object.keys(primaryNodes).length){
+            var catPos = typePositions[node.type]; 
+            pY = (catPos.top - node.y); 
+            pSpeed = (pY / (graphWidth)) * ATTRACTION_FORCE; 
+            pY *= Math.abs(pSpeed)/4;
+            
             node.vector = node.vector.add(new Vector([0, pY, 0]));    
         }
         
 	    //don't let secondary nodes get too close to centroid
         if (secondaryNodes.hasOwnProperty(node.location) && centDist < SECONDARY_CENT_DIST){
-            pX = (centroid.x - node.x) / centDist;
-            pY = (centroid.y - node.y) / centDist;
+            actualCentDist = Math.sqrt(centDist);
+            pX = (centroid.x - node.x) / actualCentDist;
+            pY = (centroid.y - node.y) / actualCentDist;
 
-            pSpeed =  ((TOUCH_DISTANCE - Math.sqrt(centDist)) / TOUCH_DISTANCE) * REPULSE_FORCE * 2; 
+            pSpeed =  ((SECONDARY_CENT_DIST_ACTUAL - actualCentDist) / SECONDARY_CENT_DIST_ACTUAL) * REPULSE_FORCE * 2; 
 
-            pX *= pSpeed;
-            pY *= pSpeed;
+            pX *= pSpeed * X_REPULSE_FACTOR;
+            pY *= pSpeed * Y_REPULSE_FACTOR;
             
             node.vector = node.vector.add(new Vector([pX, pY, 0]));
         }
@@ -116,13 +130,13 @@ function stepPhysical(x){
 				pX = (parent.x - node.x) / pDist;
 				pY = (parent.y - node.y) / pDist;
 				
-				power = Math.sqrt(Math.pow(renderedNodesList.length - n, 2));
+				power = Math.abs(renderedNodesList.length - n);
 				
                 //the more you multiply graph width by, the more of the space nodes take up
-				pSpeed = (pDist / (graphWidth*100)) * ATTRACTION_FORCE * power; 
+				pSpeed = (pDist / (graphWidth)) * ATTRACTION_FORCE * power; 
 				
-				pX *= pSpeed;
-				pY *= pSpeed;
+				pX *= pSpeed * X_ATTRACT_FACTOR;
+				pY *= pSpeed * Y_ATTRACT_FACTOR;
 				
 				node.vector = node.vector.add(new Vector([pX, pY, 0]));
 			}        
@@ -153,13 +167,14 @@ function stepPhysical(x){
                     
 					pSpeed =  ((TOUCH_DISTANCE - pDist) / TOUCH_DISTANCE) * REPULSE_FORCE; 
 			
-                    pX *= pSpeed;
-					pY *= pSpeed;
+                    pX *= pSpeed * X_REPULSE_FACTOR;
+                    pY *= pSpeed * Y_REPULSE_FACTOR;
 					
 					repulsionVector = repulsionVector.add(new Vector([pX, pY, 0]));
 				}
                 //if they are too close on the y move them
                 else if(yDist < Y_TOUCH_DISTANCE && Math.abs(other.x - node.x) < X_OVERLAP){
+                    pY = (other.y - node.y) / pDist;
 					pSpeed =  ((Y_TOUCH_DISTANCE - yDist) / Y_TOUCH_DISTANCE) * REPULSE_FORCE; 
 					pY *= pSpeed;
 					repulsionVector = repulsionVector.add(new Vector([0, pY, 0]));
