@@ -3,7 +3,7 @@ chrome.extension.onRequest.addListener(
     	if (request.loadStudySettings != null)
     		getStudySettings(request.loadStudySettings, sendResponse);
     	else if (request.storeStudySettings != null)
-    		setStudySettings(request.storeStudySettings);
+    		setStudySettings(request.storeStudySettings, sendResponse);
     	else if (request.loadOAuthTokenValues != null)
     		getOAuthTokenSecret(request.loadOAuthTokenValues, sendResponse);
     	else if (request.storeOAuthTokenObject != null)
@@ -18,7 +18,7 @@ function generateUserId(cond)
     var charSet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
     // to avoid any possible duplicate between study and normal usage
-    var len = (cond == "none")? 6 : 7;
+    var len = (cond == "none")? 6 : 8;
     
     for (var i = 0; i < len; i++)
         id += charSet.charAt(Math.floor(Math.random() * charSet.length));
@@ -52,10 +52,11 @@ function getStudySettings(url, sendResponse)
 
 	sendResponse({last_userid: prevUserId, userid: localStorage["tweetBubbleUserId"], 
 				last_condition: prevCondition, condition: localStorage["tweetBubbleStudyCondition"],
-				agree: localStorage["agreeToInformationSheet"]});
+				agree: localStorage["agreeToInformationSheet"], username: localStorage["username"],
+				oauth_token: localStorage["oauth_token"], oauth_token_secret: localStorage["oauth_token_secret"]});
 }
 
-function setStudySettings(options)
+function setStudySettings(options, sendResponse)
 {
 	for (var k in options)
 	{
@@ -65,6 +66,7 @@ function setStudySettings(options)
 			localStorage[prop] = options[k];
 		}
 	}
+	sendResponse({storageAck: "OK"});
 }
 
 function setOAuthTokenSecret(oauth_token_object)

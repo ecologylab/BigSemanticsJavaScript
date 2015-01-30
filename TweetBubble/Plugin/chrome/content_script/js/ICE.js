@@ -12,9 +12,11 @@ var mice_condition = "mice";
 var experiment_condition = null;
 var response_condition = null;
 var userid = null;
+var username = null;
 
 var currentUrl = null;
 var instance = null;
+var prevYOffset = 0;
 
 //call to get and replace divs, queue w on-demand prioritizing
 function processPage()
@@ -67,6 +69,8 @@ function onUpdateHandler()
 		MetadataLoader.logger(eventObj);
 	}
 	processPage();
+	//instance.logScrolledTweetIds(prevYOffset, window.pageYOffset);
+	//prevYOffset = window.pageYOffset;
 }
 
 function isExpanded(icon)
@@ -266,6 +270,8 @@ function defaultConditionOnUpdateHandler()
 		MetadataLoader.logger(eventObj);
 	}
 	processDefaultConditionClicks(document);
+	//instance.logScrolledTweetIds(prevYOffset, window.pageYOffset);
+	//prevYOffset = window.pageYOffset;
 }
 
 function defaultConditionItemClick(event)
@@ -371,7 +377,51 @@ function run_script(userid, cond)
 		{
 			window.addEventListener("scroll", onUpdateHandler);
 		}
+	}
+	else
+	{
+		if (isExtension)
+		{
+			Logger.init(userid, cond);
+		}
 		
+		processDefaultConditionClicks(document);
+		
+		if (isExtension)
+		{
+			window.addEventListener("scroll", defaultConditionOnUpdateHandler);
+		}
+	}
+	
+	currentUrl = document.URL;
+	if (document.URL == "https://twitter.com" || document.URL == "https://twitter.com/")
+		instance.validateUserInfo();
+	
+	if (isExtension) 
+	{
+		setInterval(function() {
+			instance.addAJAXContentListener(ajaxContentUpdate);
+		}, 5000);
+	}
+}
+
+function processInfoSheetResponse(resp)
+{
+	chrome.extension.sendRequest({storeStudySettings: {"agreeToInformationSheet": resp}}, function(response) {
+		window.location.replace("https://twitter.com");
+	});
+	//if (resp == Util.YES)
+		//run_script(userid, response_condition);
+}
+
+function isAccessGranted(response)
+{
+	if (response.oauth_token && response.oauth_token_secret)
+	{
+		return true;
+	}
+	else
+	{
 		var params = document.URL.substr(document.URL.indexOf('?') + 1).split('&');
 		var oauth_token = null;
 		var oauth_verifier = null;
@@ -391,38 +441,13 @@ function run_script(userid, cond)
 		if (oauth_token && oauth_verifier)
 		{
 			TwitterOAuth.accessTokenHelper(oauth_token, oauth_verifier);
+			return true;
 		}
-	}
-	else
-	{
-		if (isExtension)
+		else
 		{
-			Logger.init(userid, cond);
-		}
-		
-		processDefaultConditionClicks(document);
-		
-		if (isExtension)
-		{
-			window.addEventListener("scroll", defaultConditionOnUpdateHandler);
+			return false;
 		}
 	}
-	
-	currentUrl = document.URL;
-	
-	if (isExtension) 
-	{
-		setInterval(function() {
-			instance.addAJAXContentListener(ajaxContentUpdate);
-		}, 5000);
-	}
-}
-
-function processInfoSheetResponse(resp)
-{
-	chrome.extension.sendRequest({storeStudySettings: {"agreeToInformationSheet": resp}});
-	if (resp == Util.YES)
-		run_script(userid, response_condition);
 }
 
 //run_at is document_end i.e. after DOM is complete but before images and frames are loaded
@@ -440,19 +465,29 @@ else
 			experiment_condition = response.condition;
 		else
 			experiment_condition = mice_condition;
-			  
-		if (response && response.agree == Util.YES)
-			run_script(response.userid, response.condition);
+		
+		if (response && !isAccessGranted(response))
+		{
+			Util.promptUserForAccessGrant(processInfoSheetResponse);
+		}
 		else
 		{
-			if (response && response.agree != Util.NO)
+			if (response && response.agree == Util.YES)
 			{
-				response_condition = response.condition;
-				userid = response.userid;
-				Util.getInformationSheetResponse(processInfoSheetResponse);
+				username = response.username;
+				run_script(response.userid, response.condition);
 			}
-			//if (window.confirm(Util.info_sheet))
-				//processInfoSheetResponse(Util.YES);
+			else
+			{
+				if (response && response.agree != Util.NO)
+				{
+					response_condition = response.condition;
+					userid = response.userid;
+					Util.getInformationSheetResponse(processInfoSheetResponse);
+				}
+				//if (window.confirm(Util.info_sheet))
+					//processInfoSheetResponse(Util.YES);
+			}
 		}
 		
 		if (MetadataLoader.logger)
@@ -482,27 +517,4 @@ if (isExtension)
 		if (request.url != null)
 			processUrlChange(request.url);
 	});
-}
-
-
-function testLoad()
-{
-	var url = "https://api.twitter.com/1.1/statuses/retweets_of_me.json?count=50&since_id=259320959964680190&max_id=259320959964680500";
-	
-	var xhr = new XMLHttpRequest();
-	//xhr.responseType = "document";
-	//xhr.followRedirects = true;
-	
-	xhr.onreadystatechange = function() {
-		
-		console.log("state: " + xhr.readyState + " status: " + xhr.status);
-		
-		if (xhr.readyState==4 && xhr.status==200)
-	    {
-			console.log(xhr.response);
-		}
-	};
-	
-	xhr.open("GET", url, true);
-	xhr.send();
 }

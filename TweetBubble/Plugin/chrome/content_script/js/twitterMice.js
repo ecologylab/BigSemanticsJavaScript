@@ -20,7 +20,9 @@ var retweetIconPath1 = isExtension? chrome.extension.getURL("content_script/img/
 var favoriteIconPath1 = isExtension? chrome.extension.getURL("content_script/img/favorite_221.png") : imgDir + "favorite_221.png";
 var replyIconPath2 = isExtension? chrome.extension.getURL("content_script/img/reply_153.png") :	imgDir + "reply_153.png";
 var retweetIconPath2 = isExtension? chrome.extension.getURL("content_script/img/retweet_153.png") :	imgDir + "retweet_153.png";
+var retweetIconPath3 = isExtension? chrome.extension.getURL("content_script/img/retweet_on.png") :	imgDir + "retweet_on.png";
 var favoriteIconPath2 = isExtension? chrome.extension.getURL("content_script/img/favorite_153.png") : imgDir + "favorite_153.png";
+var favoriteIconPath3 = isExtension? chrome.extension.getURL("content_script/img/favorite_on.png") : imgDir + "favorite_on.png";
 
 var MetadataRenderer = MICE;
 
@@ -919,7 +921,7 @@ MetadataRenderer.buildMetadataField = function(metadataField, isChildTable, fiel
 				// Uses http://getfavicon.appspot.com/ to resolve the favicon
 				var favicon = document.createElement('img');
 					favicon.className = styleInfo.styles.faviconICE;
-					favicon.src = "http://g.etfv.co/" + metadataField.value;
+					favicon.src = MetadataLoader.getFaviconURL(metadataField.navigatesTo);
 					
 				var aTag = document.createElement('a');
 				aTag.innerText = MetadataLoader.removeLineBreaksAndCrazies(metadataField.value);
@@ -949,7 +951,7 @@ MetadataRenderer.buildMetadataField = function(metadataField, isChildTable, fiel
 				// Uses http://getfavicon.appspot.com/ to resolve the favicon
 				var favicon = document.createElement('img');
 					favicon.className = styleInfo.styles.faviconICE;
-					favicon.src = "http://g.etfv.co/" + metadataField.navigatesTo;
+					favicon.src = MetadataLoader.getFaviconURL(metadataField.navigatesTo);
 					
 				var aTag = document.createElement('a');
 					aTag.className = styleInfo.styles.fieldValue;
@@ -1576,110 +1578,53 @@ MetadataRenderer.setDocumentDownloader = function(fnDownloadRequester)
 	requestDocumentDownload = fnDownloadRequester;
 }
 
-MetadataRenderer.openUrlInNewWindow = function()
+MetadataRenderer.postRetweet = function()
 {
-	var url = this.getAttribute("url");
-	window.open(url, 'Tweet', "height=500,width=500");
-	
-	if(MetadataLoader.logger)
-	{
-		var eventObj = {
-			tweet_action: {
-				action: url
-			}
-		}
-		MetadataLoader.logger(eventObj);
-	}
+	var tweetId = this.getAttribute("tweetId");
+	TwitterRequests.postRetweet(tweetId, TwitterRequests.retweetCallback);
 }
 
-MetadataRenderer.highlightTweetSemanticsIcon = function()
+MetadataRenderer.postFavorite = function()
 {
-	var icon = this.firstChild;
-	
-	if (icon.src == replyIconPath1)
-		icon.src = replyIconPath2;
-	else if (icon.src == retweetIconPath1)
-		icon.src = retweetIconPath2;
-	else if (icon.src == favoriteIconPath1)
-		icon.src = favoriteIconPath2;
-}
-
-MetadataRenderer.unhighlightTweetSemanticsIcon = function()
-{
-	var icon = this.firstChild;
-	
-	if (icon.src == replyIconPath2)
-		icon.src = replyIconPath1;
-	else if (icon.src == retweetIconPath2)
-		icon.src = retweetIconPath1;
-	else if (icon.src == favoriteIconPath2)
-		icon.src = favoriteIconPath1;
-}
-
-MetadataRenderer.getTweetSemanticsDiv = function(tweetId, styleInfo)
-{
-	var imgReply = document.createElement('img');
-	imgReply.className = styleInfo.styles.tweetSemantics;
-	imgReply.src = replyIconPath1;
-		
-	var imgRetweet = document.createElement('img');
-	imgRetweet.className = styleInfo.styles.tweetSemantics;
-	imgRetweet.src = retweetIconPath1;
-	
-	var imgFavorite = document.createElement('img');
-	imgFavorite.className = styleInfo.styles.tweetSemantics;
-	imgFavorite.src = favoriteIconPath1;
-	
-	var a_reply = document.createElement('a');
-	a_reply.className = styleInfo.styles.tweetSemantics;
-	a_reply.setAttribute("url", "https://twitter.com/intent/tweet?in_reply_to=" + tweetId);
-	a_reply.addEventListener('click', MetadataRenderer.createReplyBox);
-	a_reply.addEventListener('mouseover', MetadataRenderer.highlightTweetSemanticsIcon);
-	a_reply.addEventListener('mouseout', MetadataRenderer.unhighlightTweetSemanticsIcon);
-	a_reply.appendChild(imgReply);
-		
-	var a_retweet = document.createElement('a');
-	a_retweet.className = styleInfo.styles.tweetSemantics;
-	a_retweet.setAttribute("url", "https://twitter.com/intent/retweet?tweet_id=" + tweetId);
-	a_retweet.addEventListener('click', MetadataRenderer.openUrlInNewWindow);
-	a_retweet.addEventListener('mouseover', MetadataRenderer.highlightTweetSemanticsIcon);
-	a_retweet.addEventListener('mouseout', MetadataRenderer.unhighlightTweetSemanticsIcon);
-	a_retweet.appendChild(imgRetweet);
-	
-	var a_favorite = document.createElement('a');
-	a_favorite.className = styleInfo.styles.tweetSemantics;
-	a_favorite.setAttribute("url", "https://twitter.com/intent/favorite?tweet_id=" + tweetId);
-	a_favorite.addEventListener('click', MetadataRenderer.openUrlInNewWindow);
-	a_favorite.addEventListener('mouseover', MetadataRenderer.highlightTweetSemanticsIcon);
-	a_favorite.addEventListener('mouseout', MetadataRenderer.unhighlightTweetSemanticsIcon);
-	a_favorite.appendChild(imgFavorite);
-	
-	var twSemanticsRow = document.createElement('div');
-	twSemanticsRow.className = styleInfo.styles.tweetSemanticsRow;
-	twSemanticsRow.appendChild(a_reply);
-	twSemanticsRow.appendChild(a_retweet);
-	twSemanticsRow.appendChild(a_favorite);
-		
-	var twSemanticsDiv = document.createElement('div');
-	twSemanticsDiv.className = styleInfo.styles.tweetSemanticsDiv;
-	twSemanticsDiv.appendChild(twSemanticsRow);
-	
-	return twSemanticsDiv;
+	var tweetId = this.getAttribute("tweetId");
+	TwitterRequests.postFavorite(tweetId, TwitterRequests.favoriteCallback);
 }
 
 MetadataRenderer.postReply = function()
 {
 	var textareaParentDiv = this.parentElement.parentElement.parentElement; // button.valueCol.row.table
 	var replyBoxTextarea = textareaParentDiv.getElementsByTagName('textarea')[0];
-	var tweetStr = replyBoxTextarea.value;	
+	var tweetId = this.getAttribute("tweetId");
 	
-	TwitterRequests.postReply(tweetStr);
+	var tweetStr = replyBoxTextarea.value;	
+	TwitterRequests.postReply(tweetStr, tweetId, TwitterRequests.replyCallback);
+	
+	var replyBoxValueCol = replyBoxTextarea.parentElement;
+	while (replyBoxValueCol.hasChildNodes())
+		replyBoxValueCol.removeChild(replyBoxValueCol.lastChild);
+	
+	var textDiv = document.createElement("div");
+	textDiv.innerHTML = "Your reply has been posted!";
+	textDiv.textContent = "Your reply has been posted!";
+	replyBoxValueCol.appendChild(textDiv);
+	
+	var hideText = function(txtParent) {
+		while (txtParent.hasChildNodes())
+			txtParent.removeChild(txtParent.lastChild);
+	}
+	
+	window.setTimeout(hideText, 1000, replyBoxValueCol);
+
+	var replyButtonRow = replyBoxValueCol.parentElement.nextSibling;
+	var replyButtonRowParent = replyButtonRow.parentElement;
+	replyButtonRowParent.removeChild(replyButtonRow);
 }
 
 MetadataRenderer.createReplyBox = function()
 {
 	if (!this.isReplyBoxVisible)
 	{
+		var tweetId = this.getAttribute("tweetId");
 		var miceStyles = InterfaceStyle.getMiceStyleDictionary();
 		var styleInfo = {styles: miceStyles};
 		
@@ -1694,7 +1639,7 @@ MetadataRenderer.createReplyBox = function()
 		valueCol.className = styleInfo.styles.valueColShowDiv;
 
 		var replyBox = document.createElement('textarea');
-		replyBox.cols = "80";
+		replyBox.style.width = "93%";
 		valueCol.appendChild(replyBox);
 		
 		var twReplyBoxRow = document.createElement('div');
@@ -1711,7 +1656,10 @@ MetadataRenderer.createReplyBox = function()
 		var twButton = document.createElement('input');
 		twButton.type = "button";
 		twButton.value = "Tweet";
+		twButton.style.background = "#0084b4";
+		twButton.style.color = "white";
 		twButton.addEventListener('click', MetadataRenderer.postReply);
+		twButton.setAttribute("tweetId", tweetId);
 		valueCol2.appendChild(twButton);
 		var twButtonRow = document.createElement('div');
 		twButtonRow.className = styleInfo.styles.metadataRow;
@@ -1739,4 +1687,110 @@ MetadataRenderer.createReplyBox = function()
 			replyBox.value = usernameStr;
 		}
 	}
+}
+
+MetadataRenderer.highlightTweetSemanticsIcon = function()
+{
+	var icon = this.firstChild;
+	
+	if (icon.src == replyIconPath1)
+		icon.src = replyIconPath2;
+	else if (icon.src == retweetIconPath1)
+		icon.src = retweetIconPath2;
+	else if (icon.src == favoriteIconPath1)
+		icon.src = favoriteIconPath2;
+}
+
+MetadataRenderer.unhighlightTweetSemanticsIcon = function()
+{
+	var icon = this.firstChild;
+	
+	if (icon.src == replyIconPath2)
+		icon.src = replyIconPath1;
+	else if (icon.src == retweetIconPath2)
+		icon.src = retweetIconPath1;
+	else if (icon.src == favoriteIconPath2)
+		icon.src = favoriteIconPath1;
+}
+
+MetadataRenderer.setRetweetIconOn = function(id)
+{
+	if (id)
+	{
+		var idStr = "retweetIcon" + id;
+		var elt = document.getElementById(idStr);
+		if(elt)
+		{
+			var icon = elt.firstChild;
+			icon.src = retweetIconPath3;
+		}
+	}
+}
+
+MetadataRenderer.setFavoriteIconOn = function(id)
+{
+	if (id)
+	{
+		var idStr = "favoriteIcon" + id;
+		var elt = document.getElementById(idStr);
+		if(elt)
+		{
+			var icon = elt.firstChild;
+			icon.src = favoriteIconPath3;
+		}
+	}
+}
+
+MetadataRenderer.getTweetSemanticsDiv = function(tweetId, styleInfo)
+{
+	var imgReply = document.createElement('img');
+	imgReply.className = styleInfo.styles.tweetSemantics;
+	imgReply.src = replyIconPath1;
+		
+	var imgRetweet = document.createElement('img');
+	imgRetweet.className = styleInfo.styles.tweetSemantics;
+	imgRetweet.src = retweetIconPath1;
+	
+	var imgFavorite = document.createElement('img');
+	imgFavorite.className = styleInfo.styles.tweetSemantics;
+	imgFavorite.src = favoriteIconPath1;
+	
+	var a_reply = document.createElement('a');
+	a_reply.className = styleInfo.styles.tweetSemantics;
+	a_reply.setAttribute("url", "https://twitter.com/intent/tweet?in_reply_to=" + tweetId);
+	a_reply.setAttribute("tweetId", tweetId);
+	a_reply.addEventListener('click', MetadataRenderer.createReplyBox);
+	a_reply.addEventListener('mouseover', MetadataRenderer.highlightTweetSemanticsIcon);
+	a_reply.addEventListener('mouseout', MetadataRenderer.unhighlightTweetSemanticsIcon);
+	a_reply.appendChild(imgReply);
+		
+	var a_retweet = document.createElement('a');
+	a_retweet.className = styleInfo.styles.tweetSemantics;
+	a_retweet.setAttribute("id", "retweetIcon" + tweetId);
+	a_retweet.setAttribute("tweetId", tweetId);
+	a_retweet.addEventListener('click', MetadataRenderer.postRetweet);
+	a_retweet.addEventListener('mouseover', MetadataRenderer.highlightTweetSemanticsIcon);
+	a_retweet.addEventListener('mouseout', MetadataRenderer.unhighlightTweetSemanticsIcon);
+	a_retweet.appendChild(imgRetweet);
+	
+	var a_favorite = document.createElement('a');
+	a_favorite.className = styleInfo.styles.tweetSemantics;
+	a_favorite.setAttribute("id", "favoriteIcon" + tweetId);
+	a_favorite.setAttribute("tweetId", tweetId);
+	a_favorite.addEventListener('click', MetadataRenderer.postFavorite);
+	a_favorite.addEventListener('mouseover', MetadataRenderer.highlightTweetSemanticsIcon);
+	a_favorite.addEventListener('mouseout', MetadataRenderer.unhighlightTweetSemanticsIcon);
+	a_favorite.appendChild(imgFavorite);
+	
+	var twSemanticsRow = document.createElement('div');
+	twSemanticsRow.className = styleInfo.styles.tweetSemanticsRow;
+	twSemanticsRow.appendChild(a_reply);
+	twSemanticsRow.appendChild(a_retweet);
+	twSemanticsRow.appendChild(a_favorite);
+		
+	var twSemanticsDiv = document.createElement('div');
+	twSemanticsDiv.className = styleInfo.styles.tweetSemanticsDiv;
+	twSemanticsDiv.appendChild(twSemanticsRow);
+	
+	return twSemanticsDiv;
 }

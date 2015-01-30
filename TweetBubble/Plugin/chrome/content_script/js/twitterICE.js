@@ -1,6 +1,8 @@
 
 function twitterICE() {
 
+this.usernameXPath = "//span[@class='u-linkComplex-target']";	
+	
 this.expandableItemsXPath = "//ol[@id='stream-items-id']/li//p[@class='js-tweet-text tweet-text']/a/b";
 
 //@usernames, #hashtags, tweet tweeter, @connect tweeter, new layout tweet tweeter
@@ -419,6 +421,104 @@ this.getExternalURLsXPath = function() {
 this.checkAndSetExternalUrlTarget = function(elt) {
 	if (elt.getAttribute("target") != "_blank")
 		elt.setAttribute("target", "_blank");
+};
+
+this.validateUserInfo = function(prevUsername)
+{
+	var usernameResult = document.evaluate(this.usernameXPath, document, null, XPathResult.STRING_TYPE, null).stringValue;
+	if (usernameResult && usernameResult != prevUsername)
+	{
+		chrome.extension.sendRequest({userInfo: usernameResult}, function(response) {
+			if (response && response.doc) {
+				var twUser = response.doc;
+				twUser.tweets = {};
+				
+				if (MetadataLoader.logger)
+				{
+					if (!prevUsername)
+					{
+						prevUsername = usernameResult;
+						var eventObj = {
+							user_info: {
+								username: usernameResult,
+								info: twUser
+							}
+						}
+						MetadataLoader.logger(eventObj);
+					}
+					else
+					{
+						var eventObj = {
+							change_user_info: {
+								prev_username: prevUsername,
+								new_username: usernameResult,
+								info: twUser
+							}
+						}
+						MetadataLoader.logger(eventObj);
+					}
+				}
+			}
+		});
+	}
+};
+
+this.logScrolledTweetIds = function(prevYOffset, newYOffset)
+{
+//	var end1, end2; // end1 < end2
+//	if (prevYOffset < newYOffset) //scroll down
+//	{
+//		end2 = newYOffset + window.innerHeight;
+//		end1 = end2 - (newYOffset - prevYOffset);	
+//	}
+//	else // scroll up
+//	{
+//		end1 = newYOffset;
+//		end2 = end1 + (prevYOffset - newYOffset);
+//	}
+//	var twitterElts;
+//	if (document.URL.indexOf("https://twitter.com/search") == 0 || document.URL.indexOf("https://twitter.com/search"))
+//	{
+//		twitterElts = document.getElementsByClassName("content");
+//		for (var i = 0; twitterElts.length; i++)
+//		{
+//			if (twitterElts[i] && twitterElts[i].parentElement)
+//			{
+//				var elt = twitterElts[i].parentElement;
+//		
+//				var rect = elt.getBoundingClientRect();
+//				if (rect.top)
+//				{
+//					
+//				}
+//			}
+//		}
+//	}
+//	else
+//	{
+//		twitterElts = document.getElementsByClassName("StreamItem js-stream-item");
+//		for (var i = 0; twitterElts.length; i++)
+//		{
+//			var elt = twitterElts[i];
+//			var rect = elt.getBoundingClientRect();
+//			if (rect.top)
+//			{
+//				
+//			}
+//		}
+//	}
+//	
+//	var twbElements = document.getElementsByClassName("tweetSemanticsRow");
+//	for (var i = 0; twbElements.length; i++)
+//	{
+//		var elt = twbElements[i];
+//		var rect = elt.getBoundingClientRect();
+//		if (rect.top)
+//		{
+//			
+//		}
+//	}
+	
 };
 
 }

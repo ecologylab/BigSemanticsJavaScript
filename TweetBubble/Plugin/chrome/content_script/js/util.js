@@ -11,6 +11,79 @@ Util.getCurrentUTCMilliTime = function()
 	return d.getTime() + (d.getTimezoneOffset()*60*1000)/1000;
 }
 
+Util.promptUserForAccessGrant = function(callback)
+{
+	var accessGrantSheet = "<h3>TweetBubble Extension for Chrome</h3><br>" +
+	"<h4>GRANT ACCESS</h4><br>" +
+	"<p>To grant access to the application, please click <strong>Sign-In</strong> below.<br>" +
+	"You will be taken through the standard Twitter login and authorization process. Please ensure that pop-ups are not blocked.</p><br>" +
+	"<p>If you do not want to participate, click <strong>Cancel</strong>.</p><br>";
+	
+	var removeDivAndReturnResp = function(event) {
+		document.body.removeChild(bgDiv);
+		document.body.removeChild(outerDiv);
+		if (event.target.value == "Sign-In")
+		{
+			//callback(Util.YES);
+			TwitterOAuth.authorize();
+		}
+		else
+			callback(Util.NO);
+	}
+	
+	var doNothing = function() {}
+	
+	//var handleScroll = function() {
+	//	outerDiv.style.top = window.scrollY;
+	//}
+	
+	var highlightbutton = function(event) {
+		if (event.target.value == "Sign-In")
+			event.target.style.background = "#55ACEE";
+		else
+			event.target.style.background = "#AA0000";
+	}
+	
+	var unhighlightbutton = function(event) {
+		event.target.style.background = "#ddd";
+	}
+	
+	var button_ok = document.createElement("input");
+	button_ok.type = "button";
+	button_ok.value = "Sign-In";
+	button_ok.className = "infoSheetButton";
+	button_ok.onclick = removeDivAndReturnResp;
+	button_ok.onmouseover = highlightbutton;
+	button_ok.onmouseout = unhighlightbutton;
+	
+	var button_cancel = document.createElement("input");
+	button_cancel.type = "button";
+	button_cancel.value = "Cancel";
+	button_cancel.className = "infoSheetButton";
+	button_cancel.style.float = "right";
+	button_cancel.onclick = removeDivAndReturnResp;
+	button_cancel.onmouseover = highlightbutton;
+	button_cancel.onmouseout = unhighlightbutton;
+			
+	var buttonDiv = document.createElement("div");
+	buttonDiv.appendChild(button_ok);
+	buttonDiv.appendChild(button_cancel);
+	
+	var bgDiv = document.createElement("div");
+	bgDiv.className = "infoSheetBgDiv";
+	bgDiv.style.width = window.screen.width + "px";
+	bgDiv.style.height = window.screen.height + "px";
+	bgDiv.onClick = doNothing;
+	
+	var outerDiv = document.createElement("div");
+	outerDiv.innerHTML = accessGrantSheet;	
+	outerDiv.className = "infoSheetDiv";
+	outerDiv.appendChild(buttonDiv);
+			
+	document.body.appendChild(bgDiv);
+	document.body.appendChild(outerDiv);
+}
+
 Util.info_sheet = "TweetBubble Extension for Chrome\n\n" +
 "INFORMATION SHEET\n" +
 "Interacting With Information\n" +
@@ -32,7 +105,7 @@ Util.info_sheet = "TweetBubble Extension for Chrome\n\n" +
 "Whom do I contact with questions about the research?" +
 "If you have questions regarding this study, you may contact Dr. Kerne (979 862-3217, andruid @cse.tamu.edu).\n\n" +
 "Whom do I contact about my rights as a research participant?" +
-"This research study has been reviewed by the Human Subjects’ Protection Program and/or the Institutional Review Board at Texas A&M University.  For research-related problems or questions regarding your rights as a research participant, you can contact these offices at (979)458-4067 or irb@tamu.edu." +
+"This research study has been reviewed by the Human Subjects Protection Program and/or the Institutional Review Board at Texas A&M University.  For research-related problems or questions regarding your rights as a research participant, you can contact these offices at (979)458-4067 or irb@tamu.edu." +
 "\n\n";
 
 Util.getInformationSheetResponse = function(callback)
@@ -58,7 +131,7 @@ Util.getInformationSheetResponse = function(callback)
 		"<p><b>Whom do I contact with questions about the research?</b>" +
 		"If you have questions regarding this study, you may contact Dr. Kerne (979 862-3217, andruid @cse.tamu.edu).</p><br>" +
 		"<p><b>Whom do I contact about my rights as a research participant?</b>" +
-		"This research study has been reviewed by the Human Subjects’ Protection Program and/or the Institutional Review Board at Texas A&M University.  For research-related problems or questions regarding your rights as a research participant, you can contact these offices at (979)458-4067 or irb@tamu.edu." +
+		"This research study has been reviewed by the Human Subjects' Protection Program and/or the Institutional Review Board at Texas A&M University.  For research-related problems or questions regarding your rights as a research participant, you can contact these offices at (979)458-4067 or irb@tamu.edu." +
 		"</p><br>";
 	
 	var removeDivAndReturnResp = function(event) {

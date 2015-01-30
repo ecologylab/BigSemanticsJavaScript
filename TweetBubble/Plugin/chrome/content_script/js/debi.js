@@ -1153,8 +1153,23 @@ MetadataLoader.getHost = function(url)
 {
   if (url)
   {
-    var host = url.match(/:\/\/(www\.)?(.[^/:]+)/)[2];
-    return "http://www." + host;
+    if (url.match(/:\/\/(www\.)?(.[^/:]+)/) != null)
+		 return "http://www." + url.match(/:\/\/(www\.)?(.[^/:]+)/)[2];
+	else
+		return "error getting domain";
+   
   }
+}
+
+/**
+ * Gets the favicon image for a url
+ * @param url, string of target URL
+ * @return string of the favicon url
+ */
+MetadataLoader.getFaviconURL = function(url)
+{
+	return MetadataLoader.getHost(url) + "/favicon.ico";
+	
+	//return "http://g.etfv.co/" + url;
 }
 
