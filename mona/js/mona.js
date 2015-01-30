@@ -23,8 +23,8 @@ var MONA = {},
     TYPE_ELEM,          //the html element of the type area
     HISTORY_ELEM,       //the html element of the history area
     LOAD_BAR_ELEM,      //the html element of the loading bar/spinner
-    MAX_NODES = 40;     //max number of nodes we want to render
-
+    MAX_NODES = 40,     //max number of nodes we want to render
+    SEMANTIC_SERVICE_URL = "http://ecology-service.cse.tamu.edu/BigSemanticsService/";
 
 function Node(type, title, location, mmdName, parent){
 	this.type = type;
@@ -110,6 +110,21 @@ function waitForNewMMD(){
     deleteChildren(GRAPH_ELEM);
     getNodes();
 }
+
+/*
+MONA.getMetadata = function(url, callback, reload)
+{
+	var serviceURL; 
+	if(reload === true){
+		serviceURL = SEMANTIC_SERVICE_URL + "metadata.jsonp?reload=true&callback=" + callback + "&url=" + encodeURIComponent(url);
+	}
+	else{
+		serviceURL = SEMANTIC_SERVICE_URL + "metadata.jsonp?callback=" + callback + "&url=" + encodeURIComponent(url);
+	}
+  MetadataLoader.doJSONPCall(serviceURL);
+  console.log("requesting semantics service for metadata: " + serviceURL);
+};
+*/
 
 //make requests for all the node metadata
 function populateNodeMetadata(){
