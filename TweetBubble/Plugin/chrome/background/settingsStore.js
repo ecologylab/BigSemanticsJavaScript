@@ -18,7 +18,7 @@ function generateUserId(cond)
     var charSet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
     // to avoid any possible duplicate between study and normal usage
-    var len = (cond == "none")? 6 : 7;
+    var len = (cond == "none")? 6 : 8;
     
     for (var i = 0; i < len; i++)
         id += charSet.charAt(Math.floor(Math.random() * charSet.length));

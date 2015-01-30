@@ -60,6 +60,8 @@
     "content_script/img/favorite_153.png",
     "content_script/img/reply_221.png",
     "content_script/img/retweet_221.png",
-    "content_script/img/favorite_221.png"
+    "content_script/img/favorite_221.png",
+    "content_script/img/retweet_on.png",
+    "content_script/img/favorite_on.png"
   ]
 }
