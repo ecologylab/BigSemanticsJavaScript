@@ -12,51 +12,45 @@
     <link href="css/prettify.css" type="text/css" rel="stylesheet" />
     
     <link href="css/mdc.css" rel="stylesheet" media="screen">
-    <link href="../interactiveSemantics/metadataRenderer.css" rel="stylesheet" type="text/css">
-	<link href="../TweetBubble/Plugin/chrome/content_script/css/twitterMice.css" rel="stylesheet" type="text/css">
+    <link href="../renderers/styles/metadataRenderer.css" rel="stylesheet" type="text/css">
+	<!--  TweetBubble Stuff, currently ommited due to restructure testing
+	
+	<link href="../TweetBubble/Plugin/chrome/content_script/css/twitterMice.css" rel="stylesheet" type="text/css"> 
 
-    <!-- Scripts! -->
-    <script src="http://code.jquery.com/jquery-latest.js"></script>
-    <script src="js/bootstrap.min.js"></script>
-    <script type="text/javascript" src="js/prettify.js"></script>
-
-<!--  
-    <script type="text/javascript" src="../interactive/metadataRenderer/code/metadataRenderer.js"></script>
-    <script type="text/javascript" src="../interactive/metadataRenderer/code/metadataField.js"></script>
-    <script type="text/javascript" src="../interactive/metadataRenderer/code/documentContainer.js"></script>
-    <script type="text/javascript" src="../interactive/metadataRenderer/code/renderingTask.js"></script>
-    <script type="text/javascript" src="../interactive/metadataRenderer/code/createMetadataRendering.js"></script>
-    <script type="text/javascript" src="../interactive/metadataRenderer/code/interactiveMetadataRendering.js"></script>
-    <script type="text/javascript" src="../interactive/metadataRenderer/code/simplDeserializer.js"></script>
-   -->
-
-   <script type="text/javascript" src="../interactiveSemantics/interfaceStyle.js"></script>
-   <script type="text/javascript" src="../interactiveSemantics/extensionInterface.js"></script>
-   <!--  
-    <script type="text/javascript" src="../interactiveSemantics/facetedCollection.js"></script>
-   
-   <script type="text/javascript" src="../interactiveSemantics/hashmap.js"></script>
-       <script type="text/javascript" src="../interactiveSemantics/micePlusPlus.js"></script>
-    -->
-     
-  
-   
-   <script type="text/javascript" src="../interactiveSemantics/debi.js"></script>   
-   <script type="text/javascript" src="../interactiveSemantics/mice.js"></script>
 
     <script type="text/javascript" src="../TweetBubble/Plugin/chrome/content_script/js/renderingTask.js"></script>
 	<script type="text/javascript" src="../TweetBubble/Plugin/chrome/content_script/js/twitterMice.js"></script>
 	<script type="text/javascript" src="../TweetBubble/Plugin/chrome/content_script/js/twitterICE.js"></script>
 	<script type="text/javascript" src="../TweetBubble/Plugin/chrome/content_script/js/ICE.js"></script>
+	-->
+    <!-- Libaries! -->
+    <script src="../libraries/jquery-2.0.0.min.js"></script>
+    <script src="../libraries/bootstrap/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="js/prettify.js"></script>
+   <!-- bsjsCore Files -->
+   <script type="text/javascript" src="../bsjsCore/MetadataLoader.js"></script>   
+   <script type="text/javascript" src="../bsjsCore/BSUtilities.js"></script>
+   <script type="text/javascript" src="../bsjsCore/MetadataTask.js"></script>   
+   <script type="text/javascript" src="../bsjsCore/MetadataViewModel.js"></script>
+   <script type="text/javascript" src="../bsjsCore/RepoMan.js"></script>
+    <script type="text/javascript" src="../interactiveSemantics/extensionInterface.js"></script>
+   
+   
+   <!-- Required renderer files -->
+    <script type="text/javascript" src="../renderers/interfaceStyle.js"></script>
+    <script type="text/javascript" src="../renderers/RendererBase.js"></script>
+    <script type="text/javascript" src="../renderers/RenderingTask.js"></script>
+    <script type="text/javascript" src="../renderers/VanillaMICE.js"></script>
+	<!-- Just the simpl things -->    
 
-	<script type="text/javascript" src="../simpl/simplDeserializer.js"></script>
-	<script type="text/javascript" src="../simpl/simplFieldTypes.js"></script>
-	<script type="text/javascript" src="../simpl/simplGraphCollapse.js"></script>
-	<script type="text/javascript" src="../simpl/simplGraphExpand.js"></script>
-	<script type="text/javascript" src="../simpl/simplTypeScope.js"></script>
-	<script type="text/javascript" src="../simpl/simplTypeScopeDeserialize.js"></script>
-	<script type="text/javascript" src="../simpl/simplTypeScopeSerialize.js"></script>
-
+	<script type="text/javascript" src="../bsjsCore/simpl/simplDeserializer.js"></script>
+	<script type="text/javascript" src="../bsjsCore/simpl/simplFieldTypes.js"></script>
+	<script type="text/javascript" src="../bsjsCore/simpl/simplGraphCollapse.js"></script>
+	<script type="text/javascript" src="../bsjsCore/simpl/simplGraphExpand.js"></script>
+	<script type="text/javascript" src="../bsjsCore/simpl/simplTypeScope.js"></script>
+	<script type="text/javascript" src="../bsjsCore/simpl/simplTypeScopeDeserialize.js"></script>
+	<script type="text/javascript" src="../bsjsCore/simpl/simplTypeScopeSerialize.js"></script>
+	<!-- HouseMice specifics -->
     <script type="text/javascript" src="js/mdc.js"></script>
     
     <script type="text/javascript" src="../semantics/MetaMetadataRepositoryLibrary.js"></script>

@@ -10,7 +10,7 @@
  * @param container, HTML container which will hold the rendering
 
  */
-function MetadataTask(url,isRoot, clipping, handler, container)
+function MetadataTask(url, isRoot, clipping, handler, container)
 {
   if (url != null)
   {

@@ -1,22 +1,48 @@
 /*
- * Loads the metadataRepository for BigSemantics projects that do not hook into an extension
+ * Loads the metadataRepository
+ * Will eventually select between various extensions, but for now is content to just use a lcoal version
  */
 
 var RepoMan = {};
-MetadataLoader.initMetaMetadataRepo = function(jsonRepo)
+
+RepoMan.repoIsLoading = false;
+RepoMan.repo = null;
+
+
+var isExtension = (typeof chrome !== "undefined" && typeof chrome.extension !== "undefined");
+
+RepoMan.extensionMetadataDomains = ["twitter.com"];
+
+
+
+
+
+	
+RepoMan.loadMMDRepo = function()
+{	
+	var callback = "RepoMan.initMetaMetadataRepo";
+	var serviceURL = SEMANTIC_SERVICE_URL + "mmdrepository.jsonp?reload=true&callback=" + callback;
+	  
+	MetadataLoader.doJSONPCall(serviceURL);
+	//console.log("requesting semantics service for mmd repository");
+};
+
+
+
+RepoMan.initMetaMetadataRepo = function(jsonRepo)
 {
 	simplDeserialize(jsonRepo);
 	
 	var mmdByName = jsonRepo["meta_metadata_repository"]["repository_by_name"];
 		
-	MetadataLoader.repo = {};
+	RepoMan.repo = {};
 	
 	//go through all mmd and construct mmd dictionary
 	for (var i = 0; i < mmdByName.length; i++)
 	{
 		var mmd = mmdByName[i];
 		
-		MetadataLoader.repo[mmd.name] = mmd;
+		RepoMan.repo[mmd.name] = mmd;
 	}
 	
 	// alt names 
@@ -27,7 +53,7 @@ MetadataLoader.initMetaMetadataRepo = function(jsonRepo)
 		var mmdName = altNames[i].name;
 		var mmdObj = altNames[i].mmd;
 		
-		MetadataLoader.repo[mmdName] = mmdObj;
+		RepoMan.repo[mmdName] = mmdObj;
 	}
 	
 	//go through all tasks and set their metadata
@@ -43,20 +69,20 @@ MetadataLoader.initMetaMetadataRepo = function(jsonRepo)
 		var task = lengthSafeTaskList[i];
 		if (task.mmdType)
 		{
-    		MetadataLoader.getMMDFromRepoByTask(task); 
+    		RepoMan.getMMDFromRepoByTask(task); 
     	}    	
 	}	
 };
 
-MetadataLoader.getMMDFromRepoByName = function(name)
+RepoMan.getMMDFromRepoByName = function(name)
 {
-	var mmd = MetadataLoader.repo[name];
+	var mmd = RepoMan.repo[name];
 	MetadataLoader.setMetaMetadata(mmd);
 };
 
-MetadataLoader.getMMDFromRepoByTask = function(task)
+RepoMan.getMMDFromRepoByTask = function(task)
 {
-	var mmd = MetadataLoader.repo[task.mmdType];
+	var mmd = RepoMan.repo[task.mmdType];
 	task.mmdType = mmd.name;
 	
 	MetadataLoader.setMetaMetadata(mmd);

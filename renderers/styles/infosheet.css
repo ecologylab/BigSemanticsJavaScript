@@ -1,0 +1,36 @@
+
+.infoSheetButton {
+	padding: 5px;
+	margin-right: 2px;
+	display: inline;
+	background: #ddd;
+}
+
+.infoSheetButtonDiv {
+	padding-left: 20%;
+	padding-right: 20%;
+}
+
+.infoSheetBgDiv {
+	background: black;
+	z-index: 9999;
+	position: fixed;
+	top: 0;
+	left: 0;
+	opacity: 0.6;
+}
+
+.infoSheetDiv {
+	font-size: 13px;
+	max-height: 87%;
+	overflow: auto;
+	z-index: 10000;
+	position: fixed;
+	left: 0;
+	top: 50px;
+	background: white;
+	margin-left: 15%;
+	margin-right: 15%;
+	padding: 15px;
+	border-radius: 8px;
+}

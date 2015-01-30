@@ -1,7 +1,7 @@
 /**
  *  Basic functions intended to be shared by metadata renderers
- *  Not actually capable of building HTML on its own, please use vanillaMICE
- *  for use in applications.
+ *  RendererBase.addMetadataDisplay is the key function here
+ *  
  *  
  *  DO NOT OVERWRITE these functions 
  *  
@@ -17,31 +17,6 @@ var RendererBase = {};
 
 RendererBase.documentMap = [];
 
-RendererBase.metadataToModel = function(task){
-
-    var metadataFields =
-      MetadataLoader.createMetadata(task.isRoot, task.mmd,
-                                    task.metadata, task.url);
-    // Is there any visable metadata?
-    if (MetadataLoader.hasVisibleMetadata(metadataFields))
-    {	
-    // If so, then build the HTML table	
-      var styleMmdType = (task.expandedItem && tasks[i].expandedItem.mmdType && 
-			task.expandedItem.mmdType.indexOf("twitter") != -1)? "twitter" : mmd.name; 
-		var miceStyles = InterfaceStyle.getMiceStyleDictionary(styleMmdType);         //Adds the metadata type as an attribute to the first field in the MD
-     //Adds the metadata type as an attribute to the first field in the MD
-      metadataFields[0].parentMDType = mmd.name;
-      var fieldAndStyle = {};
-      fieldAndStyle.fields = metadataFields;
-      fieldAndStyle.style = {styles: miceStyles, type: mmd.name};
-      return metadataFields;
-
-    }
-    else{
-    	return null;
-    }
-}
-
 /**
  * add metadata display to the container.
  * @param container, the HTML object to which the metadata rendering will be appended
@@ -54,7 +29,7 @@ RendererBase.metadataToModel = function(task){
 RendererBase.addMetadataDisplay = function(container, url, isRoot, clipping, requestMD, reloadMD, renderer){
 	
 	// Add the rendering task to the queue
-	var task = new RenderingTask(url, container, isRoot, clipping, renderer)
+	var task = new RenderingTask(url, true, clipping, null, container, renderer)
 	MetadataLoader.queue.push(task);	
 	
 	if(clipping != null && clipping.rawMetadata != null)
@@ -82,7 +57,7 @@ RendererBase.addMetadataDisplay = function(container, url, isRoot, clipping, req
 
 RendererBase.isRenderedDocument = function(url)
 {
-  for (var i = 0; i < MICE.documentMap.length; i++)
+  for (var i = 0; i < RendererBase.documentMap.length; i++)
   {
     if (RendererBase.documentMap[i].matches(url) && RendererBase.documentMap[i].rendered)
     {
@@ -105,7 +80,7 @@ RendererBase.getFieldLabel = function(metadataField)
 			label.type = "scalar";
 			label.value = metadataField.value_as_label.value;
 		}
-		else if (metadataField.value_as_label.type == "image" && MetadataLoader.getImageSource(metadataField.value_as_label.value))
+		else if (metadataField.value_as_label.type == "image" && ViewModeler.getImageSource(metadataField.value_as_label.value))
 		{
 			label.type = "image";
 			label.value = metadataField.value_as_label.value;

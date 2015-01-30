@@ -4,7 +4,7 @@
     border: 1px solid gray;
     margin: 8px;
     padding: 8px;
-    min-width: 500px;
+    min-width: 640px;
 }
 .facetLabel{
 	float:left;
@@ -17,7 +17,7 @@
     border-top-right-radius: 8px;
     border-bottom-right-radius: 8px;
     border-bottom-left-radius: 8px;
-    min-width: 500px;
+    min-width: 640px;
     
     line-height: 15px;
     
@@ -455,14 +455,12 @@
     opacity: 1.0    
 }
 
-.metadata_h1{
-	font-weight: bold;
-}
-
 .tabValue {
     
 }
-
+.metadata_h1{
+	font-weight: bold;
+}
 .clippingFieldsTable {
     
 }

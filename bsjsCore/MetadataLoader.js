@@ -17,6 +17,7 @@ var MetadataLoader = {};
 //The queue holds a list of containers which are waiting for metadata or
 //meta-metadata from the service.
 MetadataLoader.queue = [];
+MetadataLoader.onloadCallback = function(urls, url) { /* null default implementation */ };
 
 
 /**
@@ -63,8 +64,13 @@ MetadataLoader.load = function(handler, url, isRoot, clipping, container)
  * @param url, url of the target document
  * @param callback, name of the function to be called from the JSON-p call
  */
-MetadataLoader.getMetadata = function(url, callback, reload)
+MetadataLoader.getMetadata = function(url, callback, reload, source)
 {
+	/*
+	 * Should eventually choose where to get mmd from based on source
+	 */
+	
+	
 	var serviceURL; 
 	if(reload == true){
 		serviceURL = SEMANTIC_SERVICE_URL + "metadata.jsonp?reload=true&callback=" + callback
@@ -74,37 +80,18 @@ MetadataLoader.getMetadata = function(url, callback, reload)
 		serviceURL = SEMANTIC_SERVICE_URL + "metadata.jsonp?callback=" + callback
         + "&url=" + encodeURIComponent(url);
 	}
-  MetadataLoader.doJSONPCall(serviceURL);
+	  MetadataLoader.doJSONPCall(serviceURL);
+
   console.log("requesting semantics service for metadata: " + serviceURL);
 };
 
 
 
-MetadataLoader.repoIsLoading = false;
-MetadataLoader.repo = null;
-
-// The URL for the document being loaded.
-MetadataLoader.currentDocumentLocation = "";
-
-// Logger
+//Logger
 MetadataLoader.logger = function(message) { /* null default implementation */ };
 
-MetadataLoader.extensionMetadataDomains = ["twitter.com"];
-
-MetadataLoader.onloadCallback = function(urls, url) { /* null default implementation */ };
-
-
-
-
-	
-MetadataLoader.loadMMDRepo = function()
-{	
-	var callback = "MetadataLoader.initMetaMetadataRepo";
-	var serviceURL = SEMANTIC_SERVICE_URL + "mmdrepository.jsonp?reload=true&callback=" + callback;
-	  
-	MetadataLoader.doJSONPCall(serviceURL);
-	//console.log("requesting semantics service for mmd repository");
-};
+//The URL for the document being loaded.
+MetadataLoader.currentDocumentLocation = "";
 
 
 /**
@@ -242,7 +229,7 @@ MetadataLoader.setMetaMetadata = function (mmd)
       	}     	
       	
      
-          tasks[i].renderer(tasks[i]);
+          tasks[i].handler(tasks[i]);
         
       }
     }
@@ -288,9 +275,9 @@ MetadataLoader.toRequestMetadataFromService = function(location)
 
 MetadataLoader.isExtensionMetadataDomain = function(location)
 {
-	for (var i = 0; i < MetadataLoader.extensionMetadataDomains.length; i++)
+	for (var i = 0; i < RepoMan.extensionMetadataDomains.length; i++)
 	{
-		if (location.indexOf(MetadataLoader.extensionMetadataDomains[i]) != -1)
+		if (location.indexOf(RepoMan.extensionMetadataDomains[i]) != -1)
 			return true;
 	}
 	return false;
@@ -318,14 +305,14 @@ MetadataLoader.checkForMetadataFromExtension = function()
 
 MetadataLoader.getMMD = function(task, callback)
 {
-	if(MetadataLoader.repo != null)
+	if(RepoMan.repo != null)
 	{
-		MetadataLoader.getMMDFromRepoByTask(task);
+		RepoMan.getMMDFromRepoByTask(task);
 	}
-	else if(MetadataLoader.repoIsLoading == false)
+	else if(RepoMan.repoIsLoading == false)
 	{
-		MetadataLoader.repoIsLoading = true;
-		MetadataLoader.loadMMDRepo();
+		RepoMan.repoIsLoading = true;
+		RepoMan.loadMMDRepo();
 	}
 };	
 

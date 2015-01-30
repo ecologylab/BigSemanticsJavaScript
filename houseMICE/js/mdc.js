@@ -121,7 +121,6 @@ function showMetadata()
 	  var hostname = window.location.hostname;
 	  var port = window.location.port;
 	  SEMANTIC_SERVICE_URL = "http://" + hostname + ":" + port + "/BigSemanticsService/";
-
   }
   else{
 	   SEMANTIC_SERVICE_URL = "http://ecology-service.cse.tamu.edu/BigSemanticsService/";
@@ -141,7 +140,7 @@ function showMetadata()
   
   var request_md = MetadataLoader.toRequestMetadataFromService(url);
     
-  MICE.addMetadataDisplay(content, url, false, null, request_md, reload_md);
+  RendererBase.addMetadataDisplay(content, url, false, null, request_md, reload_md, MICE.render);
   if (!request_md)
   {
 	  //document.dispatchEvent(new Event("tweetbubbleExternal"));
