@@ -265,12 +265,25 @@ var logTweetAction = function(twAction, item) {
 		else
 		{	
 			//a.li.ul.div
-			var aNode = item.parentNode.parentNode.parentNode.getElementsByTagName('a')[0];
+			var aNode = item.parentNode.parentNode.parentNode.parentNode.getElementsByTagName('a')[0];
+			var actionUrl;
+			if (aNode)
+			{
+				actionUrl = aNode.getAttribute("href");
+			}
+			else
+			{
+				aNode = item.parentNode.parentNode.parentNode.parentNode.parentNode.getElementsByTagName('a')[0];
+				if (aNode)
+				{
+					actionUrl = aNode.getAttribute("href");
+				}
+			}
 			
 			eventObj = {
 				tweet_action: {
 					name: twAction,
-					url: aNode.getAttribute("href")
+					url: actionUrl
 				}
 			}
 		}
@@ -345,9 +358,19 @@ this.addOtherEventHandlers = function()
 			item.addEventListener('click', this.replyClick);
 			this.setProcessed(item);
 			
-			var aNodes = item.parentNode.parentNode.parentNode.parentNode.getElementsByTagName('a');
-			if (aNodes && aNodes[0])
-				viewedTweets.push(aNodes[0].getAttribute("href"));
+			var aNode = item.parentNode.parentNode.parentNode.parentNode.getElementsByTagName('a')[0];
+			if (aNode)
+			{
+				viewedTweets.push(aNode.getAttribute("href"));
+			}
+			else
+			{
+				aNode = item.parentNode.parentNode.parentNode.parentNode.parentNode.getElementsByTagName('a')[0];
+				if (aNode)
+				{
+					viewedTweets.push(aNode.getAttribute("href"));
+				}
+			}
 		}
 	}
 	if (MetadataLoader.logger)
