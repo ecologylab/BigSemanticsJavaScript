@@ -6,6 +6,7 @@ var MONA = {},
     nodeColors = {},    //maps node type to a color
     nodeMetadata = {},  //maps node location to that node's metatata
     nodeMetadataCache = {}, //all the metadata that has been loaded
+    outstandingRequests = {}, //urls that we have erquested but don't have metadata for
     pageMidHeight,      //the pixel vertical center of the page. used to center MICE/the graph area
     colorCount = 0,     //number of colors we have used. used to index clorArray
     COLOR_ARRAY = ["#009933", "#006699", "#CC9900", "#CC0000", "#CC00CC"], 
@@ -24,7 +25,8 @@ var MONA = {},
     HISTORY_ELEM,       //the html element of the history area
     LOAD_BAR_ELEM,      //the html element of the loading bar/spinner
     MAX_NODES = 40,     //max number of nodes we want to render
-    SEMANTIC_SERVICE_URL = "http://ecology-service.cse.tamu.edu/BigSemanticsService/";
+    SEMANTIC_SERVICE_URL = "http://ecology-service.cse.tamu.edu/BigSemanticsService/",
+    SERVICE_LOGS_URL = "http://ecology-service.cse.tamu.edu:8082/admin/find-logs.json";
 
 function Node(type, title, location, mmdName, parent){
 	this.type = type;
@@ -100,20 +102,7 @@ MONA.initialize = function (){
     waitForNewMMD();
 };
 
-//waits until the new metadata comes in before updating the nodes
-function waitForNewMMD(){
-    if (MDC_rawMMD === cachedMMD){
-        setTimeout(waitForNewMMD, 100);
-        return;
-    }
-    cachedMMD = MDC_rawMMD;
-    deleteChildren(GRAPH_ELEM);
-    getNodes();
-}
-
-/*
-MONA.getMetadata = function(url, callback, reload)
-{
+MONA.getMetadata = function(url, callback, reload){
 	var serviceURL; 
 	if(reload === true){
 		serviceURL = SEMANTIC_SERVICE_URL + "metadata.jsonp?reload=true&callback=" + callback + "&url=" + encodeURIComponent(url);
@@ -124,7 +113,17 @@ MONA.getMetadata = function(url, callback, reload)
   MetadataLoader.doJSONPCall(serviceURL);
   console.log("requesting semantics service for metadata: " + serviceURL);
 };
-*/
+
+//waits until the new metadata comes in before updating the nodes
+function waitForNewMMD(){
+    if (MDC_rawMMD === cachedMMD){
+        setTimeout(waitForNewMMD, 100);
+        return;
+    }
+    cachedMMD = MDC_rawMMD;
+    deleteChildren(GRAPH_ELEM);
+    getNodes();
+}
 
 //make requests for all the node metadata
 function populateNodeMetadata(){
@@ -146,25 +145,27 @@ function populateNodeMetadata(){
             }
             else{
                 MetadataLoader.getMetadata(primaryNodes[nodeKey].location, "storeNodeMD", false);
+                outstandingRequests[primaryNodes[nodeKey].location] = true;
                 requestsMade++;
             }
 		}
 	}
     
     //start the loading bar
-    var loadingDiv = document.createElement('div');
-    var loadingText = document.createElement('p');
-    loadingText.id="loadingText";
-    
-    var spinner = new Image(24,24);
-    spinner.src = "img/spinner.gif";
-    loadingDiv.appendChild(spinner);
-    
-    loadingText.innerHTML= "0 of " + requestsMade + " new node metadata loadeds";
-    loadingDiv.appendChild(loadingText);
-    
-    LOAD_BAR_ELEM.appendChild(loadingDiv);
-    
+    if (requestsMade > 0){
+        var loadingDiv = document.createElement('div');
+        var loadingText = document.createElement('p');
+        loadingText.id="loadingText";
+
+        var spinner = new Image(24,24);
+        spinner.src = "img/spinner.gif";
+        loadingDiv.appendChild(spinner);
+
+        loadingText.innerHTML= "0 of " + requestsMade + " new node metadata loadeds";
+        loadingDiv.appendChild(loadingText);
+
+        LOAD_BAR_ELEM.appendChild(loadingDiv);
+    }
     waitForNodeMDLoaded();
 }
 
@@ -176,10 +177,7 @@ function waitForNodeMDLoaded(){
         loading.innerHTML= Object.keys(nodeMetadata).length + " of " + requestsMade + " new node metadata loaded";
     }
     
-	//if url is 404, then we get an http error 500 from the service and get stuck
-	//there are some other cases where we get a service error and get stuch
-	//make it greater than one to account for not getting 404s
-    if (Object.keys(nodeMetadata).length === 0 || requestsMade - (Object.keys(nodeMetadata).length) > 1) {
+    if (Object.keys(outstandingRequests).length > 0) {
         setTimeout(waitForNodeMDLoaded, 100);
         return;
     }
@@ -194,6 +192,7 @@ function storeNodeMD(rawMetadata, requestMmd){
             var rawNodeLoc = rawMetadata[key].location;
 			if (location !== undefined && (location.indexOf(rawNodeLoc) > -1 || rawNodeLoc.indexOf(location) > -1)){
 				nodeMetadata[location] = rawMetadata;
+                delete outstandingRequests[rawNodeLoc];
 				nodeMetadataCache[location] = rawMetadata;
                 nodeMDLoaded(location);
                 getSecondaryNodes(rawMetadata, primaryNodes[location]);
