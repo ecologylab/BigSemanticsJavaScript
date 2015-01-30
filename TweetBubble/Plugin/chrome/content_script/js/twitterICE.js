@@ -1,6 +1,8 @@
 
 function twitterICE() {
 
+this.usernameXPath = "//span[@class='u-linkComplex-target']";	
+	
 this.expandableItemsXPath = "//ol[@id='stream-items-id']/li//p[@class='js-tweet-text tweet-text']/a/b";
 
 //@usernames, #hashtags, tweet tweeter, @connect tweeter, new layout tweet tweeter
@@ -419,6 +421,46 @@ this.getExternalURLsXPath = function() {
 this.checkAndSetExternalUrlTarget = function(elt) {
 	if (elt.getAttribute("target") != "_blank")
 		elt.setAttribute("target", "_blank");
+};
+
+this.validateUserInfo = function(prevUsername)
+{
+	var usernameResult = document.evaluate(this.usernameXPath, document, null, XPathResult.STRING_TYPE, null).stringValue;
+	if (usernameResult && usernameResult != prevUsername)
+	{
+		chrome.extension.sendRequest({userInfo: usernameResult}, function(response) {
+			if (response && response.doc) {
+				var twUser = response.doc;
+				twUser.tweets = {};
+				
+				if (MetadataLoader.logger)
+				{
+					if (!prevUsername)
+					{
+						prevUsername = usernameResult;
+						var eventObj = {
+							user_info: {
+								username: usernameResult,
+								info: twUser
+							}
+						}
+						MetadataLoader.logger(eventObj);
+					}
+					else
+					{
+						var eventObj = {
+							change_user_info: {
+								prev_username: prevUsername,
+								new_username: usernameResult,
+								info: twUser
+							}
+						}
+						MetadataLoader.logger(eventObj);
+					}
+				}
+			}
+		});
+	}
 };
 
 }

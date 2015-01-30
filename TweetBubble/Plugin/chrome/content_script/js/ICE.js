@@ -12,6 +12,7 @@ var mice_condition = "mice";
 var experiment_condition = null;
 var response_condition = null;
 var userid = null;
+var username = null;
 
 var currentUrl = null;
 var instance = null;
@@ -388,6 +389,8 @@ function run_script(userid, cond)
 	}
 	
 	currentUrl = document.URL;
+	if (document.URL == "https://twitter.com" || document.URL == "https://twitter.com/")
+		instance.validateUserInfo();
 	
 	if (isExtension) 
 	{
@@ -465,7 +468,10 @@ else
 		else
 		{
 			if (response && response.agree == Util.YES)
+			{
+				username = response.username;
 				run_script(response.userid, response.condition);
+			}
 			else
 			{
 				if (response && response.agree != Util.NO)
