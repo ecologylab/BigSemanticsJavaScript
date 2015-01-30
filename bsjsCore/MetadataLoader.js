@@ -241,21 +241,9 @@ MetadataLoader.setMetaMetadata = function (mmd)
       		MetadataLoader.setClippingMetadataType(tasks[i].clipping, tasks[i].mmd);
       	}     	
       	
-      	
-        var metadataFields =
-          MetadataLoader.createMetadata(tasks[i].isRoot, tasks[i].mmd,
-                                        tasks[i].metadata, tasks[i].url);
-        // Is there any visable metadata?
-        if (MetadataLoader.hasVisibleMetadata(metadataFields))
-        {	
-          // If so, then build the HTML table	
-          var styleMmdType = (tasks[i].expandedItem && tasks[i].expandedItem.mmdType && 
-				tasks[i].expandedItem.mmdType.indexOf("twitter") != -1)? "twitter" : mmd.name; 
-			var miceStyles = InterfaceStyle.getMiceStyleDictionary(styleMmdType);         //Adds the metadata type as an attribute to the first field in the MD
-         //Adds the metadata type as an attribute to the first field in the MD
-          metadataFields[0].parentMDType = mmd.name;
-          tasks[i].renderer(tasks[i], metadataFields, {styles: miceStyles, type: mmd.name});
-        }
+     
+          tasks[i].renderer(tasks[i]);
+        
       }
     }
   }
