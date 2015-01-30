@@ -18,11 +18,11 @@ this.tweetsXPath = "//ol[@id='stream-items-id']/li/div | " +
 
 this.externalURLsXPath = ".//a[@class='pretty-link twitter-timeline-link']";
 
-this.replyXPath = "//li[@class='action-reply-container']/a";
+this.replyXPath = "//span[@class='Icon Icon--reply']";
 
-this.retweetXPath = "//li[@class='action-rt-container js-toggle-state js-toggle-rt']/a";
+this.retweetXPath = "//span[@class='Icon Icon--retweet']";
 
-this.favoriteXPath = "//li[@class='action-fav-container js-toggle-state js-toggle-fav']/a";
+this.favoriteXPath = "//span[@class='Icon Icon--favorite']";
 
 this.ajaxContentXPath = "//div[@class='new-tweets-bar js-new-tweets-bar']";
 
@@ -333,6 +333,8 @@ this.addGlobalNewTweetHandler = function()
 
 this.addOtherEventHandlers = function()
 {
+	var viewedTweets = [];
+	
 	var xpath = this.replyXPath;
 	var xpathResult = document.evaluate(xpath, document, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
 	for (var i = 0; i < xpathResult.snapshotLength; i++)
@@ -342,7 +344,21 @@ this.addOtherEventHandlers = function()
 		{
 			item.addEventListener('click', this.replyClick);
 			this.setProcessed(item);
+			
+			var aNodes = item.parentNode.parentNode.parentNode.parentNode.getElementsByTagName('a');
+			if (aNodes && aNodes[0])
+				viewedTweets.push(aNodes[0].getAttribute("href"));
 		}
+	}
+	if (MetadataLoader.logger)
+	{
+		eventObj = {
+			tweet_action: {
+				name: "view_tweets",
+				tweets: viewedTweets
+			}
+		}
+		MetadataLoader.logger(eventObj);
 	}
 	
 	xpath = this.retweetXPath;

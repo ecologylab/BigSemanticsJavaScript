@@ -663,6 +663,8 @@ MetadataRenderer.buildMetadataTable = function(table, isChildTable, isRoot, meta
 		}
 	}
 	
+	var viewedTweets = [];
+
 	// Iterate through the metadataFields which are already sorted into display order
 	for(var i = 0; i < metadataFields.length; i++)
 	{			
@@ -695,7 +697,6 @@ MetadataRenderer.buildMetadataTable = function(table, isChildTable, isRoot, meta
 			};
 			
 			
-			
 			var detailsSpan = document.createElement('span');
 				detailsSpan.className = styleInfo.styles.hidden;
 				detailsSpan.textContent = JSON.stringify(moreData);
@@ -716,6 +717,11 @@ MetadataRenderer.buildMetadataTable = function(table, isChildTable, isRoot, meta
 		
 		if(metadataField.value)
 		{
+			if (metadataField.name == "id")
+			{
+				viewedTweets.push(metadataField.value);
+			}
+			
 			// If the field is an empty array then move on to the next field
 			if(	metadataField.value.length != null && metadataField.value.length == 0)
 				continue;
@@ -843,7 +849,19 @@ MetadataRenderer.buildMetadataTable = function(table, isChildTable, isRoot, meta
 				}
 			}
 		}
-	}	
+	}
+	
+	if (MetadataLoader.logger)
+	{
+		eventObj = {
+			tweet_action: {
+				name: "twb_view_tweets",
+				tweets: viewedTweets
+			}
+		}
+		MetadataLoader.logger(eventObj);
+	}
+	
 	return table;
 }
 
