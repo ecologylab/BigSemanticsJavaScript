@@ -463,6 +463,64 @@ this.validateUserInfo = function(prevUsername)
 	}
 };
 
+this.logScrolledTweetIds = function(prevYOffset, newYOffset)
+{
+//	var end1, end2; // end1 < end2
+//	if (prevYOffset < newYOffset) //scroll down
+//	{
+//		end2 = newYOffset + window.innerHeight;
+//		end1 = end2 - (newYOffset - prevYOffset);	
+//	}
+//	else // scroll up
+//	{
+//		end1 = newYOffset;
+//		end2 = end1 + (prevYOffset - newYOffset);
+//	}
+//	var twitterElts;
+//	if (document.URL.indexOf("https://twitter.com/search") == 0 || document.URL.indexOf("https://twitter.com/search"))
+//	{
+//		twitterElts = document.getElementsByClassName("content");
+//		for (var i = 0; twitterElts.length; i++)
+//		{
+//			if (twitterElts[i] && twitterElts[i].parentElement)
+//			{
+//				var elt = twitterElts[i].parentElement;
+//		
+//				var rect = elt.getBoundingClientRect();
+//				if (rect.top)
+//				{
+//					
+//				}
+//			}
+//		}
+//	}
+//	else
+//	{
+//		twitterElts = document.getElementsByClassName("StreamItem js-stream-item");
+//		for (var i = 0; twitterElts.length; i++)
+//		{
+//			var elt = twitterElts[i];
+//			var rect = elt.getBoundingClientRect();
+//			if (rect.top)
+//			{
+//				
+//			}
+//		}
+//	}
+//	
+//	var twbElements = document.getElementsByClassName("tweetSemanticsRow");
+//	for (var i = 0; twbElements.length; i++)
+//	{
+//		var elt = twbElements[i];
+//		var rect = elt.getBoundingClientRect();
+//		if (rect.top)
+//		{
+//			
+//		}
+//	}
+	
+};
+
 }
 
 function getICEInstance()

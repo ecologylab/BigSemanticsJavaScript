@@ -16,6 +16,7 @@ var username = null;
 
 var currentUrl = null;
 var instance = null;
+var prevYOffset = 0;
 
 //call to get and replace divs, queue w on-demand prioritizing
 function processPage()
@@ -68,6 +69,8 @@ function onUpdateHandler()
 		MetadataLoader.logger(eventObj);
 	}
 	processPage();
+	//instance.logScrolledTweetIds(prevYOffset, window.pageYOffset);
+	//prevYOffset = window.pageYOffset;
 }
 
 function isExpanded(icon)
@@ -267,6 +270,8 @@ function defaultConditionOnUpdateHandler()
 		MetadataLoader.logger(eventObj);
 	}
 	processDefaultConditionClicks(document);
+	//instance.logScrolledTweetIds(prevYOffset, window.pageYOffset);
+	//prevYOffset = window.pageYOffset;
 }
 
 function defaultConditionItemClick(event)
