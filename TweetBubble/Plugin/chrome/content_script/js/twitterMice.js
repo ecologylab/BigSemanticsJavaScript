@@ -851,7 +851,7 @@ MetadataRenderer.buildMetadataTable = function(table, isChildTable, isRoot, meta
 		}
 	}
 	
-	if (MetadataLoader.logger)
+	if (MetadataLoader.logger && viewedTweets.length > 0)
 	{
 		eventObj = {
 			tweet_action: {
