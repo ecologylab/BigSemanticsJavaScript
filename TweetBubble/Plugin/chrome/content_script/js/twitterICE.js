@@ -1,6 +1,8 @@
 
 function twitterICE() {
 
+this.usernameXPath = "//span[@class='u-linkComplex-target']";	
+	
 this.expandableItemsXPath = "//ol[@id='stream-items-id']/li//p[@class='js-tweet-text tweet-text']/a/b";
 
 //@usernames, #hashtags, tweet tweeter, @connect tweeter, new layout tweet tweeter
@@ -16,11 +18,11 @@ this.tweetsXPath = "//ol[@id='stream-items-id']/li/div | " +
 
 this.externalURLsXPath = ".//a[@class='pretty-link twitter-timeline-link']";
 
-this.replyXPath = "//li[@class='action-reply-container']/a";
+this.replyXPath = "//span[@class='Icon Icon--reply']";
 
-this.retweetXPath = "//li[@class='action-rt-container js-toggle-state js-toggle-rt']/a";
+this.retweetXPath = "//span[@class='Icon Icon--retweet']";
 
-this.favoriteXPath = "//li[@class='action-fav-container js-toggle-state js-toggle-fav']/a";
+this.favoriteXPath = "//span[@class='Icon Icon--favorite']";
 
 this.ajaxContentXPath = "//div[@class='new-tweets-bar js-new-tweets-bar']";
 
@@ -263,12 +265,25 @@ var logTweetAction = function(twAction, item) {
 		else
 		{	
 			//a.li.ul.div
-			var aNode = item.parentNode.parentNode.parentNode.getElementsByTagName('a')[0];
+			var aNode = item.parentNode.parentNode.parentNode.parentNode.getElementsByTagName('a')[0];
+			var actionUrl;
+			if (aNode)
+			{
+				actionUrl = aNode.getAttribute("href");
+			}
+			else
+			{
+				aNode = item.parentNode.parentNode.parentNode.parentNode.parentNode.getElementsByTagName('a')[0];
+				if (aNode)
+				{
+					actionUrl = aNode.getAttribute("href");
+				}
+			}
 			
 			eventObj = {
 				tweet_action: {
 					name: twAction,
-					url: aNode.getAttribute("href")
+					url: actionUrl
 				}
 			}
 		}
@@ -331,6 +346,8 @@ this.addGlobalNewTweetHandler = function()
 
 this.addOtherEventHandlers = function()
 {
+	var viewedTweets = [];
+	
 	var xpath = this.replyXPath;
 	var xpathResult = document.evaluate(xpath, document, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
 	for (var i = 0; i < xpathResult.snapshotLength; i++)
@@ -340,7 +357,31 @@ this.addOtherEventHandlers = function()
 		{
 			item.addEventListener('click', this.replyClick);
 			this.setProcessed(item);
+			
+			var aNode = item.parentNode.parentNode.parentNode.parentNode.getElementsByTagName('a')[0];
+			if (aNode)
+			{
+				viewedTweets.push(aNode.getAttribute("href"));
+			}
+			else
+			{
+				aNode = item.parentNode.parentNode.parentNode.parentNode.parentNode.getElementsByTagName('a')[0];
+				if (aNode)
+				{
+					viewedTweets.push(aNode.getAttribute("href"));
+				}
+			}
 		}
+	}
+	if (MetadataLoader.logger && viewedTweets.length > 0)
+	{
+		eventObj = {
+			tweet_action: {
+				name: "view_tweets",
+				tweets: viewedTweets
+			}
+		}
+		MetadataLoader.logger(eventObj);
 	}
 	
 	xpath = this.retweetXPath;
@@ -419,6 +460,104 @@ this.getExternalURLsXPath = function() {
 this.checkAndSetExternalUrlTarget = function(elt) {
 	if (elt.getAttribute("target") != "_blank")
 		elt.setAttribute("target", "_blank");
+};
+
+this.validateUserInfo = function(prevUsername)
+{
+	var usernameResult = document.evaluate(this.usernameXPath, document, null, XPathResult.STRING_TYPE, null).stringValue;
+	if (usernameResult && usernameResult != prevUsername)
+	{
+		chrome.extension.sendRequest({userInfo: usernameResult}, function(response) {
+			if (response && response.doc) {
+				var twUser = response.doc;
+				twUser.tweets = {};
+				
+				if (MetadataLoader.logger)
+				{
+					if (!prevUsername)
+					{
+						prevUsername = usernameResult;
+						var eventObj = {
+							user_info: {
+								username: usernameResult,
+								info: twUser
+							}
+						}
+						MetadataLoader.logger(eventObj);
+					}
+					else
+					{
+						var eventObj = {
+							change_user_info: {
+								prev_username: prevUsername,
+								new_username: usernameResult,
+								info: twUser
+							}
+						}
+						MetadataLoader.logger(eventObj);
+					}
+				}
+			}
+		});
+	}
+};
+
+this.logScrolledTweetIds = function(prevYOffset, newYOffset)
+{
+//	var end1, end2; // end1 < end2
+//	if (prevYOffset < newYOffset) //scroll down
+//	{
+//		end2 = newYOffset + window.innerHeight;
+//		end1 = end2 - (newYOffset - prevYOffset);	
+//	}
+//	else // scroll up
+//	{
+//		end1 = newYOffset;
+//		end2 = end1 + (prevYOffset - newYOffset);
+//	}
+//	var twitterElts;
+//	if (document.URL.indexOf("https://twitter.com/search") == 0 || document.URL.indexOf("https://twitter.com/search"))
+//	{
+//		twitterElts = document.getElementsByClassName("content");
+//		for (var i = 0; twitterElts.length; i++)
+//		{
+//			if (twitterElts[i] && twitterElts[i].parentElement)
+//			{
+//				var elt = twitterElts[i].parentElement;
+//		
+//				var rect = elt.getBoundingClientRect();
+//				if (rect.top)
+//				{
+//					
+//				}
+//			}
+//		}
+//	}
+//	else
+//	{
+//		twitterElts = document.getElementsByClassName("StreamItem js-stream-item");
+//		for (var i = 0; twitterElts.length; i++)
+//		{
+//			var elt = twitterElts[i];
+//			var rect = elt.getBoundingClientRect();
+//			if (rect.top)
+//			{
+//				
+//			}
+//		}
+//	}
+//	
+//	var twbElements = document.getElementsByClassName("tweetSemanticsRow");
+//	for (var i = 0; twbElements.length; i++)
+//	{
+//		var elt = twbElements[i];
+//		var rect = elt.getBoundingClientRect();
+//		if (rect.top)
+//		{
+//			
+//		}
+//	}
+	
 };
 
 }

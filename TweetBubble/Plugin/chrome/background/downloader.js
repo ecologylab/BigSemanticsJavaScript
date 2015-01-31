@@ -3,6 +3,8 @@ chrome.extension.onRequest.addListener(
 	function(request, sender, sendResponse) {
     	if (request.load != null)
       		loadWebpage(request.load, sendResponse);
+    	else if (request.userInfo != null)
+    		getUserInfo(request.userInfo, sendResponse);
     	
     	return true;	// async response    		
 	}
@@ -100,4 +102,13 @@ function isUrlRedirect(response, sendResponse, additionalUrls)
 		}
 	}
 	return false;
+}
+
+
+function getUserInfo(username, sendResponse)
+{
+	var url = "https://twitter.com/" + username;
+	// make conditional on success of loadWebpage?
+	localStorage["username"] = username;
+	loadWebpage(url, sendResponse);
 }

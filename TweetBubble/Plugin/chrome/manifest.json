@@ -2,8 +2,8 @@
   "manifest_version": 2,
 
   "name": "TweetBubble",
-  "description": "Expand to explore @usernames, #hashtags on Twitter. See related content without switching back and forth between tabs and windows",
-  "version": "0.9.60",
+  "description": "TweetBubble is a not-for-profit research project of the Interface Ecology Lab: http://ecologylab.cse.tamu.edu",
+  "version": "0.9.75",
 
   "icons": {
     "16": "content_script/img/logo_16.png",
@@ -14,7 +14,7 @@
     "https://twitter.com/*",
     "https://api.twitter.com/*",
     "http://ecology-service.cs.tamu.edu/",
-    "http://ideamache.ecologylab.net/",
+    "https://ideamache.ecologylab.net/",
     "http://*/",
     "<all_urls>",
     "cookies",
@@ -60,6 +60,8 @@
     "content_script/img/favorite_153.png",
     "content_script/img/reply_221.png",
     "content_script/img/retweet_221.png",
-    "content_script/img/favorite_221.png"
+    "content_script/img/favorite_221.png",
+    "content_script/img/retweet_on.png",
+    "content_script/img/favorite_on.png"
   ]
 }
