@@ -1648,7 +1648,8 @@ MetadataRenderer.createReplyBox = function()
 		
 		var twSemanticsValueCol = this.parentElement.parentElement.parentElement.parentElement;
 		var twSemanticsParentDiv = twSemanticsValueCol.parentElement.parentElement;	//valueCol.innerMetadataRow.outerTable
-		var twMetadataTableDiv = twSemanticsParentDiv.parentElement.parentElement.parentElement; // outerTable.td.row.table
+		var twMetadataTableRow = twSemanticsParentDiv.parentElement.parentElement; // outerTable.td.row
+		var twMetadataTableDiv = twMetadataTableRow.parentElement; // row.table
 		
 		// add textarea
 		var nameCol = document.createElement('div');
@@ -1692,7 +1693,14 @@ MetadataRenderer.createReplyBox = function()
 		replyBox.focus();
 		
 		// TODO:change later to specific className
-		var tweetDivs = twMetadataTableDiv.getElementsByClassName("twFieldValue description_div");
+		var tweetDivs;
+		while (twMetadataTableRow.previousSibling)
+		{	
+			twMetadataTableRow = twMetadataTableRow.previousSibling;
+			tweetDivs = twMetadataTableRow.getElementsByClassName("twFieldValue description_div");
+			if (tweetDivs.length > 0)
+				break;
+		}
 		if (tweetDivs.length > 0)
 		{
 			var tweetText = tweetDivs[0].textContent;
@@ -1700,7 +1708,9 @@ MetadataRenderer.createReplyBox = function()
 			var usernameStr = "";
 			for (var i = 1; i < usernameRefs.length; i++)
 			{
-				usernameStr += '@' + usernameRefs[i].substr(0, usernameRefs[i].indexOf(' ')) + ' ';
+				var userStr = (usernameRefs[i].indexOf(' ') == -1)? 
+									usernameRefs[i] : usernameRefs[i].substr(0, usernameRefs[i].indexOf(' '));  
+				usernameStr += '@' + userStr + ' ';
 			}
 			replyBox.value = usernameStr;
 		}
