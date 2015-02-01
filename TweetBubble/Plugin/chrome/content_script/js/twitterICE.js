@@ -492,7 +492,6 @@ this.validateUserInfo = function(prevUsername)
 				{
 					if (!prevUsername)
 					{
-						prevUsername = usernameResult;
 						var eventObj = {
 							user_info: {
 								username: usernameResult,
