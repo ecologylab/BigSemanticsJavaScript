@@ -14,7 +14,7 @@ this.expandableItemsXPath2 = ".//a[@class='twitter-atreply pretty-link'] | " +
 							 ".//a[@class='twitter-timeline-link']";
 
 this.tweetsXPath = "//ol[@id='stream-items-id']/li/div | " +
-					"//div[@class='GridTimeline-items']/div[@class='Grid']//div[@class='StreamItem js-stream-item']";
+					"//div[@class='GridTimeline-items']/div[@class='Grid']//div[@class='StreamItem js-stream-item']/div";
 
 this.externalURLsXPath = ".//a[@class='pretty-link twitter-timeline-link']";
 
