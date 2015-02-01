@@ -30,7 +30,7 @@ this.retweetXPath = "//span[@class='Icon Icon--retweet']";
 
 this.favoriteXPath = "//span[@class='Icon Icon--favorite']";
 
-this.ajaxContentXPath = "//div[@class='new-tweets-bar js-new-tweets-bar']";
+this.ajaxContentXPath = "//div[@class='new-tweets-bar js-new-tweets-bar ']";
 
 this.globalNewTweetXPath = "//button[@id='global-new-tweet-button']";
 //var globalNewTweetTextXPath = "//div[@id='tweet-box-global']";
