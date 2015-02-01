@@ -285,10 +285,12 @@ var logTweetAction = function(twAction, item) {
 			}
 			else
 			{
-				aNode = item.parentNode.parentNode.parentNode.parentNode.parentNode.getElementsByTagName('a')[0];
+				aNode = item.parentNode.parentNode.parentNode.parentNode.parentNode.getElementsByClassName('time')[0];
 				if (aNode)
 				{
-					actionUrl = aNode.getAttribute("href");
+					var aNode2 = aNode.getElementsByTagName('a')[0];
+					if (aNode2)
+						actionUrl = aNode2.getAttribute("href");
 				}
 			}
 			
@@ -377,10 +379,12 @@ this.addOtherEventHandlers = function()
 			}
 			else
 			{
-				aNode = item.parentNode.parentNode.parentNode.parentNode.parentNode.getElementsByTagName('a')[0];
+				aNode = item.parentNode.parentNode.parentNode.parentNode.parentNode.getElementsByClassName('time')[0];
 				if (aNode)
 				{
-					viewedTweets.push(aNode.getAttribute("href"));
+					var aNode2 = aNode.getElementsByTagName('a')[0];
+					if (aNode2)
+						viewedTweets.push(aNode2.getAttribute("href"));
 				}
 			}
 		}
