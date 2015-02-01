@@ -365,10 +365,10 @@ function run_script(userid, cond, username)
 		if (MetadataRenderer.setDocumentDownloader)
 			MetadataRenderer.setDocumentDownloader(downloadRequester);
 
-		if (isExtension)
-		{
-			Logger.init(userid, cond);
-		}
+//		if (isExtension)
+//		{
+//			Logger.init(userid, cond);
+//		}
 
 		processPage();
 		
@@ -379,10 +379,10 @@ function run_script(userid, cond, username)
 	}
 	else
 	{
-		if (isExtension)
-		{
-			Logger.init(userid, cond);
-		}
+//		if (isExtension)
+//		{
+//			Logger.init(userid, cond);
+//		}
 		
 		processDefaultConditionClicks(document);
 		
@@ -403,15 +403,23 @@ function run_script(userid, cond, username)
 	}
 }
 
-function processInfoSheetResponse(resp)
+function processInfoSheetResponse(resp, cancelType)
 {
-	chrome.extension.sendRequest({storeStudySettings: {"agreeToInformationSheet": resp}}, function(response) {
-		var url = document.URL;
-		var paramIndex = url.indexOf('?'); 
-		if (paramIndex != -1)
-			url = url.substr(0, paramIndex);
-		window.location.replace(url);
-	});
+	if (cancelType == "access_grant")
+	{
+		var resp1 = (resp == Util.YES)? undefined : resp;
+		chrome.extension.sendRequest({storeStudySettings: {"agreeToAccessGrant": resp, "agreeToInformationSheet": resp1}});
+	}
+	else if (cancelType == "infosheet_disagree")
+	{
+		chrome.extension.sendRequest({storeStudySettings: {"agreeToInformationSheet": resp}}, function(response) {
+			var url = document.URL;
+			var paramIndex = url.indexOf('?'); 
+			if (paramIndex != -1)
+				url = url.substr(0, paramIndex);
+			window.location.replace(url);
+		});
+	}
 	//if (resp == Util.YES)
 		//run_script(userid, response_condition);
 }
@@ -452,6 +460,22 @@ function isAccessGranted(response)
 	}
 }
 
+function logPendingDeclines(userId, access_grant, info_sheet)
+{
+	if (MetadataLoader.logger && typeof access_grant !== "undefined" && typeof info_sheet !== "undefined")
+	{
+		var eventObj = {
+			agree: {
+				userid: userId,
+				accessgrant: access_grant,
+				infosheet: info_sheet
+			}
+		}
+		MetadataLoader.logger(eventObj);
+		chrome.extension.sendRequest({storeStudySettings: {"loggedPending": true}});
+	}
+}
+
 //run_at is document_end i.e. after DOM is complete but before images and frames are loaded
 if (!isExtension)
 {
@@ -468,9 +492,15 @@ else
 		else
 			experiment_condition = mice_condition;
 		
-		if (response && !isAccessGranted(response))
+		Logger.init(response.userid, response.condition);
+		if (!response.loggedDeclines)
 		{
-			Util.promptUserForAccessGrant(processInfoSheetResponse);
+			logPendingDeclines(response.userid, response.agreeAccessGrant, response.agree);
+		}
+		
+		if (response && response.agreeAccessGrant != Util.NO && !isAccessGranted(response))
+		{
+			Util.promptUserForAccessGrant(processInfoSheetResponse, response.userid);
 		}
 		else
 		{
@@ -484,7 +514,7 @@ else
 				{
 					response_condition = response.condition;
 					userid = response.userid;
-					Util.getInformationSheetResponse(processInfoSheetResponse);
+					Util.getInformationSheetResponse(processInfoSheetResponse, response.userid);
 				}
 				//if (window.confirm(Util.info_sheet))
 					//processInfoSheetResponse(Util.YES);

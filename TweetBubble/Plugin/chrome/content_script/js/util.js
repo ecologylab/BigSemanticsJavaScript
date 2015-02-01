@@ -11,7 +11,77 @@ Util.getCurrentUTCMilliTime = function()
 	return d.getTime() + (d.getTimezoneOffset()*60*1000)/1000;
 }
 
-Util.promptUserForAccessGrant = function(callback)
+Util.confirmCancel = function(callback, str, orig_function, cancelType, userId)
+{
+	var confirmSheet = str;
+	
+	var removeDivAndReturnResp = function(event) {
+		document.body.removeChild(bgDiv);
+		document.body.removeChild(outerDiv);
+		if (event.target.value == "OK")
+		{
+			callback(Util.NO, cancelType);
+		}
+		else
+		{
+			orig_function(callback, userId);			
+		}
+	}
+	
+	var doNothing = function() {}
+	
+	//var handleScroll = function() {
+	//	outerDiv.style.top = window.scrollY;
+	//}
+	
+	var highlightbutton = function(event) {
+		if (event.target.value == "OK")
+			event.target.style.background = "#AA0000";
+		else
+			event.target.style.background = "#55ACEE";
+	}
+	
+	var unhighlightbutton = function(event) {
+		event.target.style.background = "#ddd";
+	}
+	
+	var button_ok = document.createElement("input");
+	button_ok.type = "button";
+	button_ok.value = "OK";
+	button_ok.className = "infoSheetButton";
+	button_ok.onclick = removeDivAndReturnResp;
+	button_ok.onmouseover = highlightbutton;
+	button_ok.onmouseout = unhighlightbutton;
+	
+	var button_cancel = document.createElement("input");
+	button_cancel.type = "button";
+	button_cancel.value = "Go Back";
+	button_cancel.className = "infoSheetButton";
+	button_cancel.style.float = "right";
+	button_cancel.onclick = removeDivAndReturnResp;
+	button_cancel.onmouseover = highlightbutton;
+	button_cancel.onmouseout = unhighlightbutton;
+			
+	var buttonDiv = document.createElement("div");
+	buttonDiv.appendChild(button_ok);
+	buttonDiv.appendChild(button_cancel);
+	
+	var bgDiv = document.createElement("div");
+	bgDiv.className = "infoSheetBgDiv";
+	bgDiv.style.width = window.screen.width + "px";
+	bgDiv.style.height = window.screen.height + "px";
+	bgDiv.onClick = doNothing;
+	
+	var outerDiv = document.createElement("div");
+	outerDiv.innerHTML = confirmSheet;	
+	outerDiv.className = "infoSheetDiv";
+	outerDiv.appendChild(buttonDiv);
+			
+	document.body.appendChild(bgDiv);
+	document.body.appendChild(outerDiv);
+}
+
+Util.promptUserForAccessGrant = function(callback, userId)
 {
 	var accessGrantSheet = "<h3>TweetBubble Extension for Chrome</h3><br>" +
 	"<h4>GRANT ACCESS</h4><br>" +
@@ -24,11 +94,15 @@ Util.promptUserForAccessGrant = function(callback)
 		document.body.removeChild(outerDiv);
 		if (event.target.value == "Sign-In")
 		{
-			//callback(Util.YES);
+			callback(Util.YES, "access_grant");
 			TwitterOAuth.authorize();
 		}
 		else
-			callback(Util.NO);
+		{
+			var str = "<p>You have chosen not to participate in the study. Please return the HIT.<p><br>";
+			Util.confirmCancel(callback, str, Util.promptUserForAccessGrant, "access_grant", userId);
+			//callback(Util.NO);
+		}
 	}
 	
 	var doNothing = function() {}
@@ -108,7 +182,7 @@ Util.info_sheet = "TweetBubble Extension for Chrome\n\n" +
 "This research study has been reviewed by the Human Subjects Protection Program and/or the Institutional Review Board at Texas A&M University.  For research-related problems or questions regarding your rights as a research participant, you can contact these offices at (979)458-4067 or irb@tamu.edu." +
 "\n\n";
 
-Util.getInformationSheetResponse = function(callback)
+Util.getInformationSheetResponse = function(callback, userId)
 {
 	var info_sheet = 
 		"<h3>TweetBubble Extension for Chrome</h3><br>" +
@@ -138,9 +212,13 @@ Util.getInformationSheetResponse = function(callback)
 		document.body.removeChild(bgDiv);
 		document.body.removeChild(outerDiv);
 		if (event.target.value == "OK")
-			callback(Util.YES);
+			callback(Util.YES, "infosheet_disagree");
 		else
-			callback(Util.NO);
+		{	
+			var str = "<p>You have chosen not to participate in the study. Please return the HIT.</p><br>";
+			Util.confirmCancel(callback, str, Util.getInformationSheetResponse, "infosheet_disagree", userId);
+			//callback(Util.NO);
+		}
 	}
 	
 	var doNothing = function() {}
