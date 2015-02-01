@@ -3,7 +3,7 @@
 
   "name": "TweetBubble",
   "description": "TweetBubble is a not-for-profit research project of the Interface Ecology Lab: http://ecologylab.cse.tamu.edu",
-  "version": "0.9.75",
+  "version": "0.9.76",
 
   "icons": {
     "16": "content_script/img/logo_16.png",

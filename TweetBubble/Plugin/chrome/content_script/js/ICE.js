@@ -12,7 +12,6 @@ var mice_condition = "mice";
 var experiment_condition = null;
 var response_condition = null;
 var userid = null;
-var username = null;
 
 var currentUrl = null;
 var instance = null;
@@ -352,7 +351,7 @@ function processUrlChange(newUrl)
 		processDefaultConditionClicks(document);
 }
 
-function run_script(userid, cond)
+function run_script(userid, cond, username)
 {
 	instance = getICEInstance();
 	
@@ -394,8 +393,7 @@ function run_script(userid, cond)
 	}
 	
 	currentUrl = document.URL;
-	if (document.URL == "https://twitter.com" || document.URL == "https://twitter.com/")
-		instance.validateUserInfo();
+	instance.validateUserInfo(username);
 	
 	if (isExtension) 
 	{
@@ -408,7 +406,11 @@ function run_script(userid, cond)
 function processInfoSheetResponse(resp)
 {
 	chrome.extension.sendRequest({storeStudySettings: {"agreeToInformationSheet": resp}}, function(response) {
-		window.location.replace("https://twitter.com");
+		var url = document.URL;
+		var paramIndex = url.indexOf('?'); 
+		if (paramIndex != -1)
+			url = url.substr(0, paramIndex);
+		window.location.replace(url);
 	});
 	//if (resp == Util.YES)
 		//run_script(userid, response_condition);
@@ -474,8 +476,7 @@ else
 		{
 			if (response && response.agree == Util.YES)
 			{
-				username = response.username;
-				run_script(response.userid, response.condition);
+				run_script(response.userid, response.condition, response.username);
 			}
 			else
 			{

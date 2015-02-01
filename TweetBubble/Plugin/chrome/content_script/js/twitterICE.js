@@ -13,10 +13,16 @@ this.expandableItemsXPath2 = ".//a[@class='twitter-atreply pretty-link'] | " +
 							 ".//a[@class='ProfileTweet-originalAuthorLink u-linkComplex js-nav js-user-profile-link']/span | " +
 							 ".//a[@class='twitter-timeline-link']";
 
-this.tweetsXPath = "//ol[@id='stream-items-id']/li/div | " +
-					"//div[@class='GridTimeline-items']/div[@class='Grid']//div[@class='StreamItem js-stream-item']";
+this.expandableItemsXPath3 = ".//a[@class='twitter-atreply pretty-link'] | " + 
+							 ".//a[@class='twitter-hashtag pretty-link js-nav'] | " + 
+							 ".//a[@class='account-group js-account-group js-action-profile js-user-profile-link js-nav'] | " + 
+							 ".//a[@class='pretty-link js-user-profile-link js-action-profile-name'] | " +
+							 ".//a[@class='ProfileTweet-originalAuthorLink u-linkComplex js-nav js-user-profile-link']/span";
 
-this.externalURLsXPath = ".//a[@class='pretty-link twitter-timeline-link']";
+this.tweetsXPath = "//ol[@id='stream-items-id']/li/div | " +
+					"//div[@class='GridTimeline-items']/div[@class='Grid']//div[@class='StreamItem js-stream-item']/div";
+
+this.externalURLsXPath = ".//a[@class='pretty-link twitter-timeline-link'] | .//a[@class='twitter-timeline-link']";
 
 this.replyXPath = "//span[@class='Icon Icon--reply']";
 
@@ -24,7 +30,7 @@ this.retweetXPath = "//span[@class='Icon Icon--retweet']";
 
 this.favoriteXPath = "//span[@class='Icon Icon--favorite']";
 
-this.ajaxContentXPath = "//div[@class='new-tweets-bar js-new-tweets-bar']";
+this.ajaxContentXPath = "//div[@class='new-tweets-bar js-new-tweets-bar ']";
 
 this.globalNewTweetXPath = "//button[@id='global-new-tweet-button']";
 //var globalNewTweetTextXPath = "//div[@id='tweet-box-global']";
@@ -192,7 +198,9 @@ this.isProcessed = function(elt) {
 
 this.getItemClickedEventObj = function(item) 
 {
-	var url_p = this.getUrlPrefix() + item.getAttribute("href");
+	var url_p = item.getAttribute("href");
+	if (url_p && url_p.indexOf("http") == -1)
+		url_p = this.getUrlPrefix() + url_p;
 	
 	var eventObj = {
 		click_name_tag: {
@@ -214,16 +222,20 @@ this.getContainerClickedEventObj = function(tweet)
 
 this.getExternalURLClickedEventObj = function(externalURL)
 {
+	var urlVal = externalURL.getAttribute("url");
+	if (!urlVal)
+		urlVal = externalURL.getAttribute("href");
+	
 	var eventObj = {
 		click_externalUrl: {
-			url: externalURL.getAttribute("href")
+			url: urlVal
 		}
 	}
 	return eventObj;
 };
 
 this.getDefaultConditionXPath = function(isMetadata) {
-	return this.expandableItemsXPath2;
+	return this.expandableItemsXPath3;
 };
 
 this.setDefaultConditionItemProcessed = function(elt) {
@@ -273,10 +285,12 @@ var logTweetAction = function(twAction, item) {
 			}
 			else
 			{
-				aNode = item.parentNode.parentNode.parentNode.parentNode.parentNode.getElementsByTagName('a')[0];
+				aNode = item.parentNode.parentNode.parentNode.parentNode.parentNode.getElementsByClassName('time')[0];
 				if (aNode)
 				{
-					actionUrl = aNode.getAttribute("href");
+					var aNode2 = aNode.getElementsByTagName('a')[0];
+					if (aNode2)
+						actionUrl = aNode2.getAttribute("href");
 				}
 			}
 			
@@ -365,10 +379,12 @@ this.addOtherEventHandlers = function()
 			}
 			else
 			{
-				aNode = item.parentNode.parentNode.parentNode.parentNode.parentNode.getElementsByTagName('a')[0];
+				aNode = item.parentNode.parentNode.parentNode.parentNode.parentNode.getElementsByClassName('time')[0];
 				if (aNode)
 				{
-					viewedTweets.push(aNode.getAttribute("href"));
+					var aNode2 = aNode.getElementsByTagName('a')[0];
+					if (aNode2)
+						viewedTweets.push(aNode2.getAttribute("href"));
 				}
 			}
 		}
@@ -476,7 +492,6 @@ this.validateUserInfo = function(prevUsername)
 				{
 					if (!prevUsername)
 					{
-						prevUsername = usernameResult;
 						var eventObj = {
 							user_info: {
 								username: usernameResult,
