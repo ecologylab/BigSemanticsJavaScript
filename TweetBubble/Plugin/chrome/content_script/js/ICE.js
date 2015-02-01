@@ -531,7 +531,8 @@ else
 						currUserId: response.userid,
 						lastCond: response.last_condition,
 						currCond: response.condition,
-						infoSheetAgree: response.agree
+						infoSheetAgree: response.agree,
+						user_info: response.user_info
 					}
 				}
 				MetadataLoader.logger(eventObj);

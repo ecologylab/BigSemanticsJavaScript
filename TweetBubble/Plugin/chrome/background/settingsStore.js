@@ -53,7 +53,7 @@ function getStudySettings(url, sendResponse)
 	sendResponse({last_userid: prevUserId, userid: localStorage["tweetBubbleUserId"], 
 				last_condition: prevCondition, condition: localStorage["tweetBubbleStudyCondition"],
 				agree: localStorage["agreeToInformationSheet"], agreeAccessGrant: localStorage["agreeToAccessGrant"], 
-				username: localStorage["username"], loggedDeclines: localStorage["loggedPending"],
+				username: localStorage["username"], user_info: localStorage["userinfo"], loggedDeclines: localStorage["loggedPending"],
 				oauth_token: localStorage["oauth_token"], oauth_token_secret: localStorage["oauth_token_secret"]});
 }
 

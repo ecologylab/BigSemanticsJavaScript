@@ -1,3 +1,4 @@
+var record_user_info = false;
 
 chrome.extension.onRequest.addListener(
 	function(request, sender, sendResponse) {
@@ -33,6 +34,13 @@ function getMetaMetadata(url, document, sendResponse, additionalUrls)
 			var resp = jQuery.parseJSON(xhr.response);
 			var metadata = extractMetadata(document, resp.meta_metadata, additionalUrls);
 			//console.log(JSON.stringify(metadata));
+			
+			if (record_user_info)
+			{
+				record_user_info = false;
+				metadata.tweets = {};
+				localStorage["userinfo"] = JSON.stringify(metadata);
+			}
 			
 			// mice looks for a metadata collection response
 			sendResponse({doc: metadata, mmd: resp});
@@ -110,5 +118,7 @@ function getUserInfo(username, sendResponse)
 	var url = "https://twitter.com/" + username;
 	// make conditional on success of loadWebpage?
 	localStorage["username"] = username;
+	if (!record_user_info)
+		record_user_info = true;
 	loadWebpage(url, sendResponse);
 }
