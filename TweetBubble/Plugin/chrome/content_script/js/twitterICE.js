@@ -1,7 +1,7 @@
 
 function twitterICE() {
 
-this.usernameXPath = "//span[@class='u-linkComplex-target']";	
+this.usernameXPath = "//li[@class='current-user']/a";	
 	
 this.expandableItemsXPath = "//ol[@id='stream-items-id']/li//p[@class='js-tweet-text tweet-text']/a/b";
 
@@ -277,11 +277,12 @@ var logTweetAction = function(twAction, item) {
 		else
 		{	
 			//a.li.ul.div
-			var aNode = item.parentNode.parentNode.parentNode.parentNode.getElementsByTagName('a')[0];
+			var aNode = item.parentNode.parentNode.parentNode.parentNode.parentNode;
+			var aNodeTweetId = aNode.getAttribute("data-tweet-id");
 			var actionUrl;
-			if (aNode)
+			if (aNodeTweetId)
 			{
-				actionUrl = aNode.getAttribute("href");
+				actionUrl = aNodeTweetId;
 			}
 			else
 			{
@@ -372,10 +373,11 @@ this.addOtherEventHandlers = function()
 			item.addEventListener('click', this.replyClick);
 			this.setProcessed(item);
 			
-			var aNode = item.parentNode.parentNode.parentNode.parentNode.getElementsByTagName('a')[0];
-			if (aNode)
+			var aNode = item.parentNode.parentNode.parentNode.parentNode.parentNode;
+			var aNodeTweetId = aNode.getAttribute("data-tweet-id");
+			if (aNodeTweetId)
 			{
-				viewedTweets.push(aNode.getAttribute("href"));
+				viewedTweets.push(aNodeTweetId);
 			}
 			else
 			{
@@ -480,7 +482,11 @@ this.checkAndSetExternalUrlTarget = function(elt) {
 
 this.validateUserInfo = function(prevUsername)
 {
-	var usernameResult = document.evaluate(this.usernameXPath, document, null, XPathResult.STRING_TYPE, null).stringValue;
+	var usernameNode = document.evaluate(this.usernameXPath, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+	var usernameResult = usernameNode.getAttribute("href");
+	if (usernameResult && usernameResult.length > 1)
+		usernameResult = usernameResult.substr(1);
+	
 	if (usernameResult && usernameResult != prevUsername)
 	{
 		chrome.extension.sendRequest({userInfo: usernameResult}, function(response) {

@@ -1691,8 +1691,40 @@ MetadataRenderer.createReplyBox = function()
 		
 		this.isReplyBoxVisible = true;
 		replyBox.focus();
+
+		var tweeterUsernameStr;
+		var tweeterRow = twMetadataTableDiv.firstChild;
+		var tweeterUsernameRef = tweeterRow.getElementsByTagName("a")[0];
+		if (tweeterUsernameRef && tweeterUsernameRef.className != "twFieldValue metadata_h1")
+			tweeterUsernameRef = null;
 		
-		// TODO:change later to specific className
+		if (!tweeterUsernameRef)
+		{
+			var rootTableDiv = twMetadataTableDiv;
+			while (rootTableDiv.parentElement)
+			{
+				if (rootTableDiv.className == "twRootMetadataTableDiv")
+				{
+					tweeterUsernameRef = rootTableDiv.getElementsByTagName("a")[0];
+					break;
+				}
+				rootTableDiv = rootTableDiv.parentElement;
+			}
+		}
+		
+		if (tweeterUsernameRef)
+		{
+			tweeterUsernameStr = tweeterUsernameRef.getAttribute("href");
+			if (tweeterUsernameStr)
+			{
+				var slashIndex = tweeterUsernameStr.lastIndexOf('/');
+				if (slashIndex != -1)
+					tweeterUsernameStr = '@' + tweeterUsernameStr.substr(slashIndex + 1) + ' ';
+				else
+					tweeterUsernameStr = '';
+			}
+		}
+		
 		var tweetDivs;
 		while (twMetadataTableRow.previousSibling)
 		{	
@@ -1705,7 +1737,7 @@ MetadataRenderer.createReplyBox = function()
 		{
 			var tweetText = tweetDivs[0].textContent;
 			var usernameRefs = tweetText.split('@');
-			var usernameStr = "";
+			var usernameStr = tweeterUsernameStr;
 			for (var i = 1; i < usernameRefs.length; i++)
 			{
 				var userStr = (usernameRefs[i].indexOf(' ') == -1)? 
