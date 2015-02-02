@@ -3,6 +3,7 @@
 var MONA = {},
     cachedMMD = "",     //the old in focus meta-metadata. used to compare against current in focus meta-metadata
     focusTitle = "",    //the title of the in focus node. used to avoid creating copy of focus node in graph area
+    focusUrl = "",      //the url of the in focus node. used to avoid creating copy of focus node in graph area
     nodeColors = {},    //maps node type to a color
     nodeMetadata = {},  //maps node location to that node's metatata
     nodeMetadataCache = {}, //all the metadata that has been loaded
@@ -63,42 +64,49 @@ MONA.initialize = function (){
     colorCount = 0;
 	requestsMade = 0;
     
+    //initialize the heap
     unrenderedNodesHeap = new Heap(function(a, b) {
         return b.parents.length - a.parents.length;
     });
     
+    //define our global html elements
     GRAPH_ELEM = document.getElementById("graphArea");
     TYPE_ELEM = document.getElementById("typeArea");
     LOAD_BAR_ELEM = document.getElementById("loadingBar");
     HISTORY_ELEM = document.getElementById("historyArea");
     
-    var linesElement = document.getElementById("lineSVG"),
-        miceElement = document.getElementById("monaMice"),
-        nodesLoading = document.createElement('div'),
-        nodeMDLoading = document.createElement('div');
-	    
     graphWidth = GRAPH_ELEM.getClientRects()[0].width;
 	graphHeight = GRAPH_ELEM.getClientRects()[0].height;
 	
+    var linesElement = document.getElementById("lineSVG");
 	linesElement.width = graphWidth;
 	linesElement.height = graphHeight;
     
     pageMidHeight = graphHeight/2;
     setCentroid();
     
+    var miceElement = document.getElementById("monaMice");
     miceElement.style.top = pageMidHeight + "px";
     TYPE_ELEM.style.top = pageMidHeight + "px";
     var histHeight = pageMidHeight - 70;
     HISTORY_ELEM.style.height = histHeight + "px";
     
     deleteChildren(GRAPH_ELEM, TYPE_ELEM, linesElement, LOAD_BAR_ELEM);
-    
-	nodesLoading.innerHTML = "Loading Nodes...";
-	GRAPH_ELEM.appendChild(nodesLoading);
 
-    nodeMDLoading.innerHTML = "Loading Nodes Metadata...";
-	LOAD_BAR_ELEM.appendChild(nodeMDLoading);
+    var nodesLoading = document.createElement('div');
+    nodesLoading.style.top = (pageMidHeight - 6) + "px";
+    nodesLoading.style.fontSize = "16px";
+	GRAPH_ELEM.appendChild(nodesLoading);
+    
+    var spinner = new Image(24,24);
+    spinner.src = "img/spinner.gif";
+    nodesLoading.appendChild(spinner);
 	
+    var loadingTxt = document.createElement('p');
+    loadingTxt.innerHTML = "Loading Focus Node...";
+    loadingTxt.style.margin = "2px 0px 0px 35px";
+    nodesLoading.appendChild(loadingTxt);
+    
     waitForNewMMD();
 };
 
@@ -154,16 +162,19 @@ function populateNodeMetadata(){
     //start the loading bar
     if (requestsMade > 0){
         var loadingDiv = document.createElement('div');
-        var loadingText = document.createElement('p');
-        loadingText.id="loadingText";
+        loadingDiv.style.marginTop = "10px";
 
         var spinner = new Image(24,24);
         spinner.src = "img/spinner.gif";
         loadingDiv.appendChild(spinner);
 
-        loadingText.innerHTML= "0 of " + requestsMade + " new node metadata loadeds";
-        loadingDiv.appendChild(loadingText);
-
+        var loadingTxt = document.createElement('p');
+        loadingTxt.innerHTML =  "0 of " + requestsMade + " new node metadata loadeds";
+        loadingTxt.style.margin = "0px 0px 0px 5px";
+        loadingTxt.style.display = "inline";
+        loadingTxt.id = "mdLoadingTxt";
+        loadingDiv.appendChild(loadingTxt);
+        
         LOAD_BAR_ELEM.appendChild(loadingDiv);
     }
     waitForNodeMDLoaded();
@@ -172,7 +183,7 @@ function populateNodeMetadata(){
 //update loading bar while we wait on all the node metadata to come in
 function waitForNodeMDLoaded(){
 
-    var loading = document.getElementById("loadingText");
+    var loading = document.getElementById("mdLoadingTxt");
     if (loading !== null){
         loading.innerHTML= Object.keys(nodeMetadata).length + " of " + requestsMade + " new node metadata loaded";
     }
@@ -359,6 +370,9 @@ function getNodes(){
             if (key == "title"){
                 focusTitle = MDC_rawMetadata[metadataType][key];
             }
+            else if (key == "location"){
+                focusUrl = MDC_rawMetadata[metadataType][key];
+            }
             var newNode, curObj, firstMD;
 			var currentField = MDC_rawMetadata[metadataType][key];
 			if (currentField instanceof Array && currentField[0] instanceof Object){
@@ -436,7 +450,7 @@ function getSecondaryNodes(nodeMMD, parent){
 						for (var i = 0;  i < currentField.length; i++){
                             // we found a valid node!
                             curObj = currentField[i];
-                            if (curObj.hasOwnProperty('title') && curObj.title !== focusTitle && !tooManyNodes()){
+                            if (curObj.hasOwnProperty('title') && curObj.title !== focusTitle && !tooManyNodes() && focusUrl !== curObj.location){
                                 //if the node doesn't already exist create it. 
                                 if (!(curObj.location in secondaryNodes) && !(curObj.location in primaryNodes)){
                                     newNode = new Node(key, curObj.title, curObj.location, curObj.meta_metadata_name, parent);
@@ -464,7 +478,7 @@ function getSecondaryNodes(nodeMMD, parent){
 								key = getLabel(key);				
 								for (var j = 0;  j < currentField.length; j++){
                                     curObj = currentField[j][key2];
-                                    if ("title" in curObj && curObj.title !== focusTitle){ 
+                                    if ("title" in curObj && curObj.title !== focusTitle && focusUrl !== curObj.location){ 
                                         if (!(curObj.location in secondaryNodes) && !(curObj.location in primaryNodes) && !tooManyNodes()){
                                             newNode = new Node(key, curObj.title, curObj.location, curObj.meta_metadata_name, parent);
                                             secondaryNodes[curObj.location] = newNode;
@@ -488,7 +502,7 @@ function getSecondaryNodes(nodeMMD, parent){
 				if ("meta_metadata_name" in currentField && "location" in currentField){
 					if (currentField.meta_metadata_name != "rich_document" && currentField.meta_metadata_name != "image"){
 				        key = getLabel(key);
-                        if (currentField.title !== focusTitle && currentField.title != "See all colleagues of this author"){
+                        if (currentField.title !== focusTitle && currentField.title != "See all colleagues of this author" && focusUrl !== curObj.location){
                             if (!(currentField.location in secondaryNodes) && !(currentField.location in primaryNodes) && !tooManyNodes()){
                                 newNode = new Node(key, currentField.title, currentField.location, currentField.meta_metadata_name, parent);
                                 secondaryNodes[currentField.location] = newNode;
