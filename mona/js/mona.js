@@ -25,6 +25,7 @@ var MONA = {},
     TYPE_ELEM,          //the html element of the type area
     HISTORY_ELEM,       //the html element of the history area
     LOAD_BAR_ELEM,      //the html element of the loading bar/spinner
+    LINE_ELEM,          //the html element (svg) that we draw lines on 
     MAX_NODES = 40,     //max number of nodes we want to render
     SEMANTIC_SERVICE_URL = "http://ecology-service.cse.tamu.edu/BigSemanticsService/",
     SERVICE_LOGS_URL = "http://ecology-service.cse.tamu.edu:8082/admin/find-logs.json";
@@ -74,13 +75,13 @@ MONA.initialize = function (){
     TYPE_ELEM = document.getElementById("typeArea");
     LOAD_BAR_ELEM = document.getElementById("loadingBar");
     HISTORY_ELEM = document.getElementById("historyArea");
+    LINE_ELEM = document.getElementById("lineSVG"); 
     
     graphWidth = GRAPH_ELEM.getClientRects()[0].width;
 	graphHeight = GRAPH_ELEM.getClientRects()[0].height;
 	
-    var linesElement = document.getElementById("lineSVG");
-	linesElement.width = graphWidth;
-	linesElement.height = graphHeight;
+    LINE_ELEM.style.width = graphWidth;
+	LINE_ELEM.style.height = graphHeight;
     
     pageMidHeight = graphHeight/2;
     setCentroid();
@@ -91,7 +92,7 @@ MONA.initialize = function (){
     var histHeight = pageMidHeight - 70;
     HISTORY_ELEM.style.height = histHeight + "px";
     
-    deleteChildren(GRAPH_ELEM, TYPE_ELEM, linesElement, LOAD_BAR_ELEM);
+    deleteChildren(GRAPH_ELEM, TYPE_ELEM, LINE_ELEM, LOAD_BAR_ELEM);
 
     var nodesLoading = document.createElement('div');
     nodesLoading.style.top = (pageMidHeight - 6) + "px";
@@ -803,8 +804,7 @@ function drawLines(){
 		var rgb = hexToRgb(nodeColors[primaryNodes[nodeKey].type]);
 		line.style.stroke = "rgba(" + rgb.r + "," + rgb.g + "," + rgb.b + ",.2)";
 		line.setAttribute('stroke-width', 1);
-        var linesElement = document.getElementById("lineSVG");
-		linesElement.appendChild(line);
+		LINE_ELEM.appendChild(line);
 	}	
 }
 
@@ -817,13 +817,12 @@ function drawLine(node){
 }
 
 //draws either parent on child lines
-function drawRelativeLines(node, relatives, isParents){
-        var lineElement = document.getElementById("lineSVG");   
+function drawRelativeLines(node, relatives, isParents){  
         for (var i in relatives){
             var relative = relatives[i];
             if (secondaryNodes[node.location] !== undefined && relative.rendered && document.getElementById(node.location+relative.location+"Line") === null){
                 var line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-                //line.setAttribute('class', node.location+"Line");
+
                 //line ids are in the form parent.location+child.location+"Line"
                 if (isParents){
                     line.setAttribute('id', relative.location+node.location+"Line");
@@ -840,7 +839,7 @@ function drawRelativeLines(node, relatives, isParents){
                 var rgb = hexToRgb(nodeColors[relative.type]);
                 line.style.stroke = "rgba(" + rgb.r + "," + rgb.g + "," + rgb.b + ",.2)";
                 line.setAttribute('stroke-width', 1);
-                lineElement.appendChild(line);
+                LINE_ELEM.appendChild(line);
             }
         }	
 }

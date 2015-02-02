@@ -94,6 +94,12 @@ form {
 	bottom: 0;
 }
 
+#lineSVG {
+	position: absolute;
+	left: 550px;
+}
+
+
 #loadingBar {
 	position: absolute;
 	top: 0;
