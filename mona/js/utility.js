@@ -38,10 +38,12 @@ function median(values) {
 
 function nestedHasNavTo (array){
 	for (var i in array){
-		if (array[i].hasOwnProperty('navigatesTo')) return true;
+		if (array[i].hasOwnProperty('navigatesTo')) 
+            return true;
 		
 		for (var j in array[i].value){
-			if (array[i].value[j].hasOwnProperty('navigatesTo')) return true;
+			if (array[i].value[j].hasOwnProperty('navigatesTo')) 
+                return true;
 		}
 	}
 	return false;
