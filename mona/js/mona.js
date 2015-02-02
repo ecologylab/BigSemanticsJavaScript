@@ -80,7 +80,7 @@ MONA.initialize = function (){
     graphWidth = GRAPH_ELEM.getClientRects()[0].width;
 	graphHeight = GRAPH_ELEM.getClientRects()[0].height;
 	
-    LINE_ELEM.style.width = graphWidth;
+    LINE_ELEM.style.width = graphWidth+550;
 	LINE_ELEM.style.height = graphHeight;
     
     pageMidHeight = graphHeight/2;
