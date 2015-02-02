@@ -1,0 +1,469 @@
+.twMetadataContainer {
+
+    font-size: 13px;
+    /*font-weight: 100;*/
+    	
+	border-top-right-radius: 8px;
+	border-bottom-right-radius: 8px;
+	border-bottom-left-radius: 8px;
+	width: 550px;
+	
+	line-height: 15px;
+	
+	position: relative;
+	
+	transition: opacity 0.3s;
+	-moz-transition: opacity 0.3s; /* Firefox 4 */
+	-webkit-transition: opacity 0.3s; /* Safari and Chrome */
+	-o-transition: opacity 0.3s; /* Opera */
+
+}
+
+.twMetadataTable {
+	margin: 0px 4px 0px 6px;
+	width: 100%;
+	table-layout: fixed;
+	
+}
+
+/* for non-twitter compatibility */
+.rootMetadataTableDiv {
+	display: table;
+    
+    font-size: 12px;
+    white-space: normal;
+    overflow: scroll;
+    text-overflow: ellipsis;
+    
+    border-spacing: 0px;
+    border-collapse:collapse;
+    margin: 0px;
+}
+
+.twRootMetadataTableDiv {
+	display: table;
+	background: white;
+	/*border: 2px solid #CCC;*/
+	border-radius: 8px;
+	padding-top: 5px;
+	padding-bottom: 1px;
+	
+	cursor: default;
+}
+
+.twMetadataTableDiv {
+	display: table;
+	cursor: default;
+}
+
+.twMetadataRow {
+	display: table-row;
+}
+
+.twMetadataTable tr{
+    width:100%;
+    display: table;
+}
+
+.twMetadataContainer tr{
+    border-bottom: 1px solid #ccc;
+    margin-bottom: 0px;
+}
+
+.twMetadataContainer p{
+    padding: 0px;
+    margin: 0px;
+}
+
+.twMetadataContainer table{
+	color: #111;
+	font-size: 13px;
+	
+	white-space: normal;
+	overflow: scroll;
+	text-overflow: ellipsis;
+	
+	table-layout: fixed;
+	border-spacing: 0px;
+  	border-collapse:collapse;
+	
+	margin: 0px;
+}
+
+.twMetadataContainer table .twMetadata_h1{
+	font-size: 14px;
+}
+
+.twMetadataContainer .twMetadataTableDiv .twMetadata_h1{
+    font-weight: 700;
+}
+
+.twMetadataContainer .twFieldLabel{	
+	white-space: nowrap;
+	vertical-align: top;
+	text-align: left;
+	pointer-events: none;
+	padding: 2px;	
+	margin-left: 6px;
+	margin-right: 8px;
+	width: 100%;
+}
+
+.twMetadataContainer .twFieldLabelImage{	
+	width: 35px;
+	height: 35px;
+}
+
+.twMetadataContainer .twFieldValue{ 
+    white-space: normal;
+    text-align: left;
+    vertical-align: middle;
+    text-overflow: ellipsis;
+    
+    
+    padding: 3px 8px;
+}
+
+.twMetadataContainer a.twFieldValue{
+    text-align: left;
+    text-decoration: underline;
+    
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    display: inline-block;
+    max-width: 350px;
+    
+    line-height: 19px;
+    position: absolute;
+    margin-top: -3px;
+
+    padding: 3px 8px;
+    color: black;
+}
+
+.twMetadataContainer .twLabelCol{
+	display: table-cell;
+	/*vertical-align: top;*/
+	text-align: right;
+	
+	/*padding-right: 10px;*/
+	
+}
+
+.twMetadataContainer .twLabelCol .noShow{
+    display: none;
+}
+.noShow{
+    display: none;
+}
+
+.twMetadataContainer .twValueCol{
+	display: table-cell;
+	vertical-align: top;
+	text-align: left;
+	padding: 0px;
+	margin: 0px;
+	
+	width: 100%;
+}
+
+.twMetadataContainer a{
+	color: #0084B4;
+	font-size: 13px;
+}
+
+.twMetadataContainer a:hover{
+	color: #0084B4;
+}
+
+.twMetadataContainer .twFieldLabelContainer{
+	color: #999;
+	
+	
+	border-top-left-radius: 8px;
+	border-bottom-left-radius: 8px;
+	
+	width: 100%;
+	min-height: 19px;
+	text-align: right;
+}
+
+.twMetadataContainer .twFieldLabelContainerOpened{
+	color: #888;
+	
+	border-top-left-radius: 8px;
+	border-bottom-left-radius: 8px;
+	
+	width: 100%;
+	min-height: 17px;
+	border: 1px solid #555;
+	text-align: right;
+}
+
+.twMetadataContainer .twFieldLabelContainer.highlight{
+	/*background: white;*/
+	border: 1px solid #888;
+	min-height: 15px;
+	height: 17px;
+}
+
+.twMetadataContainer .twFieldLabelContainer.unhighlight{
+	/*background: white;*/
+	border: none;
+	height: 19px;
+}
+
+.twMetadataContainer .twFieldLabelContainerOpened.highlight{
+	/*background: white;*/
+	border: 1px solid #888;
+	min-height: 15px;
+	height: 17px;
+}
+
+.twMetadataContainer .twFieldLabelContainerOpened.unhighlight{
+	/*background: white;*/
+	border: none;
+	height: 19px;
+}
+
+.twMetadataContainer .twFieldValueContainer{
+	
+	
+	border-top-right-radius: 8px;
+	border-bottom-right-radius: 8px;
+	
+	width: 100%;
+	min-height: 19px;
+	height: auto;
+	text-overflow: ellipsis;
+	/*overflow-x: visible;*/
+
+	transition: height 0.3s;
+	-moz-transition: height 0.3s; /* Firefox 4 */
+	-webkit-transition: height 0.3s; /* Safari and Chrome */
+	-o-transition: height 0.3s; /* Opera */
+}
+
+.twMetadataContainer .twFieldValueContainer:hover{
+    height: auto;
+}
+
+.twMetadataContainer .twFieldValueImage{
+	width: auto;
+	max-height: 250px;
+}
+
+.twMetadataContainer .twFieldChildContainer{
+	
+	/*border-top-right-radius: 8px;
+	border-bottom-right-radius: 8px;
+	border-bottom-left-radius: 8px;*/
+	
+	width: 100%;
+	min-height: 19px;
+	text-overflow: ellipsis;
+}
+
+.twMetadataContainer .twFieldCompositeContainer{
+	
+	background: white;
+	
+	border: 1px solid #CCC;
+	
+	/*border-top-right-radius: 8px;
+	border-bottom-right-radius: 8px;
+	border-bottom-left-radius: 8px;*/
+	
+	width: 100%;
+	min-height: 19px;
+	text-overflow: ellipsis;	
+}
+
+.twMetadataContainer .twExpandButton{
+	background: white;
+	width: 16px;
+	height: 16px;
+	border-radius: 8px;
+	float: left;
+	margin: 1px 4px 1px 1px;
+}
+
+.twMetadataContainer .twExpandButton:hover{
+	background: gray;
+	cursor: pointer;
+}
+
+.twMetadataContainer .twCollapseButton{
+	width: 16px;
+	height: 16px;
+	border-radius: 8px;
+	float: left;
+	margin: 1px 4px 1px 4px;
+	background: white;
+}
+.twMetadataContainer .twCollapseButton:hover{
+	background: gray;
+	cursor: pointer;
+}
+
+.twMetadataContainer .twExpandSymbol{
+	position: absolute;
+	background: darkgray;
+	width: 2px;
+	height: 12px;
+	margin: 2px 7px 2px 7px;
+	pointer-events: none;
+}
+
+.twMetadataContainer .twCollapseSymbol{
+	position: absolute;
+	background: darkgray;
+	width: 12px;
+	height: 2px;
+	margin: 7px 2px 7px 2px;
+	pointer-events: none;
+}
+
+.twMetadataContainer .twOpenedSymbol{
+	position: relative;
+	top: 2px;
+	left: 2px;
+	width: 8px;
+	height: 8px;
+	border-radius: 6px;
+	border: 2px solid darkgray;
+}
+
+.twMetadataContainer .twLoadingRow{
+	background: white;
+	border-radius: 8px;
+	height: 15px;
+	margin-bottom: 4px;
+	padding: 2px 16px 2px 8px; 
+	
+}
+
+.twMetadataContainer .twNestedPad{
+	padding: 0px;
+	padding-left: 8px;
+	padding-right: 4px;	
+}
+
+.twMetadataContainer .citeULikeButton:hover {
+    cursor: pointer;
+}
+
+.twMetadataContainer .citeULikeButton:hover img {
+    background: #8AA615;
+}
+
+.metadataContainer .citeULikeButton img{
+    width: 22px;
+    height: 18px;
+    background: white;
+    border-radius: 6px;
+    margin-left: 6px;
+    margin-right: 6px;
+    padding: 0px;
+    padding-left: 6px;
+    padding-right: 6px;
+}
+
+.twLineCanvas {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    pointer-events: none;
+    background: rgba(0, 0, 100, 0.0);
+}
+
+#twBigLineCanvas {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    pointer-events: none;
+    background: rgba(0, 0, 100, 0.0);
+}
+
+.twHidden {
+    display: none;
+}
+
+.twMoreButton {
+    border-radius: 4px;
+    background: #ccc;
+    padding: 2px 6px;
+}
+
+.twMoreButton:hover {
+    cursor: pointer;
+    background: #bbb;
+}
+
+.twMetadataContainer .twFieldCompositeContainer.highlightTweet{
+	background: #F5F5F5;
+	cursor: pointer;
+}
+
+.twMetadataContainer a.tweetSemantics {
+	display: table-cell;
+}
+
+.twMetadataContainer a.tweetSemantics:hover {
+	cursor: pointer;
+}
+
+.twMetadataContainer img.tweetSemantics {
+	padding-left: 7px;
+	padding-right: 7px;
+}
+
+.twMetadataContainer .tweetSemanticsRow {
+	display: table-row;
+}
+
+.twMetadataContainer .tweetSemanticsDiv {
+	display: table;
+}
+
+.twMetadataContainer .twFieldValue.sub {
+	font-size: 12px;
+	color: #8899A6;
+}
+
+.twMetadataContainer .twFieldCompositeContainer.twitterMicroblog {
+	border: none; 
+}
+
+.twMetadataContainer .twFaviconICE{
+	width: 16px;
+	height: 16px;
+	padding: 2px 0px 1px 1px;
+}
+
+/*.semanticsBgDiv {
+	background: black;
+	z-index: 9999;
+	position: fixed;
+	top: 0;
+	left: 0;
+	opacity: 0.6;
+}
+
+.semanticsIframe {
+	max-height: 50%;
+	max-width: 50%;
+	overflow: auto;
+	z-index: 10000;
+	position: fixed;
+	left: 0;
+	top: 0;
+	margin: 25%;
+	padding: 15px;
+	border-radius: 8px;
+}*/
