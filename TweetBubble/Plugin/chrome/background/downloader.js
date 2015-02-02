@@ -1,4 +1,5 @@
 var record_user_info = false;
+var record_user_url = null;
 
 chrome.extension.onRequest.addListener(
 	function(request, sender, sendResponse) {
@@ -35,7 +36,7 @@ function getMetaMetadata(url, document, sendResponse, additionalUrls)
 			var metadata = extractMetadata(document, resp.meta_metadata, additionalUrls);
 			//console.log(JSON.stringify(metadata));
 			
-			if (record_user_info)
+			if (record_user_info && record_user_url == url)
 			{
 				record_user_info = false;
 				metadata.tweets = {};
@@ -115,10 +116,10 @@ function isUrlRedirect(response, sendResponse, additionalUrls)
 
 function getUserInfo(username, sendResponse)
 {
-	var url = "https://twitter.com/" + username;
+	record_user_url = "https://twitter.com/" + username;
 	// make conditional on success of loadWebpage?
 	localStorage["username"] = username;
 	if (!record_user_info)
 		record_user_info = true;
-	loadWebpage(url, sendResponse);
+	loadWebpage(record_user_url, sendResponse);
 }
