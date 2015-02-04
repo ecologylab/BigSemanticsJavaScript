@@ -1,4 +1,4 @@
-/*global window, doc, document, Image, setInterval, clearInterval, Vector, getRandomArbitrary, setTimeout, doPhysical, graphWidth:true, graphHeight:true, primaryNodes:true, secondaryNodes:true, renderedNodesList:true, secondaryNodesList:true, nodeList:true, nodePositions:true*/
+/*global window, doc, document, Image, setInterval, clearInterval, Vector, getRandomArbitrary, setTimeout, doPhysical, graphWidth:true, graphHeight:true, primaryNodes:true, secondaryNodes:true, renderedNodesList:true, secondaryNodesList:true, nodeList:true, nodePositions:true, typePositions*/
 
 /* ================================================================== Let's render it! */
 
@@ -15,12 +15,51 @@ function doPhysical(n){
     physicalInterval = setInterval(stepPhysical, NODE_RENDER_TIMER);
 }
 
-var ATTRACTION_FORCE = 10;
-var REPULSE_FORCE = -1;
-var TOUCH_DISTANCE = 100;
-var Y_TOUCH_DISTANCE = 40;
+var ATTRACTION_FORCE = 2;
+var REPULSE_FORCE = -10;
+var TOUCH_DISTANCE = 60;
+var Y_TOUCH_DISTANCE = 30;
+var X_OVERLAP = 200;
+
+//adjust these to stretch entire graph accross x/y axis
+var X_REPULSE_FACTOR = 2;
+var Y_REPULSE_FACTOR = 1;
+var X_ATTRACT_FACTOR = 0.5;
+var Y_ATTRACT_FACTOR = 1;
 
 var nodeCounter = 0;
+var centroid;
+var CENT_RADIUS = 350;
+var CENT_DIST_SQ = Math.pow(CENT_RADIUS, 2);
+var PRIMARY_CENT_DIST = Math.pow((CENT_RADIUS+20),2);
+var SECONDARY_CENT_DIST = Math.pow((CENT_RADIUS+40),2);
+var SECONDARY_CENT_DIST_ACTUAL = Math.sqrt(SECONDARY_CENT_DIST);
+
+function setCentroid(){
+    centroid = {
+        x : -200,
+        y : graphHeight/2
+    };
+    drawCircle(CENT_RADIUS+50);
+}
+
+function drawCircle(radius){
+    //draw it
+    var circle = document.createElement('div');
+    circle.style.position = "absolute";
+    var centerDivY = centroid.y - radius;
+    circle.style.top = centerDivY + "px";
+    circle.style.left = (300-radius) + "px";
+    circle.style.border = "3px solid red";
+    circle.style.width = (2*radius) + "px";
+    circle.style.height = (2*radius) + "px";
+    circle.style.borderRadius = radius + "px";
+    //document.body.appendChild(circle);
+}
+
+function centroidDistance(node){
+    return Math.pow((centroid.x - node.x), 2) + Math.pow((centroid.y - node.y), 2);
+}
 
 function stepPhysical(x){
 	
@@ -38,11 +77,51 @@ function stepPhysical(x){
     for(n = 0; n < renderedNodesList.length; n++){
         node = renderedNodesList[n];
     
-       
-        var n, node, p, pDist, pSpeed, pX, pY;
-        // calculate attractive forces
+        var n, node, p, pDist, yDist, pSpeed, pX, pY, power, actualCentDist;
 		node.vector = new Vector([0,0,0]);
-		
+
+        //if node is primary pull it toward the centroid
+        var centDist = centroidDistance(node);
+        //we use PRIMARY_CENT_DIST (square the radius plus 20 to avoid having to square root so much
+        if (primaryNodes.hasOwnProperty(node.location) && centDist > PRIMARY_CENT_DIST){
+            actualCentDist = Math.sqrt(centDist);
+            pX = (centroid.x - node.x) / actualCentDist;
+            pY = (centroid.y - node.y) / actualCentDist;
+
+            power = Math.abs(renderedNodesList.length - n);
+
+            pSpeed = ( actualCentDist /graphWidth) * ATTRACTION_FORCE * power; 
+
+            pX *= pSpeed;
+            pY *= pSpeed;
+
+            node.vector = node.vector.add(new Vector([pX, pY, 0]));
+        }
+        //pull slightly towards category while rendering primary nodes
+        if (primaryNodes.hasOwnProperty(node.location) && renderedNodesList.length == Object.keys(primaryNodes).length){
+            var catPos = typePositions[node.type]; 
+            pY = (catPos.top - node.y); 
+            pSpeed = (pY / (graphWidth)) * ATTRACTION_FORCE; 
+            pY *= Math.abs(pSpeed)/4;
+            
+            node.vector = node.vector.add(new Vector([0, pY, 0]));    
+        }
+        
+	    //don't let secondary nodes get too close to centroid
+        if (secondaryNodes.hasOwnProperty(node.location) && centDist < SECONDARY_CENT_DIST){
+            actualCentDist = Math.sqrt(centDist);
+            pX = (centroid.x - node.x) / actualCentDist;
+            pY = (centroid.y - node.y) / actualCentDist;
+
+            pSpeed =  ((SECONDARY_CENT_DIST_ACTUAL - actualCentDist) / SECONDARY_CENT_DIST_ACTUAL) * REPULSE_FORCE * 2; 
+
+            pX *= pSpeed * X_REPULSE_FACTOR;
+            pY *= pSpeed * Y_REPULSE_FACTOR;
+            
+            node.vector = node.vector.add(new Vector([pX, pY, 0]));
+        }
+        
+        // calculate attractive forces		
 		for(p = 0; p < node.parents.length; p++){
 			var parent = node.parents[p];
 			pDist = Math.sqrt( Math.pow((parent.x - node.x), 2) + Math.pow((parent.y - node.y), 2) );
@@ -51,41 +130,27 @@ function stepPhysical(x){
 				pX = (parent.x - node.x) / pDist;
 				pY = (parent.y - node.y) / pDist;
 				
-				var power = Math.sqrt(Math.pow(renderedNodesList.length - n, 2));
+				power = Math.abs(renderedNodesList.length - n);
 				
-				pSpeed = (pDist / graphWidth) * ATTRACTION_FORCE * power; 
+                //the more you multiply graph width by, the more of the space nodes take up
+				pSpeed = (pDist / (graphWidth)) * ATTRACTION_FORCE * power; 
 				
-				pX *= pSpeed;
-				pY *= pSpeed;
+				pX *= pSpeed * X_ATTRACT_FACTOR;
+				pY *= pSpeed * Y_ATTRACT_FACTOR;
 				
 				node.vector = node.vector.add(new Vector([pX, pY, 0]));
 			}        
 		}
-        
-        //if node is primary pull it left and to the center
-        if (primaryNodes.hasOwnProperty(node.location)){
-            pY = ((graphHeight/2 - 50) - node.y) / 10;
-            pSpeed = (Math.abs(pY) / graphWidth) * ATTRACTION_FORCE;
-            pY *= pSpeed;
-
-            node.vector = node.vector.add(new Vector([-5, pY, 0]));
-        }	
-	
+                
         // add in repulsive forces
-		
 		var repulsionVector = new Vector([0,0,0]);
         
-        //if a node is there is a constant push right
-        if (node.x < 100 && secondaryNodes.hasOwnProperty(node.location)){
-            repulsionVector = repulsionVector.add(new Vector([30, 0, 0]));
-        }
-            
-		for(p = 0; p <renderedNodesList.length; p++){
-			
+		for(p = 0; p <renderedNodesList.length; p++){		
 			if(n != p){
 				var other = renderedNodesList[p];
 				pDist = Math.sqrt( Math.pow((other.x - node.x), 2) + Math.pow((other.y - node.y), 2) );
-				
+				yDist = Math.abs(other.y - node.y);
+
 				if(pDist < TOUCH_DISTANCE){
                     if(pDist < 1)
 						pDist = 1;
@@ -102,15 +167,15 @@ function stepPhysical(x){
                     
 					pSpeed =  ((TOUCH_DISTANCE - pDist) / TOUCH_DISTANCE) * REPULSE_FORCE; 
 			
-                    pX *= pSpeed;
-					pY *= pSpeed;
+                    pX *= pSpeed * X_REPULSE_FACTOR;
+                    pY *= pSpeed * Y_REPULSE_FACTOR;
 					
 					repulsionVector = repulsionVector.add(new Vector([pX, pY, 0]));
 				}
                 //if they are too close on the y move them
-                else if(Math.abs(other.y - node.y) < Y_TOUCH_DISTANCE  && Math.abs(other.x - node.x) < TOUCH_DISTANCE){					
-					pY = (other.y - node.y);
-					pSpeed =  ((TOUCH_DISTANCE - pY) / Y_TOUCH_DISTANCE) * REPULSE_FORCE; 
+                else if(yDist < Y_TOUCH_DISTANCE && Math.abs(other.x - node.x) < X_OVERLAP){
+                    pY = (other.y - node.y) / pDist;
+					pSpeed =  ((Y_TOUCH_DISTANCE - yDist) / Y_TOUCH_DISTANCE) * REPULSE_FORCE; 
 					pY *= pSpeed;
 					repulsionVector = repulsionVector.add(new Vector([0, pY, 0]));
 				}
@@ -119,11 +184,6 @@ function stepPhysical(x){
 				
 		node.vector = node.vector.add(repulsionVector);
 	
-	
-	//step through 1 tick
-	//for(n = 0; n < renderedNodesList.length; n++){
-		
-		
 		if(!isNaN(node.vector.items[0])){
 			node.x += node.vector.items[0];
 		}
@@ -144,11 +204,15 @@ function stepPhysical(x){
 			node.y = 100;
 		else if(node.y > graphHeight-50)
 			node.y = graphHeight-100;
+
+        //if node is too close to the centroid move it
+        centDist = centroidDistance(node);
+        if (centDist < CENT_DIST_SQ){
+            //how much we need to move the node so that it will be out of the centroid
+            var xDisplace = Math.sqrt(CENT_DIST_SQ - Math.pow((node.y - centroid.y),2)) + centroid.x - node.x; 
+            node.x = node.x + xDisplace;
+        }
         
-    //}
-	
-        //nodeCounter = 0;
-        //moveNextNode();
         moveNode(node);
     }
 }
@@ -156,6 +220,8 @@ function stepPhysical(x){
 function moveNode(n){
     if (n !== undefined){
         n.visual.style.webkitTransform = "translate("+n.x+"px, "+n.y+"px)";
+        var z = graphWidth - n.x;
+        n.visual.style.zIndex = Math.round(z);
         updateNodeLines(n);
     }
 }
@@ -173,13 +239,14 @@ function moveNextNode(){
 function updateAllLines(){
 	for (var nodeKey in primaryNodes){
         var doc = document.documentElement;
-		var topOffset = (window.pageYOffset || doc.scrollTop)  - (doc.clientTop || 0);
+		var topOffset = (window.pageYOffset || doc.scrollTop) - (doc.clientTop || 0);
+        var leftOffset = (window.pageXOffset || doc.scrollLeft) - (doc.clientLeft || 0);
         
         //update line ends
 		var div = document.getElementById(nodeKey);
 		nodePositions[nodeKey] = div.getBoundingClientRect();
 		var line = document.getElementById(primaryNodes[nodeKey].location+"Line");
-		line.setAttribute('x1', nodePositions[nodeKey].left);
+		line.setAttribute('x1', nodePositions[nodeKey].left + leftOffset);
 		line.setAttribute('y1', nodePositions[nodeKey].top+nodePositions[nodeKey].height/2 + topOffset);
         
         for (var i in primaryNodes[nodeKey].children){
@@ -197,8 +264,8 @@ function updateAllLines(){
                     line2 = document.getElementById(primaryNodes[nodeKey].location+primaryNodes[childKey].location+"Line");
                 }
                 if (line2 !== null){
-                    line2.setAttribute('x1', nodePositions[childKey].left);
-                    line2.setAttribute('x2', nodePositions[nodeKey].left+2);
+                    line2.setAttribute('x1', nodePositions[childKey].left + leftOffset);
+                    line2.setAttribute('x2', nodePositions[nodeKey].left + 2 + leftOffset);
                     line2.setAttribute('y1', nodePositions[childKey].top + nodePositions[childKey].height/2 + topOffset);
                     line2.setAttribute('y2', nodePositions[nodeKey].top + nodePositions[nodeKey].height/2 + topOffset);
                 }
@@ -210,13 +277,15 @@ function updateAllLines(){
 function updateNodeLines(node){
     var doc = document.documentElement;
     var topOffset = (window.pageYOffset || doc.scrollTop)  - (doc.clientTop || 0);
+    var leftOffset = (window.pageXOffset || doc.scrollLeft) - (doc.clientLeft || 0);
+
     nodePositions[node.location] = node.visual.getBoundingClientRect();
 
     var div, line;
     
     if (primaryNodes.hasOwnProperty(node.location)){
         line = document.getElementById(node.location+"Line");
-        line.setAttribute('x1', nodePositions[node.location].left);
+        line.setAttribute('x1', nodePositions[node.location].left + leftOffset);
         line.setAttribute('y1', nodePositions[node.location].top+nodePositions[node.location].height/2 + topOffset);
     }
     
@@ -235,8 +304,8 @@ function updateNodeLines(node){
                 line = document.getElementById(node.location+primaryNodes[childKey].location+"Line");
             }
             if (line !== null){
-                line.setAttribute('x1', nodePositions[childKey].left);
-                line.setAttribute('x2', nodePositions[node.location].left+2);
+                line.setAttribute('x1', nodePositions[childKey].left + leftOffset);
+                line.setAttribute('x2', nodePositions[node.location].left + 2 + leftOffset);
                 line.setAttribute('y1', nodePositions[childKey].top + nodePositions[childKey].height/2 + topOffset);
                 line.setAttribute('y2', nodePositions[node.location].top + nodePositions[node.location].height/2 + topOffset);
             }
@@ -257,8 +326,8 @@ function updateNodeLines(node){
                 line = document.getElementById(node.location+secondaryNodes[parentKey].location+"Line");
             }
             if (line !== null){
-                line.setAttribute('x1', nodePositions[parentKey].left);
-                line.setAttribute('x2', nodePositions[node.location].left+2);
+                line.setAttribute('x1', nodePositions[parentKey].left + leftOffset);
+                line.setAttribute('x2', nodePositions[node.location].left + 2 + leftOffset);
                 line.setAttribute('y1', nodePositions[parentKey].top + nodePositions[parentKey].height/2 + topOffset);
                 line.setAttribute('y2', nodePositions[node.location].top + nodePositions[node.location].height/2 + topOffset);
             }

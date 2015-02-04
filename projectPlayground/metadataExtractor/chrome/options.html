@@ -1,0 +1,436 @@
+<html>
+<head>
+	<title>Metadata Extractor | Options</title>
+	
+	<script type="text/javascript">
+	
+	/** Options Page Management **/
+	
+	var backgroundPage = chrome.extension.getBackgroundPage();
+	
+	/** setOptions
+	 * Loads the current options and updates the UI selections
+	 */
+	function setOptions() {
+		var options = backgroundPage.getOptions();
+		
+	  	if (options.service == "ecologyLab") {
+	   		var radio = document.getElementById("serviceEcologyLab");
+		   	radio.checked = true;
+		   	hideUrl();
+		}
+		else if (options.service == "infoComp") {
+	   		var radio = document.getElementById("serviceInfoComp");
+		   	radio.checked = true;
+		   	hideUrl();
+		}
+		else if (options.service == "custom") {
+	   		var radio = document.getElementById("serviceCustom");
+		   	radio.checked = true;
+		   	showUrl();
+		}
+		
+		var urlBox = document.getElementById("serviceUrl");
+		
+		var checkbox = document.getElementById("injectAttribute");	
+		if (options.attributeInjection == "true")		   	
+		   	checkbox.checked = true;
+		else
+			checkbox.checked = false;
+			
+		var checkbox = document.getElementById("injectSelection");	
+		if (options.selectionInjection == "true")		   	
+		   	checkbox.checked = true;
+		else
+			checkbox.checked = false;
+		   		
+		var checkbox = document.getElementById("debugMmd");	
+		if (options.debugMmd == "true")		   	
+		   	checkbox.checked = true;
+		else
+			checkbox.checked = false;
+				
+		checkbox = document.getElementById("debugMetadata");
+		if (options.debugMetadata == "true")		   	
+		   	checkbox.checked = true;
+		else
+			checkbox.checked = false;
+	}
+	
+	/** updateService
+	 * Updates the service related option values.
+	 */
+	function updateService() {
+		var ecologyLab = document.getElementById("serviceEcologyLab").checked;
+		var infoComp = document.getElementById("serviceInfoComp").checked;
+		var custom = document.getElementById("serviceCustom").checked;
+		var url = document.getElementById("serviceUrl").value;
+
+		
+		if (ecologyLab) {
+		   	localStorage["service"] = "ecologyLab";
+		   	hideUrl();
+		   	
+		   	//EcologyLab MMD Service URL
+		   	localStorage["serviceUrl"] = "http://128.194.143.75:8080/ecologylabSemanticService/mmd?url=";
+		}
+		else if(infoComp) {
+			localStorage["service"] = "infoComp";
+			hideUrl();
+		   	
+		   	//Local InfoComposer MMD Service URL
+		   	localStorage["serviceUrl"] = "http://localhost:2107/";
+		}
+		else if(custom) {
+			localStorage["service"] = "custom";
+			showUrl();
+			
+			if (!url) {
+			   	localStorage["serviceUrl"] = url;
+			}
+		}		
+	}
+	
+	/** updateInjection
+	 * Updates the injection related option values.
+	 */
+	function updateInjection() {			
+		var attribute = document.getElementById("injectAttribute").checked;
+		if (attribute)
+		   	localStorage["attributeInjection"] = "true";
+		else
+			localStorage["attributeInjection"] = "false";			
+		
+		var selection = document.getElementById("injectSelection").checked;
+		if (selection)
+		   	localStorage["selectionInjection"] = "true";
+		else
+			localStorage["selectionInjection"] = "false";
+	}
+	
+	/** updateDebug
+	 * Updates the debug printing related option values.
+	 */
+	function updateDebug() {				
+		var debugMmd = document.getElementById("debugMmd").checked;
+		var debugMetadata = document.getElementById("debugMetadata").checked;
+		
+		if (debugMmd) {
+		   	localStorage["debugMmd"] = "true";
+		}
+		else {
+		   	localStorage["debugMmd"] = "false";
+		}
+		
+		if (debugMetadata) {
+		   	localStorage["debugMetadata"] = "true";
+		}
+		else {
+		   	localStorage["debugMetadata"] = "false";
+		}
+	}
+	
+	/** showUrl
+	 * Shows the custom URL input box.
+	 */
+	function showUrl() {
+		var urlDiv = document.getElementById("url");
+		urlDiv.style.visibility = "visible";
+		urlDiv.style.display = "block";
+	}
+	
+	/** hideUrl
+	 * Hides the custom URL input box.
+	 */
+	function hideUrl() {
+		var urlDiv = document.getElementById("url");
+		urlDiv.style.visibility = "hidden";
+		urlDiv.style.display = "none";
+	}
+	
+	/** restore
+	 * Restores the optiosn to there default values.
+	 */
+	function restore() {
+		
+		localStorage["service"] = "ecologyLab";	
+	   	localStorage["serviceUrl"] = "http://localhost:2107/";	
+	   	
+	   	localStorage["metadataInjection"] = "raw";
+	   	localStorage["attributeInjection"] = "true";
+	   	localStorage["selectionInjection"] = "true";
+	   	
+	   	localStorage["debugMmd"] = "false";
+	   	localStorage["debugMetadata"] = "false";
+	   	
+	   	setOptions();
+	   	
+	}	
+	</script>
+	
+	<style>
+		body {
+			font-family: 'Segoe UI', Tahoma, sans-serif;
+			font-size: 75%;
+			color: #303942;
+		}
+	
+		.moreOptions {
+			visibility: hidden;
+			display: none;
+			margin: 0px;
+			padding: 0px;
+		}
+		
+		h1, h2, h3 {
+			-webkit-user-select: none;
+			font-weight: normal;
+			line-height: 1;
+		}
+		
+		h1 {
+			margin-bottom: 22px;
+			font-size: 1.8em;
+		}
+		
+		h3 {
+			color: black;
+			font-size: 1.2em;
+			margin-bottom: 0.7em;
+		}
+		
+		.checkbox label, .radio label {
+			display: -webkit-inline-box;
+		}
+		
+		button:not(.custom-appearance):not(.link-button), input[type="button"]:not(.custom-appearance):not(.link-button), input[type="submit"]:not(.custom-appearance):not(.link-button), select, input[type="checkbox"], input[type="radio"] {
+-webkit-appearance: none;
+-webkit-user-select: none;
+background-image: -webkit-linear-gradient(
+#EDEDED, 
+#EDEDED 38%, 
+#DEDEDE);
+border: 1px solid 
+rgba(0, 0, 0, 0.25);
+border-radius: 2px;
+box-shadow: 0 1px 0 
+rgba(0, 0, 0, 0.08), inset 0 1px 2px 
+rgba(255, 255, 255, 0.75);
+color: 
+#444;
+font: inherit;
+margin: 0 1px 0 0;
+text-shadow: 0 1px 0 
+#F0F0F0;
+}
+		
+		input[type="radio"] {
+			border-radius: 100%;
+			bottom: 3px;
+			height: 15px;
+			position: relative;
+			vertical-align: middle;
+			width: 15px;
+		}
+		
+		input[type="radio"]:checked::before {
+background-color: 
+#666;
+border-radius: 100%;
+bottom: 25%;
+content: '';
+display: block;
+left: 25%;
+position: absolute;
+right: 25%;
+top: 25%;
+}
+
+input[type="checkbox"] {
+bottom: 2px;
+height: 13px;
+position: relative;
+vertical-align: middle;
+width: 13px;
+}
+
+input[type="checkbox"]:checked::before {
+-webkit-user-select: none;
+background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAALCAYAAACprHcmAAAAAXNSR0IArs4c6QAAAAZiS0dEAP8A/wD/oL2nkwAAAAlwSFlzAAALEwAACxMBAJqcGAAAAAd0SU1FB9wDBhYcG79aGIsAAACbSURBVBjTjdFBCkFhFAXgj4fp24PBy0SZ2ICRXRgYGb2xlKzBSEo2YgsiKWVoZgFKMjD5X/2Ux6lb99bpnNO5lKMR5i8MsEQHkhJiEzlS9HCqfiFWMUIt3AfsC3KKLCL30Qr7HfM4Ro4h6rhiEqmusIMKuphGqo+ogSPGcbYLzh91vdkXSHDDBk+0gxussS3rNcMCs+D6E18/9gLPPhbDshfzLgAAAABJRU5ErkJggg==");
+background-size: 100% 100%;
+content: '';
+display: block;
+height: 100%;
+width: 100%;
+}
+
+button:not(.custom-appearance):not(.link-button), input[type="button"]:not(.custom-appearance):not(.link-button), input[type="submit"]:not(.custom-appearance):not(.link-button), select {
+min-height: 2em;
+min-width: 4em;
+padding-bottom: 1px;
+}
+
+button:not(.custom-appearance):not(.link-button), input[type="button"]:not(.custom-appearance):not(.link-button), input[type="submit"]:not(.custom-appearance):not(.link-button) {
+-webkit-padding-end: 10px;
+-webkit-padding-start: 10px;
+}
+
+button:not(.custom-appearance):not(.link-button):enabled:active,
+input[type='button']:not(.custom-appearance):not(.link-button):enabled:active,
+input[type='submit']:not(.custom-appearance):not(.link-button):enabled:active,
+select:enabled:active,
+input[type='checkbox']:enabled:active,
+input[type='radio']:enabled:active {
+  background-image: -webkit-linear-gradient(#e7e7e7, #e7e7e7 38%, #d7d7d7);
+  box-shadow: none;
+  text-shadow: none;
+}
+
+button:not(.custom-appearance):not(.link-button):enabled:hover,
+input[type='button']:not(.custom-appearance):not(.link-button):enabled:hover,
+input[type='submit']:not(.custom-appearance):not(.link-button):enabled:hover,
+select:enabled:hover,
+input[type='checkbox']:enabled:hover,
+input[type='radio']:enabled:hover {
+  background-image: -webkit-linear-gradient(#f0f0f0, #f0f0f0 38%, #e0e0e0);
+  border-color: rgba(0, 0, 0, 0.3);
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.12),
+      inset 0 1px 2px rgba(255, 255, 255, 0.95);
+  color: black;
+}
+.option {
+	border-top:#dadada 1 solid;
+	margin-top: 16px;
+	padding-left: 12px;
+}
+
+.subOption {
+	padding-left: 16px;
+}
+
+.sideBar {
+	
+	width: 120px;
+	padding: 10px;
+	float:left;
+	height:600px;
+}
+
+.center {
+	width: 400px;
+	float:left;
+	margin-left: 16px;
+}
+
+label {
+	margin-left: 22px;
+}
+
+.spacer {
+	height: 6px;
+}
+
+.moreOptions {
+	margin-left: 64px;
+}
+
+	</style>
+	
+</head>
+
+<body onload="setOptions()">
+
+<div class="sideBar">
+	<img src="images/icon_128.png" />
+</div>
+
+<div class="center">
+
+	<h1> Metadata Extractor Options</h1>
+	
+	<div id="serviceOptions" class="option">
+		<h2>Meta-Metadata Repository Service</h2>
+			
+		<label>
+	       	<input id="serviceEcologyLab" type="radio" name="service" value="ecologyLab" onchange="updateService();">
+	    	<span>Use the Inferface Ecology Lab's Meta-Metadata service</span>
+	    </label>
+	    <div class="spacer"></div>
+	    
+	    <label>
+	       	<input id="serviceInfoComp" type="radio" name="service" value="infoComposer" onchange="updateService();">
+	    	<span>Use InfoComposer as the Meta-Metadata service</span>
+	    </label>
+		<div class="spacer"></div>
+	    
+	    <label>
+	       	<input id="serviceCustom" type="radio" name="service" value="local" onchange="updateService();">
+	    	<span>Use a custom Meta-Metadata OODSS service</span>
+	    </label>
+	    	<div id="url" class="moreOptions">
+		   		<span>Custom Service URL:</span>
+		   		<input id="serviceUrl" type="text"  value="http://localhost:2107/" onchange="updateService();">       		
+			</div>
+	</div>
+	
+	<div id="injectionOptions" class="option">
+		<h2>Metadata Injection for Drag and Drop</h2>
+		
+		<!--
+		<div class="subOption">
+			
+			<h3>What to Inject</h3>
+			
+				<label>
+			       	<input id="metadataFields" type="radio" name="injection" onchange="updateInjection();">
+			    	<span>Inject metadata as MetadataFields</span>
+			    </label>
+				<div class="spacer"></div>
+				
+				<label>
+			       	<input id="rawMetadata" type="radio" name="injection" onchange="updateInjection();">
+			    	<span>Inject metadata as a simple key/value object</span>
+			    </label>
+			
+			<h3>Where to Inject</h3>
+		-->
+				<label>
+			        <input id="injectAttribute" type="checkbox" onchange="updateInjection();">
+			       	<span>Inject 'metadata' attribute into DOM tags</span>
+			   	</label>
+			   	<div class="spacer"></div>
+			   	
+			   	<label>
+			        <input id="injectSelection" type="checkbox" onchange="updateInjection();">
+			       	<span>Inject 'metadata' into selected ranges</span>
+			   	</label>
+		<!--	   	
+		</div>
+		-->
+	   	
+	</div>
+	
+	<div id="debugOptions" class="option">
+		<h2>Debug Statements</h2>
+		
+		<label>
+	        <input id="debugMmd" type="checkbox" onchange="updateDebug();">
+	       	<span>Recieved meta-metadata object from repository service</span>
+	   	</label>
+	   	<div class="spacer"></div>
+	   	
+	   	<label>
+	        <input id="debugMetadata" type="checkbox" onchange="updateDebug();">
+	       	<span>Extracted metadata object</span>
+	   	</label>
+	</div>
+	
+	<div id="restore" class="option">
+		<br/>
+		<label>
+	        <input id="restoreButton" type="button" value="Restore Defaults" onclick="restore();">
+	   	</label>
+	</div>
+</div>
+</body>
+</html>

@@ -1,6 +1,6 @@
 // GLODBAL VARIABLES
 var slideOutVisual;
-var serializedMeta;
+var serializedMeta = "{\"undefined\":{}}";
 var SLIDEOUT_WIDTH = 660; //320
 var browserExtraction = true; //service or browser extraction (blackboxing)
 var defVars = { };
@@ -20,7 +20,10 @@ function setup(document)
 {
 	// create the the 'slide-out'
 	buildSlideOut(document);
-	getMMD(document.URL, handleMMD);
+	//getMMD(document.URL, handleMMD);
+    
+    //we are now doing it client-side
+    handleMMD(getDocumentMM(document.URL), document.URL);
 }
 
 /**
@@ -32,7 +35,7 @@ function getMMD(pageURL, callback)
 	
 	baseURL = url.substring(0,getPosition(url,"/",3));
 	
-	var serviceURL = "http://ecology-service.cse.tamu.edu/BigSemanticsService/mmd.json?url="; //settings.serviceUrl;
+	var serviceURL = "//ecology-service.cse.tamu.edu/BigSemanticsService/mmd.json?url=";
 	serviceURL += url;
 	
 	//make a request to the service for the mmd for the url
@@ -50,10 +53,7 @@ function getMMD(pageURL, callback)
 				callback(ans);
 
 			} else {
-				// if the request fails, call the callback function with an error message
-				// and log an error to the console
-				var errormes = "Error! XMLHttpRequest failed.";
-				handleMMD(errormes);
+				console.log("Error! XMLHttpRequest failed.");
 			}
 		}	
 
@@ -66,49 +66,48 @@ function getMMD(pageURL, callback)
  * Callback function for getMMD() 
  * @param mmd, returned mmd JSON from service
  */
-function handleMMD(mmd)
+function handleMMD(mmd, url)
 {
-	// deserialize
-	mmd = JSON.parse(mmd);
-
-	//console.log(mmd);
-
-	simplDeserialize(mmd);	
-	MMD = mmd;
-	callService(mmd);
+    if (mmd === undefined){
+        setTimeout(function() {handleMMD(getDocumentMM(url), url);}, 1000);
+        return;
+    }
+   //simplDeserialize(mmd);	
+   MMD = mmd;
+   callService(mmd, url);
 }
 
 /*
  * decides whether or not the code will call the service for the metadata
  */
-function callService(mmd)
+function callService(mmd, url)
 {
-	var parser = mmd.meta_metadata.parser;
-	
-	if (mmd["meta_metadata"]["extract_with"] == "service"){
-		browserExtraction = false;
-		serviceCall = true;
-	}
-		
-	if (browserExtraction && parser == "xpath")
-	{
-		var metadataObject;
-		metadataObject = extractMetadata(mmd);
-	}
-	if (!browserExtraction || serviceCall || parser != "xpath") // service extraction
-	{
-		return getMetadataFromService(mmd);
-	}
-	handleMetadata(mmd,metadataObject,url);
+    var parser = mmd.parser;
+
+    if (mmd["extract_with"] == "service"){
+        browserExtraction = false;
+        serviceCall = true;
+    }
+
+    if (browserExtraction && parser == "xpath")
+    {
+        var metadataObject;
+        metadataObject = extractMetadata(mmd);
+    }
+    if (!browserExtraction || serviceCall || parser != "xpath") // service extraction
+    {
+        return getMetadataFromService(mmd, url);
+    }
+    handleMetadata(mmd,metadataObject,url);
 }
 
 /*
  * get metadata from service if needed
  */
-function getMetadataFromService(mmd)
+function getMetadataFromService(mmd, url)
 {
 	//to get metadata
-	var mServiceURL = "http://ecology-service.cs.tamu.edu/BigSemanticsService/metadata.json?url=";
+	var mServiceURL = "//ecology-service.cs.tamu.edu/BigSemanticsService/metadata.json?url=";
 	mServiceURL += url;
 	
 	var request = new XMLHttpRequest();
@@ -129,7 +128,7 @@ function getMetadataFromService(mmd)
 /*
  * sends mmd and metadata to mice display code for a mice display on the slide-out
  */
-function handleMetadata(mmd,meta)
+function handleMetadata(mmd,meta,url)
 {
 	console.log(JSON.stringify(meta));
 	for (i in meta) {

@@ -15,6 +15,7 @@ var userid = null;
 
 var currentUrl = null;
 var instance = null;
+var prevYOffset = 0;
 
 //call to get and replace divs, queue w on-demand prioritizing
 function processPage()
@@ -67,6 +68,8 @@ function onUpdateHandler()
 		MetadataLoader.logger(eventObj);
 	}
 	processPage();
+	//instance.logScrolledTweetIds(prevYOffset, window.pageYOffset);
+	//prevYOffset = window.pageYOffset;
 }
 
 function isExpanded(icon)
@@ -266,6 +269,8 @@ function defaultConditionOnUpdateHandler()
 		MetadataLoader.logger(eventObj);
 	}
 	processDefaultConditionClicks(document);
+	//instance.logScrolledTweetIds(prevYOffset, window.pageYOffset);
+	//prevYOffset = window.pageYOffset;
 }
 
 function defaultConditionItemClick(event)
@@ -346,7 +351,7 @@ function processUrlChange(newUrl)
 		processDefaultConditionClicks(document);
 }
 
-function run_script(userid, cond)
+function run_script(userid, cond, username)
 {
 	instance = getICEInstance();
 	
@@ -360,10 +365,10 @@ function run_script(userid, cond)
 		if (MetadataRenderer.setDocumentDownloader)
 			MetadataRenderer.setDocumentDownloader(downloadRequester);
 
-		if (isExtension)
-		{
-			Logger.init(userid, cond);
-		}
+//		if (isExtension)
+//		{
+//			Logger.init(userid, cond);
+//		}
 
 		processPage();
 		
@@ -374,10 +379,10 @@ function run_script(userid, cond)
 	}
 	else
 	{
-		if (isExtension)
-		{
-			Logger.init(userid, cond);
-		}
+//		if (isExtension)
+//		{
+//			Logger.init(userid, cond);
+//		}
 		
 		processDefaultConditionClicks(document);
 		
@@ -388,6 +393,7 @@ function run_script(userid, cond)
 	}
 	
 	currentUrl = document.URL;
+	instance.validateUserInfo(username);
 	
 	if (isExtension) 
 	{
@@ -397,11 +403,77 @@ function run_script(userid, cond)
 	}
 }
 
-function processInfoSheetResponse(resp)
+function processInfoSheetResponse(resp, cancelType)
 {
-	chrome.extension.sendRequest({storeStudySettings: {"agreeToInformationSheet": resp}});
-	if (resp == Util.YES)
-		run_script(userid, response_condition);
+	if (cancelType == "access_grant")
+	{
+		var resp1 = (resp == Util.YES)? undefined : resp;
+		chrome.extension.sendRequest({storeStudySettings: {"agreeToAccessGrant": resp, "agreeToInformationSheet": resp1}});
+	}
+	else if (cancelType == "infosheet_disagree")
+	{
+		chrome.extension.sendRequest({storeStudySettings: {"agreeToInformationSheet": resp}}, function(response) {
+			var url = document.URL;
+			var paramIndex = url.indexOf('?'); 
+			if (paramIndex != -1)
+				url = url.substr(0, paramIndex);
+			window.location.replace(url);
+		});
+	}
+	//if (resp == Util.YES)
+		//run_script(userid, response_condition);
+}
+
+function isAccessGranted(response)
+{
+	if (response.oauth_token && response.oauth_token_secret)
+	{
+		return true;
+	}
+	else
+	{
+		var params = document.URL.substr(document.URL.indexOf('?') + 1).split('&');
+		var oauth_token = null;
+		var oauth_verifier = null;
+		var oauth_token_str = "oauth_token=";
+		var oauth_verifier_str = "oauth_verifier=";
+		for (var i = 0; i < params.length; i++)
+		{
+			if (params[i].indexOf(oauth_token_str) == 0)
+			{
+				oauth_token = params[i].substr(oauth_token_str.length);
+			}
+			if (params[i].indexOf(oauth_verifier_str) == 0)
+			{
+				oauth_verifier = params[i].substr(oauth_verifier_str.length);
+			}
+		}
+		if (oauth_token && oauth_verifier)
+		{
+			TwitterOAuth.accessTokenHelper(oauth_token, oauth_verifier);
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+}
+
+function logPendingDeclines(userId, access_grant, info_sheet)
+{
+	if (MetadataLoader.logger && typeof access_grant !== "undefined" && typeof info_sheet !== "undefined")
+	{
+		var eventObj = {
+			agree: {
+				userid: userId,
+				accessgrant: access_grant,
+				infosheet: info_sheet
+			}
+		}
+		MetadataLoader.logger(eventObj);
+		chrome.extension.sendRequest({storeStudySettings: {"loggedPending": true}});
+	}
 }
 
 //run_at is document_end i.e. after DOM is complete but before images and frames are loaded
@@ -419,19 +491,34 @@ else
 			experiment_condition = response.condition;
 		else
 			experiment_condition = mice_condition;
-			  
-		if (response && response.agree == Util.YES)
-			run_script(response.userid, response.condition);
+		
+		Logger.init(response.userid, response.condition);
+		if (!response.loggedDeclines)
+		{
+			logPendingDeclines(response.userid, response.agreeAccessGrant, response.agree);
+		}
+		
+		if (response && response.agreeAccessGrant != Util.NO && !isAccessGranted(response))
+		{
+			Util.promptUserForAccessGrant(processInfoSheetResponse, response.userid);
+		}
 		else
 		{
-			if (response && response.agree != Util.NO)
+			if (response && response.agree == Util.YES)
 			{
-				response_condition = response.condition;
-				userid = response.userid;
-				Util.getInformationSheetResponse(processInfoSheetResponse);
+				run_script(response.userid, response.condition, response.username);
 			}
-			//if (window.confirm(Util.info_sheet))
-				//processInfoSheetResponse(Util.YES);
+			else
+			{
+				if (response && response.agree != Util.NO)
+				{
+					response_condition = response.condition;
+					userid = response.userid;
+					Util.getInformationSheetResponse(processInfoSheetResponse, response.userid);
+				}
+				//if (window.confirm(Util.info_sheet))
+					//processInfoSheetResponse(Util.YES);
+			}
 		}
 		
 		if (MetadataLoader.logger)
@@ -444,7 +531,8 @@ else
 						currUserId: response.userid,
 						lastCond: response.last_condition,
 						currCond: response.condition,
-						infoSheetAgree: response.agree
+						infoSheetAgree: response.agree,
+						user_info: response.user_info
 					}
 				}
 				MetadataLoader.logger(eventObj);
@@ -462,4 +550,3 @@ if (isExtension)
 			processUrlChange(request.url);
 	});
 }
-

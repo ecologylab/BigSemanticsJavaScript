@@ -5,7 +5,7 @@ Logger.queue = [];
 var MILLIS_BETWEEN_LOG = 12000;
 
 
-var LOGGING_SERVICE = "http://ideamache.ecologylab.net/i/event_log/";//"http://ecoarray0:3080/i/event_log/";
+var LOGGING_SERVICE = "https://ideamache.ecologylab.net/i/event_log/";//"http://ecoarray0:3080/i/event_log/";
 
 Logger.username = "pcfndmfodhl";
 
@@ -32,7 +32,7 @@ Logger.init = function(userid, cond)
 	Logger.hash_key = userid;
 	
 	if (cond != "none")
-		Logger.username = cond + "_s14_s3";
+		Logger.username = cond + "_s15_s2";
 	
 	setInterval(Logger.checkLogEvents, MILLIS_BETWEEN_LOG);
 }

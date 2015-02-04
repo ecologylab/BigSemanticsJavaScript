@@ -1,5 +1,7 @@
 var upperLevel = { }; //holds upperlevel metadata
 var scalars = { };
+var baseURL = "";
+var getScalarStringCalled = 0;
 
 /*
  * extracts metadata from metametadata
@@ -7,8 +9,9 @@ var scalars = { };
  * @param mmd, meta-metadata object
  */
 function extractMetadata(mmd) {
-	var extractedMeta = { };
-	mmd = mmd.meta_metadata;
+    baseURL = document.URL.substring(0,getPosition(document.URL,"/",3));
+	
+    var extractedMeta = { };
 	mmdKids = mmd.kids;
 	mmdKids = sortKids(mmdKids);
 	var contextNode = document;
@@ -22,9 +25,9 @@ function extractMetadata(mmd) {
 				var def = mmd.def_vars[i];
 				var path = def.xpaths[0];
 				var nodes = document.evaluate(path, document, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
-				if (nodes.snapshotLength != null)
+				if (nodes.snapshotLength !== null)
 				{
-					var n = def['name'];
+					var n = def.name;
 					var snap = nodes.snapshotItem(0);
 					defVars[n] = snap;
 				}
@@ -34,7 +37,7 @@ function extractMetadata(mmd) {
 	
 	//console.log(mmd);
 	
-	if (type != undefined) 
+	if (type !== undefined) 
 	{
 		extractedMeta[type] = dataFromKids(mmdKids,contextNode,true,null);
 		extractedMeta[type]['download_status'] = "DOWNLOAD_DONE";
@@ -44,6 +47,7 @@ function extractMetadata(mmd) {
 		extractedMeta[name]['download_status'] = "DOWNLOAD_DONE";
 		extractedMeta[name]['mm_name'] = mmd.name;
 	}
+    //console.log(getScalarStringCalled);
 	return extractedMeta;
 }
 
@@ -54,35 +58,42 @@ function dataFromKids(mmdKids,contextNode,recurse,parserContext)
 {
 	var d = { };
 	var e = true; //if object is empty
-
+    var isNested = false;
+    if (contextNode != document) isNested = true;
+    
 	for (var i = 0; i < mmdKids.length; i++) {
 		var field = mmdKids[i];
 		var name;
 		var obj;
 		var tag;
 				
+        if (field[Object.keys(field)[0]].hasOwnProperty('declaring_mmd') && isNested){
+            continue;
+        }
+        
 		if(field.scalar) 
 		{
 			field = field.scalar;
 			name = field.name;
+            var hasContext = false;
 
-			if (field.hasOwnProperty('context_node'))
-			{
+			if (field.hasOwnProperty('context_node')){
 				if (defVars[field.context_node] != null)
 					contextNode = defVars[field.context_node];
+                hasContext = true;
 			}
 			
 			obj = getScalarD(field,contextNode,recurse,parserContext);
 			tag = field.tag;
 			
-			if (recurse && name == 'location') {
-				obj = url;
+			if (recurse && name == 'location' && !hasContext) {
+				obj = document.URL;
 			}
 			
 			if (obj != null)
 			{
 				e = false;
-				if (tag != undefined){
+				if (tag !== undefined){
 					d[tag] = obj;
 					if (recurse) {
 						upperLevel[tag] = obj;
@@ -121,10 +132,10 @@ function dataFromKids(mmdKids,contextNode,recurse,parserContext)
 				//		delete obj["location"];
 				//	}
 				//}
-				if(obj != null)
+				if(obj !== null)
 				{
 					e = false;
-					if (tag != undefined){
+					if (tag !== undefined){
 						d[tag] = obj;
 					} else {
 						d[name] = obj;
@@ -143,10 +154,10 @@ function dataFromKids(mmdKids,contextNode,recurse,parserContext)
 			}			
 			
 			obj = getCollectionD(field,contextNode,recurse,parserContext);
-			if(obj != null)
+			if(obj !== null)
 			{
 				e = false;
-				if (tag != undefined) {
+				if (tag !== undefined) {
 					d[tag] = obj;
 				} else {
 					d[name] = obj;
@@ -167,8 +178,8 @@ function getScalarD(field,contextNode,recurse,parserContext)
 	var x = null;
 	var data = null;
 	
-	if (field.hasOwnProperty("concatenate_values") && field.concatenate_values.length > 1) { 	//calls the service when there is concatenate_values in the fields
-		data = concatValues(field.concatenate_values);	//temporary until there is javascript code for concatenate_values
+	if (field.hasOwnProperty("concatenate_values") && field.concatenate_values.length > 1) {
+		data = concatValues(field.concatenate_values);
 		if (!recurse) {
 			return data;
 		}
@@ -218,6 +229,7 @@ function getCompositeD(field,contextNode,recurse,parserContext)
 	var data = null;
 	var kids = field['kids'];
 	var recurseNeeded = false;
+    var newContextNode = null; 
 	
 	//in case of nested composites
 	for (kid in kids){
@@ -236,15 +248,16 @@ function getCompositeD(field,contextNode,recurse,parserContext)
 				return x;
 			}
 			else if (x != null && x != "") {
-				contextNode = x;
+				newContextNode = x;
+                break;
 			}
 		}
 
-		if (contextNode != null && recurse && recurseNeeded) {
-			data = dataFromKids(kids,contextNode,recurse,parserContext);
+		if (newContextNode != null && recurse && recurseNeeded) {
+			data = dataFromKids(kids,newContextNode,recurse,parserContext);
 		}
-		else if (contextNode != null && recurse) {
-			data = dataFromKids(kids,contextNode,false,parserContext);
+		else if (newContextNode != null) {
+			data = dataFromKids(kids,newContextNode,false,parserContext);
 		}
 		
 	} else if (recurse)
@@ -281,10 +294,6 @@ function getCollectionD(field,contextNode,recurse,parserContext)
 	var x = null;
 	var data = null;
 	
-	if (field.hasOwnProperty("field_parser")) {
-		(console.log(field.name + " has a field parser"));
-	}
-	
 	if (field["xpaths"] != null)
 	{
 		var fieldx = field["xpaths"];
@@ -292,6 +301,7 @@ function getCollectionD(field,contextNode,recurse,parserContext)
 			var x = getCollectionData(field,fieldx[j],contextNode);
 			if (x != null && x != "") {
 				data = x;
+                break;
 			}
 		}
 	}	
@@ -305,6 +315,7 @@ function getCollectionD(field,contextNode,recurse,parserContext)
 
 function getScalarString(field,xpath,contextNode)
 {
+    getScalarStringCalled++;
 	try {
 		var data = document.evaluate(xpath, contextNode, null, XPathResult.STRING_TYPE, null);
 	} catch (err) {
@@ -408,7 +419,7 @@ function getCollectionData(field,xpath,contextNode,recurse)
 	var d = null;
 	var fieldParserEl = field['field_parser'];
 	try {
-		var nodes = document.evaluate(xpath, document, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);		
+		var nodes = document.evaluate(xpath, contextNode, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);		
 	} catch (e) {
 		return null;
 	}
@@ -417,7 +428,7 @@ function getCollectionData(field,xpath,contextNode,recurse)
 		return null;
 	}
 	
-	if (field.hasOwnProperty('field_parser'))   //field parsers are not currently handled
+	if (field.hasOwnProperty('field_parser'))
 	{
 		var fieldName = fieldParserEl.name;
 		var fieldParser = getFieldParserFactory()[fieldName];
@@ -469,7 +480,14 @@ function getCollectionData(field,xpath,contextNode,recurse)
 		
 		for (var i = 0; i < size; i++) {
 			var newNode = nodes.snapshotItem(i);
-			var obj = dataFromKids(kids,newNode,false,null);
+            //allow one level of recursion
+            if (contextNode == document){
+                var obj = dataFromKids(kids,newNode,true,null);
+            }
+            else {
+                var obj = dataFromKids(kids,newNode,false,null);
+            }
+            //var obj = dataFromKids(kids,newNode,recurse,null);
 
 			if (obj != null)
 			{
@@ -519,9 +537,6 @@ function getCollectionData(field,xpath,contextNode,recurse)
 	return d;
 }
 
-/*
- * doesn't work, is supposed to concatenate values
- */
 function concatValues(concatList)
 {
 	

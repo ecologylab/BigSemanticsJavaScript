@@ -234,10 +234,12 @@ MetadataLoader.setMetaMetadata = function (mmd)
         if (MetadataLoader.hasVisibleMetadata(metadataFields))
         {	
           // If so, then build the HTML table	
-          var miceStyles = InterfaceStyle.getMiceStyleDictionary(mmd["meta_metadata"].name);	
+          var styleMmdType = (tasks[i].expandedItem && tasks[i].expandedItem.mmdType && 
+        		  					tasks[i].expandedItem.mmdType.indexOf("twitter") != -1)? "twitter" : mmd.name; 
+          var miceStyles = InterfaceStyle.getMiceStyleDictionary(styleMmdType);	
          //Adds the metadata type as an attribute to the first field in the MD
-          metadataFields[0].parentMDType = mmd["meta_metadata"].name;
-          tasks[i].renderer(tasks[i], metadataFields, {styles: miceStyles, type: mmd["meta_metadata"].name});
+          metadataFields[0].parentMDType = mmd.name;
+          tasks[i].renderer(tasks[i], metadataFields, {styles: miceStyles, type: styleMmdType});
         }
       }
     }
@@ -1151,8 +1153,23 @@ MetadataLoader.getHost = function(url)
 {
   if (url)
   {
-    var host = url.match(/:\/\/(www\.)?(.[^/:]+)/)[2];
-    return "http://www." + host;
+    if (url.match(/:\/\/(www\.)?(.[^/:]+)/) != null)
+		 return "http://www." + url.match(/:\/\/(www\.)?(.[^/:]+)/)[2];
+	else
+		return "error getting domain";
+   
   }
+}
+
+/**
+ * Gets the favicon image for a url
+ * @param url, string of target URL
+ * @return string of the favicon url
+ */
+MetadataLoader.getFaviconURL = function(url)
+{
+	return MetadataLoader.getHost(url) + "/favicon.ico";
+	
+	//return "http://g.etfv.co/" + url;
 }
 

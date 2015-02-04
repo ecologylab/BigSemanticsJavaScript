@@ -17,8 +17,9 @@
 	    ],
 	    "js": [
 	    	"code/SlideOut.js",
+            "code/getMMD.js",
 	    	"code/main.js",
-	    	"code/mice/debi.js",
+            "code/mice/debi.js",
 	    	"code/mice/mice.js",
 	    	"code/mice/metadataRenderer.js",
 	    	"code/mice/htmlDownload.js",

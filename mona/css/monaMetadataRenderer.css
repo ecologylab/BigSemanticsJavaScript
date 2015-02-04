@@ -1,0 +1,469 @@
+.metadataRendering {
+    background: #EEE;
+    border-radius: 8px;
+    border: 1px solid gray;
+    margin: 8px;
+    padding: 8px;
+    min-width: 500px;
+}
+.facetLabel{
+	float:left;
+}
+.metadataContainer {
+
+    font-size: 10px;
+    font-weight: 300;
+        
+    border-top-right-radius: 8px;
+    border-bottom-right-radius: 8px;
+    border-bottom-left-radius: 8px;
+    min-width: 500px;
+    
+    line-height: 15px;
+    
+    position: relative;
+    
+}
+
+.metadataTableDiv {
+    display: table;
+    
+    font-size: 12px;
+    white-space: normal;
+    overflow: scroll;
+    text-overflow: ellipsis;
+    
+    border-spacing: 0px;
+    border-collapse:collapse;
+    margin: 0px;
+}
+
+.metadataRow {
+    display: table-row;
+    
+    border-bottom: 1px solid #ccc;
+    margin-bottom: 0px;
+}
+
+.metadataTable {
+    margin: 0px 4px 0px 6px;
+    width: 100%;
+    table-layout: fixed;
+    
+}
+
+.metadataTable tr{
+    width:100%;
+    display: table;
+}
+
+.metadataContainer tr{
+    border-bottom: 1px solid #ccc;
+    margin-bottom: 0px;
+}
+
+.metadataContainer p{
+    padding: 0px;
+    margin: 0px;
+}
+
+.metadataContainer table{
+    font-size: 12px;
+    
+    white-space: normal;
+    overflow: scroll;
+    text-overflow: ellipsis;
+    
+    table-layout: fixed;
+    border-spacing: 0px;
+    border-collapse:collapse;
+    
+    margin: 0px;
+}
+
+.metadataContainer table .metadata_h1{
+    font-weight: 700;
+	}
+
+.metadataContainer table .metadata_bold{
+    font-weight: 700;
+	}
+
+.metadataContainer table .metadata_normal{
+    font-weight: 300;
+}
+
+.metadataContainer .metadataTableDiv .metadata_italic{
+    font-style: italic;
+}
+
+.metadataContainer .metadataTableDiv .metadata_bolditalic{
+    font-style: italic;
+    font-weight: 700;
+}
+
+.metadataContainer .fieldLabel{ 
+    white-space: nowrap;
+    vertical-align: top;
+    text-align: right;
+    pointer-events: none;
+    padding: 2px;   
+    margin-left: 6px;
+    margin-right: 8px;
+    width: 100%;
+}
+
+.metadataContainer .fieldLabelImage{    
+    width: 35px;
+    height: 35px;
+    max-width: 100px;
+    padding-left: 3px;
+}
+
+.metadataContainer .fieldValue.google_query{    
+    color: royalblue;
+    font-weight: bold;
+    font-size: 14px;
+    text-transform: capitalize;
+}
+.fieldValue.google_link{    
+    color: #006621;
+    font-weight: bold;
+    
+}
+.fieldValue.google_search_result{
+	font-weight: bold;
+	font-size: 14px;
+	
+}
+.metadataContainer .fieldValue{ 
+    white-space: normal;
+    text-align: left;
+    vertical-align: middle;
+    text-overflow: ellipsis;
+    
+    
+    padding: 3px 8px;
+}
+
+.metadataContainer .favicon{
+    width: 16px;
+    height: 16px;
+    padding: 2px 0px 1px 8px;
+}
+
+.metadataContainer .faviconICE{
+    width: 16px;
+    height: 16px;
+    padding: 2px 0px 1px 8px;
+}
+
+.metadataContainer .labelCol{
+    display: table-cell;
+    vertical-align: top;
+    text-align: right;
+    padding-right: 10px;
+    padding-bottom: 1px;
+    padding-top: 1px;
+    width: 20px;
+}
+
+
+.metadataContainer .labelCol .noShow{
+    display: none;
+}
+.noShow{
+    display: none;
+}
+.metadataContainer .valueCol{
+    display: table-cell;
+    vertical-align: top;
+    text-align: left;
+    margin: 0px;
+    padding: 0px;
+    width: auto;
+}
+
+.metadataContainer a{
+    color: black;
+    font-size: 13px;
+}
+
+.metadataContainer a:hover{
+    color: gray;
+}
+
+.metadataContainer .fieldLabelContainer{
+    color: #808080;
+    
+    border-top-left-radius: 8px;
+    border-bottom-left-radius: 8px;
+    
+    width: auto;
+    min-height: 19px;
+}
+
+.metadataContainer .fieldLabelContainerOpened{
+    color: #888;
+        
+    border-top-left-radius: 8px;
+    border-bottom-left-radius: 8px;
+    
+    width: auto;
+    min-height: 17px;
+    margin-right: -3px;
+    
+    border-left: 3px solid rgb(122, 122, 122);
+}
+
+.metadataContainer .fieldValueContainer{
+    
+    
+    border-top-right-radius: 8px;
+    border-bottom-right-radius: 8px;
+    
+    width: auto;
+    max-width: 540px;
+    min-height: 19px;
+    height: 19px;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    
+    transition: height 0.3s;
+    -moz-transition: height 0.3s; /* Firefox 4 */
+    -webkit-transition: height 0.3s; /* Safari and Chrome */
+    -o-transition: height 0.3s; /* Opera */
+}
+
+.metadataContainer .fieldValueContainer:hover{
+    height: auto;
+}
+
+.metadataContainer .fieldValueImage{
+	height: auto;
+}
+
+.metadataContainer .fieldChildContainer{
+        
+    border-top-right-radius: 8px;
+    border-bottom-right-radius: 8px;
+    border-bottom-left-radius: 8px;
+    
+    width: auto;
+    min-height: 19px;
+    text-overflow: ellipsis;
+    
+    padding-left: 8px;
+}
+
+.metadataContainer .fieldCompositeContainer{
+    
+    border-top-right-radius: 8px;
+    border-bottom-right-radius: 8px;
+    border-bottom-left-radius: 8px;
+    
+    width: auto;
+    min-height: 19px;
+    text-overflow: ellipsis;    
+    
+    padding-left: 8px;
+}
+
+.metadataContainer .expandButton{
+    width: 18px;
+    height: 18px;
+    border-radius: 8px;
+    float: left;
+    margin: 1px 4px 1px 4px;
+    background: rgb(213, 228, 209);
+}
+.metadataContainer .expandButton:hover{
+    background: rgb(134, 155, 128);
+    cursor: pointer;
+}
+
+.metadataContainer .collapseButton{
+    width: 18px;
+    height: 18px;
+    border-radius: 8px;
+    float: left;
+    margin: 1px 4px 1px 4px;
+    background: rgb(230, 200, 200);
+}
+.metadataContainer .collapseButton:hover{
+    background: rgb(194, 152, 152);
+    cursor: pointer;
+}
+
+.metadataContainer .expandSymbol{
+    position: absolute;
+    background: #ACACAC;
+    width: 2px;
+    height: 12px;
+    margin: 3px 7px 2px 8px;
+    pointer-events: none;
+}
+
+.metadataContainer .collapseSymbol{
+    position: absolute;
+    background: #ACACAC;
+    width: 12px;
+    height: 2px;
+    margin: 8px 2px 7px 3px;
+    pointer-events: none;
+}
+
+.metadataContainer .openedSymbol{
+    position: relative;
+    top: 2px;
+    left: 2px;
+    width: 8px;
+    height: 8px;
+    border-radius: 6px;
+    border: 2px solid darkgray;
+}
+
+.metadataContainer .loadingRow{
+    border-radius: 8px;
+    height: 15px;
+    margin-bottom: 4px;
+    padding: 2px 16px 2px 8px; 
+    white-space: nowrap;
+}
+
+.metadataContainer .nestedPad{
+    padding: 0px;   
+    border-left: 1px solid #ccc;
+}
+
+.metadataContainer .citeULikeButton:hover {
+    cursor: pointer;
+}
+
+.metadataContainer .citeULikeButton:hover img {
+    background: #8AA615;
+}
+
+.metadataContainer .citeULikeButton img{
+    width: 22px;
+    height: 18px;
+    background: white;
+    border-radius: 6px;
+    margin-left: 6px;
+    margin-right: 6px;
+    padding: 0px;
+    padding-left: 6px;
+    padding-right: 6px;
+}
+
+.lineCanvas {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    pointer-events: none;
+    background: rgba(0, 0, 100, 0.0);
+}
+
+#content {
+    position: relative;
+}
+
+#bigLineCanvas {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    pointer-events: none;
+    background: rgba(0, 0, 100, 0.0);
+}
+
+.hidden {
+    display: none;
+}
+
+.moreButton {
+    border-radius: 4px;
+    background: #ccc;
+    padding: 2px 6px;
+}
+
+.moreButton:hover {
+    cursor: pointer;
+    background: #bbb;
+}
+
+.tabbedICEContainer {
+    
+}
+
+.tabMaster {
+    
+}
+
+.tabParent {
+    
+}
+
+.tabLabel {
+    position: absolute;
+    background: #282828;
+    left: -31px;
+    width: 64px;
+    height: 18px;
+    padding: 2px 4px 2px 10px;
+    border-bottom-left-radius: 12px;
+    border-top-left-radius: 12px;
+    border: 1px solid gray;
+    border-right-color: white;
+    color: white;
+}
+
+
+.tabLabel:hover {
+    cursor: pointer;
+    background: #ccc;
+    color: white;
+    font-weight: 800;
+}
+
+.tabLabel .hidden {
+    display: none;
+}
+
+.tabLabel span{
+    position: absolute;
+    left: 27px;
+}
+
+.tabLabel .refreshButton{
+    height: 16px;
+    width: 16px;
+    position: absolute;
+    background: #aaa;
+    border-radius: 10px;
+    padding: 2px;
+    margin: -1px;
+    left: 3px;
+    opacity: 0.8;
+}
+
+.tabLabel .refreshButton:hover{
+    background: #777;
+    opacity: 1.0    
+}
+
+.metadata_h1{
+	font-weight: bold;
+}
+
+.tabValue {
+    
+}
+
+.clippingFieldsTable {
+    
+}
+

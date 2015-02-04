@@ -1,0 +1,145 @@
+body { 
+    padding-top: 40px;
+    font-family: "Helvetica Neue", Helvetica,Arial, sans-serif;
+    font-weight: 300;
+    font-size: 12px;
+}
+
+.row {
+    position: absolute;
+  	top: 0px; 
+  	left: 10px;
+    margin-left: 0;
+}
+
+div.span9.content {
+    /*currently toying with*/
+    width: 500px;
+	overflow: hidden;
+
+	-webkit-border-radius: 4px;
+	-moz-border-radius: 4px;
+	border-radius: 4px;
+	border: 1px solid #E1E1E8;
+	
+	overflow-y: scroll;
+	max-height: 300px;
+    margin-left: 0;
+    
+}
+
+div.span9.content::-webkit-scrollbar { width: 0 !important }
+
+#historyWrapper {
+	position: absolute;
+	top: 10px;
+	left: 10px;
+    z-index: 10;
+}
+
+#historyWrapper h5{
+	margin: 10px 0 0 0;
+}
+
+.urlSubmit input{
+    display: inline;
+    width: 380px;
+    margin: 5px 0 5px 0;
+    font-size: 12px;
+}
+
+.urlSubmit button{
+    display: inline;
+    font-size: 12px;
+}
+
+#historyArea {
+    overflow-y: auto;
+}
+
+#historyArea::-webkit-scrollbar { 
+}
+
+
+form {
+    margin: 0;
+}
+
+#historyArea div {
+    -webkit-animation: toHistory 2s;
+    animation: dropdown 1s;
+    position: relative;
+}
+@keyframes toHistory {
+  from {top: 200px; left: 0px; opacity: .01}
+  to {top: 0px; left: 0px; opacity: 1}
+}
+@-webkit-keyframes toHistory {
+  from {top: 200px; left: 0px; opacity: .01}
+  to {top: 0px; left: 0px; opacity: 1}
+}
+
+#typeArea {
+	position: absolute;
+	top: 500px;
+	left: 550px;
+    z-index: 5;
+}
+
+#graphArea {
+	position: absolute;
+	top: 0;
+	left: 550px;
+	right: 0;
+	bottom: 0;
+}
+
+#lineSVG {
+	position: absolute;
+}
+
+
+#loadingBar {
+	position: absolute;
+	top: 0;
+	left: 1000px;
+}
+
+.nodes div {
+    position: absolute;
+    white-space: nowrap;
+    transition: .3s;
+}
+
+.nodes div img {
+    float: left;
+    position: relative;
+    z-index: 1;
+}
+
+.nodeText {
+	display: inline;
+    position: relative;
+    z-index: 4;
+    padding: 2px 3px 2px 3px;
+    border-radius: 3px;
+}
+
+.nodes div:hover img {
+    z-index: 3;
+}
+
+.nodes div:hover .nodeText {
+    font-size: 120%;
+}
+
+.nodes div:hover {
+    z-index: 10;
+}
+
+svg {
+	position: absolute;
+	left: 0;
+    top: 0;
+    z-index: -10;
+}

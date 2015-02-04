@@ -12,16 +12,16 @@
         var nodeList =[];
         var secondaryNodes = {};
         var secondaryNodesList = [];
-        var unrenderedNodesList = [];
         var renderedNodesList = [];
         var nodePositions = {};
+        var typePositions = {};
     </script>
     
     <!-- CSS! -->
     <link href="css/bootstrap.min.css" rel="stylesheet" media="screen">
 
-    <link href="css/mdc.css" rel="stylesheet" media="screen">
-    <link href="../interactiveSemantics/metadataRenderer.css" rel="stylesheet" type="text/css"> 
+    <link href="css/mona.css" rel="stylesheet" media="screen">
+    <link href="css/monaMetadataRenderer.css" rel="stylesheet" type="text/css"> 
 
     <!-- Scripts! -->
     <script src="http://code.jquery.com/jquery-latest.js"></script>
@@ -55,29 +55,22 @@
   </head>
   <body onload="onBodyLoad()">
 
-    <!-- Navbar -->
-    <div class="navbar navbar-inverse navbar-fixed-top">
-      <div class="navbar-inner form-inline">			
-        <form class="navbar-form" action="" onsubmit="return false;"> 
-          <input type="text" size="500" class="span5" id="targetURL" value="http://dl.acm.org/citation.cfm?id=1125696"/>
-          <button type="button" class="btn" onclick="showMetadata();MONA.initialize();">Go!</button>	
-        </form>	                
-      </div>
-    </div>
-
     <!-- Content -->
-    <!--  colors literature bertem, colin ware (retinal variable) // dynamic? or continuity --> 
     <div class ="container" id="vizArea">
       <div id="historyWrapper">
-        <p>History</p>
-        <div id="historyArea">
-        
-        </div>
+        <form class="urlSubmit" action="" onsubmit="return false;">
+            <span>url:</span>
+            <input type="text" size="500" id="targetURL" value="http://dl.acm.org/citation.cfm?id=1125696"/>
+            <button type="button" onclick="showMetadata();MONA.initialize();">Focus</button>	
+        </form>
+        <!--<h5>History</h5>-->
+        <div id="historyArea" class="nodes" onscroll="fadeHistory()"></div>
       </div>
 
-      <svg id="lineSVG" height="2600" width="2600"></svg>
-      <div class="row">
-        <div class="span9 content" id="mdcIce"></div>
+      <svg id="lineSVG"></svg>
+      <div class="row" id="monaMice">
+        <div class="span9 content" id="mdcIce">
+        </div>
       </div>
       <div id="typeArea"></div>
       <div id="graphArea" class="nodes"></div>
