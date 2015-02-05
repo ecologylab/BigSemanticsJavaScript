@@ -2,6 +2,8 @@ var upperLevel = { }; //holds upperlevel metadata
 var scalars = { };
 var baseURL = "";
 var getScalarStringCalled = 0;
+var upperXpath = {};
+
 
 /*
  * extracts metadata from metametadata
@@ -37,19 +39,46 @@ function extractMetadata(mmd) {
 	
 	//console.log(mmd);
 	
+    countXpaths(mmdKids);
+    
 	if (type !== undefined) 
 	{
 		extractedMeta[type] = dataFromKids(mmdKids,contextNode,true,null);
-		extractedMeta[type]['download_status'] = "DOWNLOAD_DONE";
-		extractedMeta[type]['mm_name'] = mmd.name;
+		extractedMeta[type].download_status = "DOWNLOAD_DONE";
+		extractedMeta[type].mm_name = mmd.name;
 	} else {
 		extractedMeta[name] = dataFromKids(mmdKids,contextNode,true,null);
-		extractedMeta[name]['download_status'] = "DOWNLOAD_DONE";
-		extractedMeta[name]['mm_name'] = mmd.name;
+		extractedMeta[name].download_status = "DOWNLOAD_DONE";
+		extractedMeta[name].mm_name = mmd.name;
 	}
     //console.log(getScalarStringCalled);
 	return extractedMeta;
 }
+
+//store topmost xpaths for each field. used to tell if nested fields are inherited or not
+function countXpaths(mmdKids){
+    for (var i = 0; i < mmdKids.length; i++) {
+		var field = mmdKids[i];
+        if(field.scalar) {
+			field = field.scalar;
+		}
+		else if (field.composite) {
+			field = field.composite;
+			
+		}
+		else if (field.collection){
+			field = field.collection;
+		}
+        name = field.name;
+        if ('xpaths' in field){
+            upperXpath[name] = field.xpaths;
+        }
+        else {
+            upperXpath[name] = [];
+        }
+    }
+}
+
 
 /*
  * loops through the kids of the metadata field
@@ -67,10 +96,15 @@ function dataFromKids(mmdKids,contextNode,recurse,parserContext)
 		var obj;
 		var tag;
 				
-        if (field[Object.keys(field)[0]].hasOwnProperty('declaring_mmd') && isNested){
+        var tmpField = field[Object.keys(field)[0]];
+        //if (field[Object.keys(field)[0]].hasOwnProperty('declaring_mmd') && isNested){
+        if (tmpField.hasOwnProperty('xpaths') && tmpField.xpaths == upperXpath[tmpField.name] && isNested){
             continue;
         }
-        
+        if (!isNested){
+            contextNode = document;
+        }
+
 		if(field.scalar) 
 		{
 			field = field.scalar;
@@ -78,7 +112,7 @@ function dataFromKids(mmdKids,contextNode,recurse,parserContext)
             var hasContext = false;
 
 			if (field.hasOwnProperty('context_node')){
-				if (defVars[field.context_node] != null)
+				if (defVars[field.context_node] !== null)
 					contextNode = defVars[field.context_node];
                 hasContext = true;
 			}
@@ -86,21 +120,21 @@ function dataFromKids(mmdKids,contextNode,recurse,parserContext)
 			obj = getScalarD(field,contextNode,recurse,parserContext);
 			tag = field.tag;
 			
-			if (recurse && name == 'location' && !hasContext) {
+			if (obj === null && recurse && name == 'location' && !hasContext) {
 				obj = document.URL;
 			}
 			
-			if (obj != null)
+			if (obj !== null)
 			{
 				e = false;
 				if (tag !== undefined){
 					d[tag] = obj;
-					if (recurse) {
+					if (!isNested) {
 						upperLevel[tag] = obj;
 					}
 				} else {
 					d[name] = obj;
-					if (recurse) {
+					if (!isNested) {
 						upperLevel[name] = obj;
 					}
 				}
@@ -151,7 +185,7 @@ function dataFromKids(mmdKids,contextNode,recurse,parserContext)
 			if (field.hasOwnProperty('context_node'))
 			{
 				contextNode = defVars[field.context_node];
-			}			
+			}
 			
 			obj = getCollectionD(field,contextNode,recurse,parserContext);
 			if(obj !== null)
@@ -333,7 +367,12 @@ function getScalarString(field,xpath,contextNode)
 				var h = "http:";
 				string = h.concat(string);				
 			}
-		} else if (string.indexOf("@") > -1)
+		} 
+        else if (string.charAt(0) == "#")
+		{
+			string = document.URL + string;
+		}
+        else if (string.indexOf("@") > -1)
 		{
 			return null;
 		}
