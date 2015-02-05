@@ -697,6 +697,7 @@ function onTypeClick(type){
             if (node.type == type){
                 node.rendered = true;
                 node.visual.style.display = 'block';
+                nodePositions[node.location] = node.visual.getBoundingClientRect();
                 recursiveAdd(node);
                 drawLine(node);
             }
@@ -818,6 +819,7 @@ function drawTypes(){
 		div.className=nodeType;
 		div.id=nodeType;
 		div.style.color = nodeColors[nodeType];
+        div.style.cursor = "pointer";
 		div.style.textAlign = "right";
 		TYPE_ELEM.appendChild(div);
 	}
@@ -861,7 +863,7 @@ function drawLine(node){
 function drawRelativeLines(node, relatives, isParents){  
         for (var i in relatives){
             var relative = relatives[i];
-            if (secondaryNodes[node.location] !== undefined && relative.rendered && document.getElementById(node.location+relative.location+"Line") === null){
+            if (secondaryNodes[node.location] !== undefined && relative.rendered && document.getElementById(node.location+relative.location+"Line") === null && document.getElementById(relative.location+node.location+"Line") === null){
                 var line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
 
                 //line ids are in the form parent.location+child.location+"Line"
@@ -890,7 +892,7 @@ function recursiveRemove(node){
     for (var k in node.children){
         var child = node.children[k];
         var line = document.getElementById(node.location + child.location + "Line");
-        LINE_ELEM.removeChild(line);
+        if (line !== null)  LINE_ELEM.removeChild(line);
         child.visual.style.display = "none";
     }
 }
@@ -900,6 +902,8 @@ function recursiveAdd(node){
     for (var k in node.children){
         var child = node.children[k];
         child.visual.style.display = "block";
+        nodePositions[child.location] = child.visual.getBoundingClientRect();
+        drawLine(child);
     }
 }
 
