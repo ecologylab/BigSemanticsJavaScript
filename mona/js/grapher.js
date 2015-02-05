@@ -22,9 +22,9 @@ var Y_TOUCH_DISTANCE = 30;
 var X_OVERLAP = 200;
 
 //adjust these to stretch entire graph accross x/y axis
-var X_REPULSE_FACTOR = 2;
+var X_REPULSE_FACTOR = 4;
 var Y_REPULSE_FACTOR = 1;
-var X_ATTRACT_FACTOR = 0.5;
+var X_ATTRACT_FACTOR = 0.25;
 var Y_ATTRACT_FACTOR = 1;
 
 var nodeCounter = 0;
@@ -90,7 +90,7 @@ function stepPhysical(x){
 
             power = Math.abs(renderedNodesList.length - n);
 
-            pSpeed = ( actualCentDist /graphWidth) * ATTRACTION_FORCE * power; 
+            pSpeed = (actualCentDist / (graphWidth*2)) * ATTRACTION_FORCE * power; 
 
             pX *= pSpeed;
             pY *= pSpeed;
