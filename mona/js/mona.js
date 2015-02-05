@@ -5,6 +5,7 @@ var MONA = {},
     focusTitle = "",    //the title of the in focus node. used to avoid creating copy of focus node in graph area
     focusUrl = "",      //the url of the in focus node. used to avoid creating copy of focus node in graph area
     nodeColors = {},    //maps node type to a color
+    isTypeShown = {},   //whether each type is expanded
     nodeMetadata = {},  //maps node location to that node's metatata
     nodeMetadataCache = {}, //all the metadata that has been loaded
     outstandingRequests = {}, //urls that we have erquested but don't have metadata for
@@ -669,6 +670,41 @@ function onTypeMouseout(type){
 	}
 }
 
+function onTypeClick(type){
+    var lines = document.getElementsByClassName(type+"Line");
+    var typeElem = document.getElementById(type);
+    var key, node;
+    if (!(type in isTypeShown) || isTypeShown[type] === true){
+        isTypeShown[type] = false;
+        for (key in primaryNodes){
+            node = primaryNodes[key];
+            if (node.type == type){
+                node.rendered = false;
+                node.visual.style.display = 'none';
+                recursiveRemove(node);
+            }
+        }
+        var len = lines.length;
+        for (var i=0; i<len; i++){
+            LINE_ELEM.removeChild(lines[0]);
+        }
+        typeElem.style.fontWeight = "bold";
+    }
+    else {
+        isTypeShown[type] = true;
+        for (key in primaryNodes){
+            node = primaryNodes[key];
+            if (node.type == type){
+                node.rendered = true;
+                node.visual.style.display = 'block';
+                recursiveAdd(node);
+                drawLine(node);
+            }
+        }
+        typeElem.style.fontWeight = "300";
+    }
+}
+
 function addVisual(node, nodeKey, nodeSet){
     node.visual = document.createElement('div');
     if (primaryNodes.hasOwnProperty(nodeKey)){
@@ -777,7 +813,8 @@ function drawTypes(){
 		var div = document.createElement('div');
 		div.setAttribute('onmouseover','onTypeMouseover("'+nodeType+'")');
 		div.setAttribute('onmouseout','onTypeMouseout("'+nodeType+'")');
-		div.innerHTML = nodeType;
+		div.setAttribute('onclick','onTypeClick("'+nodeType+'")');
+        div.innerHTML = nodeType;
 		div.className=nodeType;
 		div.id=nodeType;
 		div.style.color = nodeColors[nodeType];
@@ -794,17 +831,7 @@ function drawTypes(){
 
 function drawLines(){
 	for (var nodeKey in primaryNodes){
-		var line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-		line.setAttribute('class', primaryNodes[nodeKey].type+"Line");
-		line.setAttribute('id', primaryNodes[nodeKey].location+"Line");
-		line.setAttribute('x1', nodePositions[nodeKey].left);
-		line.setAttribute('x2', typePositions[primaryNodes[nodeKey].type].right+2);
-		line.setAttribute('y1', nodePositions[nodeKey].top+nodePositions[nodeKey].height/2);
-		line.setAttribute('y2', typePositions[primaryNodes[nodeKey].type].top+10);
-		var rgb = hexToRgb(nodeColors[primaryNodes[nodeKey].type]);
-		line.style.stroke = "rgba(" + rgb.r + "," + rgb.g + "," + rgb.b + ",.2)";
-		line.setAttribute('stroke-width', 1);
-		LINE_ELEM.appendChild(line);
+		drawLine(primaryNodes[nodeKey]);
 	}	
 }
 
@@ -813,6 +840,20 @@ function drawLine(node){
     if (node.rendered){
         drawRelativeLines(node, node.children, false);
         drawRelativeLines(node, node.parents, true);
+        if (node.location in primaryNodes){
+            var nodeKey = node.location;
+            var line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            line.setAttribute('class', primaryNodes[nodeKey].type+"Line");
+            line.setAttribute('id', primaryNodes[nodeKey].location+"Line");
+            line.setAttribute('x1', nodePositions[nodeKey].left);
+            line.setAttribute('x2', typePositions[primaryNodes[nodeKey].type].right+2);
+            line.setAttribute('y1', nodePositions[nodeKey].top+nodePositions[nodeKey].height/2);
+            line.setAttribute('y2', typePositions[primaryNodes[nodeKey].type].top+10);
+            var rgb = hexToRgb(nodeColors[primaryNodes[nodeKey].type]);
+            line.style.stroke = "rgba(" + rgb.r + "," + rgb.g + "," + rgb.b + ",.2)";
+            line.setAttribute('stroke-width', 1);
+            LINE_ELEM.appendChild(line);
+        }	
     }
 }
 
@@ -843,3 +884,22 @@ function drawRelativeLines(node, relatives, isParents){
             }
         }	
 }
+
+//removes children and lines of a node
+function recursiveRemove(node){
+    for (var k in node.children){
+        var child = node.children[k];
+        var line = document.getElementById(node.location + child.location + "Line");
+        LINE_ELEM.removeChild(line);
+        child.visual.style.display = "none";
+    }
+}
+
+//removes children and lines of a node
+function recursiveAdd(node){
+    for (var k in node.children){
+        var child = node.children[k];
+        child.visual.style.display = "block";
+    }
+}
+

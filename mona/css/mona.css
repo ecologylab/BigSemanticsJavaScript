@@ -109,6 +109,16 @@ form {
     position: absolute;
     white-space: nowrap;
     transition: .3s;
+    -webkit-animation: fadeIn 1s;
+    animation: fadeIn 1s;
+}
+@keyframes fadeIn {
+  from {opacity: .01}
+  to {opacity: 1}
+}
+@-webkit-keyframes fadeIn {
+  from {opacity: .01}
+  to {opacity: 1}
 }
 
 .nodes div img {

@@ -76,6 +76,8 @@ function stepPhysical(x){
     
     for(n = 0; n < renderedNodesList.length; n++){
         node = renderedNodesList[n];
+        
+        if (!node.rendered) continue;
     
         var n, node, p, pDist, yDist, pSpeed, pX, pY, power, actualCentDist;
 		node.vector = new Vector([0,0,0]);
@@ -124,6 +126,8 @@ function stepPhysical(x){
         // calculate attractive forces		
 		for(p = 0; p < node.parents.length; p++){
 			var parent = node.parents[p];
+            if (!parent.rendered) continue;
+            
 			pDist = Math.sqrt( Math.pow((parent.x - node.x), 2) + Math.pow((parent.y - node.y), 2) );
 			
 			if(pDist > TOUCH_DISTANCE){
@@ -148,6 +152,7 @@ function stepPhysical(x){
 		for(p = 0; p <renderedNodesList.length; p++){		
 			if(n != p){
 				var other = renderedNodesList[p];
+                if (!other.rendered) continue;
 				pDist = Math.sqrt( Math.pow((other.x - node.x), 2) + Math.pow((other.y - node.y), 2) );
 				yDist = Math.abs(other.y - node.y);
 
@@ -275,6 +280,8 @@ function updateAllLines(){
 }
 
 function updateNodeLines(node){
+    if (!node.rendered) return;
+    
     var doc = document.documentElement;
     var topOffset = (window.pageYOffset || doc.scrollTop)  - (doc.clientTop || 0);
     var leftOffset = (window.pageXOffset || doc.scrollLeft) - (doc.clientLeft || 0);
@@ -285,12 +292,15 @@ function updateNodeLines(node){
     
     if (primaryNodes.hasOwnProperty(node.location)){
         line = document.getElementById(node.location+"Line");
-        line.setAttribute('x1', nodePositions[node.location].left + leftOffset);
-        line.setAttribute('y1', nodePositions[node.location].top+nodePositions[node.location].height/2 + topOffset);
+        if (line !== null){
+            line.setAttribute('x1', nodePositions[node.location].left + leftOffset);
+            line.setAttribute('y1', nodePositions[node.location].top+nodePositions[node.location].height/2 + topOffset);
+        }
     }
     
     for (var i in node.children){
         var child = node.children[i];
+        if (!child.rendered) continue;
         var childKey = child.location;
         //update line ends
         div = document.getElementById(childKey);
@@ -313,6 +323,7 @@ function updateNodeLines(node){
     }
     for (var p in node.parents){
         var parent = node.parents[p];
+        if (!parent.rendered) continue;
         var parentKey = parent.location;
         //update line ends
         div = document.getElementById(parentKey);
