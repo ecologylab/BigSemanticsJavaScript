@@ -42,7 +42,7 @@ RenderingTask.prototype.metadataToModel = function(task){
     {	
     	
     // If so, then build the HTML table	
-      var styleMmdType = (task.expandedItem && tasks[i].expandedItem.mmdType && 
+      var styleMmdType = (task.expandedItem && task.expandedItem.mmdType && 
 			task.expandedItem.mmdType.indexOf("twitter") != -1)? "twitter" : task.mmd.name; 
 		var miceStyles = InterfaceStyle.getMiceStyleDictionary(styleMmdType);         //Adds the metadata type as an attribute to the first field in the MD
      //Adds the metadata type as an attribute to the first field in the MD

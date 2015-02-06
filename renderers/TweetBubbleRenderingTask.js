@@ -11,7 +11,7 @@
  * @param isRoot, true if this is the root document for a metadataRendering
  * @param expandedItem, a non-metadata item for which the display was constructed
  */
-function TweetBubbleRenderingTask(url, container, isRoot, clipping, renderer, expandedItem, visual, bgColorObj, extractor)
+function TweetBubbleRenderingTask(url, container, isRoot, clipping, handler, expandedItem, visual, bgColorObj, extractor)
 {
 	if(url != null)
 		this.url = url.toLowerCase();
@@ -23,8 +23,8 @@ function TweetBubbleRenderingTask(url, container, isRoot, clipping, renderer, ex
 	this.mmd = null;
 	
 	this.isRoot = isRoot;
-	
-	this.renderer = renderer;
+	this.handler = RenderingTask.prototype.metadataToModel
+	this.renderer = handler;
 	this.expandedItem = expandedItem;
 	this.visual = visual;
 	this.bgColorObj = bgColorObj;

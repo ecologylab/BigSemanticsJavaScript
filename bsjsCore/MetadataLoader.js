@@ -113,7 +113,7 @@ MetadataLoader.setMetadata = function(rawMetadata, requestMmd)
   var metadata = {};
   
   var deserialized = false;
-  
+  /*
   for (i in rawMetadata)
   {
     if (i != "simpl.id" && i != "simpl.ref" && i != "deserialized")
@@ -127,7 +127,10 @@ MetadataLoader.setMetadata = function(rawMetadata, requestMmd)
       deserialized = true;
     }
   }
-  
+  */
+  if(jQuery.isEmptyObject(metadata) && rawMetadata != null){
+	  metadata = rawMetadata;
+  }
   if (!deserialized)
   {
     simplDeserialize(metadata);
@@ -185,15 +188,9 @@ MetadataLoader.setMetadata = function(rawMetadata, requestMmd)
     		if(queueTask.extractor == 'nottheService'){
         		MetadataLoader.getMMD(queueTask, "MetadataLoader.setMetaMetadata");
 
-    		}else{
-        		MetadataLoader.getMMD(queueTask, "MetadataLoader.setMetaMetadata");
-
     		}
-    	
-    	} else{
-    		MetadataLoader.getMMD(queueTask, "MetadataLoader.setMetaMetadata");
-
     	}
+    	
     }
   }
   
@@ -297,9 +294,9 @@ MetadataLoader.isExtensionMetadataDomain = function(location)
 
 MetadataLoader.checkForMetadataFromExtension = function()
 {
-	for (var i = 0; i < MetadataLoader.extensionMetadataDomains.length; i++)
+	for (var i = 0; i < RepoMan.extensionMetadataDomains.length; i++)
 	{
-		var tasks = MetadataLoader.getTasksFromQueueByDomain(MetadataLoader.extensionMetadataDomains[i]);
+		var tasks = MetadataLoader.getTasksFromQueueByDomain(RepoMan.extensionMetadataDomains[i]);
 		for (var j = 0; j < tasks.length; j++)
 		{
 			MetadataLoader.getMetadata(tasks[i].url, "MetadataLoader.setMetadata");
@@ -402,7 +399,7 @@ MetadataLoader.getTasksFromQueueByType = function(type)
   var tasks = [];
   for (var i = 0; i < MetadataLoader.queue.length; i++)
   {
-    if (MetadataLoader.queue[i].mmdType == type)
+    if (MetadataLoader.queue[i].mmdType == type || type == undefined)
     {
       tasks.push(MetadataLoader.queue[i]);
     }

@@ -25,7 +25,7 @@ this.favoriteXPath = "//li[@class='action-fav-container js-toggle-state js-toggl
 this.ajaxContentXPath = "//div[@class='new-tweets-bar js-new-tweets-bar']";
 
 this.globalNewTweetXPath = "//button[@id='global-new-tweet-button']";
-//var globalNewTweetTextXPath = "//div[@id='tweet-box-global']";
+//var globalNewTweetTextXPath = "//div[@id='tweet-box-global']"
 
 var newTweetXPath = "//div[@class='tweet-button']/button";
 var newTweetTextXPath = ".//div[@id='tweet-box-global'] | .//div[@id='tweet-box-mini-home-profile']";
