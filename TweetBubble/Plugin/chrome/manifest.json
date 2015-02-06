@@ -31,14 +31,25 @@
       		  "content_script/css/twitterMice.css"
       ],
       "js": [
-        "content_script/js/simplDeserializer.js",
+        "content_script/js/bsjsCore/simpl/simplDeserializer.js",
         "content_script/js/util.js",
      	"content_script/js/logger.js",
-        "content_script/js/interfaceStyle.js",
-        "content_script/js/debi.js",
-        "content_script/js/twitterDebi.js",
-        "content_script/js/mice.js",
-        "content_script/js/twitterMice.js",
+        "content_script/js/renderers/interfaceStyle.js",
+        "content_script/js/bsjsCore/BSUtilities.js",
+        "content_script/js/bsjsCore/MetadataLoader.js",
+        "content_script/js/bsjsCore/MetadataTask.js",
+        "content_script/js/bsjsCore/extensionInterface.js",
+        
+        "content_script/js/bsjsCore/RepoMan.js",
+        "content_script/js/bsjsCore/MetadataViewModel.js",
+        "content_script/js/renderers/RendererBase.js",
+        "content_script/js/renderers/VanillaMICE.js",
+        
+        "content_script/js/renderers/RenderingTask.js",
+        "content_script/js/renderers/TweetBubbleRenderer.js",
+        "content_script/js/renderers/TweetBubbleRenderingTask.js",
+        "content_script/js/libraries/jquery-2.0.0.min.js",
+        
         "content_script/js/twitterICE.js",
       	"content_script/js/ICE.js"
       ]

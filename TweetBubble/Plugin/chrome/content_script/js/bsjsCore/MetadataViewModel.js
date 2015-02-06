@@ -1,416 +1,10 @@
-/**
- * This file handles the loading of metadata and meta-metadata for general
- * Dynamic Exploratory Browsing Interfaces.
- * A renderer can be passed in to render loaded metadata in customed ways.
+/*
+ * Contains MetadataViewMOdel, a constructor for viewModels, as well as the ViewModeler,
+ *  which builds them
  */
 
-// The constant that points to the BigSemantics service.
-var SEMANTIC_SERVICE_URL = "http://ecology-service.cse.tamu.edu/BigSemanticsService/";
+var ViewModeler = {};
 
-// Constant for how deep to recurse through the metadata
-var METADATA_FIELD_MAX_DEPTH = 7;
-
-// The main namespace.
-var MetadataLoader = {};
-
-// The queue holds a list of containers which are waiting for metadata or
-// meta-metadata from the service.
-MetadataLoader.queue = [];
-
-// The URL for the document being loaded.
-MetadataLoader.currentDocumentLocation = "";
-
-// Logger
-MetadataLoader.logger = function(message) { /* null default implementation */ };
-
-MetadataLoader.extensionMetadataDomains = ["twitter.com"];
-
-
-/**
- * Requests metadata of the given URL and the corresponding meta-metadata from
- * the BigSemantics service, then calls the given callback for rendering.
- *
- * @param renderer:
- *     The rendering callback.
- * @param container:
- * @param url:
- *     The URL to the requested document.
- * @param isRoot:
- *     Is 'true' when this metadata is a top level one in the current context.
- * @param clipping:
- *     Used to specify special clipping structure for special use.
- */
-MetadataLoader.render = function(renderer, container, url, isRoot, clipping)
-{
-	
-  // Add the rendering task to the queue
-  var task = new RenderingTask(url, container, isRoot, clipping, renderer)
-  MetadataLoader.queue.push(task);  
-  
-  if (clipping != null && clipping.rawMetadata != null)
-  {
-    clipping.rawMetadata.deserialized = true;
-    MetadataLoader.setMetadata(clipping.rawMetadata);
-  }
-  else
-  {  
-    // Fetch the metadata from the service
-    MetadataLoader.getMetadata(url, "MetadataLoader.setMetadata");  
-  }
-}
-
-/**
- * Retrieves the metadata from the service using a JSON-p call.
- * When the service responds the callback function will be called.
- *
- * @param url, url of the target document
- * @param callback, name of the function to be called from the JSON-p call
- */
-MetadataLoader.getMetadata = function(url, callback, reload)
-{
-	var serviceURL; 
-	if(reload == true){
-		serviceURL = SEMANTIC_SERVICE_URL + "metadata.jsonp?reload=true&callback=" + callback
-        + "&url=" + encodeURIComponent(url);
-	}
-	else{
-		serviceURL = SEMANTIC_SERVICE_URL + "metadata.jsonp?callback=" + callback
-        + "&url=" + encodeURIComponent(url);
-	}
-  MetadataLoader.doJSONPCall(serviceURL);
-  console.log("requesting semantics service for metadata: " + serviceURL);
-}
-
-/**
- * Retrieves the meta-metadata from the service using a JSON-p call.
- * When the service responds the callback function will be called.
- *
- * @param url, the URL of the document the requested meta-metadata is for.
- * @param callback, name of the function to be called from the JSON-p call
- */
-MetadataLoader.getMMD = function(name, callback)
-{
-  var serviceURL = SEMANTIC_SERVICE_URL + "mmd.jsonp?reload=true&callback=" + callback
-      + "&name=" + name;
-	
-  
-  MetadataLoader.doJSONPCall(serviceURL);
-  console.log("requesting semantics service for mmd: " + serviceURL);
-}
-
-/**
- * Do a JSON-P call by appending the jsonP url as a scrip object.
- * @param jsonpURL 
- */
-MetadataLoader.doJSONPCall = function(jsonpURL)
-{
-  var script = document.createElement('script');
-  script.src = jsonpURL;
-  document.head.appendChild(script);
-}
-
-/**
- * Deserializes the metadata from the service and matches the metadata with a
- * queued RenderingTask If the metadata matches then retrieve the needed
- * meta-metadata.
- *
- * @param rawMetadata, JSON metadata string returned from the semantic service
- */
-MetadataLoader.setMetadata = function(rawMetadata, requestMmd)
-{  
-  // TODO move MDC related code to mdc.js
-  if (typeof MDC_rawMetadata != "undefined")
-  {
-    MDC_rawMetadata = JSON.parse(JSON.stringify(rawMetadata));
-    updateJSON(true);
-  }
-  
-  var metadata = {};
-  
-  var deserialized = false;
-  for (i in rawMetadata)
-  {
-    if (i != "simpl.id" && i != "simpl.ref" && i != "deserialized")
-    {
-      metadata = rawMetadata[i];    
-      // metadata.meta_metadata_name = i;
-    }
-    
-    if (i == "deserialized")
-    {
-      deserialized = true;
-    }
-  }
-  
-  if (!deserialized)
-  {
-    simplDeserialize(metadata);
-  }
-
-  // Match the metadata with a task from the queue
-  var queueTasks = [];
-  
-  if (metadata.location)
-  {
-    queueTasks = MetadataLoader.getTasksFromQueueByUrl(metadata.location);
-  }
-
-  // Check additional locations for more awaiting MICE tasks
-  if (metadata["additional_locations"])
-  {
-    for (var i = 0; i < metadata["additional_locations"].length; i++)
-    {
-
-      var additional_location = metadata["additional_locations"][i];
-      var tasks = MetadataLoader.getTasksFromQueueByUrl(additional_location);
-      queueTasks = queueTasks.concat(tasks);      
-    }
-  }
-  
-  for (var i = 0; i < queueTasks.length; i++)
-  {
-    var queueTask = queueTasks[i];
-    
-    if (metadata["additional_locations"])
-    {
-      queueTask.additionalUrls = metadata["additional_locations"];
-      queueTask.url = metadata["location"].toLowerCase();
-    }
-    
-    queueTask.metadata = metadata;
-    queueTask.mmdType = metadata.meta_metadata_name;
-  
-    if (queueTask.clipping != null)
-    {
-      queueTask.clipping.rawMetadata = rawMetadata;
-    }
-        
-    if (typeof requestMmd === "undefined" || requestMmd == true) 
-    	MetadataLoader.getMMD(queueTask.mmdType, "MetadataLoader.setMetaMetadata");
-  }
-  
-  if (queueTasks.length < 0)
-  {
-    console.error("Retreived metadata: " + metadata.location
-                  + "  but it doesn't match a document from the queue.");
-    console.log(MetadataLoader.queue);
-  }
-}
-
-/**
- * Deserializes the meta-metadata, attempts to matche it with any awaiting
- * tasks. If the meta-metadata gets matched then renders it.
- *
- * @param mmd, raw meta-metadata json returned from the service
- */
-MetadataLoader.setMetaMetadata = function (mmd)
-{
-  console.log("Received mmd: " + mmd);
-
-  // TODO move MDC related code to mdc.js
-  if (typeof MDC_rawMMD != "undefined")
-  {
-    MDC_rawMMD = JSON.parse(JSON.stringify(mmd));
-  }
-  
-  simplDeserialize(mmd);
-  
-  var tasks = MetadataLoader.getTasksFromQueueByType(mmd["meta_metadata"].name);
-  
-  if (tasks.length > 0)
-  {
-    for (var i = 0; i < tasks.length; i++)
-    {
-      tasks[i].mmd = mmd;
-
-      // if the task has both metadata and meta-metadata then create and display
-      // the rendering
-      if (tasks[i].metadata && tasks[i].mmd)  
-      {
-        var metadataFields =
-          MetadataLoader.createMetadata(tasks[i].isRoot, tasks[i].mmd,
-                                        tasks[i].metadata, tasks[i].url);
-        // Is there any visable metadata?
-        if (MetadataLoader.hasVisibleMetadata(metadataFields))
-        {	
-          // If so, then build the HTML table	
-          var styleMmdType = (tasks[i].expandedItem && tasks[i].expandedItem.mmdType && 
-        		  					tasks[i].expandedItem.mmdType.indexOf("twitter") != -1)? "twitter" : mmd.name; 
-          var miceStyles = InterfaceStyle.getMiceStyleDictionary(styleMmdType);	
-         //Adds the metadata type as an attribute to the first field in the MD
-          metadataFields[0].parentMDType = mmd.name;
-          tasks[i].renderer(tasks[i], metadataFields, {styles: miceStyles, type: styleMmdType});
-        }
-      }
-    }
-  }
-  else
-  {
-    console.error("Retreived meta-metadata: " + mmd["meta_metadata"].name
-                  + "  but it doesn't match a document from the queue.");
-  }
-}
-
-/**
- *
- */
-MetadataLoader.createMetadata = function(isRoot, mmd, metadata, taskUrl)
-{
-  var metadataFields =
-    MetadataLoader.getMetadataViewModel(mmd["meta_metadata"], mmd["meta_metadata"]["kids"], metadata,
-                                        0, null, taskUrl);
-  return metadataFields;
-}
-
-/**
- * Get a matching RenderingTask from the queue 
- * @param url, target url to attempt to match to any tasks in the queue
- * @return a matching RenderingTask, null if no matches are found
- */
-MetadataLoader.getTaskFromQueueByUrl = function(url)
-{
-  for (var i = 0; i < MetadataLoader.queue.length; i++)
-  {
-    if (MetadataLoader.queue[i].matches(url))
-    {
-      return MetadataLoader.queue[i];
-    }
-  }
-  return null;
-}
-
-/**
- *
- */
-MetadataLoader.getTasksFromQueueByUrl = function(url)
-{
-  var list = [];
-  for (var i = 0; i < MetadataLoader.queue.length; i++)
-  {
-    if (MetadataLoader.queue[i].matches(url))
-    {
-      list.push(MetadataLoader.queue[i]);
-    }
-    
-    else if(MetadataLoader.queue[i].additionalUrls != null){
-    	//Checks to see if MMD matches any additionalLocations
-    	  for (var j = 0; j < MetadataLoader.queue[i].additionalUrls.length; j++){
-    		  if (MetadataLoader.queue[i].additionalUrls[j] == url){
-    			  list.push(MetadataLoader.queue[i]);
-    		  }
-    	  }
-    }
-    
-  }
-  return list;
-}
-
-/**
- * Get all tasks from the queue which are waiting for given meta-metadata type.
- *
- * @param type, meta-metadata type to search for
- * @return array of RenderingTasks, empty if no matches found
- */
-MetadataLoader.getTasksFromQueueByType = function(type)
-{
-  var tasks = [];
-  for (var i = 0; i < MetadataLoader.queue.length; i++)
-  {
-    if (MetadataLoader.queue[i].mmdType == type)
-    {
-      tasks.push(MetadataLoader.queue[i]);
-    }
-  }
-  return tasks;
-}
-
-/**
- * Get all tasks from the queue which are waiting for given meta-metadata type.
- *
- * @param domain, site domain to search for
- * @return array of RenderingTasks, empty if no matches found
- */
-MetadataLoader.getTasksFromQueueByDomain = function(domain)
-{
-  var tasks = [];
-  for (var i = 0; i < MetadataLoader.queue.length; i++)
-  {
-    if (MetadataLoader.queue[i].url.indexOf(domain) != -1)
-    {
-      tasks.push(MetadataLoader.queue[i]);
-    }
-  }
-  return tasks;
-}
-
-/**
- * @returns bool, to request extension for metadata or not
- */
-MetadataLoader.toRequestMetadataFromService = function(location)
-{
-	return !MetadataLoader.isExtensionMetadataDomain(location);
-}
-
-MetadataLoader.isExtensionMetadataDomain = function(location)
-{
-	for (var i = 0; i < MetadataLoader.extensionMetadataDomains.length; i++)
-	{
-		if (location.indexOf(MetadataLoader.extensionMetadataDomains[i]) != -1)
-			return true;
-	}
-	return false;
-}
-
-MetadataLoader.checkForMetadataFromExtension = function()
-{
-	for (var i = 0; i < MetadataLoader.extensionMetadataDomains.length; i++)
-	{
-		var tasks = MetadataLoader.getTasksFromQueueByDomain(MetadataLoader.extensionMetadataDomains[i]);
-		for (var j = 0; j < tasks.length; j++)
-		{
-			MetadataLoader.getMetadata(tasks[i].url, "MetadataLoader.setMetadata");
-		}
-	}
-}
-
-/**
- * RenderingTask represents a metadata rendering that is in progress of being
- * downloaded and parsed.
- *
- * @param url of the document
- * @param container, HTML container which will hold the rendering
- * @param isRoot, true if this is the root document for a metadataRendering
- */
-function RenderingTask(url, container, isRoot, clipping, renderer)
-{
-  if (url != null)
-  {
-    this.url = url.toLowerCase();
-  }
-  
-  this.container = container;
-  this.clipping = clipping;
-  
-  this.metadata = null;  
-  this.mmd = null;
-  
-  this.isRoot = isRoot;
-   
-  this.renderer = renderer;
-}
-
-/**
- * Does the given url match the RenderingTask's url?
- *
- * @param url, url to check against the RenderingTask
- */
-RenderingTask.prototype.matches = function(url)
-{
-  url = url.toLowerCase();
-  return this.url === url;
-}
-
-/* MetadataField and related functions */
 
 /**
  * MetadataField represents a parsed metadata field combining
@@ -453,13 +47,34 @@ function MetadataViewModel(mmdField)
   }
 }
 
+
+/**
+ *
+ */
+
+ViewModeler.createMetadata = function(isRoot, mmd, metadata, taskUrl)
+{
+  var mmdToMake;
+  if(mmd['meta_metadata']!= null){
+	  mmdToMake = mmd['meta_metadata'];
+  }else{
+	  mmdToMake = mmd;
+  }
+  var metadataFields =
+	  ViewModeler.getMetadataViewModel(mmdToMake, mmdToMake["kids"], metadata, 0, null, taskUrl);
+  
+  return metadataFields;
+};
+
+
+
 /**
  * Checks if the given list of MetadataFields has any visible fields.
  *
  * @param metadata, array of MetadataFields to search for visible fields
  * @return true if there are visible fields, false otherwise
  */
-MetadataLoader.hasVisibleMetadata = function(metadata)
+ViewModeler.hasVisibleMetadata = function(metadata)
 {
   for (var key in metadata)  
   {
@@ -485,7 +100,7 @@ MetadataLoader.hasVisibleMetadata = function(metadata)
  *
  * @param metadata, array of MetadataFields
  */
-MetadataLoader.guessDocumentLocation = function(metadata)
+ViewModeler.guessDocumentLocation = function(metadata)
 {
   var location = "";
   for (var i = 0; i < metadata.length; i++)
@@ -506,7 +121,7 @@ MetadataLoader.guessDocumentLocation = function(metadata)
 /**
  * looks up metadataFields collection for the instance, else creates new
  */
-MetadataLoader.getMetadataField = function(mmdField, metadataFields)
+ViewModeler.getMetadataField = function(mmdField, metadataFields)
 {
   for (var i = 0; i < metadataFields.length; i++)
   {
@@ -526,7 +141,7 @@ MetadataLoader.getMetadataField = function(mmdField, metadataFields)
  * @param metadata, metadata object from the service
  * @param depth, current depth level
  */
-MetadataLoader.getMetadataViewModel = function(parentField, mmdKids, metadata, depth,
+ViewModeler.getMetadataViewModel = function(parentField, mmdKids, metadata, depth,
                                                child_value_as_label, taskUrl)
 {
   var metadataViewModel = [];
@@ -543,25 +158,25 @@ MetadataLoader.getMetadataViewModel = function(parentField, mmdKids, metadata, d
     
     if (mmdField.scalar)
     {
-      MetadataLoader.getScalarMetadataViewModel(metadataViewModel, parentField, mmdField,
+      ViewModeler.getScalarMetadataViewModel(metadataViewModel, parentField, mmdField,
           mmdKids, metadata, depth, child_value_as_label, taskUrl);
     }    
     else if (mmdField.composite)
     {
-      MetadataLoader.getCompositeMetadataViewModel(metadataViewModel, parentField, mmdField,
+      ViewModeler.getCompositeMetadataViewModel(metadataViewModel, parentField, mmdField,
           mmdKids, metadata, depth, child_value_as_label, taskUrl);
     }
     else if (mmdField.collection != null)
     {
-      MetadataLoader.getCollectionMetadataViewModel(metadataViewModel, parentField, mmdField,
+      ViewModeler.getCollectionMetadataViewModel(metadataViewModel, parentField, mmdField,
           mmdKids, metadata, depth, child_value_as_label, taskUrl);
     }
   }
-    
+  
   //Sort the fields by layer, higher layers first
   metadataViewModel.sort(function(a,b) { return b.layer - a.layer - 0.5; });
 
-  MetadataLoader.collapseEmptyLabelSet(metadataViewModel, parentField);
+  ViewModeler.collapseEmptyLabelSet(metadataViewModel, parentField);
   
   return metadataViewModel;
 }
@@ -569,7 +184,7 @@ MetadataLoader.getMetadataViewModel = function(parentField, mmdKids, metadata, d
 /**
  *
  */
-MetadataLoader.getScalarMetadataViewModel = function(metadataViewModel,
+ViewModeler.getScalarMetadataViewModel = function(metadataViewModel,
 													 parentField,
                                                      mmdField,
                                                      mmdKids,
@@ -581,10 +196,10 @@ MetadataLoader.getScalarMetadataViewModel = function(metadataViewModel,
   mmdField = mmdField.scalar;
 
   // Is this a visible field?
-  if (MetadataLoader.isFieldVisible(mmdField, metadata, taskUrl, parentField))
+  if (ViewModeler.isFieldVisible(mmdField, metadata, taskUrl, parentField))
   {        
     // Is there a metadata value for this field?    
-    var value = MetadataLoader.getFieldValue(mmdField, metadata);        
+    var value = ViewModeler.getFieldValue(mmdField, metadata);        
     if (value)
     {  
       if (child_value_as_label != null)
@@ -592,13 +207,13 @@ MetadataLoader.getScalarMetadataViewModel = function(metadataViewModel,
         mmdField.use_value_as_label = child_value_as_label; 
       }
                 
-      var field = MetadataLoader.getMetadataField(mmdField, metadataViewModel);
+      var field = ViewModeler.getMetadataField(mmdField, metadataViewModel);
                 
       field.value = value;
       if (mmdField.use_value_as_label != null) 
       {
         field.value_as_label =
-          MetadataLoader.getValueForProperty(mmdField.use_value_as_label,
+          ViewModeler.getValueForProperty(mmdField.use_value_as_label,
                                              metadata, mmdKids, depth);
       }
                 
@@ -620,7 +235,7 @@ MetadataLoader.getScalarMetadataViewModel = function(metadataViewModel,
       
       if (mmdField.concatenates_to)
       {
-        MetadataLoader.concatenateField(field, metadataViewModel, mmdKids);
+        ViewModeler.concatenateField(field, metadataViewModel, mmdKids);
       }
       
       if (metadataViewModel.indexOf(field) == -1)
@@ -631,7 +246,7 @@ MetadataLoader.getScalarMetadataViewModel = function(metadataViewModel,
   }
 }
 
-MetadataLoader.getCompositeMetadataViewModel = function(metadataViewModel,
+ViewModeler.getCompositeMetadataViewModel = function(metadataViewModel,
 														parentField,
                                                         mmdField,
                                                         mmdKids,
@@ -643,10 +258,10 @@ MetadataLoader.getCompositeMetadataViewModel = function(metadataViewModel,
   mmdField = mmdField.composite;
       
   // Is this a visible field?
-  if (MetadataLoader.isFieldVisible(mmdField, metadata, taskUrl, parentField))
+  if (ViewModeler.isFieldVisible(mmdField, metadata, taskUrl, parentField))
   {        
     // Is there a metadata value for this field?    
-    var value = MetadataLoader.getFieldValue(mmdField, metadata);  
+    var value = ViewModeler.getFieldValue(mmdField, metadata);  
     if (value)
     {  
       if (child_value_as_label != null)
@@ -662,19 +277,19 @@ MetadataLoader.getCompositeMetadataViewModel = function(metadataViewModel,
           var field = new MetadataViewModel(mmdField);
           
           field.value =
-            MetadataLoader.getMetadataViewModel(mmdField, mmdField["kids"], value[i],
+            ViewModeler.getMetadataViewModel(mmdField, mmdField["kids"], value[i],
                                                 depth + 1, null, taskUrl);
           if (mmdField.use_value_as_label != null)
           {
             field.value_as_label =
-              MetadataLoader.getValueForProperty(mmdField.use_value_as_label,
+              ViewModeler.getValueForProperty(mmdField.use_value_as_label,
                                                  value[i], mmdField["kids"],
                                                  depth + 1);
           }
           
           field.composite_type = mmdField.type;
           field.parentMDType = metadata.meta_metadata_name;
-          MetadataLoader.checkAndSetShowExpanded(parentField, field);
+          ViewModeler.checkAndSetShowExpanded(parentField, field);
           
           metadataViewModel.push(field);
         }
@@ -684,28 +299,28 @@ MetadataLoader.getCompositeMetadataViewModel = function(metadataViewModel,
         var field = new MetadataViewModel(mmdField);
                     
         field.value =
-          MetadataLoader.getMetadataViewModel(mmdField, mmdField["kids"], value,
+          ViewModeler.getMetadataViewModel(mmdField, mmdField["kids"], value,
                                               depth + 1, null, taskUrl);
         if (mmdField.use_value_as_label != null)
         {
           if (mmdField.child_value_as_label != null)
           {
             field.value_as_label =
-              MetadataLoader.getValueForProperty(mmdField.use_value_as_label,
+              ViewModeler.getValueForProperty(mmdField.use_value_as_label,
                                                  value, mmdField["kids"],
                                                  depth + 1);
           }
           else
           {
             field.value_as_label =
-              MetadataLoader.getValueForProperty(mmdField.use_value_as_label,
+              ViewModeler.getValueForProperty(mmdField.use_value_as_label,
                                                  metadata, mmdKids, depth + 1);
           }
         }
         
         field.composite_type = mmdField.type;
         field.parentMDType = metadata.meta_metadata_name;
-        MetadataLoader.checkAndSetShowExpanded(parentField, field);
+        ViewModeler.checkAndSetShowExpanded(parentField, field);
         
         metadataViewModel.push(field);
       }
@@ -719,7 +334,7 @@ MetadataLoader.getCompositeMetadataViewModel = function(metadataViewModel,
   }
 }
 
-MetadataLoader.getCollectionMetadataViewModel = function(metadataViewModel,
+ViewModeler.getCollectionMetadataViewModel = function(metadataViewModel,
 														 parentField,
                                                          mmdField,
                                                          mmdKids,
@@ -729,12 +344,14 @@ MetadataLoader.getCollectionMetadataViewModel = function(metadataViewModel,
                                                          taskUrl)
 {
   mmdField = mmdField.collection;  
-  
+  if(mmdField.name == "companion_products"){
+	  
+  }
   // Is this a visible field?
-  if (MetadataLoader.isFieldVisible(mmdField, metadata, taskUrl, parentField))
+  if (ViewModeler.isFieldVisible(mmdField, metadata, taskUrl, parentField))
   {    
     // Is there a metadata value for this field?  
-    var value = MetadataLoader.getFieldValue(mmdField, metadata);  
+    var value = ViewModeler.getFieldValue(mmdField, metadata);  
     if (value)
     {  
       if (child_value_as_label != null)
@@ -793,7 +410,7 @@ MetadataLoader.getCollectionMetadataViewModel = function(metadataViewModel,
       if (mmdField.child_use_value_as_label != null)
       {
         field.value =
-          MetadataLoader.getMetadataViewModel(mmdField,
+          ViewModeler.getMetadataViewModel(mmdField,
         		  							  mmdField["kids"],
                                               value,
                                               depth + 1,
@@ -803,28 +420,28 @@ MetadataLoader.getCollectionMetadataViewModel = function(metadataViewModel,
       else if (mmdField.child_scalar_type == null)
       {
         field.value =
-          MetadataLoader.getMetadataViewModel(mmdField, mmdField["kids"], value,
+          ViewModeler.getMetadataViewModel(mmdField, mmdField["kids"], value,
                                               depth + 1, null, taskUrl);
       }
       if (mmdField.use_value_as_label != null) 
       {
         field.value_as_label =
-          MetadataLoader.getValueForProperty(mmdField.use_value_as_label,
+          ViewModeler.getValueForProperty(mmdField.use_value_as_label,
                                              metadata, mmdKids);
       }
       
+     
       metadataViewModel.push(field);
     }
   }
 }
-
-MetadataLoader.collapseEmptyLabelSet = function(metadataViewModel, parentField)
+ViewModeler.collapseEmptyLabelSet = function(metadataViewModel, parentField)
 {
 	var deleteLabelCol = true;
 	// make deleteLabelCol false if any child label is visible
 	for (var i = 0; i < metadataViewModel.length; i++)
 	{
-		if (MetadataLoader.isLabelVisible(metadataViewModel[i], parentField))
+		if (ViewModeler.isLabelVisible(metadataViewModel[i], parentField))
 		{
 			deleteLabelCol = false;
 			break;
@@ -842,7 +459,7 @@ MetadataLoader.collapseEmptyLabelSet = function(metadataViewModel, parentField)
 			}
 			else if (field.composite_type || field.child_type)
 			{
-				if (field.value.length > 0)
+				if (field.value.length > 0) 
 				{
 					metadataViewModel[i] = field.value[0];
 					
@@ -855,7 +472,7 @@ MetadataLoader.collapseEmptyLabelSet = function(metadataViewModel, parentField)
 	}
 }
 
-MetadataLoader.isLabelVisible = function(field, parentField)
+ViewModeler.isLabelVisible = function(field, parentField)
 {
 	if (field.scalar_type)
 	{
@@ -888,7 +505,7 @@ MetadataLoader.isLabelVisible = function(field, parentField)
 	return false;
 }
 
-MetadataLoader.checkAndSetShowExpanded = function(parentField, field)
+ViewModeler.checkAndSetShowExpanded = function(parentField, field)
 {
 	if (parentField.child_show_expanded_initially != null) {
 		field.show_expanded_initially = parentField.child_show_expanded_initially;
@@ -901,7 +518,7 @@ MetadataLoader.checkAndSetShowExpanded = function(parentField, field)
 /**
  * 
  */
-MetadataLoader.isFieldVisible = function(mmdField, metadata, url, parentField)
+ViewModeler.isFieldVisible = function(mmdField, metadata, url, parentField)
 {
   if (mmdField["styles"])
   {
@@ -914,12 +531,12 @@ MetadataLoader.isFieldVisible = function(mmdField, metadata, url, parentField)
     }
   }
   
-  var includeMediaField = MetadataLoader.isVisibleMediaField(mmdField, parentField);
+  var includeMediaField = ViewModeler.isVisibleMediaField(mmdField, parentField);
   
   return includeMediaField || mmdField.hide == null || mmdField.hide == "false" || mmdField.always_show == "true";
 }
 
-MetadataLoader.isVisibleMediaField = function(mmdField, parentField)
+ViewModeler.isVisibleMediaField = function(mmdField, parentField)
 {
 	if (parentField.type == "image" && mmdField.name == "location")
 		return true;
@@ -930,7 +547,7 @@ MetadataLoader.isVisibleMediaField = function(mmdField, parentField)
 /**
  * 
  */
-MetadataLoader.getFieldValue = function(mmdField, metadata)
+ViewModeler.getFieldValue = function(mmdField, metadata)
 {
   
   if (mmdField.tag != null){
@@ -949,7 +566,7 @@ MetadataLoader.getFieldValue = function(mmdField, metadata)
 /**
  * 
  */
-MetadataLoader.getValueForProperty = function(valueAsLabelStr, metadata,
+ViewModeler.getValueForProperty = function(valueAsLabelStr, metadata,
                                               mmdKids, depth, taskUrl)
 {
   var nestedFields = valueAsLabelStr.split(".");
@@ -1031,7 +648,7 @@ MetadataLoader.getValueForProperty = function(valueAsLabelStr, metadata,
     else  
     {
       var metadataFields =
-        MetadataLoader.getMetadataViewModel(mmdField, mmdKids, fieldValue, depth, null,
+        ViewModeler.getMetadataViewModel(mmdField, mmdKids, fieldValue, depth, null,
                                             taskUrl);
       return {value: metadataFields, type: fieldType};
     }        
@@ -1043,7 +660,7 @@ MetadataLoader.getValueForProperty = function(valueAsLabelStr, metadata,
 /**
  * 
  */
-MetadataLoader.concatenateField = function(field, metadataFields, mmdKids)
+ViewModeler.concatenateField = function(field, metadataFields, mmdKids)
 {
   var metadataField = "";  
   for (var i = 0; i < metadataFields.length; i++)
@@ -1089,7 +706,7 @@ MetadataLoader.concatenateField = function(field, metadataFields, mmdKids)
 /**
  *
  */
-MetadataLoader.getImageSource = function(metadataViewModel)
+ViewModeler.getImageSource = function(metadataViewModel)
 {
   for (var i = 0; i < metadataViewModel.length; i++)
   {
@@ -1100,61 +717,3 @@ MetadataLoader.getImageSource = function(metadataViewModel)
   }
   return null;
 }
-/** 
- * Make the string prettier by replacing underscores with spaces  
- * @param string to make over
- * @return hansome string, a real genlteman
- */
-MetadataLoader.toDisplayCase = function(string)
-{  
-  var strings = string.split('_');
-  var display = "";
-  for (var s in strings)
-  {
-    display += strings[s].charAt(0).toLowerCase() + strings[s].slice(1) + " ";
-  }
-  return display;
-}
-
-/**
- * Remove line breaks from the string and any non-ASCII characters
- * @param string
- * @return a string with no line breaks or crazy characters
- */
-MetadataLoader.removeLineBreaksAndCrazies = function(string)
-{
-  string = string.replace(/(\r\n|\n|\r)/gm," ");  
-  var result = "";
-  for (var i = 0; i < string.length; i++)
-  {
-    if (string.charCodeAt(i) < 128)
-    {
-      result += string.charAt(i);
-    }
-  }
-  return result;
-}
-
-/**
- *
- */
-MetadataLoader.clearDocumentCollection = function()
-{
-  MetadataLoader.queue = [];
-  MetadataLoader.documentMap = [];
-}
-
-/**
- * Gets the host from a URL
- * @param url, string of the target URL
- * @return host as a string
- */
-MetadataLoader.getHost = function(url)
-{
-  if (url)
-  {
-    var host = url.match(/:\/\/(www\.)?(.[^/:]+)/)[2];
-    return "http://www." + host;
-  }
-}
-

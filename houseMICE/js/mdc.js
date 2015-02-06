@@ -121,6 +121,8 @@ function showMetadata()
 	  var hostname = window.location.hostname;
 	  var port = window.location.port;
 	  SEMANTIC_SERVICE_URL = "http://" + hostname + ":" + port + "/BigSemanticsService/";
+	   SEMANTIC_SERVICE_URL = "http://ecology-service.cse.tamu.edu/BigSemanticsService/";
+
   }
   else{
 	   SEMANTIC_SERVICE_URL = "http://ecology-service.cse.tamu.edu/BigSemanticsService/";

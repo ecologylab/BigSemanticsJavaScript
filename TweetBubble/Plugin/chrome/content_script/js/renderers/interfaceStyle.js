@@ -1,3 +1,8 @@
+/*
+ * A mapping of metadata types to their css class names
+ * 
+ */
+
 var DEFAULT_MICE_STYLE = {
 	styles : {
 	    metadataRendering : "metadataRendering",

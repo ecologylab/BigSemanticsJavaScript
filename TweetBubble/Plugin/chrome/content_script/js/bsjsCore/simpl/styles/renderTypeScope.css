@@ -1,0 +1,77 @@
+#prettyDisplay {
+	outline: 1px solid #ccc;
+	padding: 12px;
+	margin: 12px;
+	font-family: Monaco, monospace;
+	overflow-y: scroll;
+	overflow-x: hidden;
+	
+	position: absolute;
+	top: 36px;
+	bottom: 0px;
+	right: 0px;
+	left: 0px;
+}
+
+#prettyDisplay h3 {
+	font-size: 18px;
+	margin-bottom: 12px;
+}
+
+#prettyDisplay label {
+	font-size: 14px;
+	color: #808080;
+	padding: 12px 8px;
+	margin-top: 12px;
+}	
+
+#prettyDisplay h3 {
+	font-size: 18px;
+	margin-bottom: 12px;
+}
+
+#prettyDisplay .classDisplay {
+	outline: 1px solid #ccc;
+	padding: 12px;
+	margin: 12px;
+	font-family: Monaco, monospace;
+}
+
+#prettyDisplay .className {
+	font-size: 16px;	
+}
+
+#prettyDisplay .tagName {
+	font-size: 14px;
+	color: rgb(120, 120, 120);
+	padding: 0px 12px;
+}
+
+#prettyDisplay .classDisplay .label {
+	font-size: 12px;
+	color: #808080;
+	padding: 6px;
+	margin-top: 12px;
+}	
+
+#prettyDisplay .fieldDisplay {
+	margin: 6px 24px;
+}
+
+#rawDisplay {
+	outline: 1px solid #ccc;
+	padding: 8px;
+	margin: 12px;
+	overflow-y: scroll;
+	overflow-x: hidden;
+	position: absolute;
+	top: 36px;
+	bottom: 0px;
+	right: 0px;
+	left: 0px;
+	
+}
+
+.unwrappedRawDisplay {
+	padding: 8px;
+}

@@ -47,7 +47,7 @@ function downloadRequester(expandableItemUrl, container)
 	else
 	{
 		chrome.extension.sendRequest({load: expandableItemUrl}, function(response) {
-			//console.log(response);
+			console.log(response);
 			MetadataLoader.setMetadata(response.doc, false);
 			MetadataLoader.setMetaMetadata(response.mmd);
 		});
@@ -85,7 +85,7 @@ function expandCollapseItem(event)
 	if (collapse)
 	{
 		expandCollapseIcon.src = expandIconPath;
-		MetadataRenderer.hideMetadataDisplay(item);
+		TwitterRenderer.hideMetadataDisplay(item);
 	}
 	else
 	{
@@ -93,7 +93,7 @@ function expandCollapseItem(event)
 		
 		if (instance.isCached(item))
 		{
-			MetadataRenderer.showMetadataDisplay(item);
+			TwitterRenderer.showMetadataDisplay(item);
 		}
 		else
 		{
@@ -108,7 +108,7 @@ function expandCollapseItem(event)
 			// relegate task of selecting apt parent to specific instance 
 			var parent = instance.getContainer(item);
 				
-			MetadataRenderer.addMetadataDisplay(parent, expandableItemUrl, true, null, false, false, item);
+			TwitterRenderer.addMetadataDisplay(parent, expandableItemUrl, true, null, false, false, item);
 			
 			//request loading of webpage
 			downloadRequester(expandableItemUrl, parent);
@@ -143,11 +143,11 @@ function scrollBackAndCollpaseHandler(event)
 		for (var i = 0; i < containers.length; i++)
 		{
 			documentContainers = 
-					documentContainers.concat(MetadataRenderer.getDocumentContainersByContainer(containers[i]));
+					documentContainers.concat(TwitterRenderer.getDocumentContainersByContainer(containers[i]));
 		}
 		
 		if (documentContainers.length > 0)
-			MetadataRenderer.animateScrollBackAndCollapse(y, 
+			TwitterRenderer.animateScrollBackAndCollapse(y, 
 					{content_expansions: documentContainers, metadata_expansion_buttons: []});
 	}
 }
@@ -352,13 +352,13 @@ function run_script(userid, cond)
 	
 	if(experiment_condition == mice_condition)
 	{
-		MetadataRenderer.initialize();
+//		TwitterRenderer.initialize();
 
-		if (MetadataRenderer.setMetadataProcessor)
-			MetadataRenderer.setMetadataProcessor(processMetadata);
+		if (TwitterRenderer.setMetadataProcessor)
+			TwitterRenderer.setMetadataProcessor(processMetadata);
 
-		if (MetadataRenderer.setDocumentDownloader)
-			MetadataRenderer.setDocumentDownloader(downloadRequester);
+		if (TwitterRenderer.setDocumentDownloader)
+			TwitterRenderer.setDocumentDownloader(downloadRequester);
 
 		if (isExtension)
 		{

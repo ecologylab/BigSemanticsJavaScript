@@ -1,3 +1,7 @@
+/**
+ * RenderingTask adopted for some TweetBubble-specific needs
+ */
+
 //temporary fix for overriding RenderingTask
 
 /**
@@ -7,7 +11,7 @@
  * @param isRoot, true if this is the root document for a metadataRendering
  * @param expandedItem, a non-metadata item for which the display was constructed
  */
-function RenderingTask(url, container, isRoot, clipping, renderer, expandedItem, visual, bgColorObj)
+function TweetBubbleRenderingTask(url, container, isRoot, clipping, handler, expandedItem, visual, bgColorObj, extractor)
 {
 	if(url != null)
 		this.url = url.toLowerCase();
@@ -19,18 +23,25 @@ function RenderingTask(url, container, isRoot, clipping, renderer, expandedItem,
 	this.mmd = null;
 	
 	this.isRoot = isRoot;
-	
-	this.renderer = renderer;
+	this.handler = RenderingTask.prototype.metadataToModel
+	this.renderer = handler;
 	this.expandedItem = expandedItem;
 	this.visual = visual;
 	this.bgColorObj = bgColorObj;
+	if(extractor == null){
+		this.extractor = 'notTheService'
+	}else{
+		 this.extractor = extractor;
+
+	}
+
 }
 
 /**
  * Does the given url match the RenderingTask's url?
  * @param url, url to check against the RenderingTask
  */
-RenderingTask.prototype.matches = function(url)
+TweetBubbleRenderingTask.prototype.matches = function(url)
 {
     url = url.toLowerCase();
     return this.url === url;

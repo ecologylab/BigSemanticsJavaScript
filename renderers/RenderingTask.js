@@ -11,7 +11,7 @@
 
  */
 
-function RenderingTask(url, isRoot, clipping, handler, container, renderer)
+function RenderingTask(url, isRoot, clipping, handler, container, extractor, renderer)
 {
   if (url != null)
   {
@@ -28,6 +28,8 @@ function RenderingTask(url, isRoot, clipping, handler, container, renderer)
    
   this.handler = this.metadataToModel;
   this.renderer = renderer;
+  this.extractor = extractor;
+
 }
 
 RenderingTask.prototype.metadataToModel = function(task){

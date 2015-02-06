@@ -1,35 +1,38 @@
 /**
  * custom rendering for Twitter Metadata expansion
  */
-//var CustomRenderer = {};
+var TwitterRenderer = {};
 
 var metadataProcessor = null;
 var requestDocumentDownload = null;
 
 //var colors = ['#FFFFCC', '#BBE2FA', '#FAE3C8', '#D8CAE8', '#FFD0C9', '#D4DEFF', '#D5EEF2']; // use hex values
-var colors = ['rgb(255, 255, 204)', 'rgb(187, 226, 250)', 'rgb(250, 227, 200)', 'rgb(216, 202, 232)',
+TwitterRenderer.colors = ['rgb(255, 255, 204)', 'rgb(187, 226, 250)', 'rgb(250, 227, 200)', 'rgb(216, 202, 232)',
               'rgb(255, 208, 201)', 'rgb(212, 222, 255)', 'rgb(213, 238, 242)']; // use rgb for direct comparison
-var lastColorIndex = Math.floor(Math.random()*colors.length);
+TwitterRenderer.lastColorIndex = Math.floor(Math.random()*TwitterRenderer.colors.length);
 
-var isExtension = (typeof chrome !== "undefined" && typeof chrome.extension !== "undefined");
-var imgDir = (application_name == "mdc")? "../TweetBubble/Plugin/chrome/content_script/img/"
+//var isExtension = (typeof chrome !== "undefined" && typeof chrome.extension !== "undefined");
+TwitterRenderer.imgDir = (application_name == "mdc")? "../TweetBubble/Plugin/chrome/content_script/img/"
 										: "/static/mache/code/BigSemanticsJS/TweetBubble/Plugin/chrome/content_script/img/";
 	
-var replyIconPath1 = isExtension? chrome.extension.getURL("content_script/img/reply_221.png") :	imgDir + "reply_221.png";
-var retweetIconPath1 = isExtension? chrome.extension.getURL("content_script/img/retweet_221.png") :	imgDir + "retweet_221.png";
-var favoriteIconPath1 = isExtension? chrome.extension.getURL("content_script/img/favorite_221.png") : imgDir + "favorite_221.png";
-var replyIconPath2 = isExtension? chrome.extension.getURL("content_script/img/reply_153.png") :	imgDir + "reply_153.png";
-var retweetIconPath2 = isExtension? chrome.extension.getURL("content_script/img/retweet_153.png") :	imgDir + "retweet_153.png";
-var favoriteIconPath2 = isExtension? chrome.extension.getURL("content_script/img/favorite_153.png") : imgDir + "favorite_153.png";
-
-var MetadataRenderer = MICE;
+TwitterRenderer.replyIconPath1 = isExtension? chrome.extension.getURL("content_script/img/reply_221.png") :	TwitterRenderer.imgDir + "reply_221.png";
+TwitterRenderer.retweetIconPath1 = isExtension? chrome.extension.getURL("content_script/img/retweet_221.png") :	TwitterRenderer.imgDir + "retweet_221.png";
+TwitterRenderer.favoriteIconPath1 = isExtension? chrome.extension.getURL("content_script/img/favorite_221.png") : TwitterRenderer.imgDir + "favorite_221.png";
+TwitterRenderer.replyIconPath2 = isExtension? chrome.extension.getURL("content_script/img/reply_153.png") :	TwitterRenderer.imgDir + "reply_153.png";
+TwitterRenderer.retweetIconPath2 = isExtension? chrome.extension.getURL("content_script/img/retweet_153.png") :	TwitterRenderer.imgDir + "retweet_153.png";
+TwitterRenderer.favoriteIconPath2 = isExtension? chrome.extension.getURL("content_script/img/favorite_153.png") : TwitterRenderer.imgDir + "favorite_153.png";
+TwitterRenderer.FIRST_LEVEL_FIELDS = 20;
+TwitterRenderer.FIELDS_TO_EXPAND = 10;
 
 /**
  * Create the metadataRendering, add it to the HTML container, and complete the RenderingTask
  * @param task, RenderingTask to complete 
  */
-MetadataRenderer.render = function(task, metadataFields, styleInfo)
+TwitterRenderer.render = function(task)
 {	
+	var metadataFields = task.fields;
+	var styleInfo = task.style;
+
 	var bRenderedInitial = false;
 	if (task.visual)
 	{
@@ -49,8 +52,8 @@ MetadataRenderer.render = function(task, metadataFields, styleInfo)
 	// Build the HTML table for the metadata
 	MetadataLoader.currentDocumentLocation = task.url;
 	
-	var metadataTable =  MetadataRenderer.buildMetadataTable(task.table, false, task.isRoot, metadataFields, FIRST_LEVEL_FIELDS, styleInfo, task.bgColorObj, true);
-	//MetadataRenderer.buildMetadataDisplay(task.isRoot, task.mmd, task.metadata, task.url, bgColor)
+	var metadataTable =  TwitterRenderer.buildMetadataTable(task.table, false, task.isRoot, metadataFields, TwitterRenderer.FIRST_LEVEL_FIELDS, styleInfo, task.bgColorObj, true);
+	//TwitterRenderer.buildMetadataDisplay(task.isRoot, task.mmd, task.metadata, task.url, bgColor)
 	
 	if(metadataTable)
 	{
@@ -87,20 +90,16 @@ MetadataRenderer.render = function(task, metadataFields, styleInfo)
 		}
 		
 		// Create and add a new DocumentContainer to the list
-		MetadataRenderer.documentMap.push( new DocumentContainer(task.url, task.additionalUrls, task.container, true, task.expandedItem, task.visual));
+		RendererBase.documentMap.push( new TwitterDocumentContainer(task.url, task.additionalUrls, task.container, true, task.expandedItem, task.visual));
 	
 		// Remove any highlighting of documents as the addition of the new table will cause the connection-lines to be out of place
-		MetadataRenderer.unhighlightDocuments(null, styleInfo);
-		
-		// For the WWW study, log the expansion of metadata
-		if(WWWStudy)
-			// Log the addition of the metadata rendering so that metadata expansions can be tracked
-			WWWStudy.logExpansion(task.metadata, task.container);		
+		MICE.unhighlightDocuments(null, styleInfo);
+
 	}
 	
 	// If there isn't a metadata table to display then keep the old visual and remove the loading indicator
 	else
-		MetadataRenderer.clearLoadingRows(task.container, styleInfo);
+		MICE.clearLoadingRows(task.container, styleInfo);
 	
 	// Remove the RenderingTask from the queue
 	MetadataLoader.queue.splice(MetadataLoader.queue.indexOf(task), 1);
@@ -113,7 +112,7 @@ MetadataRenderer.render = function(task, metadataFields, styleInfo)
  * @param isRoot, true if this is the root metadata for the rendering,
  * 		needed because styling is slightly different for the root metadata rendering
  */
-MetadataRenderer.addMetadataDisplay = function(container, url, isRoot, clipping, requestMD, reloadMD, expandedItem)
+TwitterRenderer.addMetadataDisplay = function(container, url, isRoot, clipping, requestMD, reloadMD, expandedItem)
 {
 	var visual = null;
 	var bgColor = null;
@@ -122,18 +121,18 @@ MetadataRenderer.addMetadataDisplay = function(container, url, isRoot, clipping,
 			(expandedItem && ((expandedItem.mmdType && expandedItem.mmdType.indexOf("twitter") != -1)
 							 || (expandedItem.className && expandedItem.className.indexOf("pretty-link twitter-timeline-link") != -1))))
 	{
-		bgColor = MetadataRenderer.getNextColor(container);
+		bgColor = TwitterRenderer.getNextColor(container);
 		bgColorObj = {color: bgColor, bFirstField: true};
 		
 		if (expandedItem)
 			expandedItem.mmdType = "twitter";
 		
 		if (isRoot)
-			visual = MetadataRenderer.renderInitial(container, url, isRoot, expandedItem, bgColorObj);
+			visual = TwitterRenderer.renderInitial(container, url, isRoot, expandedItem, bgColorObj);
 	}
 	
 	// Add the rendering task to the queue
-	var task = new RenderingTask(url, container, isRoot, clipping, MetadataRenderer.render, expandedItem, visual, bgColorObj);
+	var task = new TweetBubbleRenderingTask(url, container, isRoot, clipping, TwitterRenderer.render, expandedItem, visual, bgColorObj);
 	MetadataLoader.queue.push(task);	
 	
 	if(clipping != null && clipping.rawMetadata != null)
@@ -151,7 +150,7 @@ MetadataRenderer.addMetadataDisplay = function(container, url, isRoot, clipping,
 	}
 }
 
-MetadataRenderer.renderInitial = function(container, url, isRoot, expandedItem, bgColorObj)
+TwitterRenderer.renderInitial = function(container, url, isRoot, expandedItem, bgColorObj)
 {
 	var miceStyles = InterfaceStyle.getMiceStyleDictionary("twitter");
 	var styleInfo = {styles: miceStyles, type: "twitter"};
@@ -161,7 +160,7 @@ MetadataRenderer.renderInitial = function(container, url, isRoot, expandedItem, 
 		visual.className = styleInfo.styles.metadataContainer;
 	
 	// render initial placeholder w only title string and loading row
-	var table = MetadataRenderer.buildInitialTable(container, url, expandedItem, isRoot, styleInfo, bgColorObj);
+	var table = TwitterRenderer.buildInitialTable(container, url, expandedItem, isRoot, styleInfo, bgColorObj);
 	if (table)
 	{
 		// Add the HTML5 canvas for the drawing of connection lines
@@ -182,20 +181,20 @@ MetadataRenderer.renderInitial = function(container, url, isRoot, expandedItem, 
 	return visual;
 }
 
-MetadataRenderer.buildInitialTable = function(container, url, expandedItem, isRoot, styleInfo, bgColorObj)
+TwitterRenderer.buildInitialTable = function(container, url, expandedItem, isRoot, styleInfo, bgColorObj)
 {
 	var metadataFields = [];
-	var table = MetadataRenderer.buildMetadataTable(null, false, isRoot, metadataFields, 0, styleInfo, bgColorObj, true);
+	var table = TwitterRenderer.buildMetadataTable(null, false, isRoot, metadataFields, 0, styleInfo, bgColorObj, true);
 	if (table)
 	{
 		var text = (expandedItem && expandedItem.innerText)? expandedItem.innerText : url;
-		table.appendChild(MetadataRenderer.createInitialTitleRow(text, url, styleInfo));
-		table.appendChild(MetadataRenderer.createLoadingRow(styleInfo));
+		table.appendChild(TwitterRenderer.createInitialTitleRow(text, url, styleInfo));
+		table.appendChild(RendererBase.createLoadingRow(styleInfo));
 	}
 	return table;
 }
 
-MetadataRenderer.createInitialTitleRow = function(text, url, styleInfo)
+TwitterRenderer.createInitialTitleRow = function(text, url, styleInfo)
 {
 	var row = document.createElement('tr');
 	
@@ -203,11 +202,11 @@ MetadataRenderer.createInitialTitleRow = function(text, url, styleInfo)
 		titleDiv.className = styleInfo.styles.fieldValueContainer;
 		
 	var aTag = document.createElement('a');
-		aTag.innerText = MetadataLoader.removeLineBreaksAndCrazies(text);
-		aTag.textContent = MetadataLoader.removeLineBreaksAndCrazies(text);
+		aTag.innerText = BSUtils.removeLineBreaksAndCrazies(text);
+		aTag.textContent = BSUtils.removeLineBreaksAndCrazies(text);
 		aTag.href = url;
 		aTag.target = "_blank";
-		aTag.onclick = MetadataRenderer.logNavigate;
+		aTag.onclick = TwitterRenderer.logNavigate;
 		aTag.className = styleInfo.styles.fieldValue;
 				
 	titleDiv.appendChild(aTag);
@@ -220,7 +219,7 @@ MetadataRenderer.createInitialTitleRow = function(text, url, styleInfo)
  * Expand or collapse a collection or composite field table.
  * @param event, mouse click event 
  */
-MetadataRenderer.expandCollapseTable = function(event)
+TwitterRenderer.expandCollapseTable = function(event)
 {
 	var button = event.target;
 	var miceStyles = InterfaceStyle.getMiceStyleDictionary(button.mmdType);
@@ -239,10 +238,10 @@ MetadataRenderer.expandCollapseTable = function(event)
 		if (button.nextSibling && button.nextSibling.className == styleInfo.styles.fieldLabelImage)
 			button.nextSibling.style.display = "";
 		
-		var table = MetadataRenderer.getTableForButton(button, styleInfo);
+		var table = MICE.getTableForButton(button, styleInfo);
 		if (table)
 		{
-			MetadataRenderer.expandTable(table, styleInfo);
+			MICE.expandTable(table, styleInfo);
 			
 			if(MetadataLoader.logger && (event.name == null || event.name != "fakeEvent"))
 			{			
@@ -254,7 +253,7 @@ MetadataRenderer.expandCollapseTable = function(event)
 						eventObj = {
 							expand_metadata: {
 								field_name: button.parentElement.childNodes[1].innerText,
-								parent_doc: MetadataRenderer.getLocationForParentTable(button.parentElement, styleInfo)
+								parent_doc: TwitterRenderer.getLocationForParentTable(button.parentElement, styleInfo)
 							}
 						};
 					}
@@ -262,7 +261,7 @@ MetadataRenderer.expandCollapseTable = function(event)
 					{
 						eventObj = {
 							expand_metadata: {
-								parent_doc: MetadataRenderer.getLocationForParentTable(button.parentElement, styleInfo)
+								parent_doc: TwitterRenderer.getLocationForParentTable(button.parentElement, styleInfo)
 							}
 						};
 					}
@@ -271,7 +270,7 @@ MetadataRenderer.expandCollapseTable = function(event)
 				{
 					eventObj = {
 						expand_metadata: {
-							target_doc: MetadataRenderer.getLocationForChildTable(button.parentElement.parentElement.parentElement, styleInfo)
+							target_doc: TwitterRenderer.getLocationForChildTable(button.parentElement.parentElement.parentElement, styleInfo)
 						}
 					};
 				}
@@ -287,10 +286,10 @@ MetadataRenderer.expandCollapseTable = function(event)
 		if (button.nextSibling && button.nextSibling.className == styleInfo.styles.fieldLabelImage)
 			button.nextSibling.style.display = "none";
 		
-		var table = MetadataRenderer.getTableForButton(button, styleInfo);
+		var table = MICE.getTableForButton(button, styleInfo);
 		if (table)
 		{
-			MetadataRenderer.collapseTable(table, styleInfo);
+			MICE.collapseTable(table, styleInfo);
 			
 			if(MetadataLoader.logger)
 			{
@@ -302,7 +301,7 @@ MetadataRenderer.expandCollapseTable = function(event)
 						eventObj = {
 							collapse_metadata: {
 								field_name: button.parentElement.childNodes[1].innerText,
-								parent_doc: MetadataRenderer.getLocationForParentTable(button.parentElement, styleInfo)
+								parent_doc: TwitterRenderer.getLocationForParentTable(button.parentElement, styleInfo)
 							}
 						};
 					}
@@ -310,7 +309,7 @@ MetadataRenderer.expandCollapseTable = function(event)
 					{
 						eventObj = {
 							collapse_metadata: {
-								parent_doc: MetadataRenderer.getLocationForParentTable(button.parentElement, styleInfo)
+								parent_doc: TwitterRenderer.getLocationForParentTable(button.parentElement, styleInfo)
 							}
 						};
 					}
@@ -320,7 +319,7 @@ MetadataRenderer.expandCollapseTable = function(event)
 					
 					eventObj = {
 						collapse_metadata: {
-							target_doc: MetadataRenderer.getLocationForChildTable(button.parentElement.parentElement.parentElement, styleInfo)
+							target_doc: TwitterRenderer.getLocationForChildTable(button.parentElement.parentElement.parentElement, styleInfo)
 						}
 					};
 				}
@@ -338,7 +337,7 @@ MetadataRenderer.expandCollapseTable = function(event)
  * Expand the table, showing all of its rows
  * @param table to expand 
  */
-MetadataRenderer.expandTable = function(table, styleInfo)
+MICE.expandTable = function(table, styleInfo)
 {
 	var rows = [];
 	var elts = table.childNodes;
@@ -355,10 +354,10 @@ MetadataRenderer.expandTable = function(table, styleInfo)
 	}
 
 	// Remove any loading rows, just to be sure 	
-	MetadataRenderer.clearLoadingRows(table, styleInfo);
+	MICE.clearLoadingRows(table, styleInfo);
 	
 	// Unlight the documents because the connection lines will be in the wrong place
-	MetadataRenderer.unhighlightDocuments(null, styleInfo);
+	MICE.unhighlightDocuments(null, styleInfo);
 	
 	// Check for More and expand it
 	if(table.lastChild.lastChild.lastChild.className == styleInfo.styles.moreButton)
@@ -371,7 +370,7 @@ MetadataRenderer.expandTable = function(table, styleInfo)
  * Queue the target document for downloading and display
  * @param event, mouse click event
  */
-MetadataRenderer.downloadAndDisplayDocument = function(event)
+TwitterRenderer.downloadAndDisplayDocument = function(event)
 {
 	var button = event.target;
 	var miceStyles = InterfaceStyle.getMiceStyleDictionary(button.mmdType);
@@ -388,9 +387,9 @@ MetadataRenderer.downloadAndDisplayDocument = function(event)
 		
 	
 	// Change the onclick function of the button to expand/collapse the table
-	button.onclick = MetadataRenderer.expandCollapseTable;
+	button.onclick = TwitterRenderer.expandCollapseTable;
 		
-	var table = MetadataRenderer.getTableForButton(button, styleInfo);
+	var table = MICE.getTableForButton(button, styleInfo);
 		
 	// Search the table for the document location
 	var location = null;
@@ -420,10 +419,10 @@ MetadataRenderer.downloadAndDisplayDocument = function(event)
 		button.location = location;
 		
 		// Add a loadingRow for visual feedback that the metadata is being downloaded / parsed
-		table.appendChild(MetadataRenderer.createLoadingRow(styleInfo));
+		table.appendChild(RendererBase.createLoadingRow(styleInfo));
 		
 		var requestMD = MetadataLoader.toRequestMetadataFromService(location);
-		MetadataRenderer.addMetadataDisplay(table.parentElement, location, false, null, requestMD, false, button);
+		TwitterRenderer.addMetadataDisplay(table.parentElement, location, false, null, requestMD, false, button);
 		if (!requestMD)
 		{
 			if (!isExtension)
@@ -452,13 +451,13 @@ MetadataRenderer.downloadAndDisplayDocument = function(event)
 	}
 	// If there was no document location then the table must be a non-document composite in which case just expand
 	else
-		MetadataRenderer.expandTable(table, styleInfo);
+		MICE.expandTable(table, styleInfo);
 	
 	if (event.stopPropagation)
 		event.stopPropagation();
 	// Grow the In-Context Metadata Display
-	if(MetadataRenderer.updateInContextStyling)
-		MetadataRenderer.updateInContextStyling(table);
+	if(TwitterRenderer.updateInContextStyling)
+		TwitterRenderer.updateInContextStyling(table);
 	
 	if(MetadataLoader.logger)
 	{			
@@ -471,7 +470,7 @@ MetadataRenderer.downloadAndDisplayDocument = function(event)
 				eventObj = {
 					expand_metadata: {
 						field_name: button.parentElement.childNodes[1].innerText,
-						parent_doc: MetadataRenderer.getLocationForParentTable(button.parentElement, styleInfo)
+						parent_doc: TwitterRenderer.getLocationForParentTable(button.parentElement, styleInfo)
 					}
 				};
 			}
@@ -479,7 +478,7 @@ MetadataRenderer.downloadAndDisplayDocument = function(event)
 			{
 				eventObj = {
 					expand_metadata: {
-						parent_doc: MetadataRenderer.getLocationForParentTable(button.parentElement, styleInfo)
+						parent_doc: TwitterRenderer.getLocationForParentTable(button.parentElement, styleInfo)
 					}
 				};
 			}
@@ -500,7 +499,7 @@ MetadataRenderer.downloadAndDisplayDocument = function(event)
  * Finds matching documents, highlights them, and draws connecting lights
  * @param event, mouse enter event 
  */
-MetadataRenderer.highlightDocuments = function(event)
+TwitterRenderer.highlightDocuments = function(event)
 {
 	var row = event.srcElement;
 	var miceStyles = InterfaceStyle.getMiceStyleDictionary(row.mmdType);
@@ -514,7 +513,7 @@ MetadataRenderer.highlightDocuments = function(event)
 				|| row.className.indexOf(styleInfo.styles.fieldLabelContainer) == 0)
 	{
 		// Highlight row
-		MetadataRenderer.highlightLabel(row);
+		TwitterRenderer.highlightLabel(row);
 		
 		var table = row.parentElement.parentElement.getElementsByClassName(styleInfo.styles.valueCol)[0];
 		
@@ -542,16 +541,16 @@ MetadataRenderer.highlightDocuments = function(event)
 		// Did the table have a document location?
 		if(location != null)
 		{	
-			MetadataRenderer.clearAllCanvases(styleInfo);		
+			TwitterRenderer.clearAllCanvases(styleInfo);		
 						
 			// Find matches in the DocumentMap
 			var matches = [];
-			for(var i = 0; i < MetadataRenderer.documentMap.length; i++)
+			for(var i = 0; i < RendererBase.documentMap.length; i++)
 			{
-				if(MetadataRenderer.documentMap[i].matches(location))
+				if(RendererBase.documentMap[i].matches(location))
 				{
-					if(MetadataRenderer.documentMap[i].container.style.display != "none")
-						matches.push(MetadataRenderer.documentMap[i].container);
+					if(RendererBase.documentMap[i].container.style.display != "none")
+						matches.push(RendererBase.documentMap[i].container);
 				}	
 			}
 			
@@ -559,14 +558,14 @@ MetadataRenderer.highlightDocuments = function(event)
 			// Draw the lines to each match
 			for(var i = 0; i < matches.length; i++)			
 			{
-				MetadataRenderer.drawConnectionLine(matches[i], row, styleInfo);		
+				TwitterRenderer.drawConnectionLine(matches[i], row, styleInfo);		
 			}			
 		}
 	}
 	return false;
 }
 
-MetadataRenderer.morePlease = function(event)
+TwitterRenderer.morePlease = function(event)
 {
 	var moreData = JSON.parse(event.target.lastChild.textContent);
 	
@@ -579,7 +578,7 @@ MetadataRenderer.morePlease = function(event)
 	// Build and add extra rows
 	var miceStyles = InterfaceStyle.getMiceStyleDictionary(moreData.type);
 	var styleInfo = {styles: miceStyles, type: moreData.type};
-	MetadataRenderer.buildMetadataTable(parentTable, moreData.isChild, false, moreData.data, moreData.fields, styleInfo, null,
+	TwitterRenderer.buildMetadataTable(parentTable, moreData.isChild, false, moreData.data, moreData.fields, styleInfo, null,
 																								moreData.isMetadataDisplay);
 	
 	// TODO add logging for the 'More' button
@@ -593,7 +592,7 @@ MetadataRenderer.morePlease = function(event)
  * @param rendered, true if the document has been downloaded and displayed, false otherwise
  * @param expandedItem, a non-metadata item for which the display was constructed
  */
-function DocumentContainer(url, additionalUrls, container, rendered, expandedItem, visual)
+function TwitterDocumentContainer(url, additionalUrls, container, rendered, expandedItem, visual)
 {
 	this.urls = [];
 	this.urls.push(url.toLowerCase());
@@ -616,7 +615,7 @@ function DocumentContainer(url, additionalUrls, container, rendered, expandedIte
  * Does the given url match the DocumentContainer's?
  * @param url, url to check against the DocumentContainer
  */
-DocumentContainer.prototype.matches = function(url)
+TwitterDocumentContainer.prototype.matches = function(url)
 {
 	url = url.toLowerCase();
 	for(var i = 0; i < this.urls.length; i++)
@@ -638,7 +637,7 @@ DocumentContainer.prototype.matches = function(url)
  * @param fieldCount, the number of fields to render before cropping with a "More" button
  * @return HTML table of the metadata display
  */
-MetadataRenderer.buildMetadataTable = function(table, isChildTable, isRoot, metadataFields, fieldCount, styleInfo, bgColorObj, isMetadataDisplay)
+TwitterRenderer.buildMetadataTable = function(table, isChildTable, isRoot, metadataFields, fieldCount, styleInfo, bgColorObj, isMetadataDisplay)
 {
 	if(!table)
 	{
@@ -648,9 +647,9 @@ MetadataRenderer.buildMetadataTable = function(table, isChildTable, isRoot, meta
 		{
 			table.className = styleInfo.styles.rootMetadataTableDiv;
 			if (bgColorObj)	{
-				table.style.background = MetadataRenderer.makeTinge(bgColorObj.color);
+				table.style.background = TwitterRenderer.makeTinge(bgColorObj.color);
 			}
-			table.onclick = MetadataRenderer.stopEventPropagation;
+			table.onclick = TwitterRenderer.stopEventPropagation;
 		}
 		else
 		{
@@ -682,10 +681,10 @@ MetadataRenderer.buildMetadataTable = function(table, isChildTable, isRoot, meta
 			var fieldValueDiv = document.createElement('div');
 				fieldValueDiv.className = styleInfo.styles.moreButton;
 				fieldValueDiv.textContent = "More... ("+moreCount+")";
-				fieldValueDiv.onclick = MetadataRenderer.morePlease;
+				fieldValueDiv.onclick = TwitterRenderer.morePlease;
 						
 			var moreData = {
-				"fields": FIELDS_TO_EXPAND,
+				"fields": TwitterRenderer.FIELDS_TO_EXPAND,
 				"isChild": isChildTable,
 				"data": metadataFields.slice(i, metadataFields.length),
 				"type": styleInfo.type,
@@ -722,7 +721,7 @@ MetadataRenderer.buildMetadataTable = function(table, isChildTable, isRoot, meta
 				continue;
 			
 			var expandButton = null;
-			var fieldObj = MetadataRenderer.buildMetadataField(metadataField, isChildTable, fieldCount, row, styleInfo, bgColorObj);
+			var fieldObj = TwitterRenderer.buildMetadataField(metadataField, isChildTable, fieldCount, row, styleInfo, bgColorObj);
 			expandButton = fieldObj.expand_button;
 			
 			var fieldObjs = [];
@@ -739,7 +738,7 @@ MetadataRenderer.buildMetadataTable = function(table, isChildTable, isRoot, meta
 			
 			for (var j = 0; j < metadataField.concatenates.length; j++)
 			{
-				fieldObj = MetadataRenderer.buildMetadataField(metadataField.concatenates[j], isChildTable, fieldCount, row, styleInfo, bgColorObj);
+				fieldObj = TwitterRenderer.buildMetadataField(metadataField.concatenates[j], isChildTable, fieldCount, row, styleInfo, bgColorObj);
 				fieldObjs.push(fieldObj);
 			}
 							
@@ -830,7 +829,7 @@ MetadataRenderer.buildMetadataTable = function(table, isChildTable, isRoot, meta
 				fakeEvent.target = expandButton;
 				fakeEvent.name = "fakeEvent";
 				//console.log("fake event ready");
-				MetadataRenderer.expandCollapseTable(fakeEvent);
+				TwitterRenderer.expandCollapseTable(fakeEvent);
 				
 				//TODO: introduce semantics for hiding after expand
 				if (metadataField.composite_type == "tweet")
@@ -853,7 +852,7 @@ MetadataRenderer.buildMetadataTable = function(table, isChildTable, isRoot, meta
  * @param row, the containing element
  * @return HTML representation of the metadata field, expandButton, and fieldCount
  */
-MetadataRenderer.buildMetadataField = function(metadataField, isChildTable, fieldCount, row, styleInfo, bgColorObj)
+TwitterRenderer.buildMetadataField = function(metadataField, isChildTable, fieldCount, row, styleInfo, bgColorObj)
 {
 	var imageLabel = (metadataField.value_as_label == "") ?	false : metadataField.value_as_label.type == "image";
 	
@@ -891,13 +890,13 @@ MetadataRenderer.buildMetadataField = function(metadataField, isChildTable, fiel
 				if (bgColorObj && bgColorObj.bFirstField)
 					fieldLabelDiv.style.background = bgColorObj.color;
 					
-				var label = MetadataRenderer.getFieldLabel(metadataField);
+				var label = RendererBase.getFieldLabel(metadataField);
 				if (label.type == "scalar")
 				{
 					var fieldLabel = document.createElement('p');
 						fieldLabel.className = styleInfo.styles.fieldLabel;
-						fieldLabel.innerText = MetadataLoader.toDisplayCase(label.value);
-						fieldLabel.textContent = MetadataLoader.toDisplayCase(label.value);
+						fieldLabel.innerText = BSUtils.toDisplayCase(label.value);
+						fieldLabel.textContent = BSUtils.toDisplayCase(label.value);
 						
 					fieldLabelDiv.appendChild(fieldLabel);	
 				}
@@ -905,7 +904,7 @@ MetadataRenderer.buildMetadataField = function(metadataField, isChildTable, fiel
 				{
 					var img = document.createElement('img');
 						img.className = styleInfo.styles.fieldLabelImage;
-						img.src = MetadataLoader.getImageSource(label.value);
+						img.src = ViewModeler.getImageSource(label.value);
 						
 					fieldLabelDiv.appendChild(img);	
 				}			
@@ -922,11 +921,11 @@ MetadataRenderer.buildMetadataField = function(metadataField, isChildTable, fiel
 					favicon.src = "http://g.etfv.co/" + metadataField.value;
 					
 				var aTag = document.createElement('a');
-				aTag.innerText = MetadataLoader.removeLineBreaksAndCrazies(metadataField.value);
-				aTag.textContent = MetadataLoader.removeLineBreaksAndCrazies(metadataField.value);
+				aTag.innerText = BSUtils.removeLineBreaksAndCrazies(metadataField.value);
+				aTag.textContent = BSUtils.removeLineBreaksAndCrazies(metadataField.value);
 				
 				aTag.href = metadataField.value;
-				aTag.onclick = MetadataRenderer.logNavigate;
+				aTag.onclick = TwitterRenderer.logNavigate;
 				
 				aTag.className = styleInfo.styles.fieldValue;
 						
@@ -958,11 +957,11 @@ MetadataRenderer.buildMetadataField = function(metadataField, isChildTable, fiel
 					}
 					
 					aTag.target = "_blank";
-					aTag.innerText = MetadataLoader.removeLineBreaksAndCrazies(metadataField.value);
-					aTag.textContent = MetadataLoader.removeLineBreaksAndCrazies(metadataField.value);
+					aTag.innerText = BSUtils.removeLineBreaksAndCrazies(metadataField.value);
+					aTag.textContent = BSUtils.removeLineBreaksAndCrazies(metadataField.value);
 					
 					aTag.href = metadataField.navigatesTo;
-					aTag.onclick = MetadataRenderer.logNavigate;
+					aTag.onclick = TwitterRenderer.logNavigate;
 										
 					if(metadataField.style_name != null && metadataField.style_name != "")
 						aTag.classList.add(metadataField.style_name);
@@ -972,8 +971,7 @@ MetadataRenderer.buildMetadataField = function(metadataField, isChildTable, fiel
 					aTag.style.background = bgColorObj.color;	
 				
 				// For the current WWW study the rendering should have incontext CiteULike bookmarklets for specific types of metadata
-				if(WWWStudy)				
-					WWWStudy.addCiteULikeButton(fieldValueDiv, metadataField.parentMDType, metadataField.navigatesTo)						
+				//WWWStudy.addCiteULikeButton(fieldValueDiv, metadataField.parentMDType, metadataField.navigatesTo)						
 				
 				fieldValueDiv.appendChild(favicon);
 				fieldValueDiv.appendChild(aTag);
@@ -988,19 +986,19 @@ MetadataRenderer.buildMetadataField = function(metadataField, isChildTable, fiel
 					
 				if (metadataField.extract_as_html)
 				{
-					fieldValue.innerHTML = MetadataLoader.removeLineBreaksAndCrazies(metadataField.value);
+					fieldValue.innerHTML = BSUtils.removeLineBreaksAndCrazies(metadataField.value);
 				}
 				else
 				{
-					fieldValue.innerText = MetadataLoader.removeLineBreaksAndCrazies(metadataField.value);
-					fieldValue.textContent = MetadataLoader.removeLineBreaksAndCrazies(metadataField.value);
+					fieldValue.innerText = BSUtils.removeLineBreaksAndCrazies(metadataField.value);
+					fieldValue.textContent = BSUtils.removeLineBreaksAndCrazies(metadataField.value);
 				}
 				
 				if (metadataField.name == "post_date" || metadataField.name == "username")
 					fieldValue.className = styleInfo.styles.fieldValueSub;
 				
 				if (metadataField.name == "id")
-					fieldValue = MetadataRenderer.getTweetSemanticsDiv(metadataField.value, styleInfo);
+					fieldValue = TwitterRenderer.getTweetSemanticsDiv(metadataField.value, styleInfo);
 													
 				if(metadataField.style_name != null)
 					fieldValue.className += " "+metadataField.style_name;
@@ -1023,7 +1021,7 @@ MetadataRenderer.buildMetadataField = function(metadataField, isChildTable, fiel
 	
 	else if (metadataField.composite_type != null && metadataField.composite_type == "image")
 	{
-		var label = MetadataRenderer.getFieldLabel(metadataField);
+		var label = RendererBase.getFieldLabel(metadataField);
 		
 		if(metadataField.name && !metadataField.hide_label && (!isChildTable || label.type == "image"))
 		{
@@ -1037,8 +1035,8 @@ MetadataRenderer.buildMetadataField = function(metadataField, isChildTable, fiel
 			{
 				var fieldLabel = document.createElement('p');
 					fieldLabel.className = styleInfo.styles.fieldLabel;
-					fieldLabel.innerText = MetadataLoader.toDisplayCase(label.value);
-					fieldLabel.textContent = MetadataLoader.toDisplayCase(label.value);
+					fieldLabel.innerText = BSUtils.toDisplayCase(label.value);
+					fieldLabel.textContent = BSUtils.toDisplayCase(label.value);
 				
 				fieldLabelDiv.appendChild(fieldLabel);	
 			}
@@ -1046,7 +1044,7 @@ MetadataRenderer.buildMetadataField = function(metadataField, isChildTable, fiel
 			{
 				var img = document.createElement('img');
 					img.className = styleInfo.styles.fieldLabelImage;
-					img.src = MetadataLoader.getImageSource(label.value);
+					img.src = ViewModeler.getImageSource(label.value);
 
 				fieldLabelDiv.appendChild(img);
 			}		
@@ -1055,7 +1053,7 @@ MetadataRenderer.buildMetadataField = function(metadataField, isChildTable, fiel
 		}
 		
 		var img1 = document.createElement('img');
-			img1.src = MetadataLoader.getImageSource(metadataField.value);
+			img1.src = ViewModeler.getImageSource(metadataField.value);
 			img1.className = styleInfo.styles.fieldValueImage;
 		
 		var fieldValueDiv = document.createElement('div');
@@ -1068,7 +1066,7 @@ MetadataRenderer.buildMetadataField = function(metadataField, isChildTable, fiel
 	else if(metadataField.composite_type != null && metadataField.composite_type != "image")
 	{
 		/** Label Column **/
-		var childUrl = MetadataLoader.guessDocumentLocation(metadataField.value);
+		var childUrl = ViewModeler.guessDocumentLocation(metadataField.value);
 		
 		var fieldLabelDiv = document.createElement('div');
 			fieldLabelDiv.className = styleInfo.styles.fieldLabelContainerUnhighlight;
@@ -1078,7 +1076,7 @@ MetadataRenderer.buildMetadataField = function(metadataField, isChildTable, fiel
 			fieldLabelDiv.style.minWidth = "16px";
 							
 		// Is the document already rendered?								
-		if(childUrl != "" && MetadataRenderer.isRenderedDocument(childUrl) )
+		if(childUrl != "" && RendererBase.isRenderedDocument(childUrl) )
 		{
 			// If so, then don't allow the document to be expaned, to prevent looping						
 			fieldLabelDiv.className = styleInfo.styles.fieldLabelContainerOpenedUnhighlight;				
@@ -1092,12 +1090,12 @@ MetadataRenderer.buildMetadataField = function(metadataField, isChildTable, fiel
 				expandButton = document.createElement('div');
 					expandButton.className = styleInfo.styles.expandButtonX;
 				
-				expandButton.onclick = MetadataRenderer.downloadAndDisplayDocument;
+				expandButton.onclick = TwitterRenderer.downloadAndDisplayDocument;
 	
 				if(childUrl != "")
 				{
-					expandButton.onmouseover = MetadataRenderer.highlightDocuments;
-					expandButton.onmouseout = MetadataRenderer.unhighlightDocuments;
+					expandButton.onmouseover = TwitterRenderer.highlightDocuments;
+					expandButton.onmouseout = MICE.unhighlightDocuments;
 				}
 						
 				var expandSymbol = document.createElement('div');
@@ -1121,7 +1119,7 @@ MetadataRenderer.buildMetadataField = function(metadataField, isChildTable, fiel
 		
 		if(metadataField.name)
 		{			
-			var label = MetadataRenderer.getFieldLabel(metadataField);
+			var label = RendererBase.getFieldLabel(metadataField);
 			
 			//If the table isn't a child table then display the label for the composite
 			if((!isChildTable || label.type == "image") && !metadataField.hide_label)
@@ -1130,8 +1128,8 @@ MetadataRenderer.buildMetadataField = function(metadataField, isChildTable, fiel
 				{
 					var fieldLabel = document.createElement('p');
 						fieldLabel.className = styleInfo.styles.fieldLabel;
-						fieldLabel.innerText = MetadataLoader.toDisplayCase(label.value);
-						fieldLabel.textContent = MetadataLoader.toDisplayCase(label.value);
+						fieldLabel.innerText = BSUtils.toDisplayCase(label.value);
+						fieldLabel.textContent = BSUtils.toDisplayCase(label.value);
 					
 					fieldLabelDiv.appendChild(fieldLabel);
 				}
@@ -1139,7 +1137,7 @@ MetadataRenderer.buildMetadataField = function(metadataField, isChildTable, fiel
 				{
 					var img = document.createElement('img');
 						img.className = styleInfo.styles.fieldLabelImage;
-						img.src = MetadataLoader.getImageSource(label.value);
+						img.src = ViewModeler.getImageSource(label.value);
 
 					fieldLabelDiv.appendChild(img);
 				}
@@ -1157,14 +1155,14 @@ MetadataRenderer.buildMetadataField = function(metadataField, isChildTable, fiel
 			fieldValueDiv.className = styleInfo.styles.fieldCompositeContainer + " twitterMicroblog";
 		
 		// Build the child table for the composite
-		var childTable =  MetadataRenderer.buildMetadataTable(null, false, false, metadataField.value, 1, styleInfo, bgColorObj, false);
+		var childTable =  TwitterRenderer.buildMetadataTable(null, false, false, metadataField.value, 1, styleInfo, bgColorObj, false);
 		
 		// If the childTable has more than 1 row, collapse table
 		if(metadataField.value.length > 1 && !metadataField.show_expanded_always){
-			MetadataRenderer.collapseTable(childTable, styleInfo);			
+			MICE.collapseTable(childTable, styleInfo);			
 		}
 		if(metadataField.show_expanded_always){
-			MetadataRenderer.expandTable(childTable, styleInfo);
+			MICE.expandTable(childTable, styleInfo);
 		}			
 		
 		fieldValueDiv.appendChild(childTable);				
@@ -1180,21 +1178,21 @@ MetadataRenderer.buildMetadataField = function(metadataField, isChildTable, fiel
 		
 		// Add the unrendered document to the documentMap
 		if(childUrl != "")
-			MetadataRenderer.documentMap.push(new DocumentContainer(childUrl, null, row, false, null, null));
+			RendererBase.documentMap.push(new TwitterDocumentContainer(childUrl, null, row, false, null, null));
 		
 		// Add event handling to highlight document connections	
 		if(childUrl != "")
 		{	
-			nameCol.onmouseover = MetadataRenderer.highlightDocuments;
-			nameCol.onmouseout = MetadataRenderer.unhighlightDocuments;
+			nameCol.onmouseover = TwitterRenderer.highlightDocuments;
+			nameCol.onmouseout = MICE.unhighlightDocuments;
 			nameCol.mmdType = styleInfo.type;
 		}
 		
 		if (metadataField.composite_type == "tweet")
 		{
-			fieldValueDiv.onmouseover = MetadataRenderer.highlightTweet;
-			fieldValueDiv.onmouseout = MetadataRenderer.unhighlightTweet;
-			fieldValueDiv.onclick = MetadataRenderer.collapseOrScrollToExpandedItem;
+			fieldValueDiv.onmouseover = TwitterRenderer.highlightTweet;
+			fieldValueDiv.onmouseout = TwitterRenderer.unhighlightTweet;
+			fieldValueDiv.onclick = TwitterRenderer.collapseOrScrollToExpandedItem;
 			fieldValueDiv.mmdType = styleInfo.type;
 		}
 		
@@ -1213,7 +1211,7 @@ MetadataRenderer.buildMetadataField = function(metadataField, isChildTable, fiel
 				var expandButton = document.createElement('div');
 				expandButton.className = styleInfo.styles.expandButton;
 				
-				expandButton.onclick = MetadataRenderer.expandCollapseTable;
+				expandButton.onclick = TwitterRenderer.expandCollapseTable;
 				
 				var expandSymbol = document.createElement('div');
 					expandSymbol.className = styleInfo.styles.expandSymbol;
@@ -1233,13 +1231,13 @@ MetadataRenderer.buildMetadataField = function(metadataField, isChildTable, fiel
 				fieldLabelDiv.appendChild(expandButton);
 			}
 			
-			var label = MetadataRenderer.getFieldLabel(metadataField);
+			var label = RendererBase.getFieldLabel(metadataField);
 			if (label.type == "scalar")
 			{
 				var fieldLabel = document.createElement('p');
 					fieldLabel.className = styleInfo.styles.fieldLabel;
-					fieldLabel.innerText = MetadataLoader.toDisplayCase(label.value) + "(" + metadataField.value.length + ")";
-					fieldLabel.textContent = MetadataLoader.toDisplayCase(label.value) + "(" + metadataField.value.length + ")";
+					fieldLabel.innerText = BSUtils.toDisplayCase(label.value) + "(" + metadataField.value.length + ")";
+					fieldLabel.textContent = BSUtils.toDisplayCase(label.value) + "(" + metadataField.value.length + ")";
 					
 				if (!metadataField.hide_label)
 					fieldLabelDiv.appendChild(fieldLabel);
@@ -1248,7 +1246,7 @@ MetadataRenderer.buildMetadataField = function(metadataField, isChildTable, fiel
 			{
 				var img = document.createElement('img');
 					img.className = styleInfo.styles.fieldLabelImage;
-					img.src = MetadataLoader.getImageSource(label.value);
+					img.src = ViewModeler.getImageSource(label.value);
 
 				if (!metadataField.hide_label)
 					fieldLabelDiv.appendChild(img);
@@ -1260,10 +1258,10 @@ MetadataRenderer.buildMetadataField = function(metadataField, isChildTable, fiel
 		var fieldValueDiv = document.createElement('div');
 			fieldValueDiv.className = styleInfo.styles.fieldChildContainer;
 		
-		var childTable =  MetadataRenderer.buildMetadataTable(null, true, false, metadataField.value, 1, styleInfo, bgColorObj, false);
+		var childTable =  TwitterRenderer.buildMetadataTable(null, true, false, metadataField.value, 1, styleInfo, bgColorObj, false);
 		if(metadataField.value.length >= 1)
 		{
-			MetadataRenderer.collapseTable(childTable, styleInfo);			
+			MICE.collapseTable(childTable, styleInfo);			
 		}					
 			
 		var nestedPad = document.createElement('div');
@@ -1280,7 +1278,7 @@ MetadataRenderer.buildMetadataField = function(metadataField, isChildTable, fiel
 	return {name_col: nameCol, value_col: valueCol, count: fieldCount, expand_button: expandButton};
 }
 
-MetadataRenderer.getLocationForParentTable = function(element, styleInfo)
+TwitterRenderer.getLocationForParentTable = function(element, styleInfo)
 {
 	while(element.className != styleInfo.styles.rootMetadataTableDiv)
 	{
@@ -1299,10 +1297,10 @@ MetadataRenderer.getLocationForParentTable = function(element, styleInfo)
  * Get a suitable color for the expansion
  * @param container, element that contains expansion
  */
-MetadataRenderer.getNextColor= function(container)
+TwitterRenderer.getNextColor= function(container)
 {
 	var index = -1;
-	if (container.colors && (container.colors.length < colors.length))
+	if (container.colors && (container.colors.length < TwitterRenderer.colors.length))
 	{
 		var i = 0;
 		// iterate to find unused color
@@ -1317,23 +1315,23 @@ MetadataRenderer.getNextColor= function(container)
 		}
 		
 		if (i == container.colors.length - 1)
-			index = (container.colors[i] + 1) % colors.length;
+			index = (container.colors[i] + 1) % TwitterRenderer.colors.length;
 		
 		if (index == -1)
-			index = (++lastColorIndex) % colors.length;
+			index = (++TwitterRenderer.lastColorIndex) % TwitterRenderer.colors.length;
 		else
-			lastColorIndex = index;
+			TwitterRenderer.lastColorIndex = index;
 	}
 	else
 	{
 		container.colors = [];
-		index = (++lastColorIndex) % colors.length;		
+		index = (++TwitterRenderer.lastColorIndex) % TwitterRenderer.colors.length;		
 	}
 	
 	container.colors.push(index);
 	container.colors.sort();
 	
-    return colors[index];
+    return TwitterRenderer.colors[index];
 }
 
 /**
@@ -1341,11 +1339,11 @@ MetadataRenderer.getNextColor= function(container)
  * @param container, element that contained the expansion
  * @param color, color used for the expansion
  */
-MetadataRenderer.removeColor = function(container, color)
+TwitterRenderer.removeColor = function(container, color)
 {
 	for (var i = 0; i < container.colors.length; i++)
 	{
-		if (color == colors[container.colors[i]])
+		if (color == TwitterRenderer.colors[container.colors[i]])
 		{
 			container.colors.splice(i, 1);
 			break;
@@ -1356,7 +1354,7 @@ MetadataRenderer.removeColor = function(container, color)
 /**
  * 
  */
-MetadataRenderer.makeTinge = function(color)
+TwitterRenderer.makeTinge = function(color)
 {
 	var rgb = /^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/i.exec(color);
 	var r = parseInt(rgb[1]);
@@ -1368,7 +1366,7 @@ MetadataRenderer.makeTinge = function(color)
 	return 'rgb(' + r + ", " + g + ", " + b + ")";
 }
 
-MetadataRenderer.highlightTweet = function(event)
+TwitterRenderer.highlightTweet = function(event)
 {
 	var fieldValueDiv = event.currentTarget;
 	var miceStyles = InterfaceStyle.getMiceStyleDictionary(fieldValueDiv.mmdType);
@@ -1377,7 +1375,7 @@ MetadataRenderer.highlightTweet = function(event)
 	fieldValueDiv.className = styleInfo.styles.fieldCompositeContainerHighlightTweet;
 }
 
-MetadataRenderer.unhighlightTweet = function(event)
+TwitterRenderer.unhighlightTweet = function(event)
 {
 	var fieldValueDiv = event.currentTarget;
 	var miceStyles = InterfaceStyle.getMiceStyleDictionary(fieldValueDiv.mmdType);
@@ -1386,7 +1384,7 @@ MetadataRenderer.unhighlightTweet = function(event)
 	fieldValueDiv.className = styleInfo.styles.fieldCompositeContainer;
 }
 
-MetadataRenderer.animateScrollBackAndCollapse = function(top, containers)
+TwitterRenderer.animateScrollBackAndCollapse = function(top, containers)
 {
 	var y = top;
 	var contentExpansionContainers = containers.content_expansions;
@@ -1419,14 +1417,14 @@ MetadataRenderer.animateScrollBackAndCollapse = function(top, containers)
 				fakeEvent.target = metadataExpansionButtons[i];
 				fakeEvent.name = "fakeEvent";
 				//console.log("fake event ready");
-				MetadataRenderer.expandCollapseTable(fakeEvent);
+				TwitterRenderer.expandCollapseTable(fakeEvent);
 			}
 		}
     };
     animateScroll();
 }
 
-MetadataRenderer.collapseOrScrollToExpandedItem = function(event)
+TwitterRenderer.collapseOrScrollToExpandedItem = function(event)
 {
 	var elt = event.currentTarget;
 	var miceStyles = InterfaceStyle.getMiceStyleDictionary(elt.mmdType);
@@ -1442,13 +1440,13 @@ MetadataRenderer.collapseOrScrollToExpandedItem = function(event)
 	if (window.pageYOffset > y)
     {
     	//window.scrollTo(window.scrollLeft, (y - 50));
-		var containers = MetadataRenderer.getFirstLevelDocumentContainers(event.currentTarget, styleInfo);
-		MetadataRenderer.animateScrollBackAndCollapse(y, containers);
+		var containers = TwitterRenderer.getFirstLevelDocumentContainers(event.currentTarget, styleInfo);
+		TwitterRenderer.animateScrollBackAndCollapse(y, containers);
     }
     event.stopPropagation();
 }
 
-MetadataRenderer.stopEventPropagation = function(event)
+TwitterRenderer.stopEventPropagation = function(event)
 {
 	event.stopPropagation();
 }
@@ -1458,21 +1456,21 @@ MetadataRenderer.stopEventPropagation = function(event)
  * @param item, expandedItem to check against the DocumentContainer
  * @return DocumentContainer if there's a match, null otherwise
  */
-MetadataRenderer.getDocumentContainerByExpandedItem = function(item)
+TwitterRenderer.getDocumentContainerByExpandedItem = function(item)
 {
-	for(var i = 0; i < MetadataRenderer.documentMap.length; i++)
-		if(MetadataRenderer.documentMap[i].expandedItem == item)
-			return MetadataRenderer.documentMap[i];
+	for(var i = 0; i < RendererBase.documentMap.length; i++)
+		if(RendererBase.documentMap[i].expandedItem == item)
+			return RendererBase.documentMap[i];
 
 	return null;
 }
 
-MetadataRenderer.getDocumentContainersByContainer = function(container)
+TwitterRenderer.getDocumentContainersByContainer = function(container)
 {
 	var containers = [];
-	for(var i = 0; i < MetadataRenderer.documentMap.length; i++)
-		if(MetadataRenderer.documentMap[i].container == container)
-			containers.push(MetadataRenderer.documentMap[i]);
+	for(var i = 0; i < RendererBase.documentMap.length; i++)
+		if(RendererBase.documentMap[i].container == container)
+			containers.push(RendererBase.documentMap[i]);
 
 	return containers;
 }
@@ -1481,9 +1479,9 @@ MetadataRenderer.getDocumentContainersByContainer = function(container)
  * show the metadata display
  * @param expandedItem, item for which display was constructed
  */
-MetadataRenderer.showMetadataDisplay = function(expandedItem)
+TwitterRenderer.showMetadataDisplay = function(expandedItem)
 {
-	var dc = MetadataRenderer.getDocumentContainerByExpandedItem(expandedItem);
+	var dc = TwitterRenderer.getDocumentContainerByExpandedItem(expandedItem);
 	if (dc)
 	{
 		// metadata display
@@ -1506,9 +1504,9 @@ MetadataRenderer.showMetadataDisplay = function(expandedItem)
  * hide the metadata display
  * @param expandedItem, item for which display was constructed
  */
-MetadataRenderer.hideMetadataDisplay = function(expandedItem)
+TwitterRenderer.hideMetadataDisplay = function(expandedItem)
 {
-	var dc = MetadataRenderer.getDocumentContainerByExpandedItem(expandedItem);
+	var dc = TwitterRenderer.getDocumentContainerByExpandedItem(expandedItem);
 	if (dc)
 	{
 		// metadata display
@@ -1530,12 +1528,12 @@ MetadataRenderer.hideMetadataDisplay = function(expandedItem)
  * get the document containers existing inside given element
  * @param elt, element containing the DocumentContainer(s)
  */
-MetadataRenderer.getFirstLevelDocumentContainers = function(elt, styleInfo)
+TwitterRenderer.getFirstLevelDocumentContainers = function(elt, styleInfo)
 {
 	//check for content expansions	
 	//fieldCompositeContainer.nestedPad.metadataTableDiv.metadataRow.valueCol
 	var container = elt.lastChild.lastChild.lastChild.lastChild;
-	var contentExpansions = MetadataRenderer.getDocumentContainersByContainer(container);
+	var contentExpansions = TwitterRenderer.getDocumentContainersByContainer(container);
 	
 	//check for metadata expansions
 	//fieldCompositeContainer.nestedPad.metadataTableDiv.rows
@@ -1562,7 +1560,7 @@ MetadataRenderer.getFirstLevelDocumentContainers = function(elt, styleInfo)
  * Sets the processing function for metadata
  * @param fnMetadataProcessor, metadata processing function
  */
-MetadataRenderer.setMetadataProcessor = function(fnMetadataProcessor)
+TwitterRenderer.setMetadataProcessor = function(fnMetadataProcessor)
 {
 	metadataProcessor = fnMetadataProcessor;
 }
@@ -1571,12 +1569,12 @@ MetadataRenderer.setMetadataProcessor = function(fnMetadataProcessor)
 * Sets the function for requesting document download
 * @param fnRequestDownload
 */
-MetadataRenderer.setDocumentDownloader = function(fnDownloadRequester)
+TwitterRenderer.setDocumentDownloader = function(fnDownloadRequester)
 {
 	requestDocumentDownload = fnDownloadRequester;
 }
 
-MetadataRenderer.openUrlInNewWindow = function()
+TwitterRenderer.openUrlInNewWindow = function()
 {
 	var url = this.getAttribute("url");
 	window.open(url, 'Tweet', "height=500,width=500");
@@ -1592,66 +1590,66 @@ MetadataRenderer.openUrlInNewWindow = function()
 	}
 }
 
-MetadataRenderer.highlightTweetSemanticsIcon = function()
+TwitterRenderer.highlightTweetSemanticsIcon = function()
 {
 	var icon = this.firstChild;
 	
-	if (icon.src == replyIconPath1)
-		icon.src = replyIconPath2;
-	else if (icon.src == retweetIconPath1)
-		icon.src = retweetIconPath2;
-	else if (icon.src == favoriteIconPath1)
-		icon.src = favoriteIconPath2;
+	if (icon.src == TwitterRenderer.replyIconPath1)
+		icon.src = TwitterRenderer.replyIconPath2;
+	else if (icon.src == TwitterRenderer.retweetIconPath1)
+		icon.src = TwitterRenderer.retweetIconPath2;
+	else if (icon.src == TwitterRenderer.favoriteIconPath1)
+		icon.src = TwitterRenderer.favoriteIconPath2;
 }
 
-MetadataRenderer.unhighlightTweetSemanticsIcon = function()
+TwitterRenderer.unhighlightTweetSemanticsIcon = function()
 {
 	var icon = this.firstChild;
 	
-	if (icon.src == replyIconPath2)
-		icon.src = replyIconPath1;
-	else if (icon.src == retweetIconPath2)
-		icon.src = retweetIconPath1;
-	else if (icon.src == favoriteIconPath2)
-		icon.src = favoriteIconPath1;
+	if (icon.src == TwitterRenderer.replyIconPath2)
+		icon.src = TwitterRenderer.replyIconPath1;
+	else if (icon.src == TwitterRenderer.retweetIconPath2)
+		icon.src = TwitterRenderer.retweetIconPath1;
+	else if (icon.src == TwitterRenderer.favoriteIconPath2)
+		icon.src = TwitterRenderer.favoriteIconPath1;
 }
 
-MetadataRenderer.getTweetSemanticsDiv = function(tweetId, styleInfo)
+TwitterRenderer.getTweetSemanticsDiv = function(tweetId, styleInfo)
 {
 	var imgReply = document.createElement('img');
 	imgReply.className = styleInfo.styles.tweetSemantics;
-	imgReply.src = replyIconPath1;
+	imgReply.src = TwitterRenderer.replyIconPath1;
 		
 	var imgRetweet = document.createElement('img');
 	imgRetweet.className = styleInfo.styles.tweetSemantics;
-	imgRetweet.src = retweetIconPath1;
+	imgRetweet.src = TwitterRenderer.retweetIconPath1;
 	
 	var imgFavorite = document.createElement('img');
 	imgFavorite.className = styleInfo.styles.tweetSemantics;
-	imgFavorite.src = favoriteIconPath1;
+	imgFavorite.src = TwitterRenderer.favoriteIconPath1;
 	
 	var a_reply = document.createElement('a');
 	a_reply.className = styleInfo.styles.tweetSemantics;
 	a_reply.setAttribute("url", "https://twitter.com/intent/tweet?in_reply_to=" + tweetId);
-	a_reply.addEventListener('click', MetadataRenderer.openUrlInNewWindow);
-	a_reply.addEventListener('mouseover', MetadataRenderer.highlightTweetSemanticsIcon);
-	a_reply.addEventListener('mouseout', MetadataRenderer.unhighlightTweetSemanticsIcon);
+	a_reply.addEventListener('click', TwitterRenderer.openUrlInNewWindow);
+	a_reply.addEventListener('mouseover', TwitterRenderer.highlightTweetSemanticsIcon);
+	a_reply.addEventListener('mouseout', TwitterRenderer.unhighlightTweetSemanticsIcon);
 	a_reply.appendChild(imgReply);
 		
 	var a_retweet = document.createElement('a');
 	a_retweet.className = styleInfo.styles.tweetSemantics;
 	a_retweet.setAttribute("url", "https://twitter.com/intent/retweet?tweet_id=" + tweetId);
-	a_retweet.addEventListener('click', MetadataRenderer.openUrlInNewWindow);
-	a_retweet.addEventListener('mouseover', MetadataRenderer.highlightTweetSemanticsIcon);
-	a_retweet.addEventListener('mouseout', MetadataRenderer.unhighlightTweetSemanticsIcon);
+	a_retweet.addEventListener('click', TwitterRenderer.openUrlInNewWindow);
+	a_retweet.addEventListener('mouseover', TwitterRenderer.highlightTweetSemanticsIcon);
+	a_retweet.addEventListener('mouseout', TwitterRenderer.unhighlightTweetSemanticsIcon);
 	a_retweet.appendChild(imgRetweet);
 	
 	var a_favorite = document.createElement('a');
 	a_favorite.className = styleInfo.styles.tweetSemantics;
 	a_favorite.setAttribute("url", "https://twitter.com/intent/favorite?tweet_id=" + tweetId);
-	a_favorite.addEventListener('click', MetadataRenderer.openUrlInNewWindow);
-	a_favorite.addEventListener('mouseover', MetadataRenderer.highlightTweetSemanticsIcon);
-	a_favorite.addEventListener('mouseout', MetadataRenderer.unhighlightTweetSemanticsIcon);
+	a_favorite.addEventListener('click', TwitterRenderer.openUrlInNewWindow);
+	a_favorite.addEventListener('mouseover', TwitterRenderer.highlightTweetSemanticsIcon);
+	a_favorite.addEventListener('mouseout', TwitterRenderer.unhighlightTweetSemanticsIcon);
 	a_favorite.appendChild(imgFavorite);
 	
 	var twSemanticsRow = document.createElement('div');

@@ -181,7 +181,19 @@ MetadataLoader.setMetadata = function(rawMetadata, requestMmd)
     		queueTask.mmdType = metadata.meta_metadata_name;
     	}
     	
-    	MetadataLoader.getMMD(queueTask, "MetadataLoader.setMetaMetadata");
+    	if(queueTask.extractor != null){
+    		if(queueTask.extractor == 'nottheService'){
+        		MetadataLoader.getMMD(queueTask, "MetadataLoader.setMetaMetadata");
+
+    		}else{
+        		MetadataLoader.getMMD(queueTask, "MetadataLoader.setMetaMetadata");
+
+    		}
+    	
+    	} else{
+    		MetadataLoader.getMMD(queueTask, "MetadataLoader.setMetaMetadata");
+
+    	}
     }
   }
   
