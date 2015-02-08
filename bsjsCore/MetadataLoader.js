@@ -1,29 +1,97 @@
+/**
+ * This file handles the loading of metadata and meta-metadata for general
+ * Dynamic Exploratory Browsing Interfaces.
+ * A renderer can be passed in to render loaded metadata in customed ways.
+ */
 
-MetadataLoader.repoIsLoading = false;
-MetadataLoader.repo = null;
+// The constant that points to the BigSemantics service.
+var SEMANTIC_SERVICE_URL = "http://ecology-service.cse.tamu.edu/BigSemanticsService/";
 
-// The URL for the document being loaded.
-MetadataLoader.currentDocumentLocation = "";
+// Constant for how deep to recurse through the metadata
+var METADATA_FIELD_MAX_DEPTH = 7;
+// The main namespace.
+var MetadataLoader = {};
 
-// Logger
-MetadataLoader.logger = function(message) { /* null default implementation */ };
 
-MetadataLoader.extensionMetadataDomains = ["twitter.com"];
 
+//The queue holds a list of containers which are waiting for metadata or
+//meta-metadata from the service.
+MetadataLoader.queue = [];
 MetadataLoader.onloadCallback = function(urls, url) { /* null default implementation */ };
 
 
+/**
+ * Requests metadata of the given URL and the corresponding meta-metadata from
+ * the BigSemantics service, then calls the given callback for rendering.
+ *
+ * @param handler:
+ *     The callback that operates on metadata.
+ * @param url:
+ *     The URL to the requested document.
+ * @param isRoot:
+ *     Is 'true' when this metadata is a top level one in the current context.
+ * @param clipping:
+ *     Used to specify special clipping structure for special use.
+ * @param container: if a handler has an associated HTML container, this is where it goes!
+     
+ */
 
+MetadataLoader.load = function(handler, url, isRoot, clipping, container)
+{
+  // Add the rendering task to the queue
+  
 
-	
-MetadataLoader.loadMMDRepo = function()
-{	
-	var callback = "MetadataLoader.initMetaMetadataRepo";
-	var serviceURL = SEMANTIC_SERVICE_URL + "mmdrepository.jsonp?reload=true&callback=" + callback;
-	  
-	MetadataLoader.doJSONPCall(serviceURL);
-	//console.log("requesting semantics service for mmd repository");
+  var task = new Metadatatask(url, isRoot, clipping, renderer, container)
+  MetadataLoader.queue.push(task);  
+  
+  if (clipping != null && clipping.rawMetadata != null)
+  {
+    clipping.rawMetadata.deserialized = true;
+    MetadataLoader.setMetadata(clipping.rawMetadata);
+  }
+  else
+  {  
+    // Fetch the metadata from the service
+    MetadataLoader.getMetadata(url, "MetadataLoader.setMetadata");  
+  }
 };
+
+
+/**
+ * Retrieves the metadata from the service using a JSON-p call.
+ * When the service responds the callback function will be called.
+ *
+ * @param url, url of the target document
+ * @param callback, name of the function to be called from the JSON-p call
+ */
+MetadataLoader.getMetadata = function(url, callback, reload, source)
+{
+	/*
+	 * Should eventually choose where to get mmd from based on source
+	 */
+	
+	
+	var serviceURL; 
+	if(reload == true){
+		serviceURL = SEMANTIC_SERVICE_URL + "metadata.jsonp?reload=true&callback=" + callback
+        + "&url=" + encodeURIComponent(url);
+	}
+	else{
+		serviceURL = SEMANTIC_SERVICE_URL + "metadata.jsonp?callback=" + callback
+        + "&url=" + encodeURIComponent(url);
+	}
+	  MetadataLoader.doJSONPCall(serviceURL);
+
+  console.log("requesting semantics service for metadata: " + serviceURL);
+};
+
+
+
+//Logger
+MetadataLoader.logger = function(message) { /* null default implementation */ };
+
+//The URL for the document being loaded.
+MetadataLoader.currentDocumentLocation = "";
 
 
 /**
@@ -45,7 +113,7 @@ MetadataLoader.setMetadata = function(rawMetadata, requestMmd)
   var metadata = {};
   
   var deserialized = false;
-  
+  /*
   for (i in rawMetadata)
   {
     if (i != "simpl.id" && i != "simpl.ref" && i != "deserialized")
@@ -59,7 +127,10 @@ MetadataLoader.setMetadata = function(rawMetadata, requestMmd)
       deserialized = true;
     }
   }
-  
+  */
+  if(jQuery.isEmptyObject(metadata) && rawMetadata != null){
+	  metadata = rawMetadata;
+  }
   if (!deserialized)
   {
     simplDeserialize(metadata);
@@ -113,7 +184,13 @@ MetadataLoader.setMetadata = function(rawMetadata, requestMmd)
     		queueTask.mmdType = metadata.meta_metadata_name;
     	}
     	
-    	MetadataLoader.getMMD(queueTask, "MetadataLoader.setMetaMetadata");
+    	if(queueTask.extractor != null){
+    		if(queueTask.extractor == 'nottheService'){
+        		MetadataLoader.getMMD(queueTask, "MetadataLoader.setMetaMetadata");
+
+    		}
+    	}
+    	
     }
   }
   
@@ -160,21 +237,9 @@ MetadataLoader.setMetaMetadata = function (mmd)
       		MetadataLoader.setClippingMetadataType(tasks[i].clipping, tasks[i].mmd);
       	}     	
       	
-      	
-        var metadataFields =
-          MetadataLoader.createMetadata(tasks[i].isRoot, tasks[i].mmd,
-                                        tasks[i].metadata, tasks[i].url);
-        // Is there any visable metadata?
-        if (MetadataLoader.hasVisibleMetadata(metadataFields))
-        {	
-          // If so, then build the HTML table	
-          var styleMmdType = (tasks[i].expandedItem && tasks[i].expandedItem.mmdType && 
-				tasks[i].expandedItem.mmdType.indexOf("twitter") != -1)? "twitter" : mmd.name; 
-			var miceStyles = InterfaceStyle.getMiceStyleDictionary(styleMmdType);         //Adds the metadata type as an attribute to the first field in the MD
-         //Adds the metadata type as an attribute to the first field in the MD
-          metadataFields[0].parentMDType = mmd.name;
-          tasks[i].renderer(tasks[i], metadataFields, {styles: miceStyles, type: mmd.name});
-        }
+     
+          tasks[i].handler(tasks[i]);
+        
       }
     }
   }
@@ -210,21 +275,80 @@ MetadataLoader.getUnwrappedMetadata = function(wrappedMetadata)
 };
 
 /**
- *
+ * @returns bool, to request extension for metadata or not
  */
-MetadataLoader.createMetadata = function(isRoot, mmd, metadata, taskUrl)
+MetadataLoader.toRequestMetadataFromService = function(location)
 {
-  var metadataFields =
-    MetadataLoader.getMetadataViewModel(mmd, mmd["kids"], metadata,
-                                        0, null, taskUrl);
-  
-  return metadataFields;
-};
+	return !MetadataLoader.isExtensionMetadataDomain(location);
+}
+
+MetadataLoader.isExtensionMetadataDomain = function(location)
+{
+	for (var i = 0; i < RepoMan.extensionMetadataDomains.length; i++)
+	{
+		if (location.indexOf(RepoMan.extensionMetadataDomains[i]) != -1)
+			return true;
+	}
+	return false;
+}
+
+MetadataLoader.checkForMetadataFromExtension = function()
+{
+	for (var i = 0; i < RepoMan.extensionMetadataDomains.length; i++)
+	{
+		var tasks = MetadataLoader.getTasksFromQueueByDomain(RepoMan.extensionMetadataDomains[i]);
+		for (var j = 0; j < tasks.length; j++)
+		{
+			MetadataLoader.getMetadata(tasks[i].url, "MetadataLoader.setMetadata");
+		}
+	}
+}
 
 /**
- * Get a matching RenderingTask from the queue 
+ * Retrieves the meta-metadata from the service using a JSON-p call.
+ * When the service responds the callback function will be called.
+ *
+ * @param url, the URL of the document the requested meta-metadata is for.
+ * @param callback, name of the function to be called from the JSON-p call
+ */
+
+MetadataLoader.getMMD = function(task, callback)
+{
+	if(RepoMan.repo != null)
+	{
+		RepoMan.getMMDFromRepoByTask(task);
+	}
+	else if(RepoMan.repoIsLoading == false)
+	{
+		RepoMan.repoIsLoading = true;
+		RepoMan.loadMMDRepo();
+	}
+};	
+
+
+/**
+ * Do a JSON-P call by appending the jsonP url as a scrip object.
+ * @param jsonpURL 
+ */
+MetadataLoader.doJSONPCall = function(jsonpURL)
+{
+  var script = document.createElement('script');
+  script.src = jsonpURL;
+  document.head.appendChild(script);
+};
+
+
+MetadataLoader.clearDocumentCollection = function()
+{
+  MetadataLoader.queue = [];
+  MetadataLoader.documentMap = [];
+}
+
+
+/**
+ * Get a matching MetadataTask from the queue 
  * @param url, target url to attempt to match to any tasks in the queue
- * @return a matching RenderingTask, null if no matches are found
+ * @return a matching MetadataTask, null if no matches are found
  */
 MetadataLoader.getTaskFromQueueByUrl = function(url)
 {
@@ -275,7 +399,7 @@ MetadataLoader.getTasksFromQueueByType = function(type)
   var tasks = [];
   for (var i = 0; i < MetadataLoader.queue.length; i++)
   {
-    if (MetadataLoader.queue[i].mmdType == type)
+    if (MetadataLoader.queue[i].mmdType == type || type == undefined)
     {
       tasks.push(MetadataLoader.queue[i]);
     }
@@ -301,42 +425,3 @@ MetadataLoader.getTasksFromQueueByDomain = function(domain)
   }
   return tasks;
 }
-
-/**
- * @returns bool, to request extension for metadata or not
- */
-MetadataLoader.toRequestMetadataFromService = function(location)
-{
-	return !MetadataLoader.isExtensionMetadataDomain(location);
-}
-
-MetadataLoader.isExtensionMetadataDomain = function(location)
-{
-	for (var i = 0; i < MetadataLoader.extensionMetadataDomains.length; i++)
-	{
-		if (location.indexOf(MetadataLoader.extensionMetadataDomains[i]) != -1)
-			return true;
-	}
-	return false;
-}
-
-MetadataLoader.checkForMetadataFromExtension = function()
-{
-	for (var i = 0; i < MetadataLoader.extensionMetadataDomains.length; i++)
-	{
-		var tasks = MetadataLoader.getTasksFromQueueByDomain(MetadataLoader.extensionMetadataDomains[i]);
-		for (var j = 0; j < tasks.length; j++)
-		{
-			MetadataLoader.getMetadata(tasks[i].url, "MetadataLoader.setMetadata");
-		}
-	}
-}
-
-
-/* MetadataField and related functions */
-
-
-
-/**
- *
- */
