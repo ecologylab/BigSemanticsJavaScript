@@ -113,7 +113,7 @@ MetadataLoader.setMetadata = function(rawMetadata, requestMmd)
   var metadata = {};
   
   var deserialized = false;
-  /*
+  
   for (i in rawMetadata)
   {
     if (i != "simpl.id" && i != "simpl.ref" && i != "deserialized")
@@ -127,7 +127,7 @@ MetadataLoader.setMetadata = function(rawMetadata, requestMmd)
       deserialized = true;
     }
   }
-  */
+  
   if(jQuery.isEmptyObject(metadata) && rawMetadata != null){
 	  metadata = rawMetadata;
   }
@@ -183,13 +183,16 @@ MetadataLoader.setMetadata = function(rawMetadata, requestMmd)
     	{
     		queueTask.mmdType = metadata.meta_metadata_name;
     	}
-    	
+    	//When we specify extractors, this is where that logic will go
     	if(queueTask.extractor != null){
     		if(queueTask.extractor == 'nottheService'){
         		MetadataLoader.getMMD(queueTask, "MetadataLoader.setMetaMetadata");
 
     		}
-    	}
+    	}else{
+           MetadataLoader.getMMD(queueTask, "MetadataLoader.setMetaMetadata");
+
+      }
     	
     }
   }
