@@ -243,6 +243,8 @@ function moveNextNode(){
 //maybe make more efficient by only updating changed ones
 function updateAllLines(){
 	for (var nodeKey in primaryNodes){
+        if (!primaryNodes[nodeKey].rendered) continue;
+        
         var doc = document.documentElement;
 		var topOffset = (window.pageYOffset || doc.scrollTop) - (doc.clientTop || 0);
         var leftOffset = (window.pageXOffset || doc.scrollLeft) - (doc.clientLeft || 0);

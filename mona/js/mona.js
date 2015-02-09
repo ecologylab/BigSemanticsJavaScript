@@ -893,14 +893,31 @@ function recursiveRemove(node){
         var child = node.children[k];
         var line = document.getElementById(node.location + child.location + "Line");
         if (line !== null)  LINE_ELEM.removeChild(line);
-        child.visual.style.display = "none";
+        
+        //if a node has more than one type of rendered parent keep it
+        var remove = true;
+        for (var p in child.parents){
+            var parent = child.parents[p];
+            if (parent.rendered && parent.type !== node.type){
+                remove = false;
+            }
+        }
+        
+        if (remove){
+            child.rendered = false;
+            child.visual.style.display = "none";
+        }
     }
 }
 
-//removes children and lines of a node
+//adds children and lines of a node
 function recursiveAdd(node){
     for (var k in node.children){
         var child = node.children[k];
+        //if the child has never been rendered don't show it now
+        if (nodePositions[child.location] === undefined) continue;
+
+        child.rendered = true;
         child.visual.style.display = "block";
         nodePositions[child.location] = child.visual.getBoundingClientRect();
         drawLine(child);
