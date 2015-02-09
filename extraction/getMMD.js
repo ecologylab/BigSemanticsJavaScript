@@ -559,7 +559,7 @@ function getHost(url){
     return urlObj.hostname;
 }
 
-//gets the domain. In
+//gets the domain
 function getDomain(url){
     // source: http://stackoverflow.com/questions/8498592/extract-root-domain-name-from-string
     var matches = url.match(/^https?\:\/\/([^\/?#]+)(?:[\/?#]|$)/i);
