@@ -9,6 +9,8 @@
  * @param handler, a callback function that 'does stuff' with the metadata after its been downloaded/parsed. If NULL defaults to metadataToModel
                   
  * @param container, HTML container which will hold the rendering
+ @param extractor, though not used now, in the future will specify where to get md from
+ @renderer, after the handler is called (typically to create a viewModel), the renderer is called.
 
  */
 
