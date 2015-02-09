@@ -713,7 +713,6 @@ ViewModeler.getImageSource = function(metadataViewModel)
     }
   }
   return null;
-<<<<<<< HEAD:TweetBubble/Plugin/chrome/content_script/js/debi.js
 }
 /** 
  * Make the string prettier by replacing underscores with spaces  
@@ -787,7 +786,3 @@ MetadataLoader.getFaviconURL = function(url)
 	
 	//return "http://g.etfv.co/" + url;
 }
-
-=======
-}
->>>>>>> 9542e535d84f046fa6c9a0d4fda85665570b6c1b:bsjsCore/MetadataViewModel.js
