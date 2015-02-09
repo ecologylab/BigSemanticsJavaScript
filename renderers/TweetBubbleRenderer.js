@@ -241,7 +241,7 @@ TwitterRenderer.expandCollapseTable = function(event)
 		var table = MICE.getTableForButton(button, styleInfo);
 		if (table)
 		{
-			MICE.expandTable(table, styleInfo);
+			TwitterRenderer.expandTable(table, styleInfo);
 			
 			if(MetadataLoader.logger && (event.name == null || event.name != "fakeEvent"))
 			{			
@@ -337,7 +337,7 @@ TwitterRenderer.expandCollapseTable = function(event)
  * Expand the table, showing all of its rows
  * @param table to expand 
  */
-MICE.expandTable = function(table, styleInfo)
+TwitterRenderer.expandTable = function(table, styleInfo)
 {
 	var rows = [];
 	var elts = table.childNodes;
@@ -361,7 +361,7 @@ MICE.expandTable = function(table, styleInfo)
 	
 	// Check for More and expand it
 	if(table.lastChild.lastChild.lastChild.className == styleInfo.styles.moreButton)
-		MICE.morePlease({"target": table.lastChild.lastChild.lastChild});
+		TwitterRenderer.morePlease({"target": table.lastChild.lastChild.lastChild});
 }
 
 
@@ -451,7 +451,7 @@ TwitterRenderer.downloadAndDisplayDocument = function(event)
 	}
 	// If there was no document location then the table must be a non-document composite in which case just expand
 	else
-		MICE.expandTable(table, styleInfo);
+		TwitterRenderer.expandTable(table, styleInfo);
 	
 	if (event.stopPropagation)
 		event.stopPropagation();
@@ -918,7 +918,7 @@ TwitterRenderer.buildMetadataField = function(metadataField, isChildTable, field
 				// Uses http://getfavicon.appspot.com/ to resolve the favicon
 				var favicon = document.createElement('img');
 					favicon.className = styleInfo.styles.faviconICE;
-					favicon.src = "http://g.etfv.co/" + metadataField.value;
+					favicon.src = BSUtils.getFaviconURL(metadataField.value);
 					
 				var aTag = document.createElement('a');
 				aTag.innerText = BSUtils.removeLineBreaksAndCrazies(metadataField.value);
@@ -948,7 +948,7 @@ TwitterRenderer.buildMetadataField = function(metadataField, isChildTable, field
 				// Uses http://getfavicon.appspot.com/ to resolve the favicon
 				var favicon = document.createElement('img');
 					favicon.className = styleInfo.styles.faviconICE;
-					favicon.src = "http://g.etfv.co/" + metadataField.navigatesTo;
+					favicon.src = BSUtils.getFaviconURL(metadataField.value);
 					
 				var aTag = document.createElement('a');
 					aTag.className = styleInfo.styles.fieldValue;
@@ -1162,7 +1162,7 @@ TwitterRenderer.buildMetadataField = function(metadataField, isChildTable, field
 			MICE.collapseTable(childTable, styleInfo);			
 		}
 		if(metadataField.show_expanded_always){
-			MICE.expandTable(childTable, styleInfo);
+			TwitterRenderer.expandTable(childTable, styleInfo);
 		}			
 		
 		fieldValueDiv.appendChild(childTable);				
