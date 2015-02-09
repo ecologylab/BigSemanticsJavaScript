@@ -33,7 +33,7 @@ function TweetBubbleRenderingTask(url, container, isRoot, clipping, handler, exp
 	}else{
 		 this.extractor = extractor;
 
-	}
+	}  
 
 }
 

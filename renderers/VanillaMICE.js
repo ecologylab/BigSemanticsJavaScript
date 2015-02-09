@@ -354,7 +354,7 @@ MICE.buildMetadataField = function(metadataField, isChildTable, fieldCount, row,
 			{
 				var favicon = document.createElement('img');
 					favicon.className = styleInfo.styles.faviconICE;
-					favicon.src = BSUtils.getFaviconURL(metadataField.value);
+					favicon.src = BSUtils.getFaviconURL(metadataField.navigatesTo);
 					
 				var aTag = document.createElement('a');
 				aTag.innerText = BSUtils.removeLineBreaksAndCrazies(metadataField.value);
@@ -381,7 +381,7 @@ MICE.buildMetadataField = function(metadataField, isChildTable, fieldCount, row,
 			{				
 				var favicon = document.createElement('img');
 					favicon.className = styleInfo.styles.faviconICE;
-					favicon.src = BSUtils.getFaviconURL(metadataField.value);
+					favicon.src = BSUtils.getFaviconURL(metadataField.navigatesTo);
 					
 				var aTag = document.createElement('a');
 					aTag.className = styleInfo.styles.fieldValue;
