@@ -22,7 +22,7 @@
             "code/mice/debi.js",
 	    	"code/mice/mice.js",
 	    	"code/mice/metadataRenderer.js",
-	    	"code/mice/htmlDownload.js",
+	    	"code/htmlDownload.js",
 	    	"code/fieldParsers.js",
 	    	"code/mice/simplDeserializer.js",
 	    	"code/extractMetadata.js",

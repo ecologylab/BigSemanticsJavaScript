@@ -92,7 +92,7 @@ function callService(mmd, url)
     if (browserExtraction && parser == "xpath")
     {
         var metadataObject;
-        metadataObject = extractMetadata(mmd);
+        metadataObject = extractMetadata(mmd, document);
     }
     if (!browserExtraction || serviceCall || parser != "xpath") // service extraction
     {
