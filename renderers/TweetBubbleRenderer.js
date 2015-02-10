@@ -21,6 +21,8 @@ TwitterRenderer.favoriteIconPath1 = isExtension ? chrome.extension.getURL("conte
 TwitterRenderer.replyIconPath2 = isExtension ? chrome.extension.getURL("content_script/img/reply_153.png") : TwitterRenderer.imgDir + "reply_153.png";
 TwitterRenderer.retweetIconPath2 = isExtension ? chrome.extension.getURL("content_script/img/retweet_153.png") : TwitterRenderer.imgDir + "retweet_153.png";
 TwitterRenderer.favoriteIconPath2 = isExtension ? chrome.extension.getURL("content_script/img/favorite_153.png") : TwitterRenderer.imgDir + "favorite_153.png";
+TwitterRenderer.retweetIconPath3 = isExtension? chrome.extension.getURL("content_script/img/retweet_on.png") :	imgDir + "retweet_on.png";
+TwitterRenderer.favoriteIconPath3 = isExtension? chrome.extension.getURL("content_script/img/favorite_on.png") : imgDir + "favorite_on.png";
 TwitterRenderer.FIRST_LEVEL_FIELDS = 20;
 TwitterRenderer.FIELDS_TO_EXPAND = 10;
 
@@ -1508,9 +1510,8 @@ TwitterRenderer.postRetweet = function () {
     TwitterRequests.postRetweet(tweetId, TwitterRequests.retweetCallback);
 }
 
-TwitterRenderer.postFavorite = function () { }
-TwitterRenderer.openUrlInNewWindow = function () {
-    var tweetId = this.getAttribute("tweetId");
+TwitterRenderer.postFavorite = function () { 
+	var tweetId = this.getAttribute("tweetId");
     TwitterRequests.postFavorite(tweetId, TwitterRequests.favoriteCallback);
 }
 
@@ -1580,7 +1581,7 @@ TwitterRenderer.createReplyBox = function () {
         twButton.value = "Tweet";
         twButton.style.background = "#0084b4";
         twButton.style.color = "white";
-        twButton.addEventListener('click', MetadataRenderer.postReply);
+        twButton.addEventListener('click', TwitterRenderer.postReply);
         twButton.setAttribute("tweetId", tweetId);
         valueCol2.appendChild(twButton);
         var twButtonRow = document.createElement('div');
@@ -1672,7 +1673,7 @@ TwitterRenderer.setRetweetIconOn = function (id) {
         var elt = document.getElementById(idStr);
         if (elt) {
             var icon = elt.firstChild;
-            icon.src = retweetIconPath3;
+            icon.src = TwitterRenderer.retweetIconPath3;
         }
     }
 }
@@ -1683,7 +1684,7 @@ TwitterRenderer.setFavoriteIconOn = function (id) {
         var elt = document.getElementById(idStr);
         if (elt) {
             var icon = elt.firstChild;
-            icon.src = favoriteIconPath3;
+            icon.src = TwitterRenderer.favoriteIconPath3;
         }
     }
 }
@@ -1704,7 +1705,8 @@ TwitterRenderer.getTweetSemanticsDiv = function (tweetId, styleInfo) {
     var a_reply = document.createElement('a');
     a_reply.className = styleInfo.styles.tweetSemantics;
     a_reply.setAttribute("url", "https://twitter.com/intent/tweet?in_reply_to=" + tweetId);
-    a_reply.addEventListener('click', TwitterRenderer.openUrlInNewWindow);
+    a_reply.setAttribute("tweetId", tweetId);
+    a_reply.addEventListener('click', TwitterRenderer.createReplyBox);
     a_reply.addEventListener('mouseover', TwitterRenderer.highlightTweetSemanticsIcon);
     a_reply.addEventListener('mouseout', TwitterRenderer.unhighlightTweetSemanticsIcon);
     a_reply.appendChild(imgReply);
@@ -1712,7 +1714,9 @@ TwitterRenderer.getTweetSemanticsDiv = function (tweetId, styleInfo) {
     var a_retweet = document.createElement('a');
     a_retweet.className = styleInfo.styles.tweetSemantics;
     a_retweet.setAttribute("url", "https://twitter.com/intent/retweet?tweet_id=" + tweetId);
-    a_retweet.addEventListener('click', TwitterRenderer.openUrlInNewWindow);
+    a_retweet.setAttribute("id", "retweetIcon" + tweetId);
+    a_retweet.setAttribute("tweetId", tweetId);
+    a_retweet.addEventListener('click', TwitterRenderer.postRetweet);
     a_retweet.addEventListener('mouseover', TwitterRenderer.highlightTweetSemanticsIcon);
     a_retweet.addEventListener('mouseout', TwitterRenderer.unhighlightTweetSemanticsIcon);
     a_retweet.appendChild(imgRetweet);
@@ -1720,7 +1724,9 @@ TwitterRenderer.getTweetSemanticsDiv = function (tweetId, styleInfo) {
     var a_favorite = document.createElement('a');
     a_favorite.className = styleInfo.styles.tweetSemantics;
     a_favorite.setAttribute("url", "https://twitter.com/intent/favorite?tweet_id=" + tweetId);
-    a_favorite.addEventListener('click', TwitterRenderer.openUrlInNewWindow);
+    a_favorite.setAttribute("id", "favoriteIcon" + tweetId);
+    a_favorite.setAttribute("tweetId", tweetId);
+    a_favorite.addEventListener('click', TwitterRenderer.postFavorite);
     a_favorite.addEventListener('mouseover', TwitterRenderer.highlightTweetSemanticsIcon);
     a_favorite.addEventListener('mouseout', TwitterRenderer.unhighlightTweetSemanticsIcon);
     a_favorite.appendChild(imgFavorite);

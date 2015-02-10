@@ -23,13 +23,13 @@ function TweetBubbleRenderingTask(url, container, isRoot, clipping, handler, exp
 	this.mmd = null;
 	
 	this.isRoot = isRoot;
-	this.handler = RenderingTask.prototype.metadataToModel
+	this.handler = RenderingTask.prototype.metadataToModel;
 	this.renderer = handler;
 	this.expandedItem = expandedItem;
 	this.visual = visual;
 	this.bgColorObj = bgColorObj;
 	if(extractor == null){
-		this.extractor = 'notTheService'
+		this.extractor = 'notTheService';
 	}else{
 		 this.extractor = extractor;
 
