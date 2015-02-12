@@ -65,6 +65,13 @@ BSUtils.getFaviconURL = function(url)
 	//return "http://g.etfv.co/" + url;
 }
 
-
-
-
+//src: http://stackoverflow.com/questions/359788/how-to-execute-a-javascript-function-when-i-have-its-name-as-a-string
+function executeFunctionByName(functionName, context) {
+  var args = [].slice.call(arguments).splice(2);
+  var namespaces = functionName.split(".");
+  var func = namespaces.pop();
+  for(var i = 0; i < namespaces.length; i++) {
+    context = context[namespaces[i]];
+  }
+  return context[func].apply(this, args);
+}

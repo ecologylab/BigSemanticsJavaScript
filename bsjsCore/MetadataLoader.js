@@ -12,6 +12,7 @@ var METADATA_FIELD_MAX_DEPTH = 7;
 // The main namespace.
 var MetadataLoader = {};
 
+var hasExtension = false;
 
 
 //The queue holds a list of containers which are waiting for metadata or
@@ -70,19 +71,28 @@ MetadataLoader.getMetadata = function(url, callback, reload, source)
 	 * Should eventually choose where to get mmd from based on source
 	 */
 	
+	if (!hasExtension){
+		checkForExtension();
+	}
 	
-	var serviceURL; 
-	if(reload == true){
-		serviceURL = SEMANTIC_SERVICE_URL + "metadata.jsonp?reload=true&callback=" + callback
-        + "&url=" + encodeURIComponent(url);
+	if (hasExtension){
+		window.postMessage({source: "PAGE", type:"GET_MD", url : url, callback: callback, reload: reload}, "*");
+		console.log("requesting extension for metadata");
 	}
 	else{
-		serviceURL = SEMANTIC_SERVICE_URL + "metadata.jsonp?callback=" + callback
-        + "&url=" + encodeURIComponent(url);
-	}
-	  MetadataLoader.doJSONPCall(serviceURL);
+		var serviceURL; 
+		if(reload == true){
+			serviceURL = SEMANTIC_SERVICE_URL + "metadata.jsonp?reload=true&callback=" + callback
+			+ "&url=" + encodeURIComponent(url);
+		}
+		else{
+			serviceURL = SEMANTIC_SERVICE_URL + "metadata.jsonp?callback=" + callback
+			+ "&url=" + encodeURIComponent(url);
+		}
+		MetadataLoader.doJSONPCall(serviceURL);
 
-  console.log("requesting semantics service for metadata: " + serviceURL);
+		console.log("requesting semantics service for metadata: " + serviceURL);
+	}
 };
 
 
@@ -427,4 +437,27 @@ MetadataLoader.getTasksFromQueueByDomain = function(domain)
     }
   }
   return tasks;
+}
+
+//Listeners for plugin-based extraction
+
+function checkForExtension(){
+	window.postMessage({source: "PAGE", type:"EXT_CHECK"}, "*");
+}
+
+window.addEventListener("message", extMessageRecieved, false);
+
+function extMessageRecieved(event){
+	if (event.data.source == "EXT"){
+		if (event.data.type == "EXT_CHECK"){
+			hasExtension = event.data.value;
+			console.log("User has extension");
+		}
+		else if (event.data.type == "RET_MD"){
+			executeFunctionByName(event.data.callback, window, event.data.md);
+		}
+        else {
+			console.log("MICE received: " + event.data.text);
+		}
+	}
 }
