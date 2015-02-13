@@ -12,12 +12,11 @@ var METADATA_FIELD_MAX_DEPTH = 7;
 // The main namespace.
 var MetadataLoader = {};
 
-
-
 //The queue holds a list of containers which are waiting for metadata or
 //meta-metadata from the service.
 MetadataLoader.queue = [];
 MetadataLoader.onloadCallback = function(urls, url) { /* null default implementation */ };
+MetadataLoader.hasExtension = false;
 
 
 /**
@@ -58,8 +57,8 @@ MetadataLoader.load = function(handler, url, isRoot, clipping, container)
 
 
 /**
- * Retrieves the metadata from the service using a JSON-p call.
- * When the service responds the callback function will be called.
+ * Requests metadata from either the service or the extension
+ * When the service/extension responds the callback function will be called.
  *
  * @param url, url of the target document
  * @param callback, name of the function to be called from the JSON-p call
@@ -70,21 +69,41 @@ MetadataLoader.getMetadata = function(url, callback, reload, source)
 	 * Should eventually choose where to get mmd from based on source
 	 */
 	
+	if (!MetadataLoader.hasExtension){
+		ExtensionInterface.dispatchMessage({sender: "PAGE", type:"EXT_CHECK"});
+	}
 	
+	if (MetadataLoader.hasExtension && !document.getElementById("force_service").checked){
+		ExtensionInterface.dispatchMessage({sender: "PAGE", type:"GET_MD", url : url, callback: callback, reload: reload, source: source});
+		console.log("requesting extension for metadata");
+	}
+	else{
+		MetadataLoader.getMetadataFromService(url, callback, reload, source);
+	}
+};
+
+/**
+ * Retrieves the metadata from the service using a JSON-p call
+ * When the service responds the callback function will be called.
+ *
+ * @param url, url of the target document
+ * @param callback, name of the function to be called from the JSON-p call
+ */
+MetadataLoader.getMetadataFromService = function(url, callback, reload, source)
+{
 	var serviceURL; 
 	if(reload == true){
 		serviceURL = SEMANTIC_SERVICE_URL + "metadata.jsonp?reload=true&callback=" + callback
-        + "&url=" + encodeURIComponent(url);
+		+ "&url=" + encodeURIComponent(url);
 	}
 	else{
 		serviceURL = SEMANTIC_SERVICE_URL + "metadata.jsonp?callback=" + callback
-        + "&url=" + encodeURIComponent(url);
+		+ "&url=" + encodeURIComponent(url);
 	}
-	  MetadataLoader.doJSONPCall(serviceURL);
+	MetadataLoader.doJSONPCall(serviceURL);
 
-  console.log("requesting semantics service for metadata: " + serviceURL);
+	console.log("requesting semantics service for metadata: " + serviceURL);
 };
-
 
 
 //Logger
