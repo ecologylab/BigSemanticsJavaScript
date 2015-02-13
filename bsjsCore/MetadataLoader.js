@@ -12,13 +12,11 @@ var METADATA_FIELD_MAX_DEPTH = 7;
 // The main namespace.
 var MetadataLoader = {};
 
-var hasExtension = false;
-
-
 //The queue holds a list of containers which are waiting for metadata or
 //meta-metadata from the service.
 MetadataLoader.queue = [];
 MetadataLoader.onloadCallback = function(urls, url) { /* null default implementation */ };
+MetadataLoader.hasExtension = false;
 
 
 /**
@@ -59,8 +57,8 @@ MetadataLoader.load = function(handler, url, isRoot, clipping, container)
 
 
 /**
- * Retrieves the metadata from the service using a JSON-p call.
- * When the service responds the callback function will be called.
+ * Requests metadata from either the service or the extension
+ * When the service/extension responds the callback function will be called.
  *
  * @param url, url of the target document
  * @param callback, name of the function to be called from the JSON-p call
@@ -71,30 +69,41 @@ MetadataLoader.getMetadata = function(url, callback, reload, source)
 	 * Should eventually choose where to get mmd from based on source
 	 */
 	
-	if (!hasExtension){
-		checkForExtension();
+	if (!MetadataLoader.hasExtension){
+		ExtensionInterface.dispatchMessage({sender: "PAGE", type:"EXT_CHECK"});
 	}
 	
-	if (hasExtension){
-		window.postMessage({source: "PAGE", type:"GET_MD", url : url, callback: callback, reload: reload}, "*");
+	if (MetadataLoader.hasExtension){
+		ExtensionInterface.dispatchMessage({sender: "PAGE", type:"GET_MD", url : url, callback: callback, reload: reload, source: source});
 		console.log("requesting extension for metadata");
 	}
 	else{
-		var serviceURL; 
-		if(reload == true){
-			serviceURL = SEMANTIC_SERVICE_URL + "metadata.jsonp?reload=true&callback=" + callback
-			+ "&url=" + encodeURIComponent(url);
-		}
-		else{
-			serviceURL = SEMANTIC_SERVICE_URL + "metadata.jsonp?callback=" + callback
-			+ "&url=" + encodeURIComponent(url);
-		}
-		MetadataLoader.doJSONPCall(serviceURL);
-
-		console.log("requesting semantics service for metadata: " + serviceURL);
+		MetadataLoader.getMetadataFromService(url, callback, reload, source);
 	}
 };
 
+/**
+ * Retrieves the metadata from the service using a JSON-p call
+ * When the service responds the callback function will be called.
+ *
+ * @param url, url of the target document
+ * @param callback, name of the function to be called from the JSON-p call
+ */
+MetadataLoader.getMetadataFromService = function(url, callback, reload, source)
+{
+	var serviceURL; 
+	if(reload == true){
+		serviceURL = SEMANTIC_SERVICE_URL + "metadata.jsonp?reload=true&callback=" + callback
+		+ "&url=" + encodeURIComponent(url);
+	}
+	else{
+		serviceURL = SEMANTIC_SERVICE_URL + "metadata.jsonp?callback=" + callback
+		+ "&url=" + encodeURIComponent(url);
+	}
+	MetadataLoader.doJSONPCall(serviceURL);
+
+	console.log("requesting semantics service for metadata: " + serviceURL);
+};
 
 
 //Logger
@@ -437,27 +446,4 @@ MetadataLoader.getTasksFromQueueByDomain = function(domain)
     }
   }
   return tasks;
-}
-
-//Listeners for plugin-based extraction
-
-function checkForExtension(){
-	window.postMessage({source: "PAGE", type:"EXT_CHECK"}, "*");
-}
-
-window.addEventListener("message", extMessageRecieved, false);
-
-function extMessageRecieved(event){
-	if (event.data.source == "EXT"){
-		if (event.data.type == "EXT_CHECK"){
-			hasExtension = event.data.value;
-			console.log("User has extension");
-		}
-		else if (event.data.type == "RET_MD"){
-			executeFunctionByName(event.data.callback, window, event.data.md);
-		}
-        else {
-			console.log("MICE received: " + event.data.text);
-		}
-	}
 }

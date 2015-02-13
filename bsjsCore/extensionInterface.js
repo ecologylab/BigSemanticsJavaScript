@@ -4,6 +4,8 @@ var ExtensionInterface = {};
 ExtensionInterface.init = function()
 {
 	document.addEventListener("extractionResponse", ExtensionInterface.onMessage);
+	window.addEventListener("message", ExtensionInterface.onMessage);
+	ExtensionInterface.dispatchMessage({sender: "PAGE", type:"EXT_CHECK"});
 }
 
 /**
@@ -28,6 +30,9 @@ ExtensionInterface.dispatchMessage = function(message)
 			//message.sender.dispatchEvent(extEvent);
 		}
 	}
+	if (message.type == "GET_MD" || message.type == "EXT_CHECK"){
+		window.postMessage(message, "*");
+	}
 }
 
 /**
@@ -42,6 +47,22 @@ ExtensionInterface.onMessage = function(message)
 	{
 		ExtensionInterface.setMetadata(message.detail);
 	}
+	if (message.data.sender == "EXT"){
+		if (message.data.type == "EXT_CHECK"){
+			MetadataLoader.hasExtension = message.data.value;
+			console.log("User has extension");
+		}
+		else if (message.data.type == "RET_MD"){
+			executeFunctionByName(message.data.callback, window, message.data.md);
+		}
+		else if (event.data.type == "RET_MD_SERVICE"){
+			console.log("Tried with extension but was told to do with service");
+			MetadataLoader.getMetadataFromService(message.data.url, message.data.callback, message.data.reload, message.data.source);
+		}
+        else {
+			console.log("MICE received: " + message.data.text);
+		}
+	}
 }
 
 /**
@@ -49,8 +70,6 @@ ExtensionInterface.onMessage = function(message)
  */
 ExtensionInterface.setMetadata = function(metadata)
 {
-	//var rawMetadata = node.getAttribute("extensionMetadata");
-	
 	// object wrapper is already there, directly set
 	MetadataLoader.setMetadata(metadata);
 }
