@@ -22,7 +22,7 @@ function getRequestWaitTime(domain){
 }
 
 
-function loadWebpage(url, sendResponse, additionalUrls)
+function loadWebpage(url, sendResponse, additionalUrls, mmd, callback)
 {
 	//time needed to wait between requests	
 	var domain = getDownloadDomain(url);
@@ -32,7 +32,7 @@ function loadWebpage(url, sendResponse, additionalUrls)
 	//If we have not recently requested, then send the request, add the domain to recently requested, and set a timeout to remove it.
 	if( recentlyRequested.indexOf(domain) == -1 ){
 		
-		sendLoadRequest(url, sendResponse, additionalUrls);
+		sendLoadRequest(url, sendResponse, additionalUrls, callback);
 		recentlyRequested.push(domain);
 		setTimeout(removeRecentlyRequested, requestWaitTime, domain);
 		
@@ -41,7 +41,7 @@ function loadWebpage(url, sendResponse, additionalUrls)
 		
 		downloadQueue.push({url:url, waitTime:requestWaitTime});
 		if( downloadInterval === null ){
-			downloadInterval = setInterval(tryDownloadQueue, RETRY_WAIT_TIME, sendResponse, additionalUrls);
+			downloadInterval = setInterval(tryDownloadQueue, RETRY_WAIT_TIME, sendResponse, additionalUrls, callback);
 		}
 		
 	}
@@ -50,7 +50,7 @@ function loadWebpage(url, sendResponse, additionalUrls)
 
 //We use a polling solution to retrieve documents from the queue. The idea is that because the majority of documents will have equivalent wait times
 //we can increase efficiency and simplicity simply be checking back with the queue every (DEFAULT_INTERVAL) milliseconds.
-function tryDownloadQueue(sendResponse, additionalUrls){
+function tryDownloadQueue(sendResponse, additionalUrls, callback){
 	
 	//loop backwards so we can remove/splice elements cleanly
 	for( var i = downloadQueue.length - 1; i > 0; i-=1 ){
@@ -87,7 +87,7 @@ function removeRecentlyRequested(domain){
 
 //Do the work of sending the load request.
 //*This code is not my own, but rather was retrieved and updated from the existing download code* - Cameron
-function sendLoadRequest(url, sendResponse, additionalUrls)
+function sendLoadRequest(url, sendResponse, additionalUrls, callback)
 {
 	var xhr = new XMLHttpRequest();
 	xhr.responseType = "document";
@@ -100,12 +100,11 @@ function sendLoadRequest(url, sendResponse, additionalUrls)
 		if (xhr.readyState==4 && xhr.status==200)
 	    {
             if (xhr.response !== null){
-                console.log(xhr.response);
                 //var headers = xhr.getAllResponseHeaders();
                 //if (!isUrlRedirect(xhr.response, sendResponse, additionalUrls))			
                 //getMetaMetadata(url, xhr.response, sendResponse, additionalUrls);
                 var mmd = getDocumentMM(url);
-                sendResponse(mmd, xhr.response);
+                sendResponse(mmd, xhr.response, callback);
             }
 	    }
 	};
