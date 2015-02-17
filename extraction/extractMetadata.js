@@ -88,7 +88,7 @@ function countXpaths(mmdKids, page){
 /*
  * loops through the kids of the metadata field
  */
-function dataFromKids(mmdKids,contextNode,recurse,parserContext,page){
+function dataFromKids(mmdKids,contextNode,recurse,parserContext,page,isLowerLvl){
 	var d = { };
 	var e = true; //if object is empty
     var isNested = false;
@@ -102,7 +102,7 @@ function dataFromKids(mmdKids,contextNode,recurse,parserContext,page){
 				
         var tmpField = field[Object.keys(field)[0]];
         //if (field[Object.keys(field)[0]].hasOwnProperty('declaring_mmd') && isNested){
-        if (tmpField.hasOwnProperty('xpaths') && tmpField.xpaths == upperXpath[page.URL][tmpField.name] && isNested){
+        if (tmpField.hasOwnProperty('xpaths') && tmpField.xpaths == upperXpath[page.URL][tmpField.name] && (isNested || isLowerLvl)){
             continue;
         }
         if (!isNested){
@@ -133,12 +133,12 @@ function dataFromKids(mmdKids,contextNode,recurse,parserContext,page){
 				e = false;
 				if (tag !== undefined){
 					d[tag] = obj;
-					if (!isNested) {
+					if (!isNested && !isLowerLvl) {
 						upperLevel[page.URL][tag] = obj;
 					}
 				} else {
 					d[name] = obj;
-					if (!isNested) {
+					if (!isNested && !isLowerLvl) {
 						upperLevel[page.URL][name] = obj;
 					}
 				}
@@ -210,7 +210,7 @@ function getScalarD(field,contextNode,recurse,parserContext,page){
 	var data = null;
 	
 	if (field.hasOwnProperty("concatenate_values") && field.concatenate_values.length > 1) {
-		data = concatValues(field.concatenate_values);
+		data = concatValues(field.concatenate_values, page);
 		if (!recurse) {
 			return data;
 		}
@@ -247,7 +247,7 @@ function getScalarD(field,contextNode,recurse,parserContext,page){
 				data = data.replace(new RegExp(regex, 'g'),replace);
 			}
 		}
-        [page.URL][field.name] = data;
+        scalars[page.URL][field.name] = data;
 		return data;
 	} 
 	return null;
@@ -283,15 +283,15 @@ function getCompositeD(field,contextNode,recurse,parserContext,page){
 		}
 
 		if (newContextNode !== null && recurse && recurseNeeded) {
-			data = dataFromKids(kids,newContextNode,recurse,parserContext,page);
+			data = dataFromKids(kids,newContextNode,recurse,parserContext,page,true);
 		}
 		else if (newContextNode !== null) {
-			data = dataFromKids(kids,newContextNode,false,parserContext,page);
+			data = dataFromKids(kids,newContextNode,false,parserContext,page,true);
 		}
 		
 	} else if (recurse)
 	{
-		data = dataFromKids(kids,contextNode,false,parserContext,page);
+		data = dataFromKids(kids,contextNode,false,parserContext,page,true);
 	}  
 	
 	if(data !== null)
@@ -365,12 +365,7 @@ function getScalarString(field,xpath,contextNode,page){
         else if (string.charAt(0) == "#")
 		{
 			string = page.URL + string;
-		}
-        else if (string.indexOf("@") > -1)
-		{
-			return null;
-		}
-		
+		}		
 	}
 	return string;
 }
@@ -572,7 +567,7 @@ function getCollectionData(field,xpath,contextNode,page)
 	return d;
 }
 
-function concatValues(concatList)
+function concatValues(concatList, page)
 {
 	
 	var concatString = "";
@@ -583,7 +578,7 @@ function concatValues(concatList)
 		if (concat.hasOwnProperty("from_scalar"))
 		{
 			var x = concat.from_scalar;
-			concatString = concatString + [page.URL][x];
+			concatString = concatString + scalars[page.URL][x];
 		}
         else if (concat.hasOwnProperty("constant_value") && concat.constant_value !== "")
 		{
