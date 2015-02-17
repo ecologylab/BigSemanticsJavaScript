@@ -498,7 +498,7 @@ TwitterRenderer.highlightDocuments = function (event) {
     if (row.className.indexOf(styleInfo.styles.fieldLabelContainerOpened) == 0
 				|| row.className.indexOf(styleInfo.styles.fieldLabelContainer) == 0) {
         // Highlight row
-        TwitterRenderer.highlightLabel(row);
+        MICE.highlightLabel(row);
 
         var table = row.parentElement.parentElement.getElementsByClassName(styleInfo.styles.valueCol)[0];
 
@@ -522,7 +522,7 @@ TwitterRenderer.highlightDocuments = function (event) {
         }
         // Did the table have a document location?
         if (location != null) {
-            TwitterRenderer.clearAllCanvases(styleInfo);
+            MICE.clearAllCanvases(styleInfo);
 
             // Find matches in the DocumentMap
             var matches = [];
@@ -536,7 +536,7 @@ TwitterRenderer.highlightDocuments = function (event) {
             //console.log(location);
             // Draw the lines to each match
             for (var i = 0; i < matches.length; i++) {
-                TwitterRenderer.drawConnectionLine(matches[i], row, styleInfo);
+                MICE.drawConnectionLine(matches[i], row, styleInfo);
             }
         }
     }
