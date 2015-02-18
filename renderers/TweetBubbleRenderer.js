@@ -1346,7 +1346,7 @@ TwitterRenderer.animateScrollBackAndCollapse = function (top, containers) {
         if ((window.pageYOffset - (y - 50)) > 0) {
             var scroll = (window.pageYOffset - (y - 50)) > 100 ?
     									100 : (window.pageYOffset - (y - 50));
-            window.scrollTo(window.scrollLeft, (window.pageYOffset - scroll));
+            window.scrollTo(window.scrollX, (window.pageYOffset - scroll));
             setTimeout(animateScroll, 10);
         }
         else {
