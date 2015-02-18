@@ -257,7 +257,7 @@ TwitterRenderer.expandCollapseTable = function(event)
 				{
 					eventObj = {
 						expand_metadata: {
-							target_doc: TwitterRenderer.getLocationForChildTable(button.parentElement.parentElement.parentElement, styleInfo)
+							target_doc: MICE.getLocationForChildTable(button.parentElement.parentElement.parentElement, styleInfo)
 						}
 					};
 				}
@@ -306,7 +306,7 @@ TwitterRenderer.expandCollapseTable = function(event)
 					
 					eventObj = {
 						collapse_metadata: {
-							target_doc: TwitterRenderer.getLocationForChildTable(button.parentElement.parentElement.parentElement, styleInfo)
+							target_doc: MICE.getLocationForChildTable(button.parentElement.parentElement.parentElement, styleInfo)
 						}
 					};
 				}
