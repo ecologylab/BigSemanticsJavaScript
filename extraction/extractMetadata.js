@@ -241,10 +241,17 @@ function getScalarD(field,contextNode,recurse,parserContext,page){
 			for (var i = 0; i < field.field_ops.length; i++)
 			{
 				var regexOps = field.field_ops[i].regex_op;
-				var regex = regexOps.regex;
-				var replace = regexOps.replace;
-				
-				data = data.replace(new RegExp(regex, 'g'),replace);
+				var regex = new RegExp(regexOps.regex, 'g');
+				if (regexOps.hasOwnProperty('replace')){
+					var replace = regexOps.replace;
+					data = data.replace(regex,replace);
+				}
+				else if (regexOps.hasOwnProperty('group')){
+					var matches = regex.exec(data);
+					if (matches !== null && matches[regexOps.group] !== undefined){
+						data = matches[regexOps.group];
+					}
+				}
 			}
 		}
         scalars[page.URL][field.name] = data;
@@ -365,7 +372,10 @@ function getScalarString(field,xpath,contextNode,page){
         else if (string.charAt(0) == "#")
 		{
 			string = page.URL + string;
-		}		
+		}
+		else if (string.indexOf("http") == -1){
+			string = page.URL.substring(0, page.URL.lastIndexOf('/')+1) + string; 
+		}
 	}
 	return string;
 }
@@ -578,7 +588,9 @@ function concatValues(concatList, page)
 		if (concat.hasOwnProperty("from_scalar"))
 		{
 			var x = concat.from_scalar;
-			concatString = concatString + scalars[page.URL][x];
+			if (scalars[page.URL][x] !== undefined){
+				concatString = concatString + scalars[page.URL][x];
+			}
 		}
         else if (concat.hasOwnProperty("constant_value") && concat.constant_value !== "")
 		{
