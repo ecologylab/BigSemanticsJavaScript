@@ -222,7 +222,7 @@ MetadataLoader.setMetadata = function(rawMetadata, requestMmd)
                   + "  but it doesn't match a document from the queue.");
     console.log(MetadataLoader.queue);
   }
-}
+};
 
 /**
  * Deserializes the meta-metadata, attempts to matche it with any awaiting
@@ -256,11 +256,12 @@ MetadataLoader.setMetaMetadata = function (mmd)
       	// make sure any connected clippings have the correct meta_metadata_name
       	if (tasks[i].clipping && tasks[i].clipping.rawMetadata ) 
       	{
+      
       		MetadataLoader.setClippingMetadataType(tasks[i].clipping, tasks[i].mmd);
       	}     	
       	
-     
-          tasks[i].handler(tasks[i]);
+        tasks[i].clipping.rawMMD = mmd;
+        tasks[i].handler(tasks[i]);
         
       }
     }
@@ -302,7 +303,7 @@ MetadataLoader.getUnwrappedMetadata = function(wrappedMetadata)
 MetadataLoader.toRequestMetadataFromService = function(location)
 {
 	return !MetadataLoader.isExtensionMetadataDomain(location);
-}
+};
 
 MetadataLoader.isExtensionMetadataDomain = function(location)
 {
