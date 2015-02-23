@@ -60,9 +60,11 @@ BSUtils.getHost = function(url)
  */
 BSUtils.getFaviconURL = function(url)
 {
-	return BSUtils.getHost(url) + "/favicon.ico";
+	//return BSUtils.getHost(url) + "/favicon.ico";
 	
 	//return "http://g.etfv.co/" + url;
+	
+	return "http://www.google.com/s2/favicons?domain_url=" + url;	
 }
 
 //src: http://stackoverflow.com/questions/359788/how-to-execute-a-javascript-function-when-i-have-its-name-as-a-string
