@@ -12,7 +12,7 @@ TwitterRenderer.colors = ['rgb(255, 255, 204)', 'rgb(187, 226, 250)', 'rgb(250, 
 TwitterRenderer.lastColorIndex = Math.floor(Math.random() * TwitterRenderer.colors.length);
 
 //var isExtension = (typeof chrome !== "undefined" && typeof chrome.extension !== "undefined");
-TwitterRenderer.imgDir = (application_name == "mdc") ? "../TweetBubble/Plugin/chrome/content_script/img/"
+TwitterRenderer.imgDir = (application_name == "mdc") ? "../renderers/images/tweetBubble/"
 										: "/static/mache/code/BigSemanticsJS/TweetBubble/Plugin/chrome/content_script/img/";
 
 TwitterRenderer.replyIconPath1 = isExtension ? chrome.extension.getURL("content_script/img/reply_221.png") : TwitterRenderer.imgDir + "reply_221.png";
@@ -21,8 +21,8 @@ TwitterRenderer.favoriteIconPath1 = isExtension ? chrome.extension.getURL("conte
 TwitterRenderer.replyIconPath2 = isExtension ? chrome.extension.getURL("content_script/img/reply_153.png") : TwitterRenderer.imgDir + "reply_153.png";
 TwitterRenderer.retweetIconPath2 = isExtension ? chrome.extension.getURL("content_script/img/retweet_153.png") : TwitterRenderer.imgDir + "retweet_153.png";
 TwitterRenderer.favoriteIconPath2 = isExtension ? chrome.extension.getURL("content_script/img/favorite_153.png") : TwitterRenderer.imgDir + "favorite_153.png";
-TwitterRenderer.retweetIconPath3 = isExtension? chrome.extension.getURL("content_script/img/retweet_on.png") :	imgDir + "retweet_on.png";
-TwitterRenderer.favoriteIconPath3 = isExtension? chrome.extension.getURL("content_script/img/favorite_on.png") : imgDir + "favorite_on.png";
+TwitterRenderer.retweetIconPath3 = isExtension? chrome.extension.getURL("content_script/img/retweet_on.png") :	TwitterRenderer.imgDir + "retweet_on.png";
+TwitterRenderer.favoriteIconPath3 = isExtension? chrome.extension.getURL("content_script/img/favorite_on.png") : TwitterRenderer.imgDir + "favorite_on.png";
 TwitterRenderer.FIRST_LEVEL_FIELDS = 20;
 TwitterRenderer.FIELDS_TO_EXPAND = 10;
 

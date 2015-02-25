@@ -14,7 +14,7 @@
  * 
  */
 var RendererBase = {};
-
+RendererBase.idealRenderer = true;
 RendererBase.documentMap = [];
 
 /**
