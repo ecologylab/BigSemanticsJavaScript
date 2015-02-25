@@ -164,7 +164,10 @@ function showMetadata()
   var refreshCheckbox = document.getElementById('force_reload').checked;
   
   var request_md = MetadataLoader.toRequestMetadataFromService(url);
- RendererBase.addMetadataDisplay(content, url, false, null, request_md, reload_md, MICE.render);
+  //Clear out any html in the container
+  while(document.getElementById('mdcIce').childNodes.length > 0){
+	  document.getElementById('mdcIce').removeChild(document.getElementById('mdcIce').childNodes[0]);
+  }
   
   if (!request_md)
   {
@@ -185,6 +188,9 @@ function showMetadata()
 		  
 		  
 	  }, 5000);*/
+  }else{
+	  RendererBase.addMetadataDisplay(content, url, false, null, request_md, reload_md, MICE.render);
+
   }
 
  //getJSONData(url);
