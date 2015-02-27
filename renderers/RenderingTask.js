@@ -54,7 +54,9 @@ RenderingTask.prototype.idealRenderer = function(task){
 			else{
 				TwitterRenderer.render(task);
 			}
+			processPage();
 		}else{
+			
 			MICE.render(task);
 		}
 	}else{

@@ -99,6 +99,7 @@ TwitterRenderer.render = function (task) {
 
     // Remove the RenderingTask from the queue
     MetadataLoader.queue.splice(MetadataLoader.queue.indexOf(task), 1);
+    processPage();
 }
 
 /**
@@ -810,7 +811,52 @@ TwitterRenderer.buildMetadataTable = function (table, isChildTable, isRoot, meta
 
     return table;
 }
+TwitterRenderer.makeLinks = function(field){
+	var text = field.innerHTML;
+	var components = text.split(/\s*[\s]\s*/);
+	field.innerHTML = "";
+	for (var i = 0; i < components.length; i++){
+		var component = components[i];
+		var newElem;
+		if (component.indexOf('@') == 0){
+			var value = component.slice(1);
+			var newElem = document.createElement('a');
+			newElem.innerHTML = component;
+			newElem.href = 'https://twitter.com/' + value;
+			newElem.className = 'tb-link'
+			
+		}else if (component.indexOf('#') == 0){
+			var value = component.slice(1);
+			var newElem = document.createElement('a');
+			newElem.innerHTML = component;
+			newElem.href = 'https://twitter.com/hashtag/' + value;
+			newElem.className = 'tb-link'
 
+			
+		}else if (component.indexOf('http://') == 0){
+			var value = component.slice(1);
+			var newElem = document.createElement('a');
+			newElem.innerHTML = component;
+			newElem.href = component;
+			newElem.className = 'tb-link'
+		}else if(component.indexOf('https://') == 0){
+			var value = component.slice(1);
+			var newElem = document.createElement('a');
+			newElem.innerHTML = component;
+			newElem.href = component;
+			newElem.className = 'tb-link'
+		}else if(component.indexOf('pic.twitter') == 0){
+			var value = component.slice(1);
+			var newElem = document.createTextNode('');
+
+		}else{
+			newElem = document.createTextNode(component);
+		}
+		field.appendChild(newElem);
+		field.appendChild(document.createTextNode(' '));
+	}
+	
+}
 /**
  * Build the HTML representation for MetadataField
  * @param metadataField, MetadataField to be rendered
@@ -974,14 +1020,18 @@ TwitterRenderer.buildMetadataField = function(metadataField, isChildTable, field
 					fieldValueDiv.className = styleInfo.styles.fieldValueContainer;
 				if (bgColorObj && bgColorObj.bFirstField)
 					fieldValue.style.background = bgColorObj.color;
-					
+				//Go back and change all #.*, @.*, and http:.* to links
+				if(fieldValue.tagName == 'P'){
+					TwitterRenderer.makeLinks(fieldValue)
+
+				}
 				fieldValueDiv.appendChild(fieldValue);
 				valueCol.appendChild(fieldValueDiv);
 			}
 			
 			if (bgColorObj && bgColorObj.bFirstField)
 				bgColorObj.bFirstField = false;								
-						
+		
 			fieldCount--;
 		}		
 	}
