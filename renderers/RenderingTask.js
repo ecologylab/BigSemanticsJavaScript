@@ -39,7 +39,31 @@ function RenderingTask(url, isRoot, clipping, handler, container, extractor, ren
   this.extractor = extractor;
 
 }
+RenderingTask.prototype.idealRenderer = function(task){
+	if(RendererBase.idealRenderer){
+		if(task.mmd.renderer == 'tweetbubble'){
+			if(isExtension){
+				TwitterRenderer.addMetadataDisplay(parent, expandableItemUrl, true, null, false, false, item);
 
+				chrome.extension.sendRequest({load: expandableItemUrl}, function(response) {
+					console.log(response);
+					MetadataLoader.setMetadata(response.doc, false);
+					MetadataLoader.setMetaMetadata(response.mmd);
+				});
+			}
+			else{
+				TwitterRenderer.render(task);
+			}
+			processPage();
+		}else{
+			
+			MICE.render(task);
+		}
+	}else{
+		MICE.render(task);
+
+	}
+}
 RenderingTask.prototype.metadataToModel = function(task){
 
     var metadataFields =
@@ -57,7 +81,7 @@ RenderingTask.prototype.metadataToModel = function(task){
       metadataFields[0].parentMDType = task.mmd.name;
       task.fields = metadataFields;
       task.style = {styles: miceStyles, type: task.mmd.name};
-      task.renderer(task);
+      RenderingTask.prototype.idealRenderer(task);
       return task;
     }
     else{

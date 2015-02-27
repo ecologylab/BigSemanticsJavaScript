@@ -1119,6 +1119,7 @@ MICE.highlightDocuments = function(event)
 					if(RendererBase.documentMap[i].container.style.display != "none")
 						matches.push(RendererBase.documentMap[i].container);
 				}	
+				
 			}
 			
 			// console.log(location);
@@ -1184,20 +1185,18 @@ MICE.drawConnectionLine = function(target, source, styleInfo)
 		label = target.getElementsByClassName(styleInfo.styles.valueCol)[0];
 
 	// Get the canvas
-	var canvas = null;
-	
+
 	
 		var canvases = document.getElementsByClassName(styleInfo.styles.lineCanvas);
 		
 		// TODO - fix canvas finding, needs to find the least common canvas,
 		// the smallest canvas that contains both target and source
-		/*
+		
 		for(var i = canvases.length - 1; i >= 0; i--)
 		{	
 			canvases[i];	
 		}
-		*/
-		// for the moment just use the biggest canvas
+		
 		canvas = canvases[canvases.length - 1];		
 	
 		
@@ -1211,7 +1210,6 @@ MICE.drawConnectionLine = function(target, source, styleInfo)
 			
 		var containerRect = canvas.parentElement.getClientRects()[0];
 						
-		ctx.moveTo(startRect.left - containerRect.left + METADATA_LINE_X_OFFSET, startRect.top - containerRect.top + METADATA_LINE_Y_OFFSET);
 		ctx.lineTo(1, startRect.top - containerRect.top + METADATA_LINE_Y_OFFSET);
 		ctx.lineTo(1, endRect.top - containerRect.top + METADATA_LINE_Y_OFFSET);
 		ctx.lineTo(endRect.left - containerRect.left + METADATA_LINE_X_OFFSET, endRect.top - containerRect.top + METADATA_LINE_Y_OFFSET);

@@ -85,6 +85,43 @@ function removeRecentlyRequested(domain){
   	recentlyRequested.splice(index, 1);	
 }
 
+function isUrlRedirect(response, sendResponse, additionalUrls)
+{
+	//check <script> tags in DOM <head>
+	//containing "window.opener = null; location.replace(url)"
+	var head_elt = response.getElementsByTagName("head");
+	
+	if (head_elt.length > 0)
+	{
+		var script_elts = head_elt[0].getElementsByTagName("script");
+		for (var i = 0; i < script_elts.length; i++)
+		{
+			var str_index = 0;
+			if (script_elts[i].innerText)
+			{
+				var url = script_elts[i].innerText.match(/location.replace\(\"(.*)\"\)/i);
+				if (url && url[1])
+				{
+					url[1] = url[1].replace(/\\/g, "");
+					if (!additionalUrls)
+					{	
+						additionalUrls = [];
+					}
+					// precautionary conditions to avoid loops
+					if (url[1] != response.URL)
+					{
+						if (additionalUrls.indexOf(response.URL) == -1)
+							additionalUrls.push(response.URL);
+						if (additionalUrls.indexOf(url[1]) == -1)
+							loadWebpage(url[1], sendResponse, additionalUrls);
+						return true;
+					}
+				}
+			}
+		}
+	}
+	return false;
+}
 //Do the work of sending the load request.
 //*This code is not my own, but rather was retrieved and updated from the existing download code* - Cameron
 function sendLoadRequest(url, sendResponse, additionalUrls, callback)
@@ -99,16 +136,24 @@ function sendLoadRequest(url, sendResponse, additionalUrls, callback)
 		
 		if (xhr.readyState==4 && xhr.status==200)
 	    {
-            if (xhr.response !== null){
+		
+			
+			if (xhr.response !== null){
                 //var headers = xhr.getAllResponseHeaders();
                 //if (!isUrlRedirect(xhr.response, sendResponse, additionalUrls))			
                 //getMetaMetadata(url, xhr.response, sendResponse, additionalUrls);
-                var mmd = getDocumentMM(url);
-                sendResponse(mmd, xhr.response, callback);
-            }
+				if (!isUrlRedirect(xhr.response, sendResponse, additionalUrls))		{	
+					var mmd = getDocumentMM(url);
+					sendResponse(mmd, xhr.response, callback);
+				}
+               
+			}
+				
+            
 	    }
 	};
 	
 	xhr.open("GET", url, true);
 	xhr.send();
 }
+

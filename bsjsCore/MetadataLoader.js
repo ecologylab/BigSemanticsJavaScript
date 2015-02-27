@@ -185,7 +185,7 @@ MetadataLoader.setMetadata = function (rawMetadata, requestMmd) {
             }
             //When we specify extractors, this is where that logic will go
             if (queueTask.extractor != null) {
-                if (queueTask.extractor == 'nottheService') {
+                if (queueTask.extractor.toLowerCase() == 'nottheservice') {
                     MetadataLoader.getMMD(queueTask, "MetadataLoader.setMetaMetadata");
 
                 }

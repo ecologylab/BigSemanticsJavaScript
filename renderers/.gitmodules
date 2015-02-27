@@ -1,0 +1,4 @@
+[submodule "Plugin/chrome/content_script/js/BigSemanticsJavaScript"]
+	path = Plugin/chrome/content_script/js/BigSemanticsJavaScript
+	url = https://github.com/ecologylab/BigSemanticsJavaScript
+	branch = bsjsRestructure
