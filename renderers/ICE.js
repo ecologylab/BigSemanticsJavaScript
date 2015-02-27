@@ -3,7 +3,7 @@
 // queue asynchronous population of these divs using loading of webpages via background script
 
 var iconDir = (application_name == "mdc")? "../renderers/images/tweetBubble/"
-										: "/static/mache/code/BigSemanticsJS/TweetBubble/Plugin/chrome/content_script/img/";
+										: chrome.extension.getURL("content_script/img/");
 
 var expandIconPath =  iconDir + "expand_icon.png";	// "https://abs.twimg.com/favicons/favicon.ico";
 var collapseIconPath = iconDir + 	"collapse_icon.png";
