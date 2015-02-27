@@ -6,7 +6,7 @@ var iconDir = (application_name == "mdc")? "../renderers/images/tweetBubble/"
 										: "/static/mache/code/BigSemanticsJS/TweetBubble/Plugin/chrome/content_script/img/";
 
 var expandIconPath =  iconDir + "expand_icon.png";	// "https://abs.twimg.com/favicons/favicon.ico";
-var collapseIconPath = iconDir + 	collapse_icon.png";
+var collapseIconPath = iconDir + 	"collapse_icon.png";
 
 var mice_condition = "mice";
 var experiment_condition = null;
