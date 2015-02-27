@@ -234,12 +234,9 @@ function testURLS(){
  * Load post inheritence repository
  */
 function initRepo(){
-<<<<<<< HEAD
-	var serviceURL = "//localhost:8080/BigSemanticsService/mmdrepository.jsonp";
-=======
+
 	var serviceURL = "//api.ecologylab.net/BigSemanticsService/mmdrepository.jsonp";
->>>>>>> 0d2028c67031048cafdf193d924ef481640303ff
-	
+
 	//make a request to the service for the mmd for the url
 	var request = new XMLHttpRequest();
 	request.open("GET", serviceURL, true);
