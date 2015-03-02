@@ -107,6 +107,9 @@ function dataFromKids(mmdKids,contextNode,recurse,parserContext,page,isLowerLvl)
         if (tmpField.hasOwnProperty('xpaths') && tmpField.xpaths == upperXpath[page.URL][tmpField.name] && (isNested || isLowerLvl)){
             continue;
         }
+		else if (tmpField.hasOwnProperty('xpaths') && upperXpath[page.URL][tmpField.name] && tmpField.xpaths.length < upperXpath[page.URL][tmpField.name].length ){
+			continue;
+		}
         if (!isNested){
             contextNode = page;
         }
