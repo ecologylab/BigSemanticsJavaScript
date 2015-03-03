@@ -411,7 +411,8 @@ function run_script(userid, cond)
 	}
 	
 	currentUrl = document.URL;
-	instance.validateUserInfo(username);
+	if (isExtension)
+		instance.validateUserInfo(username);
 	
 	if (isExtension) 
 	{
