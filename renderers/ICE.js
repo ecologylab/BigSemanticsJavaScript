@@ -369,7 +369,7 @@ function processUrlChange(newUrl)
 		processDefaultConditionClicks(document);
 }
 
-function run_script(userid, cond)
+function run_script(userid, cond, username)
 {
 	instance = getICEInstance();
 	
