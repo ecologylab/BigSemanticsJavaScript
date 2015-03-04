@@ -41,29 +41,21 @@ function RenderingTask(url, isRoot, clipping, handler, container, extractor, ren
 }
 RenderingTask.prototype.idealRenderer = function(task){
 	if(RendererBase.idealRenderer){
-		if(task.mmd.renderer == 'tweetbubble'){
-			if(isExtension){
-				TwitterRenderer.addMetadataDisplay(parent, expandableItemUrl, true, null, false, false, item);
-
-				chrome.extension.sendRequest({load: expandableItemUrl}, function(response) {
-					console.log(response);
-					MetadataLoader.setMetadata(response.doc, false);
-					MetadataLoader.setMetaMetadata(response.mmd);
-				});
-			}
-			else{
+		var renderer = task.mmd.meta_metadata? task.mmd.meta_metadata.renderer : task.mmd.renderer;
+		if(renderer == 'tweetbubble'){
 				TwitterRenderer.render(task);
-			}
-			processPage();
-		}else{
-			
+				processPage();
+		} else {
+
 			MICE.render(task);
 		}
-	}else{
+	}
+	else {
+		
 		MICE.render(task);
-
 	}
 }
+
 RenderingTask.prototype.metadataToModel = function(task){
 
     var metadataFields =
