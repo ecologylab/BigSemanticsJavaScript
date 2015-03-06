@@ -42,7 +42,8 @@ function RenderingTask(url, isRoot, clipping, handler, container, extractor, ren
 RenderingTask.prototype.idealRenderer = function(task){
 	if(RendererBase.idealRenderer){
 		var renderer = task.mmd.meta_metadata? task.mmd.meta_metadata.renderer : task.mmd.renderer;
-		if(renderer == 'tweetbubble'){
+		// OR condition: temp fix for tweetbubble external urls
+		if(renderer == 'tweetbubble' || task.constructor.name == "TweetBubbleRenderingTask"){
 				TwitterRenderer.render(task);
 				processPage();
 		} else {
