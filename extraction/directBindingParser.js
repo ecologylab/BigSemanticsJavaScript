@@ -5,7 +5,7 @@
  *  @param jsonData, json data string
  *  @return metadata, metadata object
  */
-function bindFieldValues(mmd, jsonData) {
+function extractMetadataFromJSON(mmd, jsonData) {
 	var metadata = null;
 
 	var dataObj = jQuery.parseJSON(jsonData);
