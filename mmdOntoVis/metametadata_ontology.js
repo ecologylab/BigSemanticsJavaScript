@@ -6,7 +6,7 @@
 
 // Global object.
 var OntoVis = {};
-OntoVis.dataFile = "mmd_repo.json";
+OntoVis.dataFile = "/BigSemanticsService/onto/tree.json";
 OntoVis.width = 3000;
 OntoVis.height = 3200;
 OntoVis.marginX = 80;
