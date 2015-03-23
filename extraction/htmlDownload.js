@@ -1,4 +1,4 @@
-/*global setTimeout, setInterval, clearInterval, XMLHttpRequest, console, getDocumentMM
+/*global setTimeout, setInterval, clearInterval, XMLHttpRequest, console, getDocumentMM, getDocumentMMbyMime
 */
 var RETRY_WAIT_TIME = 125;
 var DEFAULT_INTERVAL = 125;
@@ -127,21 +127,23 @@ function isUrlRedirect(response, sendResponse, additionalUrls)
 function sendLoadRequest(url, sendResponse, additionalUrls, mmd, callback)
 {
 	var xhr = new XMLHttpRequest();
-	if (mmd.parser == "image"){
+	if (mmd.parser !== "xpath"){
 		xhr.responseType = "blob";
 		xhr.onreadystatechange = function() {
-			if (xhr.readyState==4 && xhr.status==200){
-				//if repository by mime is the same as mmd continue. else do something else
+			if (xhr.readyState==4 && xhr.status==200){				
 				if (xhr.response !== null){
-					//var headers = xhr.getAllResponseHeaders();
-					//if (!isUrlRedirect(xhr.response, sendResponse, additionalUrls))			
-					//getMetaMetadata(url, xhr.response, sendResponse, additionalUrls);
-					if (!isUrlRedirect(xhr.response, sendResponse, additionalUrls))		{	
-						var mmd = getDocumentMM(url);
-						sendResponse(mmd, xhr.response, callback);
+					
+					//confirm that our request returned something binary
+					var mimeMMD = getDocumentMMbyMime(xhr.response.type);
+					if (mimeMMD && mimeMMD.parser !== "xpath"){
+						sendResponse(mmd, xhr.responseURL, callback);					
 					}
-
+					else {
+						//if we requested a binary but got something else
+						console.log("requested a binary but response was something else or something we don't have a wrapper");	
+					}
 				}
+				
 			}
 		};
 	}
@@ -150,14 +152,16 @@ function sendLoadRequest(url, sendResponse, additionalUrls, mmd, callback)
 		xhr.onreadystatechange = function() {
 			if (xhr.readyState==4 && xhr.status==200){			
 				if (xhr.response !== null){
-					//var headers = xhr.getAllResponseHeaders();
-					//if (!isUrlRedirect(xhr.response, sendResponse, additionalUrls))			
-					//getMetaMetadata(url, xhr.response, sendResponse, additionalUrls);
+					
 					if (!isUrlRedirect(xhr.response, sendResponse, additionalUrls))		{	
 						var mmd = getDocumentMM(url);
 						sendResponse(mmd, xhr.response, callback);
 					}
-
+					
+				}
+				else {
+					//if we requested a document but the response is null it might have been a binary file
+					console.log("requested html page but response was something else");	
 				}
 			}
 		};

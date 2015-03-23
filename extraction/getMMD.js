@@ -371,6 +371,15 @@ function getDocumentMM(url) {
     return result;
   }
 
+function getDocumentMMbyMime(mimeStr){
+	if (repositoryByMime.hasOwnProperty(mimeStr)){
+		return repositoryByMime[mimeStr];
+	}
+	else {
+		return null;
+	}
+}
+
 /**
 * Initializes HashMaps for MetaMetadata selectors by URL or pattern. Uses the ClippableDocument
 * and Document base classes to ensure that maps are only filled with appropriate matching
