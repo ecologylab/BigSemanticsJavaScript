@@ -5,10 +5,10 @@
  *  @param jsonData, json data string
  *  @return metadata, metadata object
  */
-function extractMetadataFromJSON(jsonData, mmd) {
+function extractMetadataFromJSON(dataObj, mmd) {
 	var metadata = null;
 
-	var dataObj = jQuery.parseJSON(jsonData);
+	//var dataObj = jQuery.parseJSON(jsonData);
 	if (mmd && dataObj) {
 		metadata = recursivelyBindFieldValues(mmd, dataObj, metadata);
 	}
@@ -47,27 +47,32 @@ function bindScalarFieldValue(mmdScalarField, contextObj, metadata) {
 	if (contextObj == null)
 		return;
 
-	var stringValue = contextObj[mmdScalarField.tag];
+	console.log(contextObj[mmdScalarField.tag]);
+	var scalarValue = jsonPath(contextObj, mmdScalarField.tag);
 
-	if (stringValue) {
-		stringValue = stringValue.replace(new RegExp('\n', 'g'), "");
-		stringValue = stringValue.trim();
-		// for compatibility 
-		mmdScalarField.regex_op = getRegexOp(mmdScalarField);
-		if (mmdScalarField.regex_op != null) {
-			var regex = mmdScalarField.regex_op.regex;
-			var replace = mmdScalarField.regex_op.replace;
-			if (replace != undefined && replace != null) // We must replace all newlines if the replacement is not a empty character
-			{
-				stringValue = stringValue.replace(new RegExp(regex, 'g'), replace);
-			} else {
-				var grps = stringValue.match(new RegExp(regex));
-				if (grps != null && grps.length > 0)
-					stringValue = grps[grps.length - 1];
+	if (scalarValue) {
+		scalarValue = scalarValue[0];
+		if (typeof scalarValue == 'string')
+		{
+			scalarValue = scalarValue.replace(new RegExp('\n', 'g'), "");
+			scalarValue = scalarValue.trim();
+			// for compatibility 
+			mmdScalarField.regex_op = getRegexOp(mmdScalarField);
+			if (mmdScalarField.regex_op != null) {
+				var regex = mmdScalarField.regex_op.regex;
+				var replace = mmdScalarField.regex_op.replace;
+				if (replace != undefined && replace != null) // We must replace all newlines if the replacement is not a empty character
+				{
+					scalarValue = scalarValue.replace(new RegExp(regex, 'g'), replace);
+				} else {
+					var grps = scalarValue.match(new RegExp(regex));
+					if (grps != null && grps.length > 0)
+						scalarValue = grps[grps.length - 1];
+				}
 			}
 		}
 
-		metadata[mmdScalarField.name] = mmdScalarField;
+		metadata[mmdScalarField.name] = scalarValue;
 	}
 }
 
@@ -75,8 +80,14 @@ function bindCollectionFieldValue(mmdCollectionField, contextObj, metadata) {
 	if (contextObj == null)
 		return;
 
-	var thisObj = contextObj[mmdCompositeField.tag];
-	metadata[mmdCompositeField.name] = contextObj[mmdCompositeField.tag];
+	console.log(contextObj[mmdCollectionField.tag]);
+	
+	var thisObj = jsonPath(contextObj, mmdCollectionField.tag);
+	// temporary && condition for a single composite treated as collection in mmd
+	if (thisObj && thisObj[0] instanceof Array)
+		thisObj = thisObj[0];
+	
+	//metadata[mmdCollectionField.name] = {};
 	
 	var size = thisObj? thisObj.length : 0;
 	var elements = [];
@@ -95,7 +106,7 @@ function bindCollectionFieldValue(mmdCollectionField, contextObj, metadata) {
 				var element = {};
 				element = recursivelyBindFieldValues(
 						mmdCollectionField.kids[0].composite, thisObj[i], element);
-
+				
 				if (mmdCollectionField.polymorphic_scope != null) {
 					var child_element = {};
 					child_element[mmdCollectionField.child_type] = element;
@@ -127,12 +138,17 @@ function bindCompositeFieldValue(mmdCompositeField, contextObj, metadata) {
 	if (contextObj == null)
 		return;
 
-	var thisObj = contextObj[mmdCompositeField.tag];
-	metadata[mmdCompositeField.name] = contextObj[mmdCompositeField.tag];
-
-	var compositeMetadata = metadata[mmdCompositeField.name];
-
-	recursivelyBindFieldValues(mmdCompositeField, thisObj, compositeMetadata);
+	console.log(contextObj[mmdCompositeField.tag]);
+	
+	var thisObj = jsonPath(contextObj, mmdCompositeField.tag);
+	if (thisObj)
+	{
+		thisObj = thisObj[0];
+		metadata[mmdCompositeField.name] = {};
+	
+		var compositeMetadata = metadata[mmdCompositeField.name];
+		recursivelyBindFieldValues(mmdCompositeField, thisObj, compositeMetadata);
+	}
 }
 
 function getRegexOp(field) {
