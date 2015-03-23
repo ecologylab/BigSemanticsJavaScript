@@ -480,34 +480,37 @@ function initializeSuffixAndMimeBasedMaps(){
     
     for (var name in repositoryByName)
     {
-        var metaMetadata = repositoryByName[name];
-        var suffixes = metaMetadata.suffixes;
-        if (suffixes)
-        {
-            for (var i in suffixes)
-            {
-                var suffix = suffixes[i];
-                if (!repositoryBySuffix.hasOwnProperty(suffix))
-                {
-                    repositoryBySuffix[suffix] = metaMetadata;
-                    metaMetadata.setMmSelectorType(MMSelectorType.SUFFIX_OR_MIME);
-                }
-            }
-        }
+		var metaMetadata = repositoryByName[name];
+		for (var s in metaMetadata.selectors){
+            var selector = metaMetadata.selectors[s];  
+			var suffixes = selector.suffixes;
+			if (suffixes)
+			{
+				for (var i in suffixes)
+				{
+					var suffix = suffixes[i];
+					if (!repositoryBySuffix.hasOwnProperty(suffix))
+					{
+						repositoryBySuffix[suffix] = metaMetadata;
+						metaMetadata.mmSelectorType = MMSelectorType.SUFFIX_OR_MIME;
+					}
+				}
+			}
 
-        var mimeTypes = metaMetadata.mime_types;
-        if (mimeTypes)
-        {
-            for (var j in mimeTypes)
-            {
-                var mimeType = mimeTypes[j];
-                if (!repositoryByMime.hasOwnProperty(mimeType))
-                {
-                    repositoryByMime[mimeType] = metaMetadata;
-                    metaMetadata.setMmSelectorType(MMSelectorType.SUFFIX_OR_MIME);
-                }
-            }
-        }
+			var mimeTypes = selector.mime_types;
+			if (mimeTypes)
+			{
+				for (var j in mimeTypes)
+				{
+					var mimeType = mimeTypes[j];
+					if (!repositoryByMime.hasOwnProperty(mimeType))
+					{
+						repositoryByMime[mimeType] = metaMetadata;
+						metaMetadata.mmSelectorType = MMSelectorType.SUFFIX_OR_MIME;
+					}
+				}
+			}
+		}
     }
 }
 

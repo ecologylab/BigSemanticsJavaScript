@@ -32,7 +32,7 @@ function loadWebpage(url, sendResponse, additionalUrls, mmd, callback)
 	//If we have not recently requested, then send the request, add the domain to recently requested, and set a timeout to remove it.
 	if( recentlyRequested.indexOf(domain) == -1 ){
 		
-		sendLoadRequest(url, sendResponse, additionalUrls, callback);
+		sendLoadRequest(url, sendResponse, additionalUrls, mmd, callback);
 		recentlyRequested.push(domain);
 		setTimeout(removeRecentlyRequested, requestWaitTime, domain);
 		
@@ -41,7 +41,7 @@ function loadWebpage(url, sendResponse, additionalUrls, mmd, callback)
 		
 		downloadQueue.push({url:url, waitTime:requestWaitTime});
 		if( downloadInterval === null ){
-			downloadInterval = setInterval(tryDownloadQueue, RETRY_WAIT_TIME, sendResponse, additionalUrls, callback);
+			downloadInterval = setInterval(tryDownloadQueue, RETRY_WAIT_TIME, sendResponse, additionalUrls, mmd, callback);
 		}
 		
 	}
@@ -50,7 +50,7 @@ function loadWebpage(url, sendResponse, additionalUrls, mmd, callback)
 
 //We use a polling solution to retrieve documents from the queue. The idea is that because the majority of documents will have equivalent wait times
 //we can increase efficiency and simplicity simply be checking back with the queue every (DEFAULT_INTERVAL) milliseconds.
-function tryDownloadQueue(sendResponse, additionalUrls, callback){
+function tryDownloadQueue(sendResponse, additionalUrls, mmd, callback){
 	
 	//loop backwards so we can remove/splice elements cleanly
 	for( var i = downloadQueue.length - 1; i > 0; i-=1 ){
@@ -124,34 +124,44 @@ function isUrlRedirect(response, sendResponse, additionalUrls)
 }
 //Do the work of sending the load request.
 //*This code is not my own, but rather was retrieved and updated from the existing download code* - Cameron
-function sendLoadRequest(url, sendResponse, additionalUrls, callback)
+function sendLoadRequest(url, sendResponse, additionalUrls, mmd, callback)
 {
 	var xhr = new XMLHttpRequest();
-	xhr.responseType = "document";
-	//xhr.followRedirects = true;
-	
-	xhr.onreadystatechange = function() {
-		
-		//console.log("state: " + xhr.readyState + " status: " + xhr.status);
-		
-		if (xhr.readyState==4 && xhr.status==200)
-	    {
-		
-			
-			if (xhr.response !== null){
-                //var headers = xhr.getAllResponseHeaders();
-                //if (!isUrlRedirect(xhr.response, sendResponse, additionalUrls))			
-                //getMetaMetadata(url, xhr.response, sendResponse, additionalUrls);
-				if (!isUrlRedirect(xhr.response, sendResponse, additionalUrls))		{	
-					var mmd = getDocumentMM(url);
-					sendResponse(mmd, xhr.response, callback);
+	if (mmd.parser == "image"){
+		xhr.responseType = "blob";
+		xhr.onreadystatechange = function() {
+			if (xhr.readyState==4 && xhr.status==200){
+				//if repository by mime is the same as mmd continue. else do something else
+				if (xhr.response !== null){
+					//var headers = xhr.getAllResponseHeaders();
+					//if (!isUrlRedirect(xhr.response, sendResponse, additionalUrls))			
+					//getMetaMetadata(url, xhr.response, sendResponse, additionalUrls);
+					if (!isUrlRedirect(xhr.response, sendResponse, additionalUrls))		{	
+						var mmd = getDocumentMM(url);
+						sendResponse(mmd, xhr.response, callback);
+					}
+
 				}
-               
 			}
-				
-            
-	    }
-	};
+		};
+	}
+	else {
+		xhr.responseType = "document";
+		xhr.onreadystatechange = function() {
+			if (xhr.readyState==4 && xhr.status==200){			
+				if (xhr.response !== null){
+					//var headers = xhr.getAllResponseHeaders();
+					//if (!isUrlRedirect(xhr.response, sendResponse, additionalUrls))			
+					//getMetaMetadata(url, xhr.response, sendResponse, additionalUrls);
+					if (!isUrlRedirect(xhr.response, sendResponse, additionalUrls))		{	
+						var mmd = getDocumentMM(url);
+						sendResponse(mmd, xhr.response, callback);
+					}
+
+				}
+			}
+		};
+	}
 	
 	xhr.open("GET", url, true);
 	xhr.send();
