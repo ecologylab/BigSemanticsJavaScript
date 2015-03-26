@@ -39,7 +39,7 @@ MetadataLoader.load = function (handler, url, isRoot, clipping, container) {
     // Add the rendering task to the queue
 
 
-    var task = new Metadatatask(url, isRoot, clipping, renderer, container)
+    var task = new Metadatatask(url, isRoot, clipping, renderer, container);
     MetadataLoader.queue.push(task);
 
     if (clipping != null && clipping.rawMetadata != null) {
@@ -282,7 +282,7 @@ MetadataLoader.isExtensionMetadataDomain = function (location) {
             return true;
     }
     return false;
-}
+};
 
 MetadataLoader.checkForMetadataFromExtension = function () {
     for (var i = 0; i < RepoMan.extensionMetadataDomains.length; i++) {
@@ -291,7 +291,7 @@ MetadataLoader.checkForMetadataFromExtension = function () {
             MetadataLoader.getMetadata(tasks[i].url, "MetadataLoader.setMetadata");
         }
     }
-}
+};
 
 /**
  * Retrieves the meta-metadata from the service using a JSON-p call.
@@ -303,11 +303,11 @@ MetadataLoader.checkForMetadataFromExtension = function () {
 
 MetadataLoader.getMMD = function (task, callback) {
     if (RepoMan.repo != null) {
-        RepoMan.getMMDFromRepoByTask(task);
+        RepoMan.getMMDFromRepoByTask(task , callback);
     }
     else if (RepoMan.repoIsLoading == false) {
         RepoMan.repoIsLoading = true;
-        RepoMan.loadMMDRepo();
+        RepoMan.loadMMDRepo();    		
     }
 };
 
@@ -326,7 +326,7 @@ MetadataLoader.doJSONPCall = function (jsonpURL) {
 MetadataLoader.clearDocumentCollection = function () {
     MetadataLoader.queue = [];
     MetadataLoader.documentMap = [];
-}
+};
 
 
 /**
@@ -364,7 +364,7 @@ MetadataLoader.getTasksFromQueueByUrl = function (url) {
 
     }
     return list;
-}
+};
 
 /**
  * Get all tasks from the queue which are waiting for given meta-metadata type.
@@ -380,7 +380,7 @@ MetadataLoader.getTasksFromQueueByType = function (type) {
         }
     }
     return tasks;
-}
+};
 
 /**
  * Get all tasks from the queue which are waiting for given meta-metadata type.
@@ -396,4 +396,4 @@ MetadataLoader.getTasksFromQueueByDomain = function (domain) {
         }
     }
     return tasks;
-}
+};
