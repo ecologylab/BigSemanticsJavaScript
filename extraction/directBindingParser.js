@@ -47,8 +47,18 @@ function bindScalarFieldValue(mmdScalarField, contextObj, metadata) {
 	if (contextObj == null)
 		return;
 
-	console.log(contextObj[mmdScalarField.tag]);
-	var scalarValue = jsonPath(contextObj, mmdScalarField.tag);
+	//console.log(contextObj[mmdScalarField.tag]);
+	var scalarValue = null;
+	var jsonPaths = getJSONPaths(mmdScalarField);
+	if (jsonPaths)
+	{
+		for (var i = 0; i < jsonPaths.length; i++)
+		{
+			scalarValue = jsonPath(contextObj, jsonPaths[i]);
+			if (scalarValue)
+				break;
+		}
+	}
 
 	if (scalarValue) {
 		scalarValue = scalarValue[0];
@@ -80,9 +90,19 @@ function bindCollectionFieldValue(mmdCollectionField, contextObj, metadata) {
 	if (contextObj == null)
 		return;
 
-	console.log(contextObj[mmdCollectionField.tag]);
+	//console.log(contextObj[mmdCollectionField.tag]);
+	var thisObj = null;
+	var jsonPaths = getJSONPaths(mmdCollectionField);
+	if (jsonPaths)
+	{
+		for (var i = 0; i < jsonPaths.length; i++)
+		{
+			thisObj = jsonPath(contextObj, jsonPaths[i]);
+			if (thisObj)
+				break;
+		}
+	}
 	
-	var thisObj = jsonPath(contextObj, mmdCollectionField.tag);
 	// temporary && condition for a single composite treated as collection in mmd
 	if (thisObj && thisObj[0] instanceof Array)
 		thisObj = thisObj[0];
@@ -138,9 +158,19 @@ function bindCompositeFieldValue(mmdCompositeField, contextObj, metadata) {
 	if (contextObj == null)
 		return;
 
-	console.log(contextObj[mmdCompositeField.tag]);
+	//console.log(contextObj[mmdCompositeField.tag]);
+	var thisObj = null;	
+	var jsonPaths = getJSONPaths(mmdCompositeField);
+	if (jsonPaths)
+	{
+		for (var i = 0; i < jsonPaths.length; i++)
+		{
+			thisObj = jsonPath(contextObj, jsonPaths[i]);
+			if (thisObj)
+				break;
+		}
+	}
 	
-	var thisObj = jsonPath(contextObj, mmdCompositeField.tag);
 	if (thisObj)
 	{
 		thisObj = thisObj[0];
@@ -182,3 +212,9 @@ function clone(obj){
     return temp;
 }
 
+function getJSONPaths(field) {
+	if (field.json_paths)
+		return field.json_paths;
+		
+	return null;
+}
