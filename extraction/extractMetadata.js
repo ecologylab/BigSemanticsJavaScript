@@ -13,6 +13,10 @@ var upperXpath = {};
  */
 function extractMetadata(mmd, page) {
     
+	if (mmd.hasOwnProperty('filter_location')){
+		page.URL = PreFilter.filter(page.URL, mmd.filter_location);
+	}
+	
     upperLevel[page.URL] = {}; //holds upperlevel metadata
     scalars[page.URL] = {};
     baseURL[page.URL] = "";
