@@ -24,6 +24,12 @@ function getRequestWaitTime(domain){
 
 function loadWebpage(url, sendResponse, additionalUrls, mmd, callback)
 {
+	//testing
+	//if (mmd.hasOwnProperty('filter_location')){
+	//	additionalUrls = [url];
+	//	url = PreFilter.filter(url, mmd.filter_location);
+	//}
+	
 	//time needed to wait between requests	
 	var domain = getDownloadDomain(url);
 	
@@ -64,7 +70,7 @@ function tryDownloadQueue(sendResponse, additionalUrls, mmd, callback){
                 
 				downloadQueue.splice(i, 1);
 				
-				sendLoadRequest(url, sendResponse, additionalUrls);
+				sendLoadRequest(url, sendResponse, additionalUrls, mmd, callback);
 				recentlyRequested.push(domain);
 				setTimeout(removeRecentlyRequested, requestWaitTime, domain);
 		
@@ -136,7 +142,7 @@ function sendLoadRequest(url, sendResponse, additionalUrls, mmd, callback)
 					//confirm that our request returned something binary
 					var mimeMMD = getDocumentMMbyMime(xhr.response.type);
 					if (mimeMMD && mimeMMD.parser !== "xpath"){
-						sendResponse(mmd, xhr.responseURL, callback);					
+						sendResponse(mmd, xhr.responseURL, callback, additionalUrls);					
 					}
 					else {
 						//if we requested a binary but got something else
@@ -155,7 +161,7 @@ function sendLoadRequest(url, sendResponse, additionalUrls, mmd, callback)
 					
 					if (!isUrlRedirect(xhr.response, sendResponse, additionalUrls))		{	
 						var mmd = getDocumentMM(url);
-						sendResponse(mmd, xhr.response, callback);
+						sendResponse(mmd, xhr.response, callback, additionalUrls);
 					}
 					
 				}
