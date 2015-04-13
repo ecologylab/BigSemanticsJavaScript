@@ -24,11 +24,8 @@ function getRequestWaitTime(domain){
 
 function loadWebpage(url, sendResponse, additionalUrls, mmd, callback)
 {
-	//testing
-	//if (mmd.hasOwnProperty('filter_location')){
-	//	additionalUrls = [url];
-	//	url = PreFilter.filter(url, mmd.filter_location);
-	//}
+	
+	//if (mmd.hasOwnProperty('rewrite_location')){}
 	
 	//time needed to wait between requests	
 	var domain = getDownloadDomain(url);
