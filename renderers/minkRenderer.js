@@ -78,7 +78,7 @@ Mink.makeLinkedFieldList = function(metadataFields){
 Mink.makeExplorableCollection = function(expandableCollections, linkedField){
 	var expandableCollection = buildDiv('minkExplorableCollection');
 	var label = buildSpan('minkExplorableCollectionLabel');
-	var labelText = linkedField.name;
+	var labelText = BSUtils.removeLineBreaksAndCrazies(BSUtils.toDisplayCase(linkedField.name));
 	labelText += ' (';
 	labelText += linkedField.links.length;
 	labelText += ')';
@@ -114,7 +114,7 @@ Mink.makeTitle = function(parent, metadataField){
 }
 Mink.makeSubheader = function(parent, metadataField){
 	var text = "";
-	var textHold = document.createElement('em');
+	var textHold = document.createElement('span');
 	//composite or collection
 	if(typeof metadataField.value != 'string'){
 		if(metadataField.child_type != null){
@@ -451,8 +451,11 @@ Mink.makeTable = function(parent, fields, url, styleInfo, isRoot){
 	//iterate through fields, building name and value cols for each and then call appropriate renderer base function.
 	for(var i = 0; i < fields.length; i++){
 		var row = buildDiv('minkTableRow');
-		if(isRoot && i != (fields.length-1)){
+		if(isRoot){
 			row.classList.add('rootRow');
+			if(i != (fields.length-1)){
+				row.classList.add('notBottom');
+			}
 		}
 		var metadataField = fields[i];
 		var nameCol = document.createElement('div');
@@ -585,7 +588,49 @@ Mink.render = function(task){
 	// Remove the RenderingTask from the queue
 	MetadataLoader.queue.splice(MetadataLoader.queue.indexOf(task), 1);
 }
-Mink.buildShellControls = function(parent){
+Mink.shrink = function(event){
+	var image = event.target;
+	var imageHolder = event.target.parentNode;
+	var controlRow = image.parentNode.parentNode;
+	var title = controlRow.childNodes[1];
+	var container = controlRow.parentNode;
+	var mink = container.getElementsByClassName('mink')[0];
+	mink.style.display = 'none';
+	title.style.display = '';
+	
+	
+	image.parentNode.removeChild(image);
+	var newImage = document.createElement('img');
+	newImage.className = 'minkControlIcon';
+	newImage.src = '../renderers/images/mink/plus.png'
+		newImage.addEventListener('click', Mink.grow);
+
+	$(imageHolder).prepend($(newImage));
+	console.log('lolol');
+}
+
+Mink.grow = function(event){
+	var image = event.target;
+	var imageHolder = event.target.parentNode;
+
+	var controlRow = image.parentNode.parentNode;
+	var title = controlRow.childNodes[1];
+	var container = controlRow.parentNode;
+	var mink = container.getElementsByClassName('mink')[0];
+	mink.style.display = '';
+	title.style.display = 'none';
+	image.parentNode.removeChild(image);
+
+	var newImage = document.createElement('img');
+	newImage.className = 'minkControlIcon';
+	newImage.src = '../renderers/images/mink/minus.png'
+		newImage.addEventListener('click', Mink.shrink);
+
+	$(imageHolder).prepend($(newImage));
+
+}
+
+Mink.buildShellControls = function(parent, metadataFields){
 	var controlRow = document.createElement('div');
 	controlRow.className = "minkControls";
 	parent.appendChild(controlRow);
@@ -596,21 +641,31 @@ Mink.buildShellControls = function(parent){
 	control1Icon.className = "minkControlIcon";
 	control1Icon.src = '../renderers/images/mink/minus.png';
 	control1.appendChild(control1Icon)
-	
+	control1Icon.addEventListener('click', Mink.shrink);
 	var control2 = document.createElement('span');
 	control2.className = 'minkControl';
 	var control2Icon = document.createElement('img');
 	control2Icon.className = "minkControlIcon right";
 	control2Icon.src = '../renderers/images/mink/pin.png';
 	control2.appendChild(control2Icon)
+		controlRow.appendChild(control1);
+
+	//makes invisible title field so that we can bring it back later
+	for (var i = 0; i < metadataFields.length; i++){
+		var field = metadataFields[i];
+		if(field.name === 'title' ||field.name == 'title'){
+			Mink.makeTitle(controlRow, field);
+			controlRow.childNodes[1].style.display='none';
+		}	
+	}
 	
-	controlRow.appendChild(control1);
+	
 	//controlRow.appendChild(control2);
 	
 }
 Mink.buildMinkShell = function(table, isChildTable, isRoot, metadataFields, fieldCount, styleInfo){
 	
-	Mink.buildShellControls(table);
+	Mink.buildShellControls(table, metadataFields);
 	var minkMain = document.createElement('div');
 	minkMain.className = "mink";
 	var minkBody = buildDiv('minkBody')
