@@ -1,0 +1,324 @@
+body{
+	font-family: calibri;
+}
+.mink{
+	display: flex;
+}
+.minkContainer{
+	width: 744px;
+	border-style: solid;
+	border-color: lightgray;
+	border-width: 1px;
+	/*border-radius: 8px;*/
+	/*background-color: #e6f2ff;*/
+	display:flex;
+	flex-direction: column;
+}
+.minkBody{
+  flex: 5;
+}
+.minkSideBar{
+	border-color: darkgray;
+	border-width: 1px;
+	flex: 2;
+
+}
+.minkOtherContent{
+	width: 100%;
+	display: flex;
+		  margin-left: 12px;
+	
+	flex-direction: column;
+	margin-top: 12px;
+}
+.minkKeyFields{
+	width: 100%;
+	height: 50%;
+	display: flex;
+	  margin-left: 6px;
+}
+.minkHeader{
+  display: flex;
+  margin-right: 6px;
+  flex-grow: 11;
+  flex-direction: column;
+}
+.minkMediaContainer{
+  display: inline-block;
+  height: 100%;
+  flex: 4;
+  flex-grow: 9;
+  margin-right: 8px;
+
+}
+.metadata_italic{
+
+	font-style: italic;
+	}
+.chevron{
+
+}
+.leftArrow{
+	display: inline-block;
+	bottom: 75px;
+position: relative;
+	height: 20px;
+	width: 20px;
+}
+.rightArrow{
+	display: inline-block;
+	bottom: 75px;
+position: relative;
+	height: 20px;
+	width: 20px;
+
+}
+.minkHeaderImage{
+	display: inline-block;
+	max-height: 150px;
+	max-width: 150px;
+
+}
+.minkMedia{
+	
+}
+table{
+	width: 100%;
+}
+table#t01 tr:nth-child(even) {
+    /*background-color: #eee;*/
+}
+table#t01 tr:nth-child(odd) {
+    /*background-color: #fff;*/
+}
+table#t01 th {
+    color: white;
+  /*  background-color: darkgray;*/
+}
+.minkTable{
+/*	background-color: #e6f2ff;*/
+	border-width: 1px;
+	/*border-style: solid;*/
+	border-radius: 0px 0px 0px 8px;
+	border-color: #e2f0ff;
+	overflow: hidden;
+
+}
+.minkTableRoot{
+	overflow: hidden;
+	display: flex;
+	flex-direction: column;
+	max-width: 600px;
+}
+.minkTitleField{
+	display: block;
+font-size: 1.17em;
+margin-bottom: 8px;
+font-weight: bold;
+}
+.minkExplorableCollection{
+	margin-top: 4px;
+	margin-left: 8px;
+	width: 100%;
+}
+.minkExplorableCollections{
+		display: flex;
+		margin-left: 8px;
+	flex-wrap: wrap;
+		  margin-top: -4px;
+	
+}
+
+.minkExploreIcon{
+	height: 20px;
+	width: 20px;
+	margin-right: 4px;
+}
+.minkExplorableCollectionLabel{
+	float: left;
+}
+.minkExplorableCollectionButton{
+	float: right;
+}
+.minkExplorableCollectionButton:hover{
+	cursor: pointer;
+}
+.chevron:hover{
+	cursor: pointer;
+}
+.subtitle{
+	  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+    margin-bottom: 4px;
+    
+}
+.subtitle:hover{
+	  -webkit-line-clamp: 250;
+	
+}
+.minkSubtitleContainer{
+}
+.minkControls{
+	display: flex;
+	justify-content: space-between;
+	height: 20px;
+	width: 70%;
+}
+.minkControlIcon{
+	width: 20px;
+	margin-left: 4px;
+	height: 20px;
+}
+.minkControlIcon:hover{
+	cursor: pointer;
+}
+
+.fieldValueContainer{
+  	max-width: 420px !important;
+}
+.minkTable{
+	display: flex;
+	flex-direction: column;
+	max-width: 600px;
+}
+.minkTableRow{
+	display: flex;
+		justify-content: space-between;
+	
+}
+.rootRow{
+	margin-bottom: 8px;
+}
+.minkTableNameCol{
+		display: flex;
+		flex: 1;
+				margin-right: 4px;
+		
+	
+}
+.minkTableValueCol{
+	display: flex;
+	flex-direction: column;
+    flex: 16;
+  flex-shrink: 2;
+  flex-grow: 20.7;
+  
+  }
+
+.nestedPadBorderless{
+	border-style: none;
+	    padding: 0px;   
+	
+}
+
+.metadataRowBorderless{
+	 display: table-row;
+    
+    margin-bottom: 0px;
+	border-style: none;
+	
+}
+.minkMoreButton{
+	  /* background-color: #C9D7E9; */
+  border-radius: 8px;
+  text-align: center;
+  text-decoration: underline;
+  color: #333333;
+  -webkit-user-select: none; /* Chrome/Safari */        
+  
+  border-width: 1px;
+  border-color: #888888;
+    height: 18px;
+}
+.minkLessButton{
+  /* background-color: #C9D7E9; */
+  border-radius: 8px;
+  text-align: center;
+    text-decoration: underline;
+  -webkit-user-select: none; /* Chrome/Safari */        
+  
+  color: #333333;
+  border-width: 1px;
+  border-color: #888888;
+      height: 18px;
+        
+  
+}
+.minkMoreButton:hover{
+	/*background-color: #AABFDD;*/
+	cursor: pointer;
+}
+
+.minkLinkedDocuments{
+	 word-wrap: break-word;
+  width: 4px;
+}
+.minkLessButton:hover{
+	/*background-color: #AABFDD;*/
+	cursor: pointer;
+}
+.minkHDottedLine{
+letter-spacing: 8px;
+line-height: 15px;
+color: gray;
+}
+.minkMoreButtonContainer{
+	display: flex;
+	
+}
+
+.minkMDContainer{
+	  -webkit-margin-after: 0em;
+	  margin-bottom: 8px;
+}
+.minkFieldValue.description_div{
+	  white-space: normal;
+  text-align: left;
+  vertical-align: middle;
+  text-overflow: ellipsis;
+	
+}
+.minkFieldValue.metadata_italic{
+		  white-space: normal;
+  text-align: left;
+  vertical-align: middle;
+  text-overflow: ellipsis;
+}
+.minkFieldValueContainer{
+	  min-height: 19px;
+  height: 19px;
+  overflow: hidden;
+}
+.minkFieldLabel{
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  margin-bottom: 4px;
+}
+.minkFieldLabel:hover{
+	-webkit-line-clamp: 500;	
+}
+
+.minkFieldLabelContainer{
+	  min-height: 19px;
+  height: 19px;
+  overflow: hidden;
+}
+.minkFieldLabelContainer:hover{
+
+height: auto}
+.minkFieldValueContainer:hover{
+    height: auto;
+}
+.minkTableNameCol{
+	  flex: 4;
+  flex-shrink: 1;
+  flex-grow: 6;
+  overflow: hidden;
+  text-overflow: ellipsis;
+	
+}
+

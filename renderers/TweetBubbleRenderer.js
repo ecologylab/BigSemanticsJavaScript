@@ -1021,7 +1021,7 @@ TwitterRenderer.buildMetadataField = function(metadataField, isChildTable, field
 				if (bgColorObj && bgColorObj.bFirstField)
 					fieldValue.style.background = bgColorObj.color;
 				//Go back and change all #.*, @.*, and http:.* to links
-				if(fieldValue.tagName == 'P'){
+				if(fieldValue.tagName == 'P' && application_name != 'tweetbubble'){
 					TwitterRenderer.makeLinks(fieldValue)
 
 				}

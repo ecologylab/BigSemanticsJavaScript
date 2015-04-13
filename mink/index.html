@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Mink Renderer Test</title>
+    <script>
+    	var application_name = "mdc";
+    </script>
+    
+    <!-- CSS! -->
+    <link href="css/bootstrap.min.css" rel="stylesheet" media="screen">
+
+    <link href="css/prettify.css" type="text/css" rel="stylesheet" />
+    
+    <link href="css/mdc.css" rel="stylesheet" media="screen">
+    <link href="../renderers/styles/metadataRenderer.css" rel="stylesheet" type="text/css">
+        <link href="../renderers/styles/twitterMICE.css" rel="stylesheet" type="text/css">
+            <link href="../renderers/styles/minkRenderer.css" rel="stylesheet" type="text/css">
+    
+	<!--  TweetBubble Stuff, currently ommited due to restructure testing
+	
+	<link href="../TweetBubble/Plugin/chrome/content_script/css/twitterMice.css" rel="stylesheet" type="text/css"> 
+
+
+    <script type="text/javascript" src="../TweetBubble/Plugin/chrome/content_script/js/renderingTask.js"></script>
+	<script type="text/javascript" src="../TweetBubble/Plugin/chrome/content_script/js/twitterMice.js"></script>
+	<script type="text/javascript" src="../TweetBubble/Plugin/chrome/content_script/js/twitterICE.js"></script>
+	<script type="text/javascript" src="../TweetBubble/Plugin/chrome/content_script/js/ICE.js"></script>
+	-->
+    <!-- Libaries! -->
+    <script src="../libraries/jquery-2.0.0.min.js"></script>
+    <script src="../libraries/bootstrap/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="js/prettify.js"></script>
+   <!-- bsjsCore Files -->
+   <script type="text/javascript" src="../bsjsCore/MetadataLoader.js"></script>   
+   <script type="text/javascript" src="../bsjsCore/BSUtilities.js"></script>
+   <script type="text/javascript" src="../bsjsCore/MetadataTask.js"></script>   
+   <script type="text/javascript" src="../bsjsCore/MetadataViewModel.js"></script>
+   <script type="text/javascript" src="../bsjsCore/RepoMan.js"></script>
+    <script type="text/javascript" src="../bsjsCore/extensionInterface.js"></script>
+   
+   
+   <!-- Required renderer files -->
+    <script type="text/javascript" src="../renderers/interfaceStyle.js"></script>
+    
+    <script type="text/javascript" src="../renderers/RendererBase.js"></script>
+    <script type="text/javascript" src="../renderers/RenderingTask.js"></script>
+        <script type="text/javascript" src="../renderers/VanillaMICE.js"></script>
+    
+        <script type="text/javascript" src="../renderers/minkRenderer.js"></script>
+    
+	<!-- Just the simpl things -->    
+
+	<script type="text/javascript" src="../bsjsCore/simpl/simplDeserializer.js"></script>
+	<script type="text/javascript" src="../bsjsCore/simpl/simplFieldTypes.js"></script>
+	<script type="text/javascript" src="../bsjsCore/simpl/simplGraphCollapse.js"></script>
+	<script type="text/javascript" src="../bsjsCore/simpl/simplGraphExpand.js"></script>
+	<script type="text/javascript" src="../bsjsCore/simpl/simplTypeScope.js"></script>
+	<script type="text/javascript" src="../bsjsCore/simpl/simplTypeScopeDeserialize.js"></script>
+	<script type="text/javascript" src="../bsjsCore/simpl/simplTypeScopeSerialize.js"></script>
+        <script type="text/javascript" src="./js/minkApp.js"></script>
+
+    <script>
+       </script>
+  </head>
+  <body onload="onBodyLoad()">
+    <!-- Loading Modal - Doesn't work yet -->
+    <div id="loadingModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+      <div class="modal-body">
+        <p>Loading</p>
+      </div>
+    </div>
+
+    <!-- Link Modal -->
+    <div id="linkModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+      <div class="modal-header">
+        <h3 id="myModalLabel">Link to this Metadata</h3>
+      </div>
+      <div class="modal-body">
+        <p>Copy this link to your clipboard for easy sharing</p>
+        <input type="text" class="span5" id="modalLinkValue" placeholder="Type something…">
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" data-dismiss="modal" aria-hidden="true">Close</button>
+      </div>
+    </div>
+
+    <!-- Navbar -->
+    <div class="navbar navbar-inverse navbar-fixed-top">
+      <div class="navbar-inner form-inline">
+        <div class="container">
+          <a class="brand">Mink</a>
+						
+            <form class="navbar-form pull-right" action="" onsubmit="return false;">
+              
+              <input type="text" size="500" class="span5" id="targetURL" onkeydown="onEnterShowMetadata(event);" value="http://www.amazon.com/Discovery-Daft-Punk/dp/B000059MEK/ref=sr_1_1?s=music&ie=UTF8&qid=1365793732"/>
+              <button type="button" class="btn" onclick="showMetadata();">Go!</button>
+              <button type="button" class="btn" data-toggle="modal" data-target="#linkModal" onclick="setLinkValue();"><i class="icon-bookmark"></i></button>
+            	
+            </form>
+ 						<!-- <div class="checkbox " style="position:relative; top:10px"  title="When checked, the service will not use any cached metadata for a page.">
+	                  <label>
+	                    <input type="checkbox" name="force_reload" id='force_reload'>Refresh MD
+	                    
+	                 </label>
+             </div> -->
+	                  <label style="position:relative; top:10px" title="When checked, the service will not use any cached metadata for a page.">
+	                    <input type="checkbox" name="force_reload" id='force_reload' style="position: relative;bottom: 2.5px;" onclick="toggleReload()">Refresh MD
+	                    
+	                 </label>
+			<label style="position:relative; top:10px" title="When checked, always extract with Service.">
+	                    <input type="checkbox" name="force_service" id='force_service' style="position: relative;bottom: 2.5px;" onclick="toggleReload()">Extract w/ Service
+	                    
+	                 </label>
+	                
+	                
+        </div>
+          
+      </div>
+    </div>
+
+    <div class="navbar navbar-inverse navbar-fixed-bottom">
+      <div class="navbar-inner">
+        <div class="container">
+          <ul class="nav pull-right">
+            <li><a href="http://ecologylab.net" target="_blank">Interface Ecology Lab</a></li>
+            <li><a href="http://ecologylab.net" target="_blank"><img class="nav-img pull-right" src="img/ecologylab.png" /></a></li>
+          </ul>
+				
+        </div>
+      </div>
+    </div>
+
+
+    <!-- Content -->
+    <div class ="container">
+      <div class="row">
+        <div class="span9 title right">
+          <p>
+                    Background at the <a href="http://ecologylab.net/research/bigsemantics/" target="_blank">Big Semantics research page</a> and <a href="https://github.com/ecologylab/BigSemantics/wiki/Metadata-In-Context-Expander-%28MICE%29" target="_blank">MICE Wiki</a>.</p>
+        </div>
+      </div>
+
+     
+   
+        <div class="" id="mdcIce"></div>
+
+      <div class="row" id="scenesTitle">
+        <div class="span9 title">
+          <h4>
+            <a id="moreData" data-toggle="collapse" data-target="#dataDrop">
+              Behind-the-Scenes Data
+            </a>
+            <i id="moreDataIcon" class="icon-chevron-right"></i>
+          </h4>
+
+          <div class="btn-group" data-toggle="buttons-radio">
+            <button type="button" id="mdJsonButton" class="btn btn-mini btn-primary active">Metadata</button>
+            <button type="button" id="mmdJsonButton" class="btn btn-mini">Meta-Metadata</button>
+          </div>
+
+					<div id="dataDrop" class="collapse in">
+
+<p class="left">
+The Metadata tab shows metadata extracted via <a target="_blank" href="https://github.com/ecologylab/BigSemantics/wiki/Use-BigSemantics-Service">the BigSemantics Service</a> in JSON, using a wrapper from the repository, for the given URL.
+The wrapper, authored in the Meta-Metadata language, defines the data structure, extraction rules, and presentation guidelines for corresponding metadata.
+The wrapper shown here contains nested structures inherited from its base types; see <a target="_blank" href="https://github.com/ecologylab/BigSemantics/wiki#wiki-Wrapper_Repository">the wrapper repository</a> for their original forms, and <a target="_blank" href="https://github.com/ecologylab/BigSemantics/wiki">the BigSemantics wiki</a> for how to author them.
+</p>
+
+
+          </div>   
+
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="span9 content" id="mdcJson">
+          <pre class="prettyprint languague-css" id="mdcJsonPP"></pre>
+        </div>
+      </div> 
+      
+       </div>
+
+    <script>
+    Mink.initialize();
+    </script>
+
+  </body>
+</html>

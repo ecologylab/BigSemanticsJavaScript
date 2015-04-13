@@ -60,7 +60,7 @@ RenderingTask.prototype.idealRenderer = function(task){
 			MICE.render(task);
 		}
 	}else{
-		MICE.render(task);
+		task.renderer(task);
 
 	}
 }

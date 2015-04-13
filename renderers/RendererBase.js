@@ -90,7 +90,10 @@ RendererBase.getFieldLabel = function(metadataField)
 		if (metadataField.value_as_label.type == "scalar" && metadataField.value_as_label.value.trim() != "")
 		{
 			label.type = "scalar";
-			label.value = metadataField.value_as_label.value;
+			label.value = BSUtils.toDisplayCase(metadataField.value_as_label.value); 
+			label.value = BSUtils.removeLineBreaksAndCrazies(label.value);
+		
+		
 		}
 		else if (metadataField.value_as_label.type == "image" && ViewModeler.getImageSource(metadataField.value_as_label.value))
 		{
@@ -100,13 +103,15 @@ RendererBase.getFieldLabel = function(metadataField)
 		else
 		{
 			label.type = "scalar";
-			label.value = metadataField.name;
+			label.value = BSUtils.toDisplayCase(metadataField.name); 
+			label.value = BSUtils.removeLineBreaksAndCrazies(label.value);
 		}
 	}
 	else
 	{
 		label.type = "scalar";
-		label.value = metadataField.name;
+		label.value = BSUtils.toDisplayCase(metadataField.name); 
+		label.value = BSUtils.removeLineBreaksAndCrazies(label.value);
 	}
 	return label;
 }

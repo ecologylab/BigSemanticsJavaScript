@@ -21,7 +21,8 @@ function MetadataViewModel(mmdField)
   
   this.layer = (mmdField.layer != null) ? mmdField.layer : 0.0;
   this.style_name = (mmdField.style_name != null) ? mmdField.style_name : "";
-  
+  this.mink_style = (mmdField.mink_style != null) ? mmdField.mink_style : "";
+
   this.hide_label = (mmdField.hide_label != null) ? mmdField.hide_label : false;
   this.label_at = mmdField.label_at;
   
