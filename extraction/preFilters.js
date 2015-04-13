@@ -32,7 +32,11 @@ PreFilter.filter = function(location, filterObj){
 		newLocation = stripParamsBut(newLocation, filterObj.strip_params_but);
 	}
 	
-	//if filterObj.overide_params
+	//if filterObj.override_params
+	
+	
+	//if filterObj.alternative_host?
+	//not sure if this is actually ever used
 	
 	return newLocation;
 };
