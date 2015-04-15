@@ -30,47 +30,116 @@ Mink.initialize = function(){
 	}
 }
 
-//I refuse to go more than one level deep
 
+Mink.recursiveIsLinked = function(metadataField){
+	
+		if(metadataField.child_type != 'video' && metadataField.child_type != 'image' && metadataField.child_type != 'audio'){		
+			var collectionLinks = {};
+			collectionLinks.links = [];
+			collectionLinks.name = metadataField.name;
+			for (var j = 0; j < metadataField.value.length; j++){
+				var childField = metadataField.value[j];
+				if(typeof(childField.value) == "object"){
+					if(childField.value.length > 0){
+							if(childField.value[0].navigatesTo != null){
+								return true;
+							}else{
+								return Mink.recursiveIsLinked(childField);
+							}
+						}
+					}
+					
+				}
+		
+				
+			
+			
+		}
+		//composite
+		else{
+			var compLinks = {};
+			compLinks.links = [];
+			compLinks.name = metadataField.name;
+
+			if(metadataField.value[0].navigatesTo != null){
+				return true;
+			}else{
+				for(var l = 0; l < metadataField.value.length; l++){
+					if(typeof(metadataField.value[l]) === "object")
+						return Mink.recursiveIsLinked(metadataField.value[l]);
+
+				}
+			}
+		}
+	
+	return false;
+
+}
+
+Mink.recursiveSearchForLinked = function(metadataField, list, isRoot){
+	if(metadataField.child_type != null){
+		if(metadataField.child_type != 'video' && metadataField.child_type != 'image' && metadataField.child_type != 'audio'){		
+			var collectionLinks = {};
+			collectionLinks.links = [];
+			collectionLinks.name = metadataField.name;
+			for (var j = 0; j < metadataField.value.length; j++){
+				var childField = metadataField.value[j];
+				if(childField.value.length > 0){
+					if(childField.value[0].navigatesTo != null){
+						collectionLinks.links.push(childField.value[0].navigatesTo);
+					}else{
+						if(Mink.recursiveIsLinked(childField) && (isRoot == true)){
+							console.log("COL TRUE");
+							collectionLinks.links.push(childField.value[0].navigatesTo);
+
+						}						
+						//Mink.recursiveSearchForLinked(childField, list);
+					}
+				}
+		
+				
+			}
+			if(collectionLinks.links.length > 0){
+				list.push(collectionLinks);
+			
+				}
+			}
+		}
+		//composite
+		else{
+			var compLinks = {};
+			compLinks.links = [];
+			compLinks.name = metadataField.name;
+
+			if(metadataField.value[0].navigatesTo != null){
+				compLinks.links.push(metadataField.value[0].navigatesTo);
+				list.push(compLinks);
+			}else{
+				for(var l = 0; l < metadataField.value.length; l++){
+					if(typeof(metadataField.value[l]) === "object"){
+						Mink.recursiveSearchForLinked(metadataField.value[l], list);
+						if(Mink.recursiveIsLinked(metadataField.value[l]) && isRoot){
+							console.log("COMPOSITE TRUE");
+							
+						}
+					}
+
+				}
+			}
+		}
+		
+}
 Mink.makeLinkedFieldList = function(metadataFields){
 	var list = [];
 	
 	for (var i = 0; i < metadataFields.length; i++){
 		var metadataField = metadataFields[i];
-		if(metadataField.child_type != null){
-			if(metadataField.child_type != 'video' && metadataField.child_type != 'image' && metadataField.child_type != 'audio'){
-				
-				var collectionLinks = {};
-				collectionLinks.links = [];
-				collectionLinks.name = metadataField.name;
-				for (var j = 0; j < metadataField.value.length; j++){
-					var childField = metadataField.value[j];
-					if(childField.value[0].navigatesTo != null){
-						collectionLinks.links.push(childField.value[0].navigatesTo);
-					}
-					
-				}
-				if(collectionLinks.links.length > 0){
-					list.push(collectionLinks);
-				
-					}
-				}
-			}
-			//composite
-			else{
-				var compLinks = {};
-				compLinks.links = [];
-				compLinks.name = metadataField.name;
-
-				if(metadataField.value[0].navigatesTo != null){
-					compLinks.links.push(metadataField.value[0].navigatesTo);
-					list.push(compLinks);
-				}
-			}
-		
-		
-		
+		Mink.recursiveSearchForLinked(metadataField, list, true);
 	}
+		
+		
+		
+	
 	console.log(list);
 	return list;
 	
@@ -95,7 +164,6 @@ Mink.makeExplorableCollection = function(expandableCollections, linkedField){
 }
 Mink.makeExplorableCollections = function (sideBar, linkedFields){
 	var expandableCollections = buildDiv('minkExplorableCollections');
-	
 	for(var i = 0; i < linkedFields.length; i++){
 		Mink.makeExplorableCollection(expandableCollections, linkedFields[i]);
 		
@@ -143,12 +211,18 @@ Mink.makeSubheader = function(parent, metadataField){
 	parent.appendChild(textHold);
 	
 }
-Mink.makeHeader = function(parent, metadataFields){
+Mink.makeHeader = function(parent, metadataFields, isMedia){
 	var title = buildDiv('minkTitle');
 	var subtitles = buildDiv('minkSubtitleContainer');
+	var videoFrame = null;
 	var headeredName = [];
+	
 	for (var i = 0; i < metadataFields.length; i++){
 		var field = metadataFields[i];
+		if(i == 4){
+			var t = 0;
+		}
+		console.log(field.mmdName);
 		//make the tile field, well the title
 		if(field.name === 'title' ||field.name == 'title'){
 			Mink.makeTitle(title, field);
@@ -172,23 +246,61 @@ Mink.makeHeader = function(parent, metadataFields){
 				}
 		
 
-			}
+			}	else if(field.mink_style == "main_video"){
+				//<iframe width="560" height="315" src="https://www.youtube.com/embed/NUI9I1HU19I" frameborder="0" allowfullscreen></iframe>
+				videoFrame = document.createElement("iframe");
+				videoFrame.setAttribute('allowfullscreen', '')
+				videoFrame.className="minkVideo";
+				if(isMedia){
+					videoFrame.width = 367;
+					videoFrame.height = 206;
+				}else{
+
+					videoFrame.width = 510;
+					videoFrame.height = 286;
+				}
+				
+				videoFrame.setAttribute('frameborder', '0');
+				videoFrame.src = field.value;
+				parent.appendChild(videoFrame);
+
+				console.log("victory");
 		}
+		}
+	
+			
+		
 	}
 	parent.appendChild(title);
-	parent.appendChild(subtitles);
+	if(videoFrame){
+		parent.appendChild(videoFrame);
+	}
+	if(subtitles.childNodes.length > 0){
+		parent.appendChild(subtitles);
+
+	}
+	/*for(var i = 0; i < videos.length; i++){
 	
+	parent.style.width = '560px';
+	parent.style.height = '315px';
+}*/
 	return headeredName;
 }
+
+
+
+
 //Initially just going to scan for collections of images
 
 Mink.makeMedia = function(parent, metadataFields){
 	var images = [];
+	var videos = []
 	for (var i = 0; i < metadataFields.length; i++){
 		var field = metadataFields[i];
+	
 		//potential collection of media
 		if(field.child_type != null){
-			if(field.child_type == 'image'){
+			if(field.child_type == 'image' && field.mink_style !="hide"){
 				for (var j = 0; j < field.value.length; j++){
 					var child = field.value[j];
 					var image = buildDiv('minkHeaderImage');
@@ -210,6 +322,7 @@ Mink.makeMedia = function(parent, metadataFields){
 				images.push(image);
 			}
 		}
+	
 	}
 	console.log(images);
 	var leftArrow = buildDiv('leftArrow');
@@ -236,6 +349,7 @@ Mink.makeMedia = function(parent, metadataFields){
 		parent.appendChild(rightArrow);
 
 	}
+
     if(images.length < 1){
 		return false;
 	}else{
@@ -532,8 +646,9 @@ Mink.render = function(task){
 
 	linkedFields = Mink.makeLinkedFieldList(metadataFields);
 	Mink.makeExplorableCollections(metadataTable.getElementsByClassName('minkSideBar')[0], linkedFields);
-	var headerNames = Mink.makeHeader(metadataTable.getElementsByClassName('minkHeader')[0], metadataFields);
 	var anyMedia = Mink.makeMedia(metadataTable.getElementsByClassName('minkMedia')[0], metadataFields);
+	var headerNames = Mink.makeHeader(metadataTable.getElementsByClassName('minkHeader')[0], metadataFields, anyMedia);
+
 	if(!anyMedia){
 		metadataTable.getElementsByClassName('minkMedia')[0].parentNode.parentNode.removeChild(metadataTable.getElementsByClassName('minkMedia')[0].parentNode);
 		metadataTable.getElementsByClassName('minkHeader')[0].setAttribute('style', '  margin-left: 8px;');
