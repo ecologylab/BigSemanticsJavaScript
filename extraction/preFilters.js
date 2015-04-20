@@ -9,9 +9,13 @@ var PreFilter = {};
 PreFilter.filter = function(location, filterObj){
 	var newLocation = location;
 	
+	//special case for google search
+	if (filterObj.override_params){
+		newLocation = overrideParams(newLocation);
+	}
+	
 	for (var p in filterObj.param_ops){
 		var filterOp = filterObj.param_ops[p];
-		//TODO execute the filter
 			
 		if (filterOp.strip_param){
 			newLocation = stripParam(newLocation, filterOp.strip_param.name);
@@ -31,13 +35,7 @@ PreFilter.filter = function(location, filterObj){
 	if (filterObj.strip_params_but){
 		newLocation = stripParamsBut(newLocation, filterObj.strip_params_but);
 	}
-	
-	//if filterObj.override_params
-	
-	
-	//if filterObj.alternative_host?
-	//not sure if this is actually ever used
-	
+
 	return newLocation;
 };
 
@@ -108,4 +106,34 @@ function setParam(url, name, value){
 		}
     }
     return stripped;
+}
+
+//replaces params before the # with the ones after. 
+function overrideParams(url){
+	var stripped = url.split("?")[0];
+	var queryString = (url.indexOf("?") !== -1) ? url.split("?")[1] : "";
+	
+	if (queryString !== "") {
+		var beforeHash = queryString.split("#")[0];
+		var afterHash = queryString.split("#")[1];
+
+		var beforeParams = beforeHash.split("&");
+		var afterParams = afterHash.split("&");
+
+		var newValues = {};
+		for (var a in afterParams){
+			newValues[afterParams[a].split("=")[0]] = afterParams[a].split("=")[1];
+		}
+
+		for (var p in beforeParams){
+			var param = beforeParams[p].split("=")[0];
+			if (param in newValues){
+				beforeParams[p] = param + "=" + newValues[param];
+			}
+		}
+
+		stripped = stripped + "?" + beforeParams.join("&");
+	}
+	
+	return stripped;
 }
