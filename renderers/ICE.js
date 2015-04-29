@@ -57,6 +57,27 @@ function downloadRequester(expandableItemUrl, container)
 			MetadataLoader.setMetadata(response.doc, false);
 			MetadataLoader.setMetaMetadata(response.mmd);
 		});
+		
+		//test api (timeline tweets)
+		if ((expandableItemUrl.indexOf("twitter.com") != -1)
+				&& (expandableItemUrl.indexOf("hashtag") == -1) 
+				&& (expandableItemUrl.indexOf("search") == -1))
+		{
+			var last_index = expandableItemUrl.lastIndexOf('/');
+			if (last_index != -1)
+			{
+				var username = expandableItemUrl.substr(last_index + 1);
+				TwitterRequests.getTimelineTweets(username, TwitterRequests.timelineTweetsCallback);
+			}
+		}
+		if ((expandableItemUrl.indexOf("twitter.com") != -1)
+				&& ((expandableItemUrl.indexOf("hashtag") != -1) 
+				|| (expandableItemUrl.indexOf("search") != -1)))
+		{
+			chrome.extension.sendRequest({track: expandableItemUrl}, function(response) {
+				
+			});
+		}
 	}
 }
 
