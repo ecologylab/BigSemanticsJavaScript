@@ -249,6 +249,9 @@ function getScalarD(field,contextNode,recurse,parserContext,page){
 		{
 			for (var i = 0; i < field.field_ops.length; i++)
 			{
+				var fieldOp = field.field_ops[i];
+				data = FieldOps.operate(data, fieldOp);
+				/*
 				var regexOps = field.field_ops[i].regex_op;
 				var regex = new RegExp(regexOps.regex, 'g');
 				if (regexOps.hasOwnProperty('replace')){
@@ -261,6 +264,7 @@ function getScalarD(field,contextNode,recurse,parserContext,page){
 						data = matches[regexOps.group];
 					}
 				}
+				*/
 			}
 		}
         scalars[page.URL][field.name] = data;
@@ -566,6 +570,9 @@ function getCollectionData(field,xpath,contextNode,page)
 			data = data.trim();
 			if (field['field_ops'] != null)
 			{
+				var fieldOp = field.field_ops[0];
+				data = FieldOps.operate(data, fieldOp);
+				/*
 				var regexOps = field.field_ops[0].regex_op;
 				var regex = regexOps.regex;
 				var replace = regexOps.replace;
@@ -577,6 +584,7 @@ function getCollectionData(field,xpath,contextNode,page)
 					data = data.match(new RegExp(regex));
 					data = data[0];
 				}
+				*/
 			}
 			d.push(data);
 		}
