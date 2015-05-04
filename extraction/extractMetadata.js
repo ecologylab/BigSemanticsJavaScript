@@ -251,20 +251,6 @@ function getScalarD(field,contextNode,recurse,parserContext,page){
 			{
 				var fieldOp = field.field_ops[i];
 				data = FieldOps.operate(data, fieldOp);
-				/*
-				var regexOps = field.field_ops[i].regex_op;
-				var regex = new RegExp(regexOps.regex, 'g');
-				if (regexOps.hasOwnProperty('replace')){
-					var replace = regexOps.replace;
-					data = data.replace(regex,replace);
-				}
-				else if (regexOps.hasOwnProperty('group')){
-					var matches = regex.exec(data);
-					if (matches !== null && matches[regexOps.group] !== undefined){
-						data = matches[regexOps.group];
-					}
-				}
-				*/
 			}
 		}
         scalars[page.URL][field.name] = data;
@@ -405,7 +391,7 @@ function getCompositeObject(field,xpath,contextNode,page){
 	}
 	var size = nodes.snapshotLength;
 	
-	if (size == 0) {
+	if (size === 0) {
 		return null;
 	}
 
@@ -572,19 +558,6 @@ function getCollectionData(field,xpath,contextNode,page)
 			{
 				var fieldOp = field.field_ops[0];
 				data = FieldOps.operate(data, fieldOp);
-				/*
-				var regexOps = field.field_ops[0].regex_op;
-				var regex = regexOps.regex;
-				var replace = regexOps.replace;
-				if (replace != null) {
-					d = [];
-					data = data.replace(new RegExp(regex, 'g'),replace);
-				} else {
-					d = [];
-					data = data.match(new RegExp(regex));
-					data = data[0];
-				}
-				*/
 			}
 			d.push(data);
 		}

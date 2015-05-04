@@ -1,3 +1,4 @@
+/* jshint -W004 */
 /* global console*/
 
 
@@ -12,8 +13,8 @@ PreFilter.filter = function(location, filterObj){
 	var newLocation = location;
 	
 	//not sure exactly how filter objects are structured. will need to be tested
-	for (var i in filterObj){
-		var fieldOp = filterObj.field_ops[i];
+	for (var i in filterObj.ops){
+		var fieldOp = filterObj.ops[i];
 		newLocation = FieldOps.operate(newLocation, fieldOp);
 	}
 	
@@ -46,6 +47,8 @@ FieldOps.operate = function(str, fieldOp){
 		str = strip(str, fieldOp.strip.any_of);
 	else if (fieldOp.strip_param)
 		str = strip(str, fieldOp.strip_param.name);
+	else if (fieldOp.substring)
+		str = substring(str, fieldOp.substring);
 	
 	return str;
 };
@@ -223,10 +226,43 @@ function stripParamsBut(url, keepParams){
     return stripped;
 }
 
-//NO TEST CASE
-function substring(str){
-	//TODO
-	return str;
+
+function substring(str, substringOp){
+	var a = 0;
+	if (substringOp.after){
+		var p = str.indexOf(substringOp.after);
+		if (p >= 0){
+			a = p + substringOp.after.length;
+		}
+	}
+	else if (substringOp.inclusiveAfter){
+		var p = str.indexOf(substringOp.inclusiveAfter);
+		if (p >= 0){
+			a = p;
+		}
+	}
+	else{
+		a = substringOp.begin;
+	}
+
+	var b = str.length;
+	if (substringOp.before){
+		var p = str.lastIndexOf(substringOp.before);
+		if (p >= 0){
+		  b = p;
+		}
+	}
+	else if (substringOp.inclusiveBefore){
+		var p = str.lastIndexOf(substringOp.inclusiveBefore);
+		if (p >= 0){
+		  b = p + substringOp.inclusiveBefore.length;
+		}
+	}
+	else{
+		b = (substringOp.end === 0) ? str.length : substringOp.end;
+	}
+
+	return str.substring(a, b);
 }
 
 /*******Helpers********/
