@@ -1022,7 +1022,7 @@ TwitterRenderer.buildMetadataField = function(metadataField, isChildTable, field
 					fieldValue.style.background = bgColorObj.color;
 				//Go back and change all #.*, @.*, and http:.* to links
 				if(fieldValue.tagName == 'P'){
-					//TwitterRenderer.makeLinks(fieldValue)
+					TwitterRenderer.makeLinks(fieldValue)
 
 				}
 				fieldValueDiv.appendChild(fieldValue);

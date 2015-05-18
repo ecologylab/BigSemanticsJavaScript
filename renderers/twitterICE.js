@@ -6,14 +6,14 @@ this.usernameXPath = "//li[@class='current-user']/a";
 this.expandableItemsXPath = "//ol[@id='stream-items-id']/li//p[@class='js-tweet-text tweet-text']/a/b";
 
 //@usernames, #hashtags, tweet tweeter, @connect tweeter, new layout tweet tweeter
-this.expandableItemsXPath2 = ".//a[@class='twitter-atreply pretty-link'] | " + 
+this.expandableItemsXPath2 = ".//a[@class='twitter-atreply pretty-link js-nav'] | " + 
 							 ".//a[@class='twitter-hashtag pretty-link js-nav'] | " + 
 							 ".//a[@class='account-group js-account-group js-action-profile js-user-profile-link js-nav'] | " + 
 							 ".//a[@class='pretty-link js-user-profile-link js-action-profile-name'] | " +
 							 ".//a[@class='ProfileTweet-originalAuthorLink u-linkComplex js-nav js-user-profile-link']/span | " +
 							 ".//a[@class='twitter-timeline-link']  | " + 
 							 ".//a[@class='tb-link']";
-this.expandableItemsXPath3 = ".//a[@class='twitter-atreply pretty-link'] | " + 
+this.expandableItemsXPath3 = ".//a[@class='twitter-atreply pretty-link js-nav'] | " + 
 							 ".//a[@class='twitter-hashtag pretty-link js-nav'] | " + 
 							 ".//a[@class='account-group js-account-group js-action-profile js-user-profile-link js-nav'] | " + 
 							 ".//a[@class='pretty-link js-user-profile-link js-action-profile-name'] | " +
