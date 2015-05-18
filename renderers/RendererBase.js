@@ -82,6 +82,33 @@ RendererBase.createLoadingRow = function(styleInfo)
 /*
  * Used to obtain labels for fields
  */
+
+RendererBase.buildExpandButton = function(styleInfo){
+	var expandButton = document.createElement('div');
+	expandButton.className = styleInfo.styles.expandButtonX;
+	
+
+
+	var expandSymbol = document.createElement('div');
+		expandSymbol.className = styleInfo.styles.expandSymbol;
+		//expandSymbol.style.display = "block";
+		
+	var collapseSymbol = document.createElement('div');
+		collapseSymbol.className = styleInfo.styles.collapseSymbol;
+		//collapseSymbol.style.display = "block";						
+	
+	/* set mmdType to all as any may receive event */
+	expandButton.mmdType = styleInfo.type;
+	expandSymbol.mmdType = styleInfo.type;
+	collapseSymbol.mmdType = styleInfo.type;
+						
+	expandButton.appendChild(expandSymbol);
+	expandButton.appendChild(collapseSymbol);
+	
+	return expandButton;
+	
+	
+}
 RendererBase.getFieldLabel = function(metadataField)
 {
 	var label = {};

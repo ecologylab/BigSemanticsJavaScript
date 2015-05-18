@@ -522,36 +522,19 @@ MICE.buildCompositeValue = function(metadataField, isChildTable, row, styleInfo,
 	
 	fieldValueDiv.appendChild(nestedPad);
 }
+
 MICE.buildExpandButton = function(fieldLabelDiv, childUrl, styleInfo, expandButton){
 	// If the document hasn't been download then display a button that will download it
-	expandButton = document.createElement('div');
-		expandButton.className = styleInfo.styles.expandButtonX;
-		
-	expandButton.onclick = MICE.downloadAndDisplayDocument;
-	
+	expandButton = RendererBase.buildExpandButton(styleInfo);
 	if(childUrl != "")
 	{
 		expandButton.onmouseover = MICE.highlightDocuments;
 		expandButton.onmouseout = MICE.unhighlightDocuments;
 	}
-
-
-	var expandSymbol = document.createElement('div');
-		expandSymbol.className = styleInfo.styles.expandSymbol;
-		expandSymbol.style.display = "block";
-		
-	var collapseSymbol = document.createElement('div');
-		collapseSymbol.className = styleInfo.styles.collapseSymbol;
-		collapseSymbol.style.display = "block";						
+	expandButton.onclick = MICE.downloadAndDisplayDocument;
 	
-	/* set mmdType to all as any may receive event */
-	expandButton.mmdType = styleInfo.type;
-	expandSymbol.mmdType = styleInfo.type;
-	collapseSymbol.mmdType = styleInfo.type;
-						
-	expandButton.appendChild(expandSymbol);
-	expandButton.appendChild(collapseSymbol);
 	fieldLabelDiv.appendChild(expandButton);
+
 	
 	
 	
