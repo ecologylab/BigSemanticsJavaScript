@@ -100,6 +100,10 @@ function dataFromKids(mmdKids,contextNode,recurse,parserContext,page,isLowerLvl)
     var isNested = false;
     if (contextNode != page) isNested = true;
     
+    if (mmdKids == null || mmdKids.length == 0) {
+      return null; // Nothing to do here.
+    }
+    
 	for (var i = 0; i < mmdKids.length; i++) {
 		var field = mmdKids[i];
 		var name;
@@ -664,4 +668,9 @@ function sortKids(mmdKidsList) {
 function secondaryExtractCallback(mmd, page){
     var md = extractMetadata(mmd, page);
     console.log(md);
+}
+
+function getPosition(str, m, i) 
+{
+   return str.split(m, i).join(m).length;
 }
