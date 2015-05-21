@@ -283,7 +283,7 @@ function getCompositeD(field,contextNode,recurse,parserContext,page){
 		for (var j = 0; j < fieldx.length; j++) {
 			x = getCompositeObject(field, fieldx[j], contextNode,page);
 			// if the result is not a node, assume there was a field parser that manually got data for us and return that data
-			if (x !== null && !x.hasOwnProperty("nodeType")){
+			if (x !== null && x.prototype && !x.prototype.hasOwnProperty("nodeType")){
 				return x;
 			}
 			else if (x !== null && x !== "") {
