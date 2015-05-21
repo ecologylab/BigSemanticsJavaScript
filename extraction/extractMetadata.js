@@ -236,7 +236,15 @@ function getScalarD(field,contextNode,recurse,parserContext,page){
 	{
 		var fieldx = field.xpaths;
 		for (var j = 0; j < fieldx.length; j++) {
-			x = getScalarString(field,fieldx[j],contextNode,page);
+			if (field.extract_as_html) {
+				x = getScalarNode(field,fieldx[j],contextNode,page);
+				if (x) {
+					x = x.innerHTML;
+				}
+			}
+			else {
+				x = getScalarString(field,fieldx[j],contextNode,page);
+			}				
 			if (x !== null && x !== "" && x !== "\n") {
 				data = x;
 				break;			
@@ -350,6 +358,16 @@ function getCollectionD(field,contextNode,recurse,parserContext,page)
 		return data;
 	}				
 	return null;
+}
+
+function getScalarNode(field,xpath,contextNode,page) {
+	var data;
+	try {
+		data = page.evaluate(xpath, contextNode, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null);
+	} catch (err) {
+		return null;
+	}
+	return data.singleNodeValue;
 }
 
 function getScalarString(field,xpath,contextNode,page){
