@@ -689,8 +689,3 @@ function secondaryExtractCallback(mmd, page){
     var md = extractMetadata(mmd, page);
     console.log(md);
 }
-
-function getPosition(str, m, i) 
-{
-   return str.split(m, i).join(m).length;
-}
