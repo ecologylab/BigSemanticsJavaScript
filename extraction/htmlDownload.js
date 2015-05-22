@@ -88,7 +88,7 @@ function removeRecentlyRequested(domain){
   	recentlyRequested.splice(index, 1);	
 }
 
-function isUrlRedirect(response, sendResponse, additionalUrls)
+function isUrlRedirect(response, sendResponse, additionalUrls, mmd, callback)
 {
 	//check <script> tags in DOM <head>
 	//containing "window.opener = null; location.replace(url)"
@@ -116,7 +116,7 @@ function isUrlRedirect(response, sendResponse, additionalUrls)
 						if (additionalUrls.indexOf(response.URL) == -1)
 							additionalUrls.push(response.URL);
 						if (additionalUrls.indexOf(url[1]) == -1)
-							loadWebpage(url[1], sendResponse, additionalUrls);
+							loadWebpage(url[1], sendResponse, additionalUrls, mmd, callback);
 						return true;
 					}
 				}
@@ -156,7 +156,7 @@ function sendLoadRequest(url, sendResponse, additionalUrls, mmd, callback)
 			if (xhr.readyState==4 && xhr.status==200){			
 				if (xhr.response !== null){
 					
-					if (!isUrlRedirect(xhr.response, sendResponse, additionalUrls))		{	
+					if (!isUrlRedirect(xhr.response, sendResponse, additionalUrls, mmd, callback))		{	
 						var mmd = getDocumentMM(url);
 						sendResponse(mmd, xhr.response, callback, additionalUrls);
 					}
