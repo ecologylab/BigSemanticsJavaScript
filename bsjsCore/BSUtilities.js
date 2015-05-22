@@ -77,3 +77,9 @@ function executeFunctionByName(functionName, context) {
   }
   return context[func].apply(this, args);
 }
+
+//get base url
+function getPosition(str, m, i) 
+{
+   return str.split(m, i).join(m).length;
+}
