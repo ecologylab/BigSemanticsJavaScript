@@ -397,6 +397,7 @@ function getScalarString(field,xpath,contextNode,page){
 			string = page.URL + string;
 		}
 		else if (string.length > 1 && string.indexOf("http") == -1){
+			string = string.trim();
 			string = page.URL.substring(0, page.URL.lastIndexOf('/')+1) + string; 
 		}
 	}
