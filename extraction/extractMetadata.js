@@ -129,8 +129,9 @@ function dataFromKids(mmdKids,contextNode,recurse,parserContext,page,isLowerLvl)
             var hasContext = false;
 
 			if (field.hasOwnProperty('context_node')){
-				if (defVars[field.context_node] !== null)
+				if (defVars[field.context_node]) {
 					contextNode = defVars[field.context_node];
+				}
                 hasContext = true;
 			}
 			
