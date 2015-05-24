@@ -157,8 +157,8 @@ function sendLoadRequest(url, sendResponse, additionalUrls, mmd, callback)
 				if (xhr.response !== null){
 					
 					if (!isUrlRedirect(xhr.response, sendResponse, additionalUrls, mmd, callback))		{	
-						var mmd = getDocumentMM(url);
-						sendResponse(mmd, xhr.response, callback, additionalUrls);
+						var mmd1 = getDocumentMM(url);
+						sendResponse(mmd1, xhr.response, callback, additionalUrls);
 					}
 					
 				}
