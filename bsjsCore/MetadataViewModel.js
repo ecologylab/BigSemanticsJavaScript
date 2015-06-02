@@ -22,10 +22,14 @@ function MetadataViewModel(mmdField)
   this.layer = (mmdField.layer != null) ? mmdField.layer : 0.0;
   this.style_name = (mmdField.style_name != null) ? mmdField.style_name : "";
   this.mink_style = (mmdField.mink_style != null) ? mmdField.mink_style : "";
+  this.show_in_snippet = (mmdField.show_in_snippet != null) ? mmdField.show_in_snippet : "";
+  this.explorable_label = (mmdField.explorable_label != null) ? mmdField.explorable_label : "";
 
   this.hide_label = (mmdField.hide_label != null) ? mmdField.hide_label : false;
   this.label_at = mmdField.label_at;
-  
+  this.minkHeight = mmdField.mink_height;
+  this.minkWidth = mmdField.mink_width;
+
   this.concatenates_to = mmdField.concatenates_to;
   this.concatenates = [];
   if (mmdField.concatenates != null)

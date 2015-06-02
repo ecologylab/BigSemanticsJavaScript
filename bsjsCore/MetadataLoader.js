@@ -119,7 +119,7 @@ MetadataLoader.setMetadata = function (rawMetadata, requestMmd) {
     // TODO move MDC related code to mdc.js
     if (typeof MDC_rawMetadata != "undefined") {
         MDC_rawMetadata = JSON.parse(JSON.stringify(rawMetadata));
-        updateJSON(true);
+        //updateJSON(true);
     }
 
     var metadata = {};

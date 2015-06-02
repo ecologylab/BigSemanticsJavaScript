@@ -1,0 +1,112 @@
+.primeMinkColumn{
+	width: 520px;
+	margin-right: 200px;
+	
+}
+.secondaryMinkColumn{
+	width: 520px;
+	height: 100%;
+	margin-left: 10px;
+	display: inline-block;
+	
+}
+.minkAppContainer{
+	margin-top: 8px;
+	margin-right: auto;
+	margin-left: auto;
+	width: 1280px;
+	display: flex;
+}
+.minkPileWrapper{
+	overflow: hidden;
+	
+}
+.minkPileWrapperHide{
+	animation-name: hidePile;
+	animation-duration: .5s;
+	animation-fill-mode: forwards;
+}
+@keyframes hidePile{
+	from{opacity: 1; transform: translateX(0px)}
+	to{opacity: 0; transform: translateX(-20px)}
+}
+.minkPileWrapperShow{
+	animation-name: showPile;
+	animation-duration: .5s;
+	animation-fill-mode: forwards;
+}
+@keyframes showPile{
+	from{opacity: 0; transform: translateX(-20px)}
+	to{opacity: 1; transform: translateX(-px)}
+}
+.minkPile{
+	padding-top: 8px;
+	padding-bottom: 4px;
+	margin-top: 8px;
+	    transition: height 1s ease-out;
+	    -webkit-transition: height .5s ease, margin-top .5s ease, background-color .5s ease;
+	    	 /*   transition: margin-top 1s ease-out;
+	    -webkit-transition: margin-top 1s ease;*/
+	    
+	position: relative;
+}
+#mdcIce{
+	margin-top: auto;
+	margin-bottom: auto;
+}
+.minkPileCard{
+	margin-left: auto;
+	margin-right: auto;
+	background-color: white;
+	position: relative
+
+}
+.sampleCollapse{
+	height: 20px;
+	width: 100px;
+	border-style: solid;
+	border-width: 1px;
+	border-radius: 20px;
+	text-align: center;
+}
+.sampleCollapse:hover{
+	background-color: lightgray;
+	
+}
+.minkCardContainer{
+	transition: transform .5s ease-in, opacity .18s linear;
+	position: relative
+}
+.animatingCollapse{
+	animation-name: cardFadeOut;
+	animation-duration: .5s;
+	    animation-fill-mode: forwards;
+}
+.minkAppCanvas{
+	position: absolute;
+	pointer-events:none;
+	z-index: 100;
+}
+.animatingExpand{
+	animation-name: cardFadeIn;
+	animation-duration: .5s;
+	animation-fill-mode: forwards;
+	display: block;
+	transition
+	}
+@keyframes cardFadeOut{
+	0%{
+		opacity: 1;
+	}
+	100%{
+	opacity: 0;
+	}
+}
+@keyframes cardFadeIn{
+	from{opacity: 0}
+	to{opacity: 1}
+}
+@keyframes pileFadeIn{
+	from{opacity: 0;}
+	to {opacity: 1;}
+}

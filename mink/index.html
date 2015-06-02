@@ -61,6 +61,7 @@
 	<script type="text/javascript" src="../bsjsCore/simpl/simplTypeScopeDeserialize.js"></script>
 	<script type="text/javascript" src="../bsjsCore/simpl/simplTypeScopeSerialize.js"></script>
         <script type="text/javascript" src="./js/minkApp.js"></script>
+    <link href="./css/minkApp.css" type="text/css" rel="stylesheet" />
 
     <script>
        </script>
@@ -121,65 +122,23 @@
       </div>
     </div>
 
-    <div class="navbar navbar-inverse navbar-fixed-bottom">
-      <div class="navbar-inner">
-        <div class="container">
-          <ul class="nav pull-right">
-            <li><a href="http://ecologylab.net" target="_blank">Interface Ecology Lab</a></li>
-            <li><a href="http://ecologylab.net" target="_blank"><img class="nav-img pull-right" src="img/ecologylab.png" /></a></li>
-          </ul>
-				
-        </div>
-      </div>
-    </div>
+   
 
 
     <!-- Content -->
-    <div class ="container">
-      <div class="row">
-        <div class="span9 title right">
-          <p>
-                    Background at the <a href="http://ecologylab.net/research/bigsemantics/" target="_blank">Big Semantics research page</a> and <a href="https://github.com/ecologylab/BigSemantics/wiki/Metadata-In-Context-Expander-%28MICE%29" target="_blank">MICE Wiki</a>.</p>
-        </div>
-      </div>
-
+    <div class ="minkAppContainer" id="minkAppContainer">
+    <div class="primeMinkColumn">
+       <div class="" id="mdcIce"></div>
+    </div>
+    <div class="secondaryMinkColumn" id="minkExpandColumn">
+    	
+    </div>
      
    
-        <div class="" id="mdcIce"></div>
 
-      <div class="row" id="scenesTitle">
-        <div class="span9 title">
-          <h4>
-            <a id="moreData" data-toggle="collapse" data-target="#dataDrop">
-              Behind-the-Scenes Data
-            </a>
-            <i id="moreDataIcon" class="icon-chevron-right"></i>
-          </h4>
+     
 
-          <div class="btn-group" data-toggle="buttons-radio">
-            <button type="button" id="mdJsonButton" class="btn btn-mini btn-primary active">Metadata</button>
-            <button type="button" id="mmdJsonButton" class="btn btn-mini">Meta-Metadata</button>
-          </div>
-
-					<div id="dataDrop" class="collapse in">
-
-<p class="left">
-The Metadata tab shows metadata extracted via <a target="_blank" href="https://github.com/ecologylab/BigSemantics/wiki/Use-BigSemantics-Service">the BigSemantics Service</a> in JSON, using a wrapper from the repository, for the given URL.
-The wrapper, authored in the Meta-Metadata language, defines the data structure, extraction rules, and presentation guidelines for corresponding metadata.
-The wrapper shown here contains nested structures inherited from its base types; see <a target="_blank" href="https://github.com/ecologylab/BigSemantics/wiki#wiki-Wrapper_Repository">the wrapper repository</a> for their original forms, and <a target="_blank" href="https://github.com/ecologylab/BigSemantics/wiki">the BigSemantics wiki</a> for how to author them.
-</p>
-
-
-          </div>   
-
-        </div>
-      </div>
-
-      <div class="row">
-        <div class="span9 content" id="mdcJson">
-          <pre class="prettyprint languague-css" id="mdcJsonPP"></pre>
-        </div>
-      </div> 
+     
       
        </div>
 

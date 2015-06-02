@@ -6,6 +6,7 @@ var Mink = {};
 var FIRST_LEVEL_FIELDS = 20;
 var FIELDS_TO_EXPAND = 10;
 Mink.rootDocToCollections = new Map;
+Mink.rootDocToExpandedExplorables = new Map;
 function buildDiv(className){
 	var elem = document.createElement('div');
 	elem.className = className;
@@ -157,13 +158,17 @@ Mink.getExplorableCount = function(metadataFields){
 
 Mink.showExplorableLinks = function(event){
 	var target = event.target;
-	while(target.className != "minkExplorableCollection"){
-		target = target.parentNode;
-	}
+	target = $(target).closest(".minkExplorableField")[0];
+		 
+	target.setAttribute('expanded', 'true');
 	var rooturl = target.getAttribute('rooturl');
 	var collectionname = target.getAttribute('collectionname');
 	var links = Mink.rootDocToCollections.get(rooturl).get(collectionname);
 	console.log(links);
+	var detailDetails = {rooturl: rooturl, collectionname: collectionname, links: links, type: 'minknewpile'};
+	var eventDetail = {detail: detailDetails, bubbles: true};
+	  var myEvent = new CustomEvent("minkevent", eventDetail);
+	  target.dispatchEvent(myEvent);
 }
 Mink.makeExplorableCollection = function(expandableCollections, linkedField, url){
 	var expandableCollection = buildDiv('minkExplorableCollection');
@@ -204,37 +209,81 @@ Mink.makeExplorableCollections = function (sideBar, linkedFields, url){
 
 //	sideBar.appendChild(expandableCollections);
 }
+Mink.stopParentHoverCSS = function(event){
+	$(event.target.parentNode).removeClass('minkTitleBarHoverEffect');
+}
+Mink.returnParentHoverCSS = function(event){
+	$(event.target.parentNode).addClass('minkTitleBarHoverEffect');
+}
+
+Mink.explorableButton = function(event){
+	var target = event.target;
+	
+	var expandables = Mink.rootDocToExpandedExplorables.get(target.getAttribute('url'));
+	if(expandables.length < 1){
+		var titlebar = $(target).siblings('.minkTitleClickable')[0];
+		Mink.grow(titlebar);
+	}else{
+		//expand/collapse 'em all
+		var shouldHide = true;
+		if(target.getAttribute('show') == 'true'){
+			shouldHide = false;
+			target.setAttribute('show', 'false');
+
+		}else{
+			target.setAttribute('show', 'true');
+
+		}
+		
+		var explorables = $(target).closest('.minkContainer').find('.minkExplorableField');
+		for(var i = 0; i < explorables.length; i++){
+			if($(explorables[i]).attr('expanded') == 'true' && expandables.indexOf($(explorables[i]).attr('collectionname')) > -1){
+			var detailDetails = {type: 'minkshowhide', hide: shouldHide};
+			var eventDetail = {detail: detailDetails, bubbles: true};
+			var myEvent = new CustomEvent("minkevent", eventDetail);
+			explorables[i].dispatchEvent(myEvent);
+			}
+		}
+		
+		
+	}
+}
 Mink.makeTitle = function(metadataFields, url, styleInfo){
 	
-	var headerContainer = buildDiv('minkTitleBar');
-	var plus = RendererBase.buildExpandButton(styleInfo);
+	var headerContainer = buildDiv('minkTitleBar minkTitleBarHoverEffect');
+	var clickableToExpand = buildSpan('minkTitleClickable');
 	
-		headerContainer.appendChild(plus);
+	
+	//	headerContainer.appendChild(plus);
 	var imageCont = document.createElement('img');
 	imageCont.className = "minkFavicon";
 	imageCont.src = 	BSUtils.getFaviconURL(url);
-	headerContainer.appendChild(imageCont);
+	clickableToExpand.appendChild(imageCont);
 	var metadataField;
 	for (var i = 0; i < metadataFields.length; i++){
 		var field = metadataFields[i];
-		if(field.name === 'title' ||field.name == 'title'){
+		if(field.mmdName === 'title' ||field.mmdName == 'title'){
 			metadataField = field;
 			break;
 		}
 	}
 	if(metadataField!=null){
-	var link = document.createElement('a');
+	var link = document.createElement('span');
 	link.className = "minkTitleField";
 	link.href = metadataField.navigatesTo;
 	link.innerHTML = "<span>" + metadataField.value + "</span>";
-	headerContainer.appendChild(link);
+	clickableToExpand.appendChild(link);
 	}
-	
+	headerContainer.appendChild(clickableToExpand);
 	//function to find number of explorables
 	var explorableCount = Mink.getExplorableCount(metadataFields);
 	if(explorableCount > 0){
-		var explorableButton = buildSpan('minkExplorablesExpander');
+		var explorableButton = buildSpan('minkExplorablesExpander filledExpander');
 		explorableButton.innerHTML = explorableCount;
+		explorableButton.addEventListener('mouseenter', Mink.stopParentHoverCSS);
+		explorableButton.addEventListener('mouseleave', Mink.returnParentHoverCSS);
+		explorableButton.addEventListener('click', Mink.explorableButton);
+		explorableButton.setAttribute('url', url);
 		headerContainer.appendChild(explorableButton);
 
 	}
@@ -257,48 +306,107 @@ Mink.makeTitle = function(metadataFields, url, styleInfo){
 	tmpCanvas.getContext('2d').drawImage(imageCont,0,0); // Or at whatever offset you like
 	document.body.appendChild(tmpCanvas);
 	*/
-	plus.addEventListener('click', Mink.grow);
+	clickableToExpand.addEventListener('click', Mink.growHandler);
 	
 	return headerContainer;
 	
 }
-Mink.makeSubheader = function(parent, metadataField){
+
+
+Mink.childLabelTitles = function(metadataField){
 	var text = "";
-	var textHold = document.createElement('span');
+
+	if(metadataField.child_type != null){
+		for (var i = 0; i < metadataField.value.length; i++){
+			var childField = metadataField.value[i];
+			if(typeof childField.value[0].value === 'string'){
+				text += childField.value[0].value;
+				text += ', ';
+			}
+			
+			
+		}
+		text = text.slice(0, -2);
+	}else{
+		if(typeof metadataField.value[0].value === 'string'){
+			text += metadataField.value[0].value;
+		}
+	}
+	
+	return text;
+}
+
+/*
+ * 
+ * Holds a combination of key fields (as defined in mmd) and fields with explorables
+ * 
+ */
+
+Mink.makeSubheader = function(parent, metadataField){
+	
+	
+	
+	if(metadataField.mink_style == "show_label"){
+		var label = buildSpan('minkSnippetLabel');
+		if(metadataField.label != "" && metadataField.label != null){
+			label.innerHTML = BSUtils.toDisplayCase(metadataField.label);
+
+		}else{
+			label.innerHTML = BSUtils.toDisplayCase(metadataField.name);
+		}
+		parent.appendChild(label);
+	}
+	var value = buildSpan('');
 	//composite or collection
 	if(typeof metadataField.value != 'string'){
-		if(metadataField.child_type != null){
-			for (var i = 0; i < metadataField.value.length; i++){
-				var childField = metadataField.value[i];
-				if(typeof childField.value[0].value === 'string'){
-					text += childField.value[0].value;
-					text += ', ';
-				}
-				
-				
-			}
-			text = text.slice(0, -2);
-		}else{
-			if(typeof metadataField.value[0].value === 'string'){
-				text += metadataField.value[0].value;
-			}
-		}
+
+		value.innerHTML = Mink.childLabelTitles()
 	}
 	//scalar
 	else{
-		text += metadataField.value;
+		value.innerHTML = metadataField.value;
 	}
+	parent.appendChild(value);
 	
-	textHold.innerHTML = text;
-	parent.appendChild(textHold);
 	
 }
-Mink.makeHeader = function(parent, metadataFields, isMedia){
-	var title = buildDiv('minkTitle');
+Mink.makeExplorable = function(parent, field, explorableMap, baseUrl){
+	var explorableField = buildDiv('minkExplorableField');
+	var linkedUrls = explorableMap.get(field.name)
+	var prefixText = "";
+	//Use field name as label or use titles as label
+	if(field.explorable_label == 'title'){
+		prefixText = Mink.childLabelTitles(field);
+				
+	}else{
+		if(field.label != "" && field.label != null){
+			prefixText = BSUtils.toDisplayCase(field.label);
+
+		}else{
+			prefixText = BSUtils.toDisplayCase(field.name);
+		}
+		
+	}
+	explorableField.appendChild(buildDiv('minkExplorableFieldLabelPrefix'));
+	explorableField.childNodes[0].innerHTML = prefixText;
+	explorableField.appendChild(buildSpan('minkExplorableFieldLabelSuffix unfilledExpander'));
+	explorableField.childNodes[1].innerHTML = "  (" + linkedUrls.length + ")";
+	explorableField.setAttribute('rooturl', baseUrl);
+	explorableField.setAttribute('collectionname', field.name);
+	explorableField.addEventListener('click', Mink.showExplorableLinks);
+	parent.appendChild(explorableField);
+	return linkedUrls.length;
+}
+Mink.makeSnippet = function(parent, metadataFields, isMedia, url){
 	var subtitles = buildDiv('minkSubtitleContainer');
+	var explorables = buildDiv('minkExplorablesContainer');
+	var expCount = 0;
 	var videoFrame = null;
 	var headeredName = [];
-	
+	var explorableMap = Mink.rootDocToCollections.get(url)
+	var explorableColNames = explorableMap.keys;
+	console.log(explorableColNames);
+	var fieldNames = [];
 	for (var i = 0; i < metadataFields.length; i++){
 		var field = metadataFields[i];
 		if(i == 4){
@@ -309,25 +417,31 @@ Mink.makeHeader = function(parent, metadataFields, isMedia){
 		if(field.name == "title"){
 			headeredName.push(field.name);
 		}
+		else if(field.show_in_snippet && explorableColNames.indexOf(field.name) < 0){
+			if(field.navigatesTo){
+				var subHeader = document.createElement('a');
+				subHeader.className= 'subtitle';
+				subHeader.href = field.navigatesTo;
+				Mink.makeSubheader(subHeader, field);
+				subtitles.appendChild(subHeader);
+				headeredName.push(field.name);
+			}else{
+				var subHeader = buildDiv('subtitle');
+				
+				Mink.makeSubheader(subHeader, field);
+				subtitles.appendChild(subHeader);
+				headeredName.push(field.name);
+			}
+			
+		}
+		else if(field.show_in_snippet && explorableColNames.indexOf(field.name) >= 0){
+			
+			headeredName.push(field.name);
+			expCount += Mink.makeExplorable(explorables, field, explorableMap, url);
+		}
 		else if(field.mink_style != null){
-			if(field.mink_style == 'subheader'){
-				if(field.navigatesTo){
-					var subHeader = document.createElement('a');
-					subHeader.className= 'subtitle';
-					subHeader.href = field.navigatesTo;
-					Mink.makeSubheader(subHeader, field);
-					subtitles.appendChild(subHeader);
-					headeredName.push(field.name);
-				}else{
-					var subHeader = buildDiv('subtitle');
-					
-					Mink.makeSubheader(subHeader, field);
-					subtitles.appendChild(subHeader);
-					headeredName.push(field.name);
-				}
-		
-
-			}	else if(field.mink_style == "main_video"){
+			if(field.mink_style == "main_video"){
+			
 				//<iframe width="560" height="315" src="https://www.youtube.com/embed/NUI9I1HU19I" frameborder="0" allowfullscreen></iframe>
 				videoFrame = document.createElement("iframe");
 				videoFrame.setAttribute('allowfullscreen', '')
@@ -337,8 +451,8 @@ Mink.makeHeader = function(parent, metadataFields, isMedia){
 					videoFrame.height = 206;
 				}else{
 
-					videoFrame.width = 510;
-					videoFrame.height = 286;
+					videoFrame.width = 480;
+					videoFrame.height = 270;
 				}
 				
 				videoFrame.setAttribute('frameborder', '0');
@@ -351,8 +465,12 @@ Mink.makeHeader = function(parent, metadataFields, isMedia){
 	
 			
 		
+	
+	
+	
 	}
-	parent.appendChild(title);
+	
+	
 	if(videoFrame){
 		parent.appendChild(videoFrame);
 	}
@@ -360,11 +478,15 @@ Mink.makeHeader = function(parent, metadataFields, isMedia){
 		parent.appendChild(subtitles);
 
 	}
+	if(explorableColNames.length > 0){
+		parent.appendChild(explorables);
+	}
 	/*for(var i = 0; i < videos.length; i++){
 	
 	parent.style.width = '560px';
 	parent.style.height = '315px';
 }*/
+	parent.parentNode.setAttribute('explorables', expCount);
 	return headeredName;
 }
 
@@ -384,9 +506,14 @@ Mink.makeMedia = function(parent, metadataFields){
 			if(field.child_type == 'image' && field.mink_style !="hide"){
 				for (var j = 0; j < field.value.length; j++){
 					var child = field.value[j];
-					var image = buildDiv('minkHeaderImage');
+					var image = buildDiv('minkSnippetImage');
 					var imageCont = document.createElement('img');
 					imageCont.src = child.value[0].navigatesTo;
+					if(field.minkHeight != null && field.minkWidth != null){
+						imageCont.style.height =  field.minkHeight + "px";
+						imageCont.style.width =  field.minkWidth + "px";
+
+					}
 					image.appendChild(imageCont);
 					images.push(image);
 					
@@ -397,9 +524,10 @@ Mink.makeMedia = function(parent, metadataFields){
 		//potential composite media
 		else if(field.composite_type != null){
 			if(field.composite_type == 'image'){
-				var image = buildDiv('minkHeaderImage');
-				var imageCont = document.crateElement('img');
+				var image = buildDiv('minkSnippetImage');
+				var imageCont = document.createElement('img');
 				imageCont.src = field.value[0].navigatesTo;
+				
 				image.appendChild(imageCont);
 				images.push(image);
 			}
@@ -513,6 +641,7 @@ Mink.buildCollection = function(metadataFieldOrigin, isChildTable, rowOriginal, 
 		if(metadataField.scalar_type)
 		{				
 			MICE.buildScalarField(metadataField ,styleInfo, valueCol, nameCol);
+			valueCol.childNodes[0].addEventListener('click', Mink.focus);
 		}
 		
 		else if (metadataField.composite_type != null && metadataField.composite_type == "image")
@@ -601,6 +730,9 @@ Mink.makeTable = function(parent, fields, url, styleInfo, isRoot){
 			}
 		}
 		var metadataField = fields[i];
+		
+		
+		
 		var nameCol = document.createElement('div');
 		
 		if (!metadataField.show_expanded_always ){	
@@ -657,7 +789,24 @@ Mink.makeTable = function(parent, fields, url, styleInfo, isRoot){
 	container.appendChild(newTable);
 	parent.appendChild(container);
 }
+Mink.makeTableExplorables = function(parent, metadataFields, linkedFields, url){
+	var explorableMap = Mink.rootDocToCollections.get(url)
+	var count = Mink.getExplorableCount(metadataFields);
+	var explorableColNames = explorableMap.keys;
+	var explorables = buildDiv('minkExplorablesContainer');
+	explorables.setAttribute('explorableCount', count);
+	for(var i = 0; i < metadataFields.length; i++){
+		var field = metadataFields[i];
+		if(explorableColNames.indexOf(field.name) >=0 && !field.show_in_snippet){
+			Mink.makeExplorable(explorables, field, explorableMap, url);
+		}
+		
+	}
+	
+	parent.appendChild(explorables);
+}
 Mink.render = function(task){
+	
 	
 	var metadataFields = task.fields;
 	var styleInfo = task.style;
@@ -677,23 +826,27 @@ Mink.render = function(task){
 	linkedFields = Mink.makeLinkedFieldList(metadataFields);
 	Mink.makeExplorableCollections(metadataTable.getElementsByClassName('minkSideBar')[0], linkedFields, task.url);
 	var anyMedia = Mink.makeMedia(metadataTable.getElementsByClassName('minkMedia')[0], metadataFields);
-	var headerNames = Mink.makeHeader(metadataTable.getElementsByClassName('minkHeader')[0], metadataFields, anyMedia);
+	var headerNames = Mink.makeSnippet(metadataTable.getElementsByClassName('minkSnippet')[0], metadataFields, anyMedia, task.url);
 	
 
 	if(!anyMedia){
 		metadataTable.getElementsByClassName('minkMedia')[0].parentNode.parentNode.removeChild(metadataTable.getElementsByClassName('minkMedia')[0].parentNode);
-		metadataTable.getElementsByClassName('minkHeader')[0].setAttribute('style', '  margin-left: 8px;');
+		metadataTable.getElementsByClassName('minkSnippet')[0].setAttribute('style', '  margin-left: 8px;');
 	}
-	var prunedFields = Mink.removeLinkedAndHeaderFields(metadataFields, linkedFields, headerNames);
+	var prunedFields = Mink.removeLinkedAndHeaderFields(metadataFields, [], headerNames);
 	//Mink.makeTable(metadataTable.getElementsByClassName('minkTable')[0], prunedFields, task.url, styleInfo);
 	
 	if(prunedFields.length > 0){
 
-		//Mink.buildMoreButton(metadataTable.getElementsByClassName('minkHeader')[0]);
-		
+		//Mink.buildMoreButton(metadataTable.getElementsByClassName('minkSnippet')[0]);
+		var prunedFields2 = Mink.removeLinkedAndHeaderFields(metadataFields, linkedFields, headerNames);
 		metadataTable.getElementsByClassName('minkOtherContent')[0].appendChild(buildDiv('minkTableRoot'));
-
-		Mink.makeTable(metadataTable.getElementsByClassName('minkTableRoot')[0], prunedFields, task.url, styleInfo, true);
+		Mink.makeTable(metadataTable.getElementsByClassName('minkTableRoot')[0], prunedFields2, task.url, styleInfo, true);
+		/*readd explorables*/
+		var table = metadataTable.getElementsByClassName('minkTableRoot')[0];
+		Mink.makeTableExplorables(table, prunedFields, linkedFields, task.url);
+		
+		
 		if(task.mmd.mink_expand_always){
 			metadataTable.getElementsByClassName('minkOtherContent')[0].parentNode.maxHeight = '';
 		}
@@ -703,9 +856,6 @@ Mink.render = function(task){
 	
 	if(metadataTable)
 	{
-		// Clear out the container so that it will only contain the new metadata table
-		while (task.container.hasChildNodes())
-		    task.container.removeChild(task.container.lastChild);
 		    
 		// Add the HTML5 canvas for the drawing of connection lines
 		var canvas = document.createElement("canvas");
@@ -717,7 +867,7 @@ Mink.render = function(task){
 		task.visual.appendChild(canvas);
 		
 		// Add the interior container to the root contianer
-		task.container.appendChild(task.visual);
+		setTimeout(function(){task.container.appendChild(task.visual)}, /*(Math.floor((Math.random() * 10) + 1))*50*/0);
 		//Find dominant color in image and decorate title, would prefer if this was done in makeTitle
 		//but the script I'm using is picky
 
@@ -741,41 +891,100 @@ Mink.render = function(task){
 	// Remove the RenderingTask from the queue
 	MetadataLoader.queue.splice(MetadataLoader.queue.indexOf(task), 1);
 }
-
-Mink.grow = function(event){
-	var target = event.target;
-	while(target.className != "minkTitleBar"){
+Mink.grow = function(target, doNotUpdateStatus){
+	target.removeEventListener('click', Mink.growHandler);
+	target.addEventListener('click', Mink.shrinkHandler);
+	while(!$(target).hasClass("minkTitleBar")){
 		target = target.parentNode;
 	}
-	var exSym = target.getElementsByClassName('minkExpandSymbol')[0];
-	exSym.style.display = 'none';
+	
 	var container = target.parentNode;
+	
+	var minkExpander = container.getElementsByClassName('minkExplorablesExpander')[0];
+	
+	var toAdd = $(container).find(".minkExplorableFieldLabelSuffix");
+	for(var i = 0; i < toAdd.length; i++){
+		$(toAdd[i]).removeClass('unfilledExpander');
+	}
+	if(!doNotUpdateStatus){
+		var contentContainer = $(target).closest('.minkContentContainer')[0];
+		$(contentContainer).attr('grown', 'true');
+
+	}
 	var mink = container.getElementsByClassName('minkKeyFields')[0];
         $(mink).slideDownTransition();
 	var moreExpander = container.getElementsByClassName('minkDetailExpanderContainer')[0];
-	setTimeout(function(){moreExpander.style.display = ''}, 250, moreExpander);
 	
+	
+	var detailExplorables = $(mink).find('.minkExplorableField');
+	var explorablesLeftForExpander = 0;
+	/*Attach other piles to expander*/
+	for(var i = 0; i < detailExplorables.length; i++){
+		if($(detailExplorables[i]).attr('expanded') == 'true'){
+			var rooturl = $(detailExplorables[i]).attr('rooturl');
+			var collectionname = $(detailExplorables[i]).attr('collectionname');
+
+			var detailDetails = {rooturl: rooturl, collectionname: collectionname, newroot: minkExpander, type: 'minkshowmore'};
+			var eventDetail = {detail: detailDetails, bubbles: true};
+			var myEvent = new CustomEvent("minkevent", eventDetail);
+			detailExplorables[i].dispatchEvent(myEvent);
+			var previous = Mink.rootDocToExpandedExplorables.get(rooturl);
+			if(previous == null){
+				previous = [];
+			}
+			previous.splice(previous.indexOf(collectionname), 1);
+			explorablesLeftForExpander = previous.length;
+			Mink.rootDocToExpandedExplorables.put(rooturl, previous);
+		}
+	}
+	if(explorablesLeftForExpander > 0){
+		$(minkExpander).addClass('unfilledExpander');
+		minkExpander.innerHTML = mink.getAttribute('explorables');
+	}
+	setTimeout(function(){moreExpander.style.display = ''}, 250, moreExpander);
+
+	if(explorablesLeftForExpander > 0)
+		$(minkExpander).addClass('unfilledExpander');
+
 	var detail = container.getElementsByClassName('minkDetailExpander')[0];
 	if (detail.getAttribute('revealme') == 'true'){
 		Mink.showMore(detail);
 	}
+}
+Mink.growHandler = function(event){
+	event.stopPropagation();
+
+	Mink.grow(event.target);
 	//moreExpander.style.display = '';
-	event.target.removeEventListener('click', Mink.grow);
-	event.target.addEventListener('click', Mink.shrink);
 	
 }
 
+
 Mink.focus = function(event){
-	if ($(event.target.parentNode).hasClass('focus')){
-		$(event.target.parentNode).removeClass('focus');
-		$(event.target).removeClass('focus');
+	
+	var container = $(event.target).closest(".minkOtherContent");
+	var unfocusingNode = $(event.target.parentNode).hasClass('focus');
+	//If text is being selected, ignore
+	 var sel = window.getSelection();
+	 if (sel.rangeCount && sel.type == 'Range' && sel.toString() != ""){
+		   return;
+	 }
+	
+	 //If nodes already focused clear previous focus and preHeight from DOM
+	var potentiallyFocusedNodes = $(container).find('.focus');
+	for (var i = 0; i < potentiallyFocusedNodes.length; i++){
+		$(potentiallyFocusedNodes[i]).removeClass('focus');
+	}
+	if(potentiallyFocusedNodes.length > 0){
 
 		var container = $(event.target).closest('.minkContainer')[0];
 		var mink = container.getElementsByClassName('minkOtherContentWrapper')[0];
 		var previousHeight = $(mink).attr('prevHeight');
 		$(mink).slideUpTransition();
-
-	}else{
+	}
+	//Focus on node
+	
+	if(!unfocusingNode){
 		$(event.target.parentNode).addClass('focus');
 		$(event.target).addClass('focus');
 
@@ -786,25 +995,69 @@ Mink.focus = function(event){
 
 	}
 }
-Mink.shrink = function(event){
-	var target = event.target;
-	while(target.className != "minkTitleBar"){
+
+
+Mink.shrink = function(target, doNotUpdateStatus){
+	target.removeEventListener('click', Mink.shrinkHandler);
+	target.addEventListener('click', Mink.growHandler);
+	while(!$(target).hasClass("minkTitleBar")){
 		target = target.parentNode;
 	}
-	var exSym = target.getElementsByClassName('minkExpandSymbol')[0];
-	exSym.style.display = 'block';
-
+	
 	var container = target.parentNode;
 	var mink = container.getElementsByClassName('minkKeyFields')[0];
+
+	var minkExpander = container.getElementsByClassName('minkExplorablesExpander')[0];
+	var contentContainer = $(target).closest('.minkContentContainer')[0];
+
+	$(minkExpander).removeClass('unfilledExpander');
+	var toAdd = $(container).find(".minkExplorableFieldLabelSuffix");
+	for(var i = 0; i < toAdd.length; i++){
+		$(toAdd[i]).addClass('unfilledExpander');
+	}
+	var detailExplorables = $(mink).find('.minkExplorableField');
+	
+	/*Attach other piles to expander*/
+	for(var i = 0; i < detailExplorables.length; i++){
+		if($(detailExplorables[i]).attr('expanded') == 'true'){
+			var rooturl = $(detailExplorables[i]).attr('rooturl');
+			var collectionname = $(detailExplorables[i]).attr('collectionname');
+
+			var detailDetails = {rooturl: rooturl, collectionname: collectionname, newroot: minkExpander, type: 'minkshowless'};
+			var eventDetail = {detail: detailDetails, bubbles: true};
+			var myEvent = new CustomEvent("minkevent", eventDetail);
+			minkExpander.dispatchEvent(myEvent);
+			var previous = Mink.rootDocToExpandedExplorables.get(rooturl);
+			if(previous == null){
+				previous = [];
+			}
+			if(previous.indexOf(collectionname) < 0){
+				previous.push(collectionname)
+
+			}
+			Mink.rootDocToExpandedExplorables.put(rooturl, previous);
+		}
+	}
+	
+	
+	if(!doNotUpdateStatus){
+		var contentContainer = $(target).closest('.minkContentContainer')[0];
+		$(contentContainer).attr('grown', 'false');
+
+	}
 	var moreExpander = container.getElementsByClassName('minkDetailExpanderContainer')[0];
 	moreExpander.style.display = 'none';
 	//Check to collapse table as well
 	var detail = container.getElementsByClassName('minkDetailExpander')[0];
 	Mink.showLess(detail, null, true);
-	
+	minkExpander.innerHTML = parseInt(mink.getAttribute('explorables')) + parseInt(minkExpander.innerHTML);
 	$(mink).slideUpTransition(true);
-	event.target.removeEventListener('click', Mink.shrink);
-	event.target.addEventListener('click', Mink.grow);
+}
+Mink.shrinkHandler = function(event){
+	event.stopPropagation();
+
+	Mink.shrink(event.target);
+	
 
 }
 
@@ -818,7 +1071,28 @@ Mink.showMore = function(target){
 	
 	
 	var minkTables = container.getElementsByClassName('minkOtherContent')[0].parentNode;
-		
+	
+	var detailExplorables = $(minkTables).find('.minkExplorableField');
+	var expander = $(container.parentNode.parentNode).find('.minkExplorablesExpander')[0]
+	$(expander).addClass('unfilledExpander');
+	for(var i = 0; i < detailExplorables.length; i++){
+		if($(detailExplorables[i]).attr('expanded') == 'true'){
+			var rooturl = $(detailExplorables[i]).attr('rooturl');
+			var collectionname = $(detailExplorables[i]).attr('collectionname');
+
+			var detailDetails = {rooturl: rooturl, collectionname: collectionname, newroot: expander, type: 'minkshowmore'};
+			var eventDetail = {detail: detailDetails, bubbles: true};
+			var myEvent = new CustomEvent("minkevent", eventDetail);
+			detailExplorables[i].dispatchEvent(myEvent);
+			
+			var previous = Mink.rootDocToExpandedExplorables.get(rooturl);
+			if(previous == null){
+				previous = [];
+			}
+			previous.splice(previous.indexOf(collectionname), 1);
+			Mink.rootDocToExpandedExplorables.put(rooturl, previous);
+		}
+	}
 	
 	//if ($(minkTables).hasClass("height-transition-hidden"))
         $(minkTables).slideDownTransition($(minkTables).outerHeight());	
@@ -835,8 +1109,38 @@ Mink.showLess = function(target, keepClosed, absolutelyShrink){
 	
 	var minkTables = container.getElementsByClassName('minkOtherContent')[0].parentNode;
 	
-		
+	/*
+	 * If any collections are expanded, find the total number of explorables and show them in the top explorable bubble and
+	 * re-anchor the animation
+	 */
 	
+	var detailExplorables = $(minkTables).find('.minkExplorableField');
+	var expander = $(container.parentNode.parentNode).find('.minkExplorablesExpander')[0]
+	var explorableCount = $(minkTables).find('.minkExplorablesContainer')[0].getAttribute('explorableCount');
+	expander.innerHTML = explorableCount;
+	$(expander).removeClass('unfilledExpander');
+	for(var i = 0; i < detailExplorables.length; i++){
+		if($(detailExplorables[i]).attr('expanded') == 'true'){
+			var rooturl = $(detailExplorables[i]).attr('rooturl');
+			var collectionname = $(detailExplorables[i]).attr('collectionname');
+
+			var detailDetails = {rooturl: rooturl, collectionname: collectionname, newroot: expander, type: 'minkshowless'};
+			var eventDetail = {detail: detailDetails, bubbles: true};
+			var myEvent = new CustomEvent("minkevent", eventDetail);
+			expander.dispatchEvent(myEvent);
+			
+			
+			var previous = Mink.rootDocToExpandedExplorables.get(rooturl);
+			if(previous == null){
+				previous = [];
+			}
+			if(previous.indexOf(collectionname) < 0){
+				previous.push(collectionname)
+
+			}
+			Mink.rootDocToExpandedExplorables.put(rooturl, previous);
+		}
+	}
 
 	$(minkTables).slideUpTransition(true);
 	target.innerHTML = "more";
@@ -863,7 +1167,7 @@ Mink.buildShellControls = function(parent, metadataFields){
 	control1Icon.className = "minkControlIcon";
 	control1Icon.src = '../renderers/images/mink/minus.png';
 	control1.appendChild(control1Icon)
-	control1Icon.addEventListener('click', Mink.shrink);
+	control1Icon.addEventListener('click', Mink.shrinkHandler);
 	var control2 = document.createElement('span');
 	control2.className = 'minkControl';
 	var control2Icon = document.createElement('img');
@@ -901,7 +1205,7 @@ Mink.buildMinkShell = function(table, isChildTable, isRoot, metadataFields, fiel
 	var minkMedia = buildDiv('minkMediaContainer');
 	var mmedia = buildDiv('minkMedia');
 	minkMedia.appendChild(mmedia);
-	var header = buildDiv('minkHeader');
+	var header = buildDiv('minkSnippet');
 	
 	var showHideExp = buildDiv('minkCollectionsExpander');
 	var expLabel = document.createElement('div');
@@ -915,6 +1219,13 @@ Mink.buildMinkShell = function(table, isChildTable, isRoot, metadataFields, fiel
 	minkRow.appendChild(header);
 	//minkRow.appendChild(showHideExp);
 	minkBody.appendChild(minkRow);
+	var minkMoreLess = buildDiv('minkDetailExpanderContainer');
+	var moreLessLabel = buildDiv('minkDetailExpander');
+	moreLessLabel.addEventListener('click', Mink.showMoreHandler);
+	moreLessLabel.innerHTML = "more";
+	minkMoreLess.style.display = 'none';
+	minkMoreLess.appendChild(moreLessLabel)
+	minkBody.appendChild(minkMoreLess);
 	var otherContentWrapper = buildDiv('minkOtherContentWrapper height-transition height-transition-hidden');
 	otherContentWrapper.appendChild(buildDiv('minkOtherContent'));
 	minkBody.appendChild(otherContentWrapper)
@@ -924,13 +1235,7 @@ Mink.buildMinkShell = function(table, isChildTable, isRoot, metadataFields, fiel
 
 	table.appendChild(minkMain);
 
-	var minkMoreLess = buildDiv('minkDetailExpanderContainer');
-	var moreLessLabel = buildDiv('minkDetailExpander');
-	moreLessLabel.addEventListener('click', Mink.showMoreHandler);
-	moreLessLabel.innerHTML = "more";
-	minkMoreLess.style.display = 'none';
-	minkMoreLess.appendChild(moreLessLabel)
-	table.appendChild(minkMoreLess);
+
 	
 }
 

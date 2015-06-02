@@ -8,23 +8,32 @@ body{
 }
 
  .height-transition {
-      -webkit-transition: all 250ms cubic-bezier(0.250, 0.250, 0.750, 0.750); 
-   -moz-transition: all 250ms cubic-bezier(0.250, 0.250, 0.750, 0.750); 
-     -o-transition: all 250ms cubic-bezier(0.250, 0.250, 0.750, 0.750); 
+      
         transition: all 250ms cubic-bezier(0.250, 0.250, 0.750, 0.750);
         overflow-y: hidden;            
     }
     .height-transition-hidden {            
         max-height: 0;            
     }
-
+@keyframes cardSlideIn{
+	from {opacity: 0; right: 30px;}
+	to {opacity: 1; right: 0px;}
+}
 .minkContainer{
-	width: 632px;
+	width: 500px;
 	/*border-radius: 8px;*/
 	/*background-color: #e6f2ff;*/
 	display:flex;
-	-webkit-box-shadow: 2px 2px 8px 0px rgba(0,0,0,0.75);
+	-webkit-box-shadow: 2px 2px 8px 0px rgba(0,0,0,0.4);
 	flex-direction: column;
+	position: relative;
+	animation-name: cardSlideIn;
+	animation-duration: .5s;
+	margin-left: auto;
+	margin-right: auto;
+	background-color: white;
+	margin-bottom: 8px;
+	
 }
 .minkFavicon{
 	  max-height: 20px;
@@ -45,9 +54,8 @@ body{
 .minkOtherContent{
 	width: 100%;
 	display: flex;
-	
+	margin-top: 8px;
 	flex-direction: column;
-	margin-top: 12px;
 }
 .minkKeyFields{
 	width: 100%;
@@ -59,9 +67,8 @@ body{
 	overflow-x: hidden;
 	
 }
-.minkHeader{
+.minkSnippet{
   display: flex;
-  margin-right: 6px;
   flex-grow: 11;
   flex-direction: column;
   justify-content: center;
@@ -70,6 +77,7 @@ body{
   display: inline-block;
   height: 100%;
   margin-right: 8px;
+  margin-left: 8px;
 
 }
 .metadata_italic{
@@ -94,7 +102,7 @@ position: relative;
 	width: 20px;
 
 }
-.minkHeaderImage{
+.minkSnippetImage{
 	display: inline-block;
 	max-height: 150px;
 	max-width: 150px;
@@ -142,7 +150,7 @@ height: 30px;
   vertical-align: middle;
   display: -webkit-inline-box;
     -webkit-box-orient: vertical;
-    max-width: 512px;
+    max-width: 402px;
   -webkit-line-clamp: 1;
   overflow: hidden;
     text-overflow: ellipsis;
@@ -182,7 +190,88 @@ box-shadow: 0px 2px 4px -2px rgba(0,0,0,0.4);
     background: lightblue;
     cursor: pointer;
 }
+.minkExplorable{
+  color: #00446b;
+  padding: 0px 4px 0px 4px;
+  display: inline-block;
+  max-height: 26px;
+  line-height: 26px;
+  margin-top: 6px;
+  
+}
 
+
+.minkVideo{
+	margin-top: 8px;
+}
+.minkExplorableFieldLabelSuffix{
+
+  position: relative;
+  height: 20px;
+  min-height: 28px;
+  height: 100%;
+  background-color: rgb(181, 211, 221);
+  padding: 0 0px 0 4px;
+  margin-left: 4px;
+  min-width: 32px;
+  text-shadow: 0px 0px 1px #fff;
+  color: white;
+  text-align: center;
+  color: #00446b;
+  border-radius: 8px 0 0 8px;
+  line-height: 28px;
+
+  transition: all 250ms cubic-bezier(0.250, 0.250, 0.750, 0.750);
+
+
+}
+.minkExplorableFieldLabelSuffix:hover{
+	background-color: #00446b;
+	color: white;
+	  transition: all 0s cubic-bezier(0.250, 0.250, 0.750, 0.750);
+	
+}
+.minkExplorableFieldLabelPrefix{
+	  line-height: 28px;
+	
+	  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+ 
+  max-width: 90%;
+  height: 100%;
+}
+.minkExplorableField{
+  margin-top: 6px;
+  max-height: 20px;
+  color: #00446b;
+  justify-content: space-between;
+  display: inline-flex;
+  margin-bottom: 4px;
+  min-height: 28px;
+	
+	
+}
+ .minkExplorableField:hover{
+	cursor: pointer;
+	background-color: #00446b;
+	color: white;
+}
+.minkExplorable:hover{
+	
+	cursor: pointer;
+	  background: -webkit-linear-gradient( #005485, #00446b);
+  -webkit-background-clip: initial;
+  -webkit-text-fill-color: initial;
+  color: white;
+}
+.minkExplorablesContainer{
+	display: flex;
+	flex-direction: column;
+	margin-top: 4px;
+	align-items: flex-being;
+}
+/*
 .minkExplorableCollection{
 	margin-left: 8px;
 	border-bottom: hidden  1px gray;
@@ -217,7 +306,7 @@ box-shadow: 0px 2px 4px -2px rgba(0,0,0,0.4);
 }
 .minkExplorableCollectionButton:hover{
 	cursor: pointer;
-}
+}*/
 .chevron:hover{
 	cursor: pointer;
 }
@@ -235,7 +324,7 @@ box-shadow: 0px 2px 4px -2px rgba(0,0,0,0.4);
 }
 
 .minkSubtitleContainer{
-	margin-top: 4px;
+	margin-top: 8px;
 }
 .minkControls{
 	display: flex;
@@ -352,9 +441,10 @@ color: gray;
 
 .minkMDContainer{
 	  -webkit-margin-after: 0em;
-	  margin-bottom: 8px;
+	  margin-right: 8px;
+	    margin-bottom: 8px;
 }
-.minkFieldValue.description_div{
+.minkFieldValue{
   display: -webkit-box;
   -webkit-line-clamp: 1;
   overflow: hidden;
@@ -365,7 +455,7 @@ color: gray;
 
 .minkFieldValue.focus{
 	-webkit-line-clamp: 255;
-	 	-webkit-box-shadow: inset 0px 0px 5px 0px rgba(255,128,171,1);
+	 	-webkit-box-shadow: inset 0px 0px 4px 0px rgba(255,128,171,1);
 	
 }
 
@@ -428,6 +518,7 @@ height: auto}
   border-width: 0px 1px 1px 0px;
   max-height: 40px;
   min-width: 70px;
+  
   line-height: 12px;
 }
 .minkCollectionsExpander:hover{
@@ -446,7 +537,6 @@ height: auto}
 }
 .minkExplorablesExpander{
 	  float: right;
-  background-color: darkblue;
   width: 40px;
   font-weight: bold;
   padding-left: 4px;
@@ -455,10 +545,31 @@ height: auto}
    line-height: 30px;
   text-align: center;
   color: white;
+       -webkit-transition: width 250ms cubic-bezier(0.250, 0.250, 0.750, 0.750); 
+   -moz-transition: width 250ms cubic-bezier(0.250, 0.250, 0.750, 0.750); 
+     -o-transition: width 250ms cubic-bezier(0.250, 0.250, 0.750, 0.750); 
+        transition: width 250ms cubic-bezier(0.250, 0.250, 0.750, 0.750);
+        
+  color: #00446b;
+    text-shadow: 0px 0px 1px #fff;
 }
+
+.filledExpander{
+	background-color: rgb(181, 211, 221);
+}
+.unfilledExpander{
+	width: 0px;
+	overflow: hidden;
+	padding: 0px;
+	min-width: 0px;
+	
+}
+
 .minkExplorablesExpander:hover{
-	background-color: blue;
+	background: -webkit-linear-gradient( #005485, #00446b);
+	color: white;
 	cursor: pointer;
+	
 }
 
 .minkDetailExpanderContainer{
@@ -466,17 +577,15 @@ height: auto}
 	display: flex;
 	justify-content: center;
 	position: relative;
-	bottom: 20px;
-	  height: 0px;
-	
+	  height: 20px;
 	z-index: 2;
+	
 }
 .minkDetailExpander{
-	background-color: lightgray;
 	text-align: center;
-	border-radius: 8px 8px 0 0;
+	border-radius: 20px;
 	height: 20px;
-	width: 40px;
+	width: 400px;
 
 }
 .minkDetailExpander:hover{
@@ -484,6 +593,25 @@ height: auto}
 	cursor: pointer;
 }
 
+.minkSnippetLabel{
+	color: #666666;
+	overflow: hidden;
+	word-wrap: break-word;
+	margin-right: 8px;
+	
+}
+.minkTitleBar{
+	display: flex;
+	align-content: flex-start;
+	-webkit-user-select: none;
+}
+.minkTitleBarHoverEffect:hover{
+	background-color: lightgray;
+	cursor: pointer;
+}
+.minkTitleClickable{
+	flex-grow: 20;
+}
 .ignore{
 	  /* border-color: lightgray; */
   /* border-style: solid; */
