@@ -234,31 +234,63 @@ function testURLS(){
  * Load post inheritence repository
  */
 function initRepo(){
+  function doInitRepo(serviceURL) {
+    //make a request to the service for the mmd for the url
+    var request = new XMLHttpRequest();
+    request.open("GET", serviceURL, true);
+    request.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+    
+    request.onreadystatechange = function()
+    {
+      if(request.readyState == 4) {	
+        if (request.status == 200) {
+          var ans = request.responseText;
+          // cludge ahead to remove null callback
+          mmdRepo = JSON.parse(ans.substring(5, ans.length-2));
+          initRepositoryByName();
+          initializeLocationBasedMaps();
+          initializeSuffixAndMimeBasedMaps();
+        } else {
+          console.log("Error on requesting post-inheritance mmd repository, "
+                      + "URL: " + serviceURL);
+        }
+      }	
+    };
+    request.send();
+  }
 
-	var serviceURL = "//api.ecologylab.net/BigSemanticsService/mmdrepository.jsonp";
+  var host = "api.ecologylab.net";
+  var port = 80;
+  var securePort = 443;
 
-	//make a request to the service for the mmd for the url
-	var request = new XMLHttpRequest();
-	request.open("GET", serviceURL, true);
-	request.setRequestHeader("Content-type","application/x-www-form-urlencoded");
-	
-	request.onreadystatechange = function()
-	{
-		if(request.readyState == 4) {	
-			if (request.status == 200) {
-				var ans = request.responseText;
-				//cludge ahead to remove null callback
-                mmdRepo = JSON.parse(ans.substring(5, ans.length-2));
-                initRepositoryByName();
-                initializeLocationBasedMaps();
-                initializeSuffixAndMimeBasedMaps();
-            } else {
-				//console.log("Error! XMLHttpRequest failed.");
-			}
-		}	
+  function getRepoURL() {
+    var repoURL = null;
+    if (window.location.protocol == 'https:') {
+      repoURL = "//" + host + ":" + securePort;
+    } else {
+      repoURL = "//" + host + ":" + port;
+    }
+    repoURL += "/BigSemanticsService/mmdrepository.jsonp";
+    return repoURL;
+  }
 
-	};
-	request.send();
+  if (typeof chrome === 'object' && chrome && chrome.storage) {
+    // if this code is running as a Chrome extension content script,
+    // check if the user has configured different host / port for the service
+    chrome.storage.local.get({
+      serviceHost: host,
+      servicePort: port,
+      serviceSecurePort: securePort
+    }, function(opts) {
+      host = opts.serviceHost;
+      port = opts.servicePort;
+      securePort = opts.serviceSecurePort;
+      doInitRepo(getRepoURL());
+    });
+  } else {
+    // not running as a Chrome extension content script, just do normal things
+    doInitRepo(getRepoURL());
+  }
 }
 
 function initRepositoryByName(){
