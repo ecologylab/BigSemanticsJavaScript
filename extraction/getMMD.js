@@ -270,7 +270,9 @@ function initRepo(){
     } else {
       repoURL = "//" + host + ":" + port;
     }
-    repoURL += "/BigSemanticsService/mmdrepository.jsonp";
+    repoURL += "/BigSemanticsService/";
+    SEMANTIC_SERVICE_URL = repoURL;
+    repoURL += "mmdrepository.jsonp";
     return repoURL;
   }
 
@@ -295,6 +297,8 @@ function initRepo(){
 
 function initRepositoryByName(){
     simplDeserialize(mmdRepo.meta_metadata_repository.repository_by_name);
+    RepoMan.initMetaMetadataRepo(mmdRepo, true);
+
     for (var i in mmdRepo.meta_metadata_repository.repository_by_name){
         var mmd = mmdRepo.meta_metadata_repository.repository_by_name[i];
         if (mmd.name)
