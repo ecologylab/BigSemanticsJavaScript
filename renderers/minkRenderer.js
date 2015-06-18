@@ -111,22 +111,24 @@ Mink.recursiveSearchForLinked = function(metadataField, list, isRoot){
 			var compLinks = {};
 			compLinks.links = [];
 			compLinks.name = metadataField.name;
-
-			if(metadataField.value[0].navigatesTo != null){
-				compLinks.links.push(metadataField.value[0].navigatesTo);
-				list.push(compLinks);
-			}else{
-				for(var l = 0; l < metadataField.value.length; l++){
-					if(typeof(metadataField.value[l]) === "object"){
-						Mink.recursiveSearchForLinked(metadataField.value[l], list);
-						if(Mink.recursiveIsLinked(metadataField.value[l]) && isRoot){
-							console.log("COMPOSITE TRUE");
-							
+			if(metadataField.value[0]){
+				if(metadataField.value[0].navigatesTo != null){
+					compLinks.links.push(metadataField.value[0].navigatesTo);
+					list.push(compLinks);
+				}else{
+					for(var l = 0; l < metadataField.value.length; l++){
+						if(typeof(metadataField.value[l]) === "object"){
+							Mink.recursiveSearchForLinked(metadataField.value[l], list);
+							if(Mink.recursiveIsLinked(metadataField.value[l]) && isRoot){
+								console.log("COMPOSITE TRUE");
+								
+							}
 						}
-					}
 
+					}
 				}
 			}
+		
 		}
 		
 }
@@ -277,7 +279,6 @@ Mink.makeTitle = function(metadataFields, url, styleInfo){
 	headerContainer.appendChild(clickableToExpand);
 	//function to find number of explorables
 	var explorableCount = Mink.getExplorableCount(metadataFields);
-	if(explorableCount > 0){
 		var explorableButton = buildSpan('minkExplorablesExpander filledExpander');
 		explorableButton.innerHTML = explorableCount;
 		explorableButton.addEventListener('mouseenter', Mink.stopParentHoverCSS);
@@ -285,8 +286,10 @@ Mink.makeTitle = function(metadataFields, url, styleInfo){
 		explorableButton.addEventListener('click', Mink.explorableButton);
 		explorableButton.setAttribute('url', url);
 		headerContainer.appendChild(explorableButton);
-
-	}
+		if(explorableCount < 1){
+			explorableButton.style.display = 'none';
+		}
+	
 	/*
 	var img = new Image();
 	img.onload = function () {

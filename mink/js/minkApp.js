@@ -6,6 +6,13 @@ minkApp.trails = [];
 minkApp.metadata_collection = {};
 minkApp.counter = 0;
 minkApp.COLLAPSED_CARD_HEIGHT = 31;
+minkApp.columns = [];
+minkApp.leftMostCol = null;
+minkApp.rightMostCol = null;
+minkApp.maxCols = 1;
+minkApp.columnKeyGen = 1;
+minkApp.offScreenColumnsLeft = 0;
+minkApp.offScreenColumnsRight = 0;
 
 function setIntervalX(callback, delay, repetitions) {
     var x = 0;
@@ -23,13 +30,15 @@ function minkCard(url, div){
 	this.html = div;
 }
 
-function minkPile(id, cards, root, html){
+function minkPile(id, cards, root, html, parent){
 	this.id = id;
 	this.cards = cards;
 	this.collapsed = false;
 	this.rootHTML = root;
 	this.HTML = html;
+	this.parentPile= parent;
 	this.visible = true;
+	this.kids = [];
 }
 
 
@@ -37,16 +46,174 @@ function pileIDGen(url, collection){
 	var pileId = url + '|' + collection;
 	return pileId
 }
+
+minkApp.newColumnId = function(){
+	minkApp.columnKey++;
+	return (minkApp.columnKey-1);
+}
+minkApp.initialize = function(minkAppHTML){
+	//Dumb code that sets at 3 columns instead of checking stuff. putting this here now
+	//In case there's a responsive future to be had
+	minkApp.baseCol = minkAppHTML.childNodes[0];
+	var columns = $(minkAppHTML).find(".minkColumn");
+	minkApp.columns = columns;
+	minkApp.leftMostCol = columns[0];
+	minkApp.rightMostCol = columns[0];
+	columns[0].setAttribute('column', '1');
+	minkApp.maxCols = 3;
+	minkApp.HTML = minkAppHTML;
+	
+	$(".minkBackButton").css('display', 'none');
+	$(".minkForwardButton").css('display', 'none');
+
+	
+}
+
+//if new Column is true, ignore code about opneing a new colun
+minkApp.moveForward = function(newColumn){
+	//
+
+	var already = false;
+	 for(var i = 0; i < minkApp.columns.length; i++){
+		  var colNo = parseInt(minkApp.columns[i].getAttribute('column'));
+		 
+		  if(colNo == 1){
+			  minkApp.columns[i].classList.add('minkDeletingColumn');
+			  minkApp.columns[i].addEventListener('animationend', minkApp.toggleDisplay)
+			  minkApp.columns[i].setAttribute('column', "0");
+
+			  }
+		  else if(colNo == 2){
+				  minkApp.leftMostCol = minkApp.columns[i];
+		  }
+		  
+		  if(colNo > 1 && (already == false)) 
+			  minkApp.columns[i].setAttribute('column', (colNo - 1).toString());
+		  
+	 
+		 if(colNo == (minkApp.maxCols) && (newColumn != true) && (already == false)){
+			  minkApp.columns[(i+1)].setAttribute('column', minkApp.maxCols.toString());
+			  minkApp.rightMostCol = minkApp.columns[(i+1)];
+			  minkApp.rightMostCol.style.display = '';
+			  $(minkApp.rightMostCol).removeClass("minkDeletingColumnRight");
+			  //this is a hacky way to ensure this code is only executed one
+			  already = true;
+
+		 }
+	 }
+		minkApp.offScreenColumnsLeft++;
+		if(minkApp.offScreenColumnsRight > 0){
+			minkApp.offScreenColumnsRight--;
+
+		}
+		$(".minkBackButton").css('display', '');
+		if(minkApp.offScreenColumnsRight < 1){
+			$(".minkForwardButton").css('display', 'none');
+
+		}
+
+}
+minkApp.goBackwards = function(howMany){
+	 for(var i = 0; i < minkApp.columns.length; i++){
+		  var colNo = parseInt(minkApp.columns[i].getAttribute('column'));
+		  if(colNo == 1){
+			  minkApp.columns[(i-1)].setAttribute('column', "1");
+			  minkApp.leftMostCol = minkApp.columns[(i-1)];
+			  minkApp.leftMostCol.style.display = '';
+			  $(minkApp.leftMostCol).removeClass("minkDeletingColumn");
+			  
+
+		  }
+		  if(colNo == minkApp.maxCols){
+			  minkApp.columns[i].classList.add('minkDeletingColumnRight');
+			  minkApp.columns[i].addEventListener('animationend', minkApp.toggleDisplay)
+			  minkApp.columns[i].setAttribute('column', "0");
+
+			  
+		  }else if(colNo > 0){
+			  minkApp.columns[i].setAttribute('column', (colNo + 1).toString());
+
+		  }
+	 }
+	 minkApp.offScreenColumnsRight++;
+		minkApp.offScreenColumnsLeft--;
+
+	 $(".minkForwardButton").css('display', '');
+	 if(minkApp.offScreenColumnsLeft < 1){
+			$(".minkBackButton").css('display', 'none');
+
+		}
+
+}
+minkApp.buildColumn = function(parent){
+	var column = buildDiv('minkColumn');
+	column.id = minkApp.newColumnId();
+	parent.appendChild(column);
+	return column;
+}
+minkApp.goBackHandler = function(event){
+	console.log('hahaha')
+	minkApp.goBackwards(1);
+	
+}
+minkApp.goForwardsHandler = function(event){
+	console.log('hahaha')
+	minkApp.moveForward();
+	
+}
 minkApp.minkEventHandler = function(event){
 	 
 	 if(event.detail.type == 'minknewpile'){
-		//Draw in the new minks in right-hand column and connect with cool curves
-		 var secondaryColumn = $("#minkExpandColumn")[0];
-		 var pile = minkApp.buildPile(secondaryColumn, event.detail.links, event.detail.rooturl, event.detail.collectionname, event.srcElement)
+		
+		 //Determine which column the event comes from
+		 var nextCol = null;
+		 var targetColumn = $(event.srcElement).closest(".minkColumn")[0];
+		 var columnNumber = parseInt(targetColumn.getAttribute('column'));
+		 console.log(columnNumber);
+		 if(targetColumn == minkApp.rightMostCol){
+			 if(columnNumber < minkApp.maxCols){
+				 //makes new column and add it in
+				  nextCol = minkApp.buildColumn($(minkApp.HTML).children('.minkColumns')[0]);
+				  nextCol.setAttribute('column', (columnNumber+1).toString());
+				  minkApp.columns.push(nextCol);
+				  minkApp.rightMostCol = nextCol;
+
+			 }else{
+				/* nextCol = minkApp.buildColumn(minkApp.HTML);
+				  nextCol.setAttribute('column', (minkApp.maxCols).toString());
+				  minkApp.columns.push(nextCol);
+				  minkApp.rightMostCol = nextCol;*/
+				  nextCol = minkApp.buildColumn($(minkApp.HTML).children('.minkColumns')[0]);
+					nextCol.setAttribute('column', (minkApp.maxCols).toString());
+					  minkApp.rightMostCol = nextCol;
+
+				  minkApp.moveForward(true);
+					minkApp.columns.push(nextCol);
+
+				  
+			 }
+			 //move forwards
+		 }else{
+			 var searchForCol = (columnNumber+1).toString();
+			 nextCol = $("div[column='" + searchForCol + "']")[0];
+			 
+			 
+			 
+		 }
+		 var pile = minkApp.buildPile(nextCol, event.detail.links, event.detail.rooturl, event.detail.collectionname, event.srcElement)
+		// var parentID = $(event.srcElement).closest('.minkPile')[0].getAttribute('pileID');
+		 
+		 /*
+		  * TODO: Update to be done with keys
+		  */
 		 minkApp.piles.push(pile);
+		 
 		 minkApp.pileMap.put(pileIDGen(event.detail.rooturl, event.detail.collectionname), pile);
 		 event.srcElement.addEventListener('click', minkApp.showHidePileHandler);
 		 event.srcElement.removeEventListener('click', Mink.showExplorableLinks);
+
+		 
+		 
 	 }else if(event.detail.type == 'minkshowless'){
 		 var id = pileIDGen(event.detail.rooturl, event.detail.collectionname);
 		 var pile = minkApp.pileMap.get(id);
@@ -66,6 +233,7 @@ minkApp.toggleDisplay = function(event){
 	}else{
 		event.target.style.display = '';
 	}
+	event.target.removeEventListener('animationend',minkApp.toggleDisplay )
 }
 minkApp.formStack = function(secondCard, thirdCard){
 	secondCard.style.transform = "translateY(" + (-1/2 * minkApp.COLLAPSED_CARD_HEIGHT + 4) + "px)";
@@ -181,7 +349,7 @@ minkApp.expandCollapsePile = function(event){
 
 				}
 				else{
-					kids[i].style.transform = "translate(" + (10) + "px)";
+					kids[i].style.transform = "translateY(" + (-i*20) + "px)";
 
 				}
 				if(i > 2){
@@ -270,7 +438,6 @@ minkApp.buildPile = function(parent, links, rooturl, collectionname, src){
 	console.log(links);
 	var wrapper= buildDiv('minkPileWrapper');
 	var collapseButton = buildDiv('sampleCollapse');
-	collapseButton.innerHTML = "BUTTON";
 	collapseButton.addEventListener('click', minkApp.expandCollapsePile);
 	var newPile = buildDiv('minkPile minkPileExpanded');
 	parent.appendChild(wrapper);
@@ -278,6 +445,7 @@ minkApp.buildPile = function(parent, links, rooturl, collectionname, src){
 	wrapper.appendChild(collapseButton);
 
 	var pile = new minkPile(pileId, minkApp.buildCards(newPile, links), src, newPile);
+	//pile.setAttribute('pileID', pileId);
 	wrapper.appendChild(newPile);
 	
 	
@@ -333,13 +501,13 @@ function redrawCanvas(){
 	var canvas = document.getElementById('minkAppCanvas');
 	var ctx = canvas.getContext('2d');
 	ctx.clearRect ( 0 , 0 , canvas.width, canvas.height );
-	  ctx.canvas.height = window.innerHeight;
+	  ctx.canvas.height = document.body.clientHeight;
 
 	var canvasY = canvas.getBoundingClientRect().top;
 	var canvasX = canvas.getBoundingClientRect().left;
 	for (var i = 0; i < minkApp.piles.length; i++){
 		var pile = minkApp.piles[i];
-		if (pile.visible){
+		if (pile.visible && $(pile.rootHTML.closest('.minkColumn')).is(':visible') && $(pile.HTML.closest('.minkColumn')).is(':visible')){
 			var rootRect = pile.rootHTML.getBoundingClientRect();
 			var rootAttachPointX = rootRect.left + rootRect.width - canvasX;
 			var rootAttachPointY = (rootRect.top + rootRect.height / 2) - canvasY;
@@ -381,10 +549,20 @@ function redrawCanvas(){
 }
 function onBodyLoad() {
 	var minkapp = $("#minkAppContainer")[0];
+	//SEMANTIC_SERVICE_URL = "http://128.194.128.84:8080/BigSemanticsService/";
+	
+	  if (document.URL.indexOf("http://localhost:") > -1){
+		  
+			SEMANTIC_SERVICE_URL = "http://localhost:8080/BigSemanticsService/";
 
+	  }
+	  else{
+		   SEMANTIC_SERVICE_URL = "http://ecology-service.cse.tamu.edu/BigSemanticsService/";
+
+	  }
 	var canvas = document.createElement('canvas');
 	canvas.className = "minkAppCanvas";
-	canvas.width = 1280;
+	canvas.width = 1800;
 	canvas.height = 1080;
 	canvas.id = 'minkAppCanvas';
 	animFrame(recursiveAnim);
@@ -396,7 +574,7 @@ function onBodyLoad() {
 	RendererBase.idealRenderer = false;
 	$(".collapse").collapse();
 	minkapp.addEventListener('minkevent', minkApp.minkEventHandler);
-	
+	minkApp.initialize(minkapp);
  
   //Try to get passed in parameter url
   var n = getParameter("url");
@@ -432,6 +610,7 @@ var MDC_rawMetadata = "";
 var MDC_rawMMD = "";
 
 //Stringify the JSON and make it pretty looking
+
 
 
 //Sets the value of the link text box in the linking modal view
@@ -521,7 +700,6 @@ function showMetadata(url)
   var hostname = window.location.hostname;
   var port = window.location.port;
   //SEMANTIC_SERVICE_URL = "http://" + hostname + ":" + port + "/BigSemanticsService/";
-  SEMANTIC_SERVICE_URL = "http://localhost:8080/BigSemanticsService/";
  
   if(window.history.pushState)
   {
