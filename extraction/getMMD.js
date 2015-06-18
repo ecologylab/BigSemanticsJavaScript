@@ -276,6 +276,7 @@ function initRepo(){
       repoURL = "//" + host + ":" + securePort;
     } else {
       repoURL = "//" + host + ":" + port;
+      repoURL = serviceURLPrefix + repoURL;
     }
     repoURL += "/BigSemanticsService/";
     SEMANTIC_SERVICE_URL = repoURL;
