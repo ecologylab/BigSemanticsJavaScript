@@ -29,12 +29,16 @@ RepoMan.loadMMDRepo = function()
 
 
 
-RepoMan.initMetaMetadataRepo = function(jsonRepo)
+RepoMan.initMetaMetadataRepo = function(jsonRepo, alreadyDeserialized)
 {
-	simplDeserialize(jsonRepo);
+    if (!alreadyDeserialized) {
+        simplDeserialize(jsonRepo);
+       
+
+    }
 	
-	var mmdByName = jsonRepo["meta_metadata_repository"]["repository_by_name"];
-		
+    var mmdByName = jsonRepo["meta_metadata_repository"]["repository_by_name"];
+
 	RepoMan.repo = {};
 	
 	//go through all mmd and construct mmd dictionary

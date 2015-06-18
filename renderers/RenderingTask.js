@@ -12,9 +12,12 @@
  @param extractor, though not used now, in the future will specify where to get md from
  @renderer, after the handler is called (typically to create a viewModel), the renderer is called.
 
+ @mmd if you already have mmd and metadata, just set them here
+
+
  */
 
-function RenderingTask(url, isRoot, clipping, handler, container, extractor, renderer)
+function RenderingTask(url, isRoot, clipping, handler, container, extractor, renderer, mmd, metadata)
 {
   if (url != null)
   {
@@ -24,8 +27,8 @@ function RenderingTask(url, isRoot, clipping, handler, container, extractor, ren
   this.container = container;
   this.clipping = clipping;
   
-  this.metadata = null;  
-  this.mmd = null;
+  this.metadata = metadata;  
+  this.mmd = mmd;
   
   this.isRoot = isRoot;
   if (handler == null) {
