@@ -158,6 +158,7 @@ function sendLoadRequest(url, sendResponse, additionalUrls, mmd, callback)
 					
 					if (!isUrlRedirect(xhr.response, sendResponse, additionalUrls, mmd, callback))		{	
 						var mmd1 = getDocumentMM(url);
+						simplGraphCollapse({mmdObj: mmd1});
 						sendResponse(mmd1, xhr.response, callback, additionalUrls);
 					}
 					
