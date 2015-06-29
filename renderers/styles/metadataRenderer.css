@@ -1,3 +1,5 @@
+
+@media all{
 .ecologylab-metadataRendering {
     background: #EEE;
     border-radius: 8px;
@@ -108,6 +110,7 @@
     text-align: right;
     pointer-events: none;
     padding: 2px;   
+    font-family: arial, sans-serif;
     margin-left: 6px;
     margin-right: 8px;
     width: 100%;
@@ -141,11 +144,15 @@
     text-align: left;
     vertical-align: middle;
     text-overflow: ellipsis;
-    
-    
+    color: black;
+  line-height: 15px;
+    font-family: arial, sans-serif;
     padding: 3px 8px;
 }
-
+.ecologylab-fieldValue.metadata_h1{
+		  vertical-align: text-bottom;
+	
+}
 .ecologylab-metadataContainer .ecologylab-favicon{
     width: 16px;
     height: 16px;
@@ -466,4 +473,8 @@
 .ecologylab-clippingFieldsTable {
     
 }
+p{
+	
+}
 
+}
