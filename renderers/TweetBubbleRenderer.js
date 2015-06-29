@@ -13,7 +13,7 @@ TwitterRenderer.lastColorIndex = Math.floor(Math.random() * TwitterRenderer.colo
 
 //var isExtension = (typeof chrome !== "undefined" && typeof chrome.extension !== "undefined");
 TwitterRenderer.imgDir = (application_name == "mdc") ? "../renderers/images/tweetBubble/"
-										: "/static/mache/code/BigSemanticsJS/TweetBubble/Plugin/chrome/content_script/img/";
+										: "/static/mache/code/BigSemanticsJS/renderers/images/tweetBubble/";
 
 TwitterRenderer.replyIconPath1 = isExtension ? chrome.extension.getURL("content_script/img/reply_221.png") : TwitterRenderer.imgDir + "reply_221.png";
 TwitterRenderer.retweetIconPath1 = isExtension ? chrome.extension.getURL("content_script/img/retweet_221.png") : TwitterRenderer.imgDir + "retweet_221.png";
@@ -1022,7 +1022,7 @@ TwitterRenderer.buildMetadataField = function(metadataField, isChildTable, field
 					fieldValue.style.background = bgColorObj.color;
 				//Go back and change all #.*, @.*, and http:.* to links
 				if(fieldValue.tagName == 'P'){
-					TwitterRenderer.makeLinks(fieldValue)
+					//TwitterRenderer.makeLinks(fieldValue)
 
 				}
 				fieldValueDiv.appendChild(fieldValue);

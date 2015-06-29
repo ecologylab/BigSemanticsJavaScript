@@ -10,6 +10,8 @@
 //the repo given to us by the service
 var mmdRepo;
 
+var serviceURLPrefix = "";
+
 /**
 * The map from meta-metadata name (currently simple name, but might be extended to fully
 * qualified name in the future) to meta-metadata objects. This collection is filled during the
@@ -194,6 +196,11 @@ var urlPrefixCollection = new PrefixCollection('/');
 
 
 //LEEEEETS GET IT STARTED IN HEEEEERE
+if (typeof chrome !== "undefined" && typeof chrome.extension !== "undefined")
+{
+	serviceURLPrefix = "http:";
+}
+
 initRepo();
 
 function StrippedUrlEntry(metaMetadata, selector){
@@ -269,6 +276,7 @@ function initRepo(){
       repoURL = "//" + host + ":" + securePort;
     } else {
       repoURL = "//" + host + ":" + port;
+      repoURL = serviceURLPrefix + repoURL;
     }
     repoURL += "/BigSemanticsService/";
     SEMANTIC_SERVICE_URL = repoURL;

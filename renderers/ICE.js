@@ -6,7 +6,7 @@ var iconDir = "";
 if (application_name == "mdc")
 	iconDir = "../renderers/images/tweetBubble/";
 else if (application_name == "ideamache")
-	iconDir = "/static/mache/code/BigSemanticsJS/TweetBubble/Plugin/chrome/content_script/img/";
+	iconDir = "/static/mache/code/BigSemanticsJS/renderers/images/tweetBubble/";
 else //tweetbubble
 	iconDir = chrome.extension.getURL("content_script/img/");
 

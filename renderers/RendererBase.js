@@ -44,7 +44,7 @@ RendererBase.addMetadataDisplay = function(container, url, isRoot, clipping, req
 
         if (clipping != null && clipping.rawMetadata != null) {
             clipping.rawMetadata.deserialized = true;
-            MetadataLoader.setMetadata(clipping.rawMetadata, false);
+            MetadataLoader.setMetadata(clipping.rawMetadata, true);
         }
         else {
             var requestMetadata = (typeof requestMD === "undefined") || requestMD == true;
