@@ -110,7 +110,7 @@ function addAdditionalUrl(additionalUrls, newUrl)
 	return doit;	// if false, circular reference -- quit!
 }
 
-function isJsContentRedirect(response, sendResponse, additionalUrls, mmd, callback)
+function isJsContentRedirect(xhr, sendResponse, additionalUrls, mmd, callback)
 {
 	//check <script> tags in DOM <head>
 	//containing "window.opener = null; location.replace(url)"
@@ -184,7 +184,7 @@ function sendLoadRequest(url, sendResponse, additionalUrls, mmd, callback)
 	{
 		var	ok			= false;
 		var status		= xhr.status;
-		switch (status)
+		switch (xhr.readyState)
 		{
 			case READY_STATE_RECEIVING:
 				if (!xhr.first300)
@@ -218,6 +218,12 @@ function sendLoadRequest(url, sendResponse, additionalUrls, mmd, callback)
 				{
 					// check content type and make sure we can parse it; otherwise, abort!
 					var contentType	= xhr.getResponseHeader("Content-Type");
+					//remove any secondary types ('charset=')
+					var firstSemicolonIndex = contentType.indexOf(';');
+					
+					if(firstSemicolonIndex > 0){
+						contentType = contentType.slice(0, firstSemicolonIndex);
+					}
 					// we think its html
 					if (contentType == null || contentType == "" || contentType =="text/html" || contentType == "text/plain" 
 						|| contentType.indexOf("xml") != -1)  //TODO -- RSS, OPML, other types using xml?
@@ -271,7 +277,7 @@ function sendLoadRequest(url, sendResponse, additionalUrls, mmd, callback)
 //					xhr.responseType = "document";
 				if (xhr.status==200 && xhr.response !== null)
 				{							
-					if (!isJsContentRedirect(xhr.response, sendResponse, additionalUrls, mmd, callback))		
+					if (!isJsContentRedirect(xhr, sendResponse, additionalUrls, mmd, callback))		
 					{	// normal case
 						var mmd1 = getDocumentMM(xhr.response.URL);
 						simplGraphCollapse({mmdObj: mmd1});
