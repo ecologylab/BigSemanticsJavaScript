@@ -178,6 +178,7 @@ var READY_STATE_LOADED		= 4;	// data transfer complete. body received.
 function sendLoadRequest(url, sendResponse, additionalUrls, mmd, callback)
 {
 	var xhr = new XMLHttpRequest();
+	xhr.setRequestHeader("X-Requested-With", "XMLHttpRequest");
 	xhr.first300	= true;
 	//FIXME -- (1) responseType field should not be set based on our assumptions! use content-type (2) handling should be more consistent
 	xhr.onreadystatechange = function() 
