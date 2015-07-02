@@ -88,7 +88,16 @@ function removeRecentlyRequested(domain){
   	recentlyRequested.splice(index, 1);	
 }
 
-function isUrlRedirect(response, sendResponse, additionalUrls, mmd, callback)
+function addAdditionalUrl(additionalUrls, newUrl)
+{
+	var doit	= additionalUrls.indexOf(newUrl) == -1;
+	// precautionary conditions to avoid loops
+	if (doit)
+		additionalUrls.push(newUrl);
+	return doit;	// if false, circular reference -- quit!
+}
+
+function isJsContentRedirect(response, sendResponse, additionalUrls, mmd, callback)
 {
 	//check <script> tags in DOM <head>
 	//containing "window.opener = null; location.replace(url)"
@@ -116,7 +125,10 @@ function isUrlRedirect(response, sendResponse, additionalUrls, mmd, callback)
 						if (additionalUrls.indexOf(response.URL) == -1)
 							additionalUrls.push(response.URL);
 						if (additionalUrls.indexOf(url[1]) == -1)
+						{
+							console.log("JsContentRedirect: " + response.URL + "\t-> " + url[1]);
 							loadWebpage(url[1], sendResponse, additionalUrls, mmd, callback);
+						}
 						return true;
 					}
 				}
@@ -125,51 +137,121 @@ function isUrlRedirect(response, sendResponse, additionalUrls, mmd, callback)
 	}
 	return false;
 }
+
+/*
+ * For more info, see http://www.w3.org/TR/2006/WD-XMLHttpRequest-20060405/
+ */
+var READY_STATE_RECEIVING	= 3;	// before message body. all http headers have been received
+var READY_STATE_LOADED		= 4;	// data transfer complete. body received.
+
 //Do the work of sending the load request.
 //*This code is not my own, but rather was retrieved and updated from the existing download code* - Cameron
 function sendLoadRequest(url, sendResponse, additionalUrls, mmd, callback)
 {
 	var xhr = new XMLHttpRequest();
-	if (mmd.parser !== "xpath"){
-		xhr.responseType = "blob";
-		xhr.onreadystatechange = function() {
-			if (xhr.readyState==4 && xhr.status==200){				
-				if (xhr.response !== null){
-					
-					//confirm that our request returned something binary
-					var mimeMMD = getDocumentMMbyMime(xhr.response.type);
-					if (mimeMMD && mimeMMD.parser !== "xpath"){
-						sendResponse(mmd, xhr.responseURL, callback, additionalUrls);					
-					}
-					else {
-						//if we requested a binary but got something else
-						console.log("requested a binary but response was something else or something we don't have a wrapper");	
+	xhr.first300	= true;
+	//FIXME -- (1) responseType field should not be set based on our assumptions! use content-type (2) handling should be more consistent
+	xhr.onreadystatechange = function() 
+	{
+		var	ok			= false;
+		var status		= xhr.status;
+		switch (status)
+		{
+			case READY_STATE_RECEIVING:
+				if (!xhr.first300)
+					break;
+				xhr.first300	= false;
+				if (status == 304)
+				{
+					//FIXME handle not modified, should read from cache here!!!
+					ok		= true; // continue load for now
+				}
+				else if (status >= 300 && status < 400)
+				{
+					// handle redirects
+					var newURL	= xhr.response.URL;
+					if (newURL != url )
+					{
+						if (additionalUrls == null)
+							addtionalUrls	= [];
+						if (addAdditionalUrl(addtionalUrls, newURL))
+						{	// redirect good
+//								mmd	= getMMD(newURL);
+							//FIXME see if the new mmd is more specific than the old!?
+							console.log("sendLoadRequest() "+url + "\t-> " + newURL);
+							xhr.first300	= true;
+							url				= newURL;
+							ok	= true;
+						}			
 					}
 				}
-				
-			}
-		};
-	}
-	else {
-		xhr.responseType = "document";
-		xhr.onreadystatechange = function() {
-			if (xhr.readyState==4 && xhr.status==200){			
-				if (xhr.response !== null){
-					
-					if (!isUrlRedirect(xhr.response, sendResponse, additionalUrls, mmd, callback))		{	
-						var mmd1 = getDocumentMM(url);
+				else
+				{
+					// check content type and make sure we can parse it; otherwise, abort!
+					var contentType	= xhr.getResponseHeader("Content-Type");
+					// we think its html
+					if (contentType == null || contentType == "" || contentType =="text/html" || contentType == "text/plain" 
+						|| contentType.indexOf("xml") != -1)  //TODO -- RSS, OPML, other types using xml?
+					{
+							if (mmd.parser == "xpath")
+							{
+								ok		= true;
+							}
+							else
+							{ // ERROR
+							}
+					}
+					else if (contentType == "application/javascript" || contentType == "application/json" || (contentType == "text/javascript"))
+					{
+							if (mmd.parser == "jsonpath")
+							{
+								ok		= true;
+							}
+							else
+							{ // ERROR
+							}
+					}
+					/*
+					else if (contentType == "text/xml" || (contentType == "application/xml"))
+					{
+							if (mmd.parser == "xpath")
+							{
+								ok	= true;
+							}
+							else // includes parser="direct"
+							{ // ERROR
+							}
+					} */
+					else
+					{	// something we don't currently parse!
+						//TODO setup parse of JPEG headers here, using parser type "jpeg"
+						if (contentType == "image/jpeg" && mmd.parser == "jpeg")
+						{
+						}
+					}
+				}
+				if (!ok)
+				{
+					xhr.abort();
+					console.log("Aborting as no meta-metadata: " + xhr.status + " " + xhr.location);
+				}
+			break;
+			
+			case READY_STATE_LOADED:
+//		xhr.responseType = "blob";
+//					xhr.responseType = "document";
+				if (xhr.status==200 && xhr.response !== null)
+				{							
+					if (!isJsContentRedirect(xhr.response, sendResponse, additionalUrls, mmd, callback))		
+					{	// normal case
+						var mmd1 = getDocumentMM(xhr.response.URL);
 						simplGraphCollapse({mmdObj: mmd1});
 						sendResponse(mmd1, xhr.response, callback, additionalUrls);
 					}
-					
 				}
-				else {
-					//if we requested a document but the response is null it might have been a binary file
-					console.log("requested html page but response was something else");	
-				}
-			}
-		};
-	}
+			break;
+		}
+	};
 	
 	xhr.open("GET", url, true);
 	xhr.send();
