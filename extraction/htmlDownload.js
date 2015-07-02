@@ -25,28 +25,41 @@ function getRequestWaitTime(domain){
 function loadWebpage(url, sendResponse, additionalUrls, mmd, callback)
 {
 	
-	//if (mmd.hasOwnProperty('rewrite_location')){}
-	
-	//time needed to wait between requests	
-	var domain = getDownloadDomain(url);
-	
-	var requestWaitTime = getRequestWaitTime(domain);
-	
-	//If we have not recently requested, then send the request, add the domain to recently requested, and set a timeout to remove it.
-	if( recentlyRequested.indexOf(domain) == -1 ){
+	var mmd2 = getDocumentMM(url);
+	if (extractWithService(mmd2, url)){
+		window.postMessage({
+			sender: "EXT", 
+			type:"RET_MD_SERVICE", 
+			url: url, 
+			callback: callback, 
+			reload: true, 
+			source: null
+		}, "*");
+	}
+	else{
+		//if (mmd.hasOwnProperty('rewrite_location')){}
 		
-		sendLoadRequest(url, sendResponse, additionalUrls, mmd, callback);
-		recentlyRequested.push(domain);
-		setTimeout(removeRecentlyRequested, requestWaitTime, domain);
+		//time needed to wait between requests	
+		var domain = getDownloadDomain(url);
 		
-	}else{
-		//Otherwise add to a queue of urls that are waiting.
+		var requestWaitTime = getRequestWaitTime(domain);
 		
-		downloadQueue.push({url:url, waitTime:requestWaitTime});
-		if( downloadInterval === null ){
-			downloadInterval = setInterval(tryDownloadQueue, RETRY_WAIT_TIME, sendResponse, additionalUrls, mmd, callback);
+		//If we have not recently requested, then send the request, add the domain to recently requested, and set a timeout to remove it.
+		if( recentlyRequested.indexOf(domain) == -1 ){
+			
+			sendLoadRequest(url, sendResponse, additionalUrls, mmd, callback);
+			recentlyRequested.push(domain);
+			setTimeout(removeRecentlyRequested, requestWaitTime, domain);
+			
+		}else{
+			//Otherwise add to a queue of urls that are waiting.
+			
+			downloadQueue.push({url:url, waitTime:requestWaitTime});
+			if( downloadInterval === null ){
+				downloadInterval = setInterval(tryDownloadQueue, RETRY_WAIT_TIME, sendResponse, additionalUrls, mmd, callback);
+			}
+			
 		}
-		
 	}
 	
 }
@@ -88,10 +101,11 @@ function removeRecentlyRequested(domain){
   	recentlyRequested.splice(index, 1);	
 }
 
-function isUrlRedirect(response, sendResponse, additionalUrls, mmd, callback)
+function isUrlRedirect(xhr, sendResponse, additionalUrls, mmd, callback)
 {
 	//check <script> tags in DOM <head>
 	//containing "window.opener = null; location.replace(url)"
+	var response = xhr.response;
 	var head_elt = response.getElementsByTagName("head");
 	
 	if (head_elt.length > 0)
@@ -123,6 +137,21 @@ function isUrlRedirect(response, sendResponse, additionalUrls, mmd, callback)
 			}
 		}
 	}
+	
+	if(xhr.response.URL != xhr.responseURL){
+	
+		if (!additionalUrls)
+		{	
+			additionalUrls = [];
+		}
+		additionalUrls.push(xhr.response.URL);
+		loadWebpage(xhr.responseURL, sendResponse, additionalUrls, mmd, callback);
+		return true;
+	}
+	
+	
+	
+	
 	return false;
 }
 //Do the work of sending the load request.
@@ -153,10 +182,11 @@ function sendLoadRequest(url, sendResponse, additionalUrls, mmd, callback)
 	else {
 		xhr.responseType = "document";
 		xhr.onreadystatechange = function() {
+			
 			if (xhr.readyState==4 && xhr.status==200){			
 				if (xhr.response !== null){
 					
-					if (!isUrlRedirect(xhr.response, sendResponse, additionalUrls, mmd, callback))		{	
+					if (!isUrlRedirect(xhr, sendResponse, additionalUrls, mmd, callback))		{	
 						var mmd1 = getDocumentMM(url);
 						simplGraphCollapse({mmdObj: mmd1});
 						sendResponse(mmd1, xhr.response, callback, additionalUrls);
@@ -168,6 +198,7 @@ function sendLoadRequest(url, sendResponse, additionalUrls, mmd, callback)
 					console.log("requested html page but response was something else");	
 				}
 			}
+			
 		};
 	}
 	
