@@ -184,7 +184,8 @@ function sendLoadRequest(url, sendResponse, additionalUrls, mmd, callback)
 	{
 		var	ok			= false;
 		var status		= xhr.status;
-		switch (status)
+		var readyState	= xhr.readyState;
+		switch (readyState)
 		{
 			case READY_STATE_RECEIVING:
 				if (!xhr.first300)
