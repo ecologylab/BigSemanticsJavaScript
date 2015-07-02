@@ -70,9 +70,11 @@ MetadataLoader.getMetadata = function (url, callback, reload, source) {
     }
 
 	var forceService = document.getElementById("force_service");
-	
-	
-    if (MetadataLoader.hasExtension && forceService != null && (!forceService || !forceService.checked)) {
+	var serviceForced = false;
+	if(forceService != null){
+		serviceForced = forceService.checked;
+	}
+    if (MetadataLoader.hasExtension && !serviceForced) {
         ExtensionInterface.dispatchMessage({ sender: "PAGE", type: "GET_MD", url: url, callback: callback, reload: reload, source: source });
         console.log("requesting extension for metadata");
     }
