@@ -172,21 +172,23 @@ function isJsContentRedirect(xhr, sendResponse, additionalUrls, mmd, callback)
  */
 var READY_STATE_RECEIVING	= 3;	// before message body. all http headers have been received
 var READY_STATE_LOADED		= 4;	// data transfer complete. body received.
-
+var READY_STATE_HEADERS_RECIEVED = 2;
 //Do the work of sending the load request.
 //*This code is not my own, but rather was retrieved and updated from the existing download code* - Cameron
 function sendLoadRequest(url, sendResponse, additionalUrls, mmd, callback)
 {
 	var xhr = new XMLHttpRequest();
 	xhr.first300	= true;
+	xhr.responseType = "document";
 	//FIXME -- (1) responseType field should not be set based on our assumptions! use content-type (2) handling should be more consistent
 	xhr.onreadystatechange = function() 
 	{
 		var	ok			= false;
 		var status		= xhr.status;
-		switch (xhr.readyState)
+		var readyState	= xhr.readyState;
+		switch (readyState)
 		{
-			case READY_STATE_RECEIVING:
+			case READY_STATE_HEADERS_RECIEVED:
 				if (!xhr.first300)
 					break;
 				xhr.first300	= false;
@@ -289,6 +291,8 @@ function sendLoadRequest(url, sendResponse, additionalUrls, mmd, callback)
 	};
 	
 	xhr.open("GET", url, true);
+	xhr.setRequestHeader("X-Requested-With", "XMLHttpRequest");
+
 	xhr.send();
 }
 
