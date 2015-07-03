@@ -255,7 +255,7 @@ function getScalarD(field,contextNode,recurse,parserContext,page){
 				
 	}
 	
-	if(data !== null)
+	if(data !== null && data != undefined)
 	{			
 		data = data.trim();
 		if (field.hasOwnProperty('field_ops'))
