@@ -313,13 +313,18 @@ MetadataLoader.checkForMetadataFromExtension = function () {
  */
 
 MetadataLoader.getMMD = function (task, callback) {
-    if (RepoMan.repo != null) {
+	if (MetadataLoader.hasExtension){
+	    ExtensionInterface.dispatchMessage({ sender: "PAGE", type: "GET_MMD", url: task.url, callback: callback, reload: task.reload, source: task.source, application: application_name });
+
+	}else{
+		if (RepoMan.repo != null) {
         RepoMan.getMMDFromRepoByTask(task , callback);
-    }
-    else if (RepoMan.repoIsLoading == false) {
-        RepoMan.repoIsLoading = true;
-        RepoMan.loadMMDRepo();    		
-    }
+	    }
+	    else if (RepoMan.repoIsLoading == false) {
+	        RepoMan.repoIsLoading = true;
+	        RepoMan.loadMMDRepo();    		
+	    }
+	}
 };
 
 
