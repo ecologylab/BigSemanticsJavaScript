@@ -20,7 +20,6 @@ ExtensionInterface.dispatchMessage = function(message)
 {
 	if (typeof message === "undefined" || typeof message.type === "undefined" || typeof message.sender === "undefined")
 		return;
-	
 	if (message.type == "extractionRequest")
 	{
 		if (message.detail && message.detail.url)
