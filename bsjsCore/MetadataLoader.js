@@ -81,7 +81,15 @@ MetadataLoader.getMetadata = function (url, callback, reload, source) {
         MetadataLoader.getMetadataFromService(url, callback, reload, source);
     }
 };
+MetadataLoader.printMMD = function(stuff){
+	console.log(stuff);
+}
+MetadataLoader.mimicIdeaMache = function(url, callback){
+	var reload = false;
+	var source = undefined;
+    ExtensionInterface.dispatchMessage({ sender: "PAGE", type: "GET_MMD", url: url, callback: callback, reload: reload, source: source });
 
+}
 /**
  * Retrieves the metadata from the service using a JSON-p call
  * When the service responds the callback function will be called.
