@@ -217,6 +217,14 @@ Mink.stopParentHoverCSS = function(event){
 Mink.returnParentHoverCSS = function(event){
 	$(event.target.parentNode).addClass('minkTitleBarHoverEffect');
 }
+Mink.signalFavorite = function(event){
+	var url = $(event.target).siblings('.minkExplorablesExpander')[0].getAttribute('url');
+	console.log(url)
+	var detailDetails = {type: 'minkfavorite', url: url};
+	var eventDetail = {detail: detailDetails, bubbles: true};
+	var myEvent = new CustomEvent("minkevent", eventDetail);
+	event.target.dispatchEvent(myEvent);
+}
 
 Mink.explorableButton = function(event){
 	var target = event.target;
@@ -277,6 +285,13 @@ Mink.makeTitle = function(metadataFields, url, styleInfo){
 	clickableToExpand.appendChild(link);
 	}
 	headerContainer.appendChild(clickableToExpand);
+	var pinIcon = document.createElement('img');
+	pinIcon.src = "../renderers/images/mink/star.png";
+	pinIcon.addEventListener('click', Mink.signalFavorite);
+	pinIcon.addEventListener('mouseenter', Mink.stopParentHoverCSS);
+	pinIcon.addEventListener('mouseleave', Mink.returnParentHoverCSS);	pinIcon.className = "minkPinIcon";
+	headerContainer.appendChild(pinIcon);	
+	
 	//function to find number of explorables
 	var explorableCount = Mink.getExplorableCount(metadataFields);
 		var explorableButton = buildSpan('minkExplorablesExpander filledExpander');
@@ -290,6 +305,7 @@ Mink.makeTitle = function(metadataFields, url, styleInfo){
 			explorableButton.style.display = 'none';
 		}
 	
+
 	/*
 	var img = new Image();
 	img.onload = function () {

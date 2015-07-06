@@ -13,7 +13,7 @@ minkApp.maxCols = 1;
 minkApp.columnKeyGen = 1;
 minkApp.offScreenColumnsLeft = 0;
 minkApp.offScreenColumnsRight = 0;
-
+minkApp.favorites = [];
 function setIntervalX(callback, delay, repetitions) {
     var x = 0;
     var intervalID = window.setInterval(function () {
@@ -161,6 +161,16 @@ minkApp.goForwardsHandler = function(event){
 	minkApp.moveForward();
 	
 }
+
+minkApp.addFavorite = function(url, srcHTML){
+	if(minkApp.favorites.indexOf(url) < 0){
+		var favorite = {url: url, src: srcHTML};
+		minkApp.favorites.push(favorite);
+
+		
+	}
+	
+}
 minkApp.minkEventHandler = function(event){
 	 
 	 if(event.detail.type == 'minknewpile'){
@@ -224,6 +234,8 @@ minkApp.minkEventHandler = function(event){
 		 pile.rootHTML = event.srcElement;
 	 }else if(event.detail.type=="minkshowhide"){
 		 minkApp.showHidePileHandler(event);
+	 }else if(event.detail.type=='minkfavorite'){
+		 minkApp.addFavorite(event.detail.url, event.srcElement);
 	 }
 	 
 }

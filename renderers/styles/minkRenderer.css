@@ -592,7 +592,17 @@ height: auto}
 	background-color: #EEEEEE;
 	cursor: pointer;
 }
-
+.minkPinIcon{
+	width: 26px;
+	height:26px;
+	padding: 2.5px;
+	border-radius: 40px;
+	margin-right: 4px;
+}
+.minkPinIcon:hover{
+	cursor: pointer;
+	background-color: lightgray;
+}
 .minkSnippetLabel{
 	color: #666666;
 	overflow: hidden;
