@@ -59,7 +59,10 @@ ExtensionInterface.onMessage = function(message)
 			MetadataLoader.getMetadataFromService(message.data.url, message.data.callback, message.data.reload, message.data.source);
 		}
 		else if (event.data.type=="RET_MMD"){
-			executeFunctionByName(message.data.callback, window, message.data.mmd);
+			if(message.data.application == application_name){
+				executeFunctionByName(message.data.callback, window, message.data.mmd);
+
+			}
 
 		}
         else {
