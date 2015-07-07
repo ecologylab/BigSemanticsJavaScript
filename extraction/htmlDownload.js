@@ -282,7 +282,7 @@ function sendLoadRequest(url, sendResponse, additionalUrls, mmd, callback)
 					if (!isJsContentRedirect(xhr, sendResponse, additionalUrls, mmd, callback))		
 					{	// normal case
 						var mmd1 = getDocumentMM(xhr.response.URL);
-						simplGraphCollapse({mmdObj: mmd1});
+						//simplGraphCollapse({mmdObj: mmd1});
 						sendResponse(mmd1, xhr.response, callback, additionalUrls);
 					}
 				}
