@@ -317,7 +317,7 @@ MetadataLoader.checkForMetadataFromExtension = function () {
 
 MetadataLoader.getMMD = function (task, callback) {
 	if (MetadataLoader.hasExtension){
-	    ExtensionInterface.dispatchMessage({ sender: "PAGE", type: "GET_MMD", url: task.url, callback: callback, reload: task.reload, source: task.source, application: application_name });
+	    ExtensionInterface.dispatchMessage({ sender: "PAGE", type: "GET_MMD", url: task.metadata.location, callback: callback, reload: task.reload, source: task.source, application: application_name });
 
 	}else{
 		if (RepoMan.repo != null) {
