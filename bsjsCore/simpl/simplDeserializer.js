@@ -110,7 +110,7 @@ function simplDeserialize(simplObj) {
 /*
 // testing:
 var fs = require('fs');
-var repoJson = fs.readFileSync('repo.json');
+var repoJson = fs.readFileSync('tests/testRepo.json');
 var repo = JSON.parse(repoJson);
 simplDeserialize(repo);
 */
