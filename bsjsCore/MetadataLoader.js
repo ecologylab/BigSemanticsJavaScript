@@ -230,6 +230,9 @@ MetadataLoader.setMetaMetadata = function (mmd) {
         simplDeserialize(mmd);
     }
 
+	// deserialize meta-metadata
+	simplDeserialize(mmd);	
+
     var tasks = MetadataLoader.getTasksFromQueueByType(mmd.name);
 
     if (tasks.length > 0) {
