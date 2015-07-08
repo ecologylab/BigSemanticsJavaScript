@@ -43,11 +43,18 @@ function loadWebpage(url, sendResponse, additionalUrls, mmd, callback)
 		var domain = getDownloadDomain(url);
 		
 		var requestWaitTime = getRequestWaitTime(domain);
+		//Apply location filter
+		var ogURL = url;
+		if (mmd.hasOwnProperty('filter_location')){
+			url = PreFilter.filter(url, mmd2.filter_location);
+		}
+		
+		
 		
 		//If we have not recently requested, then send the request, add the domain to recently requested, and set a timeout to remove it.
 		if( recentlyRequested.indexOf(domain) == -1 ){
 			
-			sendLoadRequest(url, sendResponse, additionalUrls, mmd, callback);
+			sendLoadRequest(url, sendResponse, additionalUrls, mmd, callback, ogURL);
 			recentlyRequested.push(domain);
 			setTimeout(removeRecentlyRequested, requestWaitTime, domain);
 			
@@ -56,7 +63,7 @@ function loadWebpage(url, sendResponse, additionalUrls, mmd, callback)
 			
 			downloadQueue.push({url:url, waitTime:requestWaitTime});
 			if( downloadInterval === null ){
-				downloadInterval = setInterval(tryDownloadQueue, RETRY_WAIT_TIME, sendResponse, additionalUrls, mmd, callback);
+				downloadInterval = setInterval(tryDownloadQueue, RETRY_WAIT_TIME, sendResponse, additionalUrls, mmd, callback, ogURL);
 			}
 			
 		}
@@ -66,7 +73,7 @@ function loadWebpage(url, sendResponse, additionalUrls, mmd, callback)
 
 //We use a polling solution to retrieve documents from the queue. The idea is that because the majority of documents will have equivalent wait times
 //we can increase efficiency and simplicity simply be checking back with the queue every (DEFAULT_INTERVAL) milliseconds.
-function tryDownloadQueue(sendResponse, additionalUrls, mmd, callback){
+function tryDownloadQueue(sendResponse, additionalUrls, mmd, callback, ogurl){
 	
 	//loop backwards so we can remove/splice elements cleanly
 	for( var i = downloadQueue.length - 1; i > 0; i-=1 ){
@@ -80,7 +87,7 @@ function tryDownloadQueue(sendResponse, additionalUrls, mmd, callback){
                 
 				downloadQueue.splice(i, 1);
 				
-				sendLoadRequest(url, sendResponse, additionalUrls, mmd, callback);
+				sendLoadRequest(url, sendResponse, additionalUrls, mmd, callback, ogurl);
 				recentlyRequested.push(domain);
 				setTimeout(removeRecentlyRequested, requestWaitTime, domain);
 		
@@ -175,7 +182,7 @@ var READY_STATE_LOADED		= 4;	// data transfer complete. body received.
 var READY_STATE_HEADERS_RECIEVED = 2;
 //Do the work of sending the load request.
 //*This code is not my own, but rather was retrieved and updated from the existing download code* - Cameron
-function sendLoadRequest(url, sendResponse, additionalUrls, mmd, callback)
+function sendLoadRequest(url, sendResponse, additionalUrls, mmd, callback, originalURL)
 {
 	var xhr = new XMLHttpRequest();
 	xhr.first300	= true;
@@ -283,7 +290,7 @@ function sendLoadRequest(url, sendResponse, additionalUrls, mmd, callback)
 					{	// normal case
 						var mmd1 = getDocumentMM(xhr.response.URL);
 						//simplGraphCollapse({mmdObj: mmd1});
-						sendResponse(mmd1, xhr.response, callback, additionalUrls);
+						sendResponse(mmd1, xhr.response, callback, additionalUrls, originalURL);
 					}
 				}
 			break;
