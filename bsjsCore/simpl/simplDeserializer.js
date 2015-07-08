@@ -1,117 +1,87 @@
 /**
- * Iterates through the Simpl object to match up the simpl_ids and simpl_refs.
- *
- * @param simplObj, object to deserialize.
+ * Iterates through the simpl Object to match up the simpl IDs and simpl references
+ * @param simplObj, object to deserialize
  */
-function simplDeserialize(simplObj) {
-  // const
-	var SIMPL_ID = "simpl.id";
-	var SIMPL_REF = "simpl.ref";
+function simplDeserialize(simplObj)
+{
+	var simplReferences = [];
+	var simplId = "simpl.id";
+	var simplRef = "simpl.ref";
+	var idCount = 0;
+	var refCount = 0;
 
-  // book keeping
-  var simplObjs = {};
+	function recurse(currentObj, parentObj, parentFieldName, level)
+	{
+		var skipRecursion = false;
+		
+		if((typeof currentObj) != 'object' || currentObj == null)
+		{
+			return;
+		}
+		
+		if(simplId in currentObj)
+		{
+			//console.info(parentFieldName + " ------------ Adding ref: " + currentObj[simplId] + " [" + ++idCount +"]");
+			simplReferences[currentObj[simplId]] = currentObj;
+			delete currentObj[simplId];
+		}
+		
+		else if(simplRef in currentObj)
+		{
+			var ref = currentObj[simplRef];
+			if(ref in simplReferences)
+			{
+				//console.info(parentFieldName + "---------- Resolving Ref: " + ref + " [" + ++refCount +"]");
+				//Replace field in the parent with the simplRef
+				if(parentObj instanceof Array) //Never happens?
+				{
+					//console.info("parentObj is an Array!");
+					var index = parentObj.indexOf(currentObj)
+					if(index == -1)
+					{
+						//console.info("Item not found in parent!");
+					}
+					else
+					{
+						//console.info("Replacing item at index: " + index);
+						parentObj[index] = simplReferences[ref];
+					}					
+				}
+				else
+				{
+					//console.info("Replacing item with name: " + parentFieldName + " with reference" + ref);
+					parentObj[parentFieldName] = simplReferences[ref];
+				}
+			}
+			else 
+				//console.info("No Such Reference: " + ref);
+				
+			skipRecursion = true;
+		}
 
-  // idCallback: (obj, parentObj, fieldName) => void
-  // refCallback: (obj, parentObj, fieldName) => resolvedObj
-  function dfs(obj, parentObj, fieldName, idCallback, refCallback) {
-    var VISITED_MARK = "_simpl_visited";
-    var visitId = 1;
-    var visited = {};
-
-    function helper(obj, parentObj, fieldName, idCallback, refCallback) {
-      if (obj != null && obj instanceof Object) {
-        // first of all, re
-        if (SIMPL_REF in obj) {
-          if (refCallback) {
-            obj = refCallback(obj, parentObj, fieldName);
-            if (!obj) { return; }
-          }
-        }
-
-        if (obj[VISITED_MARK]) { return; }
-        obj[VISITED_MARK] = visitId;
-        visited[visitId] = obj;
-        visitId++;
-
-        for (var subfieldName in obj) {
-          if (obj.hasOwnProperty(subfieldName)) {
-            var subfield = obj[subfieldName];
-            if (subfield instanceof Array) {
-              for(var i = 0; i < subfield.length; i++) {
-                helper(subfield[i], subfield, i, idCallback, refCallback);
-              }
-            } else if (subfield instanceof Object) {
-              helper(subfield, obj, subfieldName, idCallback, refCallback);
-            }
-          }
-        }
-
-        if (SIMPL_ID in obj) {
-          if (idCallback) { idCallback(obj, parentObj, fieldName); }
-        }
-      }
-    }
-
-    // do it!
-    helper(obj, parentObj, fieldName, idCallback, refCallback);
-
-    // finish: clear our visited marks
-    for (var id in visited) {
-      delete visited[id][VISITED_MARK];
-    }
-  }
-
-  // Pass 1: collect all objects comtaining simpl_id
-  dfs(simplObj, null, null, function(obj, parentObj, fieldName) {
-    var id = obj[SIMPL_ID];
-    if (id in simplObjs) {
-      console.error("Error: already collected: " + id);
-    } else {
-      simplObjs[id] = obj;
-      delete obj[SIMPL_ID];
-    }
-  });
-
-  // Pass 2: replace all object stubs containing simpl_ref
-  dfs(simplObj, null, null, null, function(obj, parentObj, fieldName) {
-    var refId = obj[SIMPL_REF];
-    var ref = simplObjs[refId];
-    if (ref) {
-      if (parentObj == null) {
-        console.error("Error: parentObj cannot be null.");
-        return null;
-      }
-      if (fieldName == null) {
-        console.error("Error: fieldName cannot be null.");
-        return null;
-      }
-      parentObj[fieldName] = ref;
-      return ref;
-    } else {
-      console.error("Error: unknown simpl_ref: " + refId);
-    }
-    return null;
-  });
-
-  /*
-  // testing: 
-  dfs(simplObj, null, null, function(obj, parentObj, fieldName) {
-    var id = obj[SIMPL_ID];
-    console.error("Error: uncollected simpl_id: " + id);
-  }, function(obj, parentObj, fieldName) {
-    var refId = obj[SIMPL_REF];
-    console.error("Error: unresolved simpl_ref: " + refId);
-    console.log(parentObj);
-    return obj;
-  });
-  */
+		if(!skipRecursion)
+		{
+			for(var fieldName in currentObj)
+			{
+				if(!currentObj.hasOwnProperty(fieldName))
+				{
+					//console.info("Found shitty props");
+					continue;
+				}
+				var field = currentObj[fieldName];
+				if(field instanceof Array)
+				{
+					for(var i = 0; i < field.length; i++)// arrayItem in field)
+					{
+						recurse(field[i], field, fieldName, level + 1);
+					}
+				}
+				else if(field instanceof Object)
+				{
+					recurse(field, currentObj, fieldName, level + 1);
+				}
+			}
+		}
+	}	
+    recurse(simplObj, null, null, 0);
 }
-
-/*
-// testing:
-var fs = require('fs');
-var repoJson = fs.readFileSync('repo.json');
-var repo = JSON.parse(repoJson);
-simplDeserialize(repo);
-*/
-
