@@ -23,9 +23,18 @@ function getRequestWaitTime(domain){
 
 
 function loadWebpage(url, sendResponse, additionalUrls, mmd, callback)
-{
+{	
+	getDocumentMM(url, loadWebpageCallback, [url ,sendResponse, additionalUrls, mmd, callback]);	
+}
+
+function loadWebpageCallback(mmd2, paramList){
+	var url = paramList[0];
+	var sendResponse = paramList[1];
+	var additionalUrls = paramList[2];
+	var mmd =mmd2;
+	var callback = paramList[4];
 	
-	var mmd2 = getDocumentMM(url);
+	
 	if (extractWithService(mmd2, url)){
 		window.postMessage({
 			sender: "EXT", 
@@ -68,7 +77,6 @@ function loadWebpage(url, sendResponse, additionalUrls, mmd, callback)
 			
 		}
 	}
-	
 }
 
 //We use a polling solution to retrieve documents from the queue. The idea is that because the majority of documents will have equivalent wait times
@@ -288,9 +296,8 @@ function sendLoadRequest(url, sendResponse, additionalUrls, mmd, callback, origi
 				{							
 					if (!isJsContentRedirect(xhr, sendResponse, additionalUrls, mmd, callback))		
 					{	// normal case
-						var mmd1 = getDocumentMM(xhr.response.URL);
+						getDocumentMM(xhr.response.URL, loadRequestCallback, [xhr.response, callback, additionalUrls, originalURL, sendResponse]);
 						//simplGraphCollapse({mmdObj: mmd1});
-						sendResponse(mmd1, xhr.response, callback, additionalUrls, originalURL);
 					}
 				}
 			break;
@@ -302,4 +309,13 @@ function sendLoadRequest(url, sendResponse, additionalUrls, mmd, callback, origi
 
 	xhr.send();
 }
+
+//sendResponse(mmd1, xhr.response, callback, additionalUrls, originalURL);
+
+function loadRequestCallback(mmd1, params){
+	
+	params[4](mmd1, params[0], params[1], params[2], params[3]);
+
+}
+
 

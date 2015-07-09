@@ -223,19 +223,6 @@ var MMSelectorType = {
     DEFAULT : 3
 };
 
-/*
-function testURLS(){
-    var nullCount = 0;
-    for (var i in testList){
-        var mmd = getDocumentMM(testList[i], "tagName");
-        if (mmd == repositoryByName.rich_document){
-            nullCount++;
-        }
-    }
-    console.log(nullCount);
-    console.log(testList.length);
-}
-*/
                 
 /**
  * Load post inheritence repository
@@ -265,17 +252,19 @@ function initRepo(){
     };
     request.send();
   }
-
+/*
   var host = "api.ecologylab.net";
   var port = 80;
-  var securePort = 443;
-
+  var securePort = 443;*/
+  var host2 = "api.ecologylab.net";
+  var port2 = 80;
+  var securePort2 = 443;
   function getRepoURL() {
     var repoURL = null;
     if (window.location.protocol == 'https:') {
-      repoURL = "//" + host + ":" + securePort;
+      repoURL = "//" + host2 + ":" + securePort2;
     } else {
-      repoURL = "//" + host + ":" + port;
+      repoURL = "//" + host2 + ":" + port2;
       repoURL = serviceURLPrefix + repoURL;
     }
     repoURL += "/BigSemanticsService/";
@@ -286,15 +275,15 @@ function initRepo(){
 
   if (typeof chrome === 'object' && chrome && chrome.storage) {
     // if this code is running as a Chrome extension content script,
-    // check if the user has configured different host / port for the service
+    // check if the user has configured different host2 / port for the service
     chrome.storage.local.get({
-      serviceHost: host,
-      servicePort: port,
-      serviceSecurePort: securePort
+      serviceHost: host2,
+      servicePort: port2,
+      serviceSecurePort: securePort2
     }, function(opts) {
-      host = opts.serviceHost;
-      port = opts.servicePort;
-      securePort = opts.serviceSecurePort;
+      host2 = opts.serviceHost;
+      port2 = opts.servicePort;
+      securePort2 = opts.serviceSecurePort;
       doInitRepo(getRepoURL());
     });
   } else {
@@ -328,13 +317,14 @@ function addReselectEntry(selector, mmd){
 * @param url
 * @return MMD object
 */
-function getDocumentMM(url) {
-    if (!mmdRepo){
-        return undefined;
-    }
+
+function checkURL(url) {
+    return(url.match(/\.(jpeg|jpg|gif|png|pdf)$/) != null);
+}
+function getDocumentMMLogic(url){
+	var result;
     
-    var result;
-    
+	
     var noAnchorNoQueryPageString = trimAnchorQueryPageString(url);
     var strippedUrlEntries = documentRepositoryByUrlStripped[noAnchorNoQueryPageString];
 
@@ -413,7 +403,18 @@ function getDocumentMM(url) {
     }
         
     return result;
-  }
+}
+
+function getDocumentMM(url, callback, callbackParams) {
+
+	if (!mmdRepo){
+        setTimeout(function(){getDocumentMM(url, callback, callbackParams)}, 50);
+    }
+    else{
+    	callback(getDocumentMMLogic(url), callbackParams);
+    }
+    
+}
 
 function getDocumentMMbyMime(mimeStr){
 	if (repositoryByMime.hasOwnProperty(mimeStr)){

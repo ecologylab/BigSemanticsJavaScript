@@ -13,9 +13,7 @@ var defVars = {};
  */
 function extractMetadata(mmd, page) {
     
-	if (mmd.hasOwnProperty('filter_location')){
-		page.URL = PreFilter.filter(page.URL, mmd.filter_location);
-	}
+	
 	
     upperLevel[page.URL] = {}; //holds upperlevel metadata
     scalars[page.URL] = {};
@@ -95,6 +93,8 @@ function countXpaths(mmdKids, page){
  * loops through the kids of the metadata field
  */
 function dataFromKids(mmdKids,contextNode,recurse,parserContext,page,isLowerLvl){
+	console.log('dk');
+
 	var d = { };
 	var e = true; //if object is empty
     var isNested = false;
@@ -222,7 +222,8 @@ function dataFromKids(mmdKids,contextNode,recurse,parserContext,page,isLowerLvl)
 function getScalarD(field,contextNode,recurse,parserContext,page){
 	var x = null;
 	var data = null;
-	
+	console.log('S');
+
 	if (field.hasOwnProperty("concatenate_values") && field.concatenate_values.length > 1) {
 		data = concatValues(field.concatenate_values, page);
 		if (!recurse) {
@@ -273,6 +274,7 @@ function getScalarD(field,contextNode,recurse,parserContext,page){
 }
 
 function getCompositeD(field,contextNode,recurse,parserContext,page){
+	console.log('COMP');
 	var x = null;
 	var data = null;
 	var kids = field.kids;
@@ -334,6 +336,8 @@ function getCompositeD(field,contextNode,recurse,parserContext,page){
 
 function getCollectionD(field,contextNode,recurse,parserContext,page)
 {
+	console.log('COLL');
+
 	if (!recurse) 
 	{
 		return null;
@@ -362,6 +366,8 @@ function getCollectionD(field,contextNode,recurse,parserContext,page)
 }
 
 function getScalarNode(field,xpath,contextNode,page) {
+	console.log('SN');
+
 	var data;
 	try {
 		data = page.evaluate(xpath, contextNode, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null);
@@ -510,9 +516,13 @@ function getCollectionData(field,xpath,contextNode,page)
 				{
 					fieldParserResults = fieldParser.getKeyValuePairResult(fieldName,string.trim());
 				}
-				for (var i = 0; i < fieldParserResults.length; i++)
+				for (var k = 0; k < Object.keys(fieldParserResults).length; k++)
 				{
-					contextList.push(fieldParserResults[i]);
+					for(var y = 0; y < Object.keys(fieldParserResults).length; y++){
+						contextList.push(fieldParserResults[Object.keys(fieldParserResults)[y]]);
+						console.log(contextList);
+					}
+					
 				}
 			}
 		}
@@ -520,12 +530,12 @@ function getCollectionData(field,xpath,contextNode,page)
 		if (contextList != null)
 		{
 			d = [];
-			for (var i = 0; i < contextList.length; i++)
+			for (var q = 0; q < contextList.length; q++)
 			{
-				context = contextList[i];
+				context = contextList[q];
 				if (context)
 				{
-					var data = dataFromKids(field.kids[0].composite.kids,nodes.snapshotItem(i),false,context,page);
+					var data = dataFromKids(field.kids[0].composite.kids,nodes.snapshotItem(q),false,context,page);
 					if (data != null &&!isObjEmpty(data, page)) 
 					{
 						d.push(data);
