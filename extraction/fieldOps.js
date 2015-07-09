@@ -83,6 +83,7 @@ function getParam(str, name, otherwise){
 function match(str, pattern, group){
 	try {
 		var result = str.match(new RegExp(pattern));
+		
 		result = group ? result[group] : result[0] ;
 		return result;
 	}
@@ -162,15 +163,31 @@ function strip(str, anyOf){
         return str.trim();
     }
     else{
-		var a = 0;
-		var b = str.length - 1;
+		console.log(str)
+		if(str.indexOf(anyOf) > str.indexOf('?')){
+			var startRemove = str.indexOf(anyOf);
+			var endRemove = str.substring(startRemove).indexOf('&');
+			if(endRemove > -1){
+				str = str.replace(str.substring(startRemove, endRemove), "");
+
+			}else{
+				str = str.replace(str.substring(startRemove, str.length), "");
+
+			}
+			
+			console.log(str);
+		}
+    	/*var a = 0;
+		var b = str.lengextth - 1;
 		while (a <= b && containsAny(anyOf, str[a])){
 		  a++;
 		}
 		while (b >= a && containsAny(anyOf, str[b])){
 		  b--;
 		}
-		return (a <= b) ? str.substring(a, b + 1) : "";
+		return (a <= b) ? str.substring(a, b + 1) : "";*/
+    	
+    	
     }
 	return str;
 }
