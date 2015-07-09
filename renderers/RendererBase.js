@@ -22,6 +22,8 @@ RendererBase.documentMap = [];
  * @param container, the HTML object to which the metadata rendering will be appended
  * @param url, url of the  document
  * @param isRoot, is this the root metadata for the rendering (currently used for removing existing children)
+ @param clipping. Clippings either hold .rawMetadata, or have a pair of metadata and mmd. If the later, then MetadataLoader is never called
+ !!!!If you already have metadata and mmd, please pass them in here in the form {metadata: your_data_here, mmd: you_data_here}
  * @param requestMD, true if the function should request metadata from service, else false
  * @param reloadMD, true if the metadata should be extracted afresh, else false 
  * @param renderer, the function used by a particular renderer to fill in the container with HTML
@@ -29,22 +31,31 @@ RendererBase.documentMap = [];
 RendererBase.addMetadataDisplay = function(container, url, isRoot, clipping, requestMD, reloadMD, renderer){
 	
 	// Add the rendering task to the queue
-	var task = new RenderingTask(url, true, clipping, null, container, null, renderer)
-	MetadataLoader.queue.push(task);	
-	
-	if(clipping != null && clipping.rawMetadata != null)
-	{
-		clipping.rawMetadata.deserialized = true;
-		MetadataLoader.setMetadata(clipping.rawMetadata);
-	}
-	else
-	{	
-		var requestMetadata = (typeof requestMD === "undefined") || requestMD == true;
-		
-		// Fetch the metadata from the service
-		if(!isExtension && requestMetadata)
-			MetadataLoader.getMetadata(url, "MetadataLoader.setMetadata", reloadMD);	
-	}
+    if (clipping != null) {
+        if (clipping.metadata != null && clipping.mmd != null) {
+            var task = new RenderingTask(url, true, null, null, container, null, renderer, clipping.mmd, clipping.metadata)
+            task.handler(task);
+            return;
+        }
+    }
+  
+        var task = new RenderingTask(url, true, clipping, null, container, null, renderer)
+        MetadataLoader.queue.push(task);
+
+        if (clipping != null && clipping.rawMetadata != null) {
+            clipping.rawMetadata.deserialized = true;
+            MetadataLoader.setMetadata(clipping.rawMetadata, true);
+        }
+        else {
+            var requestMetadata = (typeof requestMD === "undefined") || requestMD == true;
+
+            // Fetch the metadata from the service
+            if ( requestMetadata)
+                MetadataLoader.getMetadata(url, "MetadataLoader.setMetadata", reloadMD);
+        }
+
+    
+    
 }
 
 

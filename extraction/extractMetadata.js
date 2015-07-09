@@ -4,7 +4,7 @@ var baseURL = {};
 var getScalarStringCalled = 0;
 var getScalarStringCalledGotData = 0;
 var upperXpath = {};
-
+var defVars = {};
 
 /*
  * extracts metadata from metametadata
@@ -100,6 +100,10 @@ function dataFromKids(mmdKids,contextNode,recurse,parserContext,page,isLowerLvl)
     var isNested = false;
     if (contextNode != page) isNested = true;
     
+    if (mmdKids == null || mmdKids.length == 0) {
+      return null; // Nothing to do here.
+    }
+    
 	for (var i = 0; i < mmdKids.length; i++) {
 		var field = mmdKids[i];
 		var name;
@@ -125,8 +129,9 @@ function dataFromKids(mmdKids,contextNode,recurse,parserContext,page,isLowerLvl)
             var hasContext = false;
 
 			if (field.hasOwnProperty('context_node')){
-				if (defVars[field.context_node] !== null)
+				if (defVars[field.context_node]) {
 					contextNode = defVars[field.context_node];
+				}
                 hasContext = true;
 			}
 			
@@ -232,7 +237,15 @@ function getScalarD(field,contextNode,recurse,parserContext,page){
 	{
 		var fieldx = field.xpaths;
 		for (var j = 0; j < fieldx.length; j++) {
-			x = getScalarString(field,fieldx[j],contextNode,page);
+			if (field.extract_as_html) {
+				x = getScalarNode(field,fieldx[j],contextNode,page);
+				if (x) {
+					x = x.innerHTML;
+				}
+			}
+			else {
+				x = getScalarString(field,fieldx[j],contextNode,page);
+			}				
 			if (x !== null && x !== "" && x !== "\n") {
 				data = x;
 				break;			
@@ -242,25 +255,15 @@ function getScalarD(field,contextNode,recurse,parserContext,page){
 				
 	}
 	
-	if(data !== null)
+	if(data !== null && data != undefined)
 	{			
 		data = data.trim();
 		if (field.hasOwnProperty('field_ops'))
 		{
 			for (var i = 0; i < field.field_ops.length; i++)
 			{
-				var regexOps = field.field_ops[i].regex_op;
-				var regex = new RegExp(regexOps.regex, 'g');
-				if (regexOps.hasOwnProperty('replace')){
-					var replace = regexOps.replace;
-					data = data.replace(regex,replace);
-				}
-				else if (regexOps.hasOwnProperty('group')){
-					var matches = regex.exec(data);
-					if (matches !== null && matches[regexOps.group] !== undefined){
-						data = matches[regexOps.group];
-					}
-				}
+				var fieldOp = field.field_ops[i];
+				data = FieldOps.operate(data, fieldOp);
 			}
 		}
         scalars[page.URL][field.name] = data;
@@ -289,7 +292,7 @@ function getCompositeD(field,contextNode,recurse,parserContext,page){
 		for (var j = 0; j < fieldx.length; j++) {
 			x = getCompositeObject(field, fieldx[j], contextNode,page);
 			// if the result is not a node, assume there was a field parser that manually got data for us and return that data
-			if (x !== null && !x.hasOwnProperty("nodeType")){
+			if (x !== null && !("nodeType" in x)) {//x.prototype && !x.prototype.hasOwnProperty("nodeType")){
 				return x;
 			}
 			else if (x !== null && x !== "") {
@@ -358,6 +361,16 @@ function getCollectionD(field,contextNode,recurse,parserContext,page)
 	return null;
 }
 
+function getScalarNode(field,xpath,contextNode,page) {
+	var data;
+	try {
+		data = page.evaluate(xpath, contextNode, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null);
+	} catch (err) {
+		return null;
+	}
+	return data.singleNodeValue;
+}
+
 function getScalarString(field,xpath,contextNode,page){
     getScalarStringCalled++;
 	var data;
@@ -384,6 +397,7 @@ function getScalarString(field,xpath,contextNode,page){
 			string = page.URL + string;
 		}
 		else if (string.length > 1 && string.indexOf("http") == -1){
+			string = string.trim();
 			string = page.URL.substring(0, page.URL.lastIndexOf('/')+1) + string; 
 		}
 	}
@@ -401,7 +415,7 @@ function getCompositeObject(field,xpath,contextNode,page){
 	}
 	var size = nodes.snapshotLength;
 	
-	if (size == 0) {
+	if (size === 0) {
 		return null;
 	}
 
@@ -566,17 +580,8 @@ function getCollectionData(field,xpath,contextNode,page)
 			data = data.trim();
 			if (field['field_ops'] != null)
 			{
-				var regexOps = field.field_ops[0].regex_op;
-				var regex = regexOps.regex;
-				var replace = regexOps.replace;
-				if (replace != null) {
-					d = [];
-					data = data.replace(new RegExp(regex, 'g'),replace);
-				} else {
-					d = [];
-					data = data.match(new RegExp(regex));
-					data = data[0];
-				}
+				var fieldOp = field.field_ops[0];
+				data = FieldOps.operate(data, fieldOp);
 			}
 			d.push(data);
 		}

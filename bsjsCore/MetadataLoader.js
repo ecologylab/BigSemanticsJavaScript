@@ -66,19 +66,30 @@ MetadataLoader.getMetadata = function (url, callback, reload, source) {
 	 */
 
     if (!MetadataLoader.hasExtension) {
-        ExtensionInterface.dispatchMessage({ sender: "PAGE", type: "EXT_CHECK" });
     }
 
 	var forceService = document.getElementById("force_service");
-    if (MetadataLoader.hasExtension && (!forceService || !forceService.checked)) {
-        ExtensionInterface.dispatchMessage({ sender: "PAGE", type: "GET_MD", url: url, callback: callback, reload: reload, source: source });
+	var serviceForced = false;
+	if(forceService != null){
+		serviceForced = forceService.checked;
+	}
+    if (MetadataLoader.hasExtension && !serviceForced) {
+        ExtensionInterface.dispatchMessage({ sender: "PAGE", type: "GET_MD", url: url, callback: callback, reload: reload, source: source, application: application_name });
         console.log("requesting extension for metadata");
     }
     else {
         MetadataLoader.getMetadataFromService(url, callback, reload, source);
     }
 };
+MetadataLoader.printMMD = function(stuff){
+	console.log(stuff);
+}
+MetadataLoader.mimicIdeaMache = function(url, callback){
+	var reload = false;
+	var source = undefined;
+    ExtensionInterface.dispatchMessage({ sender: "PAGE", type: "GET_MMD", url: url, callback: callback, reload: reload, source: source });
 
+}
 /**
  * Retrieves the metadata from the service using a JSON-p call
  * When the service responds the callback function will be called.
@@ -219,6 +230,9 @@ MetadataLoader.setMetaMetadata = function (mmd) {
         simplDeserialize(mmd);
     }
 
+	// deserialize meta-metadata
+	simplDeserialize(mmd);	
+
     var tasks = MetadataLoader.getTasksFromQueueByType(mmd.name);
 
     if (tasks.length > 0) {
@@ -302,13 +316,20 @@ MetadataLoader.checkForMetadataFromExtension = function () {
  */
 
 MetadataLoader.getMMD = function (task, callback) {
-    if (RepoMan.repo != null) {
-        RepoMan.getMMDFromRepoByTask(task , callback);
-    }
-    else if (RepoMan.repoIsLoading == false) {
-        RepoMan.repoIsLoading = true;
-        RepoMan.loadMMDRepo();    		
-    }
+	/*
+	if (MetadataLoader.hasExtension){
+	    ExtensionInterface.dispatchMessage({ sender: "PAGE", type: "GET_MMD", url: task.metadata.location, callback: callback, reload: task.reload, source: task.source, application: application_name });
+
+	}else{
+	*/
+		if (RepoMan.repo != null) {
+        	RepoMan.getMMDFromRepoByTask(task , callback);
+	    }
+	    else if (RepoMan.repoIsLoading == false) {
+	        RepoMan.repoIsLoading = true;
+	        RepoMan.loadMMDRepo();    		
+	    }
+	//}
 };
 
 
