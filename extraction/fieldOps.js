@@ -46,7 +46,7 @@ FieldOps.operate = function(str, fieldOp){
 	else if (fieldOp.strip)
 		str = strip(str, fieldOp.strip.any_of);
 	else if (fieldOp.strip_param)
-		str = strip(str, fieldOp.strip_param.name);
+		str = stripParam(str, fieldOp.strip_param.name);
 	else if (fieldOp.substring)
 		str = substring(str, fieldOp.substring);
 	
