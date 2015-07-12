@@ -590,8 +590,6 @@ if (isExtension)
 	});
 }
 
-=======
-
 // replace different hyperlink elements with styled divs.
 // queue asynchronous population of these divs using loading of webpages via background script
 

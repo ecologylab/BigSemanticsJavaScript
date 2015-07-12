@@ -1793,7 +1793,7 @@ TwitterRenderer.getTweetSemanticsDiv = function (tweetId, styleInfo) {
 
     return twSemanticsDiv;
 }
-=======
+
 /**
  * custom rendering for Twitter Metadata expansion
  */
