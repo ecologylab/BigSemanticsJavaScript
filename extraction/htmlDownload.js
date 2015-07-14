@@ -1,4 +1,4 @@
-/*global setTimeout, setInterval, clearInterval, XMLHttpRequest, console, getDocumentMM
+/*global setTimeout, setInterval, clearInterval, XMLHttpRequest, console, getDocumentMM, getDocumentMMbyMime
 */
 var RETRY_WAIT_TIME = 125;
 var DEFAULT_INTERVAL = 125;
@@ -24,33 +24,56 @@ function getRequestWaitTime(domain){
 
 function loadWebpage(url, sendResponse, additionalUrls, mmd, callback)
 {
-	//time needed to wait between requests	
-	var domain = getDownloadDomain(url);
 	
-	var requestWaitTime = getRequestWaitTime(domain);
-	
-	//If we have not recently requested, then send the request, add the domain to recently requested, and set a timeout to remove it.
-	if( recentlyRequested.indexOf(domain) == -1 ){
+	var mmd2 = getDocumentMM(url);
+	if (extractWithService(mmd2, url)){
+		window.postMessage({
+			sender: "EXT", 
+			type:"RET_MD_SERVICE", 
+			url: url, 
+			callback: callback, 
+			reload: true, 
+			source: null
+		}, "*");
+	}
+	else{
+		//if (mmd.hasOwnProperty('rewrite_location')){}
 		
-		sendLoadRequest(url, sendResponse, additionalUrls, callback);
-		recentlyRequested.push(domain);
-		setTimeout(removeRecentlyRequested, requestWaitTime, domain);
+		//time needed to wait between requests	
+		var domain = getDownloadDomain(url);
 		
-	}else{
-		//Otherwise add to a queue of urls that are waiting.
-		
-		downloadQueue.push({url:url, waitTime:requestWaitTime});
-		if( downloadInterval === null ){
-			downloadInterval = setInterval(tryDownloadQueue, RETRY_WAIT_TIME, sendResponse, additionalUrls, callback);
+		var requestWaitTime = getRequestWaitTime(domain);
+		//Apply location filter
+		var ogURL = url;
+		if (mmd.hasOwnProperty('filter_location')){
+			url = PreFilter.filter(url, mmd2.filter_location);
 		}
 		
+		
+		
+		//If we have not recently requested, then send the request, add the domain to recently requested, and set a timeout to remove it.
+		if( recentlyRequested.indexOf(domain) == -1 ){
+			
+			sendLoadRequest(url, sendResponse, additionalUrls, mmd, callback, ogURL);
+			recentlyRequested.push(domain);
+			setTimeout(removeRecentlyRequested, requestWaitTime, domain);
+			
+		}else{
+			//Otherwise add to a queue of urls that are waiting.
+			
+			downloadQueue.push({url:url, waitTime:requestWaitTime});
+			if( downloadInterval === null ){
+				downloadInterval = setInterval(tryDownloadQueue, RETRY_WAIT_TIME, sendResponse, additionalUrls, mmd, callback, ogURL);
+			}
+			
+		}
 	}
 	
 }
 
 //We use a polling solution to retrieve documents from the queue. The idea is that because the majority of documents will have equivalent wait times
 //we can increase efficiency and simplicity simply be checking back with the queue every (DEFAULT_INTERVAL) milliseconds.
-function tryDownloadQueue(sendResponse, additionalUrls, callback){
+function tryDownloadQueue(sendResponse, additionalUrls, mmd, callback, ogurl){
 	
 	//loop backwards so we can remove/splice elements cleanly
 	for( var i = downloadQueue.length - 1; i > 0; i-=1 ){
@@ -64,7 +87,7 @@ function tryDownloadQueue(sendResponse, additionalUrls, callback){
                 
 				downloadQueue.splice(i, 1);
 				
-				sendLoadRequest(url, sendResponse, additionalUrls);
+				sendLoadRequest(url, sendResponse, additionalUrls, mmd, callback, ogurl);
 				recentlyRequested.push(domain);
 				setTimeout(removeRecentlyRequested, requestWaitTime, domain);
 		
@@ -85,10 +108,20 @@ function removeRecentlyRequested(domain){
   	recentlyRequested.splice(index, 1);	
 }
 
-function isUrlRedirect(response, sendResponse, additionalUrls)
+function addAdditionalUrl(additionalUrls, newUrl)
+{
+	var doit	= additionalUrls.indexOf(newUrl) == -1;
+	// precautionary conditions to avoid loops
+	if (doit)
+		additionalUrls.push(newUrl);
+	return doit;	// if false, circular reference -- quit!
+}
+
+function isJsContentRedirect(xhr, sendResponse, additionalUrls, mmd, callback)
 {
 	//check <script> tags in DOM <head>
 	//containing "window.opener = null; location.replace(url)"
+	var response = xhr.response;
 	var head_elt = response.getElementsByTagName("head");
 	
 	if (head_elt.length > 0)
@@ -113,47 +146,160 @@ function isUrlRedirect(response, sendResponse, additionalUrls)
 						if (additionalUrls.indexOf(response.URL) == -1)
 							additionalUrls.push(response.URL);
 						if (additionalUrls.indexOf(url[1]) == -1)
-							loadWebpage(url[1], sendResponse, additionalUrls);
+						{
+							console.log("JsContentRedirect: " + response.URL + "\t-> " + url[1]);
+							loadWebpage(url[1], sendResponse, additionalUrls, mmd, callback);
+						}
 						return true;
 					}
 				}
 			}
 		}
 	}
+	
+	if(xhr.response.URL != xhr.responseURL){
+	
+		if (!additionalUrls)
+		{	
+			additionalUrls = [];
+		}
+		additionalUrls.push(xhr.response.URL);
+		loadWebpage(xhr.responseURL, sendResponse, additionalUrls, mmd, callback);
+		return true;
+	}
+	
+	
+	
+	
 	return false;
 }
+
+/*
+ * For more info, see http://www.w3.org/TR/2006/WD-XMLHttpRequest-20060405/
+ */
+var READY_STATE_RECEIVING	= 3;	// before message body. all http headers have been received
+var READY_STATE_LOADED		= 4;	// data transfer complete. body received.
+var READY_STATE_HEADERS_RECIEVED = 2;
 //Do the work of sending the load request.
 //*This code is not my own, but rather was retrieved and updated from the existing download code* - Cameron
-function sendLoadRequest(url, sendResponse, additionalUrls, callback)
+function sendLoadRequest(url, sendResponse, additionalUrls, mmd, callback, originalURL)
 {
 	var xhr = new XMLHttpRequest();
+	xhr.first300	= true;
 	xhr.responseType = "document";
-	//xhr.followRedirects = true;
-	
-	xhr.onreadystatechange = function() {
-		
-		//console.log("state: " + xhr.readyState + " status: " + xhr.status);
-		
-		if (xhr.readyState==4 && xhr.status==200)
-	    {
-		
-			
-			if (xhr.response !== null){
-                //var headers = xhr.getAllResponseHeaders();
-                //if (!isUrlRedirect(xhr.response, sendResponse, additionalUrls))			
-                //getMetaMetadata(url, xhr.response, sendResponse, additionalUrls);
-				if (!isUrlRedirect(xhr.response, sendResponse, additionalUrls))		{	
-					var mmd = getDocumentMM(url);
-					sendResponse(mmd, xhr.response, callback);
+	//FIXME -- (1) responseType field should not be set based on our assumptions! use content-type (2) handling should be more consistent
+	xhr.onreadystatechange = function() 
+	{
+		var	ok			= false;
+		var status		= xhr.status;
+		var readyState	= xhr.readyState;
+		switch (readyState)
+		{
+			case READY_STATE_HEADERS_RECIEVED:
+				if (!xhr.first300)
+					break;
+				xhr.first300	= false;
+				if (status == 304)
+				{
+					//FIXME handle not modified, should read from cache here!!!
+					ok		= true; // continue load for now
 				}
-               
-			}
-				
-            
-	    }
+				else if (status >= 300 && status < 400)
+				{
+					// handle redirects
+					var newURL	= xhr.response.URL;
+					if (newURL != url )
+					{
+						if (additionalUrls == null)
+							addtionalUrls	= [];
+						if (addAdditionalUrl(addtionalUrls, newURL))
+						{	// redirect good
+//								mmd	= getMMD(newURL);
+							//FIXME see if the new mmd is more specific than the old!?
+							console.log("sendLoadRequest() "+url + "\t-> " + newURL);
+							xhr.first300	= true;
+							url				= newURL;
+							ok	= true;
+						}			
+					}
+				}
+				else
+				{
+					// check content type and make sure we can parse it; otherwise, abort!
+					var contentType	= xhr.getResponseHeader("Content-Type");
+					//remove any secondary types ('charset=')
+					var firstSemicolonIndex = contentType.indexOf(';');
+					
+					if(firstSemicolonIndex > 0){
+						contentType = contentType.slice(0, firstSemicolonIndex);
+					}
+					// we think its html
+					if (contentType == null || contentType == "" || contentType =="text/html" || contentType == "text/plain" 
+						|| contentType.indexOf("xml") != -1)  //TODO -- RSS, OPML, other types using xml?
+					{
+							if (mmd.parser == "xpath")
+							{
+								ok		= true;
+							}
+							else
+							{ // ERROR
+							}
+					}
+					else if (contentType == "application/javascript" || contentType == "application/json" || (contentType == "text/javascript"))
+					{
+							if (mmd.parser == "jsonpath")
+							{
+								ok		= true;
+							}
+							else
+							{ // ERROR
+							}
+					}
+					/*
+					else if (contentType == "text/xml" || (contentType == "application/xml"))
+					{
+							if (mmd.parser == "xpath")
+							{
+								ok	= true;
+							}
+							else // includes parser="direct"
+							{ // ERROR
+							}
+					} */
+					else
+					{	// something we don't currently parse!
+						//TODO setup parse of JPEG headers here, using parser type "jpeg"
+						if (contentType == "image/jpeg" && mmd.parser == "jpeg")
+						{
+						}
+					}
+				}
+				if (!ok)
+				{
+					xhr.abort();
+					console.log("Aborting as no meta-metadata: " + xhr.status + " " + xhr.location);
+				}
+			break;
+			
+			case READY_STATE_LOADED:
+//		xhr.responseType = "blob";
+//					xhr.responseType = "document";
+				if (xhr.status==200 && xhr.response !== null)
+				{							
+					if (!isJsContentRedirect(xhr, sendResponse, additionalUrls, mmd, callback))		
+					{	// normal case
+						var mmd1 = getDocumentMM(xhr.response.URL);
+						//simplGraphCollapse({mmdObj: mmd1});
+						sendResponse(mmd1, xhr.response, callback, additionalUrls, originalURL);
+					}
+				}
+			break;
+		}
 	};
 	
 	xhr.open("GET", url, true);
+	xhr.setRequestHeader("X-Requested-With", "XMLHttpRequest");
+
 	xhr.send();
 }
 

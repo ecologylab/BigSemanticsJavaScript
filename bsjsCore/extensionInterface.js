@@ -20,7 +20,6 @@ ExtensionInterface.dispatchMessage = function(message)
 {
 	if (typeof message === "undefined" || typeof message.type === "undefined" || typeof message.sender === "undefined")
 		return;
-	
 	if (message.type == "extractionRequest")
 	{
 		if (message.detail && message.detail.url)
@@ -30,7 +29,7 @@ ExtensionInterface.dispatchMessage = function(message)
 			//message.sender.dispatchEvent(extEvent);
 		}
 	}
-	if (message.type == "GET_MD" || message.type == "EXT_CHECK"){
+	if (message.type == "GET_MD" || message.type == "EXT_CHECK" || message.type=="GET_MMD"){
 		window.postMessage(message, "*");
 	}
 }
@@ -58,6 +57,13 @@ ExtensionInterface.onMessage = function(message)
 		else if (event.data.type == "RET_MD_SERVICE"){
 			console.log("Tried with extension but was told to do with service");
 			MetadataLoader.getMetadataFromService(message.data.url, message.data.callback, message.data.reload, message.data.source);
+		}
+		else if (event.data.type=="RET_MMD"){
+			if(message.data.application == application_name){
+				executeFunctionByName(message.data.callback, window, message.data.mmd);
+
+			}
+
 		}
         else {
 			console.log("MICE received: " + message.data.text);

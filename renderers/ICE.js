@@ -2,8 +2,13 @@
 // replace different hyperlink elements with styled divs.
 // queue asynchronous population of these divs using loading of webpages via background script
 
-var iconDir = (application_name == "mdc")? "../renderers/images/tweetBubble/"
-										: chrome.extension.getURL("content_script/img/");
+var iconDir = "";
+if (application_name == "mdc")
+	iconDir = "../renderers/images/tweetBubble/";
+else if (application_name == "ideamache")
+	iconDir = "/static/mache/code/BigSemanticsJS/renderers/images/tweetBubble/";
+else //tweetbubble
+	iconDir = chrome.extension.getURL("content_script/img/");
 
 var expandIconPath =  iconDir + "expand_icon.png";	// "https://abs.twimg.com/favicons/favicon.ico";
 var collapseIconPath = iconDir + 	"collapse_icon.png";
@@ -37,9 +42,9 @@ function downloadRequester(expandableItemUrl, container)
 		//document.dispatchEvent(new Event("tweetbubbleExternal"));
 		var message = {
 				type : "extractionRequest",
-				sender : table.parentElement,
+				sender : container,
 				detail : {
-					url : location
+					url : expandableItemUrl
 				}
 			};
 			ExtensionInterface.dispatchMessage(message);
@@ -364,12 +369,8 @@ function processUrlChange(newUrl)
 		processDefaultConditionClicks(document);
 }
 
-function run_script(userid, cond)
+function run_script(userid, cond, username)
 {
-	if(application_name =='mdc'){
-		instance = getICEInstance();
-
-	}
 	instance = getICEInstance();
 	
 	if(experiment_condition == mice_condition)
@@ -382,10 +383,10 @@ function run_script(userid, cond)
 		if (TwitterRenderer.setDocumentDownloader)
 			TwitterRenderer.setDocumentDownloader(downloadRequester);
 
-		if (isExtension)
-		{
-			Logger.init(userid, cond);
-		}
+//		if (isExtension)
+//		{
+//			Logger.init(userid, cond);
+//		}
 
 		processPage();
 		
@@ -410,6 +411,8 @@ function run_script(userid, cond)
 	}
 	
 	currentUrl = document.URL;
+	if (isExtension)
+		instance.validateUserInfo(username);
 	
 	if (isExtension) 
 	{
@@ -419,11 +422,77 @@ function run_script(userid, cond)
 	}
 }
 
-function processInfoSheetResponse(resp)
+function processInfoSheetResponse(resp, cancelType)
 {
-	chrome.extension.sendRequest({storeStudySettings: {"agreeToInformationSheet": resp}});
-	if (resp == Util.YES)
-		run_script(userid, response_condition);
+	if (cancelType == "access_grant")
+	{
+		var resp1 = (resp == Util.YES)? undefined : resp;
+		chrome.extension.sendRequest({storeStudySettings: {"agreeToAccessGrant": resp, "agreeToInformationSheet": resp1}});
+	}
+	else if (cancelType == "infosheet_disagree")
+	{
+		chrome.extension.sendRequest({storeStudySettings: {"agreeToInformationSheet": resp}}, function(response) {
+			var url = document.URL;
+			var paramIndex = url.indexOf('?'); 
+			if (paramIndex != -1)
+				url = url.substr(0, paramIndex);
+			window.location.replace(url);
+		});
+	}
+	//if (resp == Util.YES)
+		//run_script(userid, response_condition);
+}
+
+function isAccessGranted(response)
+{
+	if (response.oauth_token && response.oauth_token_secret)
+	{
+		return true;
+	}
+	else
+	{
+		var params = document.URL.substr(document.URL.indexOf('?') + 1).split('&');
+		var oauth_token = null;
+		var oauth_verifier = null;
+		var oauth_token_str = "oauth_token=";
+		var oauth_verifier_str = "oauth_verifier=";
+		for (var i = 0; i < params.length; i++)
+		{
+			if (params[i].indexOf(oauth_token_str) == 0)
+			{
+				oauth_token = params[i].substr(oauth_token_str.length);
+			}
+			if (params[i].indexOf(oauth_verifier_str) == 0)
+			{
+				oauth_verifier = params[i].substr(oauth_verifier_str.length);
+			}
+		}
+		if (oauth_token && oauth_verifier)
+		{
+			TwitterOAuth.accessTokenHelper(oauth_token, oauth_verifier);
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+}
+
+function logPendingDeclines(userId, access_grant, info_sheet)
+{
+	if (MetadataLoader.logger && typeof access_grant !== "undefined" && typeof info_sheet !== "undefined")
+	{
+		var eventObj = {
+			agree: {
+				userid: userId,
+				accessgrant: access_grant,
+				infosheet: info_sheet
+			}
+		}
+		MetadataLoader.logger(eventObj);
+		chrome.extension.sendRequest({storeStudySettings: {"loggedPending": true}});
+	}
 }
 
 //run_at is document_end i.e. after DOM is complete but before images and frames are loaded
@@ -441,19 +510,34 @@ else
 			experiment_condition = response.condition;
 		else
 			experiment_condition = mice_condition;
-			  
-		if (response && response.agree == Util.YES)
-			run_script(response.userid, response.condition);
+		
+		Logger.init(response.userid, response.condition);
+		if (!response.loggedDeclines)
+		{
+			logPendingDeclines(response.userid, response.agreeAccessGrant, response.agree);
+		}
+		
+		if (response && response.agreeAccessGrant != Util.NO && !isAccessGranted(response))
+		{
+			Util.promptUserForAccessGrant(processInfoSheetResponse, response.userid);
+		}
 		else
 		{
-			if (response && response.agree != Util.NO)
+			if (response && response.agree == Util.YES)
 			{
-				response_condition = response.condition;
-				userid = response.userid;
-				Util.getInformationSheetResponse(processInfoSheetResponse);
+				run_script(response.userid, response.condition, response.username);
 			}
-			//if (window.confirm(Util.info_sheet))
-				//processInfoSheetResponse(Util.YES);
+			else
+			{
+				if (response && response.agree != Util.NO)
+				{
+					response_condition = response.condition;
+					userid = response.userid;
+					Util.getInformationSheetResponse(processInfoSheetResponse, response.userid);
+				}
+				//if (window.confirm(Util.info_sheet))
+					//processInfoSheetResponse(Util.YES);
+			}
 		}
 		
 		if (MetadataLoader.logger)
@@ -466,7 +550,8 @@ else
 						currUserId: response.userid,
 						lastCond: response.last_condition,
 						currCond: response.condition,
-						infoSheetAgree: response.agree
+						infoSheetAgree: response.agree,
+						user_info: response.user_info
 					}
 				}
 				MetadataLoader.logger(eventObj);

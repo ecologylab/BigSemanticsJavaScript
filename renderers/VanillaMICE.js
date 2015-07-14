@@ -19,7 +19,7 @@ var FIELDS_TO_EXPAND = 10;
 
 MICE.initialize = function(){
 	
-	var miceRenderings = document.getElementsByClassName('metadataRendering');
+	var miceRenderings = document.getElementsByClassName('ecologylab-metadataRendering');
 
 	
 	for(var i = 0; i < miceRenderings.length; i++)

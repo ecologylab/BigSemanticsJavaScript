@@ -29,12 +29,16 @@ RepoMan.loadMMDRepo = function()
 
 
 
-RepoMan.initMetaMetadataRepo = function(jsonRepo)
+RepoMan.initMetaMetadataRepo = function(jsonRepo, alreadyDeserialized)
 {
-	simplDeserialize(jsonRepo);
+    if (!alreadyDeserialized) {
+        simplDeserialize(jsonRepo);
+       
+
+    }
 	
-	var mmdByName = jsonRepo["meta_metadata_repository"]["repository_by_name"];
-		
+    var mmdByName = jsonRepo["meta_metadata_repository"]["repository_by_name"];
+
 	RepoMan.repo = {};
 	
 	//go through all mmd and construct mmd dictionary
@@ -80,10 +84,24 @@ RepoMan.getMMDFromRepoByName = function(name)
 	MetadataLoader.setMetaMetadata(mmd);
 };
 
-RepoMan.getMMDFromRepoByTask = function(task)
+RepoMan.getMMDFromRepoByTask = function(task , callback)
 {
 	var mmd = RepoMan.repo[task.mmdType];
 	task.mmdType = mmd.name;
-	
-	MetadataLoader.setMetaMetadata(mmd);
+	if ( typeof callback == "function")
+		callback(mmd);
+	else
+		MetadataLoader.setMetaMetadata(mmd);
+};
+
+RepoMan.isLoaded = function()
+{
+    if (RepoMan.repo != null) {
+    	  return true;
+    }
+    else if (RepoMan.repoIsLoading == false) {
+        RepoMan.repoIsLoading = true;
+        RepoMan.loadMMDRepo();
+    }
+    return false;
 };

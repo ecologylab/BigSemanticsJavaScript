@@ -1,3 +1,4 @@
+
 /**
  * This file handles the loading of metadata and meta-metadata for general
  * Dynamic Exploratory Browsing Interfaces.
@@ -39,7 +40,7 @@ MetadataLoader.load = function (handler, url, isRoot, clipping, container) {
     // Add the rendering task to the queue
 
 
-    var task = new Metadatatask(url, isRoot, clipping, renderer, container)
+    var task = new Metadatatask(url, isRoot, clipping, renderer, container);
     MetadataLoader.queue.push(task);
 
     if (clipping != null && clipping.rawMetadata != null) {
@@ -66,18 +67,30 @@ MetadataLoader.getMetadata = function (url, callback, reload, source) {
 	 */
 
     if (!MetadataLoader.hasExtension) {
-        ExtensionInterface.dispatchMessage({ sender: "PAGE", type: "EXT_CHECK" });
     }
 
-    if (MetadataLoader.hasExtension && !document.getElementById("force_service").checked) {
-        ExtensionInterface.dispatchMessage({ sender: "PAGE", type: "GET_MD", url: url, callback: callback, reload: reload, source: source });
+	var forceService = document.getElementById("force_service");
+	var serviceForced = false;
+	if(forceService != null){
+		serviceForced = forceService.checked;
+	}
+    if (MetadataLoader.hasExtension && !serviceForced) {
+        ExtensionInterface.dispatchMessage({ sender: "PAGE", type: "GET_MD", url: url, callback: callback, reload: reload, source: source, application: application_name });
         console.log("requesting extension for metadata");
     }
     else {
         MetadataLoader.getMetadataFromService(url, callback, reload, source);
     }
 };
+MetadataLoader.printMMD = function(stuff){
+	console.log(stuff);
+}
+MetadataLoader.mimicIdeaMache = function(url, callback){
+	var reload = false;
+	var source = undefined;
+    ExtensionInterface.dispatchMessage({ sender: "PAGE", type: "GET_MMD", url: url, callback: callback, reload: reload, source: source });
 
+}
 /**
  * Retrieves the metadata from the service using a JSON-p call
  * When the service responds the callback function will be called.
@@ -119,7 +132,7 @@ MetadataLoader.setMetadata = function (rawMetadata, requestMmd) {
     // TODO move MDC related code to mdc.js
     if (typeof MDC_rawMetadata != "undefined") {
         MDC_rawMetadata = JSON.parse(JSON.stringify(rawMetadata));
-        //updateJSON(true);
+        updateJSON(true);
     }
 
     var metadata = {};
@@ -218,6 +231,9 @@ MetadataLoader.setMetaMetadata = function (mmd) {
         simplDeserialize(mmd);
     }
 
+	// deserialize meta-metadata
+	simplDeserialize(mmd);	
+
     var tasks = MetadataLoader.getTasksFromQueueByType(mmd.name);
 
     if (tasks.length > 0) {
@@ -281,7 +297,7 @@ MetadataLoader.isExtensionMetadataDomain = function (location) {
             return true;
     }
     return false;
-}
+};
 
 MetadataLoader.checkForMetadataFromExtension = function () {
     for (var i = 0; i < RepoMan.extensionMetadataDomains.length; i++) {
@@ -290,7 +306,7 @@ MetadataLoader.checkForMetadataFromExtension = function () {
             MetadataLoader.getMetadata(tasks[i].url, "MetadataLoader.setMetadata");
         }
     }
-}
+};
 
 /**
  * Retrieves the meta-metadata from the service using a JSON-p call.
@@ -301,13 +317,20 @@ MetadataLoader.checkForMetadataFromExtension = function () {
  */
 
 MetadataLoader.getMMD = function (task, callback) {
-    if (RepoMan.repo != null) {
-        RepoMan.getMMDFromRepoByTask(task);
-    }
-    else if (RepoMan.repoIsLoading == false) {
-        RepoMan.repoIsLoading = true;
-        RepoMan.loadMMDRepo();
-    }
+	/*
+	if (MetadataLoader.hasExtension){
+	    ExtensionInterface.dispatchMessage({ sender: "PAGE", type: "GET_MMD", url: task.metadata.location, callback: callback, reload: task.reload, source: task.source, application: application_name });
+
+	}else{
+	*/
+		if (RepoMan.repo != null) {
+        	RepoMan.getMMDFromRepoByTask(task , callback);
+	    }
+	    else if (RepoMan.repoIsLoading == false) {
+	        RepoMan.repoIsLoading = true;
+	        RepoMan.loadMMDRepo();    		
+	    }
+	//}
 };
 
 
@@ -325,7 +348,7 @@ MetadataLoader.doJSONPCall = function (jsonpURL) {
 MetadataLoader.clearDocumentCollection = function () {
     MetadataLoader.queue = [];
     MetadataLoader.documentMap = [];
-}
+};
 
 
 /**
@@ -363,7 +386,7 @@ MetadataLoader.getTasksFromQueueByUrl = function (url) {
 
     }
     return list;
-}
+};
 
 /**
  * Get all tasks from the queue which are waiting for given meta-metadata type.
@@ -379,7 +402,7 @@ MetadataLoader.getTasksFromQueueByType = function (type) {
         }
     }
     return tasks;
-}
+};
 
 /**
  * Get all tasks from the queue which are waiting for given meta-metadata type.
@@ -395,4 +418,5 @@ MetadataLoader.getTasksFromQueueByDomain = function (domain) {
         }
     }
     return tasks;
-}
+};
+>>>>>>> 415c1ca924c8269b1aa391dbd2fb8c2d31efa66c

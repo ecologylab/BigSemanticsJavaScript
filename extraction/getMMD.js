@@ -10,6 +10,8 @@
 //the repo given to us by the service
 var mmdRepo;
 
+var serviceURLPrefix = "";
+
 /**
 * The map from meta-metadata name (currently simple name, but might be extended to fully
 * qualified name in the future) to meta-metadata objects. This collection is filled during the
@@ -194,6 +196,11 @@ var urlPrefixCollection = new PrefixCollection('/');
 
 
 //LEEEEETS GET IT STARTED IN HEEEEERE
+if (typeof chrome !== "undefined" && typeof chrome.extension !== "undefined")
+{
+	serviceURLPrefix = "http:";
+}
+
 initRepo();
 
 function StrippedUrlEntry(metaMetadata, selector){
@@ -234,35 +241,72 @@ function testURLS(){
  * Load post inheritence repository
  */
 function initRepo(){
+  function doInitRepo(serviceURL) {
+    //make a request to the service for the mmd for the url
+    var request = new XMLHttpRequest();
+    request.open("GET", serviceURL, true);
+    request.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+    
+    request.onreadystatechange = function()
+    {
+      if(request.readyState == 4) {	
+        if (request.status == 200) {
+          var ans = request.responseText;
+          // cludge ahead to remove null callback
+          mmdRepo = JSON.parse(ans.substring(5, ans.length-2));
+          initRepositoryByName();
+          initializeLocationBasedMaps();
+          initializeSuffixAndMimeBasedMaps();
+        } else {
+          console.log("Error on requesting post-inheritance mmd repository, "
+                      + "URL: " + serviceURL);
+        }
+      }	
+    };
+    request.send();
+  }
 
-	var serviceURL = "//api.ecologylab.net/BigSemanticsService/mmdrepository.jsonp";
+  var host = "api.ecologylab.net";
+  var port = 80;
+  var securePort = 443;
 
-	//make a request to the service for the mmd for the url
-	var request = new XMLHttpRequest();
-	request.open("GET", serviceURL, true);
-	request.setRequestHeader("Content-type","application/x-www-form-urlencoded");
-	
-	request.onreadystatechange = function()
-	{
-		if(request.readyState == 4) {	
-			if (request.status == 200) {
-				var ans = request.responseText;
-				//cludge ahead to remove null callback
-                mmdRepo = JSON.parse(ans.substring(5, ans.length-2));
-                initRepositoryByName();
-                initializeLocationBasedMaps();
-                initializeSuffixAndMimeBasedMaps();
-            } else {
-				//console.log("Error! XMLHttpRequest failed.");
-			}
-		}	
+  function getRepoURL() {
+    var repoURL = null;
+    if (window.location.protocol == 'https:') {
+      repoURL = "//" + host + ":" + securePort;
+    } else {
+      repoURL = "//" + host + ":" + port;
+      repoURL = serviceURLPrefix + repoURL;
+    }
+    repoURL += "/BigSemanticsService/";
+    SEMANTIC_SERVICE_URL = repoURL;
+    repoURL += "mmdrepository.jsonp";
+    return repoURL;
+  }
 
-	};
-	request.send();
+  if (typeof chrome === 'object' && chrome && chrome.storage) {
+    // if this code is running as a Chrome extension content script,
+    // check if the user has configured different host / port for the service
+    chrome.storage.local.get({
+      serviceHost: host,
+      servicePort: port,
+      serviceSecurePort: securePort
+    }, function(opts) {
+      host = opts.serviceHost;
+      port = opts.servicePort;
+      securePort = opts.serviceSecurePort;
+      doInitRepo(getRepoURL());
+    });
+  } else {
+    // not running as a Chrome extension content script, just do normal things
+    doInitRepo(getRepoURL());
+  }
 }
 
 function initRepositoryByName(){
     simplDeserialize(mmdRepo.meta_metadata_repository.repository_by_name);
+    RepoMan.initMetaMetadataRepo(mmdRepo, true);
+
     for (var i in mmdRepo.meta_metadata_repository.repository_by_name){
         var mmd = mmdRepo.meta_metadata_repository.repository_by_name[i];
         if (mmd.name)
@@ -370,6 +414,15 @@ function getDocumentMM(url) {
         
     return result;
   }
+
+function getDocumentMMbyMime(mimeStr){
+	if (repositoryByMime.hasOwnProperty(mimeStr)){
+		return repositoryByMime[mimeStr];
+	}
+	else {
+		return null;
+	}
+}
 
 /**
 * Initializes HashMaps for MetaMetadata selectors by URL or pattern. Uses the ClippableDocument
@@ -480,34 +533,37 @@ function initializeSuffixAndMimeBasedMaps(){
     
     for (var name in repositoryByName)
     {
-        var metaMetadata = repositoryByName[name];
-        var suffixes = metaMetadata.suffixes;
-        if (suffixes)
-        {
-            for (var i in suffixes)
-            {
-                var suffix = suffixes[i];
-                if (!repositoryBySuffix.hasOwnProperty(suffix))
-                {
-                    repositoryBySuffix[suffix] = metaMetadata;
-                    metaMetadata.setMmSelectorType(MMSelectorType.SUFFIX_OR_MIME);
-                }
-            }
-        }
+		var metaMetadata = repositoryByName[name];
+		for (var s in metaMetadata.selectors){
+            var selector = metaMetadata.selectors[s];  
+			var suffixes = selector.suffixes;
+			if (suffixes)
+			{
+				for (var i in suffixes)
+				{
+					var suffix = suffixes[i];
+					if (!repositoryBySuffix.hasOwnProperty(suffix))
+					{
+						repositoryBySuffix[suffix] = metaMetadata;
+						metaMetadata.mmSelectorType = MMSelectorType.SUFFIX_OR_MIME;
+					}
+				}
+			}
 
-        var mimeTypes = metaMetadata.mime_types;
-        if (mimeTypes)
-        {
-            for (var j in mimeTypes)
-            {
-                var mimeType = mimeTypes[j];
-                if (!repositoryByMime.hasOwnProperty(mimeType))
-                {
-                    repositoryByMime[mimeType] = metaMetadata;
-                    metaMetadata.setMmSelectorType(MMSelectorType.SUFFIX_OR_MIME);
-                }
-            }
-        }
+			var mimeTypes = selector.mime_types;
+			if (mimeTypes)
+			{
+				for (var j in mimeTypes)
+				{
+					var mimeType = mimeTypes[j];
+					if (!repositoryByMime.hasOwnProperty(mimeType))
+					{
+						repositoryByMime[mimeType] = metaMetadata;
+						metaMetadata.mmSelectorType = MMSelectorType.SUFFIX_OR_MIME;
+					}
+				}
+			}
+		}
     }
 }
 
