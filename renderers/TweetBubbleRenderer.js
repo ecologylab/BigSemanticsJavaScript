@@ -1814,5 +1814,12 @@ TwitterRenderer.renderUpdate = function(url, mmd, metadata)
 	for (var i = 0; i < contentExpansions.length; i++) {
 		var metadataTable = TwitterRenderer.buildMetadataTable(null, false, false, 
 				metadataFields, TwitterRenderer.FIRST_LEVEL_FIELDS, styleInfo, null, false);
+		if (metadataTable) {
+			//visual.metadataTable.title.tweets
+			var rowDiv = contentExpansions[i].visual.firstChild.firstChild.nextSibling;
+			//row.td.td
+			var tweetsCell = rowDiv.firstChild.nextSibling;
+			tweetsCell.insertBefore(metadataTable, tweetsCell.firstChild);
+		}
 	}
 }
