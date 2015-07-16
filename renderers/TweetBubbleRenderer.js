@@ -1467,6 +1467,15 @@ TwitterRenderer.getDocumentContainersByContainer = function (container) {
     return containers;
 }
 
+TwitterRenderer.getDocumentContainersByUrl = function (url) {
+    var containers = [];
+    for (var i = 0; i < RendererBase.documentMap.length; i++)
+        if (RendererBase.documentMap[i].matches(url))
+            containers.push(RendererBase.documentMap[i]);
+
+    return containers;
+}
+
 /**
  * show the metadata display
  * @param expandedItem, item for which display was constructed
@@ -1792,4 +1801,18 @@ TwitterRenderer.getTweetSemanticsDiv = function (tweetId, styleInfo) {
     twSemanticsDiv.appendChild(twSemanticsRow);
 
     return twSemanticsDiv;
+}
+
+TwitterRenderer.renderUpdate = function(url, mmd, metadata)
+{
+	var metadataFields = ViewModeler.createMetadata(false, mmd, metadata, url);
+	var miceStyles = InterfaceStyle.getMiceStyleDictionary("twitter");
+    var styleInfo = { styles: miceStyles, type: "twitter" };
+    
+	var contentExpansions = TwitterRenderer.getDocumentContainersByUrl(url);
+	
+	for (var i = 0; i < contentExpansions.length; i++) {
+		var metadataTable = TwitterRenderer.buildMetadataTable(null, false, false, 
+				metadataFields, TwitterRenderer.FIRST_LEVEL_FIELDS, styleInfo, null, false);
+	}
 }

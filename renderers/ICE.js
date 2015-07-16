@@ -587,5 +587,10 @@ if (isExtension)
 			
 		if (request.url != null)
 			processUrlChange(request.url);
+		else if (request.update != null) {
+			console.log(request.update);
+			TwitterRenderer.renderUpdate(request.update.url, request.update.mmd, 
+													request.update.metadata);
+		}
 	});
 }
