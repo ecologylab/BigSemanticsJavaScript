@@ -3,6 +3,7 @@
 
 # editor
 *~
+*.swp
 
 # eclipse
 .metadata
