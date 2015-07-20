@@ -26,6 +26,11 @@ TwitterRenderer.favoriteIconPath3 = isExtension? chrome.extension.getURL("conten
 TwitterRenderer.FIRST_LEVEL_FIELDS = 20;
 TwitterRenderer.FIELDS_TO_EXPAND = 10;
 
+TwitterRenderer.playIconPath = isExtension ? chrome.extension.getURL("content_script/js/BigSemanticsJavaScript/renderers/images/tweetBubble/play.png") 
+														: TwitterRenderer.imgDir + "play.png";
+TwitterRenderer.pauseIconPath = isExtension ? chrome.extension.getURL("content_script/js/BigSemanticsJavaScript/renderers/images/tweetBubble/pause.png") 
+														: TwitterRenderer.imgDir + "pause.png";
+
 /**
  * Create the metadataRendering, add it to the HTML container, and complete the RenderingTask
  * @param task, RenderingTask to complete 
@@ -1269,6 +1274,15 @@ TwitterRenderer.buildMetadataField = function(metadataField, isChildTable, field
 					fieldLabelDiv.appendChild(img);
 			}		
 			
+			if (metadataField.child_type == "tweet")
+			{
+				var imgPnP = document.createElement('img');
+			    imgPnP.className = styleInfo.styles.tweetStreamIcon;
+			    imgPnP.src = TwitterRenderer.pauseIconPath;
+			    
+			    fieldLabelDiv.appendChild(imgPnP);
+			}
+			
 			nameCol.appendChild(fieldLabelDiv);
 		}
 			
@@ -1805,6 +1819,10 @@ TwitterRenderer.getTweetSemanticsDiv = function (tweetId, styleInfo) {
 
 TwitterRenderer.renderUpdate = function(url, mmd, metadata)
 {
+	//TODO: generalize (streaming directives in mmd)
+	if (metadata.title)
+		delete metadata["title"];
+		
 	var metadataFields = ViewModeler.createMetadata(false, mmd, metadata, url);
 	var miceStyles = InterfaceStyle.getMiceStyleDictionary("twitter");
     var styleInfo = { styles: miceStyles, type: "twitter" };
@@ -1815,11 +1833,24 @@ TwitterRenderer.renderUpdate = function(url, mmd, metadata)
 		var metadataTable = TwitterRenderer.buildMetadataTable(null, false, false, 
 				metadataFields, TwitterRenderer.FIRST_LEVEL_FIELDS, styleInfo, null, false);
 		if (metadataTable) {
-			//visual.metadataTable.title.tweets
-			var rowDiv = contentExpansions[i].visual.firstChild.firstChild.nextSibling;
-			//row.td.td
-			var tweetsCell = rowDiv.firstChild.nextSibling;
-			tweetsCell.insertBefore(metadataTable, tweetsCell.firstChild);
+			////visual.metadataTable.title.tweets
+			//var rowDiv = contentExpansions[i].visual.firstChild.firstChild.nextSibling;
+			////row.td.td
+			//var tweetsCell = rowDiv.firstChild.nextSibling;
+			var streamIcon = contentExpansions[i].visual.getElementsByClassName(
+												styleInfo.styles.tweetStreamIcon)[0];
+			if (streamIcon)
+			{
+				//fieldLabelDiv.labelCol.row
+				var labelRow = streamIcon.parentElement.parentElement.parentElement;
+				//row.table.td
+				var tweetsCell = labelRow.parentElement.parentElement;
+				tweetsCell.insertBefore(metadataTable, tweetsCell.firstChild);
+				
+				//remove previous icon
+				var iconParent = streamIcon.parentElement;
+				iconParent.removeChild(streamIcon);
+			}
 		}
 	}
 }

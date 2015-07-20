@@ -90,7 +90,8 @@ var TWITTER_MICE_STYLE = {
 	    tweetSemantics : "tweetSemantics",
 	    tweetSemanticsRow : "tweetSemanticsRow",
 	    tweetSemanticsDiv : "tweetSemanticsDiv",
-	    fieldValueImage : "twFieldValueImage"
+	    fieldValueImage : "twFieldValueImage",
+	    tweetStreamIcon: "tweetStreamIcon"
 	}
 };
 
