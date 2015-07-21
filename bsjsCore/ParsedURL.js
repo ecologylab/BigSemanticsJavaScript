@@ -63,6 +63,8 @@ function ParsedURL(url) {
       } else {
         this.domain = this.host;
       }
+      // TODO get the top level domain, see
+      // https://publicsuffix.org/list/public_suffix_list.dat
       this.path = matches[4];
       if (this.path.length == 0) {
         this.path = '/';
