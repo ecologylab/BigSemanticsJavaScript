@@ -78,7 +78,7 @@ function ParsedURL(url) {
 }
 
 // for use in Node:
-if (module) {
+if (typeof module == 'object') {
   module.exports = ParsedURL;
 }
 

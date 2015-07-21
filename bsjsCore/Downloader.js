@@ -1,8 +1,9 @@
 // Downloader (via XHR).
 
 // for use with Node:
-if (require) {
+if (typeof require == 'function') {
   XMLHttpRequest = require('xmlhttprequest').XMLHttpRequest;
+  ParsedURL = require('./ParsedURL.js');
 }
 
 function Downloader(options) {
@@ -16,15 +17,19 @@ function Downloader(options) {
   var that = this;
 
   // utility function
+  // add newLocation to response, if not seen before
   // returns: true iff otherLocation is unseen and added to response
-  function addOtherLocation(response, otherLocation) {
-    if (!('otherLocations' in response)) {
-      response.otherLocations = [];
-    }
-    if (otherLocation != response.location
-        && response.otherLocations.indexOf(otherLocation) < 0) {
-      resopnse.otherLocations.push(otherLocation);
-      return true;
+  function addNewLocation(response, newLocation) {
+    if (newLocation) {
+      if (newLocation != response.location) {
+        if (!response.otherLocations) { response.otherLocations = []; }
+        if (response.otherLocations.indexOf(newLocation) < 0) {
+          var prevLocation = response.location;
+          response.location = newLocation;
+          response.otherLocations.push(prevLocation);
+          return true;
+        }
+      }
     }
     return false;
   }
@@ -33,7 +38,7 @@ function Downloader(options) {
   // returns: true iff the contentType is acceptable
   // use options to indicate other acceptable content types.
   function isContentTypeAcceptable(contentType, options) {
-    var baseList = { null, '', 'text/html', 'text/plain' };
+    var baseList = [ null, '', 'text/html', 'text/plain' ];
     if (baseList.indexOf(contentType) >= 0) { return true; }
     if (contentType.indexOf('xml') >= 0) { return true; }
     if (options && options.acceptTypes) {
@@ -42,21 +47,26 @@ function Downloader(options) {
     return false;
   }
 
+  // utility function
+  // do JS redirection, if not resulting in infinite loop
+  // returns: true iff JS redirection detected and is happening.
   function isJsContentRedirect(xhr, response, options, callback) {
-    var heads = xhr.response.getElementByTagName('head');
-    if (heads.length > 0) {
-      var scripts = heads[0].getElementByTagName('script');
-      for (var i in scripts) {
-        var script = scripts[i];
-        if (script.innerText) {
-          var match = script.innerText.match(/location.replace\(\"(.*)\"\)/i);
-          if (match && match[1]) {
-            var url = match[1].replace(/\\/g, '');
-            if (addOtherLocations(response, url)) {
-              console.log("JavaScript redirect to: " + url);
-              options.response = response;
-              that.httpGet(url, options, callback);
-              return true;
+    if (xhr.response) {
+      var heads = xhr.response.getElementByTagName('head');
+      if (heads.length > 0) {
+        var scripts = heads[0].getElementByTagName('script');
+        for (var i in scripts) {
+          var script = scripts[i];
+          if (script.innerText) {
+            var match = script.innerText.match(/location.replace\(\"(.*)\"\)/i);
+            if (match && match[1]) {
+              var url = match[1].replace(/\\/g, '');
+              if (addNewLocations(response, url)) {
+                console.log("JavaScript redirect to: " + url);
+                options.response = response;
+                that.httpGet(url, options, callback);
+                return true;
+              }
             }
           }
         }
@@ -83,62 +93,81 @@ function Downloader(options) {
 
       var response = null;
       if (options.response) { response = options.response; }
-      else { response = { initialLocation: location, code: 0 } };
+      else { response = { location: location, code: 0 } };
 
       var xhr = new XMLHttpRequest();
       xhr.first300 = true;
       xhr.responseType = 'document';
       xhr.onreadystatechange = function() {
+        console.log(xhr.readyState);
         response.code = xhr.status;
         var ok = false;
+        var err = null;
         switch (xhr.readyState) {
-          case READY_STATE_HEADERS_RECEIVED:
+          case xhr.HEADERS_RECEIVED:
+            console.log(xhr);
             if (!xhr.first300) { break; }
             xhr.first300 = false;
             if (xhr.status == 304) {
               // TODO handle 'not modified' -- read from cache
-              console.warn("TODO: handle 'not modified' -- read from cache");
+              err = new Error("TODO: handle 'not modified' -- read from cache");
             } else if (xhr.status >= 300 && xhr.status < 400) {
               // handle redirects
               var newLocation = xhr.response.URL;
-              if (newLocation != location) {
-                if (addOtherLocation(response, newLocation)) {
-                  console.log("redirect location: " + newLocation);
-                  xhr.first300 = true;
-                  response.location = newLocation;
-                  ok = true;
-                }
+              if (addNewLocation(response, newLocation)) {
+                console.log("redirect location: " + newLocation);
+                xhr.first300 = true;
+                response.location = newLocation;
+                ok = true;
+              } else {
+                err = new Error("Redirection loop detected");
               }
             } else {
               // check content type and make sure we can parse it
               // otherwise abort
-              response.contentType = xhr.getResponseHeader('Content-Type');
-              var p = response.contentType.indexOf(';');
-              if (p >= 0) {
-                response.charset = response.contentType.substr(p+1).trim();
-                if (response.charset.substr(0, 8) == 'charset=') {
-                  response.charset = response.charset.substr(9);
-                }
-                response.contentType = response.contentType.substr(0, p);
+              var contentType = xhr.getResponseHeader('Content-Type');
+              var matches = contentType.match(/([^;]+)(;\s*charset=(.*))?/);
+              if (matches) {
+                response.contentType = matches[1];
+                response.charset = matches[3];
               }
 
-              if (isContentTypeAcceptable(response.contentType) {
+              if (isContentTypeAcceptable(response.contentType)) {
                 ok = true;
               } else {
-                console.warn("Unsupported content type: " + response.contentType);
-              }
-
-              if (!ok) {
-                xhr.abort();
-                console.warn("Aborting: " + xhr.status + "; " + xhr.location);
+                err = new Error("Unsupported content type: " + response.contentType);
               }
             }
+            if (!ok) {
+              console.warn("Aborting: " + xhr.status + "; " + xhr.location);
+              xhr.abort();
+              callback(err, null);
+            }
             break;
-          case READY_STATE_LOADED:
-            if (xhr.status == 200 && xhr.response != null) {
+          case xhr.DONE:
+            if (xhr.status == 200) {
+              addNewLocation(response, xhr.responseURL);
               if (!isJsContentRedirect(xhr, response, options, callback)) {
+                if (xhr.response) {
+                  response.page = xhr.response;
+                } else if (xhr.responseXML) {
+                  response.pageXml = xhr.responseXML;
+                } else if (xhr.responseText) {
+                  response.pageText = xhr.responseText;
+                } else {
+                  var err = new Error("Missing response body");
+                  err.xhr = xhr;
+                  callback(err, null);
+                  return;
+                }
                 callback(null, response);
+              } else {
+                callback(new Error("Redirection loop using JS detected"), null);
               }
+            } else {
+              var err = new Error("Error in response");
+              err.xhr = xhr;
+              callback(err, null);
             }
             break;
         }
@@ -153,5 +182,10 @@ function Downloader(options) {
   }
 
   return this;
+}
+
+// for use in Node:
+if (typeof module == 'object') {
+  module.exports = Downloader;
 }
 
