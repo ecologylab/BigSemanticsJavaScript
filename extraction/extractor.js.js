@@ -1,6 +1,6 @@
 
 
-function extract(response, mmd, repoMan, options){
+function extract(response, mmd, repoMan, callback, options){
 	
 	
 	/*
@@ -687,5 +687,5 @@ function extract(response, mmd, repoMan, options){
 		extractedMeta[mmd.name].download_status = "DOWNLOAD_DONE";
 		extractedMeta[mmd.name].mm_name = mmd.name;
 	}
-	return extractedMeta;
+	callback(extractedMeta);
 }
