@@ -223,6 +223,11 @@ simpl.deserialize = function(str, options) {
   return simpl.graphExpand(JSON.parse(str), options);
 }
 
+// for use in Node:
+if (module) {
+  module.exports = simpl;
+}
+
 
 
 // tests:
