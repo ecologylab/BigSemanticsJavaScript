@@ -41,6 +41,11 @@ function Downloader(options) {
     var baseList = [ null, '', 'text/html', 'text/plain' ];
     if (baseList.indexOf(contentType) >= 0) { return true; }
     if (contentType.indexOf('xml') >= 0) { return true; }
+    if (options && options.responseType) {
+      if (options.responseType == 'json' && contentType.indexOf('json') >= 0) {
+        return true;
+      }
+    }
     if (options && options.acceptTypes) {
       if (options.acceptTypes.indexOf(contentType)) { return true; }
     }
@@ -51,7 +56,8 @@ function Downloader(options) {
   // do JS redirection, if not resulting in infinite loop
   // returns: true iff JS redirection detected and is happening.
   function isJsContentRedirect(xhr, response, options, callback) {
-    if (xhr.response) {
+    if (typeof Document == 'undefined') { return false; }
+    if (xhr.response && xhr.response instanceof Document) {
       var heads = xhr.response.getElementByTagName('head');
       if (heads.length > 0) {
         var scripts = heads[0].getElementByTagName('script');
@@ -98,14 +104,15 @@ function Downloader(options) {
       var xhr = new XMLHttpRequest();
       xhr.first300 = true;
       xhr.responseType = 'document';
+      if (options && options.responseType) {
+        xhr.responseType = options.responseType;
+      }
       xhr.onreadystatechange = function() {
-        console.log(xhr.readyState);
         response.code = xhr.status;
         var ok = false;
         var err = null;
         switch (xhr.readyState) {
           case xhr.HEADERS_RECEIVED:
-            console.log(xhr);
             if (!xhr.first300) { break; }
             xhr.first300 = false;
             if (xhr.status == 304) {
@@ -132,7 +139,7 @@ function Downloader(options) {
                 response.charset = matches[3];
               }
 
-              if (isContentTypeAcceptable(response.contentType)) {
+              if (isContentTypeAcceptable(response.contentType, options)) {
                 ok = true;
               } else {
                 err = new Error("Unsupported content type: " + response.contentType);
@@ -149,11 +156,11 @@ function Downloader(options) {
               addNewLocation(response, xhr.responseURL);
               if (!isJsContentRedirect(xhr, response, options, callback)) {
                 if (xhr.response) {
-                  response.page = xhr.response;
+                  response.entity = xhr.response;
                 } else if (xhr.responseXML) {
-                  response.pageXml = xhr.responseXML;
+                  response.xml = xhr.responseXML;
                 } else if (xhr.responseText) {
-                  response.pageText = xhr.responseText;
+                  response.text = xhr.responseText;
                 } else {
                   var err = new Error("Missing response body");
                   err.xhr = xhr;

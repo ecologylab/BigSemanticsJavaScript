@@ -224,7 +224,7 @@ simpl.deserialize = function(str, options) {
 }
 
 // for use in Node:
-if (module) {
+if (typeof module == 'object' && module != null) {
   module.exports = simpl;
 }
 

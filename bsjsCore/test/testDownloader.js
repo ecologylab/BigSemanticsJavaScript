@@ -17,7 +17,7 @@ function testBasic() {
     assert(response.code == 200);
     assert(response.contentType == 'text/html');
     assert(response.charset == 'UTF-8' || response.charset == 'ISO-8859-1');
-    assert(response.pageText != null);
+    assert(response.text != null);
   });
 }
 
@@ -26,5 +26,5 @@ function testBasic() {
 // level 1, which does not provide responseURL. Thus it cannot capture
 // redirected locations.
 
-testRedirect();
+testBasic();
 

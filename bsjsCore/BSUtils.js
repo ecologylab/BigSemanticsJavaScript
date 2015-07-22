@@ -1,3 +1,5 @@
+// Utilities
+
 var BSUtils = {};
 
 /** 
@@ -14,6 +16,16 @@ BSUtils.toDisplayCase = function(string)
     display += strings[s].charAt(0).toLowerCase() + strings[s].slice(1) + " ";
   }
   return display;
+}
+
+BSUtils.unwrap = function(target) {
+  if (typeof target == 'object' && target != null) {
+    var keys = Object.keys(target);
+    if (keys.length == 1) {
+      return target[keys[0]];
+    }
+  }
+  return target;
 }
 
 /**
@@ -35,24 +47,6 @@ BSUtils.removeLineBreaksAndCrazies = function(string)
   return result;
 }
 
-
-/**
- * Gets the host from a URL
- * @param url, string of the target URL
- * @return host as a string
- */
-BSUtils.getHost = function(url)
-{
-  if (url)
-  {
-    if (url.match(/:\/\/(www\.)?(.[^/:]+)/) != null)
-		 return "http://www." + url.match(/:\/\/(www\.)?(.[^/:]+)/)[2];
-	else
-		return "error getting domain";
-   
-  }
-}
-
 /**
  * Gets the favicon image for a url
  * @param url, string of target URL
@@ -60,14 +54,10 @@ BSUtils.getHost = function(url)
  */
 BSUtils.getFaviconURL = function(url)
 {
-	//return BSUtils.getHost(url) + "/favicon.ico";
-	
-	//return "http://g.etfv.co/" + url;
-	
 	return "http://www.google.com/s2/favicons?domain_url=" + url;	
 }
 
-//src: http://stackoverflow.com/questions/359788/how-to-execute-a-javascript-function-when-i-have-its-name-as-a-string
+// src: http://stackoverflow.com/questions/359788/how-to-execute-a-javascript-function-when-i-have-its-name-as-a-string
 function executeFunctionByName(functionName, context) {
   var args = [].slice.call(arguments).splice(2);
   var namespaces = functionName.split(".");
@@ -78,8 +68,9 @@ function executeFunctionByName(functionName, context) {
   return context[func].apply(this, args);
 }
 
-//get base url
+// get base url
 function getPosition(str, m, i) 
 {
    return str.split(m, i).join(m).length;
 }
+
