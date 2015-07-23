@@ -86,7 +86,7 @@ RendererBase.addMetadataDisplay = function(container, url, clipping, renderer, o
 }
 
 
-}
+
 
 
 

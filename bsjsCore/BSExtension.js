@@ -42,7 +42,7 @@ BSExtension.prototype.sendMessageToExt = function(method, params, callback) {
   }
   var msg = { method: method, params: params };
   if (this.extensionId) {
-    chrome.runtime.sendMessage(extid, msg, onResponse);
+    chrome.runtime.sendMessage(this.extensionId, msg, onResponse);
   } else {
     chrome.runtime.sendMessage(msg, onResponse);
   }

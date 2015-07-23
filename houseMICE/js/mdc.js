@@ -141,16 +141,7 @@ function showMetadata()
 {
   var url = document.getElementById("targetURL").value;
   var content = document.getElementById("mdcIce");
-  if (document.URL.indexOf("http://localhost:") > -1){
-	  var hostname = window.location.hostname;
-	  var port = window.location.port;
-	  SEMANTIC_SERVICE_URL = "http://" + hostname + ":" + port + "/BigSemanticsService/";
-
-  }
-  else{
-	   SEMANTIC_SERVICE_URL = "http://ecology-service.cse.tamu.edu/BigSemanticsService/";
-
-  }
+ 
   if(window.history.pushState)
   {
    
@@ -196,8 +187,26 @@ function onEnterShowMetadata(event)
 }
 
 //Decide whether to show default or if there's a parameter passed in
+var BSService;
 function onBodyLoad() {
-  $(".collapse").collapse();
+	
+   if (document.URL.indexOf("http://localhost:") > -1){
+	  var hostname = window.location.hostname;
+	  var port = window.location.port;
+	  SEMANTIC_SERVICE_URL = "http://" + hostname;
+	   BSService = new BSAutoSwitch('eganfccpbldleckkpfomlgcbadhmjnlf',  {
+			  host: SEMANTIC_SERVICE_URL,
+			  port: port,
+			  securePort: 443
+			}); 
+
+  }
+  else{
+	    BSService = new BSAutoSwitch('eganfccpbldleckkpfomlgcbadhmjnlf');
+  }
+ 
+
+   $(".collapse").collapse();
 
   //Register button call backs
   $('#mmdJsonButton').on('click', function (e) {
