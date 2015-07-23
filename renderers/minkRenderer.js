@@ -220,7 +220,9 @@ Mink.returnParentHoverCSS = function(event){
 Mink.signalFavorite = function(event){
 	var url = $(event.target).siblings('.minkExplorablesExpander')[0].getAttribute('url');
 	console.log(url)
-	var detailDetails = {type: 'minkfavorite', url: url};
+	var favicon = $(event.target).siblings('.minkTitleClickable').children('.minkFavicon')[0].src;
+	var mdname = $(event.target).siblings('.minkTitleClickable').children('.minkTitleField')[0].childNodes[0].innerHTML;
+	var detailDetails = {type: 'minkfavorite', url: url, favicon: favicon, mdname: mdname};
 	var eventDetail = {detail: detailDetails, bubbles: true};
 	var myEvent = new CustomEvent("minkevent", eventDetail);
 	event.target.dispatchEvent(myEvent);
@@ -877,13 +879,9 @@ Mink.render = function(task){
 	{
 		    
 		// Add the HTML5 canvas for the drawing of connection lines
-		var canvas = document.createElement("canvas");
-			canvas.className = styleInfo.styles.lineCanvas;
-		
 		// Add the table and canvas to the interior container
 			
 		task.visual.appendChild(metadataTable);
-		task.visual.appendChild(canvas);
 		
 		// Add the interior container to the root contianer
 		setTimeout(function(){task.container.appendChild(task.visual)}, /*(Math.floor((Math.random() * 10) + 1))*50*/0);

@@ -26,17 +26,18 @@
 .minkAppContainer{
 	margin-top: 8px;
 	margin-right: auto;
-	margin-left: auto;
-	width: 1800px;
+	width: 1900px;
 	display: flex;
 	flex-direction: column;
 }
 .minkColumns{
-		display: flex;
-	
+		display: inline-flex;
+	  max-width: 1800px;
 }
 .minkToolbar{
 	width: 100%;
+	display: flex;
+	
 	justify-content: space-between;
 	margin-bottom: 10px;
 	min-height: 32px;
@@ -55,6 +56,65 @@
 	float: right;
 		display: inline-block;
 	
+}
+.leftPlaceholder{
+	display: inline-block;
+	height: 30px;
+	width: 30px;
+	padding: 2px;
+}
+.rightPlaceholder{
+	display: inline-block;
+	height: 30px;
+	width: 30px;
+		padding: 2px;
+
+}
+.minkFavoritesExpander{
+	  color: lightgray;
+  line-height: 30px;
+  font-size: 16px;
+  display: inline-block;
+  text-align: center;
+  top: 2px;
+  width: 100px;
+  /* border: solid 2px rgba(0,0,0,.4); */
+  position: relative;
+	
+}
+.minkFavoritesExpander:hover{
+	cursor: pointer;
+}
+.minkFavoritesExpander.nonempty{
+  font-size: 16px;
+  /* border-style: solid; */
+  font-weight: bold;
+  box-shadow: 2px;
+  color: rgba(0,0,0,.8);
+  -webkit-box-shadow: 0px 0px 2px 0px rgba(0,0,0,0.4);
+  background-color: rgba(0,0,0,.1);
+  /* border-width: 1px 1px 1px 0px; */
+}
+
+
+.flash{
+	animation-name: flashFavorites;
+	animation-duration: .5s;
+}
+@keyframes flashFavorites{
+	0%{background-color: rgba(0,0,0,.1)}
+	50%{background-color: rgba(249, 215, 78, .5)}
+	100%{background-color: rgba(0,0,0,.1)}
+}
+
+.minkFavorites{
+	margin-left: -400px;
+	width: 400px;
+	position: relative;
+	z-index: 100;
+	  -webkit-box-shadow: 0px 2px 2px 0px rgba(0,0,0,0.4);
+	  display: inline-block;
+
 }
 .minkBackButton:hover{
 	background-color: lightgray;
@@ -99,11 +159,11 @@
 	padding-top: 8px;
 	padding-bottom: 4px;
 	margin-top: 8px;
-	    transition: height 1s ease-out;
-	    -webkit-transition: height .5s ease, margin-top .5s ease, background-color .1s ease;
+	 /*   transition: height 1s ease-out;
 	    	 /*   transition: margin-top 1s ease-out;
 	    -webkit-transition: margin-top 1s ease;*/
-	    
+	-webkit-transition: margin-top .5s ease, background-color .1s ease;
+
 	position: relative;
 	margin-bottom: 12px;
 	padding-right: 8px;
@@ -142,7 +202,6 @@
 	
 }
 .minkCardContainer{
-	transition: transform .5s ease-in, opacity .18s linear;
 	position: relative
 }
 .animatingCollapse{

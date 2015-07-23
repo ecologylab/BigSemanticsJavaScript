@@ -52,8 +52,8 @@
         <script type="text/javascript" src="../renderers/minkRenderer.js"></script>
     
 	<!-- Just the simpl things -->    
+	<script type="text/javascript" src="../bsjsCore/simpl/newSimplDeserializer.js"></script>
 
-	<script type="text/javascript" src="../bsjsCore/simpl/simplDeserializer.js"></script>
 	<script type="text/javascript" src="../bsjsCore/simpl/simplFieldTypes.js"></script>
 	<script type="text/javascript" src="../bsjsCore/simpl/simplGraphCollapse.js"></script>
 	<script type="text/javascript" src="../bsjsCore/simpl/simplGraphExpand.js"></script>
@@ -128,11 +128,13 @@
     <!-- Content -->
     
     <div class ="minkAppContainer" id="minkAppContainer">
-    <div class="minkToolbar" id="minkToolbar"><div onclick="minkApp.goBackHandler()" class="minkBackButton"><img src="../renderers/images/mink/back-icon.png"></img></div><div onclick="minkApp.goForwardsHandler()" class="minkForwardButton"><img src="../renderers/images/mink/back-icon.png"></img></div></div>
-    <div class='minkColumns'>    <div class="minkColumn" id="minkC1">
+    <div class="minkToolbar" id="minkToolbar"><div class="leftPlaceholder"></div><div onclick="minkApp.goBackHandler()" class="minkBackButton"><img src="../renderers/images/mink/back-icon.png"></img></div><div onclick="minkApp.goForwardsHandler()" class="minkForwardButton"><img src="../renderers/images/mink/back-icon.png"></img></div><div class="rightPlaceholder"></div></div>
+  
+    <div class="minkCenterRow">  <div class="minkFavorites" id="minkFavorites"></div><div class="minkFavoritesExpander" id="minkFavoritesExpander" onclick="minkApp.favoritesToggleHandler()">Favorites-></div><div class='minkColumns'>    <div class="minkColumn" id="minkC1">
        <div class="" id="mdcIce"></div>
     </div>
-  </div>
+  </div></div>
+    
 
      
 

@@ -14,6 +14,20 @@ minkApp.columnKeyGen = 1;
 minkApp.offScreenColumnsLeft = 0;
 minkApp.offScreenColumnsRight = 0;
 minkApp.favorites = [];
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 function setIntervalX(callback, delay, repetitions) {
     var x = 0;
     var intervalID = window.setInterval(function () {
@@ -107,8 +121,11 @@ minkApp.moveForward = function(newColumn){
 
 		}
 		$(".minkBackButton").css('display', '');
+		$(".leftPlaceholder").css('display', 'none');
+
 		if(minkApp.offScreenColumnsRight < 1){
 			$(".minkForwardButton").css('display', 'none');
+			$(".rightPlaceholder").css('display', '');
 
 		}
 
@@ -139,8 +156,11 @@ minkApp.goBackwards = function(howMany){
 		minkApp.offScreenColumnsLeft--;
 
 	 $(".minkForwardButton").css('display', '');
+	 $(".rightPlaceholder").css('display', 'none');
+
 	 if(minkApp.offScreenColumnsLeft < 1){
 			$(".minkBackButton").css('display', 'none');
+			 $(".leftPlaceholder").css('display', '');
 
 		}
 
@@ -162,13 +182,69 @@ minkApp.goForwardsHandler = function(event){
 	
 }
 
-minkApp.addFavorite = function(url, srcHTML){
-	if(minkApp.favorites.indexOf(url) < 0){
-		var favorite = {url: url, src: srcHTML};
+minkApp.addFavorite = function(url, mdName, faviconLink, srcHTML){
+	
+	var found = -1;
+	
+	for(var i = 0; i < minkApp.favorites.length; i++){
+		if (minkApp.favorites[i].url == url){
+			found = i;
+		}
+	}
+	
+	if(found < 0){
+		var favorite = {url: url, src: srcHTML, mdname: mdName, favicon: faviconLink, html: null};
 		minkApp.favorites.push(favorite);
 
-		
+	}else{
+		var toBack = minkApp.favorites[found];
+		minkApp.favorites.splice(found, 1);
+		minkApp.favorites.push(toBack);
 	}
+	
+	minkApp.updateFavoritesDisplay();
+	
+	
+}
+
+minkApp.buildFavorite = function(favorite){
+	var favoriteCont = buildDiv('minkFavorite');
+	var favoriteTitle = buildDiv('minkFavoriteTitlebar');
+	var favoriteIcon = document.createElement('img');
+	favoriteIcon.className = "minkFavoriteIcon";
+	favoriteIcon.setAttribute('src', favorite.favicon);
+	var favoriteLink = document.createElement('a');
+	favoriteLink.className = "minkFavoriteLink";
+	favoriteLink.innerHTML = favorite.mdname;
+	favoriteLink.href = favorite.url;
+	favoriteTitle.appendChild(favoriteIcon);
+	favoriteTitle.appendChild(favoriteLink);
+	favoriteCont.appendChild(favoriteTitle);
+	return favoriteCont;
+}
+minkApp.updateFavoritesDisplay = function(){
+	var favoritesContainer = $('#minkFavorites')[0];
+	favoritesContainer.childNodes = [];
+	for(var i = minkApp.favorites.length-1; i >=0 ; i--){
+		
+		
+		if(minkApp.favorites[i].html == null){
+			minkApp.favorites[i].html = minkApp.buildFavorite(minkApp.favorites[i])
+		}
+		favoritesContainer.appendChild(minkApp.favorites[i].html);
+	}
+	if(minkApp.favorites.length >0){
+		var expander = $('#minkFavoritesExpander')[0];
+		if(!$('#minkFavoritesExpander').hasClass('nonempty')){
+					$('#minkFavoritesExpander').addClass('nonempty');
+
+		}
+		$('#minkFavoritesExpander').removeClass('flash');
+		setTimeout(function(){$('#minkFavoritesExpander').addClass('flash')}, 1)
+
+	}
+}
+minkApp.favoritesToggleHandler = function(event){
 	
 }
 minkApp.minkEventHandler = function(event){
@@ -183,7 +259,7 @@ minkApp.minkEventHandler = function(event){
 		 if(targetColumn == minkApp.rightMostCol){
 			 if(columnNumber < minkApp.maxCols){
 				 //makes new column and add it in
-				  nextCol = minkApp.buildColumn($(minkApp.HTML).children('.minkColumns')[0]);
+				  nextCol = minkApp.buildColumn($(minkApp.HTML).find('.minkColumns')[0]);
 				  nextCol.setAttribute('column', (columnNumber+1).toString());
 				  minkApp.columns.push(nextCol);
 				  minkApp.rightMostCol = nextCol;
@@ -193,7 +269,7 @@ minkApp.minkEventHandler = function(event){
 				  nextCol.setAttribute('column', (minkApp.maxCols).toString());
 				  minkApp.columns.push(nextCol);
 				  minkApp.rightMostCol = nextCol;*/
-				  nextCol = minkApp.buildColumn($(minkApp.HTML).children('.minkColumns')[0]);
+				  nextCol = minkApp.buildColumn($(minkApp.HTML).find('.minkColumns')[0]);
 					nextCol.setAttribute('column', (minkApp.maxCols).toString());
 					  minkApp.rightMostCol = nextCol;
 
@@ -235,7 +311,7 @@ minkApp.minkEventHandler = function(event){
 	 }else if(event.detail.type=="minkshowhide"){
 		 minkApp.showHidePileHandler(event);
 	 }else if(event.detail.type=='minkfavorite'){
-		 minkApp.addFavorite(event.detail.url, event.srcElement);
+		 minkApp.addFavorite(event.detail.url, event.detail.mdname, event.detail.favicon);
 	 }
 	 
 }
@@ -260,17 +336,65 @@ minkApp.formStack = function(secondCard, thirdCard){
 }
 minkApp.minimizePile = function(pile, numberOfCards){
 	var oldHeight = pile.clientHeight;
-	if(numberOfCards >= 3){
-		//pile.style.minHeight = (2 * minkApp.COLLAPSED_CARD_HEIGHT + 20) + 'px';
-	}
+	var newHeight;
+	var ph = $(pile).outerHeight();
+	var $el = $(pile);
+	$el.css('height', ph + 'px');
+	newHeight = (2 * minkApp.COLLAPSED_CARD_HEIGHT + 20);
+
 	$(pile).attr('collapsed', 'true');
+	
+	
+	var speed = ((newHeight - oldHeight)) / (0.25);
+
+//	$(pile).css('height', ph + 'px')
+	//every 1/60'th of a second, add, 1/60th of speed to height
+	var thisInterval = setInterval(function() {
+		var float = parseFloat(pile.style.height.substring(0, (pile.style.height.length-2)));
+		float += ((1/60)*speed)
+		ph =  float.toString()  + "px";
+		$(pile).css('height', ph)
+    }, (1/60 * 1000));
+	setTimeout(function(){clearInterval(thisInterval);}, 250);
+	
+	
+
+	
+		
+		
 }
 minkApp.expandPile = function(pile){
 	var cardCount = pile.childNodes.length;
 	pile.style.minHeight = "";
-	//pile.style.height = (cardCount * 39 -2 ) + "px";
 	pile.style.marginTop =  '0px';
 	$(pile).attr('collapsed', 'false');
+	var speed = 0;
+	if(cardCount > 3){
+		speed = (((cardCount) * 41) - pile.clientHeight) * 2; //pixels per second 
+	}else if(count == 3){
+		speed = (141-106)/(.5);
+	}
+	var ph = pile.clientHeight -8;
+//	$(pile).css('height', ph + 'px')
+	//every 1/60'th of a second, add, 1/60th of speed to height
+	var thisInterval = setInterval(function() {
+	/*	var float = parseFloat(pile.style.height.substring(0, (pile.style.height.length-2)));
+		float += ((1/60)*speed)
+		ph =  float.toString()  + "px";*/
+		var totalHeight = 0;
+		$(pile).children().each(function(){
+		    totalHeight = totalHeight + $(this).outerHeight(true) + 8;
+		});
+		if(totalHeight < pile.clientHeight){
+			ph = totalHeight + "px"
+		}else{
+			ph = pile.clientHeight + "px";
+
+		}
+		
+		$(pile).css('height', ph)
+    }, (1/60 * 1000));
+	setTimeout(function(){clearInterval(thisInterval); $(pile).css('height', '')}, 500);
 
 }
 minkApp.displayNone = function(event){
@@ -337,6 +461,7 @@ minkApp.expandCollapsePile = function(event){
 	/*
 	 * If none are uncollapseable, shrink all cards to snippet form and put behind first card
 	 */
+	var ogHeight = pile.clientHeight -8;
 
 	for(var i = 0; i < kids.length; i++){
 		if($(pile).attr('collapsed')!= 'true'){
@@ -388,31 +513,14 @@ minkApp.expandCollapsePile = function(event){
 		
 	}
 	if($(pile).attr('collapsed')!= 'true'){
-		minkApp.minimizePile(pile, kids.length);
-		var ph = $(pile).outerHeight();
-		var $el = $(pile);
-		$el.css('height', ph + 'px');
+		minkApp.minimizePile(pile, kids.length, ogHeight);
 
-		setTimeout(function() {
-            $el.css({
-                "height":  (2 * minkApp.COLLAPSED_CARD_HEIGHT + 20) + 'px'
-            });
-        }, 1);
-		//First card becomes front by going down to the middle of the pile.
-		var firstCard = kids[0];
-		
-		
 		//minkApp.formStack(kids[1], kids[2]);
 	}else{
 
 		    
 		minkApp.expandPile(pile, kids.length);
-		var ph = pile.scrollHeight -8;
-		$(pile).css('height', ph + 'px')
-		setTimeout(function() {
-			;
-			$(pile).css('height', '')
-        }, 500);
+		
 		//First card becomes front by going down to the middle of the pile.
 		/*var firstCard = kids[0];
 		minkApp.toMiddleOfPile(firstCard, pile);
@@ -563,7 +671,8 @@ function onBodyLoad() {
 	var minkapp = $("#minkAppContainer")[0];
 	//SEMANTIC_SERVICE_URL = "http://128.194.128.84:8080/BigSemanticsService/";
 	
-	  if (document.URL.indexOf("http://localhost:") > -1){
+	  if (document.URL.indexOf("http://localhost:") > -1 || document.URL.indexOf("file:///") > -1){
+		  
 		  
 			SEMANTIC_SERVICE_URL = "http://localhost:8080/BigSemanticsService/";
 
@@ -617,9 +726,6 @@ function syntaxHighlight(json) {
 	  });
 	}
 
-
-var MDC_rawMetadata = "";
-var MDC_rawMMD = "";
 
 //Stringify the JSON and make it pretty looking
 
