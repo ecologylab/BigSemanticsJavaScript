@@ -42,7 +42,7 @@ MICE.render = function(task){
 	task.visual.setAttribute('mdType', metadataFields[0].parentMDType);
 
 	// Build the HTML table for the metadata
-	MetadataLoader.currentDocumentLocation = task.url;
+	// MetadataLoader.currentDocumentLocation = task.url;
 	
 	var metadataTable = MICE.buildMetadataTable(null, false, task.isRoot, metadataFields, FIRST_LEVEL_FIELDS, styleInfo);
 	if(metadataTable)
@@ -75,7 +75,7 @@ MICE.render = function(task){
 		MICE.clearLoadingRows(task.container, styleInfo);
 	
 	// Remove the RenderingTask from the queue
-	MetadataLoader.queue.splice(MetadataLoader.queue.indexOf(task), 1);
+	// MetadataLoader.queue.splice(MetadataLoader.queue.indexOf(task), 1);
 }
 
 

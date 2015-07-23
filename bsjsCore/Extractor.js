@@ -1,6 +1,23 @@
+// Default metadata extractor.
 
-
-function extract(response, mmd, repoMan, callback, options){
+// Extracts metadata, given DOM and mmd.
+//
+// Response response:
+//   contains the DOM (in its 'entity' property). see Downloader for the
+//   specifics.
+//
+// MetaMetadata mmd:
+//   the mmd
+//
+// BigSemantics bigSemantics:
+//   used to provide types for outlinks
+//
+// Object options:
+//   containing optional configurations
+//
+// (err, metadata)=>void callback:
+//   to receive extraction result
+function extractMetadata(response, mmd, bigSemantics, options, callback) {
 	
 	
 	/*
@@ -635,7 +652,7 @@ function extract(response, mmd, repoMan, callback, options){
 	
 	
 	var metadata = {};
-	var page = response;
+	var page = response.entity;
 	//Kade's code filters the URL here. I'm going to assume this is done earlier in the process
 	var upperLevel = {}; //holds upperlevel metadata
 	var scalars = {};
@@ -687,5 +704,10 @@ function extract(response, mmd, repoMan, callback, options){
 		extractedMeta[mmd.name].download_status = "DOWNLOAD_DONE";
 		extractedMeta[mmd.name].mm_name = mmd.name;
 	}
-	callback(extractedMeta);
+
+  extractedMeta = BSUtils.unwrap(extractedMeta);
+  extractedMeta.location = response.location;
+  extractedMeta.additionalLocations = response.otherLocations;
+	callback(null, extractedMeta);
 }
+

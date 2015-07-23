@@ -7,6 +7,17 @@ simpl.SIMPL_ID = "simpl.id";
 simpl.SIMPL_REF = "simpl.ref";
 simpl.SIMPL_VISITED_ID = "_simpl._visited";
 
+simpl.jsonEscape = function(str) {
+  return str.replace(/\\n/g, "\\n")
+            .replace(/\\'/g, "\\'")
+            .replace(/\\"/g, '\\"')
+            .replace(/\\&/g, "\\&")
+            .replace(/\\r/g, "\\r")
+            .replace(/\\t/g, "\\t")
+            .replace(/\\b/g, "\\b")
+            .replace(/\\f/g, "\\f");
+};
+
 // (For internal use)
 // Depth-first search on the given object.
 // 'handlers' can be used to receive events and operate on the tree.
@@ -181,16 +192,14 @@ simpl.graphExpand = function(obj, options) {
 simpl.serialize = function(obj, options) {
   simpl.graphCollapse(obj, options);
   var result = undefined;
-  if (options && options.ref_before_id) {
-    result = JSON.stringify(obj);
-  } else {
+  if (options && options.id_before_ref) {
     // the following process makes sure that simpl_id appears before
     // corresponding simpl_refs.
     var parts = [];
     function output() { Array.prototype.push.apply(parts, arguments); }
     simpl.dfs(obj, options, {
       onScalar: function(val, parentVal, name) {
-        if (typeof val == 'string') { output('"', val, '"'); }
+        if (typeof val == 'string') { output('"', simpl.jsonEscape(val), '"'); }
         else { output(String(val)); }
       },
       onArray: function(val, parentVal, name) { output('['); },
@@ -210,6 +219,8 @@ simpl.serialize = function(obj, options) {
       onFieldName: function(val, parentVal, name) { output('"', name, '":'); }
     });
     result = parts.join('');
+  } else {
+    result = JSON.stringify(obj);
   }
   simpl.graphExpand(obj, options);
   return result;

@@ -5,68 +5,65 @@
 //               when used from content script, this can be omitted.
 //               when used from webpage, be sure to provide this ID.
 function BSExtension(extId) {
-  var ready = false;
-  this.isReady = function() { return ready; }
+  Readyable.call(this);
 
-  var queue = [];
-  this.onReady = function(callback) {
-    if (this.isReady()) { callback(null, this); }
-    else { queue.push(callback); }
-  }
-  function processCallbacks(err, bs) {
-    for (var i in queue) {
-      var callback = queue[i];
-      callback(err, bs);
-    }
-    queue = [];
-  }
+  this.extensionId = extId;
 
   var that = this;
-
-  // string method: name of the method
-  // object params: params for the invocation
-  // (err, result)=>void callback: callback to receive the result of the
-  //                               invocation.
-  function sendMessageToExt(method, params, callback) {
-    var msg = { method: method, params: params };
-    var onResponse = function(response) {
-      callback(response.error, response.result);
-    }
-    if (extId) {
-      chrome.runtime.sendMessage(extid, msg, onResponse);
-    } else {
-      chrome.runtime.sendMessage(msg, onResponse);
-    }
-  }
-
-  sendMessageToExt('hasExtension', null, function(err, result) {
-    if (err) { console.error(err); return; }
+  this.sendMessageToExt('hasExtension', null, function(err, result) {
+    if (err) { that.setError(err); return; }
     console.log("Extension detected: " + JSON.stringify(result));
-
-    that.loadMetadata = function(location, options, callback) {
-      var params = { location: location, options: options };
-      sendMessageToExt('loadMetadata', params, callback);
-    };
-
-    that.loadMmd = function(name, options, callback) {
-      var params = { name: name, options: options };
-      sendMessageToExt('loadMmd', params, callback);
-    };
-
-    that.selectMmd = function(location, options, callback) {
-      var params = { location: location, options: options };
-      sendMessageToExt('selectMmd', params, callback);
-    };
-
-    that.canonicalizeLocation = function(location, options, callback) {
-      var params = { location: location, options: options };
-      sendMessageToExt('canonicalizeLocation', params, callback);
-    };
-
-    ready = true;
-    processCallbacks(null, that);
+    that.setReady();
   });
 
   return this;
+}
+BSExtension.prototype = Object.create(Readyable.prototype);
+BSExtension.prototype.constructor = BSExtension;
+
+// Send message to extension, and listen for callabck.
+//
+// String method:
+//   name of the method
+// Object params:
+//   params for the invocation
+// (err, result)=>void callback:
+//   callback to receive the result of the invocation.
+BSExtension.prototype.sendMessageToExt = function(method, params, callback) {
+  function onResponse(response) {
+    callback(response.error, response.result);
+  }
+  var msg = { method: method, params: params };
+  if (this.extensionId) {
+    chrome.runtime.sendMessage(extid, msg, onResponse);
+  } else {
+    chrome.runtime.sendMessage(msg, onResponse);
+  }
+}
+
+BSExtension.prototype.loadMetadata = function(location, options, callback) {
+  var params = { location: location, options: options };
+  this.sendMessageToExt('loadMetadata', params, function(err, serialResult) {
+    callback(err, simpl.deserialize(serialResult));
+  });
+}
+
+BSExtension.prototype.loadMmd = function(name, options, callback) {
+  var params = { name: name, options: options };
+  this.sendMessageToExt('loadMmd', params, function(err, serialResult) {
+    callback(err, simpl.deserialize(serialResult));
+  });
+}
+
+BSExtension.prototype.selectMmd = function(location, options, callback) {
+  var params = { location: location, options: options };
+  this.sendMessageToExt('selectMmd', params, function(err, serialResult) {
+    callback(err, simpl.deserialize(serialResult));
+  });
+}
+
+BSExtension.prototype.canonicalizeLocation = function(location, options, callback) {
+  var params = { location: location, options: options };
+  this.sendMessageToExt('canonicalizeLocation', params, callback);
 }
 
