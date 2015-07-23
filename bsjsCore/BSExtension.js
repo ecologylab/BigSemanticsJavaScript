@@ -49,9 +49,21 @@ BSExtension.prototype.sendMessageToExt = function(method, params, callback) {
 }
 
 BSExtension.prototype.loadMetadata = function(location, options, callback) {
-  if (options && options.page && ) {
-
+  if (options && options.page && this.extractor) {
+    // we already have the DOM (in options.page)
+    var that = this;
+    var params = { location: location, options: options };
+    this.sendMessageToExt('loadMmd', params, function(err, serialResult) {
+      if (err) { callback(err, null); return; }
+      var mmd = simpl.deserialize(serialResult);
+      var response = { location: location, entity: options.page };
+      that.extractor(response, mmd, that, options, function(err, metadata) {
+        if (err) { callback(err, null); return; }
+        callback(null, { metadata: metadata, mmd: mmd });
+      });
+    });
   } else {
+    // we don't have the DOM
     var params = { location: location, options: options };
     this.sendMessageToExt('loadMetadata', params, function(err, serialResult) {
       callback(err, simpl.deserialize(serialResult));
