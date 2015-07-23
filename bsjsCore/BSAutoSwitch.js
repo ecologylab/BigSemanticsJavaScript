@@ -18,8 +18,8 @@ function BSAutoSwitch(extId, serviceLocation, options) {
       that.bsImpl = bsExt;
     }
   });
-
-  this.setReady();
+setTimeout(1000, this.setReady());
+  
 }
 BSAutoSwitch.prototype = Object.create(Readyable.prototype);
 BSAutoSwitch.prototype.constructor = BSAutoSwitch;

@@ -106,7 +106,7 @@ Downloader.prototype.httpGet = function(location, options, callback) {
     }
 
     var response = null;
-    if (options.response) { response = options.response; }
+    if (options && options.response) { response = options.response; }
     else { response = { location: location, code: 0 } };
 
     var xhr = new XMLHttpRequest();
