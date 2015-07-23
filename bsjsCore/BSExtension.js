@@ -1,13 +1,20 @@
 // Deals with the extension.
 // Can only use in content script or webpages allowed to talk to the extension.
 
-// string extId: the ID of the extension running BigSemantics in background.
-//               when used from content script, this can be omitted.
-//               when used from webpage, be sure to provide this ID.
-function BSExtension(extId) {
+// String extId:
+//   the ID of the extension running BigSemantics in background.  when used from
+//   content script, this can be omitted.  when used from webpage, be sure to
+//   provide this ID.
+// Object options:
+//   Optional configurations.
+function BSExtension(extId, options) {
   Readyable.call(this);
 
   this.extensionId = extId;
+
+  if (options) {
+    this.extractor = options.extractor;
+  }
 
   var that = this;
   this.sendMessageToExt('hasExtension', null, function(err, result) {
@@ -42,10 +49,14 @@ BSExtension.prototype.sendMessageToExt = function(method, params, callback) {
 }
 
 BSExtension.prototype.loadMetadata = function(location, options, callback) {
-  var params = { location: location, options: options };
-  this.sendMessageToExt('loadMetadata', params, function(err, serialResult) {
-    callback(err, simpl.deserialize(serialResult));
-  });
+  if (options && options.page && ) {
+
+  } else {
+    var params = { location: location, options: options };
+    this.sendMessageToExt('loadMetadata', params, function(err, serialResult) {
+      callback(err, simpl.deserialize(serialResult));
+    });
+  }
 }
 
 BSExtension.prototype.loadMmd = function(name, options, callback) {
