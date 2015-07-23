@@ -2,11 +2,19 @@
 
 function BSService(serviceLocation, options) {
   Readyable.call(this);
-
+	// constants:
+  this.DEFAULT_SERVICE_LOCATION = {
+	  host: 'api.ecologylab.net',
+	  port: 80,
+	  securePort: 443
+	};
+  this.METADATA_PATH = '/BigSemanticsService/metadata.json';
+  this.MMD_PATH = '/BigSemanticsService/mmd.json';
+  this.STUB_PATH = '/BigSemanticsService/metadata_or_stub.json';
   if (serviceLocation) {
     this.serviceLocation = serviceLocation;
   } else {
-    this.serviceLocation = BSService.DEFAULT_SERVICE_LOCATION;
+    this.serviceLocation = this.DEFAULT_SERVICE_LOCATION;
   }
 
   if (options) {
@@ -22,17 +30,9 @@ function BSService(serviceLocation, options) {
 BSService.prototype = Object.create(Readyable.prototype);
 BSService.prototype.constructor = BSService;
 
-// constants:
-BSService.DEFAULT_SERVICE_LOCATION = {
-  host: 'api.ecologylab.net',
-  port: 80,
-  securePort: 443
-};
-BSService.METADATA_PATH = '/BigSemanticsService/metadata.json';
-BSService.MMD_PATH = '/BigSemanticsService/mmd.json';
-BSService.STUB_PATH = '/BigSemanticsService/metadata_or_stub.json';
 
-BSService.getServiceUrl = function(serviceLocation, path, options, params) {
+
+BSService.prototype.getServiceUrl = function(serviceLocation, path, options, params) {
   var scheme = 'http';
   var host = serviceLocation.host;
   var port = serviceLocation.port;
@@ -48,7 +48,7 @@ BSService.getServiceUrl = function(serviceLocation, path, options, params) {
   return baseUrl + '?' + paramsArray.join('&');
 }
 
-BSService.unwrapResponse = function(response) {
+BSService.prototype.unwrapResponse = function(response) {
   var obj = null;
   if (response.entity) {
     obj = simpl.graphExpand(response.entity);
@@ -66,15 +66,15 @@ BSService.unwrapResponse = function(response) {
 BSService.prototype.loadMetadata = function(location, options, callback) {
   var purl = new ParsedURL(location);
 
-  var serviceUrl = BSService.getServiceUrl(this.serviceLocation,
-                                           BSService.METADATA_PATH,
+  var serviceUrl = this.getServiceUrl(this.serviceLocation,
+                                           this.METADATA_PATH,
                                            options,
                                            { url: location });
   var that = this;
   var downloadOpts = { responseType: 'json' };
   this.downloader.httpGet(serviceUrl, downloadOpts, function(err, response) {
     if (err) { callback(err, null); return; }
-    var metadata = BSService.unwrapResponse(response);
+    var metadata = that.unwrapResponse(response);
     var mmdName = metadata.meta_metadata_name;
     that.loadMmd(mmdName, options, function(err, mmd) {
       if (err) { callback(err, null); return; }
@@ -84,40 +84,42 @@ BSService.prototype.loadMetadata = function(location, options, callback) {
 }
 
 BSService.prototype.loadMmd = function(name, options, callback) {
-  var serviceUrl = BSService.getServiceUrl(this.serviceLocation,
-                                           BSService.MMD_PATH,
+  var serviceUrl = this.getServiceUrl(this.serviceLocation,
+                                           this.MMD_PATH,
                                            options,
                                            { name: name });
   var downloadOpts = { responseType: 'json' };
+  var that = this;
+
   this.downloader.httpGet(serviceUrl, downloadOpts, function(err, response) {
     if (err) { callback(err, null); return; }
-    var mmd = BSService.unwrapResponse(response);
+    var mmd = that.unwrapResponse(response);
     callback(null, mmd);
   });
 }
 
 BSService.prototype.selectMmd = function(location, options, callback) {
-  var serviceUrl = BSService.getServiceUrl(this.serviceLocation,
-                                           BSService.MMD_PATH,
+  var serviceUrl = this.getServiceUrl(this.serviceLocation,
+                                           this.MMD_PATH,
                                            options,
                                            { url: location });
   var downloadOpts = { responseType: 'json' };
   this.downloader.httpGet(serviceUrl, downloadOpts, function(err, response) {
     if (err) { callback(err, null); return; }
-    var mmd = BSService.unwrapResponse(response);
+    var mmd = that.unwrapResponse(response);
     callback(null, mmd);
   });
 }
 
 BSService.prototype.canonicalizeLocation = function(location, options, callback) {
-  var serviceUrl = BSService.getServiceUrl(this.serviceLocation,
-                                           BSService.STUB_PATH,
+  var serviceUrl = this.getServiceUrl(this.serviceLocation,
+                                           this.STUB_PATH,
                                            options,
                                            { url: location });
   var downloadOpts = { responseType: 'json' };
   this.downloader.httpGet(serviceUrl, downloadOpts, function(err, response) {
     if (err) { callback(err, null); return; }
-    var metadata = BSService.unwrapResponse(response);
+    var metadata = that.unwrapResponse(response);
     callback(null, metadata.location);
   });
 }

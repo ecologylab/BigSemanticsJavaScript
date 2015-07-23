@@ -160,38 +160,16 @@ function showMetadata()
     
   }
   
-  MetadataLoader.clearDocumentCollection();
   var refreshCheckbox = document.getElementById('force_reload').checked;
-  
-  var request_md = MetadataLoader.toRequestMetadataFromService(url);
+ //Should no longer be neccesary 
   //Clear out any html in the container
   while(document.getElementById('mdcIce').childNodes.length > 0){
 	  document.getElementById('mdcIce').removeChild(document.getElementById('mdcIce').childNodes[0]);
   }
   
-  if (!request_md)
-  {
-	  //document.dispatchEvent(new Event("tweetbubbleExternal"));
-	  var message = {
-			  type : "GET_MD",
-			  sender : "PAGE",
-				  url : url,
-			  callback: 'mdRecieved'
-	  };
-	  ExtensionInterface.dispatchMessage(message);
-	  console.log("requested extension for metadata: " + url);
-	  /*
-	  window.setTimeout(function()
-	  {
-		  checkForMissingMetadata();
-		  
-		  
-		  
-	  }, 5000);*/
-  }else{
-	  RendererBase.addMetadataDisplay(content, url, false, null, request_md, reload_md, MICE.render);
+   RendererBase.addMetadataDisplay(content, url, null, null, MICE.render, {reloadMD: reload_md});
 
-  }
+  
 
  //getJSONData(url);
 }
@@ -206,8 +184,8 @@ function checkForMissingMetadata()
 	// if the tab doesnt have metadata
 	if(content.getElementsByClassName("metadataContainer").length == 0 && content.getElementsByClassName("twMetadataContainer").length == 0)
 	{
-		if (MetadataLoader.isExtensionMetadataDomain(url))
-			MetadataLoader.getMetadata(url, "MetadataLoader.setMetadata", reload_md);
+		/*if (MetadataLoader.isExtensionMetadataDomain(url))
+			MetadataLoader.getMetadata(url, "MetadataLoader.setMetadata", reload_md);*/
 	}	
 }
 
