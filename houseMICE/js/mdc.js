@@ -193,9 +193,8 @@ function onBodyLoad() {
    if (document.URL.indexOf("http://localhost:") > -1){
 	  var hostname = window.location.hostname;
 	  var port = window.location.port;
-	  SEMANTIC_SERVICE_URL = "http://" + hostname;
 	   BSService = new BSAutoSwitch('eganfccpbldleckkpfomlgcbadhmjnlf',  {
-			  host: SEMANTIC_SERVICE_URL,
+			  host: hostname,
 			  port: port,
 			  securePort: 443
 			}); 

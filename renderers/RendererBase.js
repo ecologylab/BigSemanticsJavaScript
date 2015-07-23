@@ -54,12 +54,14 @@ RendererBase.addMetadataDisplay = function(container, url, clipping, renderer, o
 
     if (clipping != null && clipping.rawMetadata != null) {
         clipping.rawMetadata.deserialized = true;
-        BigSemantics.loadMmd(rawMetadata.meta_metadata_name, options, function(){
-        	
-        	
-        	
+        var metadata = JSON.parse(JSON.stringify(rawMetadata));
+        BigSemantics.loadMmd(metadata.meta_metadata_name, options, function(err, mmd){
+        	task.mmd = mmd;
+        	task.mmd = simpl.graphExpand(task.mmd);
+        	task.metadata = metadata;
+        	task.handler(task);
+     	
         });
-        MetadataLoader.setMetadata(clipping.rawMetadata, true);
     }
     else {
     /*	var requestMetadata;
@@ -71,13 +73,17 @@ RendererBase.addMetadataDisplay = function(container, url, clipping, renderer, o
         
         // Fetch the metadata from the service
         if ( requestMetadata)*/
-    	BSService.loadMetadata(url, options, function(blank, md_and_mmd){
+BSService.onReady(function(){
+	BSService.loadMetadata(url, options, function(blank, md_and_mmd){
+	
         	console.log(md_and_mmd);
         	task.mmd = md_and_mmd.mmd;
         	task.mmd = simpl.graphExpand(task.mmd);
         	task.metadata = md_and_mmd.metadata;
         	task.handler(task);
-        });
+        })
+
+    });
         	//MetadataLoader.getMetadata(url, "MetadataLoader.setMetadata", reloadMD);
     }
 
