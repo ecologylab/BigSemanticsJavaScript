@@ -22,6 +22,7 @@ function BSAutoSwitch(extId, serviceLocation, options) {
   setTimeout(function(){
 	  that.setReady();
 	  }, 1000);
+  
 }
 BSAutoSwitch.prototype = Object.create(Readyable.prototype);
 BSAutoSwitch.prototype.constructor = BSAutoSwitch;
