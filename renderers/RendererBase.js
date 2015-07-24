@@ -20,17 +20,28 @@ RendererBase.documentMap = [];
 /**
  * add metadata display to the container.
  * @param container, the HTML object to which the metadata rendering will be appended
- * @param url, url of the  document
- * @param isRoot, is this the root metadata for the rendering (currently used for removing existing children)
- @param clipping. Clippings either hold .rawMetadata, or have a pair of metadata and mmd. If the later, then MetadataLoader is never called
+ * @param url, url of the  document you want to display md for
+ * @param clipping. Clippings either hold .rawMetadata, or have a pair of metadata and mmd. If the later, then MetadataLoader is never called
  !!!!If you already have metadata and mmd, please pass them in here in the form {metadata: your_data_here, mmd: you_data_here}
- * @param requestMD, true if the function should request metadata from service, else false
- * @param reloadMD, true if the metadata should be extracted afresh, else false 
- * @param renderer, the function used by a particular renderer to fill in the container with HTML
+ *  @param renderer, the function used by a particular renderer to fill in the container with HTML
+ *	@param options: object containing optional values, listend below
+ *  requestMD, true if the function should request metadata from service, else false
+ *  reloadMD, true if the metadata should be extracted afresh vs being pulled from the cache (if possible), else false 
+ *  isRoot, is this the root metadata for the rendering (currently used for removing existing children)
+
+
  */
-RendererBase.addMetadataDisplay = function(container, url, isRoot, clipping, requestMD, reloadMD, renderer){
+
+
+RendererBase.addMetadataDisplay = function(container, url, clipping, renderer, options){
+	if(options == null){
+		options = {};
+	}
 	
-	// Add the rendering task to the queue
+	
+	
+	
+	// If we already have metadata and mmd provided, we skip BigSemantics and render the md immediately
     if (clipping != null) {
         if (clipping.metadata != null && clipping.mmd != null) {
             var task = new RenderingTask(url, true, null, null, container, null, renderer, clipping.mmd, clipping.metadata)
@@ -38,25 +49,52 @@ RendererBase.addMetadataDisplay = function(container, url, isRoot, clipping, req
             return;
         }
     }
-  
-        var task = new RenderingTask(url, true, clipping, null, container, null, renderer)
-        MetadataLoader.queue.push(task);
+    //Otherwise, we prepare to call BigSemantics
+    var task = new RenderingTask(url, true, clipping, null, container, null, renderer)
 
-        if (clipping != null && clipping.rawMetadata != null) {
-            clipping.rawMetadata.deserialized = true;
-            MetadataLoader.setMetadata(clipping.rawMetadata, true);
+    if (clipping != null && clipping.rawMetadata != null) {
+        clipping.rawMetadata.deserialized = true;
+        var metadata = JSON.parse(JSON.stringify(rawMetadata));
+        BigSemantics.loadMmd(metadata.meta_metadata_name, options, function(err, mmd){
+        	task.mmd = mmd;
+        	task.mmd = simpl.graphExpand(task.mmd);
+        	task.metadata = metadata;
+        	task.handler(task);
+     	
+        });
+    }
+    else {
+    /*	var requestMetadata;
+        if(options.requestMetadata){
+        	requestMetadata = options.requestMD;
+        }else{
+        	requestMetadata = true;
         }
-        else {
-            var requestMetadata = (typeof requestMD === "undefined") || requestMD == true;
+        
+        // Fetch the metadata from the service
+        if ( requestMetadata)*/
+BSService.onReady(function(){
+	BSService.loadMetadata(url, options, function(blank, md_and_mmd){
+	
+        	console.log(md_and_mmd);
+        	task.mmd = md_and_mmd.mmd;
+        	task.mmd = simpl.graphExpand(task.mmd);
+        	task.metadata = md_and_mmd.metadata;
+        	task.handler(task);
+        })
 
-            // Fetch the metadata from the service
-            if ( requestMetadata)
-                MetadataLoader.getMetadata(url, "MetadataLoader.setMetadata", reloadMD);
-        }
+    });
+        	//MetadataLoader.getMetadata(url, "MetadataLoader.setMetadata", reloadMD);
+    }
 
     
     
 }
+
+
+
+
+
 
 
 /**
