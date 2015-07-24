@@ -16,11 +16,16 @@ function BSAutoSwitch(extId, serviceLocation, options) {
   bsExt.onReady(function(err, bsExt) {
     if (!err && bsExt && bsExt.isReady()) {
       that.bsImpl = bsExt;
+	  that.setReady();
+
     }
   });
  
   setTimeout(function(){
-	  that.setReady();
+	  if(!that.isReady()){
+		  	  that.setReady();
+
+	  }
 	  }, 1000);
   
 }
