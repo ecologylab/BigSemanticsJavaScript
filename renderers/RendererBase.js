@@ -55,7 +55,7 @@ RendererBase.addMetadataDisplay = function(container, url, clipping, renderer, o
     if (clipping != null && clipping.rawMetadata != null) {
         clipping.rawMetadata.deserialized = true;
         var metadata = JSON.parse(JSON.stringify(clipping.rawMetadata));
-        BigSemantics.loadMmd(metadata.mm_name, options, function(err, mmd){
+        BSService.loadMmd(metadata.mm_name, options, function(err, mmd){
         	task.mmd = mmd;
         	task.mmd = simpl.graphExpand(task.mmd);
         	task.metadata = metadata;
