@@ -71,6 +71,6 @@ function executeFunctionByName(functionName, context) {
 // get base url
 function getPosition(str, m, i) 
 {
-   return str.split(m, i).join(m).length;
+  return str.split(m, i).join(m).length;
 }
 
