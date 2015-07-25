@@ -55,7 +55,7 @@ RendererBase.addMetadataDisplay = function(container, url, clipping, renderer, o
     if (clipping != null && clipping.rawMetadata != null) {
         clipping.rawMetadata.deserialized = true;
         var metadata = JSON.parse(JSON.stringify(clipping.rawMetadata));
-        BSService.loadMmd(metadata.mm_name, options, function(err, mmd){
+        bsService.loadMmd(metadata.mm_name, options, function(err, mmd){
         	task.mmd = mmd;
         	task.mmd = simpl.graphExpand(task.mmd);
         	task.metadata = metadata;
@@ -73,8 +73,8 @@ RendererBase.addMetadataDisplay = function(container, url, clipping, renderer, o
         
         // Fetch the metadata from the service
         if ( requestMetadata)*/
-BSService.onReady(function(){
-	BSService.loadMetadata(url, options, function(blank, md_and_mmd){
+bsService.onReady(function(){
+	bsService.loadMetadata(url, options, function(blank, md_and_mmd){
 	
         	console.log(md_and_mmd);
         	task.mmd = md_and_mmd.mmd;
