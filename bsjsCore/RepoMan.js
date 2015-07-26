@@ -18,7 +18,7 @@ var RepoMan = (function() {
 
     if (!source) { throw new Error("source required!"); }
 
-    if (options && optoins.defaultDocumentType) {
+    if (options && options.defaultDocumentType) {
       this.defaultDocumentType = options.defaultDocumentType;
     }
     if (!this.defaultDocumentType) {
