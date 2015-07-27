@@ -61,7 +61,10 @@ RendererBase.addMetadataDisplay = function(container, url, clipping, renderer, o
       // ???? wtf is the following line doing ????
       clipping.metadata = JSON.parse(JSON.stringify(clipping.rawMetadata));
     }
-    if (clipping.metadata) {
+  }
+
+  if (clipping != null && clipping.metadata) {
+    bsService.onReady(function() {
       bsService.loadMmd(clipping.metadata.mm_name, options, function(err, mmd){
         if (err) { console.error(err); return; }
         task.mmd = mmd;
@@ -69,7 +72,7 @@ RendererBase.addMetadataDisplay = function(container, url, clipping, renderer, o
         task.metadata = clipping.metadata;
         task.handler(task);
       });
-    }
+    });
   } else {
     bsService.onReady(function(){
       bsService.loadMetadata(url, options, function(err, md_and_mmd){
