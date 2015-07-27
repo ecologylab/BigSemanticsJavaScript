@@ -37,7 +37,6 @@ RendererBase.addMetadataDisplay = function(container, url, clipping, renderer, o
 	if(options == null){
 		options = {};
 	}
-	
   // If we already have metadata and mmd provided, we skip BigSemantics and
   // render the metadata immediately
   if (clipping != null) {
@@ -71,6 +70,9 @@ RendererBase.addMetadataDisplay = function(container, url, clipping, renderer, o
         task.mmd = simpl.graphExpand(task.mmd);
         task.metadata = clipping.metadata;
         task.handler(task);
+        if(options.callback){
+        	options.callback(md_and_mmd);
+        }
       });
     });
   } else {
@@ -82,10 +84,16 @@ RendererBase.addMetadataDisplay = function(container, url, clipping, renderer, o
         task.mmd = simpl.graphExpand(task.mmd);
         task.metadata = md_and_mmd.metadata;
         task.handler(task);
+        if(options.callback){
+        	options.callback(md_and_mmd);
+        }
+        
+        
       })
     });
     // MetadataLoader.getMetadata(url, "MetadataLoader.setMetadata", reloadMD);
   }
+  
 }
 
 
