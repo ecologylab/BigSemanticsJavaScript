@@ -155,7 +155,7 @@ var Downloader = (function() {
               }
             }
             if (!ok) {
-              console.warn("Aborting XHR: ", xhr);
+              console.warn("Aborting XHR for ", location, ": ", xhr);
               xhr.abort();
               callback(err, null);
             }

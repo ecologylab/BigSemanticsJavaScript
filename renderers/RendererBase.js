@@ -38,57 +38,51 @@ RendererBase.addMetadataDisplay = function(container, url, clipping, renderer, o
 		options = {};
 	}
 	
-	
-	
-	
-	// If we already have metadata and mmd provided, we skip BigSemantics and render the md immediately
-    if (clipping != null) {
-        if (clipping.metadata != null && clipping.mmd != null) {
-            var task = new RenderingTask(url, true, null, null, container, null, renderer, clipping.mmd, clipping.metadata)
-            task.handler(task);
-            return;
-        }
+  // If we already have metadata and mmd provided, we skip BigSemantics and
+  // render the metadata immediately
+  if (clipping != null) {
+    if (clipping.metadata != null && clipping.mmd != null) {
+      var task = new RenderingTask(url, true, null, null, container, null, renderer, clipping.mmd, clipping.metadata)
+      task.handler(task);
+      return;
     }
-    //Otherwise, we prepare to call BigSemantics
-    var task = new RenderingTask(url, true, clipping, null, container, null, renderer)
+  }
 
-    if (clipping != null && clipping.rawMetadata != null) {
-        clipping.rawMetadata.deserialized = true;
-        var metadata = JSON.parse(JSON.stringify(clipping.rawMetadata));
-        BSService.loadMmd(metadata.mm_name, options, function(err, mmd){
-        	task.mmd = mmd;
-        	task.mmd = simpl.graphExpand(task.mmd);
-        	task.metadata = metadata;
-        	task.handler(task);
-     	
-        });
+  //Otherwise, we prepare to call BigSemantics
+  var task = new RenderingTask(url, true, clipping, null, container, null, renderer);
+
+  if (clipping != null) {
+    if (clipping.metadata && !clipping.rawMetadata) {
+      clipping.rawMetadata = clipping.metadata;
+      clipping.rawMetadata.deserialized = true;
     }
-    else {
-    /*	var requestMetadata;
-        if(options.requestMetadata){
-        	requestMetadata = options.requestMD;
-        }else{
-        	requestMetadata = true;
-        }
-        
-        // Fetch the metadata from the service
-        if ( requestMetadata)*/
-BSService.onReady(function(){
-	BSService.loadMetadata(url, options, function(blank, md_and_mmd){
-	
-        	console.log(md_and_mmd);
-        	task.mmd = md_and_mmd.mmd;
-        	task.mmd = simpl.graphExpand(task.mmd);
-        	task.metadata = md_and_mmd.metadata;
-        	task.handler(task);
-        })
-
+    if (!clipping.metadata && clipping.rawMetadata) {
+      clipping.rawMetadata.deserialized = true;
+      // ???? wtf is the following line doing ????
+      clipping.metadata = JSON.parse(JSON.stringify(clipping.rawMetadata));
+    }
+    if (clipping.metadata) {
+      bsService.loadMmd(clipping.metadata.mm_name, options, function(err, mmd){
+        if (err) { console.error(err); return; }
+        task.mmd = mmd;
+        task.mmd = simpl.graphExpand(task.mmd);
+        task.metadata = clipping.metadata;
+        task.handler(task);
+      });
+    }
+  } else {
+    bsService.onReady(function(){
+      bsService.loadMetadata(url, options, function(err, md_and_mmd){
+        if (err) { console.error(err); return; }
+        console.log("loadMetadata result from bsService: ", md_and_mmd);
+        task.mmd = md_and_mmd.mmd;
+        task.mmd = simpl.graphExpand(task.mmd);
+        task.metadata = md_and_mmd.metadata;
+        task.handler(task);
+      })
     });
-        	//MetadataLoader.getMetadata(url, "MetadataLoader.setMetadata", reloadMD);
-    }
-
-    
-    
+    //MetadataLoader.getMetadata(url, "MetadataLoader.setMetadata", reloadMD);
+  }
 }
 
 

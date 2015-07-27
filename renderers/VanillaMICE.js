@@ -990,7 +990,7 @@ MICE.downloadAndDisplayDocument = function(event)
 	//	var requestMD = MetadataLoader.toRequestMetadataFromService(location);
 	    //MetadataLoader.render(MICE.render, table.parentElement, location, false)	;
 		//MICE.addMetadataDisplay(table.parentElement, location, false);
-		RendererBase.addMetadataDisplay(table.parentElement, location, false, null, MICE.render);
+		RendererBase.addMetadataDisplay(table.parentElement, location, null, MICE.render);
 		
 	}
 	// If there was no document location then the table must be a non-document composite in which case just expand
