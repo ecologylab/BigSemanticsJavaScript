@@ -112,31 +112,14 @@ function getJSONData (targeturl)
   });
   
 }
-function mdRecieved(){
-	/*var myTask = new RenderingTask();
-	myTask.isRoot = true;
-	myTask.prototype = RenderingTask;
-	myTask.mmd = event.data.mmd;
-	myTask.metadata =  event.data.md[event.data.mmd.name];
-	myTask.url = myTask.metadata.location;
-	myTask.renderer = MICE.render;
-	myTask.container = document.getElementById('mdcIce');
-	RenderingTask.prototype.metadataToModel(myTask);*/
-	
-	var clipping = ViewModeler.createMetadata(true, event.data.mmd,
-			event.data.md[event.data.mmd.name], event.data.md[event.data.mmd.name].location);
-	clipping.rawMetadata = event.data.md;
-	
-	RendererBase.addMetadataDisplay(document.getElementById('mdcIce'), event.data.md[event.data.mmd.name].location, false, clipping, false, false, MICE.render);
-	
-	
-	
-	
-	
-	
-	
-	console.log('bananannanana');
+
+function updateJSONVars(md_and_metadata){
+
+	  MDC_rawMMD = simpl.graphCollapse(md_and_metadata.mmd);
+	  MDC_rawMetadata = simpl.graphCollapse(md_and_metadata.metadata);
+	  updateJSON(true);
 }
+
 function showMetadata()
 {
   var url = document.getElementById("targetURL").value;
@@ -157,8 +140,12 @@ function showMetadata()
   while(document.getElementById('mdcIce').childNodes.length > 0){
 	  document.getElementById('mdcIce').removeChild(document.getElementById('mdcIce').childNodes[0]);
   }
+  var options = {};
+  options.callback = updateJSONVars;
+  options.reloadMD = reload_md
   
-   RendererBase.addMetadataDisplay(content, url, null, null, MICE.render, {reloadMD: reload_md});
+
+   RendererBase.addMetadataDisplay(content, url, null, MICE.render, options);
 
   
 
