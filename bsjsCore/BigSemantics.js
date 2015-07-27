@@ -77,16 +77,23 @@ var BigSemantics = (function() {
     });
   }
 
+  BigSemantics.prototype.loadInitialMetadata = function(location, options, callback) {
+    this.repoMan.selectMmd(location, options, function(err, mmd) {
+      if (err) { callback(err, null); return; }
+      if (mmd.filter_location) {
+        location = PreFilter.filter(location, mmd.filter_location);
+      }
+      var result = { mm_name: mmd.name; location: location };
+      callback(null, result);
+    });
+  }
+
   BigSemantics.prototype.loadMmd = function(name, options, callback) {
     this.repoMan.loadMmd(name, options, callback);
   }
 
   BigSemantics.prototype.selectMmd = function(location, options, callback) {
     this.repoMan.selectMmd(location, options, callback);
-  }
-
-  BigSemantics.prototype.canonicalizeLocation = function(location, options, callback) {
-    this.repoMan.canonicalizeLocation(location, options, callback);
   }
 
   return BigSemantics;

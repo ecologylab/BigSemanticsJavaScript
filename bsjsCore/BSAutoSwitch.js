@@ -44,16 +44,16 @@ var BSAutoSwitch = (function() {
     this.bsImpl.loadMetadata(location, options, callback);
   }
 
+  BSAutoSwitch.prototype.loadInitialMetadata = function(location, options, callback) {
+    this.bsImpl.loadInitialMetadata(location, options, callback);
+  }
+
   BSAutoSwitch.prototype.loadMmd = function(name, options, callback) {
     this.bsImpl.loadMmd(name, options, callback);
   }
 
   BSAutoSwitch.prototype.selectMmd = function(location, options, callback) {
     this.bsImpl.selectMmd(location, options, callback);
-  }
-
-  BSAutoSwitch.prototype.canonicalizeLocation = function(location, options, callback) {
-    this.bsImpl.canonicalizeLocation(location, options, callback);
   }
 
   return BSAutoSwitch;
