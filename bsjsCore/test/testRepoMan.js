@@ -97,7 +97,7 @@ function testSelectParams() {
   });
 }
 
-// TODO test canonicalizeLocation
+// TODO test loadInitialMetadata
 
 testLoadMmd();
 testSelectStripped();
