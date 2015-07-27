@@ -42,10 +42,14 @@ var BSExtension = (function() {
   //   callback to receive the result of the invocation.
   BSExtension.prototype.sendMessageToExt = function(method, params, callback) {
     function onResponse(response) {
-      if (response.result && typeof response.result == 'string') {
-        response.result = simpl.deserialize(response.result);
+      if (response) {
+        if (response.result && typeof response.result == 'string') {
+          response.result = simpl.deserialize(response.result);
+        }
+        callback(response.error, response.result);
+      } else {
+        callback(new Error("No response from extension"), null);
       }
-      callback(response.error, response.result);
     }
     var msg = { method: method, params: simpl.serialize(params) };
     if (this.extensionId) {
