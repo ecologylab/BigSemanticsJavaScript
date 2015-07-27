@@ -52,14 +52,10 @@ RendererBase.addMetadataDisplay = function(container, url, clipping, renderer, o
   var task = new RenderingTask(url, true, clipping, null, container, null, renderer);
 
   if (clipping != null) {
-    if (clipping.metadata && !clipping.rawMetadata) {
-      clipping.rawMetadata = clipping.metadata;
-      clipping.rawMetadata.deserialized = true;
-    }
     if (!clipping.metadata && clipping.rawMetadata) {
+      clipping.rawMetadata = simpl.deserialize(clipping.rawMetadata);
       clipping.rawMetadata.deserialized = true;
-      // ???? wtf is the following line doing ????
-      clipping.metadata = JSON.parse(JSON.stringify(clipping.rawMetadata));
+      clipping.metadata = BSUtils.unwrap(clipping.rawMetadata);
     }
   }
 
