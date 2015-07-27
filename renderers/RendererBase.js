@@ -81,7 +81,7 @@ RendererBase.addMetadataDisplay = function(container, url, clipping, renderer, o
         task.handler(task);
       })
     });
-    //MetadataLoader.getMetadata(url, "MetadataLoader.setMetadata", reloadMD);
+    // MetadataLoader.getMetadata(url, "MetadataLoader.setMetadata", reloadMD);
   }
 }
 
