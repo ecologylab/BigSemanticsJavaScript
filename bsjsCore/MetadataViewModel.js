@@ -716,9 +716,8 @@ ViewModeler.getImageSource = function(metadataViewModel)
   return null;
 }
 
-if (MetadataLoader == null) {
-  
-	var MetadataLoader = {};
+if (typeof MetadataLoader == 'undefined' || MetadataLoader == null) {
+  var MetadataLoader = {};
 }
 
 /** 
