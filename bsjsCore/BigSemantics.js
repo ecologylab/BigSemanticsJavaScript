@@ -83,7 +83,7 @@ var BigSemantics = (function() {
       if (mmd.filter_location) {
         location = PreFilter.filter(location, mmd.filter_location);
       }
-      var result = { mm_name: mmd.name; location: location };
+      var result = { mm_name: mmd.name, location: location };
       callback(null, result);
     });
   }
