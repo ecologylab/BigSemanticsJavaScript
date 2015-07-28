@@ -16,7 +16,7 @@ minkApp.offScreenColumnsRight = 0;
 minkApp.favorites = [];
 
 
-
+var bsService = new BSAutoSwitch('eganfccpbldleckkpfomlgcbadhmjnlf');
 
 
 
@@ -246,6 +246,24 @@ minkApp.updateFavoritesDisplay = function(){
 }
 minkApp.favoritesToggleHandler = function(event){
 	
+	var minkFavorites = $('#minkFavorites');
+	var expander = $('#minkFavoritesExpander');
+	if(minkFavorites.hasClass('mfShow')){
+		minkFavorites.removeClass('mfShow');
+		minkFavorites.addClass('mfHidden');
+		expander.removeClass('expanded');
+		expander.addClass('deflated');
+
+
+	}else{
+		minkFavorites.removeClass('mfHidden');
+		minkFavorites.addClass('mfShow');
+		expander.removeClass('deflated');
+		expander.addClass('expanded');
+
+	}
+
+
 }
 minkApp.minkEventHandler = function(event){
 	 
@@ -546,7 +564,7 @@ minkApp.buildCards = function(parent, links){
 		//gonna look through kade's code
 		var cardDiv = buildDiv('minkCardContainer');
 		parent.appendChild(cardDiv);
-		RendererBase.addMetadataDisplay(cardDiv, link, false, null, true, false, Mink.render);
+		RendererBase.addMetadataDisplay(cardDiv, link, null, Mink.render);
 		var card = new minkCard(link, cardDiv);
 		cards.push(card);
 	}
@@ -831,7 +849,7 @@ function showMetadata(url)
 	  document.getElementById('mdcIce').removeChild(document.getElementById('mdcIce').childNodes[0]);
   }
 
-  RendererBase.addMetadataDisplay(content, url, false, null, true, refreshCheckbox, Mink.render);
+  RendererBase.addMetadataDisplay(content, url, null, Mink.render, {reloadMD: true} );
 
 }
 

@@ -5,6 +5,7 @@
 
 var ViewModeler = {};
 
+METADATA_FIELD_MAX_DEPTH = 7;
 
 /**
  * MetadataField represents a parsed metadata field combining
@@ -719,6 +720,11 @@ ViewModeler.getImageSource = function(metadataViewModel)
   }
   return null;
 }
+
+if (typeof MetadataLoader == 'undefined' || MetadataLoader == null) {
+  var MetadataLoader = {};
+}
+
 /** 
  * Make the string prettier by replacing underscores with spaces  
  * @param string to make over

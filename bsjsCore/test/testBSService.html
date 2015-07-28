@@ -1,0 +1,44 @@
+<html>
+
+<head>
+<title>ServiceProxy Test</title>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+
+<script src="../simpl/simplBase.js"></script>
+<script src="../ParsedURL.js"></script>
+<script src="../BSUtils.js"></script>
+<script src="../Downloader.js"></script>
+<script src="../Readyable.js"></script>
+<script src="../BSService.js"></script>
+</head>
+
+<body>
+
+<div class="wrap">
+  URL: <input id="url" type="text" size="100" />
+  <input id="load" type="button" value="Load" />
+</div>
+
+<div class="wrap">
+  <p id="json"></p>
+</div>
+
+<script>
+$('document').ready(function() {
+  var bss = new BSService();
+  bss.onReady(function(err, bss) {
+    if (err) { console.error(err); return; }
+    var url = "http://www.amazon.com/gp/product/B00I8BIBCW/";
+    bss.loadMetadata(url, {}, function(err, metadata) {
+      if (err) { console.error(err); return; }
+
+      var json = simpl.serialize(metadata);
+      $('#json').text(json);
+    });
+  });
+});
+</script>
+</body>
+
+</html>
+
