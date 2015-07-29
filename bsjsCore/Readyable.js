@@ -13,8 +13,8 @@ var Readyable = (function() {
   }
 
   Readyable.prototype.onReady = function(callback) {
-    if (this.ready) { callback(null, this); return; }
     if (this.error) { callback(this.error, null); return; }
+    if (this.ready) { callback(null, this); return; }
     this.callbackQueue.push(callback);
   };
 

@@ -42,9 +42,10 @@ var BSAutoSwitch = (function() {
   // delegate calls to the underlying implementation
 
   BSAutoSwitch.prototype.loadMetadata = function(location, options, callback) {
+    var that = this;
     this.bsImpl.onReady(function(err, bs) {
       if (err) {
-        if (this.bsImpl instanceof BSExtension) { bs = this.bsSvc; }
+        if (that.bsImpl instanceof BSExtension) { bs = that.bsSvc; }
         else { callback(err, null); return; }
       }
       bs.loadMetadata(location, options, callback);
@@ -52,9 +53,10 @@ var BSAutoSwitch = (function() {
   }
 
   BSAutoSwitch.prototype.loadInitialMetadata = function(location, options, callback) {
+    var that = this;
     this.bsImpl.onReady(function(err, bs) {
       if (err) {
-        if (this.bsImpl instanceof BSExtension) { bs = this.bsSvc; }
+        if (that.bsImpl instanceof BSExtension) { bs = that.bsSvc; }
         else { callback(err, null); return; }
       }
       bs.loadInitialMetadata(location, options, callback);
@@ -62,9 +64,10 @@ var BSAutoSwitch = (function() {
   }
 
   BSAutoSwitch.prototype.loadMmd = function(name, options, callback) {
+    var that = this;
     this.bsImpl.onReady(function(err, bs) {
       if (err) {
-        if (this.bsImpl instanceof BSExtension) { bs = this.bsSvc; }
+        if (that.bsImpl instanceof BSExtension) { bs = that.bsSvc; }
         else { callback(err, null); return; }
       }
       bs.loadMmd(name, options, callback);
@@ -72,9 +75,10 @@ var BSAutoSwitch = (function() {
   }
 
   BSAutoSwitch.prototype.selectMmd = function(location, options, callback) {
+    var that = this;
     this.bsImpl.onReady(function(err, bs) {
       if (err) {
-        if (this.bsImpl instanceof BSExtension) { bs = this.bsSvc; }
+        if (that.bsImpl instanceof BSExtension) { bs = that.bsSvc; }
         else { callback(err, null); return; }
       }
       bs.selectMmd(location, options, callback);

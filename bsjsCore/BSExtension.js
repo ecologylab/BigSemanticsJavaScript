@@ -32,11 +32,12 @@ var BSExtension = (function() {
   BSExtension.prototype = Object.create(Readyable.prototype);
   BSExtension.prototype.constructor = BSExtension;
 
-  BSExtension.onReady = function(callback) {
+  BSExtension.prototype.onReady = function(callback) {
     if (this.isReady()) {
+      var that = this;
       this.sendMessageToExt('extensionInfo', null, function(err, result) {
         if (err) { callback(err, null); return; }
-        callback(null, result);
+        callback(null, that);
       });
     } else {
       Readyable.prototype.onReady.call(this, callback);
