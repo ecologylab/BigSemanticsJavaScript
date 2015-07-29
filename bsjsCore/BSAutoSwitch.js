@@ -13,7 +13,8 @@ var BSAutoSwitch = (function() {
 
     // BSService object is immediately available -- we assume the service is
     // always available.
-    this.bsImpl = new BSService(serviceLocation, options);
+    this.bsSvc = new BSService(serviceLocation, options);
+    this.bsImpl = this.bsSvc;
     
     // If the extension is available, switch to it.
     var that = this;
@@ -41,19 +42,43 @@ var BSAutoSwitch = (function() {
   // delegate calls to the underlying implementation
 
   BSAutoSwitch.prototype.loadMetadata = function(location, options, callback) {
-    this.bsImpl.loadMetadata(location, options, callback);
+    this.bsImpl.onReady(function(err, bs) {
+      if (err) {
+        if (this.bsImpl instanceof BSExtension) { bs = this.bsSvc; }
+        else { callback(err, null); return; }
+      }
+      bs.loadMetadata(location, options, callback);
+    });
   }
 
   BSAutoSwitch.prototype.loadInitialMetadata = function(location, options, callback) {
-    this.bsImpl.loadInitialMetadata(location, options, callback);
+    this.bsImpl.onReady(function(err, bs) {
+      if (err) {
+        if (this.bsImpl instanceof BSExtension) { bs = this.bsSvc; }
+        else { callback(err, null); return; }
+      }
+      bs.loadInitialMetadata(location, options, callback);
+    });
   }
 
   BSAutoSwitch.prototype.loadMmd = function(name, options, callback) {
-    this.bsImpl.loadMmd(name, options, callback);
+    this.bsImpl.onReady(function(err, bs) {
+      if (err) {
+        if (this.bsImpl instanceof BSExtension) { bs = this.bsSvc; }
+        else { callback(err, null); return; }
+      }
+      bs.loadMmd(name, options, callback);
+    });
   }
 
   BSAutoSwitch.prototype.selectMmd = function(location, options, callback) {
-    this.bsImpl.selectMmd(location, options, callback);
+    this.bsImpl.onReady(function(err, bs) {
+      if (err) {
+        if (this.bsImpl instanceof BSExtension) { bs = this.bsSvc; }
+        else { callback(err, null); return; }
+      }
+      bs.selectMmd(location, options, callback);
+    });
   }
 
   return BSAutoSwitch;

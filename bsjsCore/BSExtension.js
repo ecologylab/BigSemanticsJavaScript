@@ -32,6 +32,17 @@ var BSExtension = (function() {
   BSExtension.prototype = Object.create(Readyable.prototype);
   BSExtension.prototype.constructor = BSExtension;
 
+  BSExtension.onReady = function(callback) {
+    if (this.isReady()) {
+      this.sendMessageToExt('extensionInfo', null, function(err, result) {
+        if (err) { callback(err, null); return; }
+        callback(null, result);
+      });
+    } else {
+      Readyable.prototype.onReady.call(this, callback);
+    }
+  }
+
   // Send message to extension, and listen for callabck.
   //
   // String method:
