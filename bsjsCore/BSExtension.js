@@ -102,6 +102,11 @@ var BSExtension = (function() {
     }
   }
 
+  BSExtension.prototype.loadInitialMetadata = function(location, options, callback) {
+    var params = { location: location, options: options };
+    this.sendMessageToExt('loadInitialMetadata', params, callback);
+  }
+
   BSExtension.prototype.loadMmd = function(name, options, callback) {
     var params = { name: name, options: options };
     this.sendMessageToExt('loadMmd', params, function(err, result) {
@@ -114,11 +119,6 @@ var BSExtension = (function() {
     this.sendMessageToExt('selectMmd', params, function(err, result) {
       callback(err, result);
     });
-  }
-
-  BSExtension.prototype.canonicalizeLocation = function(location, options, callback) {
-    var params = { location: location, options: options };
-    this.sendMessageToExt('canonicalizeLocation', params, callback);
   }
 
   return BSExtension;

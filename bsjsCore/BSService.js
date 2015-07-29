@@ -88,6 +88,19 @@ var BSService = (function() {
     });
   }
 
+  BSService.prototype.loadInitialMetadata = function(location, options, callback) {
+    var serviceUrl = BSService.getServiceUrl(this.serviceLocation,
+                                             BSService.STUB_PATH,
+                                             options,
+                                             { url: location });
+    var downloadOpts = { responseType: 'json' };
+    this.downloader.httpGet(serviceUrl, downloadOpts, function(err, response) {
+      if (err) { callback(err, null); return; }
+      var metadata = BSService.unwrapResponse(response);
+      callback(null, metadata);
+    });
+  }
+
   BSService.prototype.loadMmd = function(name, options, callback) {
     var serviceUrl = BSService.getServiceUrl(this.serviceLocation,
                                              BSService.MMD_PATH,
@@ -111,19 +124,6 @@ var BSService = (function() {
       if (err) { callback(err, null); return; }
       var mmd = BSService.unwrapResponse(response);
       callback(null, mmd);
-    });
-  }
-
-  BSService.prototype.canonicalizeLocation = function(location, options, callback) {
-    var serviceUrl = BSService.getServiceUrl(this.serviceLocation,
-                                             BSService.STUB_PATH,
-                                             options,
-                                             { url: location });
-    var downloadOpts = { responseType: 'json' };
-    this.downloader.httpGet(serviceUrl, downloadOpts, function(err, response) {
-      if (err) { callback(err, null); return; }
-      var metadata = BSService.unwrapResponse(response);
-      callback(null, metadata.location);
     });
   }
 

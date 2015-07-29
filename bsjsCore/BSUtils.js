@@ -18,11 +18,28 @@ BSUtils.toDisplayCase = function(string)
   return display;
 }
 
+// Unwrap a metadata object.
+//
+// For example: an Amazon Product metadata object sometimes takes the form of
+//
+//   { 'amazon_product': { 'mm_name': 'amazon_product', ... } }
+//
+// This is redundant because we now require all metadata object contain the
+// 'mm_name' field. This function unwraps the (first) real metadata object if
+// found in the input target. Otherwise, it returns the input target unchanged.
 BSUtils.unwrap = function(target) {
   if (typeof target == 'object' && target != null) {
+    if (target.mm_name) {
+      // the target itself is an unwrapped metadata.
+      return target;
+    }
+    // otherwise, return the first child with mm_name
     var keys = Object.keys(target);
-    if (keys.length == 1) {
-      return target[keys[0]];
+    for (var i in keys) {
+      var key = keys[i];
+      if (typeof target[key] == 'object' && target[key].mm_name) {
+        return target[key];
+      }
     }
   }
   return target;

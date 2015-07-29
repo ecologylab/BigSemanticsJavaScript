@@ -372,18 +372,6 @@ var RepoMan = (function() {
     }
   }
 
-  // callback: (err, canonicalLocation) => void
-  RepoMan.prototype.canonicalizeLocation = function(location, options, callback) {
-    this.selectMmd(location, options, function(err, mmd) {
-      if (err) { callback(err, null); return; }
-
-      if (mmd.filter_location) {
-        location = PreFilter.filter(location, mmd.filter_location);
-      }
-      callback(null, location);
-    });
-  }
-
   return RepoMan;
 })();
 
