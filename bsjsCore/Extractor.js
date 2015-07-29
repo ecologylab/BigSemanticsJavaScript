@@ -18,8 +18,11 @@
 // (err, metadata)=>void callback:
 //   to receive extraction result
 function extractMetadata(response, mmd, bigSemantics, options, callback) {
-	
-	
+  var extractedMeta = extractMetadataSync(response, mmd, bigSemantics, options);
+	callback(null, extractedMeta);
+}
+
+function extractMetadataSync(response, mmd, bigSemantics, options) {
 	/*
 	 * Helper functions in need of closure
 	 * 
@@ -630,19 +633,21 @@ function extractMetadata(response, mmd, bigSemantics, options, callback) {
 	    	return fieldParserContext[fieldParserKey];
 	}
 
-	/*
-	 * recursion recuires that scalars be evaluated first
-	 */
-	function sortKids(mmdKidsList) {
-		var sortedList = [];
-	    for (var i = 0; i < mmdKidsList.length; i++)
-			if (mmdKidsList[i].scalar)
-				sortedList.push(mmdKidsList[i])
-	    for (var i = 0; i < mmdKidsList.length; i++)
-			if (!mmdKidsList[i].scalar)
-				sortedList.push(mmdKidsList[i])
-	    return sortedList;
-	}
+  /*
+   * recursion recuires that scalars be evaluated first
+   */
+  function sortKids(mmdKidsList) {
+    var sortedList = [];
+    if (mmdKidsList != null && mmdKidsList instanceof Array) {
+      for (var i = 0; i < mmdKidsList.length; i++)
+      if (mmdKidsList[i].scalar)
+        sortedList.push(mmdKidsList[i])
+      for (var i = 0; i < mmdKidsList.length; i++)
+      if (!mmdKidsList[i].scalar)
+        sortedList.push(mmdKidsList[i])
+    }
+    return sortedList;
+  }
 
 	function secondaryExtractCallback(mmd, page){
 	    var md = extractMetadata(mmd, page);
@@ -708,6 +713,6 @@ function extractMetadata(response, mmd, bigSemantics, options, callback) {
   extractedMeta = BSUtils.unwrap(extractedMeta);
   extractedMeta.location = response.location;
   extractedMeta.additionalLocations = response.otherLocations;
-	callback(null, extractedMeta);
+  return extractedMeta;
 }
 
