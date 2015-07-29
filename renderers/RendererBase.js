@@ -59,6 +59,8 @@ RendererBase.addMetadataDisplay = function(container, url, clipping, renderer, o
   }
 
   if (clipping != null && clipping.metadata) {
+  clipping.metadata = BSUtils.unwrap(clipping.metadata);
+
     bsService.onReady(function() {
       bsService.loadMmd(clipping.metadata.mm_name, options, function(err, mmd){
         if (err) { console.error(err); return; }
