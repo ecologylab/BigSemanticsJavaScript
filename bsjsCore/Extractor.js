@@ -716,3 +716,11 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
   return extractedMeta;
 }
 
+// for use in Node:
+if (typeof module == 'object') {
+  module.exports = {
+    extractMetadata: extractMetadata,
+    extractMetadataSync: extractMetadataSync
+  }
+}
+

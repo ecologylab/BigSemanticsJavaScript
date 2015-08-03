@@ -1,7 +1,13 @@
 // Facade of BigSemantics.
 
+// for use in Node:
+if (typeof require == 'function') {
+  Readyable = require('./Readyable');
+  PreFilter = require('./FieldOps').PreFilter;
+}
+
 var BigSemantics = (function() {
-  function BigSemantics(options) {
+  function BigSemantics(repoSource, options) {
     Readyable.call(this);
 
     if (options) {
@@ -16,7 +22,7 @@ var BigSemantics = (function() {
       this.extractor = extractMetadata;
     }
     if (!this.repoMan) {
-      this.repoMan = new RepoMan(options);
+      this.repoMan = new RepoMan(repoSource, options);
       var that = this;
       this.repoMan.onReady(function(err, repoMan) {
         if (err) { that.setError(err); return; }
@@ -98,4 +104,9 @@ var BigSemantics = (function() {
 
   return BigSemantics;
 })();
+
+// for use in Node:
+if (typeof module == 'object') {
+  module.exports = BigSemantics;
+}
 

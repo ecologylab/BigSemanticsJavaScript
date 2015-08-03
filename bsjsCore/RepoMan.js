@@ -2,10 +2,9 @@
 
 // for use in Node:
 if (typeof require == 'function') {
+  Readyable = require('./Readyable');
   ParsedURL = require('./ParsedURL');
   simpl = require('./simpl/simplBase');
-  Downloader = require('./Downloader');
-  Readyable = require('./Readyable');
 }
 
 var RepoMan = (function() {
@@ -51,7 +50,12 @@ var RepoMan = (function() {
       });
     } else if (source.url) {
       var that = this;
-      var downloader = new Downloader();
+      var downloader = null;
+      if (options && options.downloader) {
+        downloader = options.downloader;
+      } else {
+        downloader = new Downloader();
+      }
       var dOpts = { responseType: 'json' };
       downloader.httpGet(source.url, dOpts, function(err, response) {
         if (err) { that.setError(err); return; }

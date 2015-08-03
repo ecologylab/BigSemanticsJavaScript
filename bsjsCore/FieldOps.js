@@ -287,3 +287,12 @@ function substring(str, substringOp){
 function containsAny(s, c){
 	return s.indexOf(c) > -1;
 }
+
+// for use in Node:
+if (typeof module == 'object') {
+  module.exports = {
+    PreFilter: PreFilter,
+    FieldOps: FieldOps
+  }
+}
+
