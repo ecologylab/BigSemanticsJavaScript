@@ -29,7 +29,7 @@ BSUtils.toDisplayCase = function(string)
 // found in the input target. Otherwise, it returns the input target unchanged.
 BSUtils.unwrap = function(target) {
   if (typeof target == 'object' && target != null) {
-    if (target.mm_name) {
+    if (target.mm_name || target.meta_metadata_name) {
       // the target itself is an unwrapped metadata.
       return target;
     }
@@ -37,7 +37,7 @@ BSUtils.unwrap = function(target) {
     var keys = Object.keys(target);
     for (var i in keys) {
       var key = keys[i];
-      if (typeof target[key] == 'object' && target[key].mm_name) {
+      if (typeof target[key] == 'object' && (target[key].mm_name || target[key].meta_metadata_name)) {
         return target[key];
       }
     }
