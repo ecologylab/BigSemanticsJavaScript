@@ -64,10 +64,14 @@ var BSExtension = (function() {
       }
     }
     var msg = { method: method, params: simpl.serialize(params) };
-    if (this.extensionId) {
-      chrome.runtime.sendMessage(this.extensionId, msg, onResponse);
-    } else {
-      chrome.runtime.sendMessage(msg, onResponse);
+    try {
+      if (this.extensionId) {
+        chrome.runtime.sendMessage(this.extensionId, msg, onResponse);
+      } else {
+        chrome.runtime.sendMessage(msg, onResponse);
+      }
+    } catch (err) {
+      callback(err, null);
     }
   }
 
