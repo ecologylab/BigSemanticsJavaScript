@@ -17,6 +17,7 @@ function buildSpan(className){
 	elem.className = className;
 	return elem;
 }
+/*
 Mink.initialize = function(){
 	
 	var minkRenderings = document.getElementsByClassName('metadataRendering');	
@@ -29,7 +30,7 @@ Mink.initialize = function(){
 			
 			MetadataLoader.render(Mink.render, minkRenderings[i], location.href, true);
 	}
-}
+}*/
 
 
 Mink.recursiveIsLinked = function(metadataField){
@@ -838,7 +839,6 @@ Mink.render = function(task){
 	task.visual.setAttribute('mdType', metadataFields[0].parentMDType);
 
 	// Build the HTML table for the metadata
-	MetadataLoader.currentDocumentLocation = task.url;
 	
 	var metadataTable = document.createElement('div');
 	metadataTable.className = "minkContainer";
@@ -906,7 +906,6 @@ Mink.render = function(task){
 		MICE.clearLoadingRows(task.container, styleInfo);
 	*/
 	// Remove the RenderingTask from the queue
-	MetadataLoader.queue.splice(MetadataLoader.queue.indexOf(task), 1);
 }
 Mink.grow = function(target, doNotUpdateStatus){
 	target.removeEventListener('click', Mink.growHandler);

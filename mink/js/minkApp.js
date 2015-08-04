@@ -1,28 +1,20 @@
 var minkApp ={};
-minkApp.piles = [];
-minkApp.pileMap = new Map;
-minkApp.queries = [];
-minkApp.trails = [];
+
+minkApp.explorationSpaces = [];
+
 minkApp.metadata_collection = {};
 minkApp.counter = 0;
 minkApp.COLLAPSED_CARD_HEIGHT = 31;
-minkApp.columns = [];
 minkApp.leftMostCol = null;
 minkApp.rightMostCol = null;
 minkApp.maxCols = 1;
-minkApp.columnKeyGen = 1;
+minkApp.columnKeyGen = 0;
 minkApp.offScreenColumnsLeft = 0;
 minkApp.offScreenColumnsRight = 0;
 minkApp.favorites = [];
-
+minkApp.currentExplorationSpace = null;
 
 var bsService = new BSAutoSwitch('eganfccpbldleckkpfomlgcbadhmjnlf');
-
-
-
-
-
-
 
 
 
@@ -44,23 +36,24 @@ function minkCard(url, div){
 	this.html = div;
 }
 
-function minkPile(id, cards, root, html, parent){
-	this.id = id;
-	this.cards = cards;
-	this.collapsed = false;
-	this.rootHTML = root;
-	this.HTML = html;
-	this.parentPile= parent;
-	this.visible = true;
-	this.kids = [];
-}
 
 
 function pileIDGen(url, collection){
-	var pileId = url + '|' + collection;
-	return pileId
+	if(collection){
+		return url + '|' + collection;
+	}
+	else{ 
+		return url + '|' + 'base_url';
+	}
+
+
 }
 
+function Query(queryString, url){
+	this.query = queryString;
+	this.url = url;
+	this.columns = [];
+}
 minkApp.newColumnId = function(){
 	minkApp.columnKey++;
 	return (minkApp.columnKey-1);
@@ -70,7 +63,7 @@ minkApp.initialize = function(minkAppHTML){
 	//In case there's a responsive future to be had
 	minkApp.baseCol = minkAppHTML.childNodes[0];
 	var columns = $(minkAppHTML).find(".minkColumn");
-	minkApp.columns = columns;
+	//minkApp.currentExplorationSpace.columns = columns;
 	minkApp.leftMostCol = columns[0];
 	minkApp.rightMostCol = columns[0];
 	columns[0].setAttribute('column', '1');
@@ -83,31 +76,98 @@ minkApp.initialize = function(minkAppHTML){
 	
 }
 
+minkApp.hidePreviousExplorationSpace = function(){
+	$("#minkColumns").empty();
+	minkApp.leftMostCol =null;
+	minkApp.rightMostCol = null;
+	
+}
+//will come back to, may be complicated
+minkApp.rebuildCurrentExplorationSpace = function(){
+	//
+	minkApp.hidePreviousExplorationSpace();
+	//
+	var columns = minkApp.currentExplorationSpace.columns;
+	var cont = $('#minkColumns')[0];
+	for(var i = 0; i < columns.length; i++){
+		cont.appendChild(columns[i]);
+	}
+}
+
+minkApp.exploreURL = function(url){
+	//checki
+	if(minkApp.currentExplorationSpace){
+		if(url === minkApp.currentExplorationSpace.query){
+			return;
+		}
+	}
+
+	
+
+	for (var i = 0; i < minkApp.explorationSpaces.length; i++){
+		if(url === minkApp.explorationSpaces[i].query){
+			minkApp.hidePreviousExplorationSpace();
+			minkApp.currentExplorationSpace = minkApp.explorationSpaces[i];
+			minkApp.rebuildCurrentExplorationSpace();
+			return;
+		}
+	}
+
+	var explorationSpace = new ExplorationSpace(url, null);
+	var column;
+	if(!minkApp.currentExplorationSpace){
+		column = minkApp.leftMostCol;
+	}else{
+		minkApp.hidePreviousExplorationSpace();
+
+		column = minkApp.buildColumn($('#minkColumns')[0]);
+		$('#minkColumns')[0].appendChild(column);
+	}
+	var pile = minkApp.buildPile(column, [url], url, null, null);
+
+	explorationSpace.pileMap.put(pileIDGen(url, null), pile);
+	explorationSpace.columns.push(column);
+	minkApp.currentExplorationSpace = explorationSpace;
+	minkApp.explorationSpaces.push(explorationSpace);
+	
+	
+
+}
+
+minkApp.showQuery = function(queryString){
+	//find/build html
+	//hide/delete html for other metadata
+	//show html for this query
+	//update history
+	
+}
+
+
 //if new Column is true, ignore code about opneing a new colun
 minkApp.moveForward = function(newColumn){
 	//
 
 	var already = false;
-	 for(var i = 0; i < minkApp.columns.length; i++){
-		  var colNo = parseInt(minkApp.columns[i].getAttribute('column'));
+	 for(var i = 0; i < minkApp.currentExplorationSpace.columns.length; i++){
+		  var colNo = parseInt(minkApp.currentExplorationSpace.columns[i].getAttribute('column'));
 		 
 		  if(colNo == 1){
-			  minkApp.columns[i].classList.add('minkDeletingColumn');
-			  minkApp.columns[i].addEventListener('animationend', minkApp.toggleDisplay)
-			  minkApp.columns[i].setAttribute('column', "0");
+			  minkApp.currentExplorationSpace.columns[i].classList.add('minkDeletingColumn');
+			  minkApp.currentExplorationSpace.columns[i].addEventListener('animationend', minkApp.toggleDisplay)
+			  minkApp.currentExplorationSpace.columns[i].setAttribute('column', "0");
 
 			  }
 		  else if(colNo == 2){
-				  minkApp.leftMostCol = minkApp.columns[i];
+				  minkApp.leftMostCol = minkApp.currentExplorationSpace.columns[i];
 		  }
 		  
 		  if(colNo > 1 && (already == false)) 
-			  minkApp.columns[i].setAttribute('column', (colNo - 1).toString());
+			  minkApp.currentExplorationSpace.columns[i].setAttribute('column', (colNo - 1).toString());
 		  
 	 
 		 if(colNo == (minkApp.maxCols) && (newColumn != true) && (already == false)){
-			  minkApp.columns[(i+1)].setAttribute('column', minkApp.maxCols.toString());
-			  minkApp.rightMostCol = minkApp.columns[(i+1)];
+			  minkApp.currentExplorationSpace.columns[(i+1)].setAttribute('column', minkApp.maxCols.toString());
+			  minkApp.rightMostCol = minkApp.currentExplorationSpace.columns[(i+1)];
 			  minkApp.rightMostCol.style.display = '';
 			  $(minkApp.rightMostCol).removeClass("minkDeletingColumnRight");
 			  //this is a hacky way to ensure this code is only executed one
@@ -128,27 +188,28 @@ minkApp.moveForward = function(newColumn){
 			$(".rightPlaceholder").css('display', '');
 
 		}
+		minkApp.currentExplorationSpace.column++;
 
 }
 minkApp.goBackwards = function(howMany){
-	 for(var i = 0; i < minkApp.columns.length; i++){
-		  var colNo = parseInt(minkApp.columns[i].getAttribute('column'));
+	 for(var i = 0; i < minkApp.currentExplorationSpace.columns.length; i++){
+		  var colNo = parseInt(minkApp.currentExplorationSpace.columns[i].getAttribute('column'));
 		  if(colNo == 1){
-			  minkApp.columns[(i-1)].setAttribute('column', "1");
-			  minkApp.leftMostCol = minkApp.columns[(i-1)];
+			  minkApp.currentExplorationSpace.columns[(i-1)].setAttribute('column', "1");
+			  minkApp.leftMostCol = minkApp.currentExplorationSpace.columns[(i-1)];
 			  minkApp.leftMostCol.style.display = '';
 			  $(minkApp.leftMostCol).removeClass("minkDeletingColumn");
 			  
 
 		  }
 		  if(colNo == minkApp.maxCols){
-			  minkApp.columns[i].classList.add('minkDeletingColumnRight');
-			  minkApp.columns[i].addEventListener('animationend', minkApp.toggleDisplay)
-			  minkApp.columns[i].setAttribute('column', "0");
+			  minkApp.currentExplorationSpace.columns[i].classList.add('minkDeletingColumnRight');
+			  minkApp.currentExplorationSpace.columns[i].addEventListener('animationend', minkApp.toggleDisplay)
+			  minkApp.currentExplorationSpace.columns[i].setAttribute('column', "0");
 
 			  
 		  }else if(colNo > 0){
-			  minkApp.columns[i].setAttribute('column', (colNo + 1).toString());
+			  minkApp.currentExplorationSpace.columns[i].setAttribute('column', (colNo + 1).toString());
 
 		  }
 	 }
@@ -163,11 +224,11 @@ minkApp.goBackwards = function(howMany){
 			 $(".leftPlaceholder").css('display', '');
 
 		}
+	minkApp.currentExplorationSpace.column--;
 
 }
 minkApp.buildColumn = function(parent){
 	var column = buildDiv('minkColumn');
-	column.id = minkApp.newColumnId();
 	parent.appendChild(column);
 	return column;
 }
@@ -265,66 +326,69 @@ minkApp.favoritesToggleHandler = function(event){
 
 
 }
+
+minkApp.newPile = function(details, srcElement){
+	//Determine which column the event comes from
+	 var nextCol = null;
+	 var targetColumn = $(srcElement).closest(".minkColumn")[0];
+	 var columnNumber = parseInt(targetColumn.getAttribute('column'));
+	 console.log(columnNumber);
+	 if((targetColumn == minkApp.rightMostCol) || (minkApp.rightMostCol == null)){
+		 if(columnNumber < minkApp.maxCols){
+			 //makes new column and add it in
+			  nextCol = minkApp.buildColumn($(minkApp.HTML).find('.minkColumns')[0]);
+			  nextCol.setAttribute('column', (columnNumber+1).toString());
+			  minkApp.currentExplorationSpace.columns.push(nextCol);
+			  minkApp.rightMostCol = nextCol;
+
+		 }else{
+			
+			  nextCol = minkApp.buildColumn($(minkApp.HTML).find('.minkColumns')[0]);
+				nextCol.setAttribute('column', (minkApp.maxCols).toString());
+				  minkApp.rightMostCol = nextCol;
+
+			  minkApp.moveForward(true);
+				minkApp.currentExplorationSpace.columns.push(nextCol);
+
+			  
+		 }
+		 //move forwards
+	 }/*else if(minkApp.rightMostCol == null){
+ 		  nextCol = minkApp.buildColumn($(minkApp.HTML).find('.minkColumns')[0]);
+		  nextCol.setAttribute('column', (columnNumber+1).toString());
+		  minkApp.currentExplorationSpace.columns.push(nextCol);
+		  minkApp.rightMostCol = nextCol;
+	 }*/
+	 else{
+		 var searchForCol = (columnNumber+1).toString();
+		 nextCol = $("div[column='" + searchForCol + "']")[0];
+		 
+		 
+		 
+	 }
+	 var pile = minkApp.buildPile(nextCol, event.detail.links, event.detail.rooturl, event.detail.collectionname, event.srcElement)
+
+	 
+	 minkApp.currentExplorationSpace.pileMap.put(pileIDGen(details.rooturl, details.collectionname), pile);
+	 srcElement.addEventListener('click', minkApp.showHidePileHandler);
+	 srcElement.removeEventListener('click', Mink.showExplorableLinks);
+	
+}
 minkApp.minkEventHandler = function(event){
 	 
 	 if(event.detail.type == 'minknewpile'){
 		
-		 //Determine which column the event comes from
-		 var nextCol = null;
-		 var targetColumn = $(event.srcElement).closest(".minkColumn")[0];
-		 var columnNumber = parseInt(targetColumn.getAttribute('column'));
-		 console.log(columnNumber);
-		 if(targetColumn == minkApp.rightMostCol){
-			 if(columnNumber < minkApp.maxCols){
-				 //makes new column and add it in
-				  nextCol = minkApp.buildColumn($(minkApp.HTML).find('.minkColumns')[0]);
-				  nextCol.setAttribute('column', (columnNumber+1).toString());
-				  minkApp.columns.push(nextCol);
-				  minkApp.rightMostCol = nextCol;
-
-			 }else{
-				/* nextCol = minkApp.buildColumn(minkApp.HTML);
-				  nextCol.setAttribute('column', (minkApp.maxCols).toString());
-				  minkApp.columns.push(nextCol);
-				  minkApp.rightMostCol = nextCol;*/
-				  nextCol = minkApp.buildColumn($(minkApp.HTML).find('.minkColumns')[0]);
-					nextCol.setAttribute('column', (minkApp.maxCols).toString());
-					  minkApp.rightMostCol = nextCol;
-
-				  minkApp.moveForward(true);
-					minkApp.columns.push(nextCol);
-
-				  
-			 }
-			 //move forwards
-		 }else{
-			 var searchForCol = (columnNumber+1).toString();
-			 nextCol = $("div[column='" + searchForCol + "']")[0];
-			 
-			 
-			 
-		 }
-		 var pile = minkApp.buildPile(nextCol, event.detail.links, event.detail.rooturl, event.detail.collectionname, event.srcElement)
-		// var parentID = $(event.srcElement).closest('.minkPile')[0].getAttribute('pileID');
-		 
-		 /*
-		  * TODO: Update to be done with keys
-		  */
-		 minkApp.piles.push(pile);
-		 
-		 minkApp.pileMap.put(pileIDGen(event.detail.rooturl, event.detail.collectionname), pile);
-		 event.srcElement.addEventListener('click', minkApp.showHidePileHandler);
-		 event.srcElement.removeEventListener('click', Mink.showExplorableLinks);
+		 minkApp.newPile(event.detail, event.srcElement);
 
 		 
 		 
 	 }else if(event.detail.type == 'minkshowless'){
 		 var id = pileIDGen(event.detail.rooturl, event.detail.collectionname);
-		 var pile = minkApp.pileMap.get(id);
+		 var pile = minkApp.currentExplorationSpace.pileMap.get(id);
 		 pile.rootHTML = event.srcElement;
 	 }else if(event.detail.type=='minkshowmore'){
 		 var id = pileIDGen(event.detail.rooturl, event.detail.collectionname);
-		 var pile = minkApp.pileMap.get(id);
+		 var pile = minkApp.currentExplorationSpace.pileMap.get(id);
 		 pile.rootHTML = event.srcElement;
 	 }else if(event.detail.type=="minkshowhide"){
 		 minkApp.showHidePileHandler(event);
@@ -459,7 +523,7 @@ minkApp.showHidePileHandler = function(event){
 	var collection = $(rootHTML).attr('collectionname');
 	var id = pileIDGen(url, collection);
 	
-	var pile = minkApp.pileMap.get(id);
+	var pile = minkApp.currentExplorationSpace.pileMap.get(id);
 	minkApp.showHidePile(pile, event.detail.hide);
 	
 	
@@ -571,21 +635,32 @@ minkApp.buildCards = function(parent, links){
 	return cards;
 
 }
+
+
 minkApp.buildPile = function(parent, links, rooturl, collectionname, src){
 	console.log('links: ');
 	console.log(links);
 	var wrapper= buildDiv('minkPileWrapper');
-	var collapseButton = buildDiv('sampleCollapse');
-	collapseButton.addEventListener('click', minkApp.expandCollapsePile);
+	
+	if(src){
+		var collapseButton = buildDiv('sampleCollapse');
+		collapseButton.addEventListener('click', minkApp.expandCollapsePile);
+		wrapper.appendChild(collapseButton);
+	}
+	
 	var newPile = buildDiv('minkPile minkPileExpanded');
 	parent.appendChild(wrapper);
-	var pileId = rooturl + '|' + collectionname;
-	wrapper.appendChild(collapseButton);
-
-	var pile = new minkPile(pileId, minkApp.buildCards(newPile, links), src, newPile);
+	
+	var pileId = pileIDGen(rooturl, collectionname);
+	var parentPile = null;
+	if(src){
+		var parentPileHTML = $(src).closest('.minkPile')[0];
+		parentPile = minkApp.currentExplorationSpace.pileMap.get(parentPileHTML.getAttribute('pileid'));
+	}
+	var pile = new minkPile(pileId, minkApp.buildCards(newPile, links), src, newPile, parentPile);
 	//pile.setAttribute('pileID', pileId);
 	wrapper.appendChild(newPile);
-	
+	newPile.setAttribute('pileid', pileId);
 	
 	return pile;
 	//Logic to let varius maps and storage representations know about what's going one
@@ -643,42 +718,46 @@ function redrawCanvas(){
 
 	var canvasY = canvas.getBoundingClientRect().top;
 	var canvasX = canvas.getBoundingClientRect().left;
-	for (var i = 0; i < minkApp.piles.length; i++){
-		var pile = minkApp.piles[i];
-		if (pile.visible && $(pile.rootHTML.closest('.minkColumn')).is(':visible') && $(pile.HTML.closest('.minkColumn')).is(':visible')){
-			var rootRect = pile.rootHTML.getBoundingClientRect();
-			var rootAttachPointX = rootRect.left + rootRect.width - canvasX;
-			var rootAttachPointY = (rootRect.top + rootRect.height / 2) - canvasY;
-			
-			var pileRect = pile.HTML.getBoundingClientRect();
-			var pileTopAttachPointX = pileRect.left - canvasX;
-			var pileTopAttachPointY = (pileRect.top) - canvasY;
-			
-			var pileBotAttachPointX = pileRect.left - canvasX;
-			var pileBotAttachPointY = (pileRect.top) + pileRect.height - canvasY;
-
-			
-			var pathSplitX = rootAttachPointX + 1/2 * (pileTopAttachPointX - rootAttachPointX);
-			var pathSplitY = (pileTopAttachPointY + pileRect.height/2);
+	if(minkApp.currentExplorationSpace){
+		for (var i = 0; i < minkApp.currentExplorationSpace.pileMap.keys.length; i++){
+			var pile = minkApp.currentExplorationSpace.pileMap.get( minkApp.currentExplorationSpace.pileMap.keys[i]);
+			if(pile.rootHTML){
+				if (pile.visible && $(pile.rootHTML.closest('.minkColumn')).is(':visible') && $(pile.HTML.closest('.minkColumn')).is(':visible')){
+					var rootRect = pile.rootHTML.getBoundingClientRect();
+					var rootAttachPointX = rootRect.left + rootRect.width - canvasX;
+					var rootAttachPointY = (rootRect.top + rootRect.height / 2) - canvasY;
+					
+					var pileRect = pile.HTML.getBoundingClientRect();
+					var pileTopAttachPointX = pileRect.left - canvasX;
+					var pileTopAttachPointY = (pileRect.top) - canvasY;
+					
+					var pileBotAttachPointX = pileRect.left - canvasX;
+					var pileBotAttachPointY = (pileRect.top) + pileRect.height - canvasY;
 		
-			ctx.beginPath();
-			ctx.strokeStyle = '#999999';
-			ctx.moveTo(rootAttachPointX, rootAttachPointY);
-			ctx.bezierCurveTo((rootAttachPointX + (1/2 * Math.abs(pathSplitX - rootAttachPointX))), rootAttachPointY, pathSplitX - (1/2 * Math.abs((pathSplitX - rootAttachPointX))), pathSplitY, pathSplitX, pathSplitY);
-			ctx.stroke();
-			
-			ctx.beginPath();
-			ctx.strokeStyle = '#999999';
-			ctx.moveTo(pathSplitX, pathSplitY);
-			ctx.bezierCurveTo((pathSplitX + (1/2 * Math.abs(pileTopAttachPointX - pathSplitX))), pathSplitY, pileTopAttachPointX - (1/2 * Math.abs((pileTopAttachPointX - pathSplitX))), pileTopAttachPointY, pileTopAttachPointX, pileTopAttachPointY);
-			ctx.stroke();
-			
-			ctx.beginPath();
-			ctx.strokeStyle = '#999999';
-			ctx.moveTo(pathSplitX, pathSplitY);
-			ctx.bezierCurveTo((pathSplitX + (1/2 * Math.abs((pileBotAttachPointX - pathSplitX)))), pathSplitY, pileBotAttachPointX - (1/2 * Math.abs((pileBotAttachPointX - pathSplitX))), pileBotAttachPointY, pileBotAttachPointX, pileBotAttachPointY);
-			ctx.stroke();
-
+					
+					var pathSplitX = rootAttachPointX + 1/2 * (pileTopAttachPointX - rootAttachPointX);
+					var pathSplitY = (pileTopAttachPointY + pileRect.height/2);
+				
+					ctx.beginPath();
+					ctx.strokeStyle = '#999999';
+					ctx.moveTo(rootAttachPointX, rootAttachPointY);
+					ctx.bezierCurveTo((rootAttachPointX + (1/2 * Math.abs(pathSplitX - rootAttachPointX))), rootAttachPointY, pathSplitX - (1/2 * Math.abs((pathSplitX - rootAttachPointX))), pathSplitY, pathSplitX, pathSplitY);
+					ctx.stroke();
+					
+					ctx.beginPath();
+					ctx.strokeStyle = '#999999';
+					ctx.moveTo(pathSplitX, pathSplitY);
+					ctx.bezierCurveTo((pathSplitX + (1/2 * Math.abs(pileTopAttachPointX - pathSplitX))), pathSplitY, pileTopAttachPointX - (1/2 * Math.abs((pileTopAttachPointX - pathSplitX))), pileTopAttachPointY, pileTopAttachPointX, pileTopAttachPointY);
+					ctx.stroke();
+					
+					ctx.beginPath();
+					ctx.strokeStyle = '#999999';
+					ctx.moveTo(pathSplitX, pathSplitY);
+					ctx.bezierCurveTo((pathSplitX + (1/2 * Math.abs((pileBotAttachPointX - pathSplitX)))), pathSplitY, pileBotAttachPointX - (1/2 * Math.abs((pileBotAttachPointX - pathSplitX))), pileBotAttachPointY, pileBotAttachPointX, pileBotAttachPointY);
+					ctx.stroke();
+		
+			}
+		}
 		}
 	}
 	
@@ -809,18 +888,6 @@ function getJSONData (targeturl)
 function toggleReload(){
 	reload_md = !reload_md;
 }
-function checkForMissingMetadata()
-{
-	var url = document.getElementById("targetURL").value;
-	var content = document.getElementById("mdcIce");		
-	
-	// if the tab doesnt have metadata
-	if(content.getElementsByClassName("metadataContainer").length == 0 && content.getElementsByClassName("twMetadataContainer").length == 0)
-	{
-		if (MetadataLoader.isExtensionMetadataDomain(url))
-			MetadataLoader.getMetadata(url, "MetadataLoader.setMetadata", reload_md);
-	}	
-}
 
 function onEnterShowMetadata(event)
 {
@@ -830,26 +897,13 @@ function onEnterShowMetadata(event)
 
 function showMetadata(url)
 {
-  var url = document.getElementById("targetURL").value;
-  var content = document.getElementById("mdcIce");
-  
-  var hostname = window.location.hostname;
-  var port = window.location.port;
-  //SEMANTIC_SERVICE_URL = "http://" + hostname + ":" + port + "/BigSemanticsService/";
- 
-  if(window.history.pushState)
-  {
-  	  window.history.pushState("state", "Mink Demo", "index.html?url="+url)    
-  }
-  
-  MetadataLoader.clearDocumentCollection();
-  var refreshCheckbox = document.getElementById('force_reload').checked;
+	if (url){
+		minkApp.exploreURL(url);
+	}else{
+		var url = document.getElementById("targetURL").value;
+		minkApp.exploreURL(url);
+	}
 
-  while(document.getElementById('mdcIce').childNodes.length > 0){
-	  document.getElementById('mdcIce').removeChild(document.getElementById('mdcIce').childNodes[0]);
-  }
-
-  RendererBase.addMetadataDisplay(content, url, null, Mink.render, {reloadMD: true} );
 
 }
 

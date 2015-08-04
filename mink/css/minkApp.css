@@ -255,7 +255,8 @@
 	
 }
 .minkCardContainer{
-	position: relative
+	position: relative;
+	
 }
 .animatingCollapse{
 	animation-name: cardFadeOut;
