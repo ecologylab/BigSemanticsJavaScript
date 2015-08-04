@@ -62,9 +62,9 @@ var RepoMan = (function() {
 
         if (response.entity) {
           that.repo = simpl.graphExpand(response.entity);
-        } else if (response.entityText) {
+        } else if (response.text) {
           try {
-            that.repo = simpl.deserialize(response.entityText);
+            that.repo = simpl.deserialize(response.text);
           } catch (err) {
             that.setError(err);
             return;
@@ -166,6 +166,16 @@ var RepoMan = (function() {
         var name = altNames[i].name;
         var mmd = altNames[i].mmd;
         this.mmds[name] = mmd;
+      }
+    }
+
+    this.userAgents = {}
+    if (this.repo.user_agents) {
+      for (var i in this.repo.user_agents) {
+        var agent = this.repo.user_agents[i];
+        if (agent.name && agent.string) {
+          this.userAgents[agent.name] = agent.string;
+        }
       }
     }
 

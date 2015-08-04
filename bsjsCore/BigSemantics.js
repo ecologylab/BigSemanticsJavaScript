@@ -40,12 +40,13 @@ var BigSemantics = (function() {
 
   BigSemantics.prototype.loadMetadata = function(location, options, callback) {
     var that = this;
+    if (!options) { options = {}; }
 
     // mmdCallback: (err, mmd) => void
     function getMmd(mmdCallback) {
-      if (options && options.mmd) {
+      if (options.mmd) {
         mmdCallback(null, options.mmd);
-      } else if (options && options.mmdName) {
+      } else if (options.mmdName) {
         that.loadMmd(options.mmdName, options, mmdCallback);
       } else {
         that.selectMmd(location, options, mmdCallback);
@@ -59,7 +60,7 @@ var BigSemantics = (function() {
         location = PreFilter.filter(location, mmd.filter_location);
       }
 
-      if (options && options.page && that.extractor) {
+      if (options.page && that.extractor) {
         // we already have the DOM
         var response = {
           location: location,
@@ -71,6 +72,11 @@ var BigSemantics = (function() {
         });
       } else {
         // we don't really have the DOM
+        if (mmd.user_agent_string) {
+          options.userAgent = mmd.user_agent_string;
+        } else if (mmd.user_agent_name && mmd.user_agent_name in that.repoMan.userAgents) {
+          options.userAgent = that.repoMan.userAgents[mmd.user_agent_name];
+        }
         that.downloader.httpGet(location, options, function(err, response) {
           if (err) { callback(err, null); return; }
 
