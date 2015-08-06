@@ -472,9 +472,9 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 					{
 						fieldParserResults = fieldParser.getKeyValuePairResult(fieldName,string.trim());
 					}
-					for (var i = 0; i < fieldParserResults.length; i++)
+					for (var k = 0; k < fieldParserResults.length; k++)
 					{
-						contextList.push(fieldParserResults[i]);
+						contextList.push(fieldParserResults[k]);
 					}
 				}
 			}
