@@ -160,6 +160,9 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 				{
 					contextNode = defVars[field.context_node];
 				}
+				if(field.name=='citations'){
+					console.log('woah');
+				}
 				
 				obj = getCollectionD(field,contextNode,recurse,parserContext,page);
 				if(obj !== null)
@@ -260,6 +263,8 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 				else if (x !== null && x !== "") {
 					newContextNode = x;
 	                break;
+				}else if(x == null){
+					return null;
 				}
 			}
 
@@ -383,7 +388,7 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 
 		if (field.hasOwnProperty('field_parser'))   
 		{
-			var fieldName = fieldParserEl.name;
+			/*var fieldName = fieldParserEl.name;
 			var fieldParser = getFieldParserFactory()[fieldName];
 			var contextList = [];
 			for (var i = 0; i < size; i++)
@@ -427,7 +432,8 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 					}
 				}
 			}
-			return d;	
+			return d;	*/
+			return null;
 		} 
 
 		var node = nodes.snapshotItem(0);
@@ -460,7 +466,7 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 		
 		if (field.hasOwnProperty('field_parser'))
 		{
-			var fieldName = fieldParserEl.name;
+			/*var fieldName = fieldParserEl.name;
 			var fieldParser = getFieldParserFactory()[fieldName];
 			var contextList = [];
 			for (var i = 0; i < size; i++)
@@ -500,7 +506,8 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 						}
 					}
 				}
-			}	
+			}	*/
+			return null;
 		} 	
 		else if (field['kids'].length > 0){
 			d = [];
@@ -633,10 +640,11 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 	}
 
 	function getFieldParserValueByKey(fieldParserContext, fieldParserKey) {
-	    if (fieldParserContext === null)
+	   /* if (fieldParserContext === null)
 	    	return null;
 	    else
-	    	return fieldParserContext[fieldParserKey];
+	    	return fieldParserContext[fieldParserKey];*/
+		return null;
 	}
 
   /*
