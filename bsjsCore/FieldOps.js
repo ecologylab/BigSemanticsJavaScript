@@ -172,9 +172,9 @@ FieldOps.strip = function(str, anyOf) {
       return s.indexOf(c) >= 0;
     }
 
-    int a = 0, b = str.length - 1;
-    while (a <= b && containsAny(anyOf, str[a]) { a++; }
-    while (b >= a && containsAny(anyOf, str[b]) { b--; }
+    var a = 0, b = str.length - 1;
+    while (a <= b && containsAny(anyOf, str[a])) { a++; }
+    while (b >= a && containsAny(anyOf, str[b])) { b--; }
     return (a <= b) ? str.substring(a, b+1) : '';
   }
   return str;
