@@ -277,6 +277,8 @@ ViewModeler.getCompositeMetadataViewModel = function(metadataViewModel,
           field.value =
             ViewModeler.getMetadataViewModel(mmdField, mmdField["kids"], value[i],
                                                 depth + 1, null, taskUrl);
+          
+          
           if (mmdField.use_value_as_label != null)
           {
             field.value_as_label =
@@ -288,8 +290,11 @@ ViewModeler.getCompositeMetadataViewModel = function(metadataViewModel,
           field.composite_type = mmdField.type;
           field.parentMDType = metadata.meta_metadata_name;
           ViewModeler.checkAndSetShowExpanded(parentField, field);
-          
-          metadataViewModel.push(field);
+         //if no value, just ignore field
+          if(field.value != null){
+              metadataViewModel.push(field);
+
+          }
         }
       }
       else
