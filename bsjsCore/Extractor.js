@@ -443,7 +443,12 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 		var d = null;
 		var fieldParserEl = field['field_parser'];
 		try {
-			var evaluationPath = ammendXpath(xpath);
+			var evaluationPath;
+			if(contextNode != page){
+				var evaluationPath = ammendXpath(xpath);
+			}else{
+				evaluationPath = xpath;
+			}
 			var nodes = page.evaluate(evaluationPath, contextNode, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);		
 		} catch (e) {
 			return null;
