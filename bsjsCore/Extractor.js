@@ -443,7 +443,13 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 		var d = null;
 		var fieldParserEl = field['field_parser'];
 		try {
-			var nodes = page.evaluate(xpath, contextNode, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);		
+			var evaluationPath;
+			if(contextNode != page){
+				var evaluationPath = ammendXpath(xpath);
+			}else{
+				evaluationPath = xpath;
+			}
+			var nodes = page.evaluate(evaluationPath, contextNode, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);		
 		} catch (e) {
 			return null;
 		}
@@ -724,3 +730,32 @@ if (typeof module == 'object') {
   }
 }
 
+//Helper functions, ported from ParserBase in BigSemanticsJava
+function ammendXpath(xpath){
+	var result = xpath;
+	if(result){
+		result = absoluteToRelative(result);
+		result = joinLines(result);
+	}
+	return result;
+}
+
+function absoluteToRelative(xpath){
+	if(xpath.startsWith('/')){
+		xpath = '.' + xpath;
+	}
+	if(xpath.includes('(/')){
+		xpath.replace('(/', '(./');
+		
+	}
+	
+	return xpath;
+}
+
+function joinLines(xpath){
+	if (xpath.includes("\n") || xpath.includes("\r"))
+    {
+      xpath = xpath.replace("\n", "").replace("\r", "");
+    }
+    return xpath;
+}
