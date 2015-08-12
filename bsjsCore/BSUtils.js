@@ -37,12 +37,26 @@ BSUtils.unwrap = function(target) {
     var keys = Object.keys(target);
     for (var i in keys) {
       var key = keys[i];
-      if (typeof target[key] == 'object' && (target[key].mm_name || target[key].meta_metadata_name)) {
-        return target[key];
+      if (typeof target[key] == 'object') {
+        if (target[key].mm_name || target[key].meta_metadata_name) {
+          return target[key];
+        }
       }
     }
   }
   return target;
+}
+
+BSUtils.getType = function(metadata) {
+  if (typeof metadata == 'object' && metadata != null) {
+    if ('meta_metadata_name' in metadata) {
+      return metadata['meta_metadata_name'];
+    }
+    if ('mm_name' in metadata) {
+      return metadata['mm_name'];
+    }
+  }
+  return null;
 }
 
 /**
@@ -89,5 +103,10 @@ function executeFunctionByName(functionName, context) {
 function getPosition(str, m, i) 
 {
   return str.split(m, i).join(m).length;
+}
+
+// for use in Node.js:
+if (typeof module == 'object') {
+  module.exports = BSUtils;
 }
 

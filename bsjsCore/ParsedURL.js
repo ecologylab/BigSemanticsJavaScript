@@ -4,7 +4,7 @@ var ParsedURL = (function() {
   function ParsedURL(url) {
     if (url) {
       this.raw = url;
-      var matches = url.match(/^((https?)\:\/\/([^\/]+)([^?#]*))(\?[^#]*)?(#.*)?/);
+      var matches = url.match(/^((https?)\:\/\/([^\/?#]+)([^?#]*))(\?[^#]*)?(#.*)?/);
       if (matches) {
         this.stripped = matches[1];
 
@@ -36,6 +36,49 @@ var ParsedURL = (function() {
       }
     }
     return this;
+  }
+
+  ParsedURL.prototype.toString = function() {
+    if (this.scheme && this.host) {
+      var result = this.scheme + '://';
+      if (this.user !== undefined && this.user != null) {
+        result += encodeURIComponent(this.user);
+        if (this.password !== undefined && this.password != null) {
+          result += ':' + encodeURIComponent(this.password);
+        }
+        result += '@';
+      }
+      result += this.host;
+      if (this.port) {
+        result += ':' + this.port;
+      }
+      if (this.path) {
+        result += this.path;
+      }
+      if (typeof this.query == 'object' && this.query != null) {
+        var keys = Object.keys(this.query).sort();
+        if (keys.length > 0) {
+          var parts = new Array();
+          for (var i in keys) {
+            var key = keys[i];
+            var val = this.query[key];
+            if (val instanceof Array) {
+              for (var j in val) {
+                parts.push(key + '=' + encodeURIComponent(val[j]));
+              }
+            } else {
+              parts.push(key + '=' + encodeURIComponent(val));
+            }
+          }
+          result += '?' + parts.join('&');
+        }
+      }
+      if (this.fragmentId !== undefined && this.fragmentId != null) {
+        result += '#' + this.fragmentId;
+      }
+      return result;
+    }
+    return this.raw;
   }
 
   // parse hostSpec: [user[:password]@]host[:port]
