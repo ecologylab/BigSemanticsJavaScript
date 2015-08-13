@@ -77,7 +77,16 @@ RendererBase.addMetadataDisplay = function(container, url, clipping, renderer, o
     bsService.onReady(function(){
       bsService.loadMetadata(url, options, function(err, md_and_mmd){
         if (err) { console.error(err); return; }
-        console.log("loadMetadata result from bsService: ", md_and_mmd);
+        
+        if(bsService.constructor.name == "BSAutoSwitch"){
+        	  console.log("loadMetadata result from " + bsService.bsImpl.constructor.name + ": ", md_and_mmd);
+
+        }else{
+      	  console.log("loadMetadata result from " + bsService.constructor.name + ": ", md_and_mmd);
+
+        }
+        	
+        
         task.mmd = md_and_mmd.mmd;
         task.mmd = simpl.graphExpand(task.mmd);
         task.metadata = md_and_mmd.metadata;
