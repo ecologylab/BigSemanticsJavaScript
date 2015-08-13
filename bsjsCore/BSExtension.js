@@ -12,7 +12,10 @@ var BSExtension = (function() {
     Readyable.call(this);
 
     //this.extensionId = extId;
-    this.extensionsLeftToCheck = idList.length;
+    if(idList){
+          this.extensionsLeftToCheck = idList.length;
+
+    }
     if (options) {
       this.extractor = options.extractor;
     }
