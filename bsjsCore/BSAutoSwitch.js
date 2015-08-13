@@ -8,7 +8,7 @@ var BSAutoSwitch = (function() {
   //   extension ID
   // serviceLocation:
   //   service spec (see BSService)
-  function BSAutoSwitch(extId, serviceLocation, options) {
+  function BSAutoSwitch(idList, serviceLocation, options) {
     Readyable.call(this);
 
     // BSService object is immediately available -- we assume the service is
@@ -18,7 +18,7 @@ var BSAutoSwitch = (function() {
     
     // If the extension is available, switch to it.
     var that = this;
-    var bsExt = new BSExtension(extId, options);
+    var bsExt = new BSExtension(idList, options);
     bsExt.onReady(function(err, bsExt) {
       if (!err && bsExt && bsExt.isReady()) {
         that.bsImpl = bsExt;

@@ -8,7 +8,7 @@ var BSExtension = (function() {
   //   provide this ID.
   // Object options:
   //   Optional configurations.
-  function BSExtension(extId, options) {
+  function BSExtension(idList, options) {
     Readyable.call(this);
 
     this.extensionId = extId;

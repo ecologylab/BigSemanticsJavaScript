@@ -188,7 +188,7 @@ function onBodyLoad() {
 
   }
   else{
-	  bsService = new BSAutoSwitch('eganfccpbldleckkpfomlgcbadhmjnlf');
+	  bsService = new BSAutoSwitch('elkanacmmmdgbnhdjopfdeafchmhecbf');
   }
  
 
