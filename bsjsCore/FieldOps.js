@@ -2,6 +2,11 @@
 //
 // Location filters also use these ops.
 
+// for use in Node:
+if (typeof require == 'function') {
+  ParsedURL = require('./ParsedURL');
+}
+
 /**
  * Semantics that transforms locations for managing variability in Document
  * locations.

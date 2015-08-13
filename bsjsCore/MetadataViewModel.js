@@ -294,7 +294,11 @@ ViewModeler.getCompositeMetadataViewModel = function(metadataViewModel,
           field.parentMDType = metadata.meta_metadata_name;
           ViewModeler.checkAndSetShowExpanded(parentField, field);
          //if no value, just ignore field
+<<<<<<< HEAD
           if(field.value != null && field.value.length >0){
+=======
+          if(field.value != null){
+>>>>>>> b1d3cc96dcb29c0f2599af5f8cd999ca9de7be2c
               metadataViewModel.push(field);
 
           }
