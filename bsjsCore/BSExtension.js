@@ -23,21 +23,18 @@ var BSExtension = (function() {
     var that = this;
     this.sendMessageToExt('extensionInfo', null, function(err, result) {
       if (err) { 
-    	  if(that.extensionsLeftToCheck > 0){
-    		  that.extensionLeftToCheck--;
-    	  }
-    	  else{
-    		      	  that.setError(err); return; 
-
-    	  }
-      }else{
-    	  console.log("Extension detected: ", result);
-      if(!that.ready){
-    	        that.setReady();
-
+        if (that.extensionsLeftToCheck > 0) {
+          that.extensionLeftToCheck--;
+        } else {
+          that.setError(err);
+          return;
+        }
+      } else {
+        console.log("Extension detected: ", result);
+        if (!that.ready) {
+          that.setReady();
+        }
       }
-      }
-      
     }, idList);
 
     return this;
@@ -78,49 +75,40 @@ var BSExtension = (function() {
     }
     
     var msg = { method: method, params: simpl.serialize(params) };
-    if(idList){
-    	for(var i = 0; i < idList.length; i++){
-    		 try {
-    		     var that = this;
-
-    			 (function(index) {
-    			       chrome.runtime.sendMessage(idList[index], msg, function (response, currentID){
-    		        	if (response) {
-    		                if (response.result && typeof response.result == 'string') {
-    		                  response.result = simpl.deserialize(response.result);
-    		                }
-    		                if(that.extensionId == null){
-    		                	that.extensionId = idList[index];
-    		                }
-    		                callback(response.error, response.result);
-    		              } else {
-    		                callback(new Error("No response from extension"), null);
-    		              }
-    		        });
-    			    })(i);
-    			 
-    			 
-    			 
-    		        
-    		    
-    		    } catch (err) {
-    		      callback(err, null);
-    		    }
-    	}
+    if (idList) {
+      for (var i = 0; i < idList.length; i++) {
+        try {
+          var that = this;
+          (function(index) {
+            chrome.runtime.sendMessage(idList[index], msg, function (response, currentID){
+              if (response) {
+                if (response.result && typeof response.result == 'string') {
+                  response.result = simpl.deserialize(response.result);
+                }
+                if(that.extensionId == null){
+                  that.extensionId = idList[index];
+                }
+                callback(response.error, response.result);
+              } else {
+                callback(new Error("No response from extension"), null);
+              }
+            });
+          })(i);
+        } catch (err) {
+          callback(err, null);
+        }
+      }
+    } else {
+      try {
+        if (this.extensionId) {
+          chrome.runtime.sendMessage(this.extensionId, msg, onResponse);
+        } else {
+          chrome.runtime.sendMessage(msg, onResponse);
+        }
+      } catch (err) {
+        callback(err, null);
+      }
     }
-    else{
-    	  try {
-		      if (this.extensionId) {
-		        chrome.runtime.sendMessage(this.extensionId, msg, onResponse);
-		      } 
-		      else {
-		        chrome.runtime.sendMessage(msg, onResponse);
-		      }
-		  }catch (err) {
-			  callback(err, null);
-		  }
-    }
-  
   }
 
   BSExtension.prototype.loadMetadata = function(location, options, callback) {
