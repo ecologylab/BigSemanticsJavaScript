@@ -180,7 +180,7 @@ function onBodyLoad() {
    if (document.URL.indexOf("http://localhost:") > -1){
 	  var hostname = window.location.hostname;
 	  var port = window.location.port;
-	  bsService = new BSAutoSwitch('eganfccpbldleckkpfomlgcbadhmjnlf',  {
+	  bsService = new BSAutoSwitch(['eganfccpbldleckkpfomlgcbadhmjnlf', 'elkanacmmmdgbnhdjopfdeafchmhecbf'],  {
 			  host: hostname,
 			  port: port,
 			  securePort: 443
@@ -188,7 +188,7 @@ function onBodyLoad() {
 
   }
   else{
-	  bsService = new BSAutoSwitch('elkanacmmmdgbnhdjopfdeafchmhecbf');
+	  bsService = new BSAutoSwitch(['eganfccpbldleckkpfomlgcbadhmjnlf', 'elkanacmmmdgbnhdjopfdeafchmhecbf']);
   }
  
 
