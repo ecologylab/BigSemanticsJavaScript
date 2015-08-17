@@ -558,16 +558,30 @@ ViewModeler.isVisibleMediaField = function(mmdField, parentField)
 ViewModeler.getFieldValue = function(mmdField, metadata)
 {
   
-  if (mmdField.tag != null){
-	  if(metadata[mmdField.tag] != null){
-		  return metadata[mmdField.tag];
-	  }
-	  else{
-		  return metadata[mmdField.name];
-	  }
-  }
-  else{
-	  return metadata[mmdField.name];
+  if (mmdField.tag != null) {
+    if (metadata[mmdField.tag] != null) {
+      return metadata[mmdField.tag];
+    } else if (metadata[mmdField.name] != null) {
+      return metadata[mmdField.name];
+    } else {
+      var typeName = null;
+      if (mmdField.tag.toUpperCase() == mmdField.tag) {
+        if (mmdField.scope && mmdField.scope.resolved_generic_type_vars) {
+          for (var i in mmdField.scope.resolved_generic_type_vars) {
+            var gtv = mmdField.scope.resolved_generic_type_vars[i];
+            if (gtv && gtv.name == mmdField.tag) {
+              typeName = gtv.arg;
+              break;
+            }
+          }
+        }
+      }
+      if (typeName) {
+        return metadata[typeName];
+      }
+    }
+  } else {
+    return metadata[mmdField.name];
   }
 }
 
