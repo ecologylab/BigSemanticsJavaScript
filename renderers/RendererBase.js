@@ -43,6 +43,9 @@ RendererBase.addMetadataDisplay = function(container, url, clipping, renderer, o
     if (clipping.metadata != null && clipping.mmd != null) {
       var task = new RenderingTask(url, true, null, null, container, null, renderer, clipping.mmd, clipping.metadata)
       task.handler(task);
+      if(options.callback){
+        options.callback({mmd: clipping.mmd, metadata: clipping.metadata});
+      }
       return;
     }
   }
@@ -55,6 +58,7 @@ RendererBase.addMetadataDisplay = function(container, url, clipping, renderer, o
       clipping.rawMetadata = simpl.deserialize(clipping.rawMetadata);
       clipping.rawMetadata.deserialized = true;
       clipping.metadata = BSUtils.unwrap(clipping.rawMetadata);
+      
     }
   }
 
