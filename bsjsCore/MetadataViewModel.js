@@ -172,7 +172,10 @@ ViewModeler.getMetadataViewModel = function(parentField, mmdKids, metadata, dept
   }
   
   //Sort the fields by layer, higher layers first
-  metadataViewModel.sort(function(a,b) { return b.layer - a.layer - 0.5; });
+  if(!parentField.child_type){
+  	  metadataViewModel.sort(function(a,b) { return b.layer - a.layer - 0.5; });
+
+  }
 
   ViewModeler.collapseEmptyLabelSet(metadataViewModel, parentField);
   
