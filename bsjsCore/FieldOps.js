@@ -204,7 +204,7 @@ FieldOps.stripParamsBut = function(url, names) {
     var keys = Object.keys(purl.query).slice(); // slice in case it changes
     for (var i in keys) {
       var key = keys[i];
-      if (!(key in names)) {
+      if (names.indexOf(key) < 0) {
         delete purl.query[key];
       }
     }
