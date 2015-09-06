@@ -2,20 +2,18 @@
 // Can only use in content script or webpages allowed to talk to the extension.
 
 var BSExtension = (function() {
-  // String extId:
-  //   the ID of the extension running BigSemantics in background.  when used from
-  //   content script, this can be omitted.  when used from webpage, be sure to
-  //   provide this ID.
+  // Array<String> extIds:
+  //   A list (array) of IDs of extensions running BigSemantics in background.
+  //   will be tried one by one in the constructor, and the first detected
+  //   extension will be used for all subsequent requests. 
+  //   - When used from content script, can be null.
+  //   - When used from webpage, must NOT be null.
   // Object options:
   //   Optional configurations.
-  function BSExtension(idList, options) {
+  function BSExtension(extIds, options) {
     Readyable.call(this);
 
-    //this.extensionId = extId;
-    if(idList){
-          this.extensionsLeftToCheck = idList.length;
-
-    }
+    this.extIds = extIds || new Array();
     if (options) {
       this.extractor = options.extractor;
     }
@@ -24,21 +22,24 @@ var BSExtension = (function() {
     }
 
     var that = this;
-    this.sendMessageToExt('extensionInfo', null, function(err, result) {
-      if (err) { 
-        if (that.extensionsLeftToCheck > 0) {
-          that.extensionLeftToCheck--;
+    var extensionsLeftToCheck = this.extIds.length;
+    function testExt(index) {
+      that.sendMessageToExt(that.extIds[index], 'extensionInfo', null, function(err, result) {
+        if (err) {
+          if (extensionsLeftToCheck > 0) {
+            extensionsLeftToCheck--;
+          } else {
+            return that.setError(err);
+          }
         } else {
-          that.setError(err);
-          return;
+          console.log("Extension detected: ", result);
+          that.extensionId = that.extIds[index];
+          return that.setReady();
         }
-      } else {
-        console.log("Extension detected: ", result);
-        if (!that.ready) {
-          that.setReady();
-        }
-      }
-    }, idList);
+        testExt(index+1);
+      });
+    }
+    testExt(0);
 
     return this;
   }
@@ -59,13 +60,23 @@ var BSExtension = (function() {
 
   // Send message to extension, and listen for callabck.
   //
+  // String extId:
+  //   (optional) the ID of the target extension
   // String method:
   //   name of the method
   // Object params:
   //   params for the invocation
   // (err, result)=>void callback:
   //   callback to receive the result of the invocation.
-  BSExtension.prototype.sendMessageToExt = function(method, params, callback, idList) {
+  BSExtension.prototype.sendMessageToExt = function(extId, method, params, callback) {
+    if (arguments.length === 3 && typeof params === 'function') {
+      // shift arguments when extId is omitted
+      callback = params;
+      params = method;
+      method = extId;
+      extId = this.extensionId;
+    }
+
     function onResponse(response) {
       if (response) {
         if (response.result && typeof response.result == 'string') {
@@ -78,39 +89,14 @@ var BSExtension = (function() {
     }
     
     var msg = { method: method, params: simpl.serialize(params) };
-    if (idList) {
-      for (var i = 0; i < idList.length; i++) {
-        try {
-          var that = this;
-          (function(index) {
-            chrome.runtime.sendMessage(idList[index], msg, function (response, currentID){
-              if (response) {
-                if (response.result && typeof response.result == 'string') {
-                  response.result = simpl.deserialize(response.result);
-                }
-                if(that.extensionId == null){
-                  that.extensionId = idList[index];
-                }
-                callback(response.error, response.result);
-              } else {
-                callback(new Error("No response from extension"), null);
-              }
-            });
-          })(i);
-        } catch (err) {
-          callback(err, null);
-        }
+    try {
+      if (extId) {
+        chrome.runtime.sendMessage(extId, msg, onResponse);
+      } else {
+        chrome.runtime.sendMessage(msg, onResponse);
       }
-    } else {
-      try {
-        if (this.extensionId) {
-          chrome.runtime.sendMessage(this.extensionId, msg, onResponse);
-        } else {
-          chrome.runtime.sendMessage(msg, onResponse);
-        }
-      } catch (err) {
-        callback(err, null);
-      }
+    } catch (err) {
+      callback(err, null);
     }
   }
 

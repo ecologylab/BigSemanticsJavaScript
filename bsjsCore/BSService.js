@@ -53,7 +53,7 @@ var BSService = (function() {
     return baseUrl + '?' + paramsArray.join('&');
   }
 
-  BSService.unwrapResponse = function(response) {
+  BSService.prepResponse = function(response) {
     var obj = null;
     if (response.entity) {
       obj = simpl.graphExpand(response.entity);
@@ -64,8 +64,7 @@ var BSService = (function() {
         console.warn("Cannot deserialize response: ", response);
       }
     }
-    if (obj) { return BSUtils.unwrap(obj); }
-    return null;
+    return obj;
   }
 
   BSService.prototype.loadMetadata = function(location, options, callback) {
@@ -79,8 +78,9 @@ var BSService = (function() {
     var downloadOpts = { responseType: 'json' };
     this.downloader.httpGet(serviceUrl, downloadOpts, function(err, response) {
       if (err) { callback(err, null); return; }
-      var metadata = BSService.unwrapResponse(response);
-      var mmdName = metadata.meta_metadata_name;
+      var metadata = BSService.prepResponse(response);
+      var unwrappedMetadata = BSUtils.unwrap(metadata);
+      var mmdName = unwrappedMetadata.meta_metadata_name;
       that.loadMmd(mmdName, options, function(err, mmd) {
         if (err) { callback(err, null); return; }
         callback(null, { metadata: metadata, mmd: mmd });
@@ -96,7 +96,7 @@ var BSService = (function() {
     var downloadOpts = { responseType: 'json' };
     this.downloader.httpGet(serviceUrl, downloadOpts, function(err, response) {
       if (err) { callback(err, null); return; }
-      var metadata = BSService.unwrapResponse(response);
+      var metadata = BSService.prepResponse(response);
       callback(null, metadata);
     });
   }
@@ -109,7 +109,7 @@ var BSService = (function() {
     var downloadOpts = { responseType: 'json' };
     this.downloader.httpGet(serviceUrl, downloadOpts, function(err, response) {
       if (err) { callback(err, null); return; }
-      var mmd = BSService.unwrapResponse(response);
+      var mmd = BSService.prepResponse(response);
       callback(null, mmd);
     });
   }
@@ -122,7 +122,7 @@ var BSService = (function() {
     var downloadOpts = { responseType: 'json' };
     this.downloader.httpGet(serviceUrl, downloadOpts, function(err, response) {
       if (err) { callback(err, null); return; }
-      var mmd = BSService.unwrapResponse(response);
+      var mmd = BSService.prepResponse(response);
       callback(null, mmd);
     });
   }
