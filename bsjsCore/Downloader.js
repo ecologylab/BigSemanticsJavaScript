@@ -164,14 +164,22 @@ var Downloader = (function() {
             if (xhr.status == 200) {
               Downloader.addNewLocation(response, xhr.responseURL);
               if (!that.isJsContentRedirect(xhr, response, options, callback)) {
-                if (xhr.response) {
-                  response.entity = xhr.response;
-                } else if (xhr.responseXML) {
-                  response.xml = xhr.responseXML;
-                } else if (xhr.responseText) {
-                  response.text = xhr.responseText;
-                } else {
-                  var err = new Error("Missing response body");
+                var err = null;
+                try {
+                  if (xhr.response) {
+                    response.entity = xhr.response;
+                  } else if (xhr.responseXML) {
+                    response.xml = xhr.responseXML;
+                  } else if (xhr.responseText) {
+                    response.text = xhr.responseText;
+                  } else {
+                    err = new Error("Missing response body");
+                  }
+                } catch (exception) {
+                  err = exception;
+                }
+
+                if (err) {
                   err.xhr = xhr;
                   callback(err, null);
                   return;

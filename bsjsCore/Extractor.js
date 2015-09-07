@@ -18,8 +18,11 @@
 // (err, metadata)=>void callback:
 //   to receive extraction result
 function extractMetadata(response, mmd, bigSemantics, options, callback) {
-	
-	
+  var extractedMeta = extractMetadataSync(response, mmd, bigSemantics, options);
+	callback(null, extractedMeta);
+}
+
+function extractMetadataSync(response, mmd, bigSemantics, options) {
 	/*
 	 * Helper functions in need of closure
 	 * 
@@ -157,6 +160,9 @@ function extractMetadata(response, mmd, bigSemantics, options, callback) {
 				{
 					contextNode = defVars[field.context_node];
 				}
+				if(field.name=='citations'){
+					console.log('woah');
+				}
 				
 				obj = getCollectionD(field,contextNode,recurse,parserContext,page);
 				if(obj !== null)
@@ -257,6 +263,8 @@ function extractMetadata(response, mmd, bigSemantics, options, callback) {
 				else if (x !== null && x !== "") {
 					newContextNode = x;
 	                break;
+				}else if(x == null){
+					return null;
 				}
 			}
 
@@ -380,7 +388,7 @@ function extractMetadata(response, mmd, bigSemantics, options, callback) {
 
 		if (field.hasOwnProperty('field_parser'))   
 		{
-			var fieldName = fieldParserEl.name;
+			/*var fieldName = fieldParserEl.name;
 			var fieldParser = getFieldParserFactory()[fieldName];
 			var contextList = [];
 			for (var i = 0; i < size; i++)
@@ -424,7 +432,8 @@ function extractMetadata(response, mmd, bigSemantics, options, callback) {
 					}
 				}
 			}
-			return d;	
+			return d;	*/
+			return null;
 		} 
 
 		var node = nodes.snapshotItem(0);
@@ -440,7 +449,13 @@ function extractMetadata(response, mmd, bigSemantics, options, callback) {
 		var d = null;
 		var fieldParserEl = field['field_parser'];
 		try {
-			var nodes = page.evaluate(xpath, contextNode, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);		
+			var evaluationPath;
+			if(contextNode != page){
+				var evaluationPath = ammendXpath(xpath);
+			}else{
+				evaluationPath = xpath;
+			}
+			var nodes = page.evaluate(evaluationPath, contextNode, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);		
 		} catch (e) {
 			return null;
 		}
@@ -451,7 +466,7 @@ function extractMetadata(response, mmd, bigSemantics, options, callback) {
 		
 		if (field.hasOwnProperty('field_parser'))
 		{
-			var fieldName = fieldParserEl.name;
+			/*var fieldName = fieldParserEl.name;
 			var fieldParser = getFieldParserFactory()[fieldName];
 			var contextList = [];
 			for (var i = 0; i < size; i++)
@@ -469,9 +484,9 @@ function extractMetadata(response, mmd, bigSemantics, options, callback) {
 					{
 						fieldParserResults = fieldParser.getKeyValuePairResult(fieldName,string.trim());
 					}
-					for (var i = 0; i < fieldParserResults.length; i++)
+					for (var k = 0; k < fieldParserResults.length; k++)
 					{
-						contextList.push(fieldParserResults[i]);
+						contextList.push(fieldParserResults[k]);
 					}
 				}
 			}
@@ -491,7 +506,8 @@ function extractMetadata(response, mmd, bigSemantics, options, callback) {
 						}
 					}
 				}
-			}	
+			}	*/
+			return null;
 		} 	
 		else if (field['kids'].length > 0){
 			d = [];
@@ -624,25 +640,28 @@ function extractMetadata(response, mmd, bigSemantics, options, callback) {
 	}
 
 	function getFieldParserValueByKey(fieldParserContext, fieldParserKey) {
-	    if (fieldParserContext === null)
+	   /* if (fieldParserContext === null)
 	    	return null;
 	    else
-	    	return fieldParserContext[fieldParserKey];
+	    	return fieldParserContext[fieldParserKey];*/
+		return null;
 	}
 
-	/*
-	 * recursion recuires that scalars be evaluated first
-	 */
-	function sortKids(mmdKidsList) {
-		var sortedList = [];
-	    for (var i = 0; i < mmdKidsList.length; i++)
-			if (mmdKidsList[i].scalar)
-				sortedList.push(mmdKidsList[i])
-	    for (var i = 0; i < mmdKidsList.length; i++)
-			if (!mmdKidsList[i].scalar)
-				sortedList.push(mmdKidsList[i])
-	    return sortedList;
-	}
+  /*
+   * recursion recuires that scalars be evaluated first
+   */
+  function sortKids(mmdKidsList) {
+    var sortedList = [];
+    if (mmdKidsList != null && mmdKidsList instanceof Array) {
+      for (var i = 0; i < mmdKidsList.length; i++)
+      if (mmdKidsList[i].scalar)
+        sortedList.push(mmdKidsList[i])
+      for (var i = 0; i < mmdKidsList.length; i++)
+      if (!mmdKidsList[i].scalar)
+        sortedList.push(mmdKidsList[i])
+    }
+    return sortedList;
+  }
 
 	function secondaryExtractCallback(mmd, page){
 	    var md = extractMetadata(mmd, page);
@@ -708,6 +727,43 @@ function extractMetadata(response, mmd, bigSemantics, options, callback) {
   extractedMeta = BSUtils.unwrap(extractedMeta);
   extractedMeta.location = response.location;
   extractedMeta.additionalLocations = response.otherLocations;
-	callback(null, extractedMeta);
+  return extractedMeta;
 }
 
+// for use in Node:
+if (typeof module == 'object') {
+  module.exports = {
+    extractMetadata: extractMetadata,
+    extractMetadataSync: extractMetadataSync
+  }
+}
+
+//Helper functions, ported from ParserBase in BigSemanticsJava
+function ammendXpath(xpath){
+	var result = xpath;
+	if(result){
+		result = absoluteToRelative(result);
+		result = joinLines(result);
+	}
+	return result;
+}
+
+function absoluteToRelative(xpath){
+	if(xpath.startsWith('/')){
+		xpath = '.' + xpath;
+	}
+	if(xpath.includes('(/')){
+		xpath.replace('(/', '(./');
+		
+	}
+	
+	return xpath;
+}
+
+function joinLines(xpath){
+	if (xpath.includes("\n") || xpath.includes("\r"))
+    {
+      xpath = xpath.replace("\n", "").replace("\r", "");
+    }
+    return xpath;
+}

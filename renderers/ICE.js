@@ -21,6 +21,8 @@ var userid = null;
 var currentUrl = null;
 var instance = null;
 
+var bsService = new BSExtension(["gbkopldnfjodomdhihdhmbfbgapiipdb"]);
+
 //call to get and replace divs, queue w on-demand prioritizing
 function processPage()
 {
@@ -118,12 +120,16 @@ function expandCollapseItem(event)
 			
 			// relegate task of selecting apt parent to specific instance 
 			var parent = instance.getContainer(item);
-			TwitterRenderer.addMetadataDisplay(parent, expandableItemUrl, true, null, false, false, item);
+			var options = {
+				isRoot: true,
+				expandedItem: item
+			};
+			TwitterRenderer.addMetadataDisplay(parent, expandableItemUrl, null, TwitterRenderer.render, options);
 
 			if(application_name != 'mdc'){
 
 				//request loading of webpage
-				downloadRequester(expandableItemUrl, parent);
+				//downloadRequester(expandableItemUrl, parent);
 				instance.setCached(item);
 			}
 			else{

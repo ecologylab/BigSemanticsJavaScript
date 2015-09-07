@@ -1,8 +1,8 @@
 
-
 /**
  * custom rendering for Twitter Metadata expansion
  */
+var isExtension = (typeof chrome !== "undefined" && typeof chrome.extension !== "undefined");
 var TwitterRenderer = {};
 
 var metadataProcessor = null;
@@ -111,7 +111,104 @@ TwitterRenderer.render = function (task) {
  * @param isRoot, true if this is the root metadata for the rendering,
  * 		needed because styling is slightly different for the root metadata rendering
  */
-TwitterRenderer.addMetadataDisplay = function (container, url, isRoot, clipping, requestMD, reloadMD, expandedItem) {
+TwitterRenderer.addMetadataDisplay = function(container, url, clipping, renderer, options){
+	var isRoot = options.isRoot;
+	var expandedItem = options.expandedItem;
+	
+	var visual = null;
+    var bgColor = null;
+    var bgColorObj = null;
+    if ((url.indexOf("twitter.com") != -1 || application_name == "tweetbubble") ||
+			(expandedItem && ((expandedItem.mmdType && expandedItem.mmdType.indexOf("twitter") != -1)
+					|| (expandedItem.className && expandedItem.className.indexOf("pretty-link twitter-timeline-link") != -1)))) {
+        bgColor = TwitterRenderer.getNextColor(container);
+        bgColorObj = { color: bgColor, bFirstField: true };
+
+        if (expandedItem)
+            expandedItem.mmdType = "twitter";
+
+        if (isRoot)
+            visual = TwitterRenderer.renderInitial(container, url, isRoot, expandedItem, bgColorObj);
+    }
+	
+	if(options == null){
+		options = {};
+	}
+  // If we already have metadata and mmd provided, we skip BigSemantics and
+  // render the metadata immediately
+  if (clipping != null) {
+    if (clipping.metadata != null && clipping.mmd != null) {
+      //var task = new RenderingTask(url, true, null, null, container, null, renderer, clipping.mmd, clipping.metadata)
+    	  var task = new TweetBubbleRenderingTask(url, isRoot, null, null, container, null, renderer, 
+    			  						clipping.mmd, clipping.metadata, expandedItem, visual, bgColorObj);	
+      task.handler(task);
+      if(options.callback){
+        options.callback({mmd: clipping.mmd, metadata: clipping.metadata});
+      }
+      return;
+    }
+  }
+
+  //Otherwise, we prepare to call BigSemantics
+  //var task = new RenderingTask(url, true, clipping, null, container, null, renderer);
+  var task = new TweetBubbleRenderingTask(url, isRoot, clipping, null, container, null, renderer, 
+									null, null, expandedItem, visual, bgColorObj);
+
+  if (clipping != null) {
+    if (!clipping.metadata && clipping.rawMetadata) {
+      clipping.rawMetadata = simpl.deserialize(clipping.rawMetadata);
+      clipping.rawMetadata.deserialized = true;
+      clipping.metadata = BSUtils.unwrap(clipping.rawMetadata);
+      
+    }
+  }
+
+  if (clipping != null && clipping.metadata) {
+  clipping.metadata = BSUtils.unwrap(clipping.metadata);
+
+    bsService.onReady(function() {
+      bsService.loadMmd(clipping.metadata.mm_name, options, function(err, mmd){
+        if (err) { console.error(err); return; }
+        task.mmd = mmd;
+        task.mmd = simpl.graphExpand(task.mmd);
+        task.metadata = clipping.metadata;
+        task.handler(task);
+        if(options.callback){
+        	options.callback(md_and_mmd);
+        }
+      });
+    });
+  } else {
+    bsService.onReady(function(){
+      bsService.loadMetadata(url, options, function(err, md_and_mmd){
+        if (err) { console.error(err); return; }
+        
+        if(bsService.constructor.name == "BSAutoSwitch"){
+        	  console.log("loadMetadata result from " + bsService.bsImpl.constructor.name + ": ", md_and_mmd);
+
+        }else{
+      	  console.log("loadMetadata result from " + bsService.constructor.name + ": ", md_and_mmd);
+
+        }
+        	
+        
+        task.mmd = md_and_mmd.mmd;
+        task.mmd = simpl.graphExpand(task.mmd);
+        task.metadata = md_and_mmd.metadata;
+        task.handler(task);
+        if(options.callback){
+        	options.callback(md_and_mmd);
+        }
+        
+        
+      })
+    });
+    // MetadataLoader.getMetadata(url, "MetadataLoader.setMetadata", reloadMD);
+  }
+  
+}
+
+/*TwitterRenderer.addMetadataDisplay = function (container, url, isRoot, clipping, requestMD, reloadMD, expandedItem) {
     var visual = null;
     var bgColor = null;
     var bgColorObj = null;
@@ -143,7 +240,7 @@ TwitterRenderer.addMetadataDisplay = function (container, url, isRoot, clipping,
         if (!isExtension && requestMetadata)
             MetadataLoader.getMetadata(url, "MetadataLoader.setMetadata", reloadMD);
     }
-}
+}*/
 
 TwitterRenderer.renderInitial = function (container, url, isRoot, expandedItem, bgColorObj) {
     var miceStyles = InterfaceStyle.getMiceStyleDictionary("twitter");
@@ -412,7 +509,12 @@ TwitterRenderer.downloadAndDisplayDocument = function(event)
 		table.appendChild(RendererBase.createLoadingRow(styleInfo));
 		
 		var requestMD = MetadataLoader.toRequestMetadataFromService(location);
-		TwitterRenderer.addMetadataDisplay(table.parentElement, location, false, null, requestMD, false, button);
+		
+		var options = {
+			isRoot: false,
+			expandedItem: button
+		};
+		TwitterRenderer.addMetadataDisplay(table.parentElement, location, null, TwitterRenderer.render, options);
 		if (!requestMD)
 		{
 			if (!isExtension)
@@ -1795,4 +1897,3 @@ TwitterRenderer.getTweetSemanticsDiv = function (tweetId, styleInfo) {
 
     return twSemanticsDiv;
 }
->>>>>>> 415c1ca924c8269b1aa391dbd2fb8c2d31efa66c

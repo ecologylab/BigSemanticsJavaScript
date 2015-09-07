@@ -177,7 +177,10 @@ ViewModeler.getMetadataViewModel = function(parentField, mmdKids, metadata, dept
   }
   
   //Sort the fields by layer, higher layers first
-  metadataViewModel.sort(function(a,b) { return b.layer - a.layer - 0.5; });
+  if(!parentField.child_type){
+  	  metadataViewModel.sort(function(a,b) { return b.layer - a.layer - 0.5; });
+
+  }
 
   ViewModeler.collapseEmptyLabelSet(metadataViewModel, parentField);
   
@@ -260,6 +263,9 @@ ViewModeler.getCompositeMetadataViewModel = function(metadataViewModel,
 {
   mmdField = mmdField.composite;
       
+  if(mmdField.name == 'keywords'){
+	  console.log('gagnam style')
+  }
   // Is this a visible field?
   if (ViewModeler.isFieldVisible(mmdField, metadata, taskUrl, parentField))
   {        
@@ -282,6 +288,8 @@ ViewModeler.getCompositeMetadataViewModel = function(metadataViewModel,
           field.value =
             ViewModeler.getMetadataViewModel(mmdField, mmdField["kids"], value[i],
                                                 depth + 1, null, taskUrl);
+          
+          
           if (mmdField.use_value_as_label != null)
           {
             field.value_as_label =
@@ -293,8 +301,11 @@ ViewModeler.getCompositeMetadataViewModel = function(metadataViewModel,
           field.composite_type = mmdField.type;
           field.parentMDType = metadata.meta_metadata_name;
           ViewModeler.checkAndSetShowExpanded(parentField, field);
-          
-          metadataViewModel.push(field);
+         //if no value, just ignore field
+          if(field.value != null && field.value.length >0){
+              metadataViewModel.push(field);
+
+          }
         }
       }
       else
@@ -325,8 +336,10 @@ ViewModeler.getCompositeMetadataViewModel = function(metadataViewModel,
         field.parentMDType = metadata.meta_metadata_name;
         ViewModeler.checkAndSetShowExpanded(parentField, field);
         
-        metadataViewModel.push(field);
-      }
+        if(field.value != null && field.value.length >0){
+            metadataViewModel.push(field);
+
+        }      }
     }
   }
   else
@@ -553,16 +566,30 @@ ViewModeler.isVisibleMediaField = function(mmdField, parentField)
 ViewModeler.getFieldValue = function(mmdField, metadata)
 {
   
-  if (mmdField.tag != null){
-	  if(metadata[mmdField.tag] != null){
-		  return metadata[mmdField.tag];
-	  }
-	  else{
-		  return metadata[mmdField.name];
-	  }
-  }
-  else{
-	  return metadata[mmdField.name];
+  if (mmdField.tag != null) {
+    if (metadata[mmdField.tag] != null) {
+      return metadata[mmdField.tag];
+    } else if (metadata[mmdField.name] != null) {
+      return metadata[mmdField.name];
+    } else {
+      var typeName = null;
+      if (mmdField.tag.toUpperCase() == mmdField.tag) {
+        if (mmdField.scope && mmdField.scope.resolved_generic_type_vars) {
+          for (var i in mmdField.scope.resolved_generic_type_vars) {
+            var gtv = mmdField.scope.resolved_generic_type_vars[i];
+            if (gtv && gtv.name == mmdField.tag) {
+              typeName = gtv.arg;
+              break;
+            }
+          }
+        }
+      }
+      if (typeName) {
+        return metadata[typeName];
+      }
+    }
+  } else {
+    return metadata[mmdField.name];
   }
 }
 

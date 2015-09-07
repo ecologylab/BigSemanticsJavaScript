@@ -14,7 +14,7 @@ minkApp.offScreenColumnsRight = 0;
 minkApp.favorites = [];
 minkApp.currentExplorationSpace = null;
 
-var bsService = new BSAutoSwitch('eganfccpbldleckkpfomlgcbadhmjnlf');
+var bsService = new BSAutoSwitch(['eganfccpbldleckkpfomlgcbadhmjnlf', 'gdgmmfgjalcpnakohgcfflgccamjoipd']);
 
 
 

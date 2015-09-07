@@ -2,10 +2,9 @@
 
 // for use in Node:
 if (typeof require == 'function') {
+  Readyable = require('./Readyable');
   ParsedURL = require('./ParsedURL');
   simpl = require('./simpl/simplBase');
-  Downloader = require('./Downloader');
-  Readyable = require('./Readyable');
 }
 
 var RepoMan = (function() {
@@ -51,16 +50,21 @@ var RepoMan = (function() {
       });
     } else if (source.url) {
       var that = this;
-      var downloader = new Downloader();
+      var downloader = null;
+      if (options && options.downloader) {
+        downloader = options.downloader;
+      } else {
+        downloader = new Downloader();
+      }
       var dOpts = { responseType: 'json' };
       downloader.httpGet(source.url, dOpts, function(err, response) {
         if (err) { that.setError(err); return; }
 
         if (response.entity) {
           that.repo = simpl.graphExpand(response.entity);
-        } else if (response.entityText) {
+        } else if (response.text) {
           try {
-            that.repo = simpl.deserialize(response.entityText);
+            that.repo = simpl.deserialize(response.text);
           } catch (err) {
             that.setError(err);
             return;
@@ -162,6 +166,16 @@ var RepoMan = (function() {
         var name = altNames[i].name;
         var mmd = altNames[i].mmd;
         this.mmds[name] = mmd;
+      }
+    }
+
+    this.userAgents = {}
+    if (this.repo.user_agents) {
+      for (var i in this.repo.user_agents) {
+        var agent = this.repo.user_agents[i];
+        if (agent.name && agent.string) {
+          this.userAgents[agent.name] = agent.string;
+        }
       }
     }
 

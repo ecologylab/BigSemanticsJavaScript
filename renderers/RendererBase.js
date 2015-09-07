@@ -1,3 +1,4 @@
+
 /**
  *  Basic functions intended to be shared by metadata renderers
  *  RendererBase.addMetadataDisplay is the key function here
@@ -43,6 +44,9 @@ RendererBase.addMetadataDisplay = function(container, url, clipping, renderer, o
     if (clipping.metadata != null && clipping.mmd != null) {
       var task = new RenderingTask(url, true, null, null, container, null, renderer, clipping.mmd, clipping.metadata)
       task.handler(task);
+      if(options.callback){
+        options.callback({mmd: clipping.mmd, metadata: clipping.metadata});
+      }
       return;
     }
   }
@@ -55,10 +59,13 @@ RendererBase.addMetadataDisplay = function(container, url, clipping, renderer, o
       clipping.rawMetadata = simpl.deserialize(clipping.rawMetadata);
       clipping.rawMetadata.deserialized = true;
       clipping.metadata = BSUtils.unwrap(clipping.rawMetadata);
+      
     }
   }
 
   if (clipping != null && clipping.metadata) {
+  clipping.metadata = BSUtils.unwrap(clipping.metadata);
+
     bsService.onReady(function() {
       bsService.loadMmd(clipping.metadata.mm_name, options, function(err, mmd){
         if (err) { console.error(err); return; }
@@ -75,7 +82,16 @@ RendererBase.addMetadataDisplay = function(container, url, clipping, renderer, o
     bsService.onReady(function(){
       bsService.loadMetadata(url, options, function(err, md_and_mmd){
         if (err) { console.error(err); return; }
-        console.log("loadMetadata result from bsService: ", md_and_mmd);
+        
+        if(bsService.constructor.name == "BSAutoSwitch"){
+        	  console.log("loadMetadata result from " + bsService.bsImpl.constructor.name + ": ", md_and_mmd);
+
+        }else{
+      	  console.log("loadMetadata result from " + bsService.constructor.name + ": ", md_and_mmd);
+
+        }
+        	
+        
         task.mmd = md_and_mmd.mmd;
         task.mmd = simpl.graphExpand(task.mmd);
         task.metadata = md_and_mmd.metadata;
