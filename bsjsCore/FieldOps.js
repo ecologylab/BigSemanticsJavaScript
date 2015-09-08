@@ -33,7 +33,7 @@ var FieldOps = {};
 FieldOps.operate = function(str, fieldOp){
   try {
     if (fieldOp.append)
-      str = FieldOps.append(str, fieldOp.value);
+      str = FieldOps.append(str, fieldOp.append.value);
     else if (fieldOp.decode_url)
       str = FieldOps.decodeUrl(str);
     else if (fieldOp.get_param)
@@ -43,7 +43,7 @@ FieldOps.operate = function(str, fieldOp){
     else if (fieldOp.override_params)
       str = FieldOps.overrideParams(str);
     else if (fieldOp.prepend)
-      str = FieldOps.prepend(str, fieldOp.value);
+      str = FieldOps.prepend(str, fieldOp.prepend.value);
     else if (fieldOp.replace)
       str = FieldOps.replace(str, fieldOp.replace);
     else if (fieldOp.set_param)
@@ -79,7 +79,7 @@ FieldOps.getParam = function(url, name, otherwise) {
     var purl = new ParsedURL(url);
     if (purl.query && name in purl.query) {
       return purl.query[name];
-    } else {
+    } else if (otherwise !== undefined && otherwise !== null) {
       return otherwise;
     }
   }
@@ -99,7 +99,7 @@ FieldOps.match = function(str, opts) {
         return opts.on_find;
       } else {
         if (typeof opts.group != 'undefined' && opts.group != null) {
-          return result[Number(group)];
+          return result[Number(opts.group)];
         } else {
           return result[0];
         }

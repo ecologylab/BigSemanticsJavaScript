@@ -47,6 +47,33 @@ BSUtils.unwrap = function(target) {
   return target;
 }
 
+// Unwrap a meta-metadata object. Returns the input object if it does not look
+// like a meta-metadata object.
+BSUtils.unwrapMmd = function(wrapped) {
+  if (typeof wrapped === 'object' && wrapped != null) {
+    var keys = Object.keys(wrapped);
+    if (keys.length == 1 && keys[0] === 'meta_metadata') {
+      return wrapped['meta_metadata'];
+    }
+  }
+  return wrapped;
+}
+
+// Wrap a metadata object.
+//
+// If input is not a metadata object, just return it.
+BSUtils.wrap = function(metadata) {
+  if (typeof metadata === 'object' && metadata != null) {
+    var typeName = metadata.mm_name || metadata.meta_metadata_name;
+    if (typeof typeName === 'string') {
+      var result = new Object();
+      result[typeName] = metadata;
+      return result;
+    }
+  }
+  return metadata;
+}
+
 BSUtils.getType = function(metadata) {
   if (typeof metadata == 'object' && metadata != null) {
     if ('meta_metadata_name' in metadata) {

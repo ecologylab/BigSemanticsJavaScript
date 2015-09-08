@@ -147,6 +147,8 @@ ViewModeler.getMetadataField = function(mmdField, metadataFields)
 ViewModeler.getMetadataViewModel = function(parentField, mmdKids, metadata, depth,
                                                child_value_as_label, taskUrl)
 {
+  metadata = BSUtils.unwrap(metadata);
+
   var metadataViewModel = [];
   
   // Stop recursing at the max depth

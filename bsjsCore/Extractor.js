@@ -23,6 +23,8 @@ function extractMetadata(response, mmd, bigSemantics, options, callback) {
 }
 
 function extractMetadataSync(response, mmd, bigSemantics, options) {
+  mmd = BSUtils.unwrapMmd(mmd);
+
 	/*
 	 * Helper functions in need of closure
 	 * 
@@ -363,7 +365,7 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 			{
 				string = page.URL + string;
 			}
-			else if (string.length > 1 && string.indexOf("http") == -1){
+			else if (string.length > 1 && string.indexOf("http") == -1 && !field.absolute_url){
 				string = string.trim();
 				string = page.URL.substring(0, page.URL.lastIndexOf('/')+1) + string; 
 			}
@@ -724,9 +726,9 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 		extractedMeta[mmd.name].mm_name = mmd.name;
 	}
 
-  extractedMeta = BSUtils.unwrap(extractedMeta);
-  extractedMeta.location = response.location;
-  extractedMeta.additionalLocations = response.otherLocations;
+  unwrapped = BSUtils.unwrap(extractedMeta);
+  unwrapped.location = response.location;
+  unwrapped.additionalLocations = response.otherLocations;
   return extractedMeta;
 }
 

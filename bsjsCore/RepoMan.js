@@ -210,7 +210,7 @@ var RepoMan = (function() {
   // callback: (err, mmd) => void
   RepoMan.prototype.loadMmd = function(name, options, callback) {
     if (this.mmds && name in this.mmds) {
-      callback(null, this.mmds[name]);
+      callback(null, { meta_metadata: this.mmds[name] });
     } else {
       callback(new Error("Cannot find target mmd"), null);
     }
@@ -377,7 +377,7 @@ var RepoMan = (function() {
 
     if (results.length == 0) {
       console.log("Use default document type for " + location);
-      callback(null, this.mmds[this.defaultDocumentType]);
+      callback(null, { meta_metadata: this.mmds[this.defaultDocumentType] });
     } else if (results.length == 1) {
       this.loadMmd(results[0].targetType, options, callback);
     } else {
