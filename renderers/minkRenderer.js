@@ -337,7 +337,8 @@ Mink.makeTitle = function(metadataFields, url, styleInfo){
 
 Mink.childLabelTitles = function(metadataField){
 	var text = "";
-
+	if(!metadataField)
+		return "";
 	if(metadataField.child_type != null){
 		for (var i = 0; i < metadataField.value.length; i++){
 			var childField = metadataField.value[i];
