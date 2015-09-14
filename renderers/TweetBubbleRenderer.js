@@ -99,7 +99,7 @@ TwitterRenderer.render = function (task) {
         MICE.clearLoadingRows(task.container, styleInfo);
 
     // Remove the RenderingTask from the queue
-    MetadataLoader.queue.splice(MetadataLoader.queue.indexOf(task), 1);
+    //MetadataLoader.queue.splice(MetadataLoader.queue.indexOf(task), 1);
     processPage();
 }
 
