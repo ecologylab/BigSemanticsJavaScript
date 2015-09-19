@@ -1,5 +1,9 @@
 // Downloader (via XHR).
 
+var JS_REDIRECT_OK = 0;
+var JS_REDIRECT_LOOP = -1;
+var JS_REDIRECT_ERR = -2;
+
 // for use with Node:
 if (typeof require == 'function') {
   XMLHttpRequest = require('xmlhttprequest').XMLHttpRequest;
@@ -64,8 +68,8 @@ var Downloader = (function() {
   // utility function
   // do JS redirection, if not resulting in infinite loop
   // returns: true iff JS redirection detected and is happening.
-  Downloader.prototype.isJsContentRedirect = function(xhr, response, options, callback) {
-    if (typeof Document == 'undefined') { return false; } // not in browser
+  Downloader.prototype.checkJsContentRedirect = function(xhr, response, options, callback) {
+    if (typeof Document == 'undefined') { return JS_REDIRECT_ERR; } // not in browser
 
     if (xhr.response && xhr.response instanceof Document) {
       var heads = xhr.response.getElementsByTagName('head');
@@ -81,14 +85,17 @@ var Downloader = (function() {
                 console.log("JavaScript redirect to: " + url);
                 options.response = response;
                 this.httpGet(url, options, callback);
-                return true;
+                return JS_REDIRECT_OK;
+              }
+              else {
+            	return JS_REDIRECT_LOOP; 
               }
             }
           }
         }
       }
     }
-    return false;
+    return JS_REDIRECT_ERR;
   }
 
   Downloader.prototype.httpGet = function(location, options, callback) {
@@ -163,7 +170,11 @@ var Downloader = (function() {
           case xhr.DONE:
             if (xhr.status == 200) {
               Downloader.addNewLocation(response, xhr.responseURL);
-              if (!that.isJsContentRedirect(xhr, response, options, callback)) {
+              var retVal = that.checkJsContentRedirect(xhr, response, options, callback);
+              if (retVal == JS_REDIRECT_LOOP) {
+              	callback(new Error("Redirection loop using JS detected"), null);
+              }
+              else if (retVal != JS_REDIRECT_OK) {
                 var err = null;
                 try {
                   if (xhr.response) {
@@ -186,7 +197,7 @@ var Downloader = (function() {
                 }
                 callback(null, response);
               } else {
-                callback(new Error("Redirection loop using JS detected"), null);
+            	  //retVal: JS_REDIRECT_OK
               }
             } else {
               var err = new Error("Error in response");
