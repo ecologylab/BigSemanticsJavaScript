@@ -536,7 +536,7 @@ ViewModeler.isFieldVisible = function(mmdField, metadata, url, parentField)
   if (mmdField["styles"])
   {
     var style = mmdField["styles"][0];
-    var location = metadata.location; 
+    var location = metadata[mmdField["name"]].location; 
     if (style.is_child_metadata == "true" && style.hide == "true" 
         && url && location && location.toLowerCase() == url)
     {

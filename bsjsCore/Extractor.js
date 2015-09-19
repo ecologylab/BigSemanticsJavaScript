@@ -367,7 +367,8 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 			}
 			else if (string.length > 1 && string.indexOf("http") == -1 && !field.absolute_url){
 				string = string.trim();
-				string = page.URL.substring(0, page.URL.lastIndexOf('/')+1) + string; 
+				var beginIndex = page.URL.indexOf("://") + 3;
+				string = page.URL.substring(0, page.URL.indexOf('/', beginIndex)+1) + string; 
 			}
 		}
 		if (string.length > 1) getScalarStringCalledGotData++;

@@ -77,7 +77,7 @@ var Downloader = (function() {
             var match = script.innerText.match(/location.replace\(\"(.*)\"\)/i);
             if (match && match[1]) {
               var url = match[1].replace(/\\/g, '');
-              if (Downloader.addNewLocations(response, url)) {
+              if (Downloader.addNewLocation(response, url)) {
                 console.log("JavaScript redirect to: " + url);
                 options.response = response;
                 this.httpGet(url, options, callback);
