@@ -265,9 +265,10 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 				else if (x !== null && x !== "") {
 					newContextNode = x;
 	                break;
-				}else if(x == null){
-					return null;
 				}
+			}
+			if(x == null){
+				return null;
 			}
 
 			if (newContextNode !== null && recurse && recurseNeeded) {

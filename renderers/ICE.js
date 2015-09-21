@@ -21,7 +21,7 @@ var userid = null;
 var currentUrl = null;
 var instance = null;
 
-var bsService = new BSExtension(["gbkopldnfjodomdhihdhmbfbgapiipdb"]);
+var bsService = new BSExtension(["hibcjiciicbghknhlepnfeghnjnbgicm"]);
 
 //call to get and replace divs, queue w on-demand prioritizing
 function processPage()
