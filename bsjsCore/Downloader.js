@@ -209,7 +209,10 @@ var Downloader = (function() {
       };
 
       xhr.open('GET', location, true);
-      xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+      if (location.indexOf("https://twitter.com") != 0 &&
+    		  location.indexOf("http://twitter.com") != 0) { //temp. fix for twitter requests
+    	  xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+      }
       xhr.send();
     }
 
