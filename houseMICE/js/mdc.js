@@ -112,45 +112,19 @@ function getJSONData (targeturl)
   });
   
 }
-function mdRecieved(){
-	/*var myTask = new RenderingTask();
-	myTask.isRoot = true;
-	myTask.prototype = RenderingTask;
-	myTask.mmd = event.data.mmd;
-	myTask.metadata =  event.data.md[event.data.mmd.name];
-	myTask.url = myTask.metadata.location;
-	myTask.renderer = MICE.render;
-	myTask.container = document.getElementById('mdcIce');
-	RenderingTask.prototype.metadataToModel(myTask);*/
-	
-	var clipping = ViewModeler.createMetadata(true, event.data.mmd,
-			event.data.md[event.data.mmd.name], event.data.md[event.data.mmd.name].location);
-	clipping.rawMetadata = event.data.md;
-	
-	RendererBase.addMetadataDisplay(document.getElementById('mdcIce'), event.data.md[event.data.mmd.name].location, false, clipping, false, false, MICE.render);
-	
-	
-	
-	
-	
-	
-	
-	console.log('bananannanana');
+
+function updateJSONVars(md_and_metadata){
+
+	  MDC_rawMMD = simpl.graphCollapse(md_and_metadata.mmd);
+	  MDC_rawMetadata = simpl.graphCollapse(md_and_metadata.metadata);
+	  updateJSON(true);
 }
+
 function showMetadata()
 {
   var url = document.getElementById("targetURL").value;
   var content = document.getElementById("mdcIce");
-  if (document.URL.indexOf("http://localhost:") > -1){
-	  var hostname = window.location.hostname;
-	  var port = window.location.port;
-	  SEMANTIC_SERVICE_URL = "http://" + hostname + ":" + port + "/BigSemanticsService/";
-
-  }
-  else{
-	   SEMANTIC_SERVICE_URL = "http://ecology-service.cse.tamu.edu/BigSemanticsService/";
-
-  }
+ 
   if(window.history.pushState)
   {
    
@@ -160,38 +134,20 @@ function showMetadata()
     
   }
   
-  MetadataLoader.clearDocumentCollection();
   var refreshCheckbox = document.getElementById('force_reload').checked;
-  
-  var request_md = MetadataLoader.toRequestMetadataFromService(url);
+ //Should no longer be neccesary 
   //Clear out any html in the container
   while(document.getElementById('mdcIce').childNodes.length > 0){
 	  document.getElementById('mdcIce').removeChild(document.getElementById('mdcIce').childNodes[0]);
   }
+  var options = {};
+  options.callback = updateJSONVars;
+  options.reloadMD = reload_md
   
-  if (!request_md)
-  {
-	  //document.dispatchEvent(new Event("tweetbubbleExternal"));
-	  var message = {
-			  type : "GET_MD",
-			  sender : "PAGE",
-				  url : url,
-			  callback: 'mdRecieved'
-	  };
-	  ExtensionInterface.dispatchMessage(message);
-	  console.log("requested extension for metadata: " + url);
-	  /*
-	  window.setTimeout(function()
-	  {
-		  checkForMissingMetadata();
-		  
-		  
-		  
-	  }, 5000);*/
-  }else{
-	  RendererBase.addMetadataDisplay(content, url, false, null, request_md, reload_md, MICE.render);
 
-  }
+   RendererBase.addMetadataDisplay(content, url, null, MICE.render, options);
+
+  
 
  //getJSONData(url);
 }
@@ -206,8 +162,8 @@ function checkForMissingMetadata()
 	// if the tab doesnt have metadata
 	if(content.getElementsByClassName("metadataContainer").length == 0 && content.getElementsByClassName("twMetadataContainer").length == 0)
 	{
-		if (MetadataLoader.isExtensionMetadataDomain(url))
-			MetadataLoader.getMetadata(url, "MetadataLoader.setMetadata", reload_md);
+		/*if (MetadataLoader.isExtensionMetadataDomain(url))
+			MetadataLoader.getMetadata(url, "MetadataLoader.setMetadata", reload_md);*/
 	}	
 }
 
@@ -218,8 +174,24 @@ function onEnterShowMetadata(event)
 }
 
 //Decide whether to show default or if there's a parameter passed in
+var bsService;
 function onBodyLoad() {
-  $(".collapse").collapse();
+	
+   if (document.URL.indexOf("http://localhost:") > -1){
+	  var hostname = window.location.hostname;
+	  var port = window.location.port;
+	  bsService = new BSAutoSwitch(['elkanacmmmdgbnhdjopfdeafchmhecbf'],  {
+			  host: hostname,
+			  port: port,
+			}); 
+
+  }
+  else{
+	  bsService = new BSAutoSwitch(['elkanacmmmdgbnhdjopfdeafchmhecbf']);
+  }
+ 
+
+   $(".collapse").collapse();
 
   //Register button call backs
   $('#mmdJsonButton').on('click', function (e) {

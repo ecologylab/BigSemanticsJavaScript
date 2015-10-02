@@ -28,7 +28,7 @@ MICE.initialize = function(){
 		var location = miceRenderings[i].getElementsByTagName('a')[0];
 		if(location)
 			
-			MetadataLoader.render(MICE.render, miceRenderings[i], location.href, true);
+			RendererBase.addMetadataDisplay(miceRenderings[i], location.href, null, MICE.render);
 	}
 }
 
@@ -42,7 +42,7 @@ MICE.render = function(task){
 	task.visual.setAttribute('mdType', metadataFields[0].parentMDType);
 
 	// Build the HTML table for the metadata
-	MetadataLoader.currentDocumentLocation = task.url;
+	// MetadataLoader.currentDocumentLocation = task.url;
 	
 	var metadataTable = MICE.buildMetadataTable(null, false, task.isRoot, metadataFields, FIRST_LEVEL_FIELDS, styleInfo);
 	if(metadataTable)
@@ -73,9 +73,6 @@ MICE.render = function(task){
 	// If there isn't a metadata table to display then keep the old visual and remove the loading indicator
 	else
 		MICE.clearLoadingRows(task.container, styleInfo);
-	
-	// Remove the RenderingTask from the queue
-	MetadataLoader.queue.splice(MetadataLoader.queue.indexOf(task), 1);
 }
 
 
@@ -736,7 +733,7 @@ MICE.expandCollapseTable = function(event)
 		if (table)
 		{	
 			MICE.expandTable(table, styleInfo);
-			
+			/*
 			if(MetadataLoader.logger)
 			{			
 				var eventObj = {};
@@ -769,7 +766,7 @@ MICE.expandCollapseTable = function(event)
 					};
 				}
 				MetadataLoader.logger(eventObj);
-			}
+			}*/
 		}
 	}
 	else if(expandSymbol.style.display == "none")
@@ -784,7 +781,7 @@ MICE.expandCollapseTable = function(event)
 		if(table)
 		{
 			MICE.collapseTable(table, styleInfo);
-			
+			/*
 			if(MetadataLoader.logger)
 			{
 				var eventObj = {};
@@ -818,7 +815,7 @@ MICE.expandCollapseTable = function(event)
 					};
 				}
 				MetadataLoader.logger(eventObj);
-			}	
+			}*/	
 		}
 	}	
 }
@@ -990,28 +987,11 @@ MICE.downloadAndDisplayDocument = function(event)
 		// Add a loadingRow for visual feedback that the metadata is being downloaded / parsed
 		table.appendChild(RendererBase.createLoadingRow(styleInfo));
 
-		var requestMD = MetadataLoader.toRequestMetadataFromService(location);
+	//	var requestMD = MetadataLoader.toRequestMetadataFromService(location);
 	    //MetadataLoader.render(MICE.render, table.parentElement, location, false)	;
 		//MICE.addMetadataDisplay(table.parentElement, location, false);
-		RendererBase.addMetadataDisplay(table.parentElement, location, false, null, requestMD, false, MICE.render);
-		if (!requestMD)
-		{
-			//document.dispatchEvent(new Event("tweetbubbleExternal"));
-			var message = {
-				type : "extractionRequest",
-				sender : table.parentElement,
-				detail : {
-					url : location
-				}
-			};
-			ExtensionInterface.dispatchMessage(message);
-			console.log("requested extension for metadata: " + location);
-			
-			window.setTimeout(function()
-			{
-				MetadataLoader.checkForMetadataFromExtension();
-			}, 3000);
-		}
+		RendererBase.addMetadataDisplay(table.parentElement, location, null, MICE.render);
+		
 	}
 	// If there was no document location then the table must be a non-document composite in which case just expand
 	else

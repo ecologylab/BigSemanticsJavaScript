@@ -1,0 +1,45 @@
+#content {
+	font-family: Monaco, monospace;
+	padding: 8px;
+}
+
+.typeScopeLabel {
+	font-size: 14px;
+	color: gray;
+	padding: 8px;
+}
+
+#content table{
+	width: 100%;
+	height: 100%;
+	padding-bottom: 36px;
+}
+
+.testCol{
+	padding: 4px;
+}
+
+.arrowCol{
+	width: 40px;
+}
+
+.testCol span{
+	padding-right: 8px;
+	
+}
+
+.testCol .varname{
+	color: gray;
+	font-size: 12px;
+}
+
+.testCol div{
+	width: 100%;
+	height: 100%;
+	bottom: 0px;
+	outline: 1px solid #ccc;
+	margin-top: 8px;
+	
+	overflow-y: scroll;
+	overflow-x: hidden;
+}
