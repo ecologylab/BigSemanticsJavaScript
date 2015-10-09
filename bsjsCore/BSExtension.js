@@ -20,7 +20,8 @@ var BSExtension = (function() {
     if (!this.extractor && typeof extractMetadata == 'function') {
       this.extractor = extractMetadata;
     }
-
+	//TODO instanstiate a BSService instance
+	  
     var that = this;
     var extensionsLeftToCheck = this.extIds.length;
     function testExt(index) {
@@ -129,6 +130,9 @@ var BSExtension = (function() {
 
         var response = { location: location, entity: options.page };
         console.log("Extracting in content script: " + location);
+		
+		//TODO if extract_with field == 'service' is true then use the BSService instance instead
+		  
         that.extractor(response, mmd, that, options, function(err, metadata) {
           if (err) { callback(err, null); return; }
           callback(null, { metadata: metadata, mmd: mmd });
