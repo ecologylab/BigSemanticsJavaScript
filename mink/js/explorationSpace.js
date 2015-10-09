@@ -15,14 +15,14 @@ function ValidUrl(str) {
 
 //exploration spaces should store some state info, ie.  which piles are in which ordered column and what the leftmost dispalyed column is
 function ExplorationSpace(queryOrUrl, engines){
+	
+	
+	this.queries = [];
 	this.query = queryOrUrl;
 	if(ValidUrl(queryOrUrl)){
 		this.urlAsRoot = true;
 	}
 	this.engines = engines;
 	this.trails = [];
-	this.pileMap = new Map();
-	this.leftMostCol = 1;
-	this.columns = [];
 	
 }

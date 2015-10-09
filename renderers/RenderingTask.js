@@ -56,7 +56,7 @@ function RenderingTask(url, isRoot, clipping, handler, container, extractor, ren
 
 	}
 }
-RenderingTask.prototype.metadataToModel = function(task){
+RenderingTask.prototype.metadataToModel = function(task, options){
 
     var metadataFields =
     	ViewModeler.createMetadata(task.isRoot, task.mmd,
@@ -72,7 +72,8 @@ RenderingTask.prototype.metadataToModel = function(task){
      //Adds the metadata type as an attribute to the first field in the MD
       metadataFields[0].parentMDType = task.mmd.name;
       task.fields = metadataFields;
-      task.style = {styles: miceStyles, type: task.mmd.name};
+      task.style = {styles: miceStyles};
+      task.options = options;
       RenderingTask.prototype.idealRenderer(task);
       return task;
     }

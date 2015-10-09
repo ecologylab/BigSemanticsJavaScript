@@ -1,6 +1,6 @@
 var minkApp ={};
 
-minkApp.explorationSpaces = [];
+minkApp.explorationSpace = new ExplorationSpace();
 
 minkApp.metadata_collection = {};
 minkApp.counter = 0;
@@ -12,9 +12,82 @@ minkApp.columnKeyGen = 0;
 minkApp.offScreenColumnsLeft = 0;
 minkApp.offScreenColumnsRight = 0;
 minkApp.favorites = [];
-minkApp.currentExplorationSpace = null;
-
+minkApp.currentQuery = null;
+minkApp.queryMap = new Map();
 var bsService = new BSAutoSwitch(['eganfccpbldleckkpfomlgcbadhmjnlf', 'gdgmmfgjalcpnakohgcfflgccamjoipd']);
+
+
+
+//remove from Space
+
+minkApp.signalFavorite = function(event){
+	var card = $(event.srcElement).closest('.minkCardContainer')[0];
+	var exExp = $(card).find('.minkExplorablesExpander')[0];
+	var minkTitleClickable = $(card).find('.minkTitleClickable')[0];
+
+	var url = exExp.getAttribute('url');
+	var favicon = $(minkTitleClickable).children('.minkFavicon')[0].src;
+	var mdname = $(minkTitleClickable).children('.minkTitleField')[0].childNodes[0].innerHTML;
+	var detailDetails = {type: 'minkfavorite', url: url, favicon: favicon, mdname: mdname};
+	var eventDetail = {detail: detailDetails, bubbles: true};
+	var myEvent = new CustomEvent("minkevent", eventDetail);
+	event.target.dispatchEvent(myEvent);
+}
+minkApp.removeButtonHandler = function(event){
+	var minkCardHTML = $(event.srcElement).closest('.minkCardContainer')[0];
+	var pileId = minkCardHTML.parentNode.getAttribute('pileid');
+	var pile = minkApp.currentQuery.pileMap.get(pileId);
+	minkApp.removeCard(pile, minkCardHTML);
+}
+minkApp.removeCard = function(pile, card){
+	var index = $(card).index();
+	pile.cards[index].vis = false;
+	$(card).css('display', 'none');
+}
+minkApp.foo = function(){
+	alert('bleh bleh bleh')
+}
+minkApp.buildCardControls = function(parent){
+	var controlCont = buildDiv('minkCardControls');
+	var r = buildDiv('minkCardControl')
+
+	var remove = document.createElement('img');
+	remove.className = 'minkCardControlIcon';
+	remove.src = './img/x.svg';
+	r.addEventListener('click', minkApp.removeButtonHandler)
+	r.appendChild(remove);
+
+	var olc = buildDiv('minkCardControl')
+	var openLink = document.createElement('img');
+	openLink.className = 'minkCardControlIcon';
+	openLink.src = './img/share-boxed.svg';
+	olc.addEventListener('click', minkApp.foo)
+	olc.appendChild(openLink);
+	var f = buildDiv('minkCardControl')
+
+	var favorite = document.createElement('img');
+	favorite.className = 'minkCardControlIcon';
+	favorite.src = './img/star.svg';
+	f.addEventListener('click', minkApp.signalFavorite)
+	f.appendChild(favorite);
+
+	
+	controlCont.appendChild(f);
+	controlCont.appendChild(olc);
+	controlCont.appendChild(r);
+	parent.appendChild(controlCont)
+}
+
+minkApp.showCardControls = function(event){
+	$(event.srcElement).children('.minkCardControls')[0].style.opacity = "1";
+	$(event.srcElement).children('.minkCardControls')[0].style.pointerEvents = "auto";
+
+}
+minkApp.hideCardControls = function(event){
+	$(event.srcElement).children('.minkCardControls')[0].style.opacity = "0";
+	$(event.srcElement).children('.minkCardControls')[0].style.pointerEvents = "none";
+
+}
 
 
 
@@ -49,10 +122,23 @@ function pileIDGen(url, collection){
 
 }
 
-function Query(queryString, url){
-	this.query = queryString;
-	this.url = url;
-	this.columns = [];
+
+minkApp.restoreQueryFromHistory = function(event){
+	var cont = event.srcElement.parentNode;
+	var queryId = cont.getAttribute('id');
+	if (queryId == minkApp.currentQuery.uuid){
+		return
+	}else{
+		try{
+			var q = minkApp.queryMap.get(queryId);
+			minkApp.hidePreviousQuery();
+			minkApp.currentQuery = q;
+			minkApp.rebuildCurrentQuery();
+		}catch(e){
+			console.log('error: ' + e);
+		}
+		
+	}
 }
 minkApp.newColumnId = function(){
 	minkApp.columnKey++;
@@ -63,7 +149,7 @@ minkApp.initialize = function(minkAppHTML){
 	//In case there's a responsive future to be had
 	minkApp.baseCol = minkAppHTML.childNodes[0];
 	var columns = $(minkAppHTML).find(".minkColumn");
-	//minkApp.currentExplorationSpace.columns = columns;
+	//minkApp.currentQuery.columns = columns;
 	minkApp.leftMostCol = columns[0];
 	minkApp.rightMostCol = columns[0];
 	columns[0].setAttribute('column', '1');
@@ -76,70 +162,229 @@ minkApp.initialize = function(minkAppHTML){
 	
 }
 
-minkApp.hidePreviousExplorationSpace = function(){
+
+minkApp.addQueryToHistory = function(){
+	//build HTML representation for new query
+	//if representation of current query already has a qLevel, dont build one, else add
+	//add representation to appropriate qLvl
+}
+minkApp.hidePreviousQuery = function(){
 	$("#minkColumns").empty();
 	minkApp.leftMostCol =null;
 	minkApp.rightMostCol = null;
+	$('#contextTitle')[0].innerHTML = "";
+	
+	//remove add query button visbility by default
+	$('.minkNewQueryButton').removeClass('visible');
+	
 	
 }
 //will come back to, may be complicated
-minkApp.rebuildCurrentExplorationSpace = function(){
+minkApp.rebuildCurrentQuery = function(){
 	//
-	minkApp.hidePreviousExplorationSpace();
+	minkApp.hidePreviousQuery();
 	//
-	var columns = minkApp.currentExplorationSpace.columns;
+	$('#contextTitle')[0].innerHTML =  minkApp.currentQuery.contextTitle;
+
+	var columns = minkApp.currentQuery.columns;
 	var cont = $('#minkColumns')[0];
 	for(var i = 0; i < columns.length; i++){
 		cont.appendChild(columns[i]);
 	}
+	$(('#' + minkApp.currentQuery.uuid)).children('.minkNewQueryButton').addClass('visible');
+}
+minkApp.queryHighlight = function(event){
+	var qLevel = $(event.srcElement).closest('.qLevel')[0];
+	if(qLevel){
+		$(qLevel).addClass('minkQHighlight');
+	}else{
+		$(event.srcElement).addClass('minkQHighlight-color');
+	}
+}
+minkApp.queryUnhighlight = function(event){
+	var qLevel = $(event.srcElement).closest('.qLevel')[0];
+	if(qLevel){
+		$(qLevel).removeClass('minkQHighlight');
+	}else{
+		$(event.srcElement).removeClass('minkQHighlight-color');
+	}
+
 }
 
+
+
+minkApp.nsearchKeypress = function(event){
+	 if(event && event.keyCode == 13){
+		 var newQueryString = event.srcElement.value;
+		 var pid = event.srcElement.getAttribute('pid');
+		 var nQuery = new Query(newQueryString, ['google_scholar'], pid);
+		
+
+		var column;
+		if(!minkApp.currentQuery){
+			column = minkApp.leftMostCol;
+		}else{
+			minkApp.hidePreviousQuery();
+
+			column = minkApp.buildColumn($('#minkColumns')[0]);
+			column.setAttribute('column', '1');
+			$('#minkColumns')[0].appendChild(column);
+		}
+		$('#contextTitle')[0].innerHTML = nQuery.contextTitle;
+		var pile = minkApp.buildPile(column, nQuery.urls, nQuery.urls[0], null, null, true);
+		nQuery.pileMap.put(pileIDGen(nQuery.urls[0], null), pile);
+		nQuery.columns.push(column);
+
+		minkApp.currentQuery = nQuery;
+		minkApp.explorationSpace.queries.push(nQuery);
+		$(('#' + minkApp.currentQuery.uuid)).children('.minkNewQueryButton').addClass('visible');
+		 
+		 
+		 
+		 
+		 
+		 
+	    $(event.srcElement.parentNode).remove();
+
+	 }
+
+}
+minkApp.newQueryBox = function(event){
+	
+	//remove other search boxes
+	$('minkNSearch').remove();
+	//create new qlevel if needed
+	var parentId = event.srcElement.parentNode.getAttribute('id');
+	var parentNode = event.srcElement.parentNode;
+	var parentQuery = minkApp.queryMap.get(parentId);
+	var pqq = parentQuery.query;
+	var level;
+	if ($(parentNode).next().hasClass('qLevel')){
+		level = $(parentNode).next()[0]
+	}else{
+		level = buildDiv('qLevel');
+		$(level).insertAfter(parentNode);
+		
+	}
+	//create search box
+	var nsearch = document.createElement('input');
+	nsearch.setAttribute('type', "text");
+	nsearch.value = pqq;
+	nsearch.setAttribute("autofocus", "");
+	nsearch.className = "minkNSearch";
+	nsearch.setAttribute('pid', parentId)
+	nsearch.addEventListener('keypress', minkApp.nsearchKeypress);
+	var holder = buildDiv('minkNSearchContainer');
+	var x = document.createElement('img');
+	x.className = 'minkNSearchX';
+	x.src = './img/x.svg';
+	holder.appendChild(nsearch);
+	holder.appendChild(x);
+	level.appendChild(holder);
+	//set event listeners	
+		
+}
 minkApp.exploreURL = function(url){
 	//checki
-	if(minkApp.currentExplorationSpace){
-		if(url === minkApp.currentExplorationSpace.query){
+	if(minkApp.currentQuery){
+		if(url === minkApp.currentQuery.query){
 			return;
 		}
 	}
 
 	
 
-	for (var i = 0; i < minkApp.explorationSpaces.length; i++){
-		if(url === minkApp.explorationSpaces[i].query){
-			minkApp.hidePreviousExplorationSpace();
-			minkApp.currentExplorationSpace = minkApp.explorationSpaces[i];
-			minkApp.rebuildCurrentExplorationSpace();
+	for (var i = 0; i < minkApp.explorationSpace.queries.length; i++){
+		if(url === minkApp.explorationSpace.queries[i].query){
+			minkApp.hidePreviousQuery();
+			minkApp.explorationSpace.currentQuery = minkApp.explorationSpace.queries[i];
+			minkApp.rebuildCurrentQuery();
 			return;
 		}
 	}
 
-	var explorationSpace = new ExplorationSpace(url, null);
+	//var explorationSpace = new ExplorationSpace(url, null);
+	var nQuery = new Query(url);
 	var column;
-	if(!minkApp.currentExplorationSpace){
+	if(!minkApp.currentQuery){
 		column = minkApp.leftMostCol;
 	}else{
-		minkApp.hidePreviousExplorationSpace();
-
+		minkApp.hidePreviousQuery();
+		
 		column = minkApp.buildColumn($('#minkColumns')[0]);
+		column.setAttribute('column', '1');
 		$('#minkColumns')[0].appendChild(column);
 	}
 	var pile = minkApp.buildPile(column, [url], url, null, null);
+	$('#contextTitle')[0].innerHTML = nQuery.contextTitle;
 
-	explorationSpace.pileMap.put(pileIDGen(url, null), pile);
-	explorationSpace.columns.push(column);
-	minkApp.currentExplorationSpace = explorationSpace;
-	minkApp.explorationSpaces.push(explorationSpace);
+	nQuery.pileMap.put(pileIDGen(url, null), pile);
+	nQuery.columns.push(column);
+	minkApp.currentQuery = nQuery;
+	minkApp.explorationSpace.queries.push(nQuery);
 	
-	
+	$(('#' + minkApp.currentQuery.uuid)).children('.minkNewQueryButton').addClass('visible');
+
 
 }
 
-minkApp.showQuery = function(queryString){
-	//find/build html
-	//hide/delete html for other metadata
-	//show html for this query
-	//update history
+function toGoogleUrl(searchString){
+    
+    
+	var terms = searchString.split(" ");
+	var url = "https://www.google.com/search?q=";
+	for (var x in terms){
+		url += terms[x];
+		url += "+";
+	}
+    encodeURI(url);
+    console.log(url);
+    return url;
+}
+
+
+minkApp.exploreNewQuery = function(queryString){
+
+	if(minkApp.currentQuery){
+		if(queryString === minkApp.currentQuery.query){
+			return;
+		}
+	}
+
 	
+
+	for (var i = 0; i < minkApp.explorationSpace.queries.length; i++){
+		if(queryString === minkApp.explorationSpace.queries[i].query){
+			minkApp.hidePreviousQuery();
+			minkApp.currentQuery = minkApp.explorationSpace.queries[i];
+			minkApp.rebuildCurrentQuery();
+			return;
+		}
+	}
+	
+	
+	var nQuery = new Query(queryString, ['google_scholar']);
+	var column;
+	if(!minkApp.currentQuery){
+		column = minkApp.leftMostCol;
+	}else{
+		minkApp.hidePreviousQuery();
+
+		column = minkApp.buildColumn($('#minkColumns')[0]);
+		column.setAttribute('column', '1');
+		$('#minkColumns')[0].appendChild(column);
+	}
+	$('#contextTitle')[0].innerHTML = nQuery.contextTitle;
+	var pile = minkApp.buildPile(column, nQuery.urls, nQuery.urls[0], null, null, true);
+	nQuery.pileMap.put(pileIDGen(nQuery.urls[0], null), pile);
+	nQuery.columns.push(column);
+
+	minkApp.currentQuery = nQuery;
+	minkApp.explorationSpace.queries.push(nQuery);
+	$(('#' + minkApp.currentQuery.uuid)).children('.minkNewQueryButton').addClass('visible');
+
+	
+
 }
 
 
@@ -148,26 +393,26 @@ minkApp.moveForward = function(newColumn){
 	//
 
 	var already = false;
-	 for(var i = 0; i < minkApp.currentExplorationSpace.columns.length; i++){
-		  var colNo = parseInt(minkApp.currentExplorationSpace.columns[i].getAttribute('column'));
+	 for(var i = 0; i < minkApp.currentQuery.columns.length; i++){
+		  var colNo = parseInt(minkApp.currentQuery.columns[i].getAttribute('column'));
 		 
 		  if(colNo == 1){
-			  minkApp.currentExplorationSpace.columns[i].classList.add('minkDeletingColumn');
-			  minkApp.currentExplorationSpace.columns[i].addEventListener('animationend', minkApp.toggleDisplay)
-			  minkApp.currentExplorationSpace.columns[i].setAttribute('column', "0");
+			  minkApp.currentQuery.columns[i].classList.add('minkDeletingColumn');
+			  minkApp.currentQuery.columns[i].addEventListener('animationend', minkApp.toggleDisplay)
+			  minkApp.currentQuery.columns[i].setAttribute('column', "0");
 
 			  }
 		  else if(colNo == 2){
-				  minkApp.leftMostCol = minkApp.currentExplorationSpace.columns[i];
+				  minkApp.leftMostCol = minkApp.currentQuery.columns[i];
 		  }
 		  
 		  if(colNo > 1 && (already == false)) 
-			  minkApp.currentExplorationSpace.columns[i].setAttribute('column', (colNo - 1).toString());
+			  minkApp.currentQuery.columns[i].setAttribute('column', (colNo - 1).toString());
 		  
 	 
 		 if(colNo == (minkApp.maxCols) && (newColumn != true) && (already == false)){
-			  minkApp.currentExplorationSpace.columns[(i+1)].setAttribute('column', minkApp.maxCols.toString());
-			  minkApp.rightMostCol = minkApp.currentExplorationSpace.columns[(i+1)];
+			  minkApp.currentQuery.columns[(i+1)].setAttribute('column', minkApp.maxCols.toString());
+			  minkApp.rightMostCol = minkApp.currentQuery.columns[(i+1)];
 			  minkApp.rightMostCol.style.display = '';
 			  $(minkApp.rightMostCol).removeClass("minkDeletingColumnRight");
 			  //this is a hacky way to ensure this code is only executed one
@@ -188,28 +433,28 @@ minkApp.moveForward = function(newColumn){
 			$(".rightPlaceholder").css('display', '');
 
 		}
-		minkApp.currentExplorationSpace.column++;
+		minkApp.currentQuery.column++;
 
 }
 minkApp.goBackwards = function(howMany){
-	 for(var i = 0; i < minkApp.currentExplorationSpace.columns.length; i++){
-		  var colNo = parseInt(minkApp.currentExplorationSpace.columns[i].getAttribute('column'));
+	 for(var i = 0; i < minkApp.currentQuery.columns.length; i++){
+		  var colNo = parseInt(minkApp.currentQuery.columns[i].getAttribute('column'));
 		  if(colNo == 1){
-			  minkApp.currentExplorationSpace.columns[(i-1)].setAttribute('column', "1");
-			  minkApp.leftMostCol = minkApp.currentExplorationSpace.columns[(i-1)];
+			  minkApp.currentQuery.columns[(i-1)].setAttribute('column', "1");
+			  minkApp.leftMostCol = minkApp.currentQuery.columns[(i-1)];
 			  minkApp.leftMostCol.style.display = '';
 			  $(minkApp.leftMostCol).removeClass("minkDeletingColumn");
 			  
 
 		  }
 		  if(colNo == minkApp.maxCols){
-			  minkApp.currentExplorationSpace.columns[i].classList.add('minkDeletingColumnRight');
-			  minkApp.currentExplorationSpace.columns[i].addEventListener('animationend', minkApp.toggleDisplay)
-			  minkApp.currentExplorationSpace.columns[i].setAttribute('column', "0");
+			  minkApp.currentQuery.columns[i].classList.add('minkDeletingColumnRight');
+			  minkApp.currentQuery.columns[i].addEventListener('animationend', minkApp.toggleDisplay)
+			  minkApp.currentQuery.columns[i].setAttribute('column', "0");
 
 			  
 		  }else if(colNo > 0){
-			  minkApp.currentExplorationSpace.columns[i].setAttribute('column', (colNo + 1).toString());
+			  minkApp.currentQuery.columns[i].setAttribute('column', (colNo + 1).toString());
 
 		  }
 	 }
@@ -224,7 +469,7 @@ minkApp.goBackwards = function(howMany){
 			 $(".leftPlaceholder").css('display', '');
 
 		}
-	minkApp.currentExplorationSpace.column--;
+	minkApp.currentQuery.column--;
 
 }
 minkApp.buildColumn = function(parent){
@@ -316,7 +561,7 @@ minkApp.favoritesToggleHandler = function(event){
 		expander.addClass('deflated');
 
 
-	}else{
+	}else if(minkApp.favorites.length > 0){
 		minkFavorites.removeClass('mfHidden');
 		minkFavorites.addClass('mfShow');
 		expander.removeClass('deflated');
@@ -338,7 +583,7 @@ minkApp.newPile = function(details, srcElement){
 			 //makes new column and add it in
 			  nextCol = minkApp.buildColumn($(minkApp.HTML).find('.minkColumns')[0]);
 			  nextCol.setAttribute('column', (columnNumber+1).toString());
-			  minkApp.currentExplorationSpace.columns.push(nextCol);
+			  minkApp.currentQuery.columns.push(nextCol);
 			  minkApp.rightMostCol = nextCol;
 
 		 }else{
@@ -348,7 +593,7 @@ minkApp.newPile = function(details, srcElement){
 				  minkApp.rightMostCol = nextCol;
 
 			  minkApp.moveForward(true);
-				minkApp.currentExplorationSpace.columns.push(nextCol);
+				minkApp.currentQuery.columns.push(nextCol);
 
 			  
 		 }
@@ -356,7 +601,7 @@ minkApp.newPile = function(details, srcElement){
 	 }/*else if(minkApp.rightMostCol == null){
  		  nextCol = minkApp.buildColumn($(minkApp.HTML).find('.minkColumns')[0]);
 		  nextCol.setAttribute('column', (columnNumber+1).toString());
-		  minkApp.currentExplorationSpace.columns.push(nextCol);
+		  minkApp.currentQuery.columns.push(nextCol);
 		  minkApp.rightMostCol = nextCol;
 	 }*/
 	 else{
@@ -369,7 +614,7 @@ minkApp.newPile = function(details, srcElement){
 	 var pile = minkApp.buildPile(nextCol, event.detail.links, event.detail.rooturl, event.detail.collectionname, event.srcElement)
 
 	 
-	 minkApp.currentExplorationSpace.pileMap.put(pileIDGen(details.rooturl, details.collectionname), pile);
+	 minkApp.currentQuery.pileMap.put(pileIDGen(details.rooturl, details.collectionname), pile);
 	 srcElement.addEventListener('click', minkApp.showHidePileHandler);
 	 srcElement.removeEventListener('click', Mink.showExplorableLinks);
 	
@@ -384,16 +629,30 @@ minkApp.minkEventHandler = function(event){
 		 
 	 }else if(event.detail.type == 'minkshowless'){
 		 var id = pileIDGen(event.detail.rooturl, event.detail.collectionname);
-		 var pile = minkApp.currentExplorationSpace.pileMap.get(id);
+		 var pile = minkApp.currentQuery.pileMap.get(id);
 		 pile.rootHTML = event.srcElement;
 	 }else if(event.detail.type=='minkshowmore'){
 		 var id = pileIDGen(event.detail.rooturl, event.detail.collectionname);
-		 var pile = minkApp.currentExplorationSpace.pileMap.get(id);
+		 var pile = minkApp.currentQuery.pileMap.get(id);
 		 pile.rootHTML = event.srcElement;
 	 }else if(event.detail.type=="minkshowhide"){
 		 minkApp.showHidePileHandler(event);
 	 }else if(event.detail.type=='minkfavorite'){
 		 minkApp.addFavorite(event.detail.url, event.detail.mdname, event.detail.favicon);
+	 }else if(event.detail.type=='minksearchstripper'){
+		 
+		 var pileID = event.srcElement.getAttribute('pileID');
+		 var pile =  minkApp.currentQuery.pileMap.get(pileID);
+		 pile.cards.pop();
+		 pile.HTML.removeChild(pile.HTML.childNodes[0]);
+		 var cards = minkApp.buildCards(pile.HTML, event.detail.links.links, true);
+		 pile.cards = cards;
+		 
+		 
+		 
+		 
+		 
+		 console.log(event.detail.links);
 	 }
 	 
 }
@@ -422,7 +681,7 @@ minkApp.minimizePile = function(pile, numberOfCards){
 	var ph = $(pile).outerHeight();
 	var $el = $(pile);
 	$el.css('height', ph + 'px');
-	newHeight = (2 * minkApp.COLLAPSED_CARD_HEIGHT + 20);
+	newHeight = ((2.5 * minkApp.COLLAPSED_CARD_HEIGHT) + 4);
 
 	$(pile).attr('collapsed', 'true');
 	
@@ -437,7 +696,9 @@ minkApp.minimizePile = function(pile, numberOfCards){
 		ph =  float.toString()  + "px";
 		$(pile).css('height', ph)
     }, (1/60 * 1000));
-	setTimeout(function(){clearInterval(thisInterval);}, 250);
+	setTimeout(function(){clearInterval(thisInterval);
+		pile.style.height = newHeight.toString() + "px";
+	}, 250);
 	
 	
 
@@ -453,7 +714,7 @@ minkApp.expandPile = function(pile){
 	var speed = 0;
 	if(cardCount > 3){
 		speed = (((cardCount) * 41) - pile.clientHeight) * 2; //pixels per second 
-	}else if(count == 3){
+	}else if(cardCount == 3){
 		speed = (141-106)/(.5);
 	}
 	var ph = pile.clientHeight -8;
@@ -523,7 +784,7 @@ minkApp.showHidePileHandler = function(event){
 	var collection = $(rootHTML).attr('collectionname');
 	var id = pileIDGen(url, collection);
 	
-	var pile = minkApp.currentExplorationSpace.pileMap.get(id);
+	var pile = minkApp.currentQuery.pileMap.get(id);
 	minkApp.showHidePile(pile, event.detail.hide);
 	
 	
@@ -572,7 +833,7 @@ minkApp.expandCollapsePile = function(event){
 
 				}
 				if(i > 2){
-					kids[i].style.opacity =0;
+					kids[i].style.display = 'none';
 
 				}
 	
@@ -590,6 +851,7 @@ minkApp.expandCollapsePile = function(event){
 				kids[i].style.transform = "none";
 				kids[i].style.zIndex = '';
 				kids[i].style.opacity = '1';
+				kids[i].style.display= "";
 			
 		}
 		
@@ -615,20 +877,51 @@ minkApp.expandCollapsePile = function(event){
 	
 	
 }
-minkApp.buildCards = function(parent, links){
+
+minkApp.contextualize = function(md_and_mmd){
+	var ct = $('#contextTitle')[0];
+	var unwrapped = BSUtils.unwrap(md_and_mmd.metadata)
+
+	if(ct.innerHTML == '' && minkApp.currentQuery.query  == unwrapped.location){
+		ct.innerHTML = unwrapped.title;
+		minkApp.currentQuery.contextTitle = unwrapped.title;
+	}
+}
+minkApp.buildCards = function(parent, links, expandCards){
 	var cards = [];
 	parent.addEventListener('minkloaded', minkApp.addCardToPile);
 	//Note, in the future will use yin's structure from google doc. In the meantime, just gonna do it 'the easy way'
 	minkApp.counter = links.length;
 	//Builds card
 	//parent.style.height = (links.length * 39 -2 ).toString() + "px";
+	
+	var faviconLink = "";
+	if(links[(links.length-1)].startsWith("fav::")){
+		faviconLink = links.pop();
+		faviconLink = faviconLink.substring(5);
+	}
 	for(var i = 0; i < links.length; i++){
 		var link = links[i];
 		//Right now I just tell mink to render it with a static message, but I should add loading icons and some kinda queue
 		//gonna look through kade's code
 		var cardDiv = buildDiv('minkCardContainer');
+		cardDiv.addEventListener('mouseenter', minkApp.showCardControls);
+		cardDiv.addEventListener('mouseleave', minkApp.hideCardControls);
+		minkApp.buildCardControls(cardDiv);
 		parent.appendChild(cardDiv);
-		RendererBase.addMetadataDisplay(cardDiv, link, null, Mink.render);
+		cardDiv.setAttribute('minkCardId', link)
+		//check to see if there's metadata contained therein{
+		if(link.startsWith('mink::')){
+			var metadata = Mink.minklinkToMetadataMap.get(link);
+			metadata['minkfav'] = faviconLink;
+			var clipping = {viewModel: metadata};
+			RendererBase.addMetadataDisplay(cardDiv, link, clipping, Mink.render, {expand: true, callback: minkApp.contextualize});
+
+		}else{
+			RendererBase.addMetadataDisplay(cardDiv, link, null, Mink.render, {expand: true, callback: minkApp.contextualize});
+
+		}
+		
 		var card = new minkCard(link, cardDiv);
 		cards.push(card);
 	}
@@ -637,7 +930,7 @@ minkApp.buildCards = function(parent, links){
 }
 
 
-minkApp.buildPile = function(parent, links, rooturl, collectionname, src){
+minkApp.buildPile = function(parent, links, rooturl, collectionname, src, expandChildren){
 	console.log('links: ');
 	console.log(links);
 	var wrapper= buildDiv('minkPileWrapper');
@@ -655,9 +948,9 @@ minkApp.buildPile = function(parent, links, rooturl, collectionname, src){
 	var parentPile = null;
 	if(src){
 		var parentPileHTML = $(src).closest('.minkPile')[0];
-		parentPile = minkApp.currentExplorationSpace.pileMap.get(parentPileHTML.getAttribute('pileid'));
+		parentPile = minkApp.currentQuery.pileMap.get(parentPileHTML.getAttribute('pileid'));
 	}
-	var pile = new minkPile(pileId, minkApp.buildCards(newPile, links), src, newPile, parentPile);
+	var pile = new minkPile(pileId, minkApp.buildCards(newPile, links, expandChildren), src, newPile, parentPile);
 	//pile.setAttribute('pileID', pileId);
 	wrapper.appendChild(newPile);
 	newPile.setAttribute('pileid', pileId);
@@ -718,9 +1011,9 @@ function redrawCanvas(){
 
 	var canvasY = canvas.getBoundingClientRect().top;
 	var canvasX = canvas.getBoundingClientRect().left;
-	if(minkApp.currentExplorationSpace){
-		for (var i = 0; i < minkApp.currentExplorationSpace.pileMap.keys.length; i++){
-			var pile = minkApp.currentExplorationSpace.pileMap.get( minkApp.currentExplorationSpace.pileMap.keys[i]);
+	if(minkApp.currentQuery){
+		for (var i = 0; i < minkApp.currentQuery.pileMap.keys.length; i++){
+			var pile = minkApp.currentQuery.pileMap.get( minkApp.currentQuery.pileMap.keys[i]);
 			if(pile.rootHTML){
 				if (pile.visible && $(pile.rootHTML.closest('.minkColumn')).is(':visible') && $(pile.HTML.closest('.minkColumn')).is(':visible')){
 					var rootRect = pile.rootHTML.getBoundingClientRect();
@@ -895,13 +1188,28 @@ function onEnterShowMetadata(event)
     showMetadata(); 
 }
 
+function isUrl(string){
+	var valid = /^(ftp|http|https):\/\/[^ "]+$/.test(string);
+	return valid;
+}
+
 function showMetadata(url)
 {
 	if (url){
-		minkApp.exploreURL(url);
+		if(isUrl(url)){
+			minkApp.exploreURL(url);
+		}else{
+			minkApp.exploreNewQuery(url);
+		}
+		
 	}else{
 		var url = document.getElementById("targetURL").value;
-		minkApp.exploreURL(url);
+		if(isUrl(url)){
+			minkApp.exploreURL(url);
+		}else{
+			minkApp.exploreNewQuery(url);
+		}
+
 	}
 
 

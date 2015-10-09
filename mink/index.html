@@ -7,11 +7,9 @@
     </script>
     
     <!-- CSS! -->
-    <link href="css/bootstrap.min.css" rel="stylesheet" media="screen">
 
     <link href="css/prettify.css" type="text/css" rel="stylesheet" />
    <link href="http://roboto-webfont.googlecode.com/svn/trunk/roboto.all.css" rel="stylesheet" type="text/css">
-    <link href="css/mdc.css" rel="stylesheet" media="screen">
     <link href="../renderers/styles/metadataRenderer.css" rel="stylesheet" type="text/css">
             <link href="../renderers/styles/minkRenderer.css" rel="stylesheet" type="text/css">
     
@@ -63,6 +61,7 @@
 
         <script type="text/javascript" src="./js/piles.js"></script>
         <script type="text/javascript" src="./js/explorationSpace.js"></script>
+        <script type="text/javascript" src="./js/query.js"></script>
 
         <script type="text/javascript" src="./js/minkApp.js"></script>
     <link href="./css/minkApp.css" type="text/css" rel="stylesheet" />
@@ -71,72 +70,27 @@
        </script>
   </head>
   <body onload="onBodyLoad()">
-    <!-- Loading Modal - Doesn't work yet -->
-    <div id="loadingModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-      <div class="modal-body">
-        <p>Loading</p>
-      </div>
-    </div>
-
-    <!-- Link Modal -->
-    <div id="linkModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-      <div class="modal-header">
-        <h3 id="myModalLabel">Link to this Metadata</h3>
-      </div>
-      <div class="modal-body">
-        <p>Copy this link to your clipboard for easy sharing</p>
-        <input type="text" class="span5" id="modalLinkValue" placeholder="Type something…">
-      </div>
-      <div class="modal-footer">
-        <button class="btn btn-primary" data-dismiss="modal" aria-hidden="true">Close</button>
-      </div>
-    </div>
-
-    <!-- Navbar -->
-    <div class="navbar navbar-inverse navbar-fixed-top">
-      <div class="navbar-inner form-inline">
-        <div class="container">
-
-						<form class="navbar-form pull-left" action="" onsubmit="return false;"><button type="button" class="btn" onclick="">Favorites</button></form>
-                      <a class="brand">Mink</a>
-
-            <form class="navbar-form pull-right" action="" onsubmit="return false;">
-              
-              <input type="text" size="500" class="span5" id="targetURL" onkeydown="onEnterShowMetadata(event);" value="http://dl.acm.org/citation.cfm?id=2063231.2063237&preflayout=flat"/>
-              <button type="button" class="btn" onclick="showMetadata();">Go!</button>
-              <button type="button" class="btn" data-toggle="modal" data-target="#linkModal" onclick="setLinkValue();"><i class="icon-bookmark"></i></button>
-            	
-            </form>
- 						<!-- <div class="checkbox " style="position:relative; top:10px"  title="When checked, the service will not use any cached metadata for a page.">
-	                  <label>
-	                    <input type="checkbox" name="force_reload" id='force_reload'>Refresh MD
-	                    
-	                 </label>
-             </div> -->
-	                  <label style="position:relative; top:10px" title="When checked, the service will not use any cached metadata for a page.">
-	                    <input type="checkbox" name="force_reload" id='force_reload' style="position: relative;bottom: 2.5px;" onclick="toggleReload()">Refresh MD
-	                    
-	                 </label>
-			<label style="position:relative; top:10px" title="When checked, always extract with Service.">
-	                    <input type="checkbox" name="force_service" id='force_service' style="position: relative;bottom: 2.5px;" onclick="toggleReload()">Extract w/ Service
-	                    
-	                 </label>
-	                
-	                
-        </div>
-          
-      </div>
-    </div>
-
-   
-
-
-    <!-- Content -->
     
-    <div class ="minkAppContainer" id="minkAppContainer">
-    <div class="minkToolbar" id="minkToolbar"><div class="leftPlaceholder"></div><div onclick="minkApp.goBackHandler()" class="minkBackButton"><img src="../renderers/images/mink/back-icon.png"></img></div><div onclick="minkApp.goForwardsHandler()" class="minkForwardButton"><img src="../renderers/images/mink/back-icon.png"></img></div><div class="rightPlaceholder"></div></div>
+    
+    <div class ="minkAppContainer" id="minkAppContainer" initurl="http://www.amazon.com/Apple-iPhone-Factory-Unlocked-Jailbroken/dp/B008VUNRZQ/ref=sr_1_1?ie=UTF8&qid=1442245975&sr=8-1&keywords=3gs">
+    	
+ 
+    <div class="minkToolbar" id="minkToolbar"><div class="leftPlaceholder"></div><div onclick="minkApp.goBackHandler()" class="minkBackButton"><img src="../renderers/images/mink/back-icon.png"></img></div> 	<div class="minkFavoritesExpander" id="minkFavoritesExpander" onclick="minkApp.favoritesToggleHandler()">FAVORITES
+    		 
+    		 </div> 
+    		 <input type="text" class="minksearchbox" id="targetURL" onkeydown="onEnterShowMetadata(event);" value="search"/>
+<div id='contextTitle' class='contextTitle'></div><div onclick="minkApp.goForwardsHandler()" class="minkForwardButton"><img src="../renderers/images/mink/back-icon.png"></img></div><div class="rightPlaceholder"></div></div>
   
-    <div class="minkCenterRow"> <div class="minkFavoritesExpander" id="minkFavoritesExpander" onclick="minkApp.favoritesToggleHandler()">Favorites-> <div class="minkFavorites" id="minkFavorites"></div></div><div class='minkColumns' id="minkColumns">    <div class="minkColumn" column="1" id="minkC1">
+    <div class="minkCenterRow"> 
+   <div class="minkFavorites" id="minkFavorites">
+    		 <div class="favLabel">favorites</div>	
+    		 
+    		 </div>
+    		 <div class='minkQueries' id='minkQueries'>
+    		 	<div class="queryLabel">queries</div>
+    		 	
+    		 </div>
+    		 <div class='minkColumns' id="minkColumns">    <div class="minkColumn" column="1" id="minkC1">
     </div>
   </div></div>
     
