@@ -511,7 +511,7 @@ Mink.makeExplorable = function(parent, field, explorableMap, baseUrl){
 	explorableField.appendChild(buildDiv('minkExplorableFieldLabelPrefix'));
 	explorableField.childNodes[0].innerHTML = prefixText;
 	explorableField.appendChild(buildSpan('minkExplorableFieldLabelSuffix unfilledExpander'));
-	explorableField.childNodes[1].innerHTML = "  (" + linkedUrls.length + ")";
+	explorableField.childNodes[1].innerHTML = "  "+ linkedUrls.length + "";
 	explorableField.setAttribute('rooturl', baseUrl);
 	explorableField.setAttribute('collectionname', field.name);
 	explorableField.addEventListener('click', Mink.showExplorableLinks);

@@ -191,7 +191,7 @@ box-shadow: 0px 2px 4px -2px rgba(0,0,0,0.4);
     cursor: pointer;
 }
 .minkExplorable{
-  color: #00446b;
+  color: white;
   padding: 0px 4px 0px 4px;
   display: inline-block;
   max-height: 26px;
@@ -210,23 +210,22 @@ box-shadow: 0px 2px 4px -2px rgba(0,0,0,0.4);
   height: 20px;
   min-height: 28px;
   height: 100%;
-  background-color: rgb(181, 211, 221);
+  background-color: #0091EA;
   padding: 0 0px 0 4px;
   margin-left: 4px;
   min-width: 32px;
   text-shadow: 0px 0px 1px #fff;
-  color: white;
   text-align: center;
-  color: #00446b;
   border-radius: 8px 0 0 8px;
   line-height: 28px;
-
+color: white;
   transition: all 250ms cubic-bezier(0.250, 0.250, 0.750, 0.750);
 
 
 }
 .minkExplorableFieldLabelSuffix:hover{
-	background-color: #00446b;
+	background-color: #01579B;
+;
 	color: white;
 	  transition: all 0s cubic-bezier(0.250, 0.250, 0.750, 0.750);
 	
@@ -244,7 +243,6 @@ box-shadow: 0px 2px 4px -2px rgba(0,0,0,0.4);
 .minkExplorableField{
   margin-top: 6px;
   max-height: 20px;
-  color: #00446b;
   justify-content: space-between;
   display: inline-flex;
   margin-bottom: 4px;
@@ -254,13 +252,14 @@ box-shadow: 0px 2px 4px -2px rgba(0,0,0,0.4);
 }
  .minkExplorableField:hover{
 	cursor: pointer;
-	background-color: #00446b;
+	background-color: #01579B;
+;
 	color: white;
 }
 .minkExplorable:hover{
 	
 	cursor: pointer;
-	  background: -webkit-linear-gradient( #005485, #00446b);
+	  background: -webkit-linear-gradient( #005485, white);
   -webkit-background-clip: initial;
   -webkit-text-fill-color: initial;
   color: white;
@@ -549,12 +548,12 @@ height: auto}
      -o-transition: width 250ms cubic-bezier(0.250, 0.250, 0.750, 0.750); 
         transition: width 250ms cubic-bezier(0.250, 0.250, 0.750, 0.750);
         
-  color: #00446b;
+  color: white;
     text-shadow: 0px 0px 1px #fff;
 }
 
 .filledExpander{
-	background-color: rgb(181, 211, 221);
+	background-color: #0091EA;
 }
 .unfilledExpander{
 	width: 0px;
@@ -565,7 +564,7 @@ height: auto}
 }
 
 .minkExplorablesExpander:hover{
-	background: -webkit-linear-gradient( #005485, #00446b);
+	background: -webkit-linear-gradient( #005485, white);
 	color: white;
 	cursor: pointer;
 	

@@ -102,7 +102,7 @@ img{
 	    text-align: center;
     color: white;
     line-height: 30px;
-    background-color: rgb(181, 211, 221);
+    background-color: #0091EA;
 }
 .minkNewQueryButton{
     width: 30px;
@@ -172,7 +172,7 @@ line-height: 34px;
 .minkToolbar{
 	width: 100%;
 	display: flex;
-	background-color: rgb(181, 211, 221);
+	background-color: #0091EA;
 	justify-content: space-between;
 	margin-bottom: 10px;
 	min-height: 32px;
@@ -242,7 +242,7 @@ line-height: 34px;
 	    text-align: center;
     color: white;
     line-height: 30px;
-    background-color: rgb(181, 211, 221);
+    background-color: #0091EA;
 }
 .minkFavoritesExpander.nonempty{
   font-size: 16px;
