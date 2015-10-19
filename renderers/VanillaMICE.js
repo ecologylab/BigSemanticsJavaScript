@@ -471,6 +471,10 @@ MICE.buildMetadataField = function(metadataField, isChildTable, fieldCount, row,
 		
 		var fieldValueDiv = document.createElement('div');
 			fieldValueDiv.className = styleInfo.styles.fieldValueContainer;
+			
+		if(metadataField.style_name != null){
+			fieldValueDiv.className += " " + metadataField.style_name;
+		}
 		
 		fieldValueDiv.appendChild(img1);
 		valueCol.appendChild(fieldValueDiv);
