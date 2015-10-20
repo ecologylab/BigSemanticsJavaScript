@@ -20,7 +20,8 @@ var BSExtension = (function() {
     if (!this.extractor && typeof extractMetadata == 'function') {
       this.extractor = extractMetadata;
     }
-	//TODO instanstiate a BSService instance
+	
+	this.bss = new BSService();
 	  
     var that = this;
     var extensionsLeftToCheck = this.extIds.length;
@@ -131,12 +132,17 @@ var BSExtension = (function() {
         var response = { location: location, entity: options.page };
         console.log("Extracting in content script: " + location);
 		
-		//TODO if extract_with field == 'service' is true then use the BSService instance instead
-		  
-        that.extractor(response, mmd, that, options, function(err, metadata) {
-          if (err) { callback(err, null); return; }
-          callback(null, { metadata: metadata, mmd: mmd });
-        });
+		if (mmd.meta_metadata.extract_with == "service"){ 
+			that.usedService = true; //so we can display in the slideout
+			that.bss.loadMetadata(location, options, callback);
+		}
+		else {  
+			that.usedService = false;
+			that.extractor(response, mmd, that, options, function(err, metadata) {
+			  if (err) { callback(err, null); return; }
+			  callback(null, { metadata: metadata, mmd: mmd });
+			});
+		}
       });
     } else {
       // we don't have the DOM

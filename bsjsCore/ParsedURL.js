@@ -23,7 +23,7 @@ var ParsedURL = (function() {
         } else {
           this.domain = this.host;
         }
-
+		  
         this.path = matches[4];
         if (this.path.length == 0) {
           this.path = '/';
@@ -132,7 +132,7 @@ var ParsedURL = (function() {
     }
     return result;
   }
-
+  
   return ParsedURL;
 })();
   
