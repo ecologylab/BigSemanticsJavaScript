@@ -251,6 +251,9 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 			if (kids[kid].hasOwnProperty("composite"))
 				if (!kids[kid].composite.hasOwnProperty("declaring_mmd"))
 					recurseNeeded=true;
+			
+			if (kids[kid].hasOwnProperty("collection"))
+				recurseNeeded=true;
 		}
 		
 		if (field.hasOwnProperty('xpaths'))
