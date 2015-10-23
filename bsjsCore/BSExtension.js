@@ -129,6 +129,9 @@ var BSExtension = (function() {
       getMmd(function(err, mmd) {
         if (err) { callback(err, null); return; }
 
+		if (mmd.meta_metadata.filter_location){
+			location = PreFilter.filter(location, mmd.meta_metadata.filter_location);
+		}
         var response = { location: location, entity: options.page };
         console.log("Extracting in content script: " + location);
 		
