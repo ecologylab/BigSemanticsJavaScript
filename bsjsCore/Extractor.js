@@ -162,10 +162,6 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 				{
 					contextNode = defVars[field.context_node];
 				}
-				if(field.name=='citations'){
-					console.log('woah');
-				}
-				
 				obj = getCollectionD(field,contextNode,recurse,parserContext,page);
 				if(obj !== null)
 				{

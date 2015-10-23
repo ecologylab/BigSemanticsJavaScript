@@ -472,8 +472,11 @@ MICE.buildMetadataField = function(metadataField, isChildTable, fieldCount, row,
 		var fieldValueDiv = document.createElement('div');
 			fieldValueDiv.className = styleInfo.styles.fieldValueContainer;
 			
-		if(metadataField.style_name != null){
-			fieldValueDiv.className += " " + metadataField.style_name;
+		if(metadataField.style_name != null && metadataField.style_name != "") {
+			if (img1.height > 500)
+				fieldValueDiv.className += " " + metadataField.style_name;
+			else 
+				fieldValueDiv.style.height = img1.height.toString() + "px";
 		}
 		
 		fieldValueDiv.appendChild(img1);
