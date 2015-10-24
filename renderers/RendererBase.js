@@ -94,6 +94,15 @@ RendererBase.addMetadataDisplay = function(container, url, clipping, renderer, o
         task.mmd = md_and_mmd.mmd;
         task.mmd = simpl.graphExpand(task.mmd);
         task.metadata = md_and_mmd.metadata;
+        
+        
+        //ideamache hack
+			if(veryBadAddMetadataToClippingStorage)
+			{
+				veryBadAddMetadataToClippingStorage(task.metadata);
+			}	
+        
+        
         task.handler(task);
         if(options.callback){
         	options.callback(md_and_mmd);
