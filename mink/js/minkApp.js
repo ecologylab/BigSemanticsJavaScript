@@ -15,7 +15,7 @@ minkApp.favorites = [];
 minkApp.currentQuery = null;
 minkApp.queryMap = new Map();
 var bsService = new BSAutoSwitch(['eganfccpbldleckkpfomlgcbadhmjnlf', 'gdgmmfgjalcpnakohgcfflgccamjoipd']);
-
+minkApp.cardDuplicateMap = new Map();
 
 
 //remove from Space
@@ -37,17 +37,44 @@ minkApp.removeButtonHandler = function(event){
 	var minkCardHTML = $(event.srcElement).closest('.minkCardContainer')[0];
 	var pileId = minkCardHTML.parentNode.getAttribute('pileid');
 	var pile = minkApp.currentQuery.pileMap.get(pileId);
-	minkApp.removeCard(pile, minkCardHTML);
+	for (var i = 0 ; i < pile.cards.length; i++){
+		if (pile.cards[i].url == minkCardHTML.getAttribute('minkcardid')){
+			minkApp.removeCard(pile, pile.cards[i]);
+
+		}
+	}
+
 }
 minkApp.removeCard = function(pile, card){
-	var index = $(card).index();
-	pile.cards[index].vis = false;
-	$(card).css('display', 'none');
+	var index = $(card.html).index();
+	pile.cards[index].removed = true;
+	pile.cards[index].displayed = false;
+	var cards = minkApp.cardDuplicateMap.get(card.url);
+	for (var i = 0; i < cards.length; i++){
+		minkApp.updateCardDisplay(cards[i]);
+		
+	}
+	
+//	$(card).css('display', 'none');
 }
-minkApp.foo = function(){
-	alert('bleh bleh bleh')
+minkApp.openLink = function(event){
+	var link = event.srcElement.getAttribute('outlink');
+	  var win = window.open(link, '_blank');
+
 }
-minkApp.buildCardControls = function(parent){
+
+minkApp.buildLinkOutControl = function(parent, link){
+	var olc = buildDiv('minkCardControl')
+	var openLink = document.createElement('img');
+	openLink.className = 'minkCardControlIcon';
+	openLink.src = './img/share-boxed.svg';
+	olc.addEventListener('click', minkApp.openLink);
+	olc.setAttribute('outlink', link)
+	olc.appendChild(openLink);
+	parent.appendChild(olc);
+}
+
+minkApp.buildCardControls = function(parent, link){
 	var controlCont = buildDiv('minkCardControls');
 	var r = buildDiv('minkCardControl')
 
@@ -57,12 +84,11 @@ minkApp.buildCardControls = function(parent){
 	r.addEventListener('click', minkApp.removeButtonHandler)
 	r.appendChild(remove);
 
-	var olc = buildDiv('minkCardControl')
-	var openLink = document.createElement('img');
-	openLink.className = 'minkCardControlIcon';
-	openLink.src = './img/share-boxed.svg';
-	olc.addEventListener('click', minkApp.foo)
-	olc.appendChild(openLink);
+	
+	
+	//see if mink::uuid, link, or mink::lin;
+
+	
 	var f = buildDiv('minkCardControl')
 
 	var favorite = document.createElement('img');
@@ -73,7 +99,15 @@ minkApp.buildCardControls = function(parent){
 
 	
 	controlCont.appendChild(f);
-	controlCont.appendChild(olc);
+	if(link.startsWith('mink::')){
+		var sublink = link.substring(6);
+		if(!sublink.startsWith('UIDD')){
+			minkApp.buildLinkOutControl(controlCont, sublink)
+		}
+	}else{
+		minkApp.buildLinkOutControl(controlCont, link)
+
+	}
 	controlCont.appendChild(r);
 	parent.appendChild(controlCont)
 }
@@ -104,9 +138,37 @@ function setIntervalX(callback, delay, repetitions) {
        }
     }, delay);
 }
-function minkCard(url, div){
+
+function isCardDuplicate(bucket, id){
+	for (var i = 0; i < bucket.length; i++){
+		if (bucket[i].displayed && bucket[i] != id){
+			return true;
+		}
+	}
+	return false;
+}
+function minkCard(url, div, pile){
 	this.url = url;
 	this.html = div;
+	//is the cards pile in view?
+	this.inView = true;	
+	//is the card already displayed in another pile
+	this.displayed;
+	var bucket = minkApp.cardDuplicateMap.get(this.url)
+	if(bucket){
+		bucket.push(this);
+		this.displayed = !isCardDuplicate(bucket, this);
+		this.duplicate = true;
+		this.html.style.display = "none";
+
+	}else{
+		minkApp.cardDuplicateMap.put(this.url, [this]);
+		this.displayed = true;
+		this.duplicate = false;
+	}
+	this.pile = pile;
+	this.removed = false;
+
 }
 
 
@@ -168,7 +230,30 @@ minkApp.addQueryToHistory = function(){
 	//if representation of current query already has a qLevel, dont build one, else add
 	//add representation to appropriate qLvl
 }
+/*
+minkApp.markPileOutOfView = function(pileID){
+	var pile = minkApp.pileMap.
+}
+
+minkApp.markColumnOutOfView = function(column){
+	var piles = $(column).find('.minkPile');
+	for (var i = 0; i < piles.length; i++){
+		var id = piles.getAttribute('pileid');
+		minkApp.markPileOutOfView(id);
+	}
+}
+*/
 minkApp.hidePreviousQuery = function(){
+	var keys = minkApp.currentQuery.pileMap.keys;
+	for (var i = 0; i < keys.length; i++){
+		var pile = minkApp.currentQuery.pileMap.get(keys[i]);
+		var cards = pile.cards;
+		for (var j = 0; j < cards.length; j++){
+			cards[j].inView = false;
+			cards[j].displayed = false;
+			
+		}
+	}
 	$("#minkColumns").empty();
 	minkApp.leftMostCol =null;
 	minkApp.rightMostCol = null;
@@ -176,14 +261,47 @@ minkApp.hidePreviousQuery = function(){
 	
 	//remove add query button visbility by default
 	$('.minkNewQueryButton').removeClass('visible');
+	//mak
 	
 	
+	
+	
+}
+
+minkApp.updateCardDisplay = function(card){
+	var bucket = minkApp.cardDuplicateMap.get(card.url);
+	card.displayed = !card.removed && !isCardDuplicate(bucket, card);
+	if (card.displayed){
+		card.html.style.display = "";
+		minkApp.updateDuplicateCount(card.pile);
+		
+	}else{
+		card.html.style.display = "none";
+		minkApp.updateDuplicateCount(card.pile);
+
+	}
 }
 //will come back to, may be complicated
 minkApp.rebuildCurrentQuery = function(){
 	//
 	minkApp.hidePreviousQuery();
 	//
+	var keys = minkApp.currentQuery.pileMap.keys;
+	for (var i = 0; i < keys.length; i++){
+		var pile = minkApp.currentQuery.pileMap.get(keys[i]);
+		var c = $(pile.HTML).closest('.minkColumn')[0];
+		var cnum = parseInt(c.getAttribute('column'));
+		if(cnum > 0 && cnum <= 3){
+			var cards = pile.cards;
+			for (var j = 0; j < cards.length; j++){
+				cards[j].inView = true;
+				minkApp.updateCardDisplay(cards[j]);
+			}
+			minkApp.updateDuplicateCount(pile);
+		}
+		
+
+	}
 	$('#contextTitle')[0].innerHTML =  minkApp.currentQuery.contextTitle;
 
 	var columns = minkApp.currentQuery.columns;
@@ -645,7 +763,7 @@ minkApp.minkEventHandler = function(event){
 		 var pile =  minkApp.currentQuery.pileMap.get(pileID);
 		 pile.cards.pop();
 		 pile.HTML.removeChild(pile.HTML.childNodes[0]);
-		 var cards = minkApp.buildCards(pile.HTML, event.detail.links.links, true);
+		 var cards = minkApp.buildCards(pile.HTML, event.detail.links.links, true, pile);
 		 pile.cards = cards;
 		 
 		 
@@ -810,6 +928,8 @@ minkApp.expandCollapsePile = function(event){
 		if($(pile).attr('collapsed')!= 'true'){
 			console.log('shrinking')
 			var target = $(kids[i]).find(".minkTitleClickable")[0];
+			var controls = $(kids[i]).find(".minkCardControls").css('display', 'none');
+			
 			var contentContainer = $(target).closest('.minkContentContainer')[0];
 			if($(contentContainer).attr('grown') == "true"){
 				Mink.shrink(target, true);
@@ -844,6 +964,8 @@ minkApp.expandCollapsePile = function(event){
 			console.log('expanding')
 			var target = $(kids[i]).find(".minkTitleClickable")[0];
 			var contentContainer = $(target).closest('.minkContentContainer')[0];
+			var controls = $(kids[i]).find(".minkCardControls").css('display', '');
+
 			if($(contentContainer).attr('grown') == "true"){
 				Mink.grow(target, true);
 			}
@@ -878,6 +1000,46 @@ minkApp.expandCollapsePile = function(event){
 	
 }
 
+minkApp.buildDuplicateCount = function(pile){
+	var dupCont = buildDiv('minkDupIndicator');
+	var dupCount = 0;
+	for (var i = 0; i < pile.cards.length; i++){
+		if(pile.cards[i].duplicate && !pile.cards[i].displayed){
+			dupCount++;
+		}
+	}
+	if(dupCount > 0){
+		var txt = dupCount.toString() + " duplicate cards hidden";
+		dupCont.innerHTML = txt;
+
+	}
+	pile.HTML.appendChild(dupCont);
+}
+minkApp.updateDuplicateCount = function(pile){
+	var dupCont = $(pile.HTML).find('.minkDupIndicator')[0];
+	var dupCount = 0;
+	var rmCount = 0;
+	for (var i = 0; i < pile.cards.length; i++){
+		if(pile.cards[i].duplicate && !pile.cards[i].displayed && !pile.cards[i].removed){
+			dupCount++;
+		}
+		if(pile.cards[i].removed){
+			rmCount++;
+		}
+	}
+	if(dupCount > 0){
+		var txt = dupCount.toString() + " duplicate cards hidden";
+		dupCont.innerHTML = txt;
+	}else if(rmCount == pile.cards.length){
+		dupCont.innerHTML = "all cards removed";
+	}else{
+		dupCont.innerHTML = "";
+	}
+	
+
+}
+
+
 minkApp.contextualize = function(md_and_mmd){
 	var ct = $('#contextTitle')[0];
 	var unwrapped = BSUtils.unwrap(md_and_mmd.metadata)
@@ -887,7 +1049,7 @@ minkApp.contextualize = function(md_and_mmd){
 		minkApp.currentQuery.contextTitle = unwrapped.title;
 	}
 }
-minkApp.buildCards = function(parent, links, expandCards){
+minkApp.buildCards = function(parent, links, expandCards, pile){
 	var cards = [];
 	parent.addEventListener('minkloaded', minkApp.addCardToPile);
 	//Note, in the future will use yin's structure from google doc. In the meantime, just gonna do it 'the easy way'
@@ -907,8 +1069,12 @@ minkApp.buildCards = function(parent, links, expandCards){
 		var cardDiv = buildDiv('minkCardContainer');
 		cardDiv.addEventListener('mouseenter', minkApp.showCardControls);
 		cardDiv.addEventListener('mouseleave', minkApp.hideCardControls);
-		minkApp.buildCardControls(cardDiv);
+		minkApp.buildCardControls(cardDiv, link);
 		parent.appendChild(cardDiv);
+		var spinner = document.createElement('img');
+		spinner.src = "./img/loading.gif";
+		spinner.className = "minkLoadingSpinner";
+		cardDiv.appendChild(spinner);
 		cardDiv.setAttribute('minkCardId', link)
 		//check to see if there's metadata contained therein{
 		if(link.startsWith('mink::')){
@@ -922,7 +1088,7 @@ minkApp.buildCards = function(parent, links, expandCards){
 
 		}
 		
-		var card = new minkCard(link, cardDiv);
+		var card = new minkCard(link, cardDiv, pile);
 		cards.push(card);
 	}
 	return cards;
@@ -950,11 +1116,12 @@ minkApp.buildPile = function(parent, links, rooturl, collectionname, src, expand
 		var parentPileHTML = $(src).closest('.minkPile')[0];
 		parentPile = minkApp.currentQuery.pileMap.get(parentPileHTML.getAttribute('pileid'));
 	}
-	var pile = new minkPile(pileId, minkApp.buildCards(newPile, links, expandChildren), src, newPile, parentPile);
+	var pile = new minkPile(pileId, null, src, newPile, parentPile);
+	pile.cards = minkApp.buildCards(newPile, links, expandChildren, pile);
 	//pile.setAttribute('pileID', pileId);
 	wrapper.appendChild(newPile);
 	newPile.setAttribute('pileid', pileId);
-	
+	minkApp.buildDuplicateCount(pile);
 	return pile;
 	//Logic to let varius maps and storage representations know about what's going one
 	//In thefuture will also need to handle stuff involving the canvas.

@@ -21,20 +21,7 @@ function buildSpan(className){
 	elem.className = className;
 	return elem;
 }
-/*
-Mink.initialize = function(){
-	
-	var minkRenderings = document.getElementsByClassName('metadataRendering');	
-	
-	for(var i = 0; i < minkRenderings.length; i++)
-	{
-		console.log("called");
-		var location = minkRenderings[i].getElementsByTagName('a')[0];
-		if(location)
-			
-			MetadataLoader.render(Mink.render, minkRenderings[i], location.href, true);
-	}
-}*/
+
 
 
 Mink.recursiveIsLinked = function(metadataField){
@@ -106,7 +93,7 @@ function generateUUID(){
 }
 
 Mink.uuidthing = function(){
-	var url = "mink::"
+	var url = "mink::UUID"
 	url += generateUUID()
 	return url;
 }
@@ -114,25 +101,30 @@ Mink.uuidthing = function(){
 Mink.getDestinationPageLink = function(field, addToMaps){
 	var kids = field.value.value;
 	if(addToMaps){
+		for (var i = 0; i < field.value.length; i++){
+			if(field.value[i].name == 'destination_page'){
+					try{
+						var url = "mink::" + field.value[i].value[0].navigatesTo;
+						Mink.minklinkToMetadataMap.put(url, field);
+						return url;
+					}catch(e){
+						var url = Mink.uuidthing();
+						Mink.minklinkToMetadataMap.put(url, field);
+						return url;
+
+					}
+				
+
+			}
+		}
 		var url = Mink.uuidthing();
 		Mink.minklinkToMetadataMap.put(url, field);
+
 
 	}
 	return url;
 	
-	/*
-	for (var i = 0; i < kids.length; i++){
-		var kid = kids[i];
-		for (var j = 0; j < kid.value.length; j++){
-			if(kid.value[j].name == 'destination_page'){
-				return kid.value[j].value.navigatesTo;
-			}
-		}
-		if(kid.name == 'destination_page'){
-			return kid.value[0].navigatesTo;
-		};
-		
-	}*/
+	
 }
 
 Mink.recursiveSearchForLinked = function(metadataField, list, isRoot, addToMaps){
@@ -704,7 +696,10 @@ Mink.removeLinkedAndHeaderFields = function(metadataFields, linkedFields, header
 	}
 	for (var i = 0; i < metadataFields.length; i++){
 		if(headerNames.indexOf(metadataFields[i].name) < 0 && linked.indexOf(metadataFields[i].name) < 0 && images.indexOf(metadataFields[i].name)){
-			remainingFields.push(metadataFields[i]);
+			if(metadataFields[i].mmdName != 'title'){
+				remainingFields.push(metadataFields[i]);
+
+			}
 		}
 	}
 	return remainingFields;
@@ -995,7 +990,8 @@ Mink.render = function(task){
 			    
 			// Add the HTML5 canvas for the drawing of connection lines
 			// Add the table and canvas to the interior container
-				
+			
+			$(task.container.childNodes[1]).remove();
 			task.visual.appendChild(metadataTable);
 			
 			// Add the interior container to the root contianer
@@ -1005,6 +1001,12 @@ Mink.render = function(task){
 					if(task.options.expand){
 						var titleBar = $(task.visual).find('.minkTitleClickable')[0];
 						Mink.grow(titleBar);
+				        setTimeout( function(){
+				        	var keyfields = $(task.visual).find('.minkKeyFields')[0];
+							$(keyfields).slideDownTransition();
+				        }, 250);
+					
+
 					}
 		}
 			

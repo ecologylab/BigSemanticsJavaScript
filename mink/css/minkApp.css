@@ -1,11 +1,15 @@
 .minkColumn{
-	width: 560px;
+	width: 610px;
 	margin-right: 50px;
 	transition: margin-left 1s ease;
 	display: inline-block;
 	
 }
-
+.minkDupIndicator{
+	    font-style: italic;
+    text-align: CENTER;
+    color: gray;
+}
 p{
 	-webkit-margin-before: 1em;
     -webkit-margin-after: 1em;
@@ -13,7 +17,10 @@ p{
     -webkit-margin-end: 0px;
         margin: 0 0 10px;
 }
-
+.minkLoadingSpinner{
+	height: 30px;
+	width: 30px;
+}
 body{
 	margin: 0px;
 	line-height: 20px;
