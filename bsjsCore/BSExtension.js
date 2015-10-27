@@ -137,6 +137,7 @@ var BSExtension = (function() {
 		
 		if (mmd.meta_metadata.extract_with == "service"){ 
 			that.usedService = true; //so we can display in the slideout
+			options.useHttps = (window.location.protocol == 'https:'); //use Https if we are on an https page
 			that.bss.loadMetadata(location, options, callback);
 		}
 		else {  
