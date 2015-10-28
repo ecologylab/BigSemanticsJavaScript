@@ -250,6 +250,10 @@
 	height: auto;
 }
 
+.ecologylab-metadataContainer .ecologylab-fieldValueContainerInstagramPostImage{
+	height: 500px;
+}
+
 .ecologylab-metadataContainer .ecologylab-fieldChildContainer{
         
     border-top-right-radius: 8px;

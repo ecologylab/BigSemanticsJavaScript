@@ -162,10 +162,6 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 				{
 					contextNode = defVars[field.context_node];
 				}
-				if(field.name=='citations'){
-					console.log('woah');
-				}
-				
 				obj = getCollectionD(field,contextNode,recurse,parserContext,page);
 				if(obj !== null)
 				{
@@ -251,6 +247,9 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 			if (kids[kid].hasOwnProperty("composite"))
 				if (!kids[kid].composite.hasOwnProperty("declaring_mmd"))
 					recurseNeeded=true;
+			
+			if (kids[kid].hasOwnProperty("collection"))
+				recurseNeeded=true;
 		}
 		
 		if (field.hasOwnProperty('xpaths'))
