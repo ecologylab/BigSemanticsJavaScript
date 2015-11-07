@@ -10,3 +10,6 @@
 Servers/
 RemoteSystemsTempFiles/
 
+# work in progress
+_wip_*
+
