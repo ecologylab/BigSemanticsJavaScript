@@ -399,25 +399,6 @@ Mink.makeTitle = function(metadataFields, url, styleInfo, expCount, minkfav){
 		}
 	
 
-	/*
-	var img = new Image();
-	img.onload = function () {
-		var colorThief = new ColorThief();
-	  console.log(colorThief.getColor(img));
-	};
-	//
-	img.crossOrigin = '*';
-
-	img.src = BSUtils.getFaviconURL(url);
-	img.className = "minkFavicon";
-	headerContainer.appendChild(img);
-	
-	var tmpCanvas = document.createElement('canvas');
-	tmpCanvas.width = 24;
-	tmpCanvas.height = 24;
-	tmpCanvas.getContext('2d').drawImage(imageCont,0,0); // Or at whatever offset you like
-	document.body.appendChild(tmpCanvas);
-	*/
 	clickableToExpand.addEventListener('click', Mink.growHandler);
 	
 	return headerContainer;
@@ -917,6 +898,53 @@ Mink.makeTableExplorables = function(parent, metadataFields, linkedFields, url){
 	
 	parent.appendChild(explorables);
 }
+
+
+Mink.devalue = function(minkContainer){
+	//shrink
+	var titleField = $(minkContainer).find('.minkTitleField')[0];
+	Mink.shrink(titleField);
+	//disable mouse events
+	var titleClickable = $(minkContainer).find('.minkTitleClickable')[0];
+	titleClickable.removeEventListener('click', Mink.growHandler);
+	titleClickable.removeEventListener('click', Mink.shrinkHandler);
+	titleField.removeEventListener('click', Mink.growHandler);
+	titleField.removeEventListener('click', Mink.shrinkHandler);
+
+	//change title, favicon
+	var fav = $(minkContainer).find('.minkFavicon');
+	$(titleField).addClass('devalued');
+	fav.addClass('devalued');
+	$(minkContainer).addClass('devalued');
+	
+	//hide explorable label
+	$(minkContainer).find('.minkExplorablesExpander').css('display', 'none');
+	//add 'show duplicate on hover'
+	//tbd
+}
+Mink.revalue = function(minkContainer){
+	//grow
+	var titleField = $(minkContainer).find('.minkTitleField')[0];
+	Mink.grow(titleField);
+
+	//enable mouse events
+	var titleClickable = $(minkContainer).find('.minkTitleClickable')[0];
+	titleClickable.addEventListener('click', Mink.shrinkHandler);
+	//change title, favicon
+	var fav = $(minkContainer).find('.minkFavicon');
+	$(titleField).removeClass('devalued');
+	fav.removeClass('devalued');
+	$(minkContainer).removeClass('devalued');
+	//show explorable label
+	$(minkContainer).find('.minkExplorablesExpander').css('display', '');
+
+	//remove 'show duplicate on hover'
+
+}
+
+
+
+
 Mink.render = function(task){
 	
 	
@@ -992,13 +1020,14 @@ Mink.render = function(task){
 			// Add the table and canvas to the interior container
 			
 			$(task.container.childNodes[1]).remove();
+			
 			task.visual.appendChild(metadataTable);
 			
 			// Add the interior container to the root contianer
 			setTimeout(function(){
 				task.container.appendChild(task.visual)
 				if(task.options){
-					if(task.options.expand){
+					if(task.options.expand && !task.options.devalue){
 						var titleBar = $(task.visual).find('.minkTitleClickable')[0];
 						Mink.grow(titleBar);
 				        setTimeout( function(){
@@ -1007,6 +1036,12 @@ Mink.render = function(task){
 				        }, 250);
 					
 
+					}else if(task.options.devalue){
+						
+						 setTimeout( function(){
+								Mink.devalue(task.visual.childNodes[0]);
+
+					        }, 250);
 					}
 		}
 			

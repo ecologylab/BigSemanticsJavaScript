@@ -50,9 +50,10 @@ minkApp.removeCard = function(pile, card){
 	pile.cards[index].removed = true;
 	pile.cards[index].displayed = false;
 	var cards = minkApp.cardDuplicateMap.get(card.url);
+	var reval = true;
 	for (var i = 0; i < cards.length; i++){
-		minkApp.updateCardDisplay(cards[i]);
-		
+		minkApp.updateCardDisplay(cards[i], reval);
+		reval = reval && false;
 	}
 	
 //	$(card).css('display', 'none');
@@ -147,30 +148,6 @@ function isCardDuplicate(bucket, id){
 	}
 	return false;
 }
-function minkCard(url, div, pile){
-	this.url = url;
-	this.html = div;
-	//is the cards pile in view?
-	this.inView = true;	
-	//is the card already displayed in another pile
-	this.displayed;
-	var bucket = minkApp.cardDuplicateMap.get(this.url)
-	if(bucket){
-		bucket.push(this);
-		this.displayed = !isCardDuplicate(bucket, this);
-		this.duplicate = true;
-		this.html.style.display = "none";
-
-	}else{
-		minkApp.cardDuplicateMap.put(this.url, [this]);
-		this.displayed = true;
-		this.duplicate = false;
-	}
-	this.pile = pile;
-	this.removed = false;
-
-}
-
 
 
 function pileIDGen(url, collection){
@@ -268,15 +245,25 @@ minkApp.hidePreviousQuery = function(){
 	
 }
 
-minkApp.updateCardDisplay = function(card){
+minkApp.updateCardDisplay = function(card, reval){
 	var bucket = minkApp.cardDuplicateMap.get(card.url);
-	card.displayed = !card.removed && !isCardDuplicate(bucket, card);
+	var previousD = card.displayed;
+	card.displayed = !card.removed;
 	if (card.displayed){
-		card.html.style.display = "";
+		
+		if(!previousD){
+			card.html.style.display = "";
+		}
+		if($(card.html).hasClass('devalued') && reval){
+			Mink.revalue(card.html);
+		}else if(card.duplicate){
+			Mink.devalue(card.html);
+		}
 		minkApp.updateDuplicateCount(card.pile);
 		
 	}else{
 		card.html.style.display = "none";
+
 		minkApp.updateDuplicateCount(card.pile);
 
 	}
@@ -1013,10 +1000,10 @@ minkApp.buildDuplicateCount = function(pile){
 		dupCont.innerHTML = txt;
 
 	}
-	pile.HTML.appendChild(dupCont);
+	//pile.HTML.appendChild(dupCont);
 }
 minkApp.updateDuplicateCount = function(pile){
-	var dupCont = $(pile.HTML).find('.minkDupIndicator')[0];
+	/*var dupCont = $(pile.HTML).find('.minkDupIndicator')[0];
 	var dupCount = 0;
 	var rmCount = 0;
 	for (var i = 0; i < pile.cards.length; i++){
@@ -1035,7 +1022,7 @@ minkApp.updateDuplicateCount = function(pile){
 	}else{
 		dupCont.innerHTML = "";
 	}
-	
+	*/
 
 }
 
@@ -1076,20 +1063,21 @@ minkApp.buildCards = function(parent, links, expandCards, pile){
 		spinner.className = "minkLoadingSpinner";
 		cardDiv.appendChild(spinner);
 		cardDiv.setAttribute('minkCardId', link)
+		var card = new minkCard(link, cardDiv, pile);
+		cards.push(card);
+
 		//check to see if there's metadata contained therein{
 		if(link.startsWith('mink::')){
 			var metadata = Mink.minklinkToMetadataMap.get(link);
 			metadata['minkfav'] = faviconLink;
 			var clipping = {viewModel: metadata};
-			RendererBase.addMetadataDisplay(cardDiv, link, clipping, Mink.render, {expand: true, callback: minkApp.contextualize});
+			RendererBase.addMetadataDisplay(cardDiv, link, clipping, Mink.render, {expand: true, callback: minkApp.contextualize, devalue: card.duplicate});
 
 		}else{
-			RendererBase.addMetadataDisplay(cardDiv, link, null, Mink.render, {expand: true, callback: minkApp.contextualize});
+			RendererBase.addMetadataDisplay(cardDiv, link, null, Mink.render, {expand: true, callback: minkApp.contextualize, devalue: card.duplicate});
 
 		}
 		
-		var card = new minkCard(link, cardDiv, pile);
-		cards.push(card);
 	}
 	return cards;
 

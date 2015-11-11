@@ -19,6 +19,20 @@ body{
 	from {opacity: 0; right: 30px;}
 	to {opacity: 1; right: 0px;}
 }
+
+
+.minkTitleField.devalued{
+	color: darkgray;
+	font-weight: normal;
+}
+
+.minkFavicon.devalued{
+	-webkit-filter: opacity(0.5);
+}
+.minkContainer.devalued{
+	-webkit-box-shadow: none;
+}
+
 .minkContainer{
 	width: 500px;
 	/*border-radius: 8px;*/
