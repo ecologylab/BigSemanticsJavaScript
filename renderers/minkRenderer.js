@@ -9,6 +9,7 @@ Mink.rootDocToCollections = new Map;
 Mink.rootDocToExpandedExplorables = new Map;
 
 
+Mink.minklinkToViewModelMap = new Map;
 Mink.minklinkToMetadataMap = new Map;
 
 function buildDiv(className){
@@ -98,18 +99,21 @@ Mink.uuidthing = function(){
 	return url;
 }
 
-Mink.getDestinationPageLink = function(field, addToMaps){
+Mink.getDestinationPageLink = function(field, addToMaps, metadata){
 	var kids = field.value.value;
 	if(addToMaps){
 		for (var i = 0; i < field.value.length; i++){
 			if(field.value[i].name == 'destination_page'){
 					try{
 						var url = "mink::" + field.value[i].value[0].navigatesTo;
-						Mink.minklinkToMetadataMap.put(url, field);
+						//hard-code for google scholar for right now
+						var betterMD = metadata['google_scholar_search'].search_results[i];
+						Mink.minklinkToMetadataMap.put(url, betterMD);
+						Mink.minklinkToViewModelMap.put(url, field);
 						return url;
 					}catch(e){
 						var url = Mink.uuidthing();
-						Mink.minklinkToMetadataMap.put(url, field);
+						Mink.minklinkToViewModelMap.put(url, field);
 						return url;
 
 					}
@@ -118,7 +122,7 @@ Mink.getDestinationPageLink = function(field, addToMaps){
 			}
 		}
 		var url = Mink.uuidthing();
-		Mink.minklinkToMetadataMap.put(url, field);
+		Mink.minklinkToViewModelMap.put(url, field);
 
 
 	}
@@ -127,7 +131,7 @@ Mink.getDestinationPageLink = function(field, addToMaps){
 	
 }
 
-Mink.recursiveSearchForLinked = function(metadataField, list, isRoot, addToMaps){
+Mink.recursiveSearchForLinked = function(metadataField, list, isRoot, addToMaps, metadata){
 	if(metadataField.child_type != null){
 		
 		//hard-ish coded case. should be expanded to include all md where pol\ymorphic thing = SR
@@ -137,7 +141,7 @@ Mink.recursiveSearchForLinked = function(metadataField, list, isRoot, addToMaps)
 			collectionLinks.name = metadataField.name;
 			for (var i = 0; i < metadataField.value.length; i++){
 				try{
-					collectionLinks.links.push(Mink.getDestinationPageLink(metadataField.value[i], addToMaps));
+					collectionLinks.links.push(Mink.getDestinationPageLink(metadataField.value[i], addToMaps, metadata));
 				}catch(err){
 					var wasteTime = 2;
 				}
@@ -161,7 +165,6 @@ Mink.recursiveSearchForLinked = function(metadataField, list, isRoot, addToMaps)
 							collectionLinks.links.push(childField.value[0].navigatesTo);
 
 						}						
-						//Mink.recursiveSearchForLinked(childField, list);
 					}
 				}
 		
@@ -199,7 +202,7 @@ Mink.recursiveSearchForLinked = function(metadataField, list, isRoot, addToMaps)
 		
 }
 
-Mink.getSearchResultLinks = function(metadataFields){
+Mink.getSearchResultLinks = function(metadataFields, metadata){
 	var list = [];
 	for (var i = 0; i < metadataFields.length; i++){
 		var metadataField = metadataFields[i];
@@ -209,7 +212,7 @@ Mink.getSearchResultLinks = function(metadataFields){
 			collectionLinks.name = metadataField.name;
 			for (var i = 0; i < metadataField.value.length; i++){
 				try{
-					collectionLinks.links.push(Mink.getDestinationPageLink(metadataField.value[i], true));
+					collectionLinks.links.push(Mink.getDestinationPageLink(metadataField.value[i], true, metadata));
 				}catch(err){
 					var wasteTime = 2;
 				}
@@ -949,7 +952,8 @@ Mink.render = function(task){
 	
 	
 	
-	Mink.minklinkToMetadataMap.put(task.url, task.fields);
+	Mink.minklinkToViewModelMap.put(task.url, task.fields);
+	
 	var metadataFields = task.fields;
 	var styleInfo = task.style;
 	styleInfo.styles = MINK_MICE_STYLE.styles;
@@ -966,7 +970,7 @@ Mink.render = function(task){
 	}
 	
 	if(task.mmd && task.mmd['meta_metadata'].extends == 'search'){
-		var minkLinks = Mink.getSearchResultLinks(metadataFields, true);
+		var minkLinks = Mink.getSearchResultLinks(metadataFields, task.metadata);
 		var flink = "fav::" + task.url;
 		minkLinks.links.push(flink);
 		var detailDetails = {type: 'minksearchstripper', links: minkLinks};

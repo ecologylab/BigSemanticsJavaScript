@@ -3,19 +3,15 @@
  * Instantiating a BibTextGenerator sets the links to a csl sheet and language it should use.
  * To get bibtex
  * 1. use BibTexGEnerator.prototype.addClipping to add BibTexClippings to the list of clippings to get BibTex for
- * 2. call BibTexGenerator.prepareClippings() - this makes calls to bsService to fill in missing md/mmd as needed. This is also done synchronously and may take a while
  * either:
- *  	call BibTexGenerator.initCiteproc // may take awhile
  *  	call BibTexGenerator.getBibHTML - returns HTML output for your clippings.
- * or:
  *      call BibTextGenerator.getBibJSON - returns array of JSON objects with bibtex
- * or: 
  *      call BibTexGenerator.getBibString - returns string output for your clippings.
-
+		each of these may take a while to process, so kindly pass them a callback function
  * 
  */
 
-function BibTexGenerator(cslLink, languageLink){
+function BibTexGenerator(cslLink, languageLink, cslName){
 	this.citeprocStatus = 'uninitialized';
 	this.clippingStatus = 'unstarted'
 	this.cslLink = cslLink;
@@ -43,19 +39,154 @@ function BibTexGenerator(cslLink, languageLink){
 BibTexGenerator.prototype.addClipping = function(clipping){
 	this.clippings.push(clipping);
 	this.clippingsTotal = this.clippings.length;
+	this.clippingStatus = 'unstarted';
+}
+
+
+BibTexGenerator.prototype.initCiteproc = function(){
+/*	var bibparser = new BibParser(session.composition);
+	this.parseBibAsJSON(function(bibs){*/
+	
+	var citeprocSys = {
+		    // Given a language tag in RFC-4646 form, this method retrieves the
+		    // locale definition file.  This method must return a valid *serialized*
+		    // CSL locale. (In other words, an blob of XML as an unparsed string.  The
+		    // processor will fail on a native XML object or buffer).
+		    retrieveLocale: function (lang){
+		        var xhr = new XMLHttpRequest();
+		        xhr.open('GET', (lang), false);
+		        xhr.send(null);
+		        return xhr.responseText;
+		    },
+
+		    // Given an identifier, this retrieves one citation item.  This method
+		    // must return a valid CSL-JSON object.
+		    retrieveItem: function(id){
+		        return bibs[id];
+		    }
+		};
+	function getProcessor(styleID) {
+		    // Get the CSL style as a serialized string of XML
+		    var xhr = new XMLHttpRequest();
+		    xhr.open('GET', styleID, false);
+		    xhr.send(null);
+		    var styleAsText = xhr.responseText;
+		    // Instantiate and return the engine
+		    var citeproc = new CSL.Engine(citeprocSys, styleAsText);
+		    return citeproc;
+		};
+		
+		this.citeproc = getProcessor(this.cslLink);
+		this.status = 'citeproc'
+		this.citeprocStatus = 'ready';
+}
+
+BibTexGenerator.prototype.getBibHTML = function(callback){
+	
+	function closurify(){
+		var itemIDs = [];
+	    var bibs = [];
+		bibs.sort(BibTexGenerator.prototype.bibComparator);
+
+		for(var i = 0; i < this.clippings.length; i++){
+			if(this.clippings[i].bibJSON){
+				bibs.push(bibJSON);
+			}
+		}
+
+		for (var i in bibs) {
+		    itemIDs.push(bibs[i].id);
+		}
+		citeproc.updateItems(itemIDs);
+		var bibResult = citeproc.makeBibliography();
+		callback( bibResult[1].join('\n'));
+	}
+	if(this.citeprocStatus != 'ready'){
+		this.initCiteproc();
+	}
+	if(this.clippingStatus != 'ready'){
+		this.prepareClippings(function(){
+			closurify();
+		});
+	}else{
+		closurify();
+	}
+	
+	
+ 
+}
+
+BibTexGenerator.prototype.getBibString = function(callback){
+	function closurify(){
+		var itemIDs = [];
+	    var bibs = [];
+	    bibs.sort(BibTexGenerator.prototype.bibComparator);
+
+		for(var i = 0; i < this.clippings.length; i++){
+			if(this.clippings[i].bibJSON){
+				bibs.push(bibJSON);
+			}
+		}
+		callback(this.prototype.bibToString(bibs));
+
+	}
+	if(this.clippingStatus != 'ready'){
+		this.prepareClippings(function(){
+			closurify();
+		});
+	}else{
+		closurify();
+	} 
 	
 }
+
+	 
+BibTexGenerator.prototype.bibToString = function(){
+	
+	function closurify(){
+		var bibs = [];
+		bibs.sort(BibTexGenerator.prototype.bibComparator);
+
+	    for(var i = 0; i < this.clippings.length; i++){
+		  	 if(this.clippings[i].bibJSON){
+		  		 bibs.push(bibJSON);
+		  	 }
+	    }
+
+		var bibString = "";
+		for ( var key in bibs){
+			bibString += this.createStringBibEntry(bibs[key]);
+		} 
+		callback(bibString);
+	}
+	
+	
+	if(this.clippingStatus != 'ready'){
+		this.prepareClippings(function(){
+			closurify();
+		});
+	}
+	else{
+		closurify();
+	}
+}
+
+
+	 
+
+
 
 
 /*
  * Functions for preppering clipppings
  */
-BibTexGenerator.prototype.markReadyAndCheckIfDone = function(){
+BibTexGenerator.prototype.markReadyAndCheckIfDone = function(callback){
 	this.clippingsFinished++;					 
 	if(this.clippingsFinished == this.clippingsTotal){
 		this.logCalls();
-		this.clippingsToBib(metadataList, callback);
+		this.clippingsToBib(metadataList);
 		this.clippingStatus = 'ready';
+		callback();
 	}
 }
 
@@ -246,7 +377,7 @@ BibTexGenerator.prototype.makeUrlReadable = function(url){
 	//attempts to get rid of common url prefixes
 	var newUrl = url.replace(/(.*?:\/\/)?(www[0-9]?\.)?/i, '');
 	return newUrl;
-
+}
 // Detect id collision and alter id to avoid collision
 	
 BibTexGenerator.prototype.avoidIdCollision = function(result , idHash)
@@ -291,7 +422,7 @@ BibTexGenerator.prototype.formatAuthor = function(author)
 	result += names[1] && names.length > 2 ? " " + names[1] : "";
 	// result += result[result.length-1] == "." ? ", " : ".,";
 	return result;
-};
+}
 
 BibTexGenerator.prototype.retrieveSiteName = function(metadata){
 	try{
@@ -329,7 +460,7 @@ BibTexGenerator.prototype.clippingsToBib = function(){
 
 
 
-BibTexGenerator.prototype.prepareClippings(){
+BibTexGenerator.prototype.prepareClippings = function(callback){
 
 	
 
@@ -354,7 +485,7 @@ BibTexGenerator.prototype.prepareClippings(){
 				this.mmdFromClippings++;
 				clipping.metadata = BSUtils.unwrap(clipping.metadata);
 				clipping.mmd = BSUtils.unwrapMmd(clipping.mmd);
-				this.markReadyAndCheckIfDone();
+				this.markReadyAndCheckIfDone(callback);
 				break;
 			case 'mmd_from_metadata_name':
 				this.metadatFromClippings++;
@@ -368,7 +499,7 @@ BibTexGenerator.prototype.prepareClippings(){
 						result = BSUtils.unwrap(result);
 						clipping.mmd = BSUtils.unwrap(result);
 					}
-					this.markReadyAndCheckIfDone();
+					this.markReadyAndCheckIfDone(callback);
 				});
 				break;
 			case 'md_and_mmd_from_link':
@@ -383,129 +514,16 @@ BibTexGenerator.prototype.prepareClippings(){
 						clipping.metadata.bibtex_type = result.mmd.bibtex_type;
 						
 					}
-					this.markReadyAndCheckIfDone();
+					this.markReadyAndCheckIfDone(callback);
 				});
 				break;
 			default:
 				console.log('following clipping in bonkers');
 				console.log(clipping);
-				this.markReadyAndCheckIfDone();
+				this.markReadyAndCheckIfDone(callback);
 			}
 	
 		})(this.clippings[i]);
-
-}
-
-
-BibTexGenerator.prototype.initCiteproc = function(){
-/*	var bibparser = new BibParser(session.composition);
-	this.parseBibAsJSON(function(bibs){*/
-	
-	var citeprocSys = {
-		    // Given a language tag in RFC-4646 form, this method retrieves the
-		    // locale definition file.  This method must return a valid *serialized*
-		    // CSL locale. (In other words, an blob of XML as an unparsed string.  The
-		    // processor will fail on a native XML object or buffer).
-		    retrieveLocale: function (lang){
-		        var xhr = new XMLHttpRequest();
-		        xhr.open('GET', (this.languageLink), false);
-		        xhr.send(null);
-		        return xhr.responseText;
-		    },
-
-		    // Given an identifier, this retrieves one citation item.  This method
-		    // must return a valid CSL-JSON object.
-		    retrieveItem: function(id){
-		        return bibs[id];
-		    }
-		};
-	function getProcessor(styleID) {
-		    // Get the CSL style as a serialized string of XML
-		    var xhr = new XMLHttpRequest();
-		    xhr.open('GET', (this.cslLink), false);
-		    xhr.send(null);
-		    var styleAsText = xhr.responseText;
-		    // Instantiate and return the engine
-		    var citeproc = new CSL.Engine(citeprocSys, styleAsText);
-		    return citeproc;
-		};
-		
-		this.citeproc = getProcessor(this.cslName);
-		this.status = 'citeproc'
-		this.citeprocStatus = 'ready';
-}
-
-BibTexGenerator.prototype.getBibHTML = function(){
-	 
-	if(this.citeprocState != 'ready' && this.clippingStatus != 'ready'){
-		throw "citeproc and clippings not initialized";
-	}else if(this.citeprocState != 'ready' && this.clippingStatus == 'in progress')){
-		throw "citeproc not initialized and clippings still loading";
-	}else if(this.citeprocState == 'ready' && this.clippingStatus == 'unstarted'){
-		throw "clipping metadata/mmd fetching not started";
-	}else if(this.citeprocState == 'ready' && this.clippingStatus == 'in progress'){
-		throw "clippings still loading";
 	}
-	
-	var itemIDs = [];
-    var bibs = [];
-	bibs.sort(BibTexGenerator.prototype.bibComparator);
-
-	for(var i = 0; i < this.clippings.length; i++){
-		if(this.clippings[i].bibJSON){
-			bibs.push(bibJSON);
-		}
-	}
-
-	for (var i in bibs) {
-	    itemIDs.push(bibs[i].id);
-	}
-	citeproc.updateItems(itemIDs);
-	var bibResult = citeproc.makeBibliography();
-	return bibResult[1].join('\n');
-     
 }
 
-BibTexGenerator.prototype.getBibString = function(){
-	if(this.clippingStatus == 'unstarted'){
-		throw "clipping metadata/mmd fetching not started";
-	}else if(this.clippingStatus == 'in progress'){
-		throw "clippings still loading";
-	}  
-	var itemIDs = [];
-    var bibs = [];
-    bibs.sort(BibTexGenerator.prototype.bibComparator);
-
-	for(var i = 0; i < this.clippings.length; i++){
-		if(this.clippings[i].bibJSON){
-			bibs.push(bibJSON);
-		}
-	}
-	return this.prototype.bibToString(bibs);
-
-}
-
-	 
-BibTexGenerator.prototype.bibToString = function(){
-	if(this.clippingStatus == 'unstarted'){
-		throw "clipping metadata/mmd fetching not started";
-	}else if(this.clippingStatus == 'in progress'){
-		throw "clippings still loading";
-	}  
-	var bibs = [];
-	bibs.sort(BibTexGenerator.prototype.bibComparator);
-
-    for(var i = 0; i < this.clippings.length; i++){
-  	 if(this.clippings[i].bibJSON){
-  		 bibs.push(bibJSON);
-  	 }
-
-	var bibString = "";
-	for ( var key in bibs)
-	{
-		bibString += this.createStringBibEntry(bibs[key]);
-	} 
-	return bibString;
-}
-
-	 

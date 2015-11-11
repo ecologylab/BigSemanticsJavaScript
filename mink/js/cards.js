@@ -20,7 +20,7 @@ function minkCard(url, div, pile){
 	this.pile = pile;
 	this.removed = false;
 
-}
+
 }
 
 minkCard.prototype.setOnScreen = function(onScreen){
@@ -53,7 +53,6 @@ minkCard.prototype.setValuedByMink = function(valuedByMink){
 
 }
 minkCard.prototype.updateDisplay = function(){
-	if(this.displayed == 'valued')
 }
 /*
 

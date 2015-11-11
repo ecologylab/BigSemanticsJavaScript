@@ -1068,7 +1068,7 @@ minkApp.buildCards = function(parent, links, expandCards, pile){
 
 		//check to see if there's metadata contained therein{
 		if(link.startsWith('mink::')){
-			var metadata = Mink.minklinkToMetadataMap.get(link);
+			var metadata = Mink.minklinkToViewModelMap.get(link);
 			metadata['minkfav'] = faviconLink;
 			var clipping = {viewModel: metadata};
 			RendererBase.addMetadataDisplay(cardDiv, link, clipping, Mink.render, {expand: true, callback: minkApp.contextualize, devalue: card.duplicate});
