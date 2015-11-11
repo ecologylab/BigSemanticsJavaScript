@@ -57,7 +57,8 @@ RendererBase.addMetadataDisplay = function(container, url, clipping, renderer, o
     if (!clipping.metadata && clipping.rawMetadata) {
       clipping.rawMetadata = simpl.deserialize(clipping.rawMetadata);
       clipping.metadata = BSUtils.unwrap(clipping.rawMetadata);
-      
+      clipping.rawMetadata.deserialized = true;
+  
     }
   }
 
