@@ -37,11 +37,31 @@ function BibTexGenerator(cslLink, languageLink, cslName){
 
 
 BibTexGenerator.prototype.addClipping = function(clipping){
-	this.clippings.push(clipping);
-	this.clippingsTotal = this.clippings.length;
-	this.clippingsFinished = 0;
+	
+	function whenDone(that, callback){
+		if(that.clippingStatus == 'ready'){
+			this.clippings.push(clipping);
+			this.clippingsTotal = this.clippings.length;
+			this.clippingsFinished = 0;
 
-	this.clippingStatus = 'unstarted';
+			this.clippingStatus = 'unstarted';
+
+		}else{
+			setTimeout(whenDone, 500);
+		}
+		
+	}
+
+	if(this.clippingStatus == 'in progress'){
+		whenDone()
+	}else{
+		this.clippings.push(clipping);
+		this.clippingsTotal = this.clippings.length;
+		this.clippingsFinished = 0;
+
+		this.clippingStatus = 'unstarted';
+
+	}
 	
 }
 
