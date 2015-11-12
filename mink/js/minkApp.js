@@ -14,7 +14,8 @@ minkApp.offScreenColumnsRight = 0;
 minkApp.favorites = [];
 minkApp.currentQuery = null;
 minkApp.queryMap = new Map();
-var bsService = new BSAutoSwitch(['eganfccpbldleckkpfomlgcbadhmjnlf', 'gdgmmfgjalcpnakohgcfflgccamjoipd']);
+//var bsService = new BSAutoSwitch(['eganfccpbldleckkpfomlgcbadhmjnlf', 'gdgmmfgjalcpnakohgcfflgccamjoipd']);
+var bsService = new BSService();
 minkApp.cardDuplicateMap = new Map();
 
 

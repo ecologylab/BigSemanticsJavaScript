@@ -46,7 +46,7 @@ BibTexGenerator.prototype.addClipping = function(clipping){
 BibTexGenerator.prototype.initCiteproc = function(){
 /*	var bibparser = new BibParser(session.composition);
 	this.parseBibAsJSON(function(bibs){*/
-	
+	var that = this;
 	var citeprocSys = {
 		    // Given a language tag in RFC-4646 form, this method retrieves the
 		    // locale definition file.  This method must return a valid *serialized*
@@ -54,7 +54,7 @@ BibTexGenerator.prototype.initCiteproc = function(){
 		    // processor will fail on a native XML object or buffer).
 		    retrieveLocale: function (lang){
 		        var xhr = new XMLHttpRequest();
-		        xhr.open('GET', (lang), false);
+		        xhr.open('GET', that.languageLink, false);
 		        xhr.send(null);
 		        return xhr.responseText;
 		    },
@@ -62,7 +62,12 @@ BibTexGenerator.prototype.initCiteproc = function(){
 		    // Given an identifier, this retrieves one citation item.  This method
 		    // must return a valid CSL-JSON object.
 		    retrieveItem: function(id){
-		        return bibs[id];
+		        for(var i = 0; i < that.bibs.length; i++){
+		        	if(that.bibs[i].id == id){
+		        		return that.bibs[i];
+		        	}
+		        }
+		    	return {};
 		    }
 		};
 	function getProcessor(styleID) {
@@ -83,91 +88,114 @@ BibTexGenerator.prototype.initCiteproc = function(){
 
 BibTexGenerator.prototype.getBibHTML = function(callback){
 	
-	function closurify(){
+	function closurify(that, callback){
 		var itemIDs = [];
-	    var bibs = [];
-		bibs.sort(BibTexGenerator.prototype.bibComparator);
-
-		for(var i = 0; i < this.clippings.length; i++){
-			if(this.clippings[i].bibJSON){
-				bibs.push(bibJSON);
-			}
+	   
+		for (var i in that.bibs) {
+		    itemIDs.push(that.bibs[i].id);
 		}
-
-		for (var i in bibs) {
-		    itemIDs.push(bibs[i].id);
-		}
-		citeproc.updateItems(itemIDs);
-		var bibResult = citeproc.makeBibliography();
+		that.citeproc.updateItems(itemIDs);
+		var bibResult = that.citeproc.makeBibliography();
 		callback( bibResult[1].join('\n'));
 	}
+	
+	
+	var that = this;
+
+	function whenDone(that, callback){
+		if(that.clippingStatus == 'ready'){
+			closurify(that, callback);
+
+		}else{
+			setTimeout(whenDone, 500);
+		}
+		
+	}
+	
 	if(this.citeprocStatus != 'ready'){
 		this.initCiteproc();
 	}
-	if(this.clippingStatus != 'ready'){
-		this.prepareClippings(function(){
-			closurify();
-		});
+	if(this.clippingStatus == 'ready'){
+		closurify(that, callback);
+
+	}else if (this.clippingState == 'in progress'){
+			whenDone(that, callback);	
 	}else{
-		closurify();
+		this.prepareClippings(function(){
+			closurify(that, callback);
+		}, that);
+
 	}
 	
 	
  
 }
 
-BibTexGenerator.prototype.getBibString = function(callback){
-	function closurify(){
-		var itemIDs = [];
-	    var bibs = [];
-	    bibs.sort(BibTexGenerator.prototype.bibComparator);
-
-		for(var i = 0; i < this.clippings.length; i++){
-			if(this.clippings[i].bibJSON){
-				bibs.push(bibJSON);
-			}
-		}
-		callback(this.prototype.bibToString(bibs));
+BibTexGenerator.prototype.getBibJSON = function(callback){
+	function closurify(that, callback){
+		callback(that.bibs);
 
 	}
-	if(this.clippingStatus != 'ready'){
-		this.prepareClippings(function(){
-			closurify();
-		});
+	var that = this;
+
+	function whenDone(that, callback){
+		if(that.clippingStatus == 'ready'){
+			closurify(that, callback);
+
+		}else{
+			setTimeout(whenDone, 500);
+		}
+		
+	}
+	
+	if(this.clippingStatus == 'ready'){
+		closurify(that, callback);
+
+	}else if (this.clippingState == 'in progress'){
+			whenDone(that, callback);	
 	}else{
-		closurify();
-	} 
+		this.prepareClippings(function(){
+			closurify(that, callback);
+		}, that);
+
+	}
 	
 }
 
 	 
-BibTexGenerator.prototype.bibToString = function(){
+BibTexGenerator.prototype.getBibString = function(callback){
 	
-	function closurify(){
-		var bibs = [];
-		bibs.sort(BibTexGenerator.prototype.bibComparator);
-
-	    for(var i = 0; i < this.clippings.length; i++){
-		  	 if(this.clippings[i].bibJSON){
-		  		 bibs.push(bibJSON);
-		  	 }
-	    }
-
+	function closurify(that, callback){
+	
 		var bibString = "";
-		for ( var key in bibs){
-			bibString += this.createStringBibEntry(bibs[key]);
+		for ( var key in that.bibs){
+			bibString += that.createStringBibEntry(that.bibs[key]);
 		} 
 		callback(bibString);
 	}
-	
-	
-	if(this.clippingStatus != 'ready'){
-		this.prepareClippings(function(){
-			closurify();
-		});
+	var that = this;
+
+
+	function whenDone(that, callback){
+		if(that.clippingStatus == 'ready'){
+			closurify(that, callback);
+
+		}else{
+			setTimeout(whenDone, 500);
+		}
+		
 	}
-	else{
-		closurify();
+	
+	if(this.clippingStatus == 'ready'){
+		closurify(that, callback);
+
+	}else if (this.clippingState == 'in progress'){
+			whenDone(that, callback);	
+	}else{
+		this.prepareClippings(function(){
+			closurify(that, callback);
+		}, that);
+
 	}
 }
 
@@ -180,12 +208,21 @@ BibTexGenerator.prototype.bibToString = function(){
 /*
  * Functions for preppering clipppings
  */
-BibTexGenerator.prototype.markReadyAndCheckIfDone = function(callback){
-	this.clippingsFinished++;					 
-	if(this.clippingsFinished == this.clippingsTotal){
-		this.logCalls();
-		this.clippingsToBib(metadataList);
-		this.clippingStatus = 'ready';
+BibTexGenerator.prototype.markReadyAndCheckIfDone = function(that, callback){
+	that.clippingsFinished++;					 
+	if(that.clippingsFinished == that.clippingsTotal){
+		that.logCalls();
+		that.clippingsToBib(that);
+		that.clippingStatus = 'ready';
+		that.bibs = [];
+
+	    for(var i = 0; i < that.clippings.length; i++){
+		  	 if(that.clippings[i].bibJSON){
+		  		 that.bibs.push(that.clippings[i].bibJSON);
+		  	 }
+	    }
+		that.bibs.sort(that.bibComparator);
+
 		callback();
 	}
 }
@@ -232,8 +269,26 @@ BibTexGenerator.prototype.bibFromMmd = function(bib, mmd, metadata){
 		}
 	}
 }
+BibTexGenerator.prototype.flattenAuthorArray = function(authors, that){
+	if(!authors)
+		return "";
+	try{
+		var result = "";
+		for (var i = 0; i < authors.length; i++)
+		{
+			result += that.formatAuthor(authors[i].title) + " and ";
+		}
+		var pos = result.lastIndexOf("and");
+		result = result.slice(0 , pos);
+		return result;
+	}
+	catch(e){
+		console.log("Error flatteningAuthor Array " + authors + "error " + e);
+		return "";
+	}
+};
 
-BibTexGenerator.prototype.createBib	= function(clipping){	
+BibTexGenerator.prototype.createBib	= function(clipping, that){	
 	try{
 		var metadata = clipping.metadata;
 		var mmd = clipping.mmd['meta_metadata'];
@@ -245,7 +300,7 @@ BibTexGenerator.prototype.createBib	= function(clipping){
 		if(metadata.authors){
 			bib.first_author  = metadata.authors ? metadata.authors[0].title : "";
 		}
-		bib.author = this.flattenAuthorArray(metadata.authors);
+		bib.author = that.flattenAuthorArray(metadata.authors, that);
 		bib.year    = metadata.year ? metadata.year : ( metadata.source ? metadata.source.year : metadata.filing_date );
 		if(bib['year'])
 		    bib['year']    = parseInt(bib['year']);
@@ -281,7 +336,7 @@ BibTexGenerator.prototype.createBib	= function(clipping){
 		if(bib.author){
 			bib['URL'] = undefined;
 		}else{
-			bib['URL'] = this.makeUrlReadable(bib['URL']); 
+			bib['URL'] = that.makeUrlReadable(bib['URL']); 
 
 		}
 		
@@ -289,7 +344,7 @@ BibTexGenerator.prototype.createBib	= function(clipping){
 		  return "";
 		}
 		else{
-			 bib['id']  = this.generateBibId(bib); 
+			 bib['id']  = that.generateBibId(bib); 
 		  return bib;
 		}
 	}
@@ -343,22 +398,24 @@ BibTexGenerator.prototype.generateBibId = function(bib )
 //Given a bib, create a bibtex string for the bib
 BibTexGenerator.prototype.createStringBibEntry = function(bib)
 {
-	if(!bib)
+	var bibC = jQuery.extend(true, {}, bib);
+
+	if(!bibC)
 		return "";
 	try{
-	  var entry  = "@" + bib['type'] + "{ ";
-		entry += bib['id'] + " , \n";	
+	  var entry  = "@" + bibC['type'] + "{ ";
+		entry += bibC['id'] + " , \n";	
 		
 		// These fields are unwanted after this point
-		bib['id']           = undefined;
-		bib['first_author'] = undefined;
-		bib['type']         = undefined;
+		bibC['id']           = undefined;
+		bibC['first_author'] = undefined;
+		bibC['type']         = undefined;
 		
 		var empty = true;
-		for (field in bib){
-			if( bib[field])
+		for (field in bibC){
+			if( bibC[field])
 			{
-				entry+= field + "= \"" + bib[field] + "\" , \n";
+				entry+= field + "= \"" + bibC[field] + "\" , \n";
 				empty = false;
 			}
 		}
@@ -368,7 +425,7 @@ BibTexGenerator.prototype.createStringBibEntry = function(bib)
 	}
 	catch(e)
 	{
-		console.log("Error when creating string bibtex entry for " + JSON.stringify(bib) + " Error message " + e);
+		console.log("Error when creating string bibtex entry for " + JSON.stringify(bibC) + " Error message " + e);
 		return undefined; 
 	}
 };
@@ -437,14 +494,14 @@ BibTexGenerator.prototype.retrieveSiteName = function(metadata){
 
 
 
-BibTexGenerator.prototype.clippingsToBib = function(){
+BibTexGenerator.prototype.clippingsToBib = function(that){
 	try{ 
 		var bibsHash = {};
 		var bibString = "";
 		var idHash = {};
-		for (var i = 0; i < this.clippings.length; i++) {
-			var clipping = this.clippings[i];
-			clipping.bibJSON = this.createBib(clipping);
+		for (var i = 0; i < that.clippings.length; i++) {
+			var clipping = that.clippings[i];
+			clipping.bibJSON = that.createBib(clipping, that);
 			if(!(clipping.bibJSON.id in bibsHash)){ 
 				 bibsHash[clipping.bibJSON.id] = "X";				 
 			}else{
@@ -460,38 +517,42 @@ BibTexGenerator.prototype.clippingsToBib = function(){
 
 
 
-BibTexGenerator.prototype.prepareClippings = function(callback){
+BibTexGenerator.prototype.prepareClippings = function(callback, that){
 
-	
 
 	function howToProcess(clip){
-		if(clipping.metadata && clipping.mmd){
+		if(clip.metadata && clip.mmd){
 			return 'ready';
-		}else if(clipping.metadata){
+		}else if(clip.metadata){
 			return 'mmd_from_metadata_name';
-		}else if(clipping.link){
+		}else if(clip.link){
 			return 'md_and_mmd_from_link';
 		}
 	}
 	
-	this.clippingStatus = 'in progress';
-	for(i in this.clippings){
+	that.clippingStatus = 'in progress';
+	for(i in that.clippings){
 		(function(clipping){
 			
 			var whatToDo = howToProcess(clipping);
 			switch(whatToDo){
 			case 'ready':
-				this.metadatFromClippings++;
-				this.mmdFromClippings++;
+				that.metadatFromClippings++;
+				that.mmdFromClippings++;
 				clipping.metadata = BSUtils.unwrap(clipping.metadata);
 				clipping.mmd = BSUtils.unwrapMmd(clipping.mmd);
-				this.markReadyAndCheckIfDone(callback);
+				that.markReadyAndCheckIfDone(that, callback);
 				break;
 			case 'mmd_from_metadata_name':
-				this.metadatFromClippings++;
-				this.mmdFromService++;
+				that.metadatFromClippings++;
+				that.mmdFromService++;
 				clipping.metadata = BSUtils.unwrap(clipping.metadata);
-				bsService.loadMmd(metadata.mm_name, null, function(err, result){
+				var mdname = clipping.metadata.meta_metadata_name;
+				if(!mdname){
+					mdname =	clipping.metadata.mm_name
+				}
+
+				bsService.loadMmd(mdname, null, function(err, result){
 					if(err){
 						console.log('error getting mmd for bib');
 					}
@@ -499,12 +560,12 @@ BibTexGenerator.prototype.prepareClippings = function(callback){
 						result = BSUtils.unwrap(result);
 						clipping.mmd = BSUtils.unwrap(result);
 					}
-					this.markReadyAndCheckIfDone(callback);
+					that.markReadyAndCheckIfDone(that, callback);
 				});
 				break;
 			case 'md_and_mmd_from_link':
-				this.metadataFromService++;
-				this.mmdFromService++;
+				that.metadataFromService++;
+				that.mmdFromService++;
 				bsService.loadMetadata(clipping.link, null, function(err, result){
 					if(err){
 						console.log(err);
@@ -514,16 +575,16 @@ BibTexGenerator.prototype.prepareClippings = function(callback){
 						clipping.metadata.bibtex_type = result.mmd.bibtex_type;
 						
 					}
-					this.markReadyAndCheckIfDone(callback);
+					that.markReadyAndCheckIfDone(that, callback);
 				});
 				break;
 			default:
 				console.log('following clipping in bonkers');
 				console.log(clipping);
-				this.markReadyAndCheckIfDone(callback);
+				that.markReadyAndCheckIfDone(that, callback);
 			}
 	
-		})(this.clippings[i]);
+		})(that.clippings[i]);
 	}
 }
 
