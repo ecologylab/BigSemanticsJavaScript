@@ -37,23 +37,23 @@ function BibTexGenerator(cslLink, languageLink, cslName){
 
 
 BibTexGenerator.prototype.addClipping = function(clipping){
-	
-	function whenDone(that, callback){
-		if(that.clippingStatus == 'ready'){
-			this.clippings.push(clipping);
-			this.clippingsTotal = this.clippings.length;
-			this.clippingsFinished = 0;
+	var that = this;
 
-			this.clippingStatus = 'unstarted';
+	function whenDone(that){
+		if(that.clippingStatus == 'ready'){
+			that.clippings.push(clipping);
+			that.clippingsTotal = this.clippings.length;
+			that.clippingsFinished = 0;
+
+			that.clippingStatus = 'unstarted';
 
 		}else{
 			setTimeout(whenDone, 500);
 		}
 		
 	}
-
 	if(this.clippingStatus == 'in progress'){
-		whenDone()
+		whenDone(that)
 	}else{
 		this.clippings.push(clipping);
 		this.clippingsTotal = this.clippings.length;
