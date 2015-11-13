@@ -21,11 +21,17 @@ function BibTexGenerator(cslLink, languageLink, cslName, documents){
 		this.cslName = 'modern-language-association-with-url'
 	}
 	this.documents = [];
+	this.documentLocationDict = {};
 
 	if(documents){
 		this.documents = documents;
+		for(var i = 0; i < documents.length; i++)
+		{	
+			this.documentLocationDict[documents[i].link] = 'X';
+		}
+
 	}
-	this.documentsTotal = 0;
+	this.documentsTotal = this.documents.length;
 	this.documentsFinished = 0;
 	this.citeproc = null;
 	this.HTML;
@@ -34,7 +40,6 @@ function BibTexGenerator(cslLink, languageLink, cslName, documents){
 	this.metadataFromDocuments = 0;
 	this.mmdFromService = 0;
 	this.mmdFromDocuments = 0;
-	this.documentLocationDict = {};
 
 }
 
@@ -59,10 +64,10 @@ BibTexGenerator.prototype.addClipping = function(clipping){
 					clipping.metadata.outlinks[k].doc.clipping_created = date;
 				}
 				if(clipping.metadata.outlinks[k].doc.rawMetadata){
-					this.addDocument(new BibTexDocument(element.metadata.outlinks[k].doc.location, clipping.metadata.outlinks[k].doc.rawMetadata, null, clipping.metadata.outlinks[k].doc.clipping_created));
+					this.addDocument(new BibTexDocument(clipping.metadata.outlinks[k].doc.location, clipping.metadata.outlinks[k].doc.rawMetadata, null, clipping.metadata.outlinks[k].doc.clipping_created));
 
 				}else{
-					this.addDocument(new BibTexDocument(element.metadata.outlinks[k].doc.location, null, null, clipping.metadata.outlinks[k].doc.clipping_created));
+					this.addDocument(new BibTexDocument(clipping.metadata.outlinks[k].doc.location, null, null, clipping.metadata.outlinks[k].doc.clipping_created));
 
 				}
 
@@ -360,6 +365,9 @@ BibTexGenerator.prototype.flattenAuthorArray = function(authors, that){
 BibTexGenerator.prototype.createBib	= function(document, that){	
 	try{
 		var metadata = document.metadata;
+		if(document.mmd == 'skip'){
+			return {};
+		}
 		var mmd = document.mmd['meta_metadata'];
 		var bib = {};
 		bib.type   = mmd.bibtex_type;
@@ -571,6 +579,7 @@ BibTexGenerator.prototype.documentsToBib = function(that){
 		for (var i = 0; i < that.documents.length; i++) {
 			var document = that.documents[i];
 			document.bibJSON = that.createBib(document, that);
+			
 			if(!(document.bibJSON.id in bibsHash)){ 
 				 bibsHash[document.bibJSON.id] = "X";				 
 			}else{
@@ -628,6 +637,7 @@ BibTexGenerator.prototype.prepareDocuments = function(callback, that){
 				bsService.loadMmd(mdname, null, function(err, result){
 					if(err){
 						console.log('error getting mmd for bib');
+						document.mmd = 'skip';
 					}
 					else{		
 						result = BSUtils.unwrap(result);
@@ -646,6 +656,8 @@ BibTexGenerator.prototype.prepareDocuments = function(callback, that){
 				bsService.loadMetadata(document.link, null, function(err, result){
 					if(err){
 						console.log(err);
+						document.mmd = 'skip';
+
 					}else{
 						document.mmd = BSUtils.unwrap(result.mmd);
 						document.metadata = BSUtils.unwrap(result.metadata);
