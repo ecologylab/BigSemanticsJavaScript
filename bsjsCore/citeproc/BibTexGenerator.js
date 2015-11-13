@@ -2,65 +2,107 @@
 /*
  * Instantiating a BibTextGenerator sets the links to a csl sheet and language it should use.
  * To get bibtex
- * 1. use BibTexGEnerator.prototype.addClipping to add BibTexClippings to the list of clippings to get BibTex for
+ * 1. use BibTexGEnerator.prototype.addDocument to add BibTexDocuments to the list of documents to get BibTex for
  * either:
- *  	call BibTexGenerator.getBibHTML - returns HTML output for your clippings.
+ *  	call BibTexGenerator.getBibHTML - returns HTML output for your documents.
  *      call BibTextGenerator.getBibJSON - returns array of JSON objects with bibtex
- *      call BibTexGenerator.getBibString - returns string output for your clippings.
+ *      call BibTexGenerator.getBibString - returns string output for your documents.
 		each of these may take a while to process, so kindly pass them a callback function
  * 
  */
 
-function BibTexGenerator(cslLink, languageLink, cslName){
+function BibTexGenerator(cslLink, languageLink, cslName, documents){
 	this.citeprocStatus = 'uninitialized';
-	this.clippingStatus = 'unstarted'
+	this.documentStatus = 'unstarted'
 	this.cslLink = cslLink;
 	this.languageLink = languageLink;
 	this.cslName = cslName;
 	if(!cslName){
 		this.cslName = 'modern-language-association-with-url'
 	}
-	this.clippings = [];
-	this.clippingsTotal = 0;
-	this.clippingsFinished = 0;
+	this.documents = [];
+
+	if(documents){
+		this.documents = documents;
+	}
+	this.documentsTotal = 0;
+	this.documentsFinished = 0;
 	this.citeproc = null;
 	this.HTML;
 	this.bibString;
 	this.metadataFromService = 0;
-	this.metadataFromClippings = 0;
+	this.metadataFromDocuments = 0;
 	this.mmdFromService = 0;
-	this.mmdFromClippings = 0;
+	this.mmdFromDocuments = 0;
+	this.documentLocationDict = {};
 
 }
 
 
-
-
 BibTexGenerator.prototype.addClipping = function(clipping){
-	var that = this;
+	
+	var date = this.getClippingDate(clipping);
+	
+	
+	if(clipping.metadata){
+		if(clipping.metadata.source){
+			if(date){
+				clipping.metadata.source.clipping_created = date;
+			}
+			this.addDocument(new BibTexDocument(clipping.metadata.source.location, null, null, clipping.metadata.source.clipping_created));
 
-	function whenDone(that){
-		if(that.clippingStatus == 'ready'){
-			that.clippings.push(clipping);
-			that.clippingsTotal = this.clippings.length;
-			that.clippingsFinished = 0;
-
-			that.clippingStatus = 'unstarted';
-
-		}else{
-			setTimeout(whenDone, 500);
 		}
-		
+		for (k in clipping.metadata.outlinks)
+		 {
+			if(clipping.metadata.outlinks[k].doc){
+				if(date){
+					clipping.metadata.outlinks[k].doc.clipping_created = date;
+				}
+				if(clipping.metadata.outlinks[k].doc.rawMetadata){
+					this.addDocument(new BibTexDocument(element.metadata.outlinks[k].doc.location, clipping.metadata.outlinks[k].doc.rawMetadata, null, clipping.metadata.outlinks[k].doc.clipping_created));
+
+				}else{
+					this.addDocument(new BibTexDocument(element.metadata.outlinks[k].doc.location, null, null, clipping.metadata.outlinks[k].doc.clipping_created));
+
+				}
+
+			} 
+		 }
 	}
-	if(this.clippingStatus == 'in progress'){
-		whenDone(that)
-	}else{
-		this.clippings.push(clipping);
-		this.clippingsTotal = this.clippings.length;
-		this.clippingsFinished = 0;
 
-		this.clippingStatus = 'unstarted';
+}
 
+BibTexGenerator.prototype.addDocument = function(document){
+	var that = this;
+	if(that.documentLocationDict[document.link] != "X"){			
+		
+		
+		function whenDone(that){
+			if(that.documentStatus == 'ready'){
+			
+				that.documentLocationDict[document.link] = 'X';
+				that.documents.push(document);
+				that.documentsTotal = that.documents.length;
+				that.documentsFinished = 0;
+	
+			}else{
+				setTimeout(function(){
+					whenDone(that);
+				}, 500);
+			}
+			
+		}
+		if(this.documentStatus == 'in progress'){
+			whenDone(that)
+		}else{
+			that.documentLocationDict[document.link] = 'X';
+			this.documents.push(document);
+			this.documentsTotal = this.documents.length;
+			this.documentsFinished = 0;
+	
+			this.documentStatus = 'unstarted';
+	
+		}
 	}
 	
 }
@@ -126,7 +168,7 @@ BibTexGenerator.prototype.getBibHTML = function(callback){
 	var that = this;
 
 	function whenDone(that, callback){
-		if(that.clippingStatus == 'ready'){
+		if(that.documentStatus == 'ready'){
 			closurify(that, callback);
 
 		}else{
@@ -138,13 +180,13 @@ BibTexGenerator.prototype.getBibHTML = function(callback){
 	if(this.citeprocStatus != 'ready'){
 		this.initCiteproc();
 	}
-	if(this.clippingStatus == 'ready'){
+	if(this.documentStatus == 'ready'){
 		closurify(that, callback);
 
-	}else if (this.clippingState == 'in progress'){
+	}else if (this.documentStatus == 'in progress'){
 			whenDone(that, callback);	
 	}else{
-		this.prepareClippings(function(){
+		this.prepareDocuments(function(){
 			closurify(that, callback);
 		}, that);
 
@@ -162,22 +204,24 @@ BibTexGenerator.prototype.getBibJSON = function(callback){
 	var that = this;
 
 	function whenDone(that, callback){
-		if(that.clippingStatus == 'ready'){
+		if(that.documentStatus == 'ready'){
 			closurify(that, callback);
 
 		}else{
-			setTimeout(whenDone, 500);
-		}
+			setTimeout(function(){
+				whenDone(that, callback);
+			}, 500);		}
 		
 	}
 	
-	if(this.clippingStatus == 'ready'){
+	if(this.documentStatus == 'ready'){
 		closurify(that, callback);
 
-	}else if (this.clippingState == 'in progress'){
-			whenDone(that, callback);	
-	}else{
-		this.prepareClippings(function(){
+	}else if (this.documentStatus == 'in progress'){
+		setTimeout(function(){
+			whenDone(that, callback);
+		}, 500);	}else{
+		this.prepareDocuments(function(){
 			closurify(that, callback);
 		}, that);
 
@@ -200,22 +244,24 @@ BibTexGenerator.prototype.getBibString = function(callback){
 
 
 	function whenDone(that, callback){
-		if(that.clippingStatus == 'ready'){
+		if(that.documentStatus == 'ready'){
 			closurify(that, callback);
 
 		}else{
-			setTimeout(whenDone, 500);
+			setTimeout(function(){
+				whenDone(that, callback);
+			}, 500);
 		}
 		
 	}
 	
-	if(this.clippingStatus == 'ready'){
+	if(this.documentStatus == 'ready'){
 		closurify(that, callback);
 
-	}else if (this.clippingState == 'in progress'){
+	}else if (this.documentStatus == 'in progress'){
 			whenDone(that, callback);	
 	}else{
-		this.prepareClippings(function(){
+		this.prepareDocuments(function(){
 			closurify(that, callback);
 		}, that);
 
@@ -232,16 +278,16 @@ BibTexGenerator.prototype.getBibString = function(callback){
  * Functions for preppering clipppings
  */
 BibTexGenerator.prototype.markReadyAndCheckIfDone = function(that, callback){
-	that.clippingsFinished++;					 
-	if(that.clippingsFinished == that.clippingsTotal){
+	that.documentsFinished++;					 
+	if(that.documentsFinished == that.documentsTotal){
 		that.logCalls();
-		that.clippingsToBib(that);
-		that.clippingStatus = 'ready';
+		that.documentsToBib(that);
+		that.documentStatus = 'ready';
 		that.bibs = [];
 
-	    for(var i = 0; i < that.clippings.length; i++){
-		  	 if(that.clippings[i].bibJSON){
-		  		 that.bibs.push(that.clippings[i].bibJSON);
+	    for(var i = 0; i < that.documents.length; i++){
+		  	 if(that.documents[i].bibJSON){
+		  		 that.bibs.push(that.documents[i].bibJSON);
 		  	 }
 	    }
 		that.bibs.sort(that.bibComparator);
@@ -251,8 +297,8 @@ BibTexGenerator.prototype.markReadyAndCheckIfDone = function(that, callback){
 }
 
 BibTexGenerator.prototype.logCalls = function(){
-	console.log("md From bs: " + this.metadataFromService.toString() + " md from clippings: " + this.metadataFromClippings.toString() 
-			+ " mmd from bs: " + this.mmdFromService.toString() + " mmd from clippings: " + this.mmdFromClippings.toString()); 
+	console.log("md From bs: " + this.metadataFromService.toString() + " md from documents: " + this.metadataFromDocuments.toString() 
+			+ " mmd from bs: " + this.mmdFromService.toString() + " mmd from documents: " + this.mmdFromDocuments.toString()); 
 }
 
 BibTexGenerator.prototype.bibComparator = function(a,b){	
@@ -311,10 +357,10 @@ BibTexGenerator.prototype.flattenAuthorArray = function(authors, that){
 	}
 };
 
-BibTexGenerator.prototype.createBib	= function(clipping, that){	
+BibTexGenerator.prototype.createBib	= function(document, that){	
 	try{
-		var metadata = clipping.metadata;
-		var mmd = clipping.mmd['meta_metadata'];
+		var metadata = document.metadata;
+		var mmd = document.mmd['meta_metadata'];
 		var bib = {};
 		bib.type   = mmd.bibtex_type;
 		bib.id     = undefined;
@@ -517,18 +563,18 @@ BibTexGenerator.prototype.retrieveSiteName = function(metadata){
 
 
 
-BibTexGenerator.prototype.clippingsToBib = function(that){
+BibTexGenerator.prototype.documentsToBib = function(that){
 	try{ 
 		var bibsHash = {};
 		var bibString = "";
 		var idHash = {};
-		for (var i = 0; i < that.clippings.length; i++) {
-			var clipping = that.clippings[i];
-			clipping.bibJSON = that.createBib(clipping, that);
-			if(!(clipping.bibJSON.id in bibsHash)){ 
-				 bibsHash[clipping.bibJSON.id] = "X";				 
+		for (var i = 0; i < that.documents.length; i++) {
+			var document = that.documents[i];
+			document.bibJSON = that.createBib(document, that);
+			if(!(document.bibJSON.id in bibsHash)){ 
+				 bibsHash[document.bibJSON.id] = "X";				 
 			}else{
-				clipping.bibJSON = null;			
+				document.bibJSON = null;			
 			}
 		 }
 	}
@@ -540,7 +586,7 @@ BibTexGenerator.prototype.clippingsToBib = function(that){
 
 
 
-BibTexGenerator.prototype.prepareClippings = function(callback, that){
+BibTexGenerator.prototype.prepareDocuments = function(callback, that){
 
 
 	function howToProcess(clip){
@@ -553,26 +599,30 @@ BibTexGenerator.prototype.prepareClippings = function(callback, that){
 		}
 	}
 	
-	that.clippingStatus = 'in progress';
-	for(i in that.clippings){
-		(function(clipping){
+	that.documentStatus = 'in progress';
+	for(i in that.documents){
+		(function(document){
 			
-			var whatToDo = howToProcess(clipping);
+			var whatToDo = howToProcess(document);
 			switch(whatToDo){
 			case 'ready':
-				that.metadatFromClippings++;
-				that.mmdFromClippings++;
-				clipping.metadata = BSUtils.unwrap(clipping.metadata);
-				clipping.mmd = BSUtils.unwrapMmd(clipping.mmd);
+				that.metadatFromDocuments++;
+				that.mmdFromDocuments++;
+				document.metadata = BSUtils.unwrap(document.metadata);
+				document.mmd = BSUtils.unwrapMmd(document.mmd);
+				if(document.createdDate){
+					document.metadata.accessed = document.createdDate;
+
+				}
 				that.markReadyAndCheckIfDone(that, callback);
 				break;
 			case 'mmd_from_metadata_name':
-				that.metadatFromClippings++;
+				that.metadatFromDocuments++;
 				that.mmdFromService++;
-				clipping.metadata = BSUtils.unwrap(clipping.metadata);
-				var mdname = clipping.metadata.meta_metadata_name;
+				document.metadata = BSUtils.unwrap(document.metadata);
+				var mdname = document.metadata.meta_metadata_name;
 				if(!mdname){
-					mdname =	clipping.metadata.mm_name
+					mdname =	document.metadata.mm_name
 				}
 
 				bsService.loadMmd(mdname, null, function(err, result){
@@ -581,7 +631,11 @@ BibTexGenerator.prototype.prepareClippings = function(callback, that){
 					}
 					else{		
 						result = BSUtils.unwrap(result);
-						clipping.mmd = BSUtils.unwrap(result);
+						document.mmd = BSUtils.unwrap(result);
+					}
+					if(document.createdDate){
+						document.metadata.accessed = document.createdDate;
+
 					}
 					that.markReadyAndCheckIfDone(that, callback);
 				});
@@ -589,25 +643,55 @@ BibTexGenerator.prototype.prepareClippings = function(callback, that){
 			case 'md_and_mmd_from_link':
 				that.metadataFromService++;
 				that.mmdFromService++;
-				bsService.loadMetadata(clipping.link, null, function(err, result){
+				bsService.loadMetadata(document.link, null, function(err, result){
 					if(err){
 						console.log(err);
 					}else{
-						clipping.mmd = BSUtils.unwrap(result.mmd);
-						clipping.metadata = BSUtils.unwrap(result.metadata);
-						clipping.metadata.bibtex_type = result.mmd.bibtex_type;
+						document.mmd = BSUtils.unwrap(result.mmd);
+						document.metadata = BSUtils.unwrap(result.metadata);
+						document.metadata.bibtex_type = result.mmd.bibtex_type;
+						if(document.createdDate){
+							document.metadata.accessed = document.createdDate;
+
+						}
 						
 					}
 					that.markReadyAndCheckIfDone(that, callback);
 				});
 				break;
 			default:
-				console.log('following clipping in bonkers');
-				console.log(clipping);
+				console.log('following document in bonkers');
+				console.log(document);
 				that.markReadyAndCheckIfDone(that, callback);
 			}
 	
-		})(that.clippings[i]);
+		})(that.documents[i]);
 	}
 }
+BibTexGenerator.prototype.getClippingDate = function(element){
+	if(!element)
+		return;
+	try{
+	var acts = element.creativeActs;
+	var creation_time = undefined;
+	for( var i = 0; i < acts.length; i++){
+		if( acts[i].action == 1)
+		{
+			creation_time = new Date(acts[i].time);
+			break;
+		}
+	}
+	if( creation_time )
+		return creation_time.toDateString().substr(4); // Hacky
+	else
+		return undefined;
+	}
+	catch(e)
+	{
+		console.log("Error getting clipping date from element error" + e);
+		return undefined;
+	}
+	
+	
+};
 

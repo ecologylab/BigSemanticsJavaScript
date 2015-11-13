@@ -1,6 +1,6 @@
 
 /*
- * BibTexClippings are passed to a BibTexGenerator
+ * BibTexDocuments are passed to a BibTexGenerator
  * The generator will prefer to use local metadata over request metadata for the link - same goes for mmd
  * 
  * 
@@ -8,8 +8,9 @@
  * 
  */
 
-function BibTexClipping(link, metadata, mmd){
+function BibTexDocument(link, metadata, mmd, createdDate){
 	this.link = null;
+	this.createdDate = createdDate;
 	if(link){
 		this.link = link;
 	}
