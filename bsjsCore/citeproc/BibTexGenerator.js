@@ -54,7 +54,7 @@ BibTexGenerator.prototype.addClipping = function(clipping){
 			if(date){
 				clipping.metadata.source.clipping_created = date;
 			}
-			this.addDocument(new BibTexDocument(clipping.metadata.source.location, null, null, clipping.metadata.source.clipping_created));
+			this.addDocument(new BibTexDocument(clipping.metadata.source.location, clipping.metadata.source.rawMetadata, null, clipping.metadata.source.clipping_created));
 
 		}
 		for (k in clipping.metadata.outlinks)
@@ -369,6 +369,9 @@ BibTexGenerator.prototype.createBib	= function(document, that){
 			return {};
 		}
 		var mmd = document.mmd['meta_metadata'];
+		if(!mmd){
+			mmd = document.mmd;
+		}
 		var bib = {};
 		bib.type   = mmd.bibtex_type;
 		bib.id     = undefined;
