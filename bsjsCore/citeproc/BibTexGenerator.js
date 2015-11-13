@@ -419,8 +419,7 @@ BibTexGenerator.prototype.createBib	= function(document, that){
 			bib['URL'] = that.makeUrlReadable(bib['URL']); 
 
 		}
-		
-		if( !bib.title && !bib.author){
+		if(!bib.title){
 		  return "";
 		}
 		else{
@@ -433,7 +432,6 @@ BibTexGenerator.prototype.createBib	= function(document, that){
 		console.log("Error in creating bib entry for " + metadata + "error " + e);
 	}
 }
-
 
 
 /*
