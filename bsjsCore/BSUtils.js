@@ -98,16 +98,21 @@ BSUtils.getType = function(metadata) {
  */
 BSUtils.removeLineBreaksAndCrazies = function(string)
 {
-  string = string.replace(/(\r\n|\n|\r)/gm," ");  
-  var result = "";
-  for (var i = 0; i < string.length; i++)
-  {
-    if (string.charCodeAt(i) < 128)
+  if (typeof string === 'string') {
+    string = string.replace(/(\r\n|\n|\r)/gm," ");  
+    var result = "";
+    for (var i = 0; i < string.length; i++)
     {
-      result += string.charAt(i);
+      if (string.charCodeAt(i) < 128)
+      {
+        result += string.charAt(i);
+      }
     }
+    return result;
+  } else {
+    console.warn("Not a string: " + string);
+    return string;
   }
-  return result;
 }
 
 /**

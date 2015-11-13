@@ -315,7 +315,11 @@ MICE.buildMetadataField = function(metadataField, isChildTable, fieldCount, row,
 	if(metadataField.scalar_type)
 	{				
 		// Currently it only rendered Strings, Dates, Integers, and ParsedURLs
-		if(metadataField.scalar_type == "String" || metadataField.scalar_type == "Date" ||metadataField.scalar_type == "Integer" || metadataField.scalar_type == "ParsedURL")
+		if(metadataField.scalar_type == "String"
+      || metadataField.scalar_type == "Integer"
+      || metadataField.scalar_type == "Float"
+      || metadataField.scalar_type == "Date"
+      || metadataField.scalar_type == "ParsedURL")
 		{	
 			
 			
