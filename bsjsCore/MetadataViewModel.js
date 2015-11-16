@@ -302,7 +302,7 @@ ViewModeler.getCompositeMetadataViewModel = function(metadataViewModel,
           
           field.composite_type = mmdField.type;
           field.parentMDType = metadata.meta_metadata_name;
-          ViewModeler.checkAndSetShowExpanded(parentField, field);
+          ViewModeler.checkAndSetChildAtributes(parentField, field);
          //if no value, just ignore field
           if(field.value != null && field.value.length >0){
               metadataViewModel.push(field);
@@ -336,7 +336,7 @@ ViewModeler.getCompositeMetadataViewModel = function(metadataViewModel,
         
         field.composite_type = mmdField.type;
         field.parentMDType = metadata.meta_metadata_name;
-        ViewModeler.checkAndSetShowExpanded(parentField, field);
+        ViewModeler.checkAndSetChildAtributes(parentField, field);
         
         if(field.value != null && field.value.length >0){
             metadataViewModel.push(field);
@@ -523,13 +523,16 @@ ViewModeler.isLabelVisible = function(field, parentField)
 	return false;
 }
 
-ViewModeler.checkAndSetShowExpanded = function(parentField, field)
+ViewModeler.checkAndSetChildAtributes = function(parentField, field)
 {
 	if (parentField.child_show_expanded_initially != null) {
 		field.show_expanded_initially = parentField.child_show_expanded_initially;
 	}
 	if (parentField.child_show_expanded_always != null) {
 		field.show_expanded_always = parentField.child_show_expanded_always;
+	}
+	if (parentField.child_style_name != null) {
+		field.style_name = parentField.child_style_name;
 	}
 }
 

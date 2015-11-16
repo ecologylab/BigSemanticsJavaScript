@@ -100,7 +100,7 @@ TwitterRenderer.render = function (task) {
         MICE.clearLoadingRows(task.container, styleInfo);
 
     // Remove the RenderingTask from the queue
-    MetadataLoader.queue.splice(MetadataLoader.queue.indexOf(task), 1);
+    //MetadataLoader.queue.splice(MetadataLoader.queue.indexOf(task), 1);
     processPage();
 }
 
@@ -508,14 +508,14 @@ TwitterRenderer.downloadAndDisplayDocument = function(event)
 		// Add a loadingRow for visual feedback that the metadata is being downloaded / parsed
 		table.appendChild(RendererBase.createLoadingRow(styleInfo));
 		
-		var requestMD = MetadataLoader.toRequestMetadataFromService(location);
+		//var requestMD = MetadataLoader.toRequestMetadataFromService(location);
 		
 		var options = {
 			isRoot: false,
 			expandedItem: button
 		};
 		TwitterRenderer.addMetadataDisplay(table.parentElement, location, null, TwitterRenderer.render, options);
-		if (!requestMD)
+		/*if (!requestMD)
 		{
 			if (!isExtension)
 			{
@@ -539,7 +539,7 @@ TwitterRenderer.downloadAndDisplayDocument = function(event)
 			{
 				requestDocumentDownload(location);
 			}
-		}
+		}*/
 	}
 	// If there was no document location then the table must be a non-document composite in which case just expand
 	else

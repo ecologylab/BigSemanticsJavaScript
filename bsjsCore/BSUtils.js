@@ -33,6 +33,11 @@ BSUtils.unwrap = function(target) {
       // the target itself is an unwrapped metadata.
       return target;
     }
+    // temporary fix: the extraction code has a bug that child metadata do not
+    // have mm_name or meta_metadata_name. this needs to be fixed.
+    if (target.location || target.download_status) {
+      return target;
+    }
     // otherwise, return the first child with mm_name
     var keys = Object.keys(target);
     for (var i in keys) {

@@ -162,10 +162,6 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 				{
 					contextNode = defVars[field.context_node];
 				}
-				if(field.name=='citations'){
-					console.log('woah');
-				}
-				
 				obj = getCollectionD(field,contextNode,recurse,parserContext,page);
 				if(obj !== null)
 				{
@@ -251,6 +247,9 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 			if (kids[kid].hasOwnProperty("composite"))
 				if (!kids[kid].composite.hasOwnProperty("declaring_mmd"))
 					recurseNeeded=true;
+			
+			if (kids[kid].hasOwnProperty("collection"))
+				recurseNeeded=true;
 		}
 		
 		if (field.hasOwnProperty('xpaths'))
@@ -265,9 +264,10 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 				else if (x !== null && x !== "") {
 					newContextNode = x;
 	                break;
-				}else if(x == null){
-					return null;
 				}
+			}
+			if(x == null){
+				return null;
 			}
 
 			if (newContextNode !== null && recurse && recurseNeeded) {
@@ -367,7 +367,8 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 			}
 			else if (string.length > 1 && string.indexOf("http") == -1 && !field.absolute_url){
 				string = string.trim();
-				string = page.URL.substring(0, page.URL.lastIndexOf('/')+1) + string; 
+				var beginIndex = page.URL.indexOf("://") + 3;
+				string = page.URL.substring(0, page.URL.indexOf('/', beginIndex)+1) + string; 
 			}
 		}
 		if (string.length > 1) getScalarStringCalledGotData++;

@@ -57,9 +57,9 @@ RendererBase.addMetadataDisplay = function(container, url, clipping, renderer, o
   if (clipping != null) {
     if (!clipping.metadata && clipping.rawMetadata) {
       clipping.rawMetadata = simpl.deserialize(clipping.rawMetadata);
-      clipping.rawMetadata.deserialized = true;
       clipping.metadata = BSUtils.unwrap(clipping.rawMetadata);
-      
+      clipping.rawMetadata.deserialized = true;
+  
     }
   }
 
@@ -112,7 +112,16 @@ RendererBase.addMetadataDisplay = function(container, url, clipping, renderer, o
         task.mmd = md_and_mmd.mmd;
         task.mmd = simpl.graphExpand(task.mmd);
         task.metadata = md_and_mmd.metadata;
-        task.handler(task, options);
+        
+        
+        //ideamache hack
+			if(typeof veryBadAddMetadataToClippingStorage == 'function')
+			{
+				veryBadAddMetadataToClippingStorage(task.metadata);
+			}	
+        
+       
+        task.handler(task);
         if(options.callback){
         	options.callback(md_and_mmd);
         }
