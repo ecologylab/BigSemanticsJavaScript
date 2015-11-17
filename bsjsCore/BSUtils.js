@@ -42,7 +42,7 @@ BSUtils.unwrap = function(target) {
     var keys = Object.keys(target);
     for (var i in keys) {
       var key = keys[i];
-      if (typeof target[key] == 'object') {
+      if (typeof target[key] == 'object' && target[key] != null) {
         if (target[key].mm_name || target[key].meta_metadata_name) {
           return target[key];
         }
