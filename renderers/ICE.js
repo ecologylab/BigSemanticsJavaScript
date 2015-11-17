@@ -576,3 +576,21 @@ if (isExtension)
 	});
 }
 
+function updateIconsPath(imgDir)
+{
+	TwitterRenderer.imgDir = imgDir;
+	iconDir = imgDir;
+	
+	TwitterRenderer.replyIconPath1 = TwitterRenderer.imgDir + "reply_221.png";
+	TwitterRenderer.retweetIconPath1 = TwitterRenderer.imgDir + "retweet_221.png";
+	TwitterRenderer.favoriteIconPath1 = TwitterRenderer.imgDir + "favorite_221.png";
+	TwitterRenderer.replyIconPath2 = TwitterRenderer.imgDir + "reply_153.png";
+	TwitterRenderer.retweetIconPath2 = TwitterRenderer.imgDir + "retweet_153.png";
+	TwitterRenderer.favoriteIconPath2 = TwitterRenderer.imgDir + "favorite_153.png";
+	TwitterRenderer.retweetIconPath3 = TwitterRenderer.imgDir + "retweet_on.png";
+	TwitterRenderer.favoriteIconPath3 = TwitterRenderer.imgDir + "favorite_on.png";
+
+	expandIconPath =  iconDir + "expand_icon.png";
+	collapseIconPath = iconDir + "collapse_icon.png";
+}
+
