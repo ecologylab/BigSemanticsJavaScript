@@ -7,8 +7,10 @@ if (application_name == "mdc")
 	iconDir = "../renderers/images/tweetBubble/";
 else if (application_name == "ideamache")
 	iconDir = "/static/mache/code/BigSemanticsJS/renderers/images/tweetBubble/";
-else //tweetbubble
+else if (application_name == "tweetbubble")//tweetbubble
 	iconDir = chrome.extension.getURL("content_script/img/");
+else if (application_name == "dod")
+	iconDir = "../../BigSemanticsJavascript/renderers/images/tweetBubble/";
 
 var expandIconPath =  iconDir + "expand_icon.png";	// "https://abs.twimg.com/favicons/favicon.ico";
 var collapseIconPath = iconDir + 	"collapse_icon.png";

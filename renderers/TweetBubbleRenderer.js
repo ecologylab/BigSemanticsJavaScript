@@ -13,8 +13,15 @@ TwitterRenderer.colors = ['rgb(255, 255, 204)', 'rgb(187, 226, 250)', 'rgb(250, 
 TwitterRenderer.lastColorIndex = Math.floor(Math.random() * TwitterRenderer.colors.length);
 
 //var isExtension = (typeof chrome !== "undefined" && typeof chrome.extension !== "undefined");
-TwitterRenderer.imgDir = (application_name == "mdc") ? "../renderers/images/tweetBubble/"
-										: "/static/mache/code/BigSemanticsJS/renderers/images/tweetBubble/";
+TwitterRenderer.imgDir = "";
+if (application_name == "mdc")
+	TwitterRenderer.imgDir = "../renderers/images/tweetBubble/";
+else if (application_name == "ideamache")
+	TwitterRenderer.imgDir = "/static/mache/code/BigSemanticsJS/renderers/images/tweetBubble/";
+else if (application_name == "tweetbubble")//tweetbubble
+	TwitterRenderer.imgDir = chrome.extension.getURL("content_script/img/");
+else if (application_name == "dod")
+	TwitterRenderer.imgDir = "../../BigSemanticsJavascript/renderers/images/tweetBubble/";
 
 TwitterRenderer.replyIconPath1 = isExtension ? chrome.extension.getURL("content_script/img/reply_221.png") : TwitterRenderer.imgDir + "reply_221.png";
 TwitterRenderer.retweetIconPath1 = isExtension ? chrome.extension.getURL("content_script/img/retweet_221.png") : TwitterRenderer.imgDir + "retweet_221.png";
