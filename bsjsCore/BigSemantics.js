@@ -61,7 +61,6 @@ var BigSemantics = (function() {
         location = PreFilter.filter(location, mmd.filter_location);
       }
 
-	  //TODO
 	  if (mmd.meta_metadata.extract_with == "service"){ 
 			options.useHttps = (window.location.protocol == 'https:'); //use Https if we are on an https page
 			that.bss.loadMetadata(location, options, callback);	  
