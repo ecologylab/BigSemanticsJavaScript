@@ -70,6 +70,7 @@ var BSAutoSwitch = (function() {
         if (that.bsImpl instanceof BSExtension) { bs = that.bsSvc; }
         else { callback(err, null); return; }
       }
+	  options.useHttps = (window.location.protocol == 'https:');
       bs.loadMmd(name, options, callback);
     });
   }

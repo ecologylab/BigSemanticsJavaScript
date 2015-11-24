@@ -75,11 +75,10 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 			var tag;
 					
 	        var tmpField = field[Object.keys(field)[0]];
-	        //if (field[Object.keys(field)[0]].hasOwnProperty('declaring_mmd') && isNested){
 	        if (tmpField.hasOwnProperty('xpaths') && tmpField.xpaths == upperXpath[page.URL][tmpField.name] && (isNested || isLowerLvl)){
 	            continue;
 	        }
-			else if (tmpField.hasOwnProperty('xpaths') && upperXpath[page.URL][tmpField.name] && tmpField.xpaths.length < upperXpath[page.URL][tmpField.name].length ){
+			else if (tmpField.hasOwnProperty('xpaths') && upperXpath[page.URL][tmpField.name] && tmpField.xpaths.length < upperXpath[page.URL][tmpField.name].length){
 				continue;
 			}
 	        if (!isNested){
@@ -252,8 +251,7 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 				recurseNeeded=true;
 		}
 		
-		if (field.hasOwnProperty('xpaths'))
-		{
+		if (field.hasOwnProperty('xpaths')){
 			var fieldx = field.xpaths;
 			for (var j = 0; j < fieldx.length; j++) {
 				x = getCompositeObject(field, fieldx[j], contextNode,page);
@@ -301,10 +299,8 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 		return null;		
 	}
 
-	function getCollectionD(field,contextNode,recurse,parserContext,page)
-	{
-		if (!recurse) 
-		{
+	function getCollectionD(field,contextNode,recurse,parserContext,page){
+		if (!recurse) {
 			return null;
 		}
 
@@ -582,23 +578,18 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 		return d;
 	}
 
-	function concatValues(concatList, page)
-	{
-		
+	function concatValues(concatList, page){	
 		var concatString = "";
 		
-		for (var i = 0; i < concatList.length; i++)
-		{
+		for (var i = 0; i < concatList.length; i++){
 			var concat = concatList[i];
-			if (concat.hasOwnProperty("from_scalar"))
-			{
+			if (concat.hasOwnProperty("from_scalar")){
 				var x = concat.from_scalar;
 				if (scalars[page.URL][x] !== undefined){
 					concatString = concatString + scalars[page.URL][x];
 				}
 			}
-	        else if (concat.hasOwnProperty("constant_value") && concat.constant_value !== "")
-			{
+	        else if (concat.hasOwnProperty("constant_value") && concat.constant_value !== ""){
 				var x = concat.constant_value;
 				concatString = concatString + x;
 			}

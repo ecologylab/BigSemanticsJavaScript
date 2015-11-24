@@ -21,6 +21,7 @@ var BigSemantics = (function() {
     if (!this.extractor) {
       this.extractor = extractMetadata;
     }
+	this.bss = new BSService();
     if (!this.repoMan) {
       this.repoMan = new RepoMan(repoSource, options);
       var that = this;
@@ -60,7 +61,12 @@ var BigSemantics = (function() {
         location = PreFilter.filter(location, mmd.filter_location);
       }
 
-      if (options.page && that.extractor) {
+	  //TODO
+	  if (mmd.meta_metadata.extract_with == "service"){ 
+			options.useHttps = (window.location.protocol == 'https:'); //use Https if we are on an https page
+			that.bss.loadMetadata(location, options, callback);	  
+	  }	
+      else if (options.page && that.extractor) {
         // we already have the DOM
         var response = {
           location: location,
