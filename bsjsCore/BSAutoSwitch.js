@@ -48,6 +48,9 @@ var BSAutoSwitch = (function() {
         if (that.bsImpl instanceof BSExtension) { bs = that.bsSvc; }
         else { callback(err, null); return; }
       }
+      if(!options){
+    	  options = {};
+      }
 	  options.useHttps = (window.location.protocol == 'https:');		
       bs.loadMetadata(location, options, callback);
     });
@@ -71,6 +74,10 @@ var BSAutoSwitch = (function() {
         if (that.bsImpl instanceof BSExtension) { bs = that.bsSvc; }
         else { callback(err, null); return; }
       }
+      if(!options){
+    	  options = {};
+      }
+
 	  options.useHttps = (window.location.protocol == 'https:');
       bs.loadMmd(name, options, callback);
     });
