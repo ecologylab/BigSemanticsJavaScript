@@ -156,13 +156,13 @@ var RepoMan = (function() {
     if (!this.repo.repository_by_name) { setError("Invalid Repo!"); return; }
 
     this.mmds = {};
-    for (var i in this.repo.repository_by_name) {
+    for (var i = 0; i <  this.repo.repository_by_name.length; i++) {
       var mmd = this.repo.repository_by_name[i];
       this.mmds[mmd.name] = mmd;
     }
     if (this.repo.alt_names) {
       var altNames = this.repo.alt_names;
-      for (var i in altNames) {
+      for (var i =0; i < altNames.length; i++) {
         var name = altNames[i].name;
         var mmd = altNames[i].mmd;
         this.mmds[name] = mmd;
@@ -171,7 +171,7 @@ var RepoMan = (function() {
 
     this.userAgents = {}
     if (this.repo.user_agents) {
-      for (var i in this.repo.user_agents) {
+      for (var i = 0; i < this.repo.user_agents.length; i++) {
         var agent = this.repo.user_agents[i];
         if (agent.name && agent.string) {
           this.userAgents[agent.name] = agent.string;
@@ -190,7 +190,7 @@ var RepoMan = (function() {
     for (var name in this.mmds) {
       var mmd = this.mmds[name];
       if (mmd.selectors) {
-        for (var i in mmd.selectors) {
+        for (var i = 0; i < mmd.selectors.length; i++) {
           var selector = mmd.selectors[i];
           selector.targetType = mmd.name;
           if (selector.url_stripped) {
