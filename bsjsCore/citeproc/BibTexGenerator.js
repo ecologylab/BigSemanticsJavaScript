@@ -362,6 +362,10 @@ BibTexGenerator.prototype.createBib	= function(document, that){
 		var metadata = document.metadata;
 		var mmd = document.mmd['meta_metadata'];
 		var bib = {};
+		//For search results which share a location (google.com) but are clearly for different actual documents
+		if(metadata.document_link){
+			metadata.location = metadata.document_link;
+		}
 		bib.type   = mmd.bibtex_type;
 		bib.id     = undefined;
 		bib.title  = metadata.title ? metadata.title.trim() : "";
@@ -402,12 +406,12 @@ BibTexGenerator.prototype.createBib	= function(document, that){
 		  }
 		 
 		}
-		if(bib.author){
+		/*if(bib.author){
 			bib['URL'] = undefined;
-		}else{
+		}else{*/
 			bib['URL'] = that.makeUrlReadable(bib['URL']); 
 
-		}
+		//}
 		
 		if( !bib.title && !bib.author){
 		  return "";

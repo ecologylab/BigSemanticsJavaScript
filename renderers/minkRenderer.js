@@ -102,13 +102,16 @@ Mink.uuidthing = function(){
 Mink.getDestinationPageLink = function(field, addToMaps, metadata){
 	var kids = field.value.value;
 	if(addToMaps){
+		
+		
 		for (var i = 0; i < field.value.length; i++){
 			if(field.value[i].name == 'destination_page'){
 					try{
 						var url = "mink::" + field.value[i].value[0].navigatesTo;
+						url = url.toLowerCase();
+
 						//hard-code for google scholar for right now
-						var betterMD = metadata['google_scholar_search'].search_results[i];
-						Mink.minklinkToMetadataMap.put(url, betterMD);
+						
 						Mink.minklinkToViewModelMap.put(url, field);
 						return url;
 					}catch(e){
@@ -139,6 +142,10 @@ Mink.recursiveSearchForLinked = function(metadataField, list, isRoot, addToMaps,
 			var collectionLinks = {};
 			collectionLinks.links = [];
 			collectionLinks.name = metadataField.name;
+			if(collectionLinks.field_as_count){
+				compLinks.count = metadataField.field_as_count.value;
+			}
+
 			for (var i = 0; i < metadataField.value.length; i++){
 				try{
 					collectionLinks.links.push(Mink.getDestinationPageLink(metadataField.value[i], addToMaps, metadata));
@@ -154,6 +161,10 @@ Mink.recursiveSearchForLinked = function(metadataField, list, isRoot, addToMaps,
 			var collectionLinks = {};
 			collectionLinks.links = [];
 			collectionLinks.name = metadataField.name;
+			if(collectionLinks.field_as_count){
+				compLinks.count = metadataField.field_as_count.value;
+			}
+
 			for (var j = 0; j < metadataField.value.length; j++){
 				var childField = metadataField.value[j];
 				if(childField.value.length > 0){
@@ -181,6 +192,9 @@ Mink.recursiveSearchForLinked = function(metadataField, list, isRoot, addToMaps,
 			var compLinks = {};
 			compLinks.links = [];
 			compLinks.name = metadataField.name;
+			if(metadataField.field_as_count){
+				compLinks.count = metadataField.field_as_count.value;
+			}
 			if(metadataField.value[0]){
 				if(metadataField.value[0].navigatesTo != null){
 					compLinks.links.push(metadataField.value[0].navigatesTo);
@@ -267,7 +281,16 @@ Mink.makeExplorableCollection = function(expandableCollections, linkedField, url
 	var label = buildSpan('minkExplorableCollectionLabel');
 	var labelText = BSUtils.removeLineBreaksAndCrazies(BSUtils.toDisplayCase(linkedField.name));
 	labelText += ' (';
-	labelText += linkedField.links.length;
+	if(linkedField.count){
+		var theCount =  linkedField.count.replace(/[^\d]/g,'');
+
+		labelText += theCount;
+
+	}else{
+		labelText += linkedField.links.length;
+
+	}
+	
 	labelText += ')';
 	label.innerHTML = labelText;
 	var listOfLinks = [];
@@ -487,7 +510,15 @@ Mink.makeExplorable = function(parent, field, explorableMap, baseUrl){
 	explorableField.appendChild(buildDiv('minkExplorableFieldLabelPrefix'));
 	explorableField.childNodes[0].innerHTML = prefixText;
 	explorableField.appendChild(buildSpan('minkExplorableFieldLabelSuffix unfilledExpander'));
-	explorableField.childNodes[1].innerHTML = "  "+ linkedUrls.length + "";
+	var fieldCount = linkedUrls.length;
+	if(field.field_as_count){
+		fieldCount = field.field_as_count.value;
+		fieldCount = fieldCount.replace(/[^\d]/g,'');
+	}
+	
+	
+	
+	explorableField.childNodes[1].innerHTML = "  "+ fieldCount + "";
 	explorableField.setAttribute('rooturl', baseUrl);
 	explorableField.setAttribute('collectionname', field.name);
 	explorableField.addEventListener('click', Mink.showExplorableLinks);
@@ -971,13 +1002,21 @@ Mink.render = function(task){
 	
 	if(task.mmd && task.mmd['meta_metadata'].extends == 'search'){
 		var minkLinks = Mink.getSearchResultLinks(metadataFields, task.metadata);
+		var metadata = task.metadata;
 		var flink = "fav::" + task.url;
 		minkLinks.links.push(flink);
 		var detailDetails = {type: 'minksearchstripper', links: minkLinks};
 		var eventDetail = {detail: detailDetails, bubbles: true};
 		var myEvent = new CustomEvent("minkevent", eventDetail);
 		task.container.parentNode.dispatchEvent(myEvent);
-		
+		//gs search hardcode for now
+		for(var j = 0; j < metadata['google_scholar_search'].search_results.length; j++){
+			var url2 = "mink::" + metadata['google_scholar_search'].search_results[j]['google_scholar_search_result'].document_link;
+			url2 = url2.toLowerCase();
+			var betterMD = metadata['google_scholar_search'].search_results[j];
+			Mink.minklinkToMetadataMap.put(url2, betterMD);
+
+		}
 		console.log(minkLinks);
 	}else{
 		// Build the HTML table for the metadata

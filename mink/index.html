@@ -55,13 +55,12 @@
         <script type="text/javascript" src="../renderers/VanillaMICE.js"></script>
     
         <script type="text/javascript" src="../renderers/minkRenderer.js"></script>
-                        <script type="text/javascript" src="../bsjsCore/xmldom.js"></script>
+                        <script type="text/javascript" src="../bsjsCore/citeproc/xmldom.js"></script>
 
-                <script type="text/javascript" src="../bsjsCore/citeproc.js"></script>
+                <script type="text/javascript" src="../bsjsCore/citeproc/citeproc.js"></script>
 
-        <script type="text/javascript" src="../bsjsCore/BibTexClipping.js"></script>
-        <script type="text/javascript" src="../bsjsCore/BibTexGenerator.js"></script>
-        <script type="text/javascript" src="./js/testCiteproc.js"></script>
+        <script type="text/javascript" src="../bsjsCore/citeproc/BibTexDocument.js"></script>
+        <script type="text/javascript" src="../bsjsCore/citeproc/BibTexGenerator.js"></script>
 
 	<!-- Just the simpl things -->    
 	<script type="text/javascript" src="../bsjsCore/simpl/simplBase.js"></script>
@@ -83,21 +82,24 @@
     <div class ="minkAppContainer" id="minkAppContainer" initurl="http://www.amazon.com/Apple-iPhone-Factory-Unlocked-Jailbroken/dp/B008VUNRZQ/ref=sr_1_1?ie=UTF8&qid=1442245975&sr=8-1&keywords=3gs">
     	
  
-    <div class="minkToolbar" id="minkToolbar"><div class="leftPlaceholder"></div><div onclick="minkApp.goBackHandler()" class="minkBackButton"><img src="../renderers/images/mink/back-icon.png"></img></div> 	<div class="minkFavoritesExpander" id="minkFavoritesExpander" onclick="minkApp.favoritesToggleHandler()">FAVORITES
+    <div class="minkToolbar" id="minkToolbar"><div class="leftPlaceholder"></div><div onclick="minkApp.goBackHandler()" class="minkBackButton"><img src="../renderers/images/mink/back-icon.png"></img></div> 
     		 
-    		 </div> 
     		 <input type="text" class="minksearchbox" id="targetURL" onkeydown="onEnterShowMetadata(event);" value="search"/>
 <div id='contextTitle' class='contextTitle'></div><div onclick="minkApp.goForwardsHandler()" class="minkForwardButton"><img src="../renderers/images/mink/back-icon.png"></img></div><div class="rightPlaceholder"></div></div>
   
     <div class="minkCenterRow"> 
-   <div class="minkFavorites" id="minkFavorites">
-    		 <div class="favLabel">favorites</div>	
-    		 
-    		 </div>
-    		 <div class='minkQueries' id='minkQueries'>
+	
+    		<div clas ="queryFavColumn">
+    			
+    				 <div class='minkQueries' id='minkQueries'>
     		 	<div class="queryLabel">queries</div>
     		 	
     		 </div>
+    			   <div class="minkFavorites" id="minkFavorites">
+    		 <div class="minkFaveHeader"> <div class="favLabel">favorites</div> <div class="minkFavoritesMenu" id="minkFavoritesMenu" onclick="minkApp.favoritesMenuHandler(event)" ><img style="height: 28px"src="./img/dots.png"></img></div>
+    		 </div></div>
+    		</div>
+    	
     		 <div class='minkColumns' id="minkColumns">    <div class="minkColumn" column="1" id="minkC1">
     </div>
   </div></div>

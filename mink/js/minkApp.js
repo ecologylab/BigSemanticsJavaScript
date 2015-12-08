@@ -14,12 +14,96 @@ minkApp.offScreenColumnsRight = 0;
 minkApp.favorites = [];
 minkApp.currentQuery = null;
 minkApp.queryMap = new Map();
-//var bsService = new BSAutoSwitch(['eganfccpbldleckkpfomlgcbadhmjnlf', 'gdgmmfgjalcpnakohgcfflgccamjoipd']);
-var bsService = new BSService();
+var bsService = new BSAutoSwitch(['eganfccpbldleckkpfomlgcbadhmjnlf', 'gdgmmfgjalcpnakohgcfflgccamjoipd']);
+//var bsService = new BSService();
 minkApp.cardDuplicateMap = new Map();
 
+function buildMenuIcon(parent, label, icon, onclick){
+	var cont = buildDiv('eco-menuItem');
+	var image = document.createElement('img');
+	image.className = "eco-menuImage";
+	image.src = icon;
+	var mlabel = buildDiv('eco-menuLabel');
+	mlabel.innerHTML = label;
+	cont.appendChild(mlabel);
+	cont.appendChild(image);
+	cont.addEventListener('click', onclick);
+	parent.appendChild(cont);
+}
+
+
+minkApp.favoritesMenuHandler = function(event){
+	console.log(event);
+	var cont = $('#minkFavorites')[0];
+	//to-do: dismiss all other eco menues
+	
+	minkApp.buildBibMenu(cont);
+	
+	
+}
+
+minkApp.removeMenu = function(event){
+	$('.eco-dropDownMenu').remove();
+	document.body.removeEventListener('click', minkApp.removeMenu);
+}
+minkApp.removeOverlay = function(event){
+	$('.eco-popup').remove();
+	event.srcElement.removeEventListener('click', minkApp.removeOverlay);
+
+}
+minkApp.killEvent = function(event){
+	event.stopPropagation();
+	}
+minkApp.buildBibMenu = function(parent){
+	var container = buildDiv('eco-dropDownMenu');
+	buildMenuIcon(container, 'View Bibliography', './img/ecologylab.png', minkApp.favesToBib);
+	buildMenuIcon(container, 'View BibText', './img/ecologylab.png', function(){alert('i cant stop my legs my legs go out late dancing')});
+
+	parent.appendChild(container);
+	setTimeout(function(){
+		document.body.addEventListener('click', minkApp.removeMenu);
+		
+	})
+	
+	
+}
+
+	
+
+minkApp.buildOverlay = function(parent, bibHTML){
+	var overlay = buildDiv('eco-overlay');
+	parent.appendChild(overlay);
+	var bibCont = buildDiv('minkBibDisplay');
+	bibCont.innerHTML = bibHTML;
+	bibCont.addEventListener('click', minkApp.killEvent);
+	parent.appendChild(bibCont);
+}
+minkApp.buildBibPopUp = function(parent, bibHTML){
+	var popUp = buildDiv('eco-popup');
+	minkApp.buildOverlay(popUp, bibHTML);
+	parent.appendChild(popUp);
+	setTimeout(function(){
+		popUp.addEventListener('click', minkApp.removeOverlay);
+	}, 10);
+}
+minkApp.favesToBib = function(){
+	var bibGen = new BibTexGenerator('../bsjsCore/citeproc/modern-language-association-with-url.csl', '../bsjsCore/citeproc/locales-en-US.xml');
+	
+	for (var i = 0; i < minkApp.favorites.length; i++){
+		var md = Mink.minklinkToMetadataMap.get(minkApp.favorites[i].url);
+		bibGen.addDocument( new BibTexDocument(minkApp.favorites[i].url, md));
+	}
+	
+	bibGen.getBibHTML(function(bibHTML){
+		minkApp.buildBibPopUp(document.body, bibHTML);
+		//alert(bibHTML)
+	});
+}
 
 //remove from Space
+
+
+
 
 minkApp.signalFavorite = function(event){
 	var card = $(event.srcElement).closest('.minkCardContainer')[0];
@@ -605,6 +689,28 @@ minkApp.addFavorite = function(url, mdName, faviconLink, srcHTML){
 	}
 	
 	if(found < 0){
+		
+		
+		
+		var md = Mink.minklinkToMetadataMap.get(url);
+		if(md){
+			md = BSUtils.unwrap(md);
+			if(md.year){
+				var sourceInfo = md.year;
+				var year = sourceInfo.replace(/[^\d]/g,'');
+				md.year = year;
+				
+			}
+			
+			//quick hack
+			if(md.google_authors){
+				md.authors = md.google_authors;
+			}
+		}
+			
+			
+		
+		
 		var favorite = {url: url, src: srcHTML, mdname: mdName, favicon: faviconLink, html: null};
 		minkApp.favorites.push(favorite);
 
@@ -862,13 +968,13 @@ minkApp.resumeAnimation = function(event){
 }
 minkApp.showHidePile = function(pile, hide){
 	console.log('yeah');
-	if(pile.visible || hide){
+	if(hide){
 		pile.visible = false;
 		$(pile.HTML.parentNode).removeClass('minkPileWrapperShow');
 		$(pile.HTML.parentNode).addClass('minkPileWrapperHide');
 		$(pile.rootHTML).attr('expanded', 'false');
 		pile.HTML.parentNode.addEventListener('animationend', minkApp.toggleDisplay);
-
+		//handle kids
 
 	}else{
 		pile.visible = true;
@@ -878,10 +984,15 @@ minkApp.showHidePile = function(pile, hide){
 		$(pile.HTML.parentNode).removeClass('minkPileWrapperHide');
 		$(pile.HTML.parentNode).addClass('minkPileWrapperShow');
 		$(pile.rootHTML).attr('expanded', 'true');
-
+		//handle kids
 
 
 	}
+	
+	for(var i = 0; i < pile.kids.length; i++){
+		minkApp.showHidePile(pile.kids[i], hide)
+	}
+
 	
 }
 minkApp.showHidePileHandler = function(event){
@@ -891,7 +1002,8 @@ minkApp.showHidePileHandler = function(event){
 	var id = pileIDGen(url, collection);
 	
 	var pile = minkApp.currentQuery.pileMap.get(id);
-	minkApp.showHidePile(pile, event.detail.hide);
+	minkApp.showHidePile(pile, pile.visible)
+	
 	
 	
 }
@@ -1111,6 +1223,9 @@ minkApp.buildPile = function(parent, links, rooturl, collectionname, src, expand
 	wrapper.appendChild(newPile);
 	newPile.setAttribute('pileid', pileId);
 	minkApp.buildDuplicateCount(pile);
+	if(parentPile)
+		parentPile.kids.push(pile);
+
 	return pile;
 	//Logic to let varius maps and storage representations know about what's going one
 	//In thefuture will also need to handle stuff involving the canvas.
