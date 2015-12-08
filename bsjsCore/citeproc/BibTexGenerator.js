@@ -573,25 +573,27 @@ BibTexGenerator.prototype.retrieveSiteName = function(metadata){
 
 
 BibTexGenerator.prototype.documentsToBib = function(that){
-	try{ 
 		var bibsHash = {};
 		var bibString = "";
 		var idHash = {};
 		for (var i = 0; i < that.documents.length; i++) {
-			var document = that.documents[i];
-			document.bibJSON = that.createBib(document, that);
-			
-			if(!(document.bibJSON.id in bibsHash)){ 
-				 bibsHash[document.bibJSON.id] = "X";				 
-			}else{
-				document.bibJSON = null;			
+			try{
+				var document = that.documents[i];
+				document.bibJSON = that.createBib(document, that);
+				
+				if(!(document.bibJSON.id in bibsHash)){ 
+					 bibsHash[document.bibJSON.id] = "X";				 
+				}else{
+					document.bibJSON = null;			
+				}
+			}catch(e){
+				console.log("Error gettign BibList error" + e); 
 			}
+			
 		 }
-	}
+	
 
-	catch(e){
-		console.log("Error gettign BibList error" + e); 
-	}
+	
 }
 
 
