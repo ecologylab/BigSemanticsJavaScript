@@ -1,0 +1,139 @@
+
+var MicroDataTools = {};
+
+// Convert schema name into metadata wrapper name
+MicroDataTools.getTypeName = function(microdata) {
+    var type = microdata.type;
+    type = type.substr(type.lastIndexOf('/') + 1);
+    var result = '';
+    for( var i =0; i < type.length; i++ ) {
+        if ( type[i] == type[i].toUpperCase() && i != 0 ) {
+            // The next character is uppercase and it is not the first letter
+            // so add underscore
+            result+= '_';
+        }
+        result+=type[i];
+    }
+    result = result.toLowerCase();
+    return result;
+};
+
+MicroDataTools.useMicroDataToImproveMMD = function( response , mmd, bigSemantics, callback ) {
+    var obj = MicroDataTools.getMicroDataAndMMD(response.entity , bigSemantics , function(err , obj) {
+        if ( err ) {
+            console.log("useMicroDataToImproveMMD call to getMicroDataAndMMd failed");
+            callback(err);
+        }
+        var bestMMD = pickBestMMD(mmd , obj.mmd);
+        callback(null , bestMMD);
+    });
+};
+
+MicroDataTools.getMicroData = function(page) {
+    return MicroDataTools.parseMicroData(page);
+};
+
+MicroDataTools.getMicroDataAndMMD = function(page , bigSemantics, callback) {
+    var microdata = MicroDataTools.parseMicroData(page);
+    var typeName = MicroDataTools.getTypeName(microdata[0]);
+
+    bigSemantics.loadMmd(typeName , null , function(err , mmd) {
+        callback( null , { mmd : mmd , microdata:microdata});
+    });
+};
+
+MicroDataTools.parseMicroData = function(page) {
+
+    var doc;
+    if ( ! ( page instanceof Document )  ) {
+        console.log("Document needs to be turned into a dom object");
+        var parser = new DOMParser();
+        doc = parser.parseFromString(page , "text/html");
+    } else {
+        doc = page;
+    }
+    var items = [];
+    var scopes = [];
+    var getNextText = null;
+    var tags = [];
+
+    doc = doc.documentElement;
+    function depthFirstTraversal(node) {
+        openNode(node);
+        processNode(node);
+        if ( node.children) {
+            for (var i = 0; i < node.children.length; i++) {
+                depthFirstTraversal(node.children[i]);
+            }
+        }
+        closeNode(node);
+    }
+
+    function openNode(node) {
+        var attribs = node.attributes;
+        var scope = scopes.length && scopes[scopes.length - 1];
+        if (attribs && attribs.hasOwnProperty('itemscope')) {
+            // create a new scope
+            if (attribs.itemprop && scopes.length) {
+                // chain the scopes
+                scope = scope[attribs.itemprop.nodeValue] = {};
+            }
+            else {
+                scope = {};
+            }
+            scopes.push(scope);
+            tags.push('SCOPE');
+        }
+        else {
+            tags.push(false);
+        }
+
+        if (scope) {
+            if (attribs.itemtype) {
+                scope.type = attribs.itemtype.nodeValue;
+            }
+            if (attribs.itemprop && !attribs.hasOwnProperty('itemscope')) {
+                if (attribs.content) {
+                    scope[attribs.itemprop.nodeValue] = attribs.content.nodeValue;
+                }
+                else {
+                    tags.pop();
+                    tags.push('TEXT');
+                    scope[attribs.itemprop.nodeValue] = '';
+                    getNextText = attribs.itemprop.nodeValue;
+                }
+            }
+        }
+    }
+
+    function processNode(node) {
+        if (getNextText) {
+            var text ='';
+            if ( node.nodeName== 'IMG' )
+                text = node.src;
+            else
+                text = node.textContent;
+            text = text.replace(/^\s+|\s+$/g, "");
+            var v = scopes[scopes.length-1][getNextText];
+            if ( !v)
+                scopes[scopes.length - 1][getNextText] = text;
+            else
+                scopes[scopes.length - 1][getNextText] += text;
+        }
+    }
+
+    function closeNode(node) {
+        var tag = tags.pop();
+        if(tag === 'SCOPE') {
+            var item = scopes.pop();
+            if (!scopes.length) {
+                items.push(item);
+            }
+        }
+        else if (tag === 'TEXT') {
+            getNextText = false;
+        }
+    }
+    depthFirstTraversal(doc);
+    return items;
+};
