@@ -24,6 +24,8 @@ function MetadataViewModel(mmdField)
   this.style_name = (mmdField.style_name != null) ? mmdField.style_name : "";
   this.mink_style = (mmdField.mink_style != null) ? mmdField.mink_style : "";
   this.show_in_snippet = (mmdField.show_in_snippet != null) ? mmdField.show_in_snippet : "";
+  this.final_page_canary = (mmdField.final_page_canary != null) ? mmdField.final_page_canary : "";
+
   this.explorable_label = (mmdField.explorable_label != null) ? mmdField.explorable_label : "";
   	
   this.hide_label = (mmdField.hide_label != null) ? mmdField.hide_label : false;

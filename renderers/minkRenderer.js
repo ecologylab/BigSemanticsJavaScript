@@ -1002,25 +1002,50 @@ Mink.render = function(task){
 	
 	if(task.mmd && task.mmd['meta_metadata'].extends == 'search'){
 		var minkLinks = Mink.getSearchResultLinks(metadataFields, task.metadata);
-		var metadata = task.metadata;
+		
+		var metadata = BSUtils.unwrap(task.metadata);
 		var flink = "fav::" + task.url;
 		minkLinks.links.push(flink);
-		var detailDetails = {type: 'minksearchstripper', links: minkLinks};
+		var iteratableURL = task.mmd['meta_metadata'].search_result_iterator;
+		
+		/*
+		if there is an iteration canary in the first level of the task fields, signal to load more
+		*/
+		var canaryAlive = false;
+		var canaryField = task.mmd['meta_metadata'].final_page_canary;
+		if(metadata[canaryField] != null && metadata[canaryField] != ""){
+			canaryAlive = true;
+		}
+
+
+
+
+		var detailDetails = {type: 'minksearchstripper', links: minkLinks, iterator: iteratableURL, mmdtype: task.mmd['meta_metadata'].name, url: task.url, canary: canaryAlive, perPage: task.mmd['meta_metadata'].results_per_page};
 		var eventDetail = {detail: detailDetails, bubbles: true};
 		var myEvent = new CustomEvent("minkevent", eventDetail);
 		task.container.parentNode.dispatchEvent(myEvent);
 		//gs search hardcode for now
-		for(var j = 0; j < metadata['google_scholar_search'].search_results.length; j++){
-			var url2 = "mink::" + metadata['google_scholar_search'].search_results[j]['google_scholar_search_result'].document_link;
+		for(var j = 0; j < metadata.search_results.length; j++){
+			var url2 = "mink::" + metadata.search_results[j]['google_scholar_search_result'].document_link;
 			url2 = url2.toLowerCase();
-			var betterMD = metadata['google_scholar_search'].search_results[j];
-			Mink.minklinkToMetadataMap.put(url2, betterMD);
+			var betterMD = metadata.search_results[j];
+			Mink. MetadataMap.put(url2, betterMD);
 
 		}
 		console.log(minkLinks);
 	}else{
 		// Build the HTML table for the metadata
 		
+		
+
+
+
+
+
+
+
+
+
 		var metadataTable = document.createElement('div');
 		metadataTable.className = "minkContainer";
 		Mink.buildMinkShell(metadataTable, false, task.isRoot, metadataFields, FIRST_LEVEL_FIELDS, styleInfo, task.url, task.favicon);

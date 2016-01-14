@@ -57,7 +57,7 @@ minkApp.killEvent = function(event){
 minkApp.buildBibMenu = function(parent){
 	var container = buildDiv('eco-dropDownMenu');
 	buildMenuIcon(container, 'View Bibliography', './img/ecologylab.png', minkApp.favesToBib);
-	buildMenuIcon(container, 'View BibText', './img/ecologylab.png', function(){alert('i cant stop my legs my legs go out late dancing')});
+	buildMenuIcon(container, 'View BibText', './img/ecologylab.png', minkApp.favesToBibTex);
 
 	parent.appendChild(container);
 	setTimeout(function(){
@@ -69,6 +69,36 @@ minkApp.buildBibMenu = function(parent){
 }
 
 	
+
+minkApp.toggleFacetsMenuHandler = function(event){
+	var facetColumn = $(event.srcElement).closest('.minkFacetColumn');
+	var collapsed = facetColumn.hasClass('collapsed');
+	if(collapsed){
+		minkApp.showFacetMenu(facetColumn);
+	}else{
+		minkApp.hideFacetMenu(facetColumn);
+
+	}
+}
+
+minkApp.hideFacetMenu = function(facetColumn){
+	facetColumn.addClass('collapsed');
+	facetColumn.removeClass('open');
+	facetColumn.find('.facetMenuItems').addClass('collapsed').removeClass('open');
+	$('#minkColumns').removeClass('facetsMenuShowing');
+	$('#minkColumns').addClass('facetsMenuHiding');
+
+}
+
+minkApp.showFacetMenu = function(facetColumn){
+	facetColumn.removeClass('collapsed');
+	facetColumn.addClass('open');
+	facetColumn.find('.facetMenuItems').removeClass('collapsed').addClass('open');
+	$('#minkColumns').removeClass('facetsMenuHiding');
+
+	$('#minkColumns').addClass('facetsMenuShowing');
+}
+
 
 minkApp.buildOverlay = function(parent, bibHTML){
 	var overlay = buildDiv('eco-overlay');
@@ -100,6 +130,19 @@ minkApp.favesToBib = function(){
 	});
 }
 
+minkApp.favesToBibTex = function(){
+	var bibGen = new BibTexGenerator('../bsjsCore/citeproc/modern-language-association-with-url.csl', '../bsjsCore/citeproc/locales-en-US.xml');
+	
+	for (var i = 0; i < minkApp.favorites.length; i++){
+		var md = Mink.minklinkToMetadataMap.get(minkApp.favorites[i].url);
+		bibGen.addDocument( new BibTexDocument(minkApp.favorites[i].url, md));
+	}
+	
+	bibGen.getBibString(function(bibString){
+		minkApp.buildBibPopUp(document.body, bibString);
+		//alert(bibHTML)
+	});
+}
 //remove from Space
 
 
@@ -113,7 +156,7 @@ minkApp.signalFavorite = function(event){
 	var url = exExp.getAttribute('url');
 	var favicon = $(minkTitleClickable).children('.minkFavicon')[0].src;
 	var mdname = $(minkTitleClickable).children('.minkTitleField')[0].childNodes[0].innerHTML;
-	var detailDetails = {type: 'minkfavorite', url: url, favicon: favicon, mdname: mdname};
+	var detailDetails = {type: 'minkfavorite', url: url, favicon: favicon, mdname: mdname, html: card};
 	var eventDetail = {detail: detailDetails, bubbles: true};
 	var myEvent = new CustomEvent("minkevent", eventDetail);
 	event.target.dispatchEvent(myEvent);
@@ -141,10 +184,10 @@ minkApp.removeCard = function(pile, card){
 		reval = reval && false;
 	}
 	
-//	$(card).css('display', 'none');
+//	$(card.html).css('display', 'none');
 }
 minkApp.openLink = function(event){
-	var link = event.srcElement.getAttribute('outlink');
+	var link = event.currentTarget.getAttribute('outlink');
 	  var win = window.open(link, '_blank');
 
 }
@@ -179,7 +222,7 @@ minkApp.buildCardControls = function(parent, link){
 
 	var favorite = document.createElement('img');
 	favorite.className = 'minkCardControlIcon';
-	favorite.src = './img/star.svg';
+	favorite.src = './img/ic_bookmark_black_24dp_2x.png';
 	f.addEventListener('click', minkApp.signalFavorite)
 	f.appendChild(favorite);
 
@@ -678,7 +721,7 @@ minkApp.goForwardsHandler = function(event){
 	
 }
 
-minkApp.addFavorite = function(url, mdName, faviconLink, srcHTML){
+minkApp.toggleFavorite = function(url, mdName, faviconLink, srcHTML){
 	
 	var found = -1;
 	
@@ -690,8 +733,11 @@ minkApp.addFavorite = function(url, mdName, faviconLink, srcHTML){
 	
 	if(found < 0){
 		
-		
-		
+		/*mark the card as favorited visually and in memory*/
+		var favoriteIndicator = srcHTML.getElementsByClassName('minkCardControl')[0];
+		favoriteIndicator.classList.add('favorited');
+		$(srcHTML).find(".minkTitleBar").addClass('favorited');
+		$(srcHTML).find(".minkTitleField").addClass('favorited');
 		var md = Mink.minklinkToMetadataMap.get(url);
 		if(md){
 			md = BSUtils.unwrap(md);
@@ -715,9 +761,14 @@ minkApp.addFavorite = function(url, mdName, faviconLink, srcHTML){
 		minkApp.favorites.push(favorite);
 
 	}else{
-		var toBack = minkApp.favorites[found];
+		
+		$($(srcHTML).find(".minkCardControl")[0]).removeClass('favorited');
+		$(srcHTML).find(".minkTitleBar").removeClass('favorited');
+		$(srcHTML).find(".minkTitleField").removeClass('favorited');
+		//find html
 		minkApp.favorites.splice(found, 1);
-		minkApp.favorites.push(toBack);
+		var selector = "[href='" + url + "']";
+		$('#minkFavorites').find(selector).closest('.minkFavorite').remove();
 	}
 	
 	minkApp.updateFavoritesDisplay();
@@ -850,20 +901,40 @@ minkApp.minkEventHandler = function(event){
 	 }else if(event.detail.type=="minkshowhide"){
 		 minkApp.showHidePileHandler(event);
 	 }else if(event.detail.type=='minkfavorite'){
-		 minkApp.addFavorite(event.detail.url, event.detail.mdname, event.detail.favicon);
+		 minkApp.toggleFavorite(event.detail.url, event.detail.mdname, event.detail.favicon, event.detail.html);
 	 }else if(event.detail.type=='minksearchstripper'){
 		 
 		 var pileID = event.srcElement.getAttribute('pileID');
 		 var pile =  minkApp.currentQuery.pileMap.get(pileID);
-		 pile.cards.pop();
-		 pile.HTML.removeChild(pile.HTML.childNodes[0]);
-		 var cards = minkApp.buildCards(pile.HTML, event.detail.links.links, true, pile);
-		 pile.cards = cards;
-		 
-		 
-		 
-		 
-		 
+		 var wrapper = $(pile.HTML).closest('.minkPileWrapper')[0];
+		/*
+		if the iteration canary is visble, give the pile a new URL as the new results URL so that buildPile knows to make it
+		a  new card loader. If the canary has 'died' then delete any existing more loaders
+
+		*/
+		
+		var loader = $(pile.HTML).closest('.minkPileWrapper').find('.minkPileLoader')[0];
+		/*
+		if the canary is dead, remove any existing more loader -- updating the existing loader is handled in "addnNewCards"
+		*/
+		var formerIndex = pile.urlIndex; 
+		pile.urlIndex = pile.urlIndex + parseInt(event.detail.perPage);
+		if(loader){
+			if(!event.detail.canary){
+				$(loader).remove();
+			}
+		
+		}else if(event.detail.canary){
+			minkApp.buildPileMoreLoader(wrapper, pile, event.detail.iterator, event.detail.url);
+			//if there's no pile loader then the card we should remove is at index 0
+		}
+		pile.perPage = parseInt(event.detail.perPage);
+		pile.cards.pop();
+		//should be counted but i don't yet
+		pile.HTML.removeChild(pile.HTML.childNodes[formerIndex]);
+		var cards = minkApp.buildCards(pile.HTML, event.detail.links.links, true, pile);
+		pile.cards = pile.cards.concat(cards);
+ 
 		 console.log(event.detail.links);
 	 }
 	 
@@ -970,20 +1041,20 @@ minkApp.showHidePile = function(pile, hide){
 	console.log('yeah');
 	if(hide){
 		pile.visible = false;
-		$(pile.HTML.parentNode).removeClass('minkPileWrapperShow');
-		$(pile.HTML.parentNode).addClass('minkPileWrapperHide');
+		$(pile.HTML).closest('.minkPileWrapper').removeClass('minkPileWrapperShow');
+		$(pile.HTML).closest('.minkPileWrapper').addClass('minkPileWrapperHide');
 		$(pile.rootHTML).attr('expanded', 'false');
-		pile.HTML.parentNode.addEventListener('animationend', minkApp.toggleDisplay);
+		$(pile.HTML).closest('.minkPileWrapper')[0].addEventListener('animationend', minkApp.toggleDisplay);
 		//handle kids
 
 	}else{
 		pile.visible = true;
-		pile.HTML.parentNode.removeEventListener('animationend', minkApp.toggleDisplay);
+		$(pile.HTML).closest('.minkPileWrapper')[0].removeEventListener('animationend', minkApp.toggleDisplay);
 
-		pile.HTML.parentNode.style.display = '';
-		$(pile.HTML.parentNode).removeClass('minkPileWrapperHide');
-		$(pile.HTML.parentNode).addClass('minkPileWrapperShow');
-		$(pile.rootHTML).attr('expanded', 'true');
+		$(pile.HTML).closest('.minkPileWrapper')[0].style.display = '';
+		$(pile.HTML).closest('.minkPileWrapper').removeClass('minkPileWrapperHide');
+		$(pile.HTML).closest('.minkPileWrapper').addClass('minkPileWrapperShow');
+		$(pile.HTML).closest('.minkPileWrapper').attr('expanded', 'true');
 		//handle kids
 
 
@@ -1149,6 +1220,30 @@ minkApp.contextualize = function(md_and_mmd){
 		minkApp.currentQuery.contextTitle = unwrapped.title;
 	}
 }
+
+minkApp.polishYear = function(metadata){
+	var values = metadata.value;
+	var year;
+	for(var i = 0; i < values.length; i++){
+		if(values[i].name == 'source_info'){
+			var sourceInfo = values[i].value;
+			year = sourceInfo.replace(/[^\d]/g,'');
+			
+		}
+	}
+	if(year != "" && year != null && (!isNaN(parseInt(year)))){
+		for(var i = 0; i < values.length; i++){
+			if(values[i].name == 'year'){
+				if(isNaN(parseInt (values[i].value))){
+					values[i].value = year;
+				}
+				
+				
+			}
+		}
+		return year;
+	}
+}
 minkApp.buildCards = function(parent, links, expandCards, pile){
 	var cards = [];
 	parent.addEventListener('minkloaded', minkApp.addCardToPile);
@@ -1183,6 +1278,28 @@ minkApp.buildCards = function(parent, links, expandCards, pile){
 		if(link.startsWith('mink::')){
 			var metadata = Mink.minklinkToViewModelMap.get(link);
 			metadata['minkfav'] = faviconLink;
+
+
+
+			/*
+		    VERY HACKY THING
+		    takes Source_info and processes it into a year field. Really shouldn't be done here but we're demo'ing
+		    */
+		    //here metadata is a viewmodel and md is just metadata
+	    	var metadata = Mink.minklinkToViewModelMap.get(link);
+	    	var yr = minkApp.polishYear(metadata);
+	    	if(yr){
+	    		var year = parseInt(yr);
+		    	if(!isNaN(year)){
+
+		    	}
+		    	var yearFacet = new Facet('year', year, 'ordinal', 'num');
+		    	card.facets.push(yearFacet);
+
+	    	}
+		    if(metadata['source_info']){
+
+		    }
 			var clipping = {viewModel: metadata};
 			RendererBase.addMetadataDisplay(cardDiv, link, clipping, Mink.render, {expand: true, callback: minkApp.contextualize, devalue: card.duplicate});
 
@@ -1196,16 +1313,49 @@ minkApp.buildCards = function(parent, links, expandCards, pile){
 
 }
 
+minkApp.addNewCardsToPile = function(event){
+
+//find pile from event
+	var src = event.srcElement;
+
+	var parent = $(src).closest('.minkPileWrapper').find('.minkPile')[0];
+	var pile = minkApp.currentQuery.pileMap.get(parent.getAttribute('pileid'));
+	var expandCards = true;
+	var urlToLoad = [src.getAttribute('loadnext') + pile.urlIndex.toString()];
+	var newCards = minkApp.buildCards(parent, urlToLoad, expandCards, pile);
+	pile.cards = pile.cards.concat(newCards);
+//find url from loader
+//ask bs for cards just like buildPile
+//	pile.urlIndex = pile.urlIndex + pile.perPage;
+
+}
+
+minkApp.buildPileMoreLoader = function (parent, pile, pattern, url){
+	var loader = buildDiv('minkPileLoader');
+	var urlToLoad = url + pattern;
+	loader.setAttribute('loadnext', urlToLoad);
+	loader.addEventListener('click', minkApp.addNewCardsToPile);
+	loader.innerHTML = 'explore further';
+
+
+
+	parent.appendChild(loader);
+}
+
 
 minkApp.buildPile = function(parent, links, rooturl, collectionname, src, expandChildren){
+	expandChildren = false;
 	console.log('links: ');
 	console.log(links);
 	var wrapper= buildDiv('minkPileWrapper');
+	var row = buildDiv('minkPileRow');
 	
 	if(src){
 		var collapseButton = buildDiv('sampleCollapse');
 		collapseButton.addEventListener('click', minkApp.expandCollapsePile);
-		wrapper.appendChild(collapseButton);
+		row.appendChild(collapseButton);
+
+
 	}
 	
 	var newPile = buildDiv('minkPile minkPileExpanded');
@@ -1213,18 +1363,32 @@ minkApp.buildPile = function(parent, links, rooturl, collectionname, src, expand
 	
 	var pileId = pileIDGen(rooturl, collectionname);
 	var parentPile = null;
+			var parentCard = null;
+
 	if(src){
 		var parentPileHTML = $(src).closest('.minkPile')[0];
 		parentPile = minkApp.currentQuery.pileMap.get(parentPileHTML.getAttribute('pileid'));
+		for(var i = 0; i < parentPile.cards.length; i++){
+			if (src.getAttribute('rooturl') == parentPile.cards[i].url){
+				parentCard = parentPile.cards[i];
+			}
+		}
+
+
 	}
-	var pile = new minkPile(pileId, null, src, newPile, parentPile);
+	var pile = new minkPile(pileId, null, src, newPile, parentPile, rooturl, parentCard);
+	
 	pile.cards = minkApp.buildCards(newPile, links, expandChildren, pile);
 	//pile.setAttribute('pileID', pileId);
-	wrapper.appendChild(newPile);
+	row.appendChild(newPile);
+	wrapper.appendChild(row);
 	newPile.setAttribute('pileid', pileId);
 	minkApp.buildDuplicateCount(pile);
 	if(parentPile)
 		parentPile.kids.push(pile);
+
+
+
 
 	return pile;
 	//Logic to let varius maps and storage representations know about what's going one
@@ -1285,13 +1449,19 @@ function redrawCanvas(){
 	if(minkApp.currentQuery){
 		for (var i = 0; i < minkApp.currentQuery.pileMap.keys.length; i++){
 			var pile = minkApp.currentQuery.pileMap.get( minkApp.currentQuery.pileMap.keys[i]);
+			
+//if root card isn't visible, don't show lines to it
+
 			if(pile.rootHTML){
+
 				if (pile.visible && $(pile.rootHTML.closest('.minkColumn')).is(':visible') && $(pile.HTML.closest('.minkColumn')).is(':visible')){
+					
+
 					var rootRect = pile.rootHTML.getBoundingClientRect();
 					var rootAttachPointX = rootRect.left + rootRect.width - canvasX;
 					var rootAttachPointY = (rootRect.top + rootRect.height / 2) - canvasY;
 					
-					var pileRect = pile.HTML.getBoundingClientRect();
+					var pileRect = $(pile.HTML).closest('.minkPileWrapper')[0].getBoundingClientRect();
 					var pileTopAttachPointX = pileRect.left - canvasX;
 					var pileTopAttachPointY = (pileRect.top) - canvasY;
 					
@@ -1301,12 +1471,16 @@ function redrawCanvas(){
 					
 					var pathSplitX = rootAttachPointX + 1/2 * (pileTopAttachPointX - rootAttachPointX);
 					var pathSplitY = (pileTopAttachPointY + pileRect.height/2);
-				
-					ctx.beginPath();
-					ctx.strokeStyle = '#999999';
-					ctx.moveTo(rootAttachPointX, rootAttachPointY);
-					ctx.bezierCurveTo((rootAttachPointX + (1/2 * Math.abs(pathSplitX - rootAttachPointX))), rootAttachPointY, pathSplitX - (1/2 * Math.abs((pathSplitX - rootAttachPointX))), pathSplitY, pathSplitX, pathSplitY);
-					ctx.stroke();
+					if(pile.parentCard.displayed){
+						ctx.beginPath();
+						ctx.strokeStyle = '#999999';
+						ctx.moveTo(rootAttachPointX, rootAttachPointY);
+						ctx.bezierCurveTo((rootAttachPointX + (1/2 * Math.abs(pathSplitX - rootAttachPointX))), rootAttachPointY, pathSplitX - (1/2 * Math.abs((pathSplitX - rootAttachPointX))), pathSplitY, pathSplitX, pathSplitY);
+						ctx.stroke();
+					}else{
+						pathSplitX = pileTopAttachPointX - 40;
+					}
+					
 					
 					ctx.beginPath();
 					ctx.strokeStyle = '#999999';

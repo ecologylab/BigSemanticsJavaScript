@@ -69,6 +69,7 @@
         <script type="text/javascript" src="./js/explorationSpace.js"></script>
         <script type="text/javascript" src="./js/query.js"></script>
          <script type="text/javascript" src="./js/cards.js"></script>
+         <script type="text/javascript" src="./js/facets.js"></script>
 
         <script type="text/javascript" src="./js/minkApp.js"></script>
     <link href="./css/minkApp.css" type="text/css" rel="stylesheet" />
@@ -89,7 +90,7 @@
   
     <div class="minkCenterRow"> 
 	
-    		<div clas ="queryFavColumn">
+    		<div class="queryFavColumn">
     			
     				 <div class='minkQueries' id='minkQueries'>
     		 	<div class="queryLabel">queries</div>
@@ -99,7 +100,27 @@
     		 <div class="minkFaveHeader"> <div class="favLabel">favorites</div> <div class="minkFavoritesMenu" id="minkFavoritesMenu" onclick="minkApp.favoritesMenuHandler(event)" ><img style="height: 28px"src="./img/dots.png"></img></div>
     		 </div></div>
     		</div>
-    	
+    	   <div class="minkFacetColumn collapsed"><div class="facetMenuHeader" onclick="minkApp.toggleFacetsMenuHandler(event)" ><img class="minkFacetMenuOpen" id="minkFacetMenuOpen" src="./img/ic_menu_black_24dp_2x.png"></img><div class="facetMenuHeaderText">facets</div></div>
+
+         <div class="facetMenuItems collapsed">
+           <div class='minkFacetMenuItem'>
+              <div class="minkFacetMenuItemHeader" onclick="minkApp.toggleFacetItemHandler(event)"><div class="minkFacetMenuIconContainer"><img class="minkFacetMenuIcon" src="./img/ic_date_range_black_24dp_2x.png"></img></div><div class="minkFacetMenuLabel">Year Range</div></div>
+              <div class="minkFacetMenuItemContent">
+                <input type="number" min="1000" max="3000" class="minkFacetYear" id="startYear"></input> -  <input min="1000" max="3000" type="number" class="minkFacetYear" id="endYear">
+
+              </div>
+           </div>
+
+          <div class='minkFacetMenuItem'>
+            <div class="minkFacetMenuItemHeader" onclick="minkApp.toggleFacetItemHandler(event)" ><div class="minkFacetMenuIconContainer"><img class="minkFacetMenuIcon" src="./img/ic_filter_list_black_24dp_2x.png"></img></div><div class="minkFacetMenuLabel">Keyword</div></div>
+            </div>
+            <div class="minkFacetMenuItemContent">
+                <input type="text" class="minkFacetKeyword" id="startYear"></input>
+
+              </div>
+            </div>
+           
+         </div>
     		 <div class='minkColumns' id="minkColumns">    <div class="minkColumn" column="1" id="minkC1">
     </div>
   </div></div>

@@ -1,6 +1,7 @@
 function minkCard(url, div, pile){
 	this.url = url;
 	this.html = div;
+	this.facets = [];
 	//is the cards pile in view?
 	this.inView = true;	
 	//is the card already displayed in another pile

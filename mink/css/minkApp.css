@@ -1,14 +1,158 @@
+.minkPileLoader{
+	width: 100px;
+	height: 50px;
+	background-color: purple;
+
+}
+
 .minkBibDisplay{
 		-webkit-filter: none;
 			position: absolute;
 top: 200px;
 background-color: white;
 left: 25%;
+    max-width: 50%;
 
 z-index: 1001;
 padding: 30px 30px 30px 30px;
 border-radius: 4px;
 }
+
+
+.facetMenuHeader{
+	display: flex;
+	transition: width .5s ease;
+}
+.facetMenuHeaderText{
+	color: black;
+	-webkit-filter: opacity(.6);
+	line-height: 28px;
+	padding-right: 2px;
+}
+.facetMenuHeader.opened{
+}
+.facetMenuHeader:hover{
+	background-color: #DDDDDD;
+	cursor: pointer;
+
+}
+
+
+.minkFacetMenuOpen.opened{
+	-webkit-filter: invert(1);
+
+}
+
+.minkFacetMenuOpen{
+
+    height: 24px;
+    width: 24px;
+    margin-top: 0px;
+    border-radius: 40px;
+    -webkit-filter: opacity(.6);
+    padding: 2px;
+    margin-right: 4px;
+}
+.minkFacetMenuOpen:hover{
+	cursor: pointer;
+
+}
+.minkFacetMenuItemContent{
+	display: flex;
+    margin-left: 32px;
+    justify-content: space-between;
+    margin-top: 4px;
+
+    margin-bottom: 4px;
+}
+.minkFacetColumn.collapsed{
+
+    min-height: 24px;
+    display: flex;
+    margin-left: 20px;
+    line-height: 24px;
+    margin-top: 8px;
+    width: 74px;
+    
+}
+.minkFacetYear{
+	width: 42px;
+}
+.minkFacetKeyword{
+	line-height: 24px;
+}
+.minkFacetColumn.open{
+
+    min-height: 24px;
+    display: flex;
+    margin-left: 20px;
+    line-height: 24px;
+    margin-top: 8px;
+    width: 170px;
+    
+}
+.minkFacetColumn{
+	 flex-direction: column;
+	 justify-content: flex-start;
+
+
+}
+
+.minkFacetMenuItemHeader{
+	display: flex;
+}
+.minkFacetMenuIconContainer{
+	width: 24px;
+	height: 24px;
+	padding: 2px;
+}
+.minkFacetMenuIcon{
+	-webkit-filter: opacity(.6);
+}
+.minkFacetMenuItem{
+	display: flex;
+    flex-direction: column
+
+}
+.minkFacetMenuItemHeader:hover{
+	cursor: pointer;
+	background-color: #CCCCCC;
+}
+
+.facetMenuItems{
+	margin-left: 8px;
+
+}
+.facetMenuItems.collapsed{
+	display: none;
+}
+.minkFacetMenuLabel{
+	line-height: 28px;
+	color: black;
+	-webkit-filter: opacity(.6);
+	margin-left: 4px;
+}
+
+
+.minkPileRow{
+	display: flex;
+	align-items: center;
+}
+.minkCardControl.favorited{
+background-color: #63D84F;
+-webkit-filter: invert(1);
+    -webkit-box-shadow: 1px 1px 4px -1px rgba(255,255,255,0.4);
+
+}
+.minkTitleBar.favorited{
+background-color: #9C27B0;
+}
+
+.minkTitleField.favorited{
+color: white;
+font-weight: normal;}
+
+
 .eco-overlay{
 	position: absolute;
 	top: 0px;
@@ -60,19 +204,20 @@ padding-right: 4px;
 	margin-right: 50px;
 	transition: margin-left 1s ease;
 	display: inline-block;
-	
+
 }
 .minkFaveHeader{
 	display: flex;
 		    text-align: center;
     color: white;
     line-height: 30px;
-    background-color: #0091EA;
+    background-color: #9C27B0;
 
 }
 .queryFavColumn{
 	display: flex;
 	flex-direction: column;
+	margin-top: 8px;
 }
 .minkFavoritesMenu{
 height: 28px;
@@ -240,7 +385,6 @@ opacity: 1;
 .minkColumns{
 		display: inline-flex;
 	  max-width: 1800px;
-    margin-left: 50px;
 
 }
 
@@ -360,6 +504,33 @@ text-decoration: underline;
 	to{width: 100px;}*/
 }
 
+.facetsMenuShowing{
+	animation-name: facetsMenuShowingA;
+	animation-duration: .5s;
+}
+
+.facetsMenuHiding{
+	animation-name: facetsMenuHidingA;
+	animation-duration: .5s;
+
+}
+
+@keyframes facetsMenuShowingA{
+	0%{margin-left: -96px}
+	100%{margin-left: 0px}
+}
+
+@keyframes facetsMenuHidingA{
+	0%{margin-left: 96px}
+	100%{margin-left: 0px}
+
+
+}
+
+
+
+
+
 .flash{
 	animation-name: flashFavorites;
 	animation-duration: .5s;
@@ -386,7 +557,23 @@ text-decoration: underline;
         overflow: visible;
 
 }
+.minkPileLoader {
+    width: 120px;
+    height: 26px;
+    margin-right: 90px;
+    align-self: center;
+    vertical-align: center;
+    text-align: center;
+    border-radius: 4px;
+    color: white;
+    background-color: #90CAF9;
+    line-height: 26px;
+}
+.minkPileLoader:hover {
 
+    background-color: #1E88E5;
+    cursor: pointer;
+}
 
 .minkFavorites.mfHidden{
 	animation-name: hideFavorites;
@@ -423,7 +610,7 @@ text-decoration: underline;
 .minkPileWrapper{
 	overflow: hidden;
 	display: flex;
-	  align-items: center;
+	flex-direction: column;
 	margin-bottom: 12px;
 	
 }
@@ -452,7 +639,6 @@ text-decoration: underline;
 .minkPile{
 	padding-top: 8px;
 	padding-bottom: 4px;
-	margin-top: 8px;
 	 /*   transition: height 1s ease-out;
 	    	 /*   transition: margin-top 1s ease-out;
 	    -webkit-transition: margin-top 1s ease;*/
@@ -534,7 +720,7 @@ text-decoration: underline;
 
 .minkCardControl:hover{
 	cursor: pointer;
-background-color: #003AA5;
+background-color:#63D84F;
 -webkit-filter: invert(1);
     -webkit-box-shadow: 1px 1px 4px -1px rgba(255,255,255,0.6);
 
