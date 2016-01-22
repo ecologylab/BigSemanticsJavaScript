@@ -50,7 +50,7 @@ simpl.dfs = function(obj, options, handlers) {
         emit(handlers.onObjectRevisit, elem, parentElem, name);
         return;
       }
-      elem[simpl.SIMPL_VISITED_ID] = String(visitId);
+      elem[simpl.SIMPL_VISITED_ID] = visitId;
       visited[visitId] = elem;
       visitId += 1;
 
