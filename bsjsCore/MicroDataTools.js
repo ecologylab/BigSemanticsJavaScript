@@ -3,6 +3,10 @@ var MicroDataTools = {};
 
 // Convert schema name into metadata wrapper name
 MicroDataTools.getTypeName = function(microdata) {
+    if (!microdata) {
+        // TODO There is probbally something smarter to do here
+        return undefined;
+    }
     var type = microdata.type;
     type = type.substr(type.lastIndexOf('/') + 1);
     var result = '';
@@ -20,11 +24,14 @@ MicroDataTools.getTypeName = function(microdata) {
 
 MicroDataTools.useMicroDataToImproveMMD = function( response , mmd, bigSemantics, callback ) {
     var obj = MicroDataTools.getMicroDataAndMMD(response.entity , bigSemantics , function(err , obj) {
+        var bestMMD = mmd;
         if ( err ) {
-            console.log("useMicroDataToImproveMMD call to getMicroDataAndMMd failed");
-            callback(err);
+                console.log("useMicroDataToImproveMMD call to getMicroDataAndMMd failed");
+                callback(err);
         }
-        var bestMMD = pickBestMMD(mmd , obj.mmd);
+        if (obj) {
+            bestMMD = pickBestMMD(mmd, obj.mmd);
+        }
         callback(null , bestMMD);
     });
 };
@@ -35,11 +42,17 @@ MicroDataTools.getMicroData = function(page) {
 
 MicroDataTools.getMicroDataAndMMD = function(page , bigSemantics, callback) {
     var microdata = MicroDataTools.parseMicroData(page);
-    var typeName = MicroDataTools.getTypeName(microdata[0]);
+    if ( microdata.length == 0 ) {
+        // There was no microdata for that page
+        callback( null , null);
+    }
+    else {
+        var typeName = MicroDataTools.getTypeName(microdata[0]);
 
-    bigSemantics.loadMmd(typeName , null , function(err , mmd) {
-        callback( null , { mmd : mmd , microdata:microdata});
-    });
+        bigSemantics.loadMmd(typeName, null, function (err, mmd) {
+            callback(null, {mmd: mmd, microdata: microdata});
+        });
+    }
 };
 
 MicroDataTools.parseMicroData = function(page) {
