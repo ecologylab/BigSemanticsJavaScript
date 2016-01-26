@@ -382,8 +382,12 @@ BibTexGenerator.prototype.createBib	= function(document, that){
 		}
 		bib.author = that.flattenAuthorArray(metadata.authors, that);
 		bib.year    = metadata.year ? metadata.year : ( metadata.source ? metadata.source.year : metadata.filing_date );
-		if(bib['year'])
-		    bib['year']    = parseInt(bib['year']);
+		if(bib['year']){
+		    bib['year'] = parseInt(bib['year']);
+			if (isNaN(bib['year'])){
+				bib['year'] = "PARSE ERROR";
+			}
+		}
 
 		//if no author, keep url, if url please strip http(s) and www(2/3/4)
 		switch (bib['type'])
@@ -409,15 +413,17 @@ BibTexGenerator.prototype.createBib	= function(document, that){
 		  }
 		  case 'undefined':
 		  {
-		  	return [];	
+		  	return [];
 		  }
 		 
 		}
 		if(bib.author){
 			bib['URL'] = undefined;
-		}else{
+		}else if(bib['URL']){
 			bib['URL'] = that.makeUrlReadable(bib['URL']); 
-
+		}
+		else if (metadata.location){
+			bib['URL'] = that.makeUrlReadable(metadata.location); 
 		}
 		if(!bib.title){
 		  return "";
@@ -570,31 +576,26 @@ BibTexGenerator.prototype.retrieveSiteName = function(metadata){
 	}
 }
 
-
-
 BibTexGenerator.prototype.documentsToBib = function(that){
-	try{ 
 		var bibsHash = {};
 		var bibString = "";
 		var idHash = {};
 		for (var i = 0; i < that.documents.length; i++) {
-			var document = that.documents[i];
-			document.bibJSON = that.createBib(document, that);
-			
-			if(!(document.bibJSON.id in bibsHash)){ 
-				 bibsHash[document.bibJSON.id] = "X";				 
-			}else{
-				document.bibJSON = null;			
+			try{
+				var document = that.documents[i];
+				document.bibJSON = that.createBib(document, that);
+				
+				if(!(document.bibJSON.id in bibsHash)){ 
+					 bibsHash[document.bibJSON.id] = "X";				 
+				}else{
+					document.bibJSON = null;			
+				}
+			}catch(e){
+				console.log("Error gettign BibList error" + e); 
 			}
-		 }
-	}
-
-	catch(e){
-		console.log("Error gettign BibList error" + e); 
-	}
+			
+		 }	
 }
-
-
 
 BibTexGenerator.prototype.prepareDocuments = function(callback, that){
 

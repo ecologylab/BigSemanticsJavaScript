@@ -11,7 +11,7 @@ BSUtils.toDisplayCase = function(string)
 {  
   var strings = string.split('_');
   var display = "";
-  for (var s in strings)
+  for (var s = 0; s < strings.length; s++)
   {
     display += strings[s].charAt(0).toLowerCase() + strings[s].slice(1) + " ";
   }
