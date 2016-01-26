@@ -61,7 +61,6 @@ var BigSemantics = (function() {
         location = PreFilter.filter(location, mmd.filter_location);
       }
 
-	  //TODO
 	  if (mmd.meta_metadata.extract_with == "service"){ 
 			options.useHttps = (window.location.protocol == 'https:'); //use Https if we are on an https page
 			that.bss.loadMetadata(location, options, callback);	  
@@ -83,7 +82,7 @@ var BigSemantics = (function() {
         } else if (mmd.user_agent_name && mmd.user_agent_name in that.repoMan.userAgents) {
           options.userAgent = that.repoMan.userAgents[mmd.user_agent_name];
         }
-        that.downloader.httpGet(location, options, function(err, response) {
+        that.downloader.backgroundGet(location, options, function(err, response) {
           if (err) { callback(err, null); return; }
 
           that.extractor(response, mmd, that, options, function(err, metadata) {
