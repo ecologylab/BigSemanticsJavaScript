@@ -62,6 +62,9 @@ RenderingTask.prototype.metadataToModel = function(task, options){
     	ViewModeler.createMetadata(task.isRoot, task.mmd,
                                     task.metadata, task.url);
     // Is there any visable metadata?
+    
+    
+
     if (ViewModeler.hasVisibleMetadata(metadataFields))
     {	
     	
@@ -73,7 +76,10 @@ RenderingTask.prototype.metadataToModel = function(task, options){
       metadataFields[0].parentMDType = task.mmd.name;
       task.fields = metadataFields;
       task.style = {styles: miceStyles};
+      if(!task.options && options){
       task.options = options;
+
+      }
       RenderingTask.prototype.idealRenderer(task);
       return task;
     }

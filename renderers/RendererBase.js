@@ -43,6 +43,8 @@ RendererBase.addMetadataDisplay = function(container, url, clipping, renderer, o
   if (clipping != null) {
     if (clipping.metadata != null && clipping.mmd != null) {
       var task = new RenderingTask(url, true, null, null, container, null, renderer, clipping.mmd, clipping.metadata)
+      task.options = options;
+
       task.handler(task);
       if(options.callback){
         options.callback({mmd: clipping.mmd, metadata: clipping.metadata});
@@ -53,6 +55,7 @@ RendererBase.addMetadataDisplay = function(container, url, clipping, renderer, o
 
   //Otherwise, we prepare to call BigSemantics
   var task = new RenderingTask(url, true, clipping, null, container, null, renderer);
+    task.options = options;
 
   if (clipping != null) {
     if (!clipping.metadata && clipping.rawMetadata) {
@@ -94,6 +97,8 @@ RendererBase.addMetadataDisplay = function(container, url, clipping, renderer, o
   }
   
   else {
+    task.options = options;
+
     bsService.onReady(function(){
       bsService.loadMetadata(url, options, function(err, md_and_mmd){
         if (err) {
@@ -120,7 +125,6 @@ RendererBase.addMetadataDisplay = function(container, url, clipping, renderer, o
 				veryBadAddMetadataToClippingStorage(task.metadata);
 			}	
         
-       
         task.handler(task);
         if(options.callback){
         	options.callback(md_and_mmd);

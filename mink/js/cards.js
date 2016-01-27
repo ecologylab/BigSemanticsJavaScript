@@ -2,6 +2,7 @@ function minkCard(url, div, pile){
 	this.url = url;
 	this.html = div;
 	this.facets = [];
+	this.filteredOut = false;
 	//is the cards pile in view?
 	this.inView = true;	
 	//is the card already displayed in another pile
@@ -30,6 +31,9 @@ minkCard.prototype.setOnScreen = function(onScreen){
 		if(!this.removed){
 			if(this.valuedByUser || this.valuedByMink){
 				this.displayed = 'valued';
+			}else if(this.filteredOut){
+				this.displayed = 'none'
+
 			}else{
 				this.displayed = 'devalued';
 			}

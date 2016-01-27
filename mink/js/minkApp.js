@@ -68,7 +68,129 @@ minkApp.buildBibMenu = function(parent){
 	
 }
 
+minkApp.handleFacetKeydown = function(event){
+	if(event.keyCode == 13){
+		minkApp.handleFacetEntry();
+	}
+}
+minkApp.handleFacetEntry = function(event){
+	var facets = getFacetsFromHTML();
+	applyFacets(minkApp.currentQuery, facets);
+	$('#removeFacets').removeClass('hidden')
+
+
+}
+minkApp.handleFacetRemoval = function(event){
+	applyFacets(minkApp.currentQuery, []);
+	$('#removeFacets').addClass('hidden')
+	$('#minkFacetsRemovedIndicator').closest('.minkFacetMenuItem').addClass('hidden')
+
+}
+
+
+function getFacetsFromHTML(){
+	//should ideally return start year, end year, and the input in that one box
+	var startYearInput = $('#startYear').val();
+	var endYearInput = $('#endYear').val();
+	var startYear = parseInt(startYearInput);
+	var endYear = parseInt(endYearInput);
+
+	if(isNaN(startYear)){
+		startYear = 0;
+	}
+	if(isNaN(endYear)){
+		endYear = 9999;
+	}
+
+	var yearFacet = {name: "year", value: [startYear,endYear]};
+
+
+	return [yearFacet];
+}
 	
+/*
+Filter by year early
+*/
+function applyFacets(query, facets){
+	//for now we support two facet types: keyword and year
+	//remove existing facet and replace with new one supplied by system
+	var numberFiltered = 0;
+	query.facets = facets;
+	//for all facets, deselect all cards that do not fit specifications
+
+	//Finds all the cards
+	var keys = query.pileMap.keys;
+	for (var i = 0; i < keys.length; i++){
+		var pile = query.pileMap.get(keys[i]);
+			var cards = pile.cards;
+			
+			//for earch card compare to whichever facets we have
+
+		for (var j = 0; j < cards.length; j++){
+			var filtered = false;
+			for(var k = 0; k < query.facets.length; k++){
+				for(var l = 0; l < cards[j].facets.length; l++){
+					if(query.facets[k].name == cards[j].facets[l].name){
+						if(query.facets[k].name == "year"){
+							if(!(query.facets[k].value[0] <= cards[j].facets[l].value && query.facets[k].value[1] >= cards[j].facets[l].value)){
+								filtered = true;
+								numberFiltered++;
+							}
+
+						}
+					}
+
+				}
+
+			}
+					
+			cards[j].filteredOut = filtered;
+			minkApp.updateCardDisplay(cards[j]);
+				
+		}
+	}
+		
+	var indicatorString = numberFiltered.toString() + " cards removed";
+	if(numberFiltered > 0){
+
+	}
+	$("#minkFacetsRemovedIndicator")[0].innerHTML = indicatorString;
+	
+	$('#minkFacetsRemovedIndicator').closest('.minkFacetMenuItem').removeClass('hidden')
+
+
+}
+
+
+
+
+
+
+
+
+
+minkApp.toggleFacetItemHandler = function(event){
+	var item = $(event.srcElement).closest('.minkFacetMenuItem');
+	var content = item.find('.minkFacetMenuItemContent');
+
+	var collapsed = content.hasClass('collapsed');
+	if(collapsed){
+		minkApp.showFacetItem(content);
+	}else{
+		minkApp.hideFacetItem(content);
+
+	}
+}
+
+minkApp.hideFacetItem= function(content){
+	content.addClass('collapsed').removeClass('open');
+}
+
+minkApp.showFacetItem = function(content){
+	content.removeClass('collapsed').addClass('open');
+}
+
+
 
 minkApp.toggleFacetsMenuHandler = function(event){
 	var facetColumn = $(event.srcElement).closest('.minkFacetColumn');
@@ -173,18 +295,19 @@ minkApp.removeButtonHandler = function(event){
 	}
 
 }
+minkApp.cardRemovalAfterAnimation = function(event){
+	event.currentTarget.removeEventListener('animationend', minkApp.cardRemovalAfterAnimation);
+	event.currentTarget.style.display = "none";
+}
 minkApp.removeCard = function(pile, card){
 	var index = $(card.html).index();
 	pile.cards[index].removed = true;
-	pile.cards[index].displayed = false;
 	var cards = minkApp.cardDuplicateMap.get(card.url);
 	var reval = true;
 	for (var i = 0; i < cards.length; i++){
 		minkApp.updateCardDisplay(cards[i], reval);
 		reval = reval && false;
 	}
-	
-//	$(card.html).css('display', 'none');
 }
 minkApp.openLink = function(event){
 	var link = event.currentTarget.getAttribute('outlink');
@@ -200,11 +323,13 @@ minkApp.buildLinkOutControl = function(parent, link){
 	olc.addEventListener('click', minkApp.openLink);
 	olc.setAttribute('outlink', link)
 	olc.appendChild(openLink);
+
+	Material.addMaterial((link + "::o"), olc, 2);
 	parent.appendChild(olc);
 }
 
 minkApp.buildCardControls = function(parent, link){
-	var controlCont = buildDiv('minkCardControls');
+	var controlCont = buildDiv('minkCardControls hidden');
 	var r = buildDiv('minkCardControl')
 
 	var remove = document.createElement('img');
@@ -238,6 +363,9 @@ minkApp.buildCardControls = function(parent, link){
 
 	}
 	controlCont.appendChild(r);
+	Material.addMaterial((link + "::r"), r, 2);
+	Material.addMaterial((link + "::f"), f, 2);
+
 	parent.appendChild(controlCont)
 }
 
@@ -376,21 +504,33 @@ minkApp.hidePreviousQuery = function(){
 minkApp.updateCardDisplay = function(card, reval){
 	var bucket = minkApp.cardDuplicateMap.get(card.url);
 	var previousD = card.displayed;
-	card.displayed = !card.removed;
+	card.displayed = !card.removed && !card.filteredOut;
+
 	if (card.displayed){
 		
 		if(!previousD){
 			card.html.style.display = "";
+			$(card.html).addClass('animatingRestore');
 		}
 		if($(card.html).hasClass('devalued') && reval){
 			Mink.revalue(card.html);
+			card.displayed = true;
+
 		}else if(card.duplicate){
 			Mink.devalue(card.html);
 		}
+
 		minkApp.updateDuplicateCount(card.pile);
 		
 	}else{
-		card.html.style.display = "none";
+		//only animate removal iff  not already removed
+		if(previousD){
+			$(card.html).removeClass('animatingRestore');
+
+			$(card.html).addClass('animatingRemoval');
+			card.html.addEventListener("animationend", minkApp.cardRemovalAfterAnimation);
+
+		}
 
 		minkApp.updateDuplicateCount(card.pile);
 
@@ -874,6 +1014,18 @@ minkApp.newPile = function(details, srcElement){
 		 
 		 
 	 }
+	 //get parentCard
+	 var parentPileId = $(event.srcElement).closest('.minkPile').attr('pileid');
+	 //get parentPile
+	 var parentPile = minkApp.currentQuery.pileMap.get(parentPileId);
+	 //get parentCard url
+	 var parentCard;
+	 for (var i = 0; i < parentPile.cards.length; i++){
+	 	if(event.detail.rooturl == parentPile.cards[i].url){
+	 		parentCard = parentPile.cards[i];
+	 	}
+	 }
+
 	 var pile = minkApp.buildPile(nextCol, event.detail.links, event.detail.rooturl, event.detail.collectionname, event.srcElement)
 
 	 
@@ -881,6 +1033,14 @@ minkApp.newPile = function(details, srcElement){
 	 srcElement.addEventListener('click', minkApp.showHidePileHandler);
 	 srcElement.removeEventListener('click', Mink.showExplorableLinks);
 	
+}
+
+minkApp.showButtons = function(container){
+	$(container).find('.minkCardControls').removeClass('hidden');
+}
+minkApp.hideButtons = function(container){
+	$(container).find('.minkCardControls').addClass('hidden');
+
 }
 minkApp.minkEventHandler = function(event){
 	 
@@ -900,7 +1060,15 @@ minkApp.minkEventHandler = function(event){
 		 pile.rootHTML = event.srcElement;
 	 }else if(event.detail.type=="minkshowhide"){
 		 minkApp.showHidePileHandler(event);
-	 }else if(event.detail.type=='minkfavorite'){
+	 }else if(event.detail.type=="minkbuttons"){
+	 	if(event.detail.show){
+	 		minkApp.showButtons(event.detail.html)
+	 	}else{
+	 		minkApp.hideButtons(event.detail.html)
+
+	 	}
+	 }
+	 else if(event.detail.type=='minkfavorite'){
 		 minkApp.toggleFavorite(event.detail.url, event.detail.mdname, event.detail.favicon, event.detail.html);
 	 }else if(event.detail.type=='minksearchstripper'){
 		 
@@ -934,7 +1102,12 @@ minkApp.minkEventHandler = function(event){
 		pile.HTML.removeChild(pile.HTML.childNodes[formerIndex]);
 		var cards = minkApp.buildCards(pile.HTML, event.detail.links.links, true, pile);
 		pile.cards = pile.cards.concat(cards);
- 
+ 		if(minkApp.currentQuery){
+			var facets = getFacetsFromHTML();
+			//applyFacets(minkApp.currentQuery, facets);
+
+		}
+
 		 console.log(event.detail.links);
 	 }
 	 
@@ -1300,6 +1473,7 @@ minkApp.buildCards = function(parent, links, expandCards, pile){
 		    if(metadata['source_info']){
 
 		    }
+		    //devalue passed into mink?
 			var clipping = {viewModel: metadata};
 			RendererBase.addMetadataDisplay(cardDiv, link, clipping, Mink.render, {expand: true, callback: minkApp.contextualize, devalue: card.duplicate});
 
@@ -1309,6 +1483,7 @@ minkApp.buildCards = function(parent, links, expandCards, pile){
 		}
 		
 	}
+
 	return cards;
 
 }
@@ -1324,6 +1499,12 @@ minkApp.addNewCardsToPile = function(event){
 	var urlToLoad = [src.getAttribute('loadnext') + pile.urlIndex.toString()];
 	var newCards = minkApp.buildCards(parent, urlToLoad, expandCards, pile);
 	pile.cards = pile.cards.concat(newCards);
+	if(minkApp.currentQuery){
+		var facets = getFacetsFromHTML();
+	//	applyFacets(minkApp.currentQuery, facets);
+
+	}
+
 //find url from loader
 //ask bs for cards just like buildPile
 //	pile.urlIndex = pile.urlIndex + pile.perPage;
@@ -1369,7 +1550,8 @@ minkApp.buildPile = function(parent, links, rooturl, collectionname, src, expand
 		var parentPileHTML = $(src).closest('.minkPile')[0];
 		parentPile = minkApp.currentQuery.pileMap.get(parentPileHTML.getAttribute('pileid'));
 		for(var i = 0; i < parentPile.cards.length; i++){
-			if (src.getAttribute('rooturl') == parentPile.cards[i].url){
+			var intermediate = parentPile.cards[i].url.toLowerCase();
+			if (src.getAttribute('rooturl') == intermediate){
 				parentCard = parentPile.cards[i];
 			}
 		}
@@ -1379,6 +1561,13 @@ minkApp.buildPile = function(parent, links, rooturl, collectionname, src, expand
 	var pile = new minkPile(pileId, null, src, newPile, parentPile, rooturl, parentCard);
 	
 	pile.cards = minkApp.buildCards(newPile, links, expandChildren, pile);
+
+	if(minkApp.currentQuery){
+		var facets = getFacetsFromHTML();
+		//applyFacets(minkApp.currentQuery, facets);
+
+	}
+
 	//pile.setAttribute('pileID', pileId);
 	row.appendChild(newPile);
 	wrapper.appendChild(row);
@@ -1504,6 +1693,21 @@ function redrawCanvas(){
 }
 function onBodyLoad() {
 	var minkapp = $("#minkAppContainer")[0];
+	
+
+	/*
+	Material shading of UI
+	*/
+	var favoritesHTML = $('#minkFavorites')[0];
+	var queryHTML = $('#minkQueries')[0];
+	var minkAppBar = $('#minkToolbar')[0];
+	Material.addMaterial('minkFavorites', favoritesHTML, 4);
+	Material.addMaterial('minkQueries', queryHTML, 2);
+	Material.addMaterial('minkToolbar', minkAppBar, 2);
+
+
+
+
 	//SEMANTIC_SERVICE_URL = "http://128.194.128.84:8080/BigSemanticsService/";
 	
 	  if (document.URL.indexOf("http://localhost:") > -1 || document.URL.indexOf("file:///") > -1){

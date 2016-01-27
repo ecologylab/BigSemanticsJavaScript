@@ -62,7 +62,7 @@ border-radius: 4px;
     margin-left: 32px;
     justify-content: space-between;
     margin-top: 4px;
-
+    transition: max-height .5s ease;
     margin-bottom: 4px;
 }
 .minkFacetColumn.collapsed{
@@ -97,6 +97,16 @@ border-radius: 4px;
 
 
 }
+.minkFacetMenuItemContent.collapsed{
+	display: none;
+	max-height: 0px;
+
+}
+.minkFacetMenuItemContent.open{
+	display: flex;
+	max-height: 24px;
+
+}
 
 .minkFacetMenuItemHeader{
 	display: flex;
@@ -114,6 +124,12 @@ border-radius: 4px;
     flex-direction: column
 
 }
+.minkFacetsRemovedIndicator{
+	line-height: 28px;
+	color: black;
+	-webkit-filter: opacity(.6);
+	margin-left: 32px;
+}
 .minkFacetMenuItemHeader:hover{
 	cursor: pointer;
 	background-color: #CCCCCC;
@@ -124,6 +140,9 @@ border-radius: 4px;
 
 }
 .facetMenuItems.collapsed{
+	display: none;
+}
+.minkFacetMenuItem.hidden{
 	display: none;
 }
 .minkFacetMenuLabel{
@@ -146,6 +165,7 @@ background-color: #63D84F;
 }
 .minkTitleBar.favorited{
 background-color: #9C27B0;
+border-radius: 4px 4px 0 0;
 }
 
 .minkTitleField.favorited{
@@ -208,10 +228,12 @@ padding-right: 4px;
 }
 .minkFaveHeader{
 	display: flex;
-		    text-align: center;
+	text-align: center;
     color: white;
     line-height: 30px;
     background-color: #9C27B0;
+    border-radius: 4px 4px 0 0;
+
 
 }
 .queryFavColumn{
@@ -323,7 +345,6 @@ img{
 	color: white;
 }
 .minkQueries{
- 	-webkit-box-shadow: 2px 2px 10px 0px rgba(0,0,0,0.4);
     width: 400px;
    	max-width: 400px;
    	    min-width: 400px;
@@ -336,6 +357,8 @@ img{
     color: white;
     line-height: 30px;
     background-color: #0091EA;
+    border-radius: 4px 4px 0 0;
+
 }
 .minkNewQueryButton{
     width: 30px;
@@ -401,13 +424,15 @@ line-height: 34px;
     font-size: 16px;
 }
 
-.minkToolbar{
+.minkToolbar.material{
 	width: 100%;
 	display: flex;
 	background-color: #0091EA;
 	justify-content: space-between;
 	margin-bottom: 10px;
 	min-height: 32px;
+	    border-radius: 0;
+
 }
 .minkBackButton{
 	width: 30px;
@@ -549,7 +574,6 @@ text-decoration: underline;
 	width: 400px;
 	/*position: relative;
 	z-index: 100;*/
-    -webkit-box-shadow: 2px 2px 10px 0px rgba(0,0,0,0.4);    
     	  display: inline-block;
 	      position: absolute;
     z-index: 100;
@@ -684,6 +708,7 @@ text-decoration: underline;
 .minkCardContainer{
 	position: relative;
 	display: flex;	
+	transition: all .25s ease;	
 	
 }
 .minkCardControls{
@@ -697,12 +722,15 @@ text-decoration: underline;
     margin-left: 8px;
     
 }
+.minkCardControls.hidden{
+	display: none;
+}
 .minkCardControl{
 	    /* padding: 5px; */
     width: 35px;
     height: 35px;
     display: flex;
-    -webkit-box-shadow: 1px 1px 4px -1px rgba(0,0,0,0.4);
+    /*-webkit-box-shadow: 1px 1px 4px -1px rgba(0,0,0,0.4);*/
     /* justify-content: space-around; */
     /* align-content: flex-end; */
 		border-radius: 35px;
@@ -720,12 +748,45 @@ text-decoration: underline;
 
 .minkCardControl:hover{
 	cursor: pointer;
-background-color:#63D84F;
--webkit-filter: invert(1);
-    -webkit-box-shadow: 1px 1px 4px -1px rgba(255,255,255,0.6);
+	background-color:#63D84F;
+	/*-webkit-filter: invert(1);*/
 
 	
 }
+
+.animatingRemoval{
+	animation-name: cardRemoval;
+	animation-duration: .25s;
+	animation-fill-mode: forwards;
+	position: relative;
+}
+@keyframes cardRemoval{
+	0%{
+		opacity: 1;
+		left: 0px;
+	}
+	100%{
+		opacity: 0;
+		left: -50px;
+	}
+}
+.animatingRestore{
+	animation-name: cardRestore;
+	animation-duration: .25s;
+	animation-fill-mode: forwards;
+	position: relative;
+}
+@keyframes cardRestore{
+	0%{
+		opacity: 0;
+		left: -50px;
+	}
+	100%{
+		opacity: 1;
+		left: 0px;
+	}
+}
+
 .animatingCollapse{
 	animation-name: cardFadeOut;
 	animation-duration: .5s;
@@ -741,7 +802,6 @@ background-color:#63D84F;
 	animation-duration: .5s;
 	animation-fill-mode: forwards;
 	display: block;
-	transition
 	}
 @keyframes cardFadeOut{
 	0%{

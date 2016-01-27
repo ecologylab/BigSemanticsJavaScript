@@ -4,3 +4,4 @@ function Facet(name, value, facet_type, value_type){
 	this.facet_type = facet_type;
 	this.value_type = value_type;
 }
+

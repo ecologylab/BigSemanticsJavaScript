@@ -933,7 +933,18 @@ Mink.makeTableExplorables = function(parent, metadataFields, linkedFields, url){
 	parent.appendChild(explorables);
 }
 
-
+Mink.signalRemoveButtons = function(minkCard){
+	var detailDetails = {type: 'minkbuttons', show: false, html: minkCard};
+	var eventDetail = {detail: detailDetails, bubbles: true};
+	var myEvent = new CustomEvent("minkevent", eventDetail);
+	minkCard.dispatchEvent(myEvent);
+}
+Mink.signalReAddButtons = function(minkCard){
+	var detailDetails = {type: 'minkbuttons', show: true, html: minkCard};
+	var eventDetail = {detail: detailDetails, bubbles: true};
+	var myEvent = new CustomEvent("minkevent", eventDetail);
+	minkCard.dispatchEvent(myEvent);
+}
 Mink.devalue = function(minkContainer){
 	//shrink
 	var titleField = $(minkContainer).find('.minkTitleField')[0];
@@ -953,6 +964,7 @@ Mink.devalue = function(minkContainer){
 	
 	//hide explorable label
 	$(minkContainer).find('.minkExplorablesExpander').css('display', 'none');
+	Mink.signalRemoveButtons(minkContainer);
 	//add 'show duplicate on hover'
 	//tbd
 }
@@ -971,6 +983,7 @@ Mink.revalue = function(minkContainer){
 	$(minkContainer).removeClass('devalued');
 	//show explorable label
 	$(minkContainer).find('.minkExplorablesExpander').css('display', '');
+	Mink.signalReaAddButtons(minkContainer);
 
 	//remove 'show duplicate on hover'
 
@@ -992,7 +1005,6 @@ Mink.render = function(task){
 	
 	task.visual = document.createElement('div');
 	task.visual.className = "minkContentContainer";
-	
 	try{
 		task.visual.setAttribute('mdType', metadataFields[0].parentMDType);
 	}
@@ -1047,7 +1059,7 @@ Mink.render = function(task){
 
 
 		var metadataTable = document.createElement('div');
-		metadataTable.className = "minkContainer";
+		metadataTable.className = "minkContainer material";
 		Mink.buildMinkShell(metadataTable, false, task.isRoot, metadataFields, FIRST_LEVEL_FIELDS, styleInfo, task.url, task.favicon);
 
 		linkedFields = Mink.makeLinkedFieldList(metadataFields, true);
@@ -1090,7 +1102,8 @@ Mink.render = function(task){
 			$(task.container.childNodes[1]).remove();
 			
 			task.visual.appendChild(metadataTable);
-			
+			Material.addMaterial(task.url, metadataTable, 2);
+
 			// Add the interior container to the root contianer
 			setTimeout(function(){
 				task.container.appendChild(task.visual)
@@ -1194,6 +1207,8 @@ Mink.grow = function(target, doNotUpdateStatus){
 		if (detail.getAttribute('revealme') == 'true'){
 			Mink.showMore(detail);
 		}
+		Mink.signalReAddButtons($(target).closest('.minkCardContainer')[0]);
+
 	}catch(err){
 		
 	}
@@ -1300,6 +1315,8 @@ Mink.shrink = function(target, doNotUpdateStatus){
 	Mink.showLess(detail, null, true);
 	minkExpander.innerHTML = parseInt(mink.getAttribute('explorables')) + parseInt(minkExpander.innerHTML);
 	$(mink).slideUpTransition(true);
+	Mink.signalRemoveButtons($(target).closest('.minkCardContainer')[0]);
+
 }
 Mink.shrinkHandler = function(event){
 	event.stopPropagation();

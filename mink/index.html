@@ -11,8 +11,9 @@
     <link href="css/prettify.css" type="text/css" rel="stylesheet" />
    <link href="http://roboto-webfont.googlecode.com/svn/trunk/roboto.all.css" rel="stylesheet" type="text/css">
     <link href="../renderers/styles/metadataRenderer.css" rel="stylesheet" type="text/css">
-            <link href="../renderers/styles/minkRenderer.css" rel="stylesheet" type="text/css">
-    
+    <link href="../renderers/styles/minkRenderer.css" rel="stylesheet" type="text/css">
+    <link href="./css/material.css" rel="stylesheet" type="text/css">
+
 	<!--  TweetBubble Stuff, currently ommited due to restructure testing
 	
 	<link href="../TweetBubble/Plugin/chrome/content_script/css/twitterMice.css" rel="stylesheet" type="text/css"> 
@@ -24,17 +25,19 @@
 	<script type="text/javascript" src="../TweetBubble/Plugin/chrome/content_script/js/ICE.js"></script>
 	-->
     <!-- Libaries! -->
+       <script type="text/javascript" src="../bsjsCore/hashmap.js"></script>
+
     <script src="../libraries/jquery-2.0.0.min.js"></script>
     <script src="../libraries/bootstrap/js/bootstrap.min.js"></script>
     <script type="text/javascript" src="js/prettify.js"></script>
    <!-- bsjsCore Files -->
       <script type="text/javascript" src="../bsjsCore/ParsedURL.js"></script>
+         <script type="text/javascript" src="./js/material.js"></script>
 
          <script type="text/javascript" src="../bsjsCore/Readyable.js"></script>
 <script type="text/javascript" src="../bsjsCore/BSUtils.js"></script>
    <script type="text/javascript" src="../bsjsCore/MetadataViewModel.js"></script>
    <script type="text/javascript" src="../bsjsCore/RepoMan.js"></script>
-   <script type="text/javascript" src="../bsjsCore/hashmap.js"></script>
       <script type="text/javascript" src="../bsjsCore/BSExtension.js"></script>
 
    <script type="text/javascript" src="../bsjsCore/Extractor.js"></script>
@@ -83,7 +86,7 @@
     <div class ="minkAppContainer" id="minkAppContainer" initurl="http://www.amazon.com/Apple-iPhone-Factory-Unlocked-Jailbroken/dp/B008VUNRZQ/ref=sr_1_1?ie=UTF8&qid=1442245975&sr=8-1&keywords=3gs">
     	
  
-    <div class="minkToolbar" id="minkToolbar"><div class="leftPlaceholder"></div><div onclick="minkApp.goBackHandler()" class="minkBackButton"><img src="../renderers/images/mink/back-icon.png"></img></div> 
+    <div class="minkToolbar material" id="minkToolbar"><div class="leftPlaceholder"></div><div onclick="minkApp.goBackHandler()" class="minkBackButton"><img src="../renderers/images/mink/back-icon.png"></img></div> 
     		 
     		 <input type="text" class="minksearchbox" id="targetURL" onkeydown="onEnterShowMetadata(event);" value="search"/>
 <div id='contextTitle' class='contextTitle'></div><div onclick="minkApp.goForwardsHandler()" class="minkForwardButton"><img src="../renderers/images/mink/back-icon.png"></img></div><div class="rightPlaceholder"></div></div>
@@ -92,11 +95,11 @@
 	
     		<div class="queryFavColumn">
     			
-    				 <div class='minkQueries' id='minkQueries'>
+    				 <div class='minkQueries material' id='minkQueries'>
     		 	<div class="queryLabel">queries</div>
     		 	
     		 </div>
-    			   <div class="minkFavorites" id="minkFavorites">
+    			   <div class="minkFavorites material" id="minkFavorites">
     		 <div class="minkFaveHeader"> <div class="favLabel">favorites</div> <div class="minkFavoritesMenu" id="minkFavoritesMenu" onclick="minkApp.favoritesMenuHandler(event)" ><img style="height: 28px"src="./img/dots.png"></img></div>
     		 </div></div>
     		</div>
@@ -106,20 +109,33 @@
            <div class='minkFacetMenuItem'>
               <div class="minkFacetMenuItemHeader" onclick="minkApp.toggleFacetItemHandler(event)"><div class="minkFacetMenuIconContainer"><img class="minkFacetMenuIcon" src="./img/ic_date_range_black_24dp_2x.png"></img></div><div class="minkFacetMenuLabel">Year Range</div></div>
               <div class="minkFacetMenuItemContent">
-                <input type="number" min="1000" max="3000" class="minkFacetYear" id="startYear"></input> -  <input min="1000" max="3000" type="number" class="minkFacetYear" id="endYear">
-
-              </div>
-           </div>
-
-          <div class='minkFacetMenuItem'>
-            <div class="minkFacetMenuItemHeader" onclick="minkApp.toggleFacetItemHandler(event)" ><div class="minkFacetMenuIconContainer"><img class="minkFacetMenuIcon" src="./img/ic_filter_list_black_24dp_2x.png"></img></div><div class="minkFacetMenuLabel">Keyword</div></div>
-            </div>
-            <div class="minkFacetMenuItemContent">
-                <input type="text" class="minkFacetKeyword" id="startYear"></input>
+                <input type="number" min="1000" max="3000" class="minkFacetYear" onkeydown="minkApp.handleFacetKeydown(event)" value="1000" id="startYear"></input> -  <input min="1000" max="3000" onkeydown="minkApp.handleFacetKeydown(event)" type="number" class="minkFacetYear"  value="3000"id="endYear">
 
               </div>
             </div>
-           
+
+            <div class='minkFacetMenuItem'>
+              <div class="minkFacetMenuItemHeader" onclick="minkApp.toggleFacetItemHandler(event)" ><div class="minkFacetMenuIconContainer"><img class="minkFacetMenuIcon" src="./img/ic_filter_list_black_24dp_2x.png"></img></div><div class="minkFacetMenuLabel">Keyword</div></div>
+              <div class="minkFacetMenuItemContent">
+                  <input type="text" class="minkFacetKeyword" id="facetkeyword" onkeydown="minkApp.handleFacetKeydown(event)"></input>
+
+                </div>
+              </div>
+            <div class='minkFacetMenuItem'>
+               <div class="minkFacetMenuItemHeader" onclick="minkApp.handleFacetEntry(event)" ><div class="minkFacetMenuIconContainer"><img class="minkFacetMenuIcon" src="./img/ic_check_black_24dp_2x.png"></img></div><div class="minkFacetMenuLabel">Apply</div></div>
+            </div>
+            
+            <div class='minkFacetMenuItem hidden' id="removeFacets">
+               <div class="minkFacetMenuItemHeader" onclick="minkApp.handleFacetRemoval(event)" ><div class="minkFacetMenuIconContainer"><img class="minkFacetMenuIcon" src="./img/ic_cancel_black_24dp_2x.png"></img></div><div class="minkFacetMenuLabel">Unfilter</div></div>
+            </div>
+            
+            <div class='minkFacetMenuItem hidden'>
+               <div class="minkFacetsRemovedIndicator" id="minkFacetsRemovedIndicator"></div>
+            </div>
+
+
+            </div>
+            
          </div>
     		 <div class='minkColumns' id="minkColumns">    <div class="minkColumn" column="1" id="minkC1">
     </div>
