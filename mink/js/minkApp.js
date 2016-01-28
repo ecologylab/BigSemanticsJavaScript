@@ -152,11 +152,12 @@ function applyFacets(query, facets){
 		
 	var indicatorString = numberFiltered.toString() + " cards removed";
 	if(numberFiltered > 0){
+		$('#removeFacets').removeClass('hidden')
+		$("#minkFacetsRemovedIndicator")[0].innerHTML = indicatorString;
+		
+		$('#minkFacetsRemovedIndicator').closest('.minkFacetMenuItem').removeClass('hidden')
 
 	}
-	$("#minkFacetsRemovedIndicator")[0].innerHTML = indicatorString;
-	
-	$('#minkFacetsRemovedIndicator').closest('.minkFacetMenuItem').removeClass('hidden')
 
 
 }
@@ -495,8 +496,12 @@ minkApp.hidePreviousQuery = function(){
 	//remove add query button visbility by default
 	$('.minkNewQueryButton').removeClass('visible');
 	//mak
-	
-	
+	//Clear facets
+	$('#startYear')[0].value = "1000";
+	$('#endYear')[0].value = "3000";
+	$('#facetkeyword')[0].value = "";
+	$('#removeFacets').addClass('hidden');
+	$('#minkFacetsRemovedIndicator')[0].innerHTML = "";
 	
 	
 }
@@ -536,7 +541,12 @@ minkApp.updateCardDisplay = function(card, reval){
 
 	}
 }
-//will come back to, may be complicated
+
+/*
+
+TODO - apple facets
+*/
+
 minkApp.rebuildCurrentQuery = function(){
 	//
 	minkApp.hidePreviousQuery();
@@ -565,6 +575,25 @@ minkApp.rebuildCurrentQuery = function(){
 		cont.appendChild(columns[i]);
 	}
 	$(('#' + minkApp.currentQuery.uuid)).children('.minkNewQueryButton').addClass('visible');
+
+
+	$('#startYear').value = minkApp.currentQuery.facets[0].value[0].toString();
+	$('#endYear')[0].value = minkApp.currentQuery.facets[0].value[1].toString();
+	if(minkApp.currentQuery.facets[1]){
+		$('#facetkeyword')[0].value = minkApp.currentQuery.facets[1].value;
+
+	}else{
+		$('#facetkeyword')[0].value = "";	
+	}
+
+	applyFacets(minkApp.currentQuery, minkApp.currentQuery.facets);
+
+
+
+
+
+
+
 }
 minkApp.queryHighlight = function(event){
 	var qLevel = $(event.srcElement).closest('.qLevel')[0];
@@ -1028,7 +1057,7 @@ minkApp.newPile = function(details, srcElement){
 
 	 var pile = minkApp.buildPile(nextCol, event.detail.links, event.detail.rooturl, event.detail.collectionname, event.srcElement)
 
-	 
+	minkApp.handleFacetEntry();
 	 minkApp.currentQuery.pileMap.put(pileIDGen(details.rooturl, details.collectionname), pile);
 	 srcElement.addEventListener('click', minkApp.showHidePileHandler);
 	 srcElement.removeEventListener('click', Mink.showExplorableLinks);
@@ -1104,7 +1133,7 @@ minkApp.minkEventHandler = function(event){
 		pile.cards = pile.cards.concat(cards);
  		if(minkApp.currentQuery){
 			var facets = getFacetsFromHTML();
-			//applyFacets(minkApp.currentQuery, facets);
+			applyFacets(minkApp.currentQuery, facets);
 
 		}
 
@@ -1501,7 +1530,7 @@ minkApp.addNewCardsToPile = function(event){
 	pile.cards = pile.cards.concat(newCards);
 	if(minkApp.currentQuery){
 		var facets = getFacetsFromHTML();
-	//	applyFacets(minkApp.currentQuery, facets);
+		applyFacets(minkApp.currentQuery, facets);
 
 	}
 
@@ -1701,9 +1730,9 @@ function onBodyLoad() {
 	var favoritesHTML = $('#minkFavorites')[0];
 	var queryHTML = $('#minkQueries')[0];
 	var minkAppBar = $('#minkToolbar')[0];
-	Material.addMaterial('minkFavorites', favoritesHTML, 4);
+	Material.addMaterial('minkFavorites', favoritesHTML, 2);
 	Material.addMaterial('minkQueries', queryHTML, 2);
-	Material.addMaterial('minkToolbar', minkAppBar, 2);
+	Material.addMaterial('minkToolbar', minkAppBar, 4);
 
 
 
@@ -1723,7 +1752,7 @@ function onBodyLoad() {
 	var canvas = document.createElement('canvas');
 	canvas.className = "minkAppCanvas";
 	canvas.width = 1800;
-	canvas.height = 1080;
+	canvas.height = 1480;
 	canvas.id = 'minkAppCanvas';
 	animFrame(recursiveAnim);
 

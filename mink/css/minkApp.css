@@ -69,10 +69,9 @@ border-radius: 4px;
 
     min-height: 24px;
     display: flex;
-    margin-left: 20px;
     line-height: 24px;
     margin-top: 8px;
-    width: 74px;
+    left: 432px;
     
 }
 .minkFacetYear{
@@ -85,16 +84,17 @@ border-radius: 4px;
 
     min-height: 24px;
     display: flex;
-    margin-left: 20px;
     line-height: 24px;
     margin-top: 8px;
     width: 170px;
+
     
 }
 .minkFacetColumn{
 	 flex-direction: column;
 	 justify-content: flex-start;
-
+	 position: fixed;
+    left: 432px;
 
 }
 .minkFacetMenuItemContent.collapsed{
@@ -240,6 +240,7 @@ padding-right: 4px;
 	display: flex;
 	flex-direction: column;
 	margin-top: 8px;
+	position: fixed;
 }
 .minkFavoritesMenu{
 height: 28px;
@@ -307,6 +308,7 @@ img{
 }
 .minkCenterRow{
 	display: flex;
+	margin-top: 42px;
 }
 .minkQuery{
 	
@@ -408,6 +410,7 @@ opacity: 1;
 .minkColumns{
 		display: inline-flex;
 	  max-width: 1800px;
+	  margin-left: 525px;
 
 }
 
@@ -431,7 +434,8 @@ line-height: 34px;
 	justify-content: space-between;
 	margin-bottom: 10px;
 	min-height: 32px;
-	    border-radius: 0;
+	border-radius: 0;
+	position: fixed;
 
 }
 .minkBackButton{
@@ -532,22 +536,28 @@ text-decoration: underline;
 .facetsMenuShowing{
 	animation-name: facetsMenuShowingA;
 	animation-duration: .5s;
+	animation-fill-mode: forwards;
+
 }
 
 .facetsMenuHiding{
 	animation-name: facetsMenuHidingA;
 	animation-duration: .5s;
+	animation-fill-mode: forwards;
+
 
 }
 
 @keyframes facetsMenuShowingA{
-	0%{margin-left: -96px}
-	100%{margin-left: 0px}
+	0%{	  margin-left: 525px;
+}
+	100%{	  margin-left: 605px;
+}
 }
 
 @keyframes facetsMenuHidingA{
-	0%{margin-left: 96px}
-	100%{margin-left: 0px}
+	0%{margin-left: 605px}
+	100%{margin-left: 525px}
 
 
 }
@@ -796,6 +806,7 @@ text-decoration: underline;
 	position: absolute;
 	pointer-events:none;
 	z-index: 100;
+	margin-left: 505px;
 }
 .animatingExpand{
 	animation-name: cardFadeIn;
