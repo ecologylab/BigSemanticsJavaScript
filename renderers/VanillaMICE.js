@@ -341,6 +341,7 @@ MICE.buildScalarField = function(metadataField, styleInfo, valueCol, nameCol){
 			var aTag = document.createElement('a');
 			aTag.innerText = BSUtils.removeLineBreaksAndCrazies(metadataField.value);
 			aTag.textContent = BSUtils.removeLineBreaksAndCrazies(metadataField.value);
+
 			
 			aTag.href = metadataField.value;
 			aTag.onclick = MICE.logNavigate;

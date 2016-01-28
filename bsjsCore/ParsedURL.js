@@ -113,7 +113,7 @@ var ParsedURL = (function() {
     if (query && query.length > 0) {
       if (query[0] == '?') { query = query.substr(1); }
       var parts = query.split('&');
-      for (var i in parts) {
+      for (var i = 0; i < parts.length; i++) {
         var pair = parts[i].split('=');
         var name = pair[0];
         var val = decodeURIComponent(pair[1]);

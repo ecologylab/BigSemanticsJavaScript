@@ -1041,7 +1041,7 @@ Mink.render = function(task){
 			var url2 = "mink::" + metadata.search_results[j]['google_scholar_search_result'].document_link;
 			url2 = url2.toLowerCase();
 			var betterMD = metadata.search_results[j];
-			Mink. MetadataMap.put(url2, betterMD);
+			Mink.minklinkToMetadataMap.put(url2, betterMD);
 
 		}
 		console.log(minkLinks);

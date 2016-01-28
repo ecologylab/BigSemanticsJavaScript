@@ -11,7 +11,7 @@ BSUtils.toDisplayCase = function(string)
 {  
   var strings = string.split('_');
   var display = "";
-  for (var s in strings)
+  for (var s = 0; s < strings.length; s++)
   {
     display += strings[s].charAt(0).toLowerCase() + strings[s].slice(1) + " ";
   }
@@ -42,7 +42,7 @@ BSUtils.unwrap = function(target) {
     var keys = Object.keys(target);
     for (var i in keys) {
       var key = keys[i];
-      if (typeof target[key] == 'object') {
+      if (typeof target[key] == 'object' && target[key] != null) {
         if (target[key].mm_name || target[key].meta_metadata_name) {
           return target[key];
         }
@@ -98,16 +98,21 @@ BSUtils.getType = function(metadata) {
  */
 BSUtils.removeLineBreaksAndCrazies = function(string)
 {
-  string = string.replace(/(\r\n|\n|\r)/gm," ");  
-  var result = "";
-  for (var i = 0; i < string.length; i++)
-  {
-    if (string.charCodeAt(i) < 128)
+  if (typeof string === 'string') {
+    string = string.replace(/(\r\n|\n|\r)/gm," ");  
+    var result = "";
+    for (var i = 0; i < string.length; i++)
     {
-      result += string.charAt(i);
+      if (string.charCodeAt(i) < 128)
+      {
+        result += string.charAt(i);
+      }
     }
+    return result;
+  } else {
+    console.warn("Not a string: " + string);
+    return string;
   }
-  return result;
 }
 
 /**
