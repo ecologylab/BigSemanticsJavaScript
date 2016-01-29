@@ -8,8 +8,12 @@ function extractMetadataCombo(response, mmd, bigSemantics, options, callback) {
     metadataNormal = metadataNormal[mmd.meta_metadata.name];
     metadataMicro  = metadataMicro[mmd.meta_metadata.name];
 
-    var metadata = mergeMetadata( metadataNormal , metadataMicro , mmd.meta_metadata);
-    var result = {};
+	var metadata = metadataNormal;
+	if (metadataMicro){
+    	metadata = mergeMetadata( metadataNormal , metadataMicro , mmd.meta_metadata);
+	}
+
+	var result = {};
     result[mmd.meta_metadata.name] = metadata;
     callback ( null , result);
 }
