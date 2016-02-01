@@ -273,6 +273,7 @@ p{
 body{
 	margin: 0px;
 	line-height: 20px;
+	    overflow-x: hidden;
 }
 img{
 	    height: auto;
@@ -281,6 +282,7 @@ img{
     border: 0;
    }
    body{
+   	background-color: rgba(0,0,0, 0.03);
    	font-size: 14px
    }
 .minkDeletingColumn{
@@ -411,7 +413,7 @@ opacity: 1;
 		display: inline-flex;
 	  max-width: 1800px;
 	  margin-left: 525px;
-
+    overflow-x: auto;
 }
 
 .contextTitle{
@@ -739,13 +741,12 @@ text-decoration: underline;
 	    /* padding: 5px; */
     width: 35px;
     height: 35px;
+    -webkit-filter: opacity(.6);
     display: flex;
     /*-webkit-box-shadow: 1px 1px 4px -1px rgba(0,0,0,0.4);*/
     /* justify-content: space-around; */
     /* align-content: flex-end; */
-		border-radius: 35px;
-		background-color: white;
-		margin-bottom: 8px;
+	margin-bottom: 8px;
 	
 }
 .minkCardControlIcon{
@@ -758,8 +759,8 @@ text-decoration: underline;
 
 .minkCardControl:hover{
 	cursor: pointer;
-	background-color:#63D84F;
-	/*-webkit-filter: invert(1);*/
+	background-color: #BBB;
+    -webkit-filter: opacity(.8);
 
 	
 }

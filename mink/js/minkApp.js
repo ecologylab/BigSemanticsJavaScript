@@ -325,7 +325,7 @@ minkApp.buildLinkOutControl = function(parent, link){
 	olc.setAttribute('outlink', link)
 	olc.appendChild(openLink);
 
-	Material.addMaterial((link + "::o"), olc, 2);
+	//Material.addMaterial((link + "::o"), olc, 2);
 	parent.appendChild(olc);
 }
 
@@ -364,8 +364,8 @@ minkApp.buildCardControls = function(parent, link){
 
 	}
 	controlCont.appendChild(r);
-	Material.addMaterial((link + "::r"), r, 2);
-	Material.addMaterial((link + "::f"), f, 2);
+//	Material.addMaterial((link + "::r"), r, 2);
+	//Material.addMaterial((link + "::f"), f, 2);
 
 	parent.appendChild(controlCont)
 }
@@ -1129,6 +1129,7 @@ minkApp.minkEventHandler = function(event){
 		pile.cards.pop();
 		//should be counted but i don't yet
 		pile.HTML.removeChild(pile.HTML.childNodes[formerIndex]);
+		event.detail.links.links.splice(5, 5);
 		var cards = minkApp.buildCards(pile.HTML, event.detail.links.links, true, pile);
 		pile.cards = pile.cards.concat(cards);
  		if(minkApp.currentQuery){
