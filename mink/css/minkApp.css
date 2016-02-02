@@ -93,7 +93,7 @@ border-radius: 4px;
 .minkFacetColumn{
 	 flex-direction: column;
 	 justify-content: flex-start;
-	 position: fixed;
+	 position: absolute;
     left: 432px;
 
 }
@@ -240,7 +240,7 @@ padding-right: 4px;
 	display: flex;
 	flex-direction: column;
 	margin-top: 8px;
-	position: fixed;
+	position: absolute;
 }
 .minkFavoritesMenu{
 height: 28px;
@@ -273,7 +273,7 @@ p{
 body{
 	margin: 0px;
 	line-height: 20px;
-	    overflow-x: hidden;
+	    overflow-x: auto;
 }
 img{
 	    height: auto;
@@ -437,7 +437,7 @@ line-height: 34px;
 	margin-bottom: 10px;
 	min-height: 32px;
 	border-radius: 0;
-	position: fixed;
+	position: absolute;
 
 }
 .minkBackButton{
