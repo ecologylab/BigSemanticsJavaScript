@@ -58,6 +58,7 @@ body{
 }
 .minkBody{
   flex: 5;
+  max-width: 500px;
 }
 .minkSideBar{
 	border-color: darkgray;
@@ -83,12 +84,13 @@ body{
     overflow-y: hidden;
 	overflow-x: hidden;
 	
+	    align-items: flex-start;
 }
 .minkSnippet{
   display: flex;
-  flex-grow: 11;
   flex-direction: column;
   justify-content: center;
+      width: 100%
 }
 .minkMediaContainer{
   display: inline-block;
@@ -284,7 +286,7 @@ color: white;
 	display: flex;
 	flex-direction: column;
 	margin-top: 4px;
-	align-items: flex-being;
+	align-items: flex-begin;
 }
 /*
 .minkExplorableCollection{
@@ -326,15 +328,15 @@ color: white;
 	cursor: pointer;
 }
 .subtitle{
-	  display: -webkit-box;
+	/*  display: -webkit-box;*/
   /*-webkit-line-clamp: 1;*/
   overflow: hidden;
-  -webkit-box-orient: vertical;
+ /* -webkit-box-orient: vertical;*/
     margin-bottom: 4px;
     
 }
 .subtitle:hover{
-	  -webkit-line-clamp: 250;
+	 /* -webkit-line-clamp: 250;*/
 	
 }
 
