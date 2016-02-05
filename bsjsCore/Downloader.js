@@ -84,7 +84,7 @@ var Downloader = (function() {
               if (Downloader.addNewLocation(response, url)) {
                 console.log("JavaScript redirect to: " + url);
                 options.response = response;
-                this.backgroundGet(url, options, callback);
+                this.httpGet(url, options, callback);
                 return JS_REDIRECT_OK;
               }
               else {
@@ -219,22 +219,7 @@ var Downloader = (function() {
 
     doHttpGet();
   };
-
-	/** Load with iframe. allows dynamic content */
-	Downloader.prototype.backgroundGet = function(location, options, callback) {
-		var test = false;
-		//test = true;
-		if (test){
-			var iframe = document.createElement('iframe');
-			iframe.setAttribute('src', location);
-			var piddle = 10;
-		}
-		else {
-			//default to old way
-			this.httpGet(location, options, callback);
-		}
-	};
- 
+	
   return Downloader;
 })();
 

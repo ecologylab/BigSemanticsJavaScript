@@ -76,7 +76,7 @@ var BSService = (function() {
                                              { url: location });
     var that = this;
     var downloadOpts = { responseType: 'json' };
-    this.downloader.backgroundGet(serviceUrl, downloadOpts, function(err, response) {
+    this.downloader.httpGet(serviceUrl, downloadOpts, function(err, response) {
       if (err) { callback(err, null); return; }
       var metadata = BSService.prepResponse(response);
       var unwrappedMetadata = BSUtils.unwrap(metadata);
@@ -94,7 +94,7 @@ var BSService = (function() {
                                              options,
                                              { url: location });
     var downloadOpts = { responseType: 'json' };
-    this.downloader.backgroundGet(serviceUrl, downloadOpts, function(err, response) {
+    this.downloader.httpGet(serviceUrl, downloadOpts, function(err, response) {
       if (err) { callback(err, null); return; }
       var metadata = BSService.prepResponse(response);
       callback(null, metadata);
@@ -107,7 +107,7 @@ var BSService = (function() {
                                              options,
                                              { name: name });
     var downloadOpts = { responseType: 'json' };
-    this.downloader.backgroundGet(serviceUrl, downloadOpts, function(err, response) {
+    this.downloader.httpGet(serviceUrl, downloadOpts, function(err, response) {
       if (err) { callback(err, null); return; }
       var mmd = BSService.prepResponse(response);
       callback(null, mmd);
@@ -120,7 +120,7 @@ var BSService = (function() {
                                              options,
                                              { url: location });
     var downloadOpts = { responseType: 'json' };
-    this.downloader.backgroundGet(serviceUrl, downloadOpts, function(err, response) {
+    this.downloader.httpGet(serviceUrl, downloadOpts, function(err, response) {
       if (err) { callback(err, null); return; }
       var mmd = BSService.prepResponse(response);
       callback(null, mmd);

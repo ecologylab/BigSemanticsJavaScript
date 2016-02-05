@@ -33,7 +33,10 @@ var BigSemantics = (function() {
     } else {
       this.setReady();
     }
-
+	if (IframeExtractor !== undefined){
+    	this.iframeExtractor = new IframeExtractor();
+	}
+	  
     return this;
   }
   BigSemantics.prototype = Object.create(Readyable.prototype);
@@ -82,17 +85,27 @@ var BigSemantics = (function() {
         } else if (mmd.user_agent_name && mmd.user_agent_name in that.repoMan.userAgents) {
           options.userAgent = that.repoMan.userAgents[mmd.user_agent_name];
         }
-        that.downloader.backgroundGet(location, options, function(err, response) {
-          if (err) { callback(err, null); return; }
+		//uncomment for iframe extraction
+		// mmd.JSFLAG =true;
+		if (mmd.JSFLAG) {
+			that.iframeExtractor.extract(location, function(err, metadata){
+				if (err) { callback(err, null); return; }
+		    	callback(null, { metadata: metadata, mmd: mmd });	
+			});
+		}
+		else {
+		  that.downloader.httpGet(location, options, function(err, response) {
+		  	if (err) { callback(err, null); return; }
 
-          that.extractor(response, mmd, that, options, function(err, metadata) {
-            if (err) { callback(err, null); return; }
-            callback(null, { metadata: metadata, mmd: mmd });
-          });
-        });
+		  	that.extractor(response, mmd, that, options, function(err, metadata) {
+		    	if (err) { callback(err, null); return; }
+		    	callback(null, { metadata: metadata, mmd: mmd });
+			});
+		  });
+		}
       }
     });
-  }
+  };
 
   BigSemantics.prototype.loadInitialMetadata = function(location, options, callback) {
     this.repoMan.selectMmd(location, options, function(err, mmd) {
@@ -103,16 +116,16 @@ var BigSemantics = (function() {
       var result = { mm_name: mmd.name, location: location };
       callback(null, result);
     });
-  }
+  };
 
   BigSemantics.prototype.loadMmd = function(name, options, callback) {
     this.repoMan.loadMmd(name, options, callback);
-  }
+  };
 
   BigSemantics.prototype.selectMmd = function(location, options, callback) {
     this.repoMan.selectMmd(location, options, callback);
-  }
-
+  };
+  
   return BigSemantics;
 })();
 
