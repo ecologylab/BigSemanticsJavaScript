@@ -24,10 +24,10 @@ var Downloader = (function() {
   }
 
   Downloader.prototype.setDomainIntervals = function(domainIntervals) {
-    if (typeof domainIntervals == 'object' && domainIntervals != null) {
+    if (typeof domainIntervals == 'object' && domainIntervals !== null) {
       this.intervals = domainIntervals;
     }
-  }
+  };
 
   // utility function
   // add newLocation to response, if not seen before
@@ -45,7 +45,7 @@ var Downloader = (function() {
       }
     }
     return false;
-  }
+  };
 
   // utility function
   // returns: true iff the contentType is acceptable
@@ -63,7 +63,7 @@ var Downloader = (function() {
       if (options.acceptTypes.indexOf(contentType)) { return true; }
     }
     return false;
-  }
+  };
 
   // utility function
   // do JS redirection, if not resulting in infinite loop
@@ -96,8 +96,9 @@ var Downloader = (function() {
       }
     }
     return JS_REDIRECT_ERR;
-  }
+  };
 
+  /** Load with XMLHttpRequest */
   Downloader.prototype.httpGet = function(location, options, callback) {
     var purl = new ParsedURL(location);
     var that = this;
@@ -117,9 +118,9 @@ var Downloader = (function() {
 
       var response = null;
       if (options && options.response) { response = options.response; }
-      else { response = { location: location, code: 0 } };
+      else { response = { location: location, code: 0 }; }
 
-      var xhr = new XMLHttpRequest();
+	  var xhr = new XMLHttpRequest();
       xhr.first300 = true;
       xhr.responseType = 'document';
       if (options && options.responseType) {
@@ -209,16 +210,16 @@ var Downloader = (function() {
       };
 
       xhr.open('GET', location, true);
-      if (location.indexOf("https://twitter.com") != 0 &&
-    		  location.indexOf("http://twitter.com") != 0) { //temp. fix for twitter requests
+      if (location.indexOf("https://twitter.com") !== 0 &&
+    		  location.indexOf("http://twitter.com") !== 0) { //temp. fix for twitter requests
     	  xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
       }
       xhr.send();
     }
 
     doHttpGet();
-  }
-
+  };
+	
   return Downloader;
 })();
 
