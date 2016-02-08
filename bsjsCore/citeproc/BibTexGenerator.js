@@ -335,7 +335,6 @@ BibTexGenerator.prototype.bibFromMmd = function(bib, mmd, metadata){
 		}else if(kid.scalar){
 			kidName = kid.scalar.name;
 			kidType = kid.scalar.bibtex_field;
-
 		}
 		if(kidType){
 			if(!bib[kidType])
@@ -343,6 +342,7 @@ BibTexGenerator.prototype.bibFromMmd = function(bib, mmd, metadata){
 		}
 	}
 }
+
 BibTexGenerator.prototype.flattenAuthorArray = function(authors, that){
 	if(!authors)
 		return "";
@@ -350,7 +350,12 @@ BibTexGenerator.prototype.flattenAuthorArray = function(authors, that){
 		var result = "";
 		for (var i = 0; i < authors.length; i++)
 		{
-			result += that.formatAuthor(authors[i].title) + " and ";
+			if (authors[i].title){
+				result += that.formatAuthor(authors[i].title) + " and ";
+			}
+			else if (authors[i].name){ 
+				result += that.formatAuthor(authors[i].name) + " and ";
+			}			
 		}
 		var pos = result.lastIndexOf("and");
 		result = result.slice(0 , pos);
@@ -379,8 +384,9 @@ BibTexGenerator.prototype.createBib	= function(document, that){
 		bib.author = '';
 		if(metadata.authors){
 			bib.first_author  = metadata.authors ? metadata.authors[0].title : "";
+			bib.author = that.flattenAuthorArray(metadata.authors, that);
 		}
-		bib.author = that.flattenAuthorArray(metadata.authors, that);
+		
 		bib.year    = metadata.year ? metadata.year : ( metadata.source ? metadata.source.year : metadata.filing_date );
 		if(bib['year']){
 		    bib['year'] = parseInt(bib['year']);
@@ -389,13 +395,12 @@ BibTexGenerator.prototype.createBib	= function(document, that){
 			}
 		}
 
-		//if no author, keep url, if url please strip http(s) and www(2/3/4)
 		switch (bib['type'])
 		{
 			case 'misc':
 			{
 				BibTexGenerator.prototype.bibFromMmd(bib, mmd, metadata);
-			  break;
+			  	break;
 			}
 			case 'book':
 			{
@@ -404,17 +409,17 @@ BibTexGenerator.prototype.createBib	= function(document, that){
 				BibTexGenerator.prototype.bibFromMmd(bib, mmd, metadata);
 				break;
 			}
-		  case 'article':
-		  {
-			  bib.type = "article-journal";
-			  BibTexGenerator.prototype.bibFromMmd(bib, mmd, metadata);
-			  bib['key']    = metadata.key; 
-			  break;
-		  }
-		  case 'undefined':
-		  {
-		  	return [];
-		  }
+			case 'article':
+			{
+				bib.type = "article-journal";
+				BibTexGenerator.prototype.bibFromMmd(bib, mmd, metadata);
+				bib['key']    = metadata.key; 
+				break;
+			}
+			case 'undefined':
+			{
+				return [];
+			}
 		 
 		}
 		if(bib.author){
@@ -426,11 +431,20 @@ BibTexGenerator.prototype.createBib	= function(document, that){
 			bib['URL'] = that.makeUrlReadable(metadata.location); 
 		}
 		if(!bib.title){
-		  return "";
+		  	return "";
 		}
 		else{
-			 bib['id']  = that.generateBibId(bib); 
-		  return bib;
+			if(!bib.author){ //if no author, keep url, if url please strip http(s) and www(2/3/4)
+				bib.author = new ParsedURL(metadata.location).domain;
+			}
+			bib['id']  = that.generateBibId(bib); 
+			for (var key in bib){
+				if (typeof bib[key] == "string"){
+					bib[key] = BSUtils.removeLineBreaksAndCrazies(bib[key]);
+				}
+			}
+			
+			return bib;
 		}
 	}
 	catch(e)
