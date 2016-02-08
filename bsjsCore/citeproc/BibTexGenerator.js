@@ -162,7 +162,14 @@ BibTexGenerator.prototype.getBibHTML = function(callback){
 		var itemIDs = [];
 	   
 		for (var i in that.bibs) {
-		    itemIDs.push(that.bibs[i].id);
+			if (that.bibs[i].id){
+		    	itemIDs.push(that.bibs[i].id);
+			}
+			else { 
+				that.bibs.splice(i,1);
+				i -= 1;
+				console.log('something went wrong. a bib did not have an ID so it was removed');
+			}
 		}
 		that.citeproc.updateItems(itemIDs);
 		var bibResult = that.citeproc.makeBibliography();
