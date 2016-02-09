@@ -50,6 +50,7 @@ MicroDataTools.getMicroDataAndMMD = function(page , bigSemantics, callback) {
         var typeName = MicroDataTools.getTypeName(microdata[0]);
 
         bigSemantics.loadMmd(typeName, null, function (err, mmd) {
+			if (err) { callback(err, null); return; }
             callback(null, {mmd: mmd, microdata: microdata});
         });
     }
