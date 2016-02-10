@@ -4,8 +4,9 @@ function IframeExtractor() {
 	var toExtract = {};
 	var callbacks = {};
 	var frames = {};
+	var timeouts = {};
 	
-	//TODO handle failure
+	var WAIT_TIME = 30000; //we assume extraction failure after 30 seconds 
 	
 	/** 
 	 * for http/https and www issues. not ideal, eventually needs to handle tougher redirects 
@@ -26,9 +27,12 @@ function IframeExtractor() {
 		iframe.setAttribute('src', rawUrl);
 		document.body.appendChild(iframe);
 		frames[url] = iframe;
+		timeouts[url] = setTimeout(this.giveUp, WAIT_TIME, url);
 	};
 	
+	/** clean up after finishing extraction */
 	this.doneWith = function(url, md){
+		clearTimeout(timeouts[url]);
 		url = sanitize(url);		
 		delete toExtract[url];
 		callbacks[url](null, md);
@@ -37,8 +41,20 @@ function IframeExtractor() {
 		delete frames[url];
 	};
 	
+	/** answer whether a newly loaded page needs to be extracted */
 	this.extractNeeded = function(url){
 		url = sanitize(url);
 		return { needed: toExtract[url] !== undefined };
+	};
+	
+	/** boradcast that extraction has failed and clean up */
+	this.giveUp = function(url){
+		callbacks[url]({error: 'iframe extraction timed out on url: ' + url + '. sumtin went wrong'}, null);
+		delete toExtract[url];
+		delete callbacks[url];
+		if (frames[url].parentNode){
+			frames[url].parentNode.removeChild(frames[url]);
+		}
+		delete frames[url];
 	};
 }

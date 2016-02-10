@@ -86,7 +86,7 @@ var BigSemantics = (function() {
           options.userAgent = that.repoMan.userAgents[mmd.user_agent_name];
         }
 		//uncomment for iframe extraction
-		// mmd.JSFLAG =true;
+		//mmd.JSFLAG =true;
 		if (mmd.JSFLAG) {
 			that.iframeExtractor.extract(location, function(err, metadata){
 				if (err) { callback(err, null); return; }
