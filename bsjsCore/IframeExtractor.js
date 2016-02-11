@@ -27,9 +27,11 @@ function IframeExtractor() {
 		var url = sanitize(rawUrl);
 		toExtract[url] = true;
 		callbacks[url] = callback;
+		
 		var iframe = document.createElement('iframe');
 		iframe.setAttribute('src', rawUrl);
 		document.body.appendChild(iframe);
+		
 		frames[url] = iframe;
 		timeouts[url] = setTimeout(this.giveUp, WAIT_TIME, url);
 	};
@@ -37,10 +39,13 @@ function IframeExtractor() {
 	/** clean up after finishing extraction */
 	this.doneWith = function(url, md){
 		clearTimeout(timeouts[url]);
+		
 		url = sanitize(url);		
 		delete toExtract[url];
+		
 		callbacks[url](null, md);
 		delete callbacks[url];
+		
 		document.body.removeChild(frames[url]);
 		delete frames[url];
 	};
@@ -54,6 +59,7 @@ function IframeExtractor() {
 	/** boradcast that extraction has failed and clean up */
 	this.giveUp = function(url){
 		callbacks[url]({error: 'iframe extraction timed out on url: ' + url + '. sumtin went wrong'}, null);
+		
 		delete toExtract[url];
 		delete callbacks[url];
 		if (frames[url].parentNode){
