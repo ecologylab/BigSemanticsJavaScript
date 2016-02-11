@@ -19,7 +19,11 @@ function IframeExtractor() {
 		return strippedURL;
 	}
 	
-	this.extract = function(rawUrl, callback){
+	this.extract = function(rawUrl, mmd, callback){		
+		if (mmd.meta_metadata.filter_location){
+			rawUrl = PreFilter.filter(rawUrl, mmd.meta_metadata.filter_location);
+		}
+		
 		var url = sanitize(rawUrl);
 		toExtract[url] = true;
 		callbacks[url] = callback;

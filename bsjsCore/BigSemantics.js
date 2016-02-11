@@ -87,8 +87,8 @@ var BigSemantics = (function() {
         }
 		//uncomment for iframe extraction
 		//mmd.JSFLAG =true;
-		if (mmd.JSFLAG) {
-			that.iframeExtractor.extract(location, function(err, metadata){
+		if (mmd.meta_metadata.extract_with == "iframe") {
+			that.iframeExtractor.extract(location, mmd, function(err, metadata){
 				if (err) { callback(err, null); return; }
 		    	callback(null, { metadata: metadata, mmd: mmd });	
 			});
