@@ -525,11 +525,11 @@ minkApp.updateCardDisplay = function(card, reval){
 			$(card.html).addClass('animatingRestore');
 		}
 		if($(card.html).hasClass('devalued') && reval){
-			Mink.revalue(card.html);
+			minkRenderer.revalue(card.html);
 			card.displayed = true;
 
 		}else if(card.duplicate){
-			Mink.devalue(card.html);
+			minkRenderer.devalue(card.html);
 		}
 
 		minkApp.updateDuplicateCount(card.pile);
@@ -1316,7 +1316,7 @@ minkApp.expandCollapsePile = function(event){
 			
 			var contentContainer = $(target).closest('.minkContentContainer')[0];
 			if($(contentContainer).attr('grown') == "true"){
-				Mink.shrink(target, true);
+				minkRenderer.shrink(target, true);
 			}
 			kids[i].style.zIndex = kids.length - i;
 
@@ -1351,7 +1351,7 @@ minkApp.expandCollapsePile = function(event){
 			var controls = $(kids[i]).find(".minkCardControls").css('display', '');
 
 			if($(contentContainer).attr('grown') == "true"){
-				Mink.grow(target, true);
+				minkRenderer.grow(target, true);
 			}
 			
 				kids[i].style.transform = "none";
@@ -1460,215 +1460,28 @@ minkApp.polishYear = function(metadata){
 
 
 
-minkApp.makeLinkedFieldList = function(metadataFields, addToMaps){
+
+
+
+
+
+minkApp.getSearchResultLinks = function(task){
 	var list = [];
-	
+	var metadataFields = task.fields;
+	var metadata = task.metadata;
+
 	for (var i = 0; i < metadataFields.length; i++){
+	
 		var metadataField = metadataFields[i];
-		minkApp.recursiveSearchForLinked(metadataField, list, true, addToMaps);
-	}
-		
-		
-		
 	
-	console.log(list);
-	return list;
+		if(task.isSearchResultsCollection(metadataField)){
 	
-}
-
-
-minkApp.getDestinationPageLink = function(field, addToMaps, metadata){
-	var kids = field.value.value;
-	if(addToMaps){
-		
-		
-		for (var i = 0; i < field.value.length; i++){
-			if(field.value[i].name == 'destination_page'){
-					try{
-						var url = "mink::" + field.value[i].value[0].navigatesTo;
-						url = url.toLowerCase();
-
-						//hard-code for google scholar for right now
-						
-						minkApp.linkToViewModelMap.put(url, field);
-						return url;
-					}catch(e){
-						var url = minkApp.uuidthing();
-						minkApp.linkToViewModelMap.put(url, field);
-						return url;
-
-					}
-				
-
-			}
-		}
-		var url = minkApp.uuidthing();
-		minkApp.linkToViewModelMap.put(url, field);
-
-
-	}
-	return url;
-	
-	
-}
-
-minkApp.recursiveIsLinked = function(metadataField){
-	
-	if(metadataField.child_type != 'video' && metadataField.child_type != 'image' && metadataField.child_type != 'audio'){		
-		
-		var collectionLinks = {};
-		collectionLinks.links = [];
-		collectionLinks.name = metadataField.name;
-		for (var j = 0; j < metadataField.value.length; j++){
-			var childField = metadataField.value[j];
-			if(typeof(childField.value) == "object"){
-				if(childField.value.length > 0){
-						if(childField.value[0].navigatesTo != null){
-							return true;
-						}else{
-							return minkApp.recursiveIsLinked(childField);
-						}
-					}
-				}
-				
-			}
-	
-			
-		
-		
-	}
-	//composite
-	else{
-		var compLinks = {};
-		compLinks.links = [];
-		compLinks.name = metadataField.name;
-
-		if(metadataField.value[0].navigatesTo != null){
-			return true;
-		}else{
-			for(var l = 0; l < metadataField.value.length; l++){
-				if(typeof(metadataField.value[l]) === "object")
-					return minkApp.recursiveIsLinked(metadataField.value[l]);
-
-			}
-		}
-	}
-	
-	return false;
-
-}
-
-minkApp.recursiveSearchForLinked = function(metadataField, list, isRoot, addToMaps, metadata){
-	if(metadataField.child_type != null){
-		
-		//hard-ish coded case. should be expanded to include all md where pol\ymorphic thing = SR
-		if(minkApp.isSearchResultsCollection(metadataField)){
-			var collectionLinks = {};
-			collectionLinks.links = [];
-			collectionLinks.name = metadataField.name;
-			if(collectionLinks.field_as_count){
-				compLinks.count = metadataField.field_as_count.value;
-			}
-
-			for (var i = 0; i < metadataField.value.length; i++){
-				try{
-					collectionLinks.links.push(minkApp.getDestinationPageLink(metadataField.value[i], addToMaps, metadata));
-				}catch(err){
-					var wasteTime = 2;
-				}
-			}
-			list.push(collectionLinks);
-			return;
-			
-		}
-		else if(metadataField.child_type != 'video' && metadataField.child_type != 'image' && metadataField.child_type != 'audio'){		
-			var collectionLinks = {};
-			collectionLinks.links = [];
-			collectionLinks.name = metadataField.name;
-			if(collectionLinks.field_as_count){
-				compLinks.count = metadataField.field_as_count.value;
-			}
-
-			for (var j = 0; j < metadataField.value.length; j++){
-				var childField = metadataField.value[j];
-				if(childField.value.length > 0){
-					if(childField.value[0].navigatesTo != null){
-						collectionLinks.links.push(childField.value[0].navigatesTo);
-					}else{
-						if(minkApp.recursiveIsLinked(childField) && (isRoot == true)){
-
-							collectionLinks.links.push(childField.value[0].navigatesTo);
-
-						}						
-					}
-				}
-		
-				
-			}
-			if(collectionLinks.links.length > 0){
-				list.push(collectionLinks);
-			
-				}
-			}
-		}
-		//composite
-		else{
-			var compLinks = {};
-			compLinks.links = [];
-			compLinks.name = metadataField.name;
-			if(metadataField.field_as_count){
-				compLinks.count = metadataField.field_as_count.value;
-			}
-			if(metadataField.value[0]){
-				if(metadataField.value[0].navigatesTo != null){
-					compLinks.links.push(metadataField.value[0].navigatesTo);
-					list.push(compLinks);
-				}else{
-					for(var l = 0; l < metadataField.value.length; l++){
-						if(typeof(metadataField.value[l]) === "object"){
-							minkApp.recursiveSearchForLinked(metadataField.value[l], list, addToMaps);
-							if(minkApp.recursiveIsLinked(metadataField.value[l]) && isRoot){
-								
-							}
-						}
-
-					}
-				}
-			}
-		
-		}
-		
-}
-
-
-
-minkApp.isSearchResultsCollection = function (field){
-	try{
-		if(field.value[0].composite_type=='SR'){
-			return true;
-		}else{
-			return false;
-		}
-	}catch(err){
-		return false;
-	}
-
-}
-
-
-
-
-minkApp.getSearchResultLinks = function(metadataFields, metadata){
-	var list = [];
-	for (var i = 0; i < metadataFields.length; i++){
-		var metadataField = metadataFields[i];
-		if(minkApp.isSearchResultsCollection(metadataField)){
 			var collectionLinks = {};
 			collectionLinks.links = [];
 			collectionLinks.name = metadataField.name;
 			for (var i = 0; i < metadataField.value.length; i++){
 				try{
-					collectionLinks.links.push(minkApp.getDestinationPageLink(metadataField.value[i], true, metadata));
+					collectionLinks.links.push(task.getDestinationPageLink(metadataField.value[i], true, metadata));
 				}catch(err){
 					var wasteTime = 2;
 				}
@@ -1690,14 +1503,10 @@ minkApp.getSearchResultLinks = function(metadataFields, metadata){
 
 minkApp.prepareSemantics = function(task){
 	var metadataFields = task.fields;
-
 	minkApp.linkToViewModelMap.put(task.url, task.fields);
 	
-	var linkedFields = minkApp.makeLinkedFieldList(task.fields, true);
-	task.linkedFields = linkedFields;
-
 	if(task.mmd && task.mmd['meta_metadata'].extends == 'search'){
-		var minkLinks = minkApp.getSearchResultLinks(metadataFields, task.metadata);
+		var minkLinks = minkApp.getSearchResultLinks(task);
 		
 		var metadata = BSUtils.unwrap(task.metadata);
 		var flink = "fav::" + task.url;
@@ -1737,7 +1546,7 @@ minkApp.prepareSemantics = function(task){
 
 minkApp.cardSemantics = function(cardDiv, link, clipping, options){
 	
-	RendererBase.addMetadataDisplay(cardDiv, link, clipping, minkApp.prepareSemantics, options);
+	MinkSemantics.addMetadataDisplay(cardDiv, link, clipping, minkApp.prepareSemantics, options);
 
 }
 
@@ -1800,10 +1609,10 @@ minkApp.buildCards = function(parent, links, expandCards, pile){
 		    }
 		    //devalue passed into mink?
 			var clipping = {viewModel: metadata};
-			minkApp.cardSemantics(cardDiv, link, clipping, {expand: true, callback: minkApp.contextualize, devalue: card.duplicate});
+			minkApp.cardSemantics(cardDiv, link, clipping, {expand: true, callback: minkApp.contextualize, devalue: card.duplicate, viewmodel: minkApp.linkToViewModelMap});
 
 		}else{
-			minkApp.cardSemantics(cardDiv, link, null, {expand: true, callback: minkApp.contextualize, devalue: card.duplicate});
+			minkApp.cardSemantics(cardDiv, link, null, {expand: true, callback: minkApp.contextualize, devalue: card.duplicate, viewmodel: minkApp.linkToViewModelMap});
 
 		}
 		

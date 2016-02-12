@@ -249,19 +249,19 @@ color: white;
 	
 }
 .minkExplorableFieldLabelPrefix{
-	  line-height: 28px;
-	
-	  white-space: nowrap;
-  text-overflow: ellipsis;
-  overflow: hidden;
- 
-  max-width: 90%;
-  height: 100%;
+	line-height: 28px;
+
+	white-space: nowrap;
+	text-overflow: ellipsis;
+	overflow: hidden;
+	margin-right: 12px;
+	max-width: 90%;
+	height: 100%;
 }
 .minkExplorableField{
   margin-top: 6px;
   max-height: 20px;
-  justify-content: space-between;
+  justify-content: flex-end;
   display: inline-flex;
   margin-bottom: 4px;
   min-height: 28px;

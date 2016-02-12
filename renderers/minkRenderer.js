@@ -217,15 +217,14 @@ minkRenderer.buildTitle = function(parent, metadataFields, url, styleInfo, expCo
 	
 	//Builds the explorationTab for showing/hiding piles
 	//It's hidden by default until mink is collapsed
-	var explorableButton = buildSpan('minkExplorablesExpander filledExpander');
+	var explorableButton = buildSpan('minkExplorablesExpander unfilledExpander');
 
 	explorableButton.addEventListener('mouseenter', minkRenderer.stopParentHoverCSS);
 	explorableButton.addEventListener('mouseleave', minkRenderer.returnParentHoverCSS);
 	explorableButton.addEventListener('click', minkRenderer.explorableButton);
-
 	explorableButton.setAttribute('url', url);
 	headerContainer.appendChild(explorableButton);
-	explorableButton.style.display = 'none';
+
 	clickableToExpand.addEventListener('click', minkRenderer.growHandler);
 	
 	parent.appendChild(headerContainer);
@@ -997,6 +996,7 @@ minkRenderer.grow = function(target, doNotUpdateStatus){
 		
 		var container = target.parentNode;		
 		var minkExpander = container.getElementsByClassName('minkExplorablesExpander')[0];		
+
 		var toAdd = $(container).find(".minkExplorableFieldLabelSuffix");
 		
 		for(var i = 0; i < toAdd.length; i++){
@@ -1039,16 +1039,12 @@ minkRenderer.grow = function(target, doNotUpdateStatus){
 			}
 
 		}
-		if(explorablesLeftForExpander > 0){
-			$(minkExpander).addClass('unfilledExpander');
-			minkExpander.innerHTML = mink.getAttribute('explorables');
-		}
 		setTimeout(function(){
 			moreExpander.style.display = ''
 		}, 250, moreExpander);
 
-		if(explorablesLeftForExpander > 0)
-			$(minkExpander).addClass('unfilledExpander');
+		$(minkExpander).removeClass('filledExpander');
+		$(minkExpander).addClass('unfilledExpander');
 
 		var detail = container.getElementsByClassName('minkDetailExpander')[0];
 		if (detail.getAttribute('revealme') == 'true'){
@@ -1077,9 +1073,9 @@ minkRenderer.shrink = function(target, doNotUpdateStatus){
 	var contentContainer = $(target).closest('.minkContentContainer')[0];
 
 	$(minkExpander).removeClass('unfilledExpander');
-	
+	$(minkExpander).addClass('filledExpander');
+
 	var toAdd = $(container).find(".minkExplorableFieldLabelSuffix");
-	
 	for(var i = 0; i < toAdd.length; i++){
 		$(toAdd[i]).addClass('unfilledExpander');
 	}
@@ -1122,7 +1118,6 @@ minkRenderer.shrink = function(target, doNotUpdateStatus){
 	//Check to collapse table as well
 	var detail = container.getElementsByClassName('minkDetailExpander')[0];
 	minkRenderer.showLess(detail, null, true);
-	minkExpander.innerHTML = parseInt(mink.getAttribute('explorables')) + parseInt(minkExpander.innerHTML);
 	$(mink).slideUpTransition(true);
 	minkRenderer.signalRemoveButtons($(target).closest('.minkCardContainer')[0]);
 
