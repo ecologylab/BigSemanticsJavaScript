@@ -158,8 +158,7 @@ border-radius: 4px;
 	align-items: center;
 }
 .minkCardControl.favorited{
-background-color: #63D84F;
--webkit-filter: invert(1);
+	color: #9C27B0;
     -webkit-box-shadow: 1px 1px 4px -1px rgba(255,255,255,0.4);
 
 }
@@ -411,7 +410,7 @@ opacity: 1;
 }
 .minkColumns{
 		display: inline-flex;
-	  max-width: 1800px;
+	/*  max-width: 1800px;*/
 	  margin-left: 525px;
     overflow-x: auto;
 }
@@ -741,8 +740,10 @@ text-decoration: underline;
 	    /* padding: 5px; */
     width: 35px;
     height: 35px;
-    -webkit-filter: opacity(.6);
     display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #727272;
     /*-webkit-box-shadow: 1px 1px 4px -1px rgba(0,0,0,0.4);*/
     /* justify-content: space-around; */
     /* align-content: flex-end; */
@@ -759,8 +760,7 @@ text-decoration: underline;
 
 .minkCardControl:hover{
 	cursor: pointer;
-	background-color: #BBB;
-    -webkit-filter: opacity(.8);
+	background-color: #CCC;
 
 	
 }

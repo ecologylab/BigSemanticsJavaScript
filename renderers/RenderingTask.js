@@ -1,6 +1,6 @@
 
 /**
- * RenderingTask is essentially (though not techincally) and ectension of MetadataTask. The big difference is that
+ * RenderingTask is essentially (though not techincally) and extension of MetadataTask. The big difference is that
  * rendering task passes the metadata is recieves through the ViewModeler before giving it to the rendering function
  *
  * @param url of the document
@@ -80,6 +80,9 @@ RenderingTask.prototype.metadataToModel = function(task, options){
       task.options = options;
 
       }
+
+
+
       RenderingTask.prototype.idealRenderer(task);
       return task;
     }

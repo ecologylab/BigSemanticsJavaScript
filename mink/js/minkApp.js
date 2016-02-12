@@ -13,6 +13,8 @@ minkApp.offScreenColumnsLeft = 0;
 minkApp.offScreenColumnsRight = 0;
 minkApp.favorites = [];
 minkApp.currentQuery = null;
+minkApp.linkToViewModelMap = new Map();
+minkApp.linkToMetadataMap = new Map();
 minkApp.queryMap = new Map();
 var bsService = new BSAutoSwitch(['eganfccpbldleckkpfomlgcbadhmjnlf', 'gdgmmfgjalcpnakohgcfflgccamjoipd']);
 //var bsService = new BSService();
@@ -29,6 +31,21 @@ function buildMenuIcon(parent, label, icon, onclick){
 	cont.appendChild(image);
 	cont.addEventListener('click', onclick);
 	parent.appendChild(cont);
+}
+function generateUUID(){
+    var d = new Date().getTime();
+    var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        var r = (d + Math.random()*16)%16 | 0;
+        d = Math.floor(d/16);
+        return (c=='x' ? r : (r&0x3|0x8)).toString(16);
+    });
+    return uuid;
+}
+
+minkApp.uuidthing = function(){
+	var url = "mink::UUID"
+	url += generateUUID()
+	return url;
 }
 
 
@@ -243,7 +260,7 @@ minkApp.favesToBib = function(){
 	var bibGen = new BibTexGenerator('../bsjsCore/citeproc/modern-language-association-with-url.csl', '../bsjsCore/citeproc/locales-en-US.xml');
 	
 	for (var i = 0; i < minkApp.favorites.length; i++){
-		var md = Mink.minklinkToMetadataMap.get(minkApp.favorites[i].url);
+		var md = minkApp.linkToMetadataMap.get(minkApp.favorites[i].url);
 		bibGen.addDocument( new BibTexDocument(minkApp.favorites[i].url, md));
 	}
 	
@@ -257,7 +274,7 @@ minkApp.favesToBibTex = function(){
 	var bibGen = new BibTexGenerator('../bsjsCore/citeproc/modern-language-association-with-url.csl', '../bsjsCore/citeproc/locales-en-US.xml');
 	
 	for (var i = 0; i < minkApp.favorites.length; i++){
-		var md = Mink.minklinkToMetadataMap.get(minkApp.favorites[i].url);
+		var md = minkApp.linkToMetadataMap.get(minkApp.favorites[i].url);
 		bibGen.addDocument( new BibTexDocument(minkApp.favorites[i].url, md));
 	}
 	
@@ -318,12 +335,9 @@ minkApp.openLink = function(event){
 
 minkApp.buildLinkOutControl = function(parent, link){
 	var olc = buildDiv('minkCardControl')
-	var openLink = document.createElement('img');
-	openLink.className = 'minkCardControlIcon';
-	openLink.src = './img/share-boxed.svg';
+	olc.innerHTML = '<i class="material-icons">open_in_new</i>';
 	olc.addEventListener('click', minkApp.openLink);
 	olc.setAttribute('outlink', link)
-	olc.appendChild(openLink);
 
 	//Material.addMaterial((link + "::o"), olc, 2);
 	parent.appendChild(olc);
@@ -333,11 +347,8 @@ minkApp.buildCardControls = function(parent, link){
 	var controlCont = buildDiv('minkCardControls hidden');
 	var r = buildDiv('minkCardControl')
 
-	var remove = document.createElement('img');
-	remove.className = 'minkCardControlIcon';
-	remove.src = './img/x.svg';
+	r.innerHTML = '<i class="material-icons">remove_circle_outline</i>';
 	r.addEventListener('click', minkApp.removeButtonHandler)
-	r.appendChild(remove);
 
 	
 	
@@ -345,12 +356,8 @@ minkApp.buildCardControls = function(parent, link){
 
 	
 	var f = buildDiv('minkCardControl')
-
-	var favorite = document.createElement('img');
-	favorite.className = 'minkCardControlIcon';
-	favorite.src = './img/ic_bookmark_black_24dp_2x.png';
+	f.innerHTML = '<i class="material-icons">bookmark_border</i>';
 	f.addEventListener('click', minkApp.signalFavorite)
-	f.appendChild(favorite);
 
 	
 	controlCont.appendChild(f);
@@ -905,9 +912,10 @@ minkApp.toggleFavorite = function(url, mdName, faviconLink, srcHTML){
 		/*mark the card as favorited visually and in memory*/
 		var favoriteIndicator = srcHTML.getElementsByClassName('minkCardControl')[0];
 		favoriteIndicator.classList.add('favorited');
+		favoriteIndicator.innerHTML = '<i class="material-icons">bookmark</i>';
 		$(srcHTML).find(".minkTitleBar").addClass('favorited');
 		$(srcHTML).find(".minkTitleField").addClass('favorited');
-		var md = Mink.minklinkToMetadataMap.get(url);
+		var md = minkApp.linkToMetadataMap.get(url);
 		if(md){
 			md = BSUtils.unwrap(md);
 			if(md.year){
@@ -932,6 +940,8 @@ minkApp.toggleFavorite = function(url, mdName, faviconLink, srcHTML){
 	}else{
 		
 		$($(srcHTML).find(".minkCardControl")[0]).removeClass('favorited');
+		$($(srcHTML).find(".minkCardControl")[0])[0].innerHTML = '<i class="material-icons">bookmark_border</i>';
+
 		$(srcHTML).find(".minkTitleBar").removeClass('favorited');
 		$(srcHTML).find(".minkTitleField").removeClass('favorited');
 		//find html
@@ -1060,7 +1070,7 @@ minkApp.newPile = function(details, srcElement){
 	minkApp.handleFacetEntry();
 	 minkApp.currentQuery.pileMap.put(pileIDGen(details.rooturl, details.collectionname), pile);
 	 srcElement.addEventListener('click', minkApp.showHidePileHandler);
-	 srcElement.removeEventListener('click', Mink.showExplorableLinks);
+	 srcElement.removeEventListener('click', minkApp.showExplorableLinksHandler);
 	
 }
 
@@ -1447,6 +1457,291 @@ minkApp.polishYear = function(metadata){
 		return year;
 	}
 }
+
+
+
+minkApp.makeLinkedFieldList = function(metadataFields, addToMaps){
+	var list = [];
+	
+	for (var i = 0; i < metadataFields.length; i++){
+		var metadataField = metadataFields[i];
+		minkApp.recursiveSearchForLinked(metadataField, list, true, addToMaps);
+	}
+		
+		
+		
+	
+	console.log(list);
+	return list;
+	
+}
+
+
+minkApp.getDestinationPageLink = function(field, addToMaps, metadata){
+	var kids = field.value.value;
+	if(addToMaps){
+		
+		
+		for (var i = 0; i < field.value.length; i++){
+			if(field.value[i].name == 'destination_page'){
+					try{
+						var url = "mink::" + field.value[i].value[0].navigatesTo;
+						url = url.toLowerCase();
+
+						//hard-code for google scholar for right now
+						
+						minkApp.linkToViewModelMap.put(url, field);
+						return url;
+					}catch(e){
+						var url = minkApp.uuidthing();
+						minkApp.linkToViewModelMap.put(url, field);
+						return url;
+
+					}
+				
+
+			}
+		}
+		var url = minkApp.uuidthing();
+		minkApp.linkToViewModelMap.put(url, field);
+
+
+	}
+	return url;
+	
+	
+}
+
+minkApp.recursiveIsLinked = function(metadataField){
+	
+	if(metadataField.child_type != 'video' && metadataField.child_type != 'image' && metadataField.child_type != 'audio'){		
+		
+		var collectionLinks = {};
+		collectionLinks.links = [];
+		collectionLinks.name = metadataField.name;
+		for (var j = 0; j < metadataField.value.length; j++){
+			var childField = metadataField.value[j];
+			if(typeof(childField.value) == "object"){
+				if(childField.value.length > 0){
+						if(childField.value[0].navigatesTo != null){
+							return true;
+						}else{
+							return minkApp.recursiveIsLinked(childField);
+						}
+					}
+				}
+				
+			}
+	
+			
+		
+		
+	}
+	//composite
+	else{
+		var compLinks = {};
+		compLinks.links = [];
+		compLinks.name = metadataField.name;
+
+		if(metadataField.value[0].navigatesTo != null){
+			return true;
+		}else{
+			for(var l = 0; l < metadataField.value.length; l++){
+				if(typeof(metadataField.value[l]) === "object")
+					return minkApp.recursiveIsLinked(metadataField.value[l]);
+
+			}
+		}
+	}
+	
+	return false;
+
+}
+
+minkApp.recursiveSearchForLinked = function(metadataField, list, isRoot, addToMaps, metadata){
+	if(metadataField.child_type != null){
+		
+		//hard-ish coded case. should be expanded to include all md where pol\ymorphic thing = SR
+		if(minkApp.isSearchResultsCollection(metadataField)){
+			var collectionLinks = {};
+			collectionLinks.links = [];
+			collectionLinks.name = metadataField.name;
+			if(collectionLinks.field_as_count){
+				compLinks.count = metadataField.field_as_count.value;
+			}
+
+			for (var i = 0; i < metadataField.value.length; i++){
+				try{
+					collectionLinks.links.push(minkApp.getDestinationPageLink(metadataField.value[i], addToMaps, metadata));
+				}catch(err){
+					var wasteTime = 2;
+				}
+			}
+			list.push(collectionLinks);
+			return;
+			
+		}
+		else if(metadataField.child_type != 'video' && metadataField.child_type != 'image' && metadataField.child_type != 'audio'){		
+			var collectionLinks = {};
+			collectionLinks.links = [];
+			collectionLinks.name = metadataField.name;
+			if(collectionLinks.field_as_count){
+				compLinks.count = metadataField.field_as_count.value;
+			}
+
+			for (var j = 0; j < metadataField.value.length; j++){
+				var childField = metadataField.value[j];
+				if(childField.value.length > 0){
+					if(childField.value[0].navigatesTo != null){
+						collectionLinks.links.push(childField.value[0].navigatesTo);
+					}else{
+						if(minkApp.recursiveIsLinked(childField) && (isRoot == true)){
+
+							collectionLinks.links.push(childField.value[0].navigatesTo);
+
+						}						
+					}
+				}
+		
+				
+			}
+			if(collectionLinks.links.length > 0){
+				list.push(collectionLinks);
+			
+				}
+			}
+		}
+		//composite
+		else{
+			var compLinks = {};
+			compLinks.links = [];
+			compLinks.name = metadataField.name;
+			if(metadataField.field_as_count){
+				compLinks.count = metadataField.field_as_count.value;
+			}
+			if(metadataField.value[0]){
+				if(metadataField.value[0].navigatesTo != null){
+					compLinks.links.push(metadataField.value[0].navigatesTo);
+					list.push(compLinks);
+				}else{
+					for(var l = 0; l < metadataField.value.length; l++){
+						if(typeof(metadataField.value[l]) === "object"){
+							minkApp.recursiveSearchForLinked(metadataField.value[l], list, addToMaps);
+							if(minkApp.recursiveIsLinked(metadataField.value[l]) && isRoot){
+								
+							}
+						}
+
+					}
+				}
+			}
+		
+		}
+		
+}
+
+
+
+minkApp.isSearchResultsCollection = function (field){
+	try{
+		if(field.value[0].composite_type=='SR'){
+			return true;
+		}else{
+			return false;
+		}
+	}catch(err){
+		return false;
+	}
+
+}
+
+
+
+
+minkApp.getSearchResultLinks = function(metadataFields, metadata){
+	var list = [];
+	for (var i = 0; i < metadataFields.length; i++){
+		var metadataField = metadataFields[i];
+		if(minkApp.isSearchResultsCollection(metadataField)){
+			var collectionLinks = {};
+			collectionLinks.links = [];
+			collectionLinks.name = metadataField.name;
+			for (var i = 0; i < metadataField.value.length; i++){
+				try{
+					collectionLinks.links.push(minkApp.getDestinationPageLink(metadataField.value[i], true, metadata));
+				}catch(err){
+					var wasteTime = 2;
+				}
+			}
+			list.push(collectionLinks);
+			
+			
+		}
+	}
+	return list[0];
+}
+
+
+
+
+
+
+
+
+minkApp.prepareSemantics = function(task){
+	var metadataFields = task.fields;
+
+	minkApp.linkToViewModelMap.put(task.url, task.fields);
+	
+	var linkedFields = minkApp.makeLinkedFieldList(task.fields, true);
+	task.linkedFields = linkedFields;
+
+	if(task.mmd && task.mmd['meta_metadata'].extends == 'search'){
+		var minkLinks = minkApp.getSearchResultLinks(metadataFields, task.metadata);
+		
+		var metadata = BSUtils.unwrap(task.metadata);
+		var flink = "fav::" + task.url;
+		minkLinks.links.push(flink);
+		var iteratableURL = task.mmd['meta_metadata'].search_result_iterator;
+		
+		/*
+		if there is an iteration canary in the first level of the task fields, signal to load more
+		*/
+		var canaryAlive = false;
+		var canaryField = task.mmd['meta_metadata'].final_page_canary;
+		if(metadata[canaryField] != null && metadata[canaryField] != ""){
+			canaryAlive = true;
+		}
+
+
+
+
+		var detailDetails = {type: 'minksearchstripper', links: minkLinks, iterator: iteratableURL, mmdtype: task.mmd['meta_metadata'].name, url: task.url, canary: canaryAlive, perPage: task.mmd['meta_metadata'].results_per_page};
+		var eventDetail = {detail: detailDetails, bubbles: true};
+		var myEvent = new CustomEvent("minkevent", eventDetail);
+		task.container.parentNode.dispatchEvent(myEvent);
+		//gs search hardcode for now
+		for(var j = 0; j < metadata.search_results.length; j++){
+			var url2 = "mink::" + metadata.search_results[j]['google_scholar_search_result'].document_link;
+			url2 = url2.toLowerCase();
+			var betterMD = metadata.search_results[j];
+			minkApp.linkToMetadataMap.put(url2, betterMD);
+
+		}
+		console.log(minkLinks);
+	}else{
+		minkRenderer.render(task)
+	}
+
+}
+
+minkApp.cardSemantics = function(cardDiv, link, clipping, options){
+	
+	RendererBase.addMetadataDisplay(cardDiv, link, clipping, minkApp.prepareSemantics, options);
+
+}
+
+
 minkApp.buildCards = function(parent, links, expandCards, pile){
 	var cards = [];
 	parent.addEventListener('minkloaded', minkApp.addCardToPile);
@@ -1479,7 +1774,7 @@ minkApp.buildCards = function(parent, links, expandCards, pile){
 
 		//check to see if there's metadata contained therein{
 		if(link.startsWith('mink::')){
-			var metadata = Mink.minklinkToViewModelMap.get(link);
+			var metadata = minkApp.linkToViewModelMap.get(link);
 			metadata['minkfav'] = faviconLink;
 
 
@@ -1489,7 +1784,7 @@ minkApp.buildCards = function(parent, links, expandCards, pile){
 		    takes Source_info and processes it into a year field. Really shouldn't be done here but we're demo'ing
 		    */
 		    //here metadata is a viewmodel and md is just metadata
-	    	var metadata = Mink.minklinkToViewModelMap.get(link);
+	    	var metadata = minkApp.linkToViewModelMap.get(link);
 	    	var yr = minkApp.polishYear(metadata);
 	    	if(yr){
 	    		var year = parseInt(yr);
@@ -1505,10 +1800,10 @@ minkApp.buildCards = function(parent, links, expandCards, pile){
 		    }
 		    //devalue passed into mink?
 			var clipping = {viewModel: metadata};
-			RendererBase.addMetadataDisplay(cardDiv, link, clipping, Mink.render, {expand: true, callback: minkApp.contextualize, devalue: card.duplicate});
+			minkApp.cardSemantics(cardDiv, link, clipping, {expand: true, callback: minkApp.contextualize, devalue: card.duplicate});
 
 		}else{
-			RendererBase.addMetadataDisplay(cardDiv, link, null, Mink.render, {expand: true, callback: minkApp.contextualize, devalue: card.duplicate});
+			minkApp.cardSemantics(cardDiv, link, null, {expand: true, callback: minkApp.contextualize, devalue: card.duplicate});
 
 		}
 		
