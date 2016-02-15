@@ -101,6 +101,9 @@ function processCompositeField(microdata, field, metadata) {
 
 function getMicroDataList(microdata , field) {
     var list = [];
+    if ( !field.microDataName) {
+        return [];
+    }
     if ( microdata[field.microDataName.trim()] ) {
         list.push(microdata[field.microDataName]);
     }
