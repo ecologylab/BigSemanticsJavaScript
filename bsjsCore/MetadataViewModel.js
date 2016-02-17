@@ -538,13 +538,20 @@ ViewModeler.isFieldVisible = function(mmdField, metadata, url, parentField)
 {
   if (mmdField["styles"])
   {
-    var style = mmdField["styles"][0];
-    var location = metadata[mmdField["name"]].location; 
-    if (style.is_child_metadata == "true" && style.hide == "true" 
-        && url && location && location.toLowerCase() == url)
-    {
-      return false;
-    }
+	  try {
+		var style = mmdField["styles"][0];
+		var location = metadata[mmdField["name"]].location; 
+		
+		if (style.is_child_metadata == "true" && style.hide == "true" && url && location && location.toLowerCase() == url)
+		{
+		  return false;
+		}  
+	  }
+	  catch(err){
+		  console.log('there was a mmdField that was not actually in the md');
+		  return false;
+	  }
+    
   }
   
   var includeMediaField = ViewModeler.isVisibleMediaField(mmdField, parentField);
