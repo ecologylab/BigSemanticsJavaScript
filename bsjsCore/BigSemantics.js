@@ -33,10 +33,11 @@ var BigSemantics = (function() {
     } else {
       this.setReady();
     }
+	this.metadataCache = new MetadataCache();	  
 	if (IframeExtractor !== undefined){
-    	this.iframeExtractor = new IframeExtractor();
+    	this.iframeExtractor = new IframeExtractor(this.metadataCache);
 	}
-	  
+
     return this;
   }
   BigSemantics.prototype = Object.create(Readyable.prototype);
@@ -64,6 +65,11 @@ var BigSemantics = (function() {
         location = PreFilter.filter(location, mmd.filter_location);
       }
 
+	  if (that.metadataCache.contains(location)){
+		  callback(null, { metadata: that.metadataCache.get(location), mmd: mmd });	
+		  return;
+	  }
+		
 	  if (mmd.meta_metadata.extract_with == "service"){ 
 			options.useHttps = (window.location.protocol == 'https:'); //use Https if we are on an https page
 			that.bss.loadMetadata(location, options, callback);	  
@@ -77,6 +83,9 @@ var BigSemantics = (function() {
         that.extractor(response, mmd, that, options, function(err, metadata) {
           if (err) { callback(err, null); return; }
           callback(null, { metadata: metadata, mmd: mmd });
+		  if (!mmd.no_cache) {
+			  that.metadataCache.add(location, metadata);
+		  }
         });
       } else {
         // we don't really have the DOM
@@ -89,6 +98,9 @@ var BigSemantics = (function() {
 			that.iframeExtractor.extract(location, mmd, function(err, metadata){
 				if (err) { callback(err, null); return; }
 		    	callback(null, { metadata: metadata, mmd: mmd });	
+				if (!mmd.no_cache) {
+					that.metadataCache.add(location, metadata);
+				}
 			});
 		}
 		else {
@@ -98,10 +110,14 @@ var BigSemantics = (function() {
 		  	that.extractor(response, mmd, that, options, function(err, metadata) {
 		    	if (err) { callback(err, null); return; }
 		    	callback(null, { metadata: metadata, mmd: mmd });
+				if (!mmd.no_cache) {
+					that.metadataCache.add(location, metadata);
+				}				
 			});
 		  });
 		}
       }
+		
     });
   };
 
@@ -131,4 +147,3 @@ var BigSemantics = (function() {
 if (typeof module == 'object') {
   module.exports = BigSemantics;
 }
-

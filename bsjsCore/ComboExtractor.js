@@ -50,6 +50,12 @@ function mergeMetadata( metadata1 , metadata2 , mmd , repoMan) {
     var metadata = {};
 
     traverseMMD(metadata1 , metadata2 , metadata , mmd);
+	
+	//cludgy cludge to clean up
+	if (!metadata.mm_name && !metadata.meta_metadata_name){
+		metadata.mm_name = metadata1.mm_name || metadata1.meta_metadata_name || metadata2.mm_name || metadata2.meta_metadata_name;
+	}
+	
     return metadata;
 
     function traverseMMD(metadata1 , metadata2 , metadata , mmd) {

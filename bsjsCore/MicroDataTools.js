@@ -24,10 +24,9 @@ MicroDataTools.getTypeName = function(microdata) {
 
 MicroDataTools.useMicroDataToImproveMMD = function( response , mmd, bigSemantics, callback ) {
     var obj = MicroDataTools.getMicroDataAndMMD(response.entity , bigSemantics , function(err , obj) {
-        var bestMMD = mmd;
+		var bestMMD = mmd;
         if ( err ) {
-                console.log("useMicroDataToImproveMMD call to getMicroDataAndMMd failed");
-                callback(err);
+            console.log("useMicroDataToImproveMMD call to getMicroDataAndMMd failed");
         }
         if (obj) {
             bestMMD = pickBestMMD(mmd, obj.mmd);
