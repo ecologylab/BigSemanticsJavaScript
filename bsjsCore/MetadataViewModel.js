@@ -22,10 +22,17 @@ function MetadataViewModel(mmdField)
   
   this.layer = (mmdField.layer != null) ? mmdField.layer : 0.0;
   this.style_name = (mmdField.style_name != null) ? mmdField.style_name : "";
-  
+  this.mink_style = (mmdField.mink_style != null) ? mmdField.mink_style : "";
+  this.show_in_snippet = (mmdField.show_in_snippet != null) ? mmdField.show_in_snippet : "";
+  this.final_page_canary = (mmdField.final_page_canary != null) ? mmdField.final_page_canary : "";
+
+  this.explorable_label = (mmdField.explorable_label != null) ? mmdField.explorable_label : "";
+  	
   this.hide_label = (mmdField.hide_label != null) ? mmdField.hide_label : false;
   this.label_at = mmdField.label_at;
-  
+  this.minkHeight = mmdField.mink_height;
+  this.minkWidth = mmdField.mink_width;
+
   this.concatenates_to = mmdField.concatenates_to;
   this.concatenates = [];
   if (mmdField.concatenates != null)
@@ -140,7 +147,7 @@ ViewModeler.getMetadataField = function(mmdField, metadataFields)
  * @param depth, current depth level
  */
 ViewModeler.getMetadataViewModel = function(parentField, mmdKids, metadata, depth,
-                                               child_value_as_label, taskUrl)
+                                               child_value_as_label, taskUrl, field_as_count)
 {
   metadata = BSUtils.unwrap(metadata);
 
@@ -159,17 +166,17 @@ ViewModeler.getMetadataViewModel = function(parentField, mmdKids, metadata, dept
     if (mmdField.scalar)
     {
       ViewModeler.getScalarMetadataViewModel(metadataViewModel, parentField, mmdField,
-          mmdKids, metadata, depth, child_value_as_label, taskUrl);
+          mmdKids, metadata, depth, child_value_as_label, taskUrl, field_as_count);
     }    
     else if (mmdField.composite)
     {
       ViewModeler.getCompositeMetadataViewModel(metadataViewModel, parentField, mmdField,
-          mmdKids, metadata, depth, child_value_as_label, taskUrl);
+          mmdKids, metadata, depth, child_value_as_label, taskUrl, field_as_count);
     }
     else if (mmdField.collection != null)
     {
       ViewModeler.getCollectionMetadataViewModel(metadataViewModel, parentField, mmdField,
-          mmdKids, metadata, depth, child_value_as_label, taskUrl);
+          mmdKids, metadata, depth, child_value_as_label, taskUrl, field_as_count);
     }
   }
   
@@ -194,7 +201,7 @@ ViewModeler.getScalarMetadataViewModel = function(metadataViewModel,
                                                      metadata,
                                                      depth,
                                                      child_value_as_label,
-                                                     taskUrl)
+                                                     taskUrl, field_as_count)
 {
   mmdField = mmdField.scalar;
 
@@ -209,7 +216,9 @@ ViewModeler.getScalarMetadataViewModel = function(metadataViewModel,
       {
         mmdField.use_value_as_label = child_value_as_label; 
       }
-                
+      if(field_as_count != null){
+    	  mmdField.field_as_count = field_as_count;
+      }          
       var field = ViewModeler.getMetadataField(mmdField, metadataViewModel);
                 
       field.value = value;
@@ -219,7 +228,10 @@ ViewModeler.getScalarMetadataViewModel = function(metadataViewModel,
           ViewModeler.getValueForProperty(mmdField.use_value_as_label,
                                              metadata, mmdKids, depth);
       }
-                
+      if(mmdField.field_as_count != null){
+      	field.field_as_count = ViewModeler.getValueForProperty(mmdField.field_as_count, metadata, mmdKids, depth+1);
+      }
+          
       field.scalar_type = mmdField.scalar_type;
       field.parentMDType = metadata.meta_metadata_name;  
             
@@ -256,7 +268,7 @@ ViewModeler.getCompositeMetadataViewModel = function(metadataViewModel,
                                                         metadata,
                                                         depth,
                                                         child_value_as_label,
-                                                        taskUrl)
+                                                        taskUrl, field_as_count)
 {
   mmdField = mmdField.composite;
       
@@ -274,7 +286,9 @@ ViewModeler.getCompositeMetadataViewModel = function(metadataViewModel,
       {
         mmdField.use_value_as_label = child_value_as_label;
       }
-    
+      if(field_as_count != null){
+    	  mmdField.field_as_count = field_as_count;
+      }
       // If there is an array of values            
       if (value.length != null)
       {            
@@ -328,6 +342,9 @@ ViewModeler.getCompositeMetadataViewModel = function(metadataViewModel,
                                                  metadata, mmdKids, depth + 1);
           }
         }
+        if(mmdField.field_as_count != null){
+        	field.field_as_count = ViewModeler.getValueForProperty(mmdField.field_as_count, metadata, mmdKids, depth+1);
+        }
         
         field.composite_type = mmdField.type;
         field.parentMDType = metadata.meta_metadata_name;
@@ -354,7 +371,7 @@ ViewModeler.getCollectionMetadataViewModel = function(metadataViewModel,
                                                          metadata,
                                                          depth,
                                                          child_value_as_label,
-                                                         taskUrl)
+                                                         taskUrl, field_as_count)
 {
   mmdField = mmdField.collection;  
   if(mmdField.name == "companion_products"){
@@ -371,7 +388,9 @@ ViewModeler.getCollectionMetadataViewModel = function(metadataViewModel,
       {
         mmdField.use_value_as_label = child_value_as_label;
       }
-      
+      if(field_as_count != null){
+    	  mmdField.field_as_count = field_as_count;
+      }
       var field = new MetadataViewModel(mmdField);
       
       field.child_type = (mmdField.child_tag != null) ? mmdField.child_tag
@@ -428,7 +447,8 @@ ViewModeler.getCollectionMetadataViewModel = function(metadataViewModel,
                                               value,
                                               depth + 1,
                                               mmdField.child_use_value_as_label,
-                                              taskUrl);
+                                              taskUrl, field_as_count
+                                              );
       }
       else if (mmdField.child_scalar_type == null)
       {
@@ -442,7 +462,10 @@ ViewModeler.getCollectionMetadataViewModel = function(metadataViewModel,
           ViewModeler.getValueForProperty(mmdField.use_value_as_label,
                                              metadata, mmdKids);
       }
-      
+      if(mmdField.field_as_count != null){
+      	field.field_as_count = ViewModeler.getValueForProperty(mmdField.field_as_count, metadata, mmdKids);
+      }
+
      
       metadataViewModel.push(field);
     }

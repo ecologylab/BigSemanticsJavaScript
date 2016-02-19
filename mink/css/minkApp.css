@@ -1,0 +1,833 @@
+.minkPileLoader{
+	width: 100px;
+	height: 50px;
+	background-color: purple;
+
+}
+
+.minkBibDisplay{
+		-webkit-filter: none;
+			position: absolute;
+top: 200px;
+background-color: white;
+left: 25%;
+    max-width: 50%;
+
+z-index: 1001;
+padding: 30px 30px 30px 30px;
+border-radius: 4px;
+}
+
+
+.facetMenuHeader{
+	display: flex;
+	transition: width .5s ease;
+}
+.facetMenuHeaderText{
+	color: black;
+	-webkit-filter: opacity(.6);
+	line-height: 28px;
+	padding-right: 2px;
+}
+.facetMenuHeader.opened{
+}
+.facetMenuHeader:hover{
+	background-color: #DDDDDD;
+	cursor: pointer;
+
+}
+
+
+.minkFacetMenuOpen.opened{
+	-webkit-filter: invert(1);
+
+}
+
+.minkFacetMenuOpen{
+
+    height: 24px;
+    width: 24px;
+    margin-top: 0px;
+    border-radius: 40px;
+    -webkit-filter: opacity(.6);
+    padding: 2px;
+    margin-right: 4px;
+}
+.minkFacetMenuOpen:hover{
+	cursor: pointer;
+
+}
+.minkFacetMenuItemContent{
+	display: flex;
+    margin-left: 32px;
+    justify-content: space-between;
+    margin-top: 4px;
+    transition: max-height .5s ease;
+    margin-bottom: 4px;
+}
+.minkFacetColumn.collapsed{
+
+    min-height: 24px;
+    display: flex;
+    line-height: 24px;
+    margin-top: 8px;
+    left: 432px;
+    
+}
+.minkFacetYear{
+	width: 42px;
+}
+.minkFacetKeyword{
+	line-height: 24px;
+}
+.minkFacetColumn.open{
+
+    min-height: 24px;
+    display: flex;
+    line-height: 24px;
+    margin-top: 8px;
+    width: 170px;
+
+    
+}
+.minkFacetColumn{
+	 flex-direction: column;
+	 justify-content: flex-start;
+	 position: absolute;
+    left: 432px;
+
+}
+.minkFacetMenuItemContent.collapsed{
+	display: none;
+	max-height: 0px;
+
+}
+.minkFacetMenuItemContent.open{
+	display: flex;
+	max-height: 24px;
+
+}
+
+.minkFacetMenuItemHeader{
+	display: flex;
+}
+.minkFacetMenuIconContainer{
+	width: 24px;
+	height: 24px;
+	padding: 2px;
+}
+.minkFacetMenuIcon{
+	-webkit-filter: opacity(.6);
+}
+.minkFacetMenuItem{
+	display: flex;
+    flex-direction: column
+
+}
+.minkFacetsRemovedIndicator{
+	line-height: 28px;
+	color: black;
+	-webkit-filter: opacity(.6);
+	margin-left: 32px;
+}
+.minkFacetMenuItemHeader:hover{
+	cursor: pointer;
+	background-color: #CCCCCC;
+}
+
+.facetMenuItems{
+	margin-left: 8px;
+
+}
+.facetMenuItems.collapsed{
+	display: none;
+}
+.minkFacetMenuItem.hidden{
+	display: none;
+}
+.minkFacetMenuLabel{
+	line-height: 28px;
+	color: black;
+	-webkit-filter: opacity(.6);
+	margin-left: 4px;
+}
+
+
+.minkPileRow{
+	display: flex;
+	align-items: center;
+}
+.minkCardControl.favorited{
+	color: #9C27B0;
+    -webkit-box-shadow: 1px 1px 4px -1px rgba(255,255,255,0.4);
+
+}
+.minkTitleBar.favorited{
+background-color: #9C27B0;
+border-radius: 4px 4px 0 0;
+}
+
+.minkTitleField.favorited{
+color: white;
+font-weight: normal;}
+
+
+.eco-overlay{
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	width: 100%;
+	height: 100%;
+	background-color: black;
+	-webkit-filter: opacity(.6);
+	z-index: 1000;
+}
+
+.eco-dropDownMenu{
+    position: absolute;
+    z-index: 100;
+    top: 36px;
+    right: 12px;        	display: flex;
+	flex-direction: column;
+	-webkit-box-shadow: 2px 2px 10px 2px rgba(0,0,0,0.6);
+	width: 200px;
+	-webkit-filter: none;
+	background-color: white;
+	border-radius: 2px;
+	padding: 4px 0 4px 0;
+}
+.eco-popup{
+	height: 100%;
+}
+.eco-menuItem{
+	display: flex;
+	height: 30px;
+	line-height: 30px;
+	padding-left: 4px;
+padding-right: 4px;
+	justify-content: space-between;
+	cursor: pointer;
+	    
+}
+.eco-menuItem:hover{
+	background-color: #01579B;
+	color: white;
+}
+.eco-menuImage{
+	height: 30px;
+	max-width: 30px;
+}
+
+.minkColumn{
+	width: 610px;
+	margin-right: 50px;
+	transition: margin-left 1s ease;
+	display: inline-block;
+
+}
+.minkFaveHeader{
+	display: flex;
+	text-align: center;
+    color: white;
+    line-height: 30px;
+    background-color: #9C27B0;
+    border-radius: 4px 4px 0 0;
+
+
+}
+.queryFavColumn{
+	display: flex;
+	flex-direction: column;
+	margin-top: 8px;
+	position: absolute;
+}
+.minkFavoritesMenu{
+height: 28px;
+    -webkit-filter: invert(1) opacity(.7);
+    margin-right: 12px;
+    }
+    
+.minkFavoritesMenu:hover{
+	
+    -webkit-filter: invert(1);	
+    cursor: pointer;
+    }
+    
+.minkDupIndicator{
+	    font-style: italic;
+    text-align: CENTER;
+    color: gray;
+}
+p{
+	-webkit-margin-before: 1em;
+    -webkit-margin-after: 1em;
+    -webkit-margin-start: 0px;
+    -webkit-margin-end: 0px;
+        margin: 0 0 10px;
+}
+.minkLoadingSpinner{
+	height: 30px;
+	width: 30px;
+}
+body{
+	margin: 0px;
+	line-height: 20px;
+	    overflow-x: auto;
+}
+img{
+	    height: auto;
+    max-width: 100%;
+    vertical-align: middle;
+    border: 0;
+   }
+   body{
+   	background-color: rgba(0,0,0, 0.03);
+   	font-size: 14px
+   }
+.minkDeletingColumn{
+	animation-name: deleteCol;
+	animation-duration: .5s;
+}
+.minksearchbox{
+    /* text-decoration: underline; */
+    font-size: 14px;
+    height: 20px;
+    margin-top: 4px;
+    width: 400px;
+}
+@keyframes deleteCol{
+	from{margin-left: 0px; opacity: 1}
+	to{margin-left: -570px; opacity: 0}
+}
+.minkDeletingColumnRight{
+	animation-name: deleteColR;
+	animation-duration: .5s;
+}
+@keyframes deleteColR{
+	from{opacity: 1}
+	to{margin-right: -570px; opacity: 0}
+}
+.minkCenterRow{
+	display: flex;
+	margin-top: 42px;
+}
+.minkQuery{
+	
+     height: 30px;
+    max-width: 380px;
+    padding-left: 4px;
+    border-color: rgba(0,0,0,0.4);
+    border-width: 1px;
+    padding-right: 4px;
+    padding-top: 4px;
+    display: flex;
+    justify-content: space-between;
+    padding-bottom: 4px;
+}
+
+
+.queryData{
+	max-width: 340px;
+	width: 340px;
+	    line-height: 30px;
+	       white-space: nowrap;
+    overflow: hidden;
+    overflow-x: hidden;
+    overflow-y: hidden;
+    text-overflow: ellipsis;
+    padding: 0 4px 0 4px;
+
+}
+.minkQHighlight{
+	background-color:#00446b;
+	color: white;
+}
+.queryData:hover{
+	cursor: pointer;
+	background-color: #00446b;
+	color: white;
+}
+.minkQueries{
+    width: 400px;
+   	max-width: 400px;
+   	    min-width: 400px;
+   	
+   	margin-left: 12px;
+	height: 100%;
+}
+.queryLabel{
+	    text-align: center;
+    color: white;
+    line-height: 30px;
+    background-color: #0091EA;
+    border-radius: 4px 4px 0 0;
+
+}
+.minkNewQueryButton{
+    width: 30px;
+    height: 30px;
+    border-radius: 40px;
+    /* margin-left: 2px; */
+    position: absolute;
+    left: 374px;
+    z-index: 20;
+    opacity: 0;
+    }
+.minkNewQueryButton.visible{
+	background-color: #FFC55A;
+	    -webkit-box-shadow: 1px 1px 4px -1px rgba(0,0,0,0.4);
+opacity: 1;
+}
+.minkNewQueryButton:hover{
+	background-color: orange;
+	cursor: pointer;
+    -webkit-box-shadow: 1px 1px 4px -1px rgba(0,0,0,0.4);
+    opacity: 1;
+
+}
+
+.minkNewIcon{
+	width: 16px;
+    -webkit-filter: invert(1);
+    margin-top: 7px;
+    margin-left: 7px;
+      pointer-events: none;
+
+}
+.minkNSearchX{
+	width: 16px;
+    margin-top: 7px;
+    margin-left: 7px;
+}
+.qLevel{
+    padding-left: 8px;
+    background-color: rgba(0, 68, 107, .1);
+}
+.minkAppContainer{
+	margin-right: auto;
+	display: flex;
+	flex-direction: column;
+}
+.minkColumns{
+		display: inline-flex;
+	/*  max-width: 1800px;*/
+	  margin-left: 525px;
+    overflow-x: auto;
+}
+
+.contextTitle{
+line-height: 34px;
+    font-size: 30;
+    width: 400px;
+    /* color: darkgray; */
+    white-space: nowrap;
+    text-align: center;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: white;
+    font-size: 16px;
+}
+
+.minkToolbar.material{
+	width: 100%;
+	display: flex;
+	background-color: #0091EA;
+	justify-content: space-between;
+	margin-bottom: 10px;
+	min-height: 32px;
+	border-radius: 0;
+	position: absolute;
+
+}
+.minkBackButton{
+	width: 30px;
+	height: 30px;
+		padding: 2px;
+	display: inline-block;
+}
+.minkForwardButton{
+	width: 30px;
+	height: 30px;
+	        transform: scaleX(-1);
+	padding: 2px;
+	float: right;
+		display: inline-block;
+	
+}
+.leftPlaceholder{
+	display: inline-block;
+	height: 30px;
+	width: 30px;
+	padding: 2px;
+}
+.rightPlaceholder{
+	display: inline-block;
+	height: 30px;
+	width: 30px;
+		padding: 2px;
+
+}
+.minkFavoritesExpander{
+  color: white;
+  line-height: 34px;
+    font-size: 16px;
+      display: inline-block;
+  text-align: center;
+  width: 100px;
+  /* border: solid 2px rgba(0,0,0,.4); */
+	
+}
+.minkFavoritesExpander:hover{
+	cursor: pointer;
+	text-decoration: underline;	
+
+
+}
+.minkFavorite{
+    margin-top: 4px;
+
+}
+.minkFavoriteLink{
+	    max-width: 350px;
+    overflow: hidden;
+    display: inline-block;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+   }
+.minkFavoriteIcon{
+	margin-left: 4px;
+	margin-right: 4px;
+	    margin-bottom: 10px;
+
+}
+.favLabel{
+	    flex-grow: 1;
+    margin-left: 40px;
+}
+.minkFavoritesExpander.nonempty{
+  font-size: 16px;
+  /* border-style: solid; */
+  color: white;
+  /* border-width: 1px 1px 1px 0px; */
+}
+
+.minkFavoritesExpander.expanded{
+	animation-name: expanderExpanding;
+	animation-duration: .5s;
+	animation-fill-mode: forwards;
+text-decoration: underline;	
+
+}
+.minkFavoritesExpander.deflated{
+	animation-name: expanderDeflating;
+	animation-duration: .5s;
+	animation-fill-mode: forwards;
+
+}
+@keyframes expanderExpanding{
+	/*from{width: 100px}
+	to{width: 400px;}*/
+}
+
+@keyframes expanderDeflating{
+	/*from{width: 400px;}
+	to{width: 100px;}*/
+}
+
+.facetsMenuShowing{
+	animation-name: facetsMenuShowingA;
+	animation-duration: .5s;
+	animation-fill-mode: forwards;
+
+}
+
+.facetsMenuHiding{
+	animation-name: facetsMenuHidingA;
+	animation-duration: .5s;
+	animation-fill-mode: forwards;
+
+
+}
+
+@keyframes facetsMenuShowingA{
+	0%{	  margin-left: 525px;
+}
+	100%{	  margin-left: 605px;
+}
+}
+
+@keyframes facetsMenuHidingA{
+	0%{margin-left: 605px}
+	100%{margin-left: 525px}
+
+
+}
+
+
+
+
+
+.flash{
+	animation-name: flashFavorites;
+	animation-duration: .5s;
+}
+@keyframes flashFavorites{
+	0%{color: white}
+	50%{color: rgba(249, 215, 78, 1)}
+	100%{color: white}
+}
+
+.minkFavorites{
+	/*margin-left: -542px;*/
+	  /*  margin-top: 30px;*/
+	margin-left: 12px;
+	margin-top: 12px;
+	width: 400px;
+	/*position: relative;
+	z-index: 100;*/
+    	  display: inline-block;
+	      position: absolute;
+    z-index: 100;
+    background-color: white;
+        overflow: visible;
+
+}
+.minkPileLoader {
+    width: 120px;
+    height: 26px;
+    margin-right: 90px;
+    align-self: center;
+    vertical-align: center;
+    text-align: center;
+    border-radius: 4px;
+    color: white;
+    background-color: #90CAF9;
+    line-height: 26px;
+}
+.minkPileLoader:hover {
+
+    background-color: #1E88E5;
+    cursor: pointer;
+}
+
+.minkFavorites.mfHidden{
+	animation-name: hideFavorites;
+	animation-duration: .5s;
+	animation-fill-mode: forwards;
+
+}
+.minkFavorites.mfShow{
+	animation-name: showFavorites;
+	animation-duration: .5s;
+	animation-fill-mode: forwards;
+
+}
+@keyframes hideFavorites{
+	from{margin-left: 0px;}
+	to{margin-left: -502px;}
+}
+
+@keyframes showFavorites{
+	from{margin-left: -502px;}
+	to{margin-left: 0px;}
+}
+
+.minkBackButton:hover{
+	background-color: lightgray;
+	cursor: pointer;
+}
+.minkForwardButton:hover{
+		background-color: lightgray;
+		cursor: pointer;
+	
+}
+
+.minkPileWrapper{
+	overflow: hidden;
+	display: flex;
+	flex-direction: column;
+	margin-bottom: 12px;
+	
+}
+.minkPile:hover{
+	background-color: #FFEE99;
+	
+}
+.minkPileWrapperHide{
+	animation-name: hidePile;
+	animation-duration: .5s;
+	animation-fill-mode: forwards;
+}
+@keyframes hidePile{
+	from{opacity: 1; transform: translateX(0px)}
+	to{opacity: 0; transform: translateX(-20px)}
+}
+.minkPileWrapperShow{
+	animation-name: showPile;
+	animation-duration: .5s;
+	animation-fill-mode: forwards;
+}
+@keyframes showPile{
+	from{opacity: 0; transform: translateX(-20px)}
+	to{opacity: 1; transform: translateX(-px)}
+}
+.minkPile{
+	padding-top: 8px;
+	padding-bottom: 4px;
+	 /*   transition: height 1s ease-out;
+	    	 /*   transition: margin-top 1s ease-out;
+	    -webkit-transition: margin-top 1s ease;*/
+	-webkit-transition: margin-top .5s ease, background-color .1s ease;
+
+	position: relative;
+	margin-bottom: 12px;
+	padding-right: 8px;
+	padding-left: 8px;
+}
+
+
+
+#mdcIce{
+	margin-top: auto;
+	margin-bottom: auto;
+}
+.minkPileCard{
+	margin-left: auto;
+	margin-right: auto;
+	background-color: white;
+	position: relative
+
+}
+
+.sampleCollapse{
+  height: 26px;
+  width: 26px;
+  margin-top: -8px;
+  margin-left: 3px;
+  margin-right: 6px;
+  border-radius: 40px;
+  background-color: lightblue;
+    -webkit-box-shadow: 0px 0px 3px #777777;
+  
+  cursor: pointer;
+  position: relative;
+}
+.sampleCollapse:hover{
+	background-color: lightgray;
+	
+}
+.minkCardContainer{
+	position: relative;
+	display: flex;	
+	transition: all .25s ease;	
+	
+}
+.minkCardControls{
+    width: 50px;
+    display: flex;
+    flex-direction: column;
+    order: 2;
+    opacity: 0;
+    height: 90%;
+    align-items: begin;
+    margin-left: 8px;
+    
+}
+.minkCardControls.hidden{
+	display: none;
+}
+.minkCardControl{
+	    /* padding: 5px; */
+    width: 24px;
+    height: 24px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #727272;
+    /*-webkit-box-shadow: 1px 1px 4px -1px rgba(0,0,0,0.4);*/
+    /* justify-content: space-around; */
+    /* align-content: flex-end; */
+	margin-bottom: 8px;
+	
+}
+.minkCardControlIcon{
+	    width: 15px;
+    height: 15px;
+    margin-top: 10px;
+    margin-left: 10px;
+	
+}
+
+.minkCardControl:hover{
+	cursor: pointer;
+	background-color: #CCC;
+
+	
+}
+
+.animatingRemoval{
+	animation-name: cardRemoval;
+	animation-duration: .25s;
+	animation-fill-mode: forwards;
+	position: relative;
+}
+@keyframes cardRemoval{
+	0%{
+		opacity: 1;
+		left: 0px;
+	}
+	100%{
+		opacity: 0;
+		left: -50px;
+	}
+}
+.animatingRestore{
+	animation-name: cardRestore;
+	animation-duration: .25s;
+	animation-fill-mode: forwards;
+	position: relative;
+}
+@keyframes cardRestore{
+	0%{
+		opacity: 0;
+		left: -50px;
+	}
+	100%{
+		opacity: 1;
+		left: 0px;
+	}
+}
+
+.animatingCollapse{
+	animation-name: cardFadeOut;
+	animation-duration: .5s;
+	    animation-fill-mode: forwards;
+}
+.minkAppCanvas{
+	position: absolute;
+	pointer-events:none;
+	z-index: 100;
+	margin-left: 505px;
+}
+.animatingExpand{
+	animation-name: cardFadeIn;
+	animation-duration: .5s;
+	animation-fill-mode: forwards;
+	display: block;
+	}
+@keyframes cardFadeOut{
+	0%{
+		opacity: 1;
+	}
+	100%{
+	opacity: 0;
+	}
+}
+@keyframes cardFadeIn{
+	from{opacity: 0}
+	to{opacity: 1}
+}
+@keyframes pileFadeIn{
+	from{opacity: 0;}
+	to {opacity: 1;}
+}

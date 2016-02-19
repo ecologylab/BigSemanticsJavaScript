@@ -94,6 +94,52 @@ var TWITTER_MICE_STYLE = {
 	}
 };
 
+var MINK_MICE_STYLE = {
+	styles : {
+	    metadataRendering : "metadataRendering",
+	    metadataContainer : "metadataContainer",
+	    metadataTableDiv : "metadataTableDiv",
+	    rootMetadataTableDiv : "rootMetadataTableDiv",
+	    metadataRow : "metadataRowBorderless",
+	    metadataTable : "metadataTable",
+	    metadata_h1 : "metadata_h1",
+	    fieldLabel : "minkFieldLabel",
+	    fieldLabelImage : "minkFieldLabelImage",
+	    fieldValueGoogleQuery : "fieldValue google_query",
+	    fieldValueGoogleLink : "fieldValue google_link",
+	    fieldValue : "minkFieldValue",
+	    favicon : "favicon",
+	    faviconICE : "faviconICE",
+	    labelCol : "labelCol",
+	    labelColShowDiv : "labelCol showDiv",
+	    valueCol : "valueCol",
+	    valueColShowDiv : "valueCol showDiv",
+	    fieldLabelContainer : "minkFieldLabelContainer",
+	    fieldLabelContainerOpened : "minkFieldLabelContainerOpened",
+	    fieldLabelContainerOpenedUnhighlight : "minkFieldLabelContainerOpened unhighlight",
+	    fieldLabelContainerUnhighlight : "minkFieldLabelContainer unhighlight",
+	    fieldValueContainer : "minkFieldValueContainer",
+	    fieldChildContainer : "fieldChildContainer",
+	    fieldCompositeContainer : "fieldCompositeContainer",
+	    expandButton : "minkExpandButton",
+	    expandButtonX : "minkExpandButton X",
+	    collapseButton : "minkCollapseButton",
+	    expandSymbol : "minkExpandSymbol",
+	    collapseSymbol : "minkCollapseSymbol",
+	    loadingRow : "loadingRow",
+	    citeULikeButton : "citeULikeButton",
+	    nestedPad : "nestedPadBorderless",
+	    lineCanvas : "lineCanvas",
+	    bigLineCanvas : "bigLineCanvas",
+	    hidden : "hidden",
+	    moreButton : "moreButton",
+	    tabLabel : "tabLabel",
+	    fieldValueImage : "fieldValueImage"
+	}
+};
+
+
+
 var miceStyles = [TWITTER_MICE_STYLE];
 
 var InterfaceStyle = {};

@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Super Simple Extraction Test</title>
+    <script>
+    	var application_name = "extr_test";
+    </script>
+    
+    <!-- CSS! -->
+    <link href="css/bootstrap.min.css" rel="stylesheet" media="screen">
+
+    <link href="css/prettify.css" type="text/css" rel="stylesheet" />
+    
+    <link href="css/mdc.css" rel="stylesheet" media="screen">
+    <link href="../renderers/styles/metadataRenderer.css" rel="stylesheet" type="text/css">
+    <link href="../renderers/styles/twitterMICE.css" rel="stylesheet" type="text/css">
+    
+	
+    <!-- Libaries! -->
+    <script src="../libraries/jquery-2.0.0.min.js"></script>
+    <script src="../libraries/bootstrap/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="js/prettify.js"></script>
+   
+      <script type="text/javascript" src="../bsjsCore/MetadataLoader.js"></script>
+      <script type="text/javascript" src="../bsjsCore/extensionInterface.js"></script>
+
+	<!-- HouseMice specifics -->
+    <script type="text/javascript" src="exstractionTest.js"></script>
+
+    <script>
+       </script>
+  </head>
+  <body onload="onBodyLoad()">
+    
+
+    <!-- Link Modal -->
+    <div id="linkModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+      <div class="modal-header">
+        <h3 id="myModalLabel">Link to this Metadata</h3>
+      </div>
+      <div class="modal-body">
+        <p>Copy this link to your clipboard for easy sharing</p>
+        <input type="text" class="span5" id="modalLinkValue" placeholder="Type something…">
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" data-dismiss="modal" aria-hidden="true">Close</button>
+      </div>
+    </div>
+
+    <!-- Navbar -->
+    <div class="navbar navbar-inverse navbar-fixed-top">
+      <div class="navbar-inner form-inline">
+        <div class="container">
+          <a class="brand">Extraction Test</a>
+						
+            <form class="navbar-form pull-right" action="" onsubmit="return false;">
+              
+              <input type="text" size="500" class="span5" id="targetURL" onkeydown="onEnterShowMetadata(event);" value="http://www.amazon.com/Discovery-Daft-Punk/dp/B000059MEK/ref=sr_1_1?s=music&ie=UTF8&qid=1365793732"/>
+              <button type="button" class="btn" onclick="showMetadata();">Go!</button>
+              <button type="button" class="btn" data-toggle="modal" data-target="#linkModal" onclick="setLinkValue();"><i class="icon-bookmark"></i></button>
+            	
+            </form>
+	                
+	                
+        </div>
+          
+      </div>
+    </div>
+
+    <div class="navbar navbar-inverse navbar-fixed-bottom">
+      <div class="navbar-inner">
+        <div class="container">
+          <ul class="nav pull-right">
+            <li><a href="http://ecologylab.net" target="_blank">Interface Ecology Lab</a></li>
+            <li><a href="http://ecologylab.net" target="_blank"><img class="nav-img pull-right" src="img/ecologylab.png" /></a></li>
+          </ul>
+				
+        </div>
+      </div>
+    </div>
+
+
+    <!-- Content -->
+    <div class ="container">
+      <div class="row">
+        <div class="span9 title right">
+          <p>
+                    Background at the <a href="http://ecologylab.net/research/bigsemantics/" target="_blank">Big Semantics research page</a> and <a href="https://github.com/ecologylab/BigSemantics/wiki/Metadata-In-Context-Expander-%28MICE%29" target="_blank">MICE Wiki</a>.</p>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="span9 title">
+          <h4>
+            <a id="moreMice" data-toggle="collapse" data-target="#miceDrop">Dynamic Metadata Interface 
+            </a> 
+            <i id="moreMiceIcon" class="icon-chevron-right"></i>
+
+          </h4>
+
+          <div id="miceDrop" class="collapse in">
+						<p class="left">
+Click a plus sign to expand metadata. If the initial document lacks data for the nested field, MICE will make an AJAX call to <a href="https://github.com/ecologylab/BigSemantics/wiki/Use-BigSemantics-Service" target="_blank">the BigSemantics service</a>. It will present this data amidst the enclosing object, expanding information without losing context as a typical web page would.
+Click hyperlinks within the metadata to open connected web pages.
+            </p>
+
+						<p class="left">
+In BigSemantics, curators and developers author <i>wrappers</i> in the <a href="http://ecologylab.net/research/publications/metaMetadataCIKM.pdf" target="_blank">Meta-Metadata</a> language to specify data structure, extraction rules, and presentation guidelines for metadata.
+Wrappers can be reused and extended as types, in a polymorphic metadata type system, such as the <a target="_blank" href="https://www.google.com/url?q=https%3A%2F%2Fgithub.com%2Fecologylab%2FBigSemanticsWrapperRepository%2Fblob%2Fmaster%2FBigSemanticsWrappers%2FMmdRepository%2Fmmdrepository%2FrepositorySources%2FscholarlyArticle.xml&amp;sa=D&amp;sntz=1&amp;usg=AFQjCNFvWzR2lCUFn50Y2qZUqXSAzBZ5Dw">scholarly_article</a>, which is extended by <a target="_blank" href="https://www.google.com/url?q=https%3A%2F%2Fgithub.com%2Fecologylab%2FBigSemanticsWrapperRepository%2Fblob%2Fmaster%2FBigSemanticsWrappers%2FMmdRepository%2Fmmdrepository%2FrepositorySources%2FacmPortal.xml&amp;sa=D&amp;sntz=1&amp;usg=AFQjCNHuGhZ4woAlVqG_TIBU4nvaJ7BAiw">acm_portal</a> and <a target="_blank" href="https://www.google.com/url?q=https%3A%2F%2Fgithub.com%2Fecologylab%2FBigSemanticsWrapperRepository%2Fblob%2Fmaster%2FBigSemanticsWrappers%2FMmdRepository%2Fmmdrepository%2FrepositorySources%2FscienceDirect.xml&amp;sa=D&amp;sntz=1&amp;usg=AFQjCNET0hjJH7BGXIHsofWC4_7UfD6Tlw">science_direct</a>.
+            </p>
+
+<p class="left">BigSemantics includes <a target="_blank" href="https://github.com/ecologylab/BigSemantics/wiki#wiki-Wrapper_Repository">a growing wrapper repository</a> of supported websites, including <a target="_blank" href="http://ecologylab.net/research/bigsemantics/MICE/index.html?url=http://dl.acm.org/citation.cfm?id=1121979">ACM Digital Library</a>, <a target="_blank" href="http://ecologylab.net/research/bigsemantics/MICE/index.html?url=http://www.amazon.co.uk/gp/product/B007VBGTX8/">Amazon Product</a>, <a target="_blank" href="http://ecologylab.net/research/bigsemantics/MICE/index.html?url=http://www.imdb.com/title/tt1707386">IMDb</a>, <a target="_blank" href="http://ecologylab.net/research/bigsemantics/MICE/index.html?url=http://www.tripadvisor.com/Hotel_Review-g187147-d269966-Reviews-Hotel_Luxembourg_Parc-Paris_Ile_de_France.html">TripAdvisor</a>, and <a target="_blank" href="http://ecologylab.net/research/bigsemantics/MICE/index.html?url=http://en.wikipedia.org/wiki/Pablo_Picasso">Wikipedia</a>. Try your own web pages in the top bar!</p>
+
+<p class="left">If you have a favorite website that is not currently wrapped, consider <a target="_blank" href="https://github.com/ecologylab/BigSemanticsWrapperRepository">forking us on github</a>, <a target="_blank" href="https://github.com/ecologylab/BigSemantics/wiki">writing your own wrappers</a>, and <a target="_blank" href="https://help.github.com/articles/using-pull-requests">making a pull request</a>.</p>
+
+          </div>
+
+        </div>
+      </div>
+      <!-- http://jsfiddle.net/KJQ9K/ -->
+
+      <!-- old layout
+        <div class="row">
+          <div class="span6 content" id="mdcIce"></div>
+          <div class="span6 content" id="mdcJson">
+            <pre class="prettyprint languague-css" id="mdcJsonPP"></pre>
+          </div>
+        </div> 
+      -->
+      <div class="row">
+        <div class="span9 content" id="mdcIce"></div>
+      </div> 
+
+      <div class="row" id="scenesTitle">
+        <div class="span9 title">
+          <h4>
+            <a id="moreData" data-toggle="collapse" data-target="#dataDrop">
+              Behind-the-Scenes Data
+            </a>
+            <i id="moreDataIcon" class="icon-chevron-right"></i>
+          </h4>
+
+          <div class="btn-group" data-toggle="buttons-radio">
+            <button type="button" id="mdJsonButton" class="btn btn-mini btn-primary active">Metadata</button>
+            <button type="button" id="mmdJsonButton" class="btn btn-mini">Meta-Metadata</button>
+          </div>
+
+					<div id="dataDrop" class="collapse in">
+
+<p class="left">
+The Metadata tab shows metadata extracted via <a target="_blank" href="https://github.com/ecologylab/BigSemantics/wiki/Use-BigSemantics-Service">the BigSemantics Service</a> in JSON, using a wrapper from the repository, for the given URL.
+The wrapper, authored in the Meta-Metadata language, defines the data structure, extraction rules, and presentation guidelines for corresponding metadata.
+The wrapper shown here contains nested structures inherited from its base types; see <a target="_blank" href="https://github.com/ecologylab/BigSemantics/wiki#wiki-Wrapper_Repository">the wrapper repository</a> for their original forms, and <a target="_blank" href="https://github.com/ecologylab/BigSemantics/wiki">the BigSemantics wiki</a> for how to author them.
+</p>
+
+
+          </div>   
+
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="span9 content" id="mdcJson">
+          <pre class="prettyprint languague-css" id="mdcJsonPP"></pre>
+        </div>
+      </div> 
+      
+       </div>
+
+    <script>
+    </script>
+
+  </body>
+</html>

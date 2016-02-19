@@ -454,6 +454,7 @@ BibTexGenerator.prototype.createBib	= function(document, that){
 			return bib;
 		}
 	}
+	}
 	catch(e)
 	{
 		console.log("Error in creating bib entry for " + metadata + "error " + e);

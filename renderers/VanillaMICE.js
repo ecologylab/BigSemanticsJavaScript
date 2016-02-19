@@ -85,6 +85,16 @@ MICE.render = function(task){
  * @param fieldCount, the number of fields to render before cropping with a "More" button
  * @return HTML table of the metadata display
  */
+
+
+
+
+
+
+
+
+
+
 MICE.buildMetadataTable = function(table, isChildTable, isRoot, metadataFields, fieldCount, styleInfo)
 {
 	if(!table)
@@ -278,8 +288,377 @@ MICE.buildMetadataTable = function(table, isChildTable, isRoot, metadataFields, 
 	return table;
 }
 
+MICE.buildLabel = function(metadataField, styleInfo, valueCol, nameCol){
+	var fieldLabelDiv = document.createElement('div');
+	fieldLabelDiv.className = styleInfo.styles.fieldLabelContainerUnhighlight;
+		
+	var label = RendererBase.getFieldLabel(metadataField);
+	if (label.type == "scalar")
+	{
+		var fieldLabel = document.createElement('p');
+			fieldLabel.className = styleInfo.styles.fieldLabel;
+			fieldLabel.innerText = BSUtils.toDisplayCase(label.value);
+			fieldLabel.textContent = BSUtils.toDisplayCase(label.value);
+			
+		fieldLabelDiv.appendChild(fieldLabel);	
+	}
+	else if (label.type == "image")
+	{
+		var img = document.createElement('img');
+			img.className = styleInfo.styles.fieldLabelImage;
+			img.src = ViewModeler.getImageSource(label.value);
+			
+		fieldLabelDiv.appendChild(img);	
+	}			
+	
+	nameCol.appendChild(fieldLabelDiv);
+}
 
 
+
+MICE.buildScalarValue = function(metadataField, styleInfo, valueCol, nameCol){
+
+}
+
+MICE.buildScalarField = function(metadataField, styleInfo, valueCol, nameCol){
+	// Currently it only rendered Strings, Dates, Integers, and ParsedURLs
+	if(metadataField.scalar_type == "String" || metadataField.scalar_type == "Date" ||metadataField.scalar_type == "Integer" || metadataField.scalar_type == "ParsedURL")
+	{	
+		
+		
+		if(metadataField.name && !metadataField.hide_label)
+		{
+			MICE.buildLabel(metadataField, styleInfo, valueCol, nameCol);
+		}
+		
+		// If the field is a URL then it should show the favicon and an A tag
+		if(metadataField.scalar_type == "ParsedURL")
+		{
+			var favicon = document.createElement('img');
+				favicon.className = styleInfo.styles.faviconICE;
+				favicon.src = BSUtils.getFaviconURL(metadataField.navigatesTo);
+				
+			var aTag = document.createElement('a');
+			aTag.innerText = BSUtils.removeLineBreaksAndCrazies(metadataField.value);
+			aTag.textContent = BSUtils.removeLineBreaksAndCrazies(metadataField.value);
+
+			
+			aTag.href = metadataField.value;
+			aTag.onclick = MICE.logNavigate;
+			
+			aTag.className = styleInfo.styles.fieldValue;
+					
+			if(metadataField.style_name != null && metadataField.style_name != "")
+				aTag.classList.add(metadataField.style_name);
+		
+			var fieldValueDiv = document.createElement('div');
+				fieldValueDiv.className = styleInfo.styles.fieldValueContainer;
+			
+			fieldValueDiv.appendChild(favicon);
+			fieldValueDiv.appendChild(aTag);
+			valueCol.appendChild(fieldValueDiv);
+		}
+	
+		// If the field navigates to a link then it should show the favicon and an A tag
+		else if( metadataField.navigatesTo)
+		{				
+			var favicon = document.createElement('img');
+				favicon.className = styleInfo.styles.faviconICE;
+				favicon.src = BSUtils.getFaviconURL(metadataField.navigatesTo);
+				
+			var aTag = document.createElement('a');
+				aTag.className = styleInfo.styles.fieldValue;
+				if(metadataField.style_name != "null" && metadataField.style_name!=""){
+					aTag.classList.add(metadataField.style_name);
+				}
+				
+				aTag.target = "_blank";
+				aTag.innerText = BSUtils.removeLineBreaksAndCrazies(metadataField.value);
+				aTag.textContent = BSUtils.removeLineBreaksAndCrazies(metadataField.value);
+				
+				aTag.href = metadataField.navigatesTo;
+				aTag.onclick = MICE.logNavigate;
+									
+				if(metadataField.style_name != null && metadataField.style_name != "")
+					aTag.classList.add(metadataField.style_name);
+			var fieldValueDiv = document.createElement('div');
+				fieldValueDiv.className = styleInfo.styles.fieldValueContainer;						
+			
+			// For the current WWW study the rendering should have incontext CiteULike bookmarklets for specific types of metadata
+			
+			fieldValueDiv.appendChild(favicon);
+			fieldValueDiv.appendChild(aTag);
+			valueCol.appendChild(fieldValueDiv);
+		}
+		
+		// If there is no navigation then just display the field value as text
+		else
+		{
+			var fieldValue = document.createElement('p');
+				fieldValue.className = styleInfo.styles.fieldValue;
+				
+			if (metadataField.extract_as_html)
+			{
+				fieldValue.innerHTML = BSUtils.removeLineBreaksAndCrazies(metadataField.value);
+			}
+			else
+			{
+				fieldValue.innerText = BSUtils.removeLineBreaksAndCrazies(metadataField.value);
+				fieldValue.textContent = BSUtils.removeLineBreaksAndCrazies(metadataField.value);
+			}
+				
+			if(metadataField.style_name != null){
+				fieldValue.className += " " + metadataField.style_name;
+			}		
+			var fieldValueDiv = document.createElement('div');
+				fieldValueDiv.className = styleInfo.styles.fieldValueContainer;
+			
+			fieldValueDiv.appendChild(fieldValue);
+			valueCol.appendChild(fieldValueDiv);
+		}
+		//value to change fieldCount by, -1 is a success
+		return -1;
+	}
+	
+}
+
+MICE.buildImageField = function(metadataField, isChildTable, styleInfo, valueCol, nameCol){
+	var label = RendererBase.getFieldLabel(metadataField);
+	
+	if(metadataField.name && !metadataField.hide_label && (!isChildTable || label.type == "image"))
+	{
+		var fieldLabelDiv = document.createElement('div');
+			fieldLabelDiv.className = styleInfo.styles.fieldLabelContainerUnhighlight;
+		
+		if (label.type == "scalar")
+		{
+			var fieldLabel = document.createElement('p');
+				fieldLabel.className = styleInfo.styles.fieldLabel;
+				fieldLabel.innerText = BSUtils.toDisplayCase(label.value);
+				fieldLabel.textContent = BSUtils.toDisplayCase(label.value);
+			
+			fieldLabelDiv.appendChild(fieldLabel);	
+		}
+		else if (label.type == "image")
+		{
+			var img = document.createElement('img');
+				img.className = styleInfo.styles.fieldLabelImage;
+				img.src = ViewModeler.getImageSource(label.value);
+
+			fieldLabelDiv.appendChild(img);
+		}		
+		
+		nameCol.appendChild(fieldLabelDiv);
+	}
+	
+	var img1 = document.createElement('img');
+		img1.src = ViewModeler.getImageSource(metadataField.value);
+		img1.className = styleInfo.styles.fieldValueImage;
+	
+	var fieldValueDiv = document.createElement('div');
+		fieldValueDiv.className = styleInfo.styles.fieldValueContainer;
+	
+	fieldValueDiv.appendChild(img1);
+	valueCol.appendChild(fieldValueDiv);
+}
+
+MICE.buildCompositeLabelColumn = function(metadataField, isChildTable, row, styleInfo, valueCol, nameCol, expandButton, childUrl, fieldLabelDiv){
+	if (childUrl != "" || metadataField.value.length > 1)
+	{
+		MICE.buildExpandButton(fieldLabelDiv, childUrl, styleInfo, expandButton);
+	
+	}
+	
+	if(metadataField.name)
+	{												
+		var label = RendererBase.getFieldLabel(metadataField);
+	
+		//If the table isn't a child table then display the label for the composite
+		if((!isChildTable || label.type == "image") && !metadataField.hide_label)
+		{				
+			if (label.type == "scalar")
+			{
+				var fieldLabel = document.createElement('p');
+					fieldLabel.className = styleInfo.styles.fieldLabel;
+					fieldLabel.innerText = BSUtils.toDisplayCase(label.value);
+					fieldLabel.textContent = BSUtils.toDisplayCase(label.value);
+				
+				fieldLabelDiv.appendChild(fieldLabel);
+			}
+			else if (label.type == "image")
+			{
+				var img = document.createElement('img');
+					img.className = styleInfo.styles.fieldLabelImage;
+					img.src = ViewModeler.getImageSource(label.value);
+	
+				fieldLabelDiv.appendChild(img);
+			}
+		}
+
+	}
+
+}
+MICE.buildCompositeValue = function(metadataField, isChildTable, row, styleInfo, valueCol, nameCol, expandButton, fieldValueDiv){
+	// Build the child table for the composite
+	var childTable =  MICE.buildMetadataTable(null, false, false, metadataField.value, 1, styleInfo);
+	
+	// If the childTable has more than 1 row, collapse table
+	
+	if(metadataField.value.length > 1 && !metadataField.show_expanded_always){
+		MICE.collapseTable(childTable, styleInfo);			
+	}
+	if(metadataField.show_expanded_always){
+		MICE.expandTable(childTable, styleInfo);
+	}
+	
+	fieldValueDiv.appendChild(childTable);				
+	
+	var nestedPad = document.createElement('div');
+		nestedPad.className = styleInfo.styles.nestedPad;
+	
+	nestedPad.appendChild(childTable);
+	
+	fieldValueDiv.appendChild(nestedPad);
+}
+
+MICE.buildExpandButton = function(fieldLabelDiv, childUrl, styleInfo, expandButton){
+	// If the document hasn't been download then display a button that will download it
+	expandButton = RendererBase.buildExpandButton(styleInfo);
+	if(childUrl != "")
+	{
+		expandButton.onmouseover = MICE.highlightDocuments;
+		expandButton.onmouseout = MICE.unhighlightDocuments;
+	}
+	expandButton.onclick = MICE.downloadAndDisplayDocument;
+	
+	fieldLabelDiv.appendChild(expandButton);
+
+	
+	
+	
+}
+
+MICE.buildCompositeField = function(metadataField, isChildTable, row, styleInfo, valueCol, nameCol, expandButton){
+	var childUrl = ViewModeler.guessDocumentLocation(metadataField.value);
+	
+	var fieldLabelDiv = document.createElement('div');
+		fieldLabelDiv.className = styleInfo.styles.fieldLabelContainerUnhighlight;
+		fieldLabelDiv.style.minWidth = "30px";					
+	
+		// Is the document already rendered?								
+		if(childUrl != "" && RendererBase.isRenderedDocument(childUrl) )
+		{
+			
+			// If so, then don't allow the document to be expaned, to prevent looping						
+			fieldLabelDiv.className = styleInfo.styles.fieldLabelContainerOpenedUnhighlight;
+		}
+		else
+		{
+			MICE.buildCompositeLabelColumn(metadataField, isChildTable, row, styleInfo, valueCol, nameCol, expandButton, childUrl, fieldLabelDiv);
+
+		}
+	nameCol.appendChild(fieldLabelDiv);
+	
+	
+	/** Value Column **/
+	
+	var fieldValueDiv = document.createElement('div');
+		fieldValueDiv.className = styleInfo.styles.fieldCompositeContainer;
+	
+	MICE.buildCompositeValue(metadataField, isChildTable, row, styleInfo, valueCol, nameCol, expandButton, fieldValueDiv);
+
+	valueCol.appendChild(fieldValueDiv);
+	
+	// Add the unrendered document to the documentMap
+	if(childUrl != "")
+		RendererBase.documentMap.push(new DocumentContainer(childUrl, null, row, false));
+	
+	// Add event handling to highlight document connections	
+	if(childUrl != "")
+	{	
+		nameCol.onmouseover = MICE.highlightDocuments;
+		nameCol.onmouseout = MICE.unhighlightDocuments;
+		nameCol.mmdType = styleInfo.type;
+	}
+	
+	//value to change fieldCount by, -1 is a success
+	return expandButton;
+	
+}
+
+MICE.buildCollectionLabelColumn = function(metadataField, nameCol, styleInfo, expandButton){
+	var fieldLabelDiv = document.createElement('div');
+	fieldLabelDiv.className = styleInfo.styles.fieldLabelContainerUnhighlight;
+		
+	// does it need to expand / collapse
+	
+	if(metadataField.value.length > 1)
+	{
+		MICE.buildExpandButton(fieldLabelDiv, null, styleInfo, expandButton);
+	}
+	var label = RendererBase.getFieldLabel(metadataField);
+	
+	if(label.type == 'scalar'){
+
+		fieldLabelDiv.innerText = label.value + " (" + metadataField.value.length + ")";
+
+		fieldLabelDiv.className = styleInfo.styles.fieldLabel;
+
+	}else if(label.type == "image"){
+		var image = document.createElement("img");
+		image.src = label.value;
+		img.className = styleInfo.styles.fieldLabelImage;
+		fieldLabelDiv.appendChild(image);
+
+
+	}
+	
+	
+	nameCol.appendChild(fieldLabelDiv);
+}
+
+
+MICE.buildCollectionValue = function(metadataField, fieldValueDiv, row, styleInfo, valueCol, nameCol, expandButton){
+	var childTable =  MICE.buildMetadataTable(null, true, false, metadataField.value, 1, styleInfo);
+
+	
+		//var collection = new facetedCollection(childUrl, row);
+		
+	
+	if(metadataField.value.length >= 1)
+	{
+		MICE.collapseTable(childTable, styleInfo);			
+	}					
+		
+	var nestedPad = document.createElement('div');
+		nestedPad.className = styleInfo.styles.nestedPad;
+	
+	nestedPad.appendChild(childTable);
+	
+	fieldValueDiv.appendChild(nestedPad);
+}
+
+MICE.buildCollection = function(metadataField, isChildTable, row, styleInfo, valueCol, nameCol, expandButton){
+
+
+	if(metadataField.name != null)
+	{
+		MICE.buildCollectionLabelColumn(metadataField, nameCol, styleInfo, expandButton);
+	}
+	
+	
+		
+	var fieldValueDiv = document.createElement('div');
+		fieldValueDiv.className = styleInfo.styles.fieldChildContainer;
+	
+	MICE.buildCollectionValue(metadataField, fieldValueDiv, row, styleInfo, valueCol, nameCol, expandButton);
+
+	
+	valueCol.appendChild(fieldValueDiv);
+
+	//value to change fieldCount by, -1 is a success
+	return expandButton;
+}
 /**
  * Build the HTML representation for MetadataField
  * @param metadataField, MetadataField to be rendered
@@ -314,401 +693,27 @@ MICE.buildMetadataField = function(metadataField, isChildTable, fieldCount, row,
 	
 	if(metadataField.scalar_type)
 	{				
-		// Currently it only rendered Strings, Dates, Integers, and ParsedURLs
-		if(metadataField.scalar_type == "String"
-      || metadataField.scalar_type == "Integer"
-      || metadataField.scalar_type == "Float"
-      || metadataField.scalar_type == "Date"
-      || metadataField.scalar_type == "ParsedURL")
-		{	
-			
-			
-			if(metadataField.name && !metadataField.hide_label)
-			{
-				var fieldLabelDiv = document.createElement('div');
-					fieldLabelDiv.className = styleInfo.styles.fieldLabelContainerUnhighlight;
-					
-				var label = RendererBase.getFieldLabel(metadataField);
-				if (label.type == "scalar")
-				{
-					var fieldLabel = document.createElement('p');
-						fieldLabel.className = styleInfo.styles.fieldLabel;
-						fieldLabel.innerText = BSUtils.toDisplayCase(label.value);
-						fieldLabel.textContent = BSUtils.toDisplayCase(label.value);
-						
-					fieldLabelDiv.appendChild(fieldLabel);	
-				}
-				else if (label.type == "image")
-				{
-					var img = document.createElement('img');
-						img.className = styleInfo.styles.fieldLabelImage;
-						img.src = ViewModeler.getImageSource(label.value);
-						
-					fieldLabelDiv.appendChild(img);	
-				}			
-				
-				nameCol.appendChild(fieldLabelDiv);
-			}
-			
-			// If the field is a URL then it should show the favicon and an A tag
-			if(metadataField.scalar_type == "ParsedURL")
-			{
-				var favicon = document.createElement('img');
-					favicon.className = styleInfo.styles.faviconICE;
-					favicon.src = BSUtils.getFaviconURL(metadataField.navigatesTo);
-					
-				var aTag = document.createElement('a');
-				aTag.innerText = BSUtils.removeLineBreaksAndCrazies(metadataField.value);
-				aTag.textContent = BSUtils.removeLineBreaksAndCrazies(metadataField.value);
-				
-				aTag.href = metadataField.value;
-				aTag.onclick = MICE.logNavigate;
-				
-				aTag.className = styleInfo.styles.fieldValue;
-						
-				if(metadataField.style_name != null && metadataField.style_name != "")
-					aTag.classList.add(metadataField.style_name);
-			
-				var fieldValueDiv = document.createElement('div');
-					fieldValueDiv.className = styleInfo.styles.fieldValueContainer;
-				
-				fieldValueDiv.appendChild(favicon);
-				fieldValueDiv.appendChild(aTag);
-				valueCol.appendChild(fieldValueDiv);
-			}
-		
-			// If the field navigates to a link then it should show the favicon and an A tag
-			else if( metadataField.navigatesTo)
-			{				
-				var favicon = document.createElement('img');
-					favicon.className = styleInfo.styles.faviconICE;
-					favicon.src = BSUtils.getFaviconURL(metadataField.navigatesTo);
-					
-				var aTag = document.createElement('a');
-					aTag.className = styleInfo.styles.fieldValue;
-					if(metadataField.style_name != "null" && metadataField.style_name!=""){
-						aTag.classList.add(metadataField.style_name);
-					}
-					
-					aTag.target = "_blank";
-					aTag.innerText = BSUtils.removeLineBreaksAndCrazies(metadataField.value);
-					aTag.textContent = BSUtils.removeLineBreaksAndCrazies(metadataField.value);
-					
-					aTag.href = metadataField.navigatesTo;
-					aTag.onclick = MICE.logNavigate;
-										
-					if(metadataField.style_name != null && metadataField.style_name != "")
-						aTag.classList.add(metadataField.style_name);
-				var fieldValueDiv = document.createElement('div');
-					fieldValueDiv.className = styleInfo.styles.fieldValueContainer;						
-				
-				// For the current WWW study the rendering should have incontext CiteULike bookmarklets for specific types of metadata
-				
-				fieldValueDiv.appendChild(favicon);
-				fieldValueDiv.appendChild(aTag);
-				valueCol.appendChild(fieldValueDiv);
-			}
-			
-			// If there is no navigation then just display the field value as text
-			else
-			{
-				var fieldValue = document.createElement('p');
-					fieldValue.className = styleInfo.styles.fieldValue;
-					
-				if (metadataField.extract_as_html)
-				{
-					fieldValue.innerHTML = BSUtils.removeLineBreaksAndCrazies(metadataField.value);
-				}
-				else
-				{
-					fieldValue.innerText = BSUtils.removeLineBreaksAndCrazies(metadataField.value);
-					fieldValue.textContent = BSUtils.removeLineBreaksAndCrazies(metadataField.value);
-				}
-					
-				if(metadataField.style_name != null){
-					fieldValue.className += " " + metadataField.style_name;
-				}		
-				var fieldValueDiv = document.createElement('div');
-					fieldValueDiv.className = styleInfo.styles.fieldValueContainer;
-				
-				fieldValueDiv.appendChild(fieldValue);
-				valueCol.appendChild(fieldValueDiv);
-			}
-			
-			fieldCount--;
-		}		
+		fieldCount += MICE.buildScalarField(metadataField ,styleInfo, valueCol, nameCol);
 	}
 	
 	else if (metadataField.composite_type != null && metadataField.composite_type == "image")
 	{
-		var label = RendererBase.getFieldLabel(metadataField);
-		
-		if(metadataField.name && !metadataField.hide_label && (!isChildTable || label.type == "image"))
-		{
-			var fieldLabelDiv = document.createElement('div');
-				fieldLabelDiv.className = styleInfo.styles.fieldLabelContainerUnhighlight;
-			
-			if (label.type == "scalar")
-			{
-				var fieldLabel = document.createElement('p');
-					fieldLabel.className = styleInfo.styles.fieldLabel;
-					fieldLabel.innerText = BSUtils.toDisplayCase(label.value);
-					fieldLabel.textContent = BSUtils.toDisplayCase(label.value);
-				
-				fieldLabelDiv.appendChild(fieldLabel);	
-			}
-			else if (label.type == "image")
-			{
-				var img = document.createElement('img');
-					img.className = styleInfo.styles.fieldLabelImage;
-					img.src = ViewModeler.getImageSource(label.value);
-
-				fieldLabelDiv.appendChild(img);
-			}		
-			
-			nameCol.appendChild(fieldLabelDiv);
-		}
-		
-		var img1 = document.createElement('img');
-			img1.src = ViewModeler.getImageSource(metadataField.value);
-			img1.className = styleInfo.styles.fieldValueImage;
-		
-		var fieldValueDiv = document.createElement('div');
-			fieldValueDiv.className = styleInfo.styles.fieldValueContainer;
-			
-		if(metadataField.style_name != null && metadataField.style_name != "") {
-			if (img1.height > 500)
-				fieldValueDiv.className += " " + metadataField.style_name;
-			else 
-				fieldValueDiv.style.height = img1.height.toString() + "px";
-		}
-		
-		fieldValueDiv.appendChild(img1);
-		valueCol.appendChild(fieldValueDiv);
+		MICE.buildImageField(metadataField, isChildTable, styleInfo, valueCol, nameCol);
 	}
-	//We're going to focus on non-composite images that have a location
+	//We're going to focus on non-image composites that have a location
 	else if(metadataField.composite_type != null && metadataField.composite_type != "image")
 	{
-		/** Label Column **/
-		var childUrl = ViewModeler.guessDocumentLocation(metadataField.value);
-		
-		var fieldLabelDiv = document.createElement('div');
-			fieldLabelDiv.className = styleInfo.styles.fieldLabelContainerUnhighlight;
-			fieldLabelDiv.style.minWidth = "30px";					
-			
-	
-		// Is the document already rendered?								
-		if(childUrl != "" && RendererBase.isRenderedDocument(childUrl) )
-		{
-			
-			// If so, then don't allow the document to be expaned, to prevent looping						
-			fieldLabelDiv.className = styleInfo.styles.fieldLabelContainerOpenedUnhighlight;
-		}
-		else
-		{
-			if (childUrl != "" || metadataField.value.length > 1)
-			{
-				
-				// If the document hasn't been download then display a button that will download it
-				expandButton = document.createElement('div');
-					expandButton.className = styleInfo.styles.expandButtonX;
-					
-				expandButton.onclick = MICE.downloadAndDisplayDocument;
-				
-				if(childUrl != "")
-				{
-					expandButton.onmouseover = MICE.highlightDocuments;
-					expandButton.onmouseout = MICE.unhighlightDocuments;
-				}
-			
-			
-				var expandSymbol = document.createElement('div');
-					expandSymbol.className = styleInfo.styles.expandSymbol;
-					expandSymbol.style.display = "block";
-					
-				var collapseSymbol = document.createElement('div');
-					collapseSymbol.className = styleInfo.styles.collapseSymbol;
-					collapseSymbol.style.display = "block";						
-				
-				/* set mmdType to all as any may receive event */
-				expandButton.mmdType = styleInfo.type;
-				expandSymbol.mmdType = styleInfo.type;
-				collapseSymbol.mmdType = styleInfo.type;
-									
-				expandButton.appendChild(expandSymbol);
-				expandButton.appendChild(collapseSymbol);
-				fieldLabelDiv.appendChild(expandButton);
-			}				
-			
-		}
-		
-		if(metadataField.name)
-		{												
-			var label = RendererBase.getFieldLabel(metadataField);
-
-			//If the table isn't a child table then display the label for the composite
-			if((!isChildTable || label.type == "image") && !metadataField.hide_label)
-			{				
-				if (label.type == "scalar")
-				{
-					var fieldLabel = document.createElement('p');
-						fieldLabel.className = styleInfo.styles.fieldLabel;
-						fieldLabel.innerText = BSUtils.toDisplayCase(label.value);
-						fieldLabel.textContent = BSUtils.toDisplayCase(label.value);
-					
-					fieldLabelDiv.appendChild(fieldLabel);
-				}
-				else if (label.type == "image")
-				{
-					var img = document.createElement('img');
-						img.className = styleInfo.styles.fieldLabelImage;
-						img.src = ViewModeler.getImageSource(label.value);
-
-					fieldLabelDiv.appendChild(img);
-				}
-			}
-		}
-	
-		nameCol.appendChild(fieldLabelDiv);
-		
-		
-		/** Value Column **/
-		
-		var fieldValueDiv = document.createElement('div');
-			fieldValueDiv.className = styleInfo.styles.fieldCompositeContainer;
-
-		// Build the child table for the composite
-		var childTable =  MICE.buildMetadataTable(null, false, false, metadataField.value, 1, styleInfo);
-		
-		// If the childTable has more than 1 row, collapse table
-		
-		if(metadataField.value.length > 1 && !metadataField.show_expanded_always){
-			MICE.collapseTable(childTable, styleInfo);			
-		}
-		if(metadataField.show_expanded_always){
-			MICE.expandTable(childTable, styleInfo);
-		}
-		
-		fieldValueDiv.appendChild(childTable);				
-		
-		var nestedPad = document.createElement('div');
-			nestedPad.className = styleInfo.styles.nestedPad;
-		
-		nestedPad.appendChild(childTable);
-		
-		fieldValueDiv.appendChild(nestedPad);
-		
-		valueCol.appendChild(fieldValueDiv);
-		
-		// Add the unrendered document to the documentMap
-		if(childUrl != "")
-			RendererBase.documentMap.push(new DocumentContainer(childUrl, null, row, false));
-		
-		// Add event handling to highlight document connections	
-		if(childUrl != "")
-		{	
-			nameCol.onmouseover = MICE.highlightDocuments;
-			nameCol.onmouseout = MICE.unhighlightDocuments;
-			nameCol.mmdType = styleInfo.type;
-		}
-	
-				
-		
+		expandButton = MICE.buildCompositeField(metadataField, isChildTable, row, styleInfo, valueCol, nameCol, expandButton);
 		fieldCount--;
+		
 		
 	}
 	
 	else if(metadataField.child_type != null)
 	{		
-
-
-		if(metadataField.name != null)
-		{
-			var fieldLabelDiv = document.createElement('div');
-					fieldLabelDiv.className = styleInfo.styles.fieldLabelContainerUnhighlight;
-					
-			// does it need to expand / collapse
-			
-			if(metadataField.value.length > 1)
-			{
-				var expandButton = document.createElement('div');
-					expandButton.className = styleInfo.styles.expandButton;
-					
-					expandButton.onclick = MICE.expandCollapseTable;
-					
-				var expandSymbol = document.createElement('div');
-					expandSymbol.className = styleInfo.styles.expandSymbol;
-					expandSymbol.style.display = "block";
-					
-				var collapseSymbol = document.createElement('div');
-					collapseSymbol.className = styleInfo.styles.collapseSymbol;
-					collapseSymbol.style.display = "block";						
-		
-				expandButton.mmdType = styleInfo.type;
-				expandSymbol.mmdType = styleInfo.type;
-				collapseSymbol.mmdType = styleInfo.type;	
-						
-				expandButton.appendChild(expandSymbol);
-				expandButton.appendChild(collapseSymbol);
-					
-				fieldLabelDiv.appendChild(expandButton);
-			}
-			
-			var label = RendererBase.getFieldLabel(metadataField);
-			if (label.type == "scalar")
-			{
-				var fieldLabel = document.createElement('p');
-					fieldLabel.className = styleInfo.styles.fieldLabel;
-					fieldLabel.innerText = BSUtils.toDisplayCase(label.value) + "(" + metadataField.value.length + ")";
-					fieldLabel.textContent = BSUtils.toDisplayCase(label.value) + "(" + metadataField.value.length + ")";
-					
-				if (!metadataField.hide_label)
-					fieldLabelDiv.appendChild(fieldLabel);
-				
-			}
-			else if (label.type == "image")
-			{
-				var img = document.createElement('img');
-					img.className = styleInfo.styles.fieldLabelImage;
-					img.src = ViewModeler.getImageSource(label.value);
-
-				if (!metadataField.hide_label)
-					fieldLabelDiv.appendChild(img);
-			}		
-			
-		
-			nameCol.appendChild(fieldLabelDiv);
-		}
-		
-		
-			
-		var fieldValueDiv = document.createElement('div');
-			fieldValueDiv.className = styleInfo.styles.fieldChildContainer;
-		
-		var childTable =  MICE.buildMetadataTable(null, true, false, metadataField.value, 1, styleInfo);
-	
-		
-			//var collection = new facetedCollection(childUrl, row);
-			
-	
-		if(metadataField.value.length >= 1)
-		{
-			MICE.collapseTable(childTable, styleInfo);			
-		}					
-			
-		var nestedPad = document.createElement('div');
-			nestedPad.className = styleInfo.styles.nestedPad;
-		
-		nestedPad.appendChild(childTable);
-		
-		fieldValueDiv.appendChild(nestedPad);
-		
-		valueCol.appendChild(fieldValueDiv);
-
+		expandButton = MICE.buildCollection(metadataField, isChildTable, row, styleInfo, valueCol, nameCol, expandButton);
 		fieldCount--;
-		//Function to be overwritten by MICE extensions
-
-
+		
 	}
 	return {name_col: nameCol, value_col: valueCol, count: fieldCount, expand_button: expandButton};
 }
