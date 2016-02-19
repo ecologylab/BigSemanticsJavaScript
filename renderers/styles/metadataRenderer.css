@@ -248,6 +248,7 @@
 
 .ecologylab-metadataContainer .ecologylab-fieldValueImage{
 	height: auto;
+	max-width: 100%;
 }
 
 .ecologylab-metadataContainer .ecologylab-fieldValueContainerInstagramPostImage{
