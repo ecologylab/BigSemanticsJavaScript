@@ -41,7 +41,8 @@ function RenderingTask(url, isRoot, clipping, handler, container, extractor, ren
   this.renderer = renderer;
   this.extractor = extractor;
 
-}RenderingTask.prototype.idealRenderer = function(task){
+}
+RenderingTask.prototype.idealRenderer = function(task){
 	if(RendererBase.idealRenderer){
 		if(task.mmd.renderer == 'tweetbubble'|| task.constructor.name == "TweetBubbleRenderingTask"){
 			TwitterRenderer.render(task);

@@ -738,8 +738,8 @@ text-decoration: underline;
 }
 .minkCardControl{
 	    /* padding: 5px; */
-    width: 35px;
-    height: 35px;
+    width: 24px;
+    height: 24px;
     display: flex;
     justify-content: center;
     align-items: center;
