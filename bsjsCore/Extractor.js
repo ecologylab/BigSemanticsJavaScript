@@ -679,7 +679,7 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
     baseURL[page.URL] = "";
     upperXpath[page.URL] = {};
 	
-    baseURL[page.URL] = page.URL.substring(0,getPosition(page.URL,"/",3));
+    baseURL[page.URL] = page.URL.substring(0, getPosition(page.URL,"/",3));
 	
     var extractedMeta = { };
 	mmdKids = mmd.kids;

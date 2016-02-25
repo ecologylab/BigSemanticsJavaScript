@@ -69,8 +69,8 @@ var BigSemantics = (function() {
 		  callback(null, { metadata: that.metadataCache.get(location), mmd: mmd });	
 		  return;
 	  }
-		
-	  if (mmd.meta_metadata.extract_with == "service"){ 
+		//TODO hardcoding for testing. 
+	  if (mmd.meta_metadata.extract_with == "service" && mmd.meta_metadata.name !== 'acm_portal'){ 
 			options.useHttps = (window.location.protocol == 'https:'); //use Https if we are on an https page
 			that.bss.loadMetadata(location, options, callback);	  
 	  }	
@@ -94,7 +94,8 @@ var BigSemantics = (function() {
         } else if (mmd.user_agent_name && mmd.user_agent_name in that.repoMan.userAgents) {
           options.userAgent = that.repoMan.userAgents[mmd.user_agent_name];
         }
-		if (mmd.meta_metadata.extract_with == "iframe") {
+		//TODO hardcoding for testing. 
+		if (mmd.meta_metadata.extract_with == 'iframe' || mmd.meta_metadata.name == 'acm_portal') {
 			that.iframeExtractor.extract(location, mmd, function(err, metadata){
 				if (err) { callback(err, null); return; }
 		    	callback(null, { metadata: metadata, mmd: mmd });	

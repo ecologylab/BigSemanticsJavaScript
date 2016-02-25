@@ -1,4 +1,5 @@
 /* jshint browser:true, devel:true */
+/* global chrome */
 
 var DLL;
 
@@ -7,40 +8,75 @@ var DLL;
  */
 function MetadataCache(){
 	
-	var MAX = 10;
+	var MAX = 256;
 	
 	var list = new DLL(MAX);
 	var map = {};
 	
+	var hitCount = 0;
+	var missCount = 0;
+	
+	//interface with the extension to adjust size and keep track of cache hits and misses
+	var defaultOpts = {
+		developerMode: false,
+		cacheSize: 256
+	};
+	chrome.storage.local.get(defaultOpts, function(opts) {
+		console.log('cache size set to ' + opts.cacheSize);
+		MAX = opts.cacheSize;
+	});
+	
 	this.add = function(url, md){
 		if (url in map){
+			console.log('tried to cache ' + url + ' but it was already in cache');
 			return;
 		}
 		var node = list.add(url, md);
 		map[url] = node;
 		
-		//console.log('added to cache');
+		console.log('added md for ' + url + ' to cache');
 		
-		//console.log('cache is this big: ' + list.length);
+		console.log('cache is this big: ' + list.length);
 		
 		//chop of the end if it is too big
 		if(list.length > list.max){
 			list.length--;
 			list.delete(list.tail);
-			delete map[url];
-			//console.log('cache got too big and we deleted it');
+			delete map[list.tail.key];
+			console.log('cache got too big and we deleted tail, which was ' + list.tail.key);
 		}
 
 	};
 	
 	this.contains = function(url){
-		return (url in map);
+		var hit = url in map;
+		
+		if (hit) {
+			console.log('cahe hit for ' + url);
+			hitCount++;
+		}
+		else {
+			console.log('cahe miss for ' + url);
+			missCount++;
+		}
+				
+		return hit;
 	};
 	
 	this.get = function(url){
-		//console.log('recieved from cache and made a new node the head');
+		console.log('fetched md for ' + url + ' from cache and made a that node the head');
 		list.makeHead(map[url]);
 		return map[url].data;
+	};
+	
+	this.getInfo = function(){
+		var hitRate = (hitCount / (hitCount + missCount) * 100) % 100 + '%' ;
+		return {
+			hitCount: hitCount,
+			missCount: missCount,
+			hitRate: hitRate,
+			size: list.length
+		};
 	};
 	
 }
