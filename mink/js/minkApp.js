@@ -16,7 +16,7 @@ minkApp.currentQuery = null;
 minkApp.linkToViewModelMap = new Map();
 minkApp.linkToMetadataMap = new Map();
 minkApp.queryMap = new Map();
-var bsService = new BSAutoSwitch(['eganfccpbldleckkpfomlgcbadhmjnlf', 'gdgmmfgjalcpnakohgcfflgccamjoipd']);
+var bsService = new BSAutoSwitch(['eganfccpbldleckkpfomlgcbadhmjnlf', 'gdgmmfgjalcpnakohgcfflgccamjoipd', 'elkanacmmmdgbnhdjopfdeafchmhecbf']);
 //var bsService = new BSService();
 minkApp.cardDuplicateMap = new Map();
 
@@ -53,10 +53,10 @@ minkApp.favoritesMenuHandler = function(event){
 	console.log(event);
 	var cont = $('#minkFavorites')[0];
 	//to-do: dismiss all other eco menues
-	
+
 	minkApp.buildBibMenu(cont);
-	
-	
+
+
 }
 
 minkApp.removeMenu = function(event){
@@ -79,10 +79,10 @@ minkApp.buildBibMenu = function(parent){
 	parent.appendChild(container);
 	setTimeout(function(){
 		document.body.addEventListener('click', minkApp.removeMenu);
-		
+
 	})
-	
-	
+
+
 }
 
 minkApp.handleFacetKeydown = function(event){
@@ -124,7 +124,7 @@ function getFacetsFromHTML(){
 
 	return [yearFacet];
 }
-	
+
 /*
 Filter by year early
 */
@@ -140,7 +140,7 @@ function applyFacets(query, facets){
 	for (var i = 0; i < keys.length; i++){
 		var pile = query.pileMap.get(keys[i]);
 			var cards = pile.cards;
-			
+
 			//for earch card compare to whichever facets we have
 
 		for (var j = 0; j < cards.length; j++){
@@ -160,18 +160,18 @@ function applyFacets(query, facets){
 				}
 
 			}
-					
+
 			cards[j].filteredOut = filtered;
 			minkApp.updateCardDisplay(cards[j]);
-				
+
 		}
 	}
-		
+
 	var indicatorString = numberFiltered.toString() + " cards removed";
 	if(numberFiltered > 0){
 		$('#removeFacets').removeClass('hidden')
 		$("#minkFacetsRemovedIndicator")[0].innerHTML = indicatorString;
-		
+
 		$('#minkFacetsRemovedIndicator').closest('.minkFacetMenuItem').removeClass('hidden')
 
 	}
@@ -258,12 +258,12 @@ minkApp.buildBibPopUp = function(parent, bibHTML){
 }
 minkApp.favesToBib = function(){
 	var bibGen = new BibTexGenerator('../bsjsCore/citeproc/modern-language-association-with-url.csl', '../bsjsCore/citeproc/locales-en-US.xml');
-	
+
 	for (var i = 0; i < minkApp.favorites.length; i++){
 		var md = minkApp.linkToMetadataMap.get(minkApp.favorites[i].url);
 		bibGen.addDocument( new BibTexDocument(minkApp.favorites[i].url, md));
 	}
-	
+
 	bibGen.getBibHTML(function(bibHTML){
 		minkApp.buildBibPopUp(document.body, bibHTML);
 		//alert(bibHTML)
@@ -272,12 +272,12 @@ minkApp.favesToBib = function(){
 
 minkApp.favesToBibTex = function(){
 	var bibGen = new BibTexGenerator('../bsjsCore/citeproc/modern-language-association-with-url.csl', '../bsjsCore/citeproc/locales-en-US.xml');
-	
+
 	for (var i = 0; i < minkApp.favorites.length; i++){
 		var md = minkApp.linkToMetadataMap.get(minkApp.favorites[i].url);
 		bibGen.addDocument( new BibTexDocument(minkApp.favorites[i].url, md));
 	}
-	
+
 	bibGen.getBibString(function(bibString){
 		minkApp.buildBibPopUp(document.body, bibString);
 		//alert(bibHTML)
@@ -350,16 +350,16 @@ minkApp.buildCardControls = function(parent, link){
 	r.innerHTML = '<i class="material-icons">remove_circle_outline</i>';
 	r.addEventListener('click', minkApp.removeButtonHandler)
 
-	
-	
+
+
 	//see if mink::uuid, link, or mink::lin;
 
-	
+
 	var f = buildDiv('minkCardControl')
 	f.innerHTML = '<i class="material-icons">bookmark_border</i>';
 	f.addEventListener('click', minkApp.signalFavorite)
 
-	
+
 	controlCont.appendChild(f);
 	if(link.startsWith('mink::')){
 		var sublink = link.substring(6);
@@ -418,7 +418,7 @@ function pileIDGen(url, collection){
 	if(collection){
 		return url + '|' + collection;
 	}
-	else{ 
+	else{
 		return url + '|' + 'base_url';
 	}
 
@@ -440,7 +440,7 @@ minkApp.restoreQueryFromHistory = function(event){
 		}catch(e){
 			console.log('error: ' + e);
 		}
-		
+
 	}
 }
 minkApp.newColumnId = function(){
@@ -458,11 +458,11 @@ minkApp.initialize = function(minkAppHTML){
 	columns[0].setAttribute('column', '1');
 	minkApp.maxCols = 3;
 	minkApp.HTML = minkAppHTML;
-	
+
 	$(".minkBackButton").css('display', 'none');
 	$(".minkForwardButton").css('display', 'none');
 
-	
+
 }
 
 
@@ -492,14 +492,14 @@ minkApp.hidePreviousQuery = function(){
 		for (var j = 0; j < cards.length; j++){
 			cards[j].inView = false;
 			cards[j].displayed = false;
-			
+
 		}
 	}
 	$("#minkColumns").empty();
 	minkApp.leftMostCol =null;
 	minkApp.rightMostCol = null;
 	$('#contextTitle')[0].innerHTML = "";
-	
+
 	//remove add query button visbility by default
 	$('.minkNewQueryButton').removeClass('visible');
 	//mak
@@ -509,8 +509,8 @@ minkApp.hidePreviousQuery = function(){
 	$('#facetkeyword')[0].value = "";
 	$('#removeFacets').addClass('hidden');
 	$('#minkFacetsRemovedIndicator')[0].innerHTML = "";
-	
-	
+
+
 }
 
 minkApp.updateCardDisplay = function(card, reval){
@@ -519,7 +519,7 @@ minkApp.updateCardDisplay = function(card, reval){
 	card.displayed = !card.removed && !card.filteredOut;
 
 	if (card.displayed){
-		
+
 		if(!previousD){
 			card.html.style.display = "";
 			$(card.html).addClass('animatingRestore');
@@ -533,7 +533,7 @@ minkApp.updateCardDisplay = function(card, reval){
 		}
 
 		minkApp.updateDuplicateCount(card.pile);
-		
+
 	}else{
 		//only animate removal iff  not already removed
 		if(previousD){
@@ -571,7 +571,7 @@ minkApp.rebuildCurrentQuery = function(){
 			}
 			minkApp.updateDuplicateCount(pile);
 		}
-		
+
 
 	}
 	$('#contextTitle')[0].innerHTML =  minkApp.currentQuery.contextTitle;
@@ -590,7 +590,7 @@ minkApp.rebuildCurrentQuery = function(){
 		$('#facetkeyword')[0].value = minkApp.currentQuery.facets[1].value;
 
 	}else{
-		$('#facetkeyword')[0].value = "";	
+		$('#facetkeyword')[0].value = "";
 	}
 
 	applyFacets(minkApp.currentQuery, minkApp.currentQuery.facets);
@@ -627,7 +627,7 @@ minkApp.nsearchKeypress = function(event){
 		 var newQueryString = event.srcElement.value;
 		 var pid = event.srcElement.getAttribute('pid');
 		 var nQuery = new Query(newQueryString, ['google_scholar'], pid);
-		
+
 
 		var column;
 		if(!minkApp.currentQuery){
@@ -647,19 +647,19 @@ minkApp.nsearchKeypress = function(event){
 		minkApp.currentQuery = nQuery;
 		minkApp.explorationSpace.queries.push(nQuery);
 		$(('#' + minkApp.currentQuery.uuid)).children('.minkNewQueryButton').addClass('visible');
-		 
-		 
-		 
-		 
-		 
-		 
+
+
+
+
+
+
 	    $(event.srcElement.parentNode).remove();
 
 	 }
 
 }
 minkApp.newQueryBox = function(event){
-	
+
 	//remove other search boxes
 	$('minkNSearch').remove();
 	//create new qlevel if needed
@@ -673,7 +673,7 @@ minkApp.newQueryBox = function(event){
 	}else{
 		level = buildDiv('qLevel');
 		$(level).insertAfter(parentNode);
-		
+
 	}
 	//create search box
 	var nsearch = document.createElement('input');
@@ -690,8 +690,8 @@ minkApp.newQueryBox = function(event){
 	holder.appendChild(nsearch);
 	holder.appendChild(x);
 	level.appendChild(holder);
-	//set event listeners	
-		
+	//set event listeners
+
 }
 minkApp.exploreURL = function(url){
 	//checki
@@ -701,7 +701,7 @@ minkApp.exploreURL = function(url){
 		}
 	}
 
-	
+
 
 	for (var i = 0; i < minkApp.explorationSpace.queries.length; i++){
 		if(url === minkApp.explorationSpace.queries[i].query){
@@ -719,7 +719,7 @@ minkApp.exploreURL = function(url){
 		column = minkApp.leftMostCol;
 	}else{
 		minkApp.hidePreviousQuery();
-		
+
 		column = minkApp.buildColumn($('#minkColumns')[0]);
 		column.setAttribute('column', '1');
 		$('#minkColumns')[0].appendChild(column);
@@ -731,15 +731,15 @@ minkApp.exploreURL = function(url){
 	nQuery.columns.push(column);
 	minkApp.currentQuery = nQuery;
 	minkApp.explorationSpace.queries.push(nQuery);
-	
+
 	$(('#' + minkApp.currentQuery.uuid)).children('.minkNewQueryButton').addClass('visible');
 
 
 }
 
 function toGoogleUrl(searchString){
-    
-    
+
+
 	var terms = searchString.split(" ");
 	var url = "https://www.google.com/search?q=";
 	for (var x in terms){
@@ -760,7 +760,7 @@ minkApp.exploreNewQuery = function(queryString){
 		}
 	}
 
-	
+
 
 	for (var i = 0; i < minkApp.explorationSpace.queries.length; i++){
 		if(queryString === minkApp.explorationSpace.queries[i].query){
@@ -770,8 +770,8 @@ minkApp.exploreNewQuery = function(queryString){
 			return;
 		}
 	}
-	
-	
+
+
 	var nQuery = new Query(queryString, ['google_scholar']);
 	var column;
 	if(!minkApp.currentQuery){
@@ -792,7 +792,7 @@ minkApp.exploreNewQuery = function(queryString){
 	minkApp.explorationSpace.queries.push(nQuery);
 	$(('#' + minkApp.currentQuery.uuid)).children('.minkNewQueryButton').addClass('visible');
 
-	
+
 
 }
 
@@ -804,7 +804,7 @@ minkApp.moveForward = function(newColumn){
 	var already = false;
 	 for(var i = 0; i < minkApp.currentQuery.columns.length; i++){
 		  var colNo = parseInt(minkApp.currentQuery.columns[i].getAttribute('column'));
-		 
+
 		  if(colNo == 1){
 			  minkApp.currentQuery.columns[i].classList.add('minkDeletingColumn');
 			  minkApp.currentQuery.columns[i].addEventListener('animationend', minkApp.toggleDisplay)
@@ -814,11 +814,11 @@ minkApp.moveForward = function(newColumn){
 		  else if(colNo == 2){
 				  minkApp.leftMostCol = minkApp.currentQuery.columns[i];
 		  }
-		  
-		  if(colNo > 1 && (already == false)) 
+
+		  if(colNo > 1 && (already == false))
 			  minkApp.currentQuery.columns[i].setAttribute('column', (colNo - 1).toString());
-		  
-	 
+
+
 		 if(colNo == (minkApp.maxCols) && (newColumn != true) && (already == false)){
 			  minkApp.currentQuery.columns[(i+1)].setAttribute('column', minkApp.maxCols.toString());
 			  minkApp.rightMostCol = minkApp.currentQuery.columns[(i+1)];
@@ -853,7 +853,7 @@ minkApp.goBackwards = function(howMany){
 			  minkApp.leftMostCol = minkApp.currentQuery.columns[(i-1)];
 			  minkApp.leftMostCol.style.display = '';
 			  $(minkApp.leftMostCol).removeClass("minkDeletingColumn");
-			  
+
 
 		  }
 		  if(colNo == minkApp.maxCols){
@@ -861,7 +861,7 @@ minkApp.goBackwards = function(howMany){
 			  minkApp.currentQuery.columns[i].addEventListener('animationend', minkApp.toggleDisplay)
 			  minkApp.currentQuery.columns[i].setAttribute('column', "0");
 
-			  
+
 		  }else if(colNo > 0){
 			  minkApp.currentQuery.columns[i].setAttribute('column', (colNo + 1).toString());
 
@@ -889,26 +889,26 @@ minkApp.buildColumn = function(parent){
 minkApp.goBackHandler = function(event){
 	console.log('hahaha')
 	minkApp.goBackwards(1);
-	
+
 }
 minkApp.goForwardsHandler = function(event){
 	console.log('hahaha')
 	minkApp.moveForward();
-	
+
 }
 
 minkApp.toggleFavorite = function(url, mdName, faviconLink, srcHTML){
-	
+
 	var found = -1;
-	
+
 	for(var i = 0; i < minkApp.favorites.length; i++){
 		if (minkApp.favorites[i].url == url){
 			found = i;
 		}
 	}
-	
+
 	if(found < 0){
-		
+
 		/*mark the card as favorited visually and in memory*/
 		var favoriteIndicator = srcHTML.getElementsByClassName('minkCardControl')[0];
 		favoriteIndicator.classList.add('favorited');
@@ -922,23 +922,23 @@ minkApp.toggleFavorite = function(url, mdName, faviconLink, srcHTML){
 				var sourceInfo = md.year;
 				var year = sourceInfo.replace(/[^\d]/g,'');
 				md.year = year;
-				
+
 			}
-			
+
 			//quick hack
 			if(md.google_authors){
 				md.authors = md.google_authors;
 			}
 		}
-			
-			
-		
-		
+
+
+
+
 		var favorite = {url: url, src: srcHTML, mdname: mdName, favicon: faviconLink, html: null};
 		minkApp.favorites.push(favorite);
 
 	}else{
-		
+
 		$($(srcHTML).find(".minkCardControl")[0]).removeClass('favorited');
 		$($(srcHTML).find(".minkCardControl")[0])[0].innerHTML = '<i class="material-icons">bookmark_border</i>';
 
@@ -949,10 +949,10 @@ minkApp.toggleFavorite = function(url, mdName, faviconLink, srcHTML){
 		var selector = "[href='" + url + "']";
 		$('#minkFavorites').find(selector).closest('.minkFavorite').remove();
 	}
-	
+
 	minkApp.updateFavoritesDisplay();
-	
-	
+
+
 }
 
 minkApp.buildFavorite = function(favorite){
@@ -974,8 +974,8 @@ minkApp.updateFavoritesDisplay = function(){
 	var favoritesContainer = $('#minkFavorites')[0];
 	favoritesContainer.childNodes = [];
 	for(var i = minkApp.favorites.length-1; i >=0 ; i--){
-		
-		
+
+
 		if(minkApp.favorites[i].html == null){
 			minkApp.favorites[i].html = minkApp.buildFavorite(minkApp.favorites[i])
 		}
@@ -993,7 +993,7 @@ minkApp.updateFavoritesDisplay = function(){
 	}
 }
 minkApp.favoritesToggleHandler = function(event){
-	
+
 	var minkFavorites = $('#minkFavorites');
 	var expander = $('#minkFavoritesExpander');
 	if(minkFavorites.hasClass('mfShow')){
@@ -1029,7 +1029,7 @@ minkApp.newPile = function(details, srcElement){
 			  minkApp.rightMostCol = nextCol;
 
 		 }else{
-			
+
 			  nextCol = minkApp.buildColumn($(minkApp.HTML).find('.minkColumns')[0]);
 				nextCol.setAttribute('column', (minkApp.maxCols).toString());
 				  minkApp.rightMostCol = nextCol;
@@ -1037,7 +1037,7 @@ minkApp.newPile = function(details, srcElement){
 			  minkApp.moveForward(true);
 				minkApp.currentQuery.columns.push(nextCol);
 
-			  
+
 		 }
 		 //move forwards
 	 }/*else if(minkApp.rightMostCol == null){
@@ -1049,9 +1049,9 @@ minkApp.newPile = function(details, srcElement){
 	 else{
 		 var searchForCol = (columnNumber+1).toString();
 		 nextCol = $("div[column='" + searchForCol + "']")[0];
-		 
-		 
-		 
+
+
+
 	 }
 	 //get parentCard
 	 var parentPileId = $(event.srcElement).closest('.minkPile').attr('pileid');
@@ -1071,7 +1071,7 @@ minkApp.newPile = function(details, srcElement){
 	 minkApp.currentQuery.pileMap.put(pileIDGen(details.rooturl, details.collectionname), pile);
 	 srcElement.addEventListener('click', minkApp.showHidePileHandler);
 	 srcElement.removeEventListener('click', minkApp.showExplorableLinksHandler);
-	
+
 }
 
 minkApp.showButtons = function(container){
@@ -1082,13 +1082,13 @@ minkApp.hideButtons = function(container){
 
 }
 minkApp.minkEventHandler = function(event){
-	 
+
 	 if(event.detail.type == 'minknewpile'){
-		
+
 		 minkApp.newPile(event.detail, event.srcElement);
 
-		 
-		 
+
+
 	 }else if(event.detail.type == 'minkshowless'){
 		 var id = pileIDGen(event.detail.rooturl, event.detail.collectionname);
 		 var pile = minkApp.currentQuery.pileMap.get(id);
@@ -1110,7 +1110,7 @@ minkApp.minkEventHandler = function(event){
 	 else if(event.detail.type=='minkfavorite'){
 		 minkApp.toggleFavorite(event.detail.url, event.detail.mdname, event.detail.favicon, event.detail.html);
 	 }else if(event.detail.type=='minksearchstripper'){
-		 
+
 		 var pileID = event.srcElement.getAttribute('pileID');
 		 var pile =  minkApp.currentQuery.pileMap.get(pileID);
 		 var wrapper = $(pile.HTML).closest('.minkPileWrapper')[0];
@@ -1119,18 +1119,18 @@ minkApp.minkEventHandler = function(event){
 		a  new card loader. If the canary has 'died' then delete any existing more loaders
 
 		*/
-		
+
 		var loader = $(pile.HTML).closest('.minkPileWrapper').find('.minkPileLoader')[0];
 		/*
 		if the canary is dead, remove any existing more loader -- updating the existing loader is handled in "addnNewCards"
 		*/
-		var formerIndex = pile.urlIndex; 
+		var formerIndex = pile.urlIndex;
 		pile.urlIndex = pile.urlIndex + parseInt(event.detail.perPage);
 		if(loader){
 			if(!event.detail.canary){
 				$(loader).remove();
 			}
-		
+
 		}else if(event.detail.canary){
 			minkApp.buildPileMoreLoader(wrapper, pile, event.detail.iterator, event.detail.url);
 			//if there's no pile loader then the card we should remove is at index 0
@@ -1150,7 +1150,7 @@ minkApp.minkEventHandler = function(event){
 
 		 console.log(event.detail.links);
 	 }
-	 
+
 }
 minkApp.toggleDisplay = function(event){
 	if(event.target.style.display != 'none'){
@@ -1180,8 +1180,8 @@ minkApp.minimizePile = function(pile, numberOfCards){
 	newHeight = ((2.5 * minkApp.COLLAPSED_CARD_HEIGHT) + 4);
 
 	$(pile).attr('collapsed', 'true');
-	
-	
+
+
 	var speed = ((newHeight - oldHeight)) / (0.25);
 
 //	$(pile).css('height', ph + 'px')
@@ -1195,12 +1195,12 @@ minkApp.minimizePile = function(pile, numberOfCards){
 	setTimeout(function(){clearInterval(thisInterval);
 		pile.style.height = newHeight.toString() + "px";
 	}, 250);
-	
-	
 
-	
-		
-		
+
+
+
+
+
 }
 minkApp.expandPile = function(pile){
 	var cardCount = pile.childNodes.length;
@@ -1209,7 +1209,7 @@ minkApp.expandPile = function(pile){
 	$(pile).attr('collapsed', 'false');
 	var speed = 0;
 	if(cardCount > 3){
-		speed = (((cardCount) * 41) - pile.clientHeight) * 2; //pixels per second 
+		speed = (((cardCount) * 41) - pile.clientHeight) * 2; //pixels per second
 	}else if(cardCount == 3){
 		speed = (141-106)/(.5);
 	}
@@ -1230,7 +1230,7 @@ minkApp.expandPile = function(pile){
 			ph = pile.clientHeight + "px";
 
 		}
-		
+
 		$(pile).css('height', ph)
     }, (1/60 * 1000));
 	setTimeout(function(){clearInterval(thisInterval); $(pile).css('height', '')}, 500);
@@ -1272,24 +1272,24 @@ minkApp.showHidePile = function(pile, hide){
 
 
 	}
-	
+
 	for(var i = 0; i < pile.kids.length; i++){
 		minkApp.showHidePile(pile.kids[i], hide)
 	}
 
-	
+
 }
 minkApp.showHidePileHandler = function(event){
 	var rootHTML = $(event.target).closest('.minkExplorableField')[0];
 	var url = $(rootHTML).attr('rooturl');
 	var collection = $(rootHTML).attr('collectionname');
 	var id = pileIDGen(url, collection);
-	
+
 	var pile = minkApp.currentQuery.pileMap.get(id);
 	minkApp.showHidePile(pile, pile.visible)
-	
-	
-	
+
+
+
 }
 minkApp.expandCollapsePile = function(event){
 	var pile = $(event.currentTarget).closest('.minkPileWrapper')[0];
@@ -1298,11 +1298,11 @@ minkApp.expandCollapsePile = function(event){
 	/*
 	 * Hide all faceted controls, etc.
 	 */
-	
+
 	/*
 	 * Check for uncollapseable cards, put one in front of stack
 	 */
-	
+
 	/*
 	 * If none are uncollapseable, shrink all cards to snippet form and put behind first card
 	 */
@@ -1313,7 +1313,7 @@ minkApp.expandCollapsePile = function(event){
 			console.log('shrinking')
 			var target = $(kids[i]).find(".minkTitleClickable")[0];
 			var controls = $(kids[i]).find(".minkCardControls").css('display', 'none');
-			
+
 			var contentContainer = $(target).closest('.minkContentContainer')[0];
 			if($(contentContainer).attr('grown') == "true"){
 				minkRenderer.shrink(target, true);
@@ -1340,7 +1340,7 @@ minkApp.expandCollapsePile = function(event){
 					kids[i].style.display = 'none';
 
 				}
-	
+
 			}else{
 				kids[i].style.transform = 'translateX(-5px)';
 			}
@@ -1353,14 +1353,14 @@ minkApp.expandCollapsePile = function(event){
 			if($(contentContainer).attr('grown') == "true"){
 				minkRenderer.grow(target, true);
 			}
-			
+
 				kids[i].style.transform = "none";
 				kids[i].style.zIndex = '';
 				kids[i].style.opacity = '1';
 				kids[i].style.display= "";
-			
+
 		}
-		
+
 	}
 	if($(pile).attr('collapsed')!= 'true'){
 		minkApp.minimizePile(pile, kids.length, ogHeight);
@@ -1368,20 +1368,20 @@ minkApp.expandCollapsePile = function(event){
 		//minkApp.formStack(kids[1], kids[2]);
 	}else{
 
-		    
+
 		minkApp.expandPile(pile, kids.length);
-		
+
 		//First card becomes front by going down to the middle of the pile.
 		/*var firstCard = kids[0];
 		minkApp.toMiddleOfPile(firstCard, pile);
 		minkApp.formStack(kids[1], kids[2]);*/
 	}
-  
-	
+
+
 	//Two others shrink down to a smaller size
 	//a
-	
-	
+
+
 }
 
 minkApp.buildDuplicateCount = function(pile){
@@ -1441,7 +1441,7 @@ minkApp.polishYear = function(metadata){
 		if(values[i].name == 'source_info'){
 			var sourceInfo = values[i].value;
 			year = sourceInfo.replace(/[^\d]/g,'');
-			
+
 		}
 	}
 	if(year != "" && year != null && (!isNaN(parseInt(year)))){
@@ -1450,8 +1450,8 @@ minkApp.polishYear = function(metadata){
 				if(isNaN(parseInt (values[i].value))){
 					values[i].value = year;
 				}
-				
-				
+
+
 			}
 		}
 		return year;
@@ -1471,11 +1471,11 @@ minkApp.getSearchResultLinks = function(task){
 	var metadata = task.metadata;
 
 	for (var i = 0; i < metadataFields.length; i++){
-	
+
 		var metadataField = metadataFields[i];
-	
+
 		if(task.isSearchResultsCollection(metadataField)){
-	
+
 			var collectionLinks = {};
 			collectionLinks.links = [];
 			collectionLinks.name = metadataField.name;
@@ -1487,8 +1487,8 @@ minkApp.getSearchResultLinks = function(task){
 				}
 			}
 			list.push(collectionLinks);
-			
-			
+
+
 		}
 	}
 	return list[0];
@@ -1504,15 +1504,15 @@ minkApp.getSearchResultLinks = function(task){
 minkApp.prepareSemantics = function(task){
 	var metadataFields = task.fields;
 	minkApp.linkToViewModelMap.put(task.url, task.fields);
-	
+
 	if(task.mmd && task.mmd['meta_metadata'].extends == 'search'){
 		var minkLinks = minkApp.getSearchResultLinks(task);
-		
+
 		var metadata = BSUtils.unwrap(task.metadata);
 		var flink = "fav::" + task.url;
 		minkLinks.links.push(flink);
 		var iteratableURL = task.mmd['meta_metadata'].search_result_iterator;
-		
+
 		/*
 		if there is an iteration canary in the first level of the task fields, signal to load more
 		*/
@@ -1545,7 +1545,7 @@ minkApp.prepareSemantics = function(task){
 }
 
 minkApp.cardSemantics = function(cardDiv, link, clipping, options){
-	
+
 	MinkSemantics.addMetadataDisplay(cardDiv, link, clipping, minkApp.prepareSemantics, options);
 
 }
@@ -1558,7 +1558,7 @@ minkApp.buildCards = function(parent, links, expandCards, pile){
 	minkApp.counter = links.length;
 	//Builds card
 	//parent.style.height = (links.length * 39 -2 ).toString() + "px";
-	
+
 	var faviconLink = "";
 	if(links[(links.length-1)].startsWith("fav::")){
 		faviconLink = links.pop();
@@ -1615,7 +1615,7 @@ minkApp.buildCards = function(parent, links, expandCards, pile){
 			minkApp.cardSemantics(cardDiv, link, null, {expand: true, callback: minkApp.contextualize, devalue: card.duplicate, viewmodel: minkApp.linkToViewModelMap});
 
 		}
-		
+
 	}
 
 	return cards;
@@ -1664,7 +1664,7 @@ minkApp.buildPile = function(parent, links, rooturl, collectionname, src, expand
 	console.log(links);
 	var wrapper= buildDiv('minkPileWrapper');
 	var row = buildDiv('minkPileRow');
-	
+
 	if(src){
 		var collapseButton = buildDiv('sampleCollapse');
 		collapseButton.addEventListener('click', minkApp.expandCollapsePile);
@@ -1672,10 +1672,10 @@ minkApp.buildPile = function(parent, links, rooturl, collectionname, src, expand
 
 
 	}
-	
+
 	var newPile = buildDiv('minkPile minkPileExpanded');
 	parent.appendChild(wrapper);
-	
+
 	var pileId = pileIDGen(rooturl, collectionname);
 	var parentPile = null;
 			var parentCard = null;
@@ -1693,7 +1693,7 @@ minkApp.buildPile = function(parent, links, rooturl, collectionname, src, expand
 
 	}
 	var pile = new minkPile(pileId, null, src, newPile, parentPile, rooturl, parentCard);
-	
+
 	pile.cards = minkApp.buildCards(newPile, links, expandChildren, pile);
 
 	if(minkApp.currentQuery){
@@ -1725,7 +1725,7 @@ minkApp.buildPile = function(parent, links, rooturl, collectionname, src, expand
 
 
 /*
- * 
+ *
  * Everything below here is essentially default bootstrap stuff and remnants of the MICE visualizer
  */
 
@@ -1747,7 +1747,7 @@ minkApp.buildPile = function(parent, links, rooturl, collectionname, src, expand
   }
 }
  var reload_md = false;
- 
+
  var mainloop = function() {
      updateGame();
      drawGame();
@@ -1772,26 +1772,26 @@ function redrawCanvas(){
 	if(minkApp.currentQuery){
 		for (var i = 0; i < minkApp.currentQuery.pileMap.keys.length; i++){
 			var pile = minkApp.currentQuery.pileMap.get( minkApp.currentQuery.pileMap.keys[i]);
-			
+
 //if root card isn't visible, don't show lines to it
 
 			if(pile.rootHTML){
 
 				if (pile.visible && $(pile.rootHTML.closest('.minkColumn')).is(':visible') && $(pile.HTML.closest('.minkColumn')).is(':visible')){
-					
+
 
 					var rootRect = pile.rootHTML.getBoundingClientRect();
 					var rootAttachPointX = rootRect.left + rootRect.width - canvasX;
 					var rootAttachPointY = (rootRect.top + rootRect.height / 2) - canvasY;
-					
+
 					var pileRect = $(pile.HTML).closest('.minkPileWrapper')[0].getBoundingClientRect();
 					var pileTopAttachPointX = pileRect.left - canvasX;
 					var pileTopAttachPointY = (pileRect.top) - canvasY;
-					
+
 					var pileBotAttachPointX = pileRect.left - canvasX;
 					var pileBotAttachPointY = (pileRect.top) + pileRect.height - canvasY;
-		
-					
+
+
 					var pathSplitX = rootAttachPointX + 1/2 * (pileTopAttachPointX - rootAttachPointX);
 					var pathSplitY = (pileTopAttachPointY + pileRect.height/2);
 					if(pile.parentCard.displayed){
@@ -1803,31 +1803,31 @@ function redrawCanvas(){
 					}else{
 						pathSplitX = pileTopAttachPointX - 40;
 					}
-					
-					
+
+
 					ctx.beginPath();
 					ctx.strokeStyle = '#999999';
 					ctx.moveTo(pathSplitX, pathSplitY);
 					ctx.bezierCurveTo((pathSplitX + (1/2 * Math.abs(pileTopAttachPointX - pathSplitX))), pathSplitY, pileTopAttachPointX - (1/2 * Math.abs((pileTopAttachPointX - pathSplitX))), pileTopAttachPointY, pileTopAttachPointX, pileTopAttachPointY);
 					ctx.stroke();
-					
+
 					ctx.beginPath();
 					ctx.strokeStyle = '#999999';
 					ctx.moveTo(pathSplitX, pathSplitY);
 					ctx.bezierCurveTo((pathSplitX + (1/2 * Math.abs((pileBotAttachPointX - pathSplitX)))), pathSplitY, pileBotAttachPointX - (1/2 * Math.abs((pileBotAttachPointX - pathSplitX))), pileBotAttachPointY, pileBotAttachPointX, pileBotAttachPointY);
 					ctx.stroke();
-		
+
 			}
 		}
 		}
 	}
-	
-	
+
+
 	//Find all expanded collections and draw lines to the top and bottom of their piles
 }
 function onBodyLoad() {
 	var minkapp = $("#minkAppContainer")[0];
-	
+
 
 	/*
 	Material shading of UI
@@ -1843,10 +1843,10 @@ function onBodyLoad() {
 
 
 	//SEMANTIC_SERVICE_URL = "http://128.194.128.84:8080/BigSemanticsService/";
-	
+
 	  if (document.URL.indexOf("http://localhost:") > -1 || document.URL.indexOf("file:///") > -1){
-		  
-		  
+
+
 			SEMANTIC_SERVICE_URL = "http://localhost:8080/BigSemanticsService/";
 
 	  }
@@ -1861,15 +1861,15 @@ function onBodyLoad() {
 	canvas.id = 'minkAppCanvas';
 	animFrame(recursiveAnim);
 
-	
-	
+
+
 	$(minkapp).prepend(canvas);
 
 	RendererBase.idealRenderer = false;
 	$(".collapse").collapse();
 	minkapp.addEventListener('minkevent', minkApp.minkEventHandler);
 	minkApp.initialize(minkapp);
- 
+
   //Try to get passed in parameter url
   var n = getParameter("url");
   if(n == -1) {
@@ -1928,9 +1928,9 @@ function onNewMMD(metametadata) {
 
 function onNewMetadata(metadata) {
   rawMetadata = metadata;
-  
+
 	console.error("Error: calling onNewMetadata()");
-  
+
   updateJSON(true);
 
   //Hate this but it's necessary for now... Service does funky redirect stuff when you request MMD with a URL
@@ -1951,7 +1951,7 @@ function onNewMetadata(metadata) {
 function getJSONData (targeturl)
 {
 	console.error("Error: calling getJSONData()");
-	
+
   $.ajax({
     url: 'http://ecology-service.cse.tamu.edu/BigSemanticsService/metadata.jsonp',
     jsonp: 'callback',
@@ -1959,7 +1959,7 @@ function getJSONData (targeturl)
     data: { url: targeturl},
     success: onNewMetadata
   });
-  
+
 }
 function toggleReload(){
 	reload_md = !reload_md;
@@ -1968,7 +1968,7 @@ function toggleReload(){
 function onEnterShowMetadata(event)
 {
   if(event.keyCode == 13)
-    showMetadata(); 
+    showMetadata();
 }
 
 function isUrl(string){
@@ -1984,7 +1984,7 @@ function showMetadata(url)
 		}else{
 			minkApp.exploreNewQuery(url);
 		}
-		
+
 	}else{
 		var url = document.getElementById("targetURL").value;
 		if(isUrl(url)){
@@ -2011,10 +2011,10 @@ function showMetadata(url)
             -moz-transition: max-height 0.5s ease-in-out;
             -o-transition: max-height 0.5s ease-in-out;
             transition: max-height 0.5s ease-in-out;
-            overflow-y: hidden;            
+            overflow-y: hidden;
         }
-        .height-transition-hidden {            
-            max-height: 0;            
+        .height-transition-hidden {
+            max-height: 0;
         }
 
         You need to wrap your actual content that you
@@ -2023,7 +2023,7 @@ function showMetadata(url)
         and optionally height-transition-hidden to initially
         hide the container (collapsed).
 
-        <div id="SlideContainer" 
+        <div id="SlideContainer"
                 class="height-transition height-transition-hidden">
             <div id="Actual">
                 Your actual content to slide up or down goes here
@@ -2035,8 +2035,8 @@ function showMetadata(url)
         var $sw = $("#SlideWrapper");
 
         if (!$sw.hasClass("height-transition-hidden"))
-            $sw.slideUpTransition();                      
-        else 
+            $sw.slideUpTransition();
+        else
             $sw.slideDownTransition();
     */
     $.fn.slideUpMinkApp = function() {
@@ -2044,7 +2044,7 @@ function showMetadata(url)
             var $el = $(this);
             $el.css("max-height", "0");
             $el.addClass("height-transition-hidden");
-                    
+
         });
     };
 

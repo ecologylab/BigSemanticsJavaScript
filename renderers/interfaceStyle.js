@@ -31,7 +31,7 @@ var DEFAULT_MICE_STYLE = {
 	    fieldChildContainer : "ecologylab-fieldChildContainer",
 	    fieldCompositeContainer : "ecologylab-fieldCompositeContainer",
 	    expandButton : "ecologylab-expandButton",
-	    expandButtonX : "ecologylab-expandButton X",
+	    expandButtonX : "ecologylab-expandButton",
 	    collapseButton : "ecologylab-collapseButton",
 	    expandSymbol : "ecologylab-expandSymbol",
 	    collapseSymbol : "ecologylab-collapseSymbol",

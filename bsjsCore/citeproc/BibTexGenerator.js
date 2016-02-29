@@ -453,7 +453,7 @@ BibTexGenerator.prototype.createBib	= function(document, that){
 			
 			return bib;
 		}
-	}
+	
 	}
 	catch(e)
 	{
