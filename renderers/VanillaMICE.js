@@ -614,8 +614,12 @@ MICE.buildCollectionLabelColumn = function(metadataField, nameCol, styleInfo, ex
 
 	if(metadataField.value.length > 1)
 	{
-		MICE.buildExpandButton(nameCol, "", styleInfo);
+		//add an extra wrapper around the expand button so it works with the very kludy
+		//code inside of findTableForButton
+		var wrapper = document.createElement('span');
 
+		MICE.buildExpandButton(wrapper, "", styleInfo);
+		nameCol.appendChild(wrapper);
 	}
 	var label = RendererBase.getFieldLabel(metadataField);
 
@@ -867,14 +871,14 @@ MICE.expandCollapseTable = function(event)
 
 MICE.getTableForButton = function(button, styleInfo)
 {
-	var table = button.parentElement.parentElement.getElementsByClassName(styleInfo.styles.valueCol)[0];
+	var table = button.parentElement.parentElement.parentElement.getElementsByClassName(styleInfo.styles.valueCol)[0];
 
 	// label_at top or bottom
 	if (table == null)
 	{
 		var sibling = (button.parentElement.parentElement.parentElement.nextSibling == null) ?
-			button.parentElement.parentElement.parentElement.previousSibling :
-			button.parentElement.parentElement.parentElement.nextSibling;
+		button.parentElement.parentElement.parentElement.previousSibling :
+		button.parentElement.parentElement.parentElement.nextSibling;
 		table = sibling.getElementsByClassName(styleInfo.styles.valueCol)[0];
 	}
 
