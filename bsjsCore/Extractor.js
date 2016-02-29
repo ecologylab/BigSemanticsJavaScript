@@ -101,7 +101,8 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 				obj = getScalarD(field,contextNode,recurse,parserContext,page);
 				tag = field.tag;
 				
-				if (obj === null && recurse && name == 'location' && !hasContext) {
+				//this is a remnant. not sure what it does, but I'm scared to remove it
+				if (!isNested && obj === null && recurse && name == 'location' && !hasContext) {
 					obj = page.URL;
 				}
 				
@@ -121,11 +122,7 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 					}
 					
 				}
-				
-				//not sure what this did. was causing errors with composites
-				//if (!recurse && field.name == 'location' && obj != null && obj != url) {
-				//	break;
-				//}
+			
 			}
 			else if (field.composite) 
 			{
@@ -385,53 +382,7 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 			return null;
 		}
 
-		if (field.hasOwnProperty('field_parser'))   
-		{
-			/*var fieldName = fieldParserEl.name;
-			var fieldParser = getFieldParserFactory()[fieldName];
-			var contextList = [];
-			for (var i = 0; i < size; i++)
-			{
-				var node = nodes.snapshotItem(i);
-				var string = node.textContent;
-				if (string != null) 
-				{
-					var fieldParserResults;
-					if (fieldName == "regex_find")
-					{
-						fieldParserResults = fieldParser.getKeyValuePairResult(fieldParserEl,string.trim());
-					}
-					else
-					{
-						fieldParserResults = fieldParser.getKeyValuePairResult(fieldName,string.trim());
-					}
-					for (i in fieldParserResults)
-					{
-						var newObj = {};
-						newObj[i] = fieldParserResults[i];
-						contextList.push(newObj);
-					}
-				}
-			}
-			if (contextList != null)
-			{
-				d = {};
-				for (var i = 0; i < contextList.length; i++)
-				{
-					context = contextList[i];
-					if (context)
-					{
-						var data = dataFromKids(field.kids,nodes.snapshotItem(i),false,context,page);
-						if (data != null && !isObjEmpty(data, page)) 
-						{
-							for (key in data){
-								d[key]=data[key];
-							}
-						}
-					}
-				}
-			}
-			return d;	*/
+		if (field.hasOwnProperty('field_parser')) {
 			return null;
 		} 
 
@@ -463,49 +414,7 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 			return null;
 		}
 		
-		if (field.hasOwnProperty('field_parser'))
-		{
-			/*var fieldName = fieldParserEl.name;
-			var fieldParser = getFieldParserFactory()[fieldName];
-			var contextList = [];
-			for (var i = 0; i < size; i++)
-			{
-				var node = nodes.snapshotItem(i);
-				var string = node.textContent;
-				if (string != null) 
-				{
-					var fieldParserResults;
-					if (fieldName == "regex_split")
-					{
-						fieldParserResults = fieldParser.getCollectionResult(fieldParserEl,string.trim());
-					}
-					else
-					{
-						fieldParserResults = fieldParser.getKeyValuePairResult(fieldName,string.trim());
-					}
-					for (var k = 0; k < fieldParserResults.length; k++)
-					{
-						contextList.push(fieldParserResults[k]);
-					}
-				}
-			}
-			
-			if (contextList != null)
-			{
-				d = [];
-				for (var i = 0; i < contextList.length; i++)
-				{
-					context = contextList[i];
-					if (context)
-					{
-						var data = dataFromKids(field.kids[0].composite.kids,nodes.snapshotItem(i),false,context,page);
-						if (data != null &&!isObjEmpty(data, page)) 
-						{
-							d.push(data);
-						}
-					}
-				}
-			}	*/
+		if (field.hasOwnProperty('field_parser')) {
 			return null;
 		} 	
 		else if (field['kids'].length > 0){
@@ -634,10 +543,6 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 	}
 
 	function getFieldParserValueByKey(fieldParserContext, fieldParserKey) {
-	   /* if (fieldParserContext === null)
-	    	return null;
-	    else
-	    	return fieldParserContext[fieldParserKey];*/
 		return null;
 	}
 
@@ -679,7 +584,7 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
     baseURL[page.URL] = "";
     upperXpath[page.URL] = {};
 	
-    baseURL[page.URL] = page.URL.substring(0,getPosition(page.URL,"/",3));
+    baseURL[page.URL] = page.URL.substring(0, getPosition(page.URL,"/",3));
 	
     var extractedMeta = { };
 	mmdKids = mmd.kids;

@@ -69,7 +69,6 @@ var BigSemantics = (function() {
 		  callback(null, { metadata: that.metadataCache.get(location), mmd: mmd });	
 		  return;
 	  }
-		
 	  if (mmd.meta_metadata.extract_with == "service"){ 
 			options.useHttps = (window.location.protocol == 'https:'); //use Https if we are on an https page
 			that.bss.loadMetadata(location, options, callback);	  
@@ -94,7 +93,7 @@ var BigSemantics = (function() {
         } else if (mmd.user_agent_name && mmd.user_agent_name in that.repoMan.userAgents) {
           options.userAgent = that.repoMan.userAgents[mmd.user_agent_name];
         }
-		if (mmd.meta_metadata.extract_with == "iframe") {
+		if (mmd.meta_metadata.extract_with == 'iframe') {
 			that.iframeExtractor.extract(location, mmd, function(err, metadata){
 				if (err) { callback(err, null); return; }
 		    	callback(null, { metadata: metadata, mmd: mmd });	
