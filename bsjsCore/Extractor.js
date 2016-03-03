@@ -1,3 +1,6 @@
+/* jshint browser:true, devel:true, node:true */
+/* global BSUtils, FieldOps, getPosition, unwrapped:true */
+
 // Default metadata extractor.
 
 // Extracts metadata, given DOM and mmd.
@@ -23,7 +26,7 @@ function extractMetadata(response, mmd, bigSemantics, options, callback) {
 }
 
 function extractMetadataSync(response, mmd, bigSemantics, options) {
-  mmd = BSUtils.unwrapMmd(mmd);
+	mmd = BSUtils.unwrapMmd(mmd);
 
 	/*
 	 * Helper functions in need of closure
@@ -44,7 +47,7 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 			else if (field.collection){
 				field = field.collection;
 			}
-	        name = field.name;
+	        var name = field.name;
 	        if ('xpaths' in field){
 	            upperXpath[page.URL][name] = field.xpaths;
 	        }
@@ -64,7 +67,7 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 	    var isNested = false;
 	    if (contextNode != page) isNested = true;
 	    
-	    if (mmdKids == null || mmdKids.length == 0) {
+	    if (mmdKids === null || mmdKids.length === 0) {
 	      return null; // Nothing to do here.
 	    }
 	    
@@ -214,7 +217,7 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 					
 		}
 		
-		if(data !== null && data != undefined)
+		if(data !== null && data !== undefined)
 		{			
 			data = data.trim();
 			if (field.hasOwnProperty('field_ops'))
@@ -261,7 +264,7 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 	                break;
 				}
 			}
-			if(x == null){
+			if(x === null){
 				return null;
 			}
 
@@ -370,9 +373,10 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 
 	function getCompositeObject(field,xpath,contextNode,page){
 		var fieldParserEl = field.field_parser;
-
+		var nodes;
+		
 		try {
-			var nodes = page.evaluate(xpath, contextNode, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);		
+			nodes = page.evaluate(xpath, contextNode, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);		
 		} catch (e) {
 			return null;
 		}
@@ -388,7 +392,7 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 
 		var node = nodes.snapshotItem(0);
 
-		if (node.textContent != null) {
+		if (node.textContent !== null) {
 			return node;
 		}
 		return null;
@@ -397,27 +401,28 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 	function getCollectionData(field,xpath,contextNode,page)
 	{
 		var d = null;
-		var fieldParserEl = field['field_parser'];
+		var fieldParserEl = field.field_parser;
+		var nodes, g, generic_type_var;
 		try {
 			var evaluationPath;
 			if(contextNode != page){
-				var evaluationPath = ammendXpath(xpath);
+				evaluationPath = ammendXpath(xpath);
 			}else{
 				evaluationPath = xpath;
 			}
-			var nodes = page.evaluate(evaluationPath, contextNode, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);		
+			nodes = page.evaluate(evaluationPath, contextNode, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);		
 		} catch (e) {
 			return null;
 		}
 		var size = nodes.snapshotLength;
-		if (size == 0) {
+		if (size === 0) {
 			return null;
 		}
 		
 		if (field.hasOwnProperty('field_parser')) {
 			return null;
 		} 	
-		else if (field['kids'].length > 0){
+		else if (field.kids.length > 0){
 			d = [];
 			var f = field.kids[0].composite;
 			var kids = f.kids;
@@ -432,24 +437,24 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 	            //    var obj = dataFromKids(kids,newNode,false,null,page);
 	            //}
 
-				if (obj != null)
+				if (obj !== null)
 				{
 					if (f.scope.hasOwnProperty('resolved_generic_type_vars')) {
-						for (var g in f.scope.resolved_generic_type_vars){
-							var generic_type_var = f.scope.resolved_generic_type_vars[g];
+						for (g in f.scope.resolved_generic_type_vars){
+							generic_type_var = f.scope.resolved_generic_type_vars[g];
 							if (generic_type_var.name == f.type){
-								obj['mm_name'] = generic_type_var.arg;
+								obj.mm_name = generic_type_var.arg;
 							}
 						}
 					}
 					else if (f.hasOwnProperty('type')) {
-						obj['mm_name'] = f.type;
+						obj.mm_name = f.type;
 					} 
 					else {
-						obj['mm_name'] = f.name;
+						obj.mm_name = f.name;
 					}
 					if (obj.hasOwnProperty('location')) {
-						obj['download_status'] = "UNPROCESSED";
+						obj.download_status = "UNPROCESSED";
 					}
 					d.push(obj);
 				}
@@ -457,11 +462,11 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 		} 
 		else if (size > 0) {
 			d = [];
-			for (var i = 0; i < size; i++) {
-				var data = nodes.snapshotItem(i).textContent;
+			for (var j = 0; j < size; j++) {
+				var data = nodes.snapshotItem(j).textContent;
 				
 				data = data.trim();
-				if (field['field_ops'] != null)
+				if (field.field_ops)
 				{
 					var fieldOp = field.field_ops[0];
 					data = FieldOps.operate(data, fieldOp);
@@ -469,17 +474,18 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 				d.push(data);
 			}
 		}	
+		
 		if(field.hasOwnProperty('polymorphic_scope')){
 			var polyd = [];
-			for (data in d){
+			for (var dataKey in d){
 				var polydata = {};
-				for (var g in field.scope.resolved_generic_type_vars){
-					var generic_type_var = field.scope.resolved_generic_type_vars[g];
+				for (g in field.scope.resolved_generic_type_vars){
+					generic_type_var = field.scope.resolved_generic_type_vars[g];
 					if (generic_type_var.name == field.child_type){
-						field['child_type'] = generic_type_var.arg;
+						field.child_type = generic_type_var.arg;
 					}
 				}
-				polydata[field['child_type']] = d[data];
+				polydata[field.child_type] = d[dataKey];
 				polyd.push(polydata);
 			}
 			return polyd;
@@ -493,14 +499,14 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 		for (var i = 0; i < concatList.length; i++){
 			var concat = concatList[i];
 			if (concat.hasOwnProperty("from_scalar")){
-				var x = concat.from_scalar;
-				if (scalars[page.URL][x] !== undefined){
-					concatString = concatString + scalars[page.URL][x];
+				var fromScalar = concat.from_scalar;
+				if (scalars[page.URL][fromScalar] !== undefined){
+					concatString = concatString + scalars[page.URL][fromScalar];
 				}
 			}
 	        else if (concat.hasOwnProperty("constant_value") && concat.constant_value !== ""){
-				var x = concat.constant_value;
-				concatString = concatString + x;
+				var constantValue = concat.constant_value;
+				concatString = concatString + constantValue;
 			}
 		}
 	    return concatString;
@@ -511,13 +517,13 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 	 */
 	function isObjEmpty(o, page)
 	{
-		if (o == null) {
+		if (o === null) {
 			return true;
 		}	
 		var size = 0;
 		var matches = 0;
 
-		for (x in o) {
+		for (var x in o) {
 			
 			if (x == 'site_name' || x == "mm_name" || x == "download_status") {continue;}
 			
@@ -551,13 +557,17 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
    */
   function sortKids(mmdKidsList) {
     var sortedList = [];
-    if (mmdKidsList != null && mmdKidsList instanceof Array) {
-      for (var i = 0; i < mmdKidsList.length; i++)
-      if (mmdKidsList[i].scalar)
-        sortedList.push(mmdKidsList[i])
-      for (var i = 0; i < mmdKidsList.length; i++)
-      if (!mmdKidsList[i].scalar)
-        sortedList.push(mmdKidsList[i])
+    if (mmdKidsList !== null && mmdKidsList instanceof Array) {
+      for (var i = 0; i < mmdKidsList.length; i++){
+		  if (mmdKidsList[i].scalar){
+			sortedList.push(mmdKidsList[i]);
+		  }
+	  }
+      for (var j = 0; j < mmdKidsList.length; j++){
+		  if (!mmdKidsList[j].scalar){
+			sortedList.push(mmdKidsList[j]);
+		  }
+	  }
     }
     return sortedList;
   }
@@ -587,7 +597,7 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
     baseURL[page.URL] = page.URL.substring(0, getPosition(page.URL,"/",3));
 	
     var extractedMeta = { };
-	mmdKids = mmd.kids;
+	var mmdKids = mmd.kids;
 	mmdKids = sortKids(mmdKids);
 	var contextNode = page;
 	var type = mmd.type;
@@ -634,7 +644,7 @@ if (typeof module == 'object') {
   module.exports = {
     extractMetadata: extractMetadata,
     extractMetadataSync: extractMetadataSync
-  }
+  };
 }
 
 //Helper functions, ported from ParserBase in BigSemanticsJava
