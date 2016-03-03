@@ -1,0 +1,313 @@
+.metadataRendering {
+	background: #EEE;
+	border-radius: 8px;
+	border: 1px solid gray;
+	margin: 8px;
+	padding: 8px;
+	min-width: 640px;
+}
+
+.metadataContainer {
+
+    font-size: 10px;
+    font-weight: 300;
+    	
+	border-top-right-radius: 8px;
+	border-bottom-right-radius: 8px;
+	border-bottom-left-radius: 8px;
+	width: 640px;
+	
+	line-height: 15px;
+	
+	position: relative;
+}
+
+.metadataTable {
+	margin: 0px 4px 0px 6px;
+	width: 100%;
+	display: table;
+	table-layout: fixed;
+	
+}
+
+.metadataTable tr{
+	display: table;
+	width:100%;
+}
+
+.metadataContainer p{
+	padding: 0px;
+	margin: 0px;
+}
+
+.metadataContainer table{
+	color: #111;
+	font-size: 12px;
+	
+	white-space: normal;
+	overflow: scroll;
+	text-overflow: ellipsis;
+	
+	table-layout: fixed;
+	border-spacing: 0px;
+  	border-collapse:collapse;
+	
+	margin: 0px;
+}
+
+.metadataContainer table .metadata_h1{
+	font-size: 18px;
+}
+
+.metadataContainer .fieldLabel{	
+	white-space: nowrap;
+	vertical-align: top;
+	text-align: right;
+	pointer-events: none;
+	padding: 2px;	
+	padding-left: 4px;
+	padding-right: 4px;
+	margin-left: 8px;
+	margin-right: 8px;
+}
+
+.metadataContainer .fieldValue{	
+	white-space: normal;
+	text-align: left;
+	vertical-align: middle;
+	text-overflow: ellipsis;
+	
+	
+	padding: 3px 8px;
+}
+
+.metadataContainer .favicon{
+	width: 16px;
+	height: 16px;
+	padding: 2px 0px 1px 8px;
+}
+
+.metadataContainer .faviconICE{
+	width: 16px;
+	height: 16px;
+	padding: 2px 0px 1px 8px;
+}
+
+.metadataContainer .labelCol{
+	vertical-align: top;
+	text-align: right;
+	
+	padding: 3px 0px 3px 0px;
+	
+}
+
+.metadataContainer .valueCol{
+	vertical-align: top;
+	text-align: left;
+	padding: 3px 0px 3px 0px;
+	margin: 0px;
+	
+	width: 100%
+}
+
+.metadataContainer a{
+	color: black;
+	font-size: 13px;
+}
+
+.metadataContainer a:hover{
+	color: gray;
+}
+
+.metadataContainer .fieldLabelContainer{
+	color: #ccc;
+	
+	background: #666;	
+	
+	border-top-left-radius: 8px;
+	border-bottom-left-radius: 8px;
+	
+	width: 100%;
+	min-height: 19px;
+}
+
+.metadataContainer .fieldLabelContainerOpened{
+	color: #888;
+	
+	background: white;
+	
+	border-top-left-radius: 8px;
+	border-bottom-left-radius: 8px;
+	
+	width: 100%;
+	min-height: 17px;
+	border: 1px solid #555;
+}
+
+.metadataContainer .fieldValueContainer{
+	
+	background: #ccc;
+	
+	border-top-right-radius: 8px;
+	border-bottom-right-radius: 8px;
+	
+	width: 100%;
+	min-height: 19px;
+	height: 19px;
+	text-overflow: ellipsis;
+	overflow: hidden;
+	
+	transition: height 0.3s;
+	-moz-transition: height 0.3s; /* Firefox 4 */
+	-webkit-transition: height 0.3s; /* Safari and Chrome */
+	-o-transition: height 0.3s; /* Opera */
+}
+
+.metadataContainer .fieldValueContainer:hover{
+	height: auto;
+}
+
+
+.metadataContainer .fieldChildContainer{
+	
+	background: #ccc;
+	
+	border-top-right-radius: 8px;
+	border-bottom-right-radius: 8px;
+	border-bottom-left-radius: 8px;
+	
+	width: 100%;
+	min-height: 19px;
+	text-overflow: ellipsis;
+}
+
+.metadataContainer .fieldCompositeContainer{
+	
+	background: #999;
+	
+	border: 1px solid #777;
+	
+	border-top-right-radius: 8px;
+	border-bottom-right-radius: 8px;
+	border-bottom-left-radius: 8px;
+	
+	width: 100%;
+	min-height: 19px;
+	text-overflow: ellipsis;	
+}
+
+.metadataContainer .expandButton{
+	background: white;
+	width: 16px;
+	height: 16px;
+	border-radius: 8px;
+	float: left;
+	margin: 1px 4px 1px 1px;
+}
+
+.metadataContainer .expandButton:hover{
+	background: gray;
+	cursor: pointer;
+}
+
+.metadataContainer .expandSymbol{
+	position: absolute;
+	background: darkgray;
+	width: 2px;
+	height: 12px;
+	margin: 2px 7px 2px 7px;
+	pointer-events: none;
+}
+
+.metadataContainer .collapseSymbol{
+	position: absolute;
+	background: darkgray;
+	width: 12px;
+	height: 2px;
+	margin: 7px 2px 7px 2px;
+	pointer-events: none;
+}
+
+.metadataContainer .openedSymbol{
+	position: relative;
+	top: 2px;
+	left: 2px;
+	width: 8px;
+	height: 8px;
+	border-radius: 6px;
+	border: 2px solid darkgray;
+}
+
+.metadataContainer .loadingRow{
+	background: white;
+	border-radius: 8px;
+	height: 15px;
+	margin-bottom: 4px;
+	padding: 2px 16px 2px 8px; 
+	
+}
+
+.metadataContainer .nestedPad{
+	padding: 0px;
+	padding-left: 8px;
+	padding-right: 4px;	
+}
+
+.metadataContainer .citeULikeButton:hover {
+	cursor: pointer;
+}
+
+.metadataContainer .citeULikeButton:hover img {
+	background: #8AA615;
+}
+
+.metadataContainer .citeULikeButton img{
+	width: 22px;
+	height: 18px;
+	background: white;
+	border-radius: 6px;
+	margin-left: 6px;
+	margin-right: 6px;
+	padding: 0px;
+	padding-left: 6px;
+	padding-right: 6px;
+}
+
+.lineCanvas {
+	width: 100%;
+	height: 100%;
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	pointer-events: none;
+	background: rgba(0, 0, 100, 0.0);
+}
+
+#content {
+	position: relative;
+}
+
+#bigLineCanvas {
+	width: 100%;
+	height: 100%;
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	pointer-events: none;
+	background: rgba(0, 0, 100, 0.0);
+}
+
+.hidden {
+	display: none;
+}
+
+.moreButton {
+	border-radius: 4px;
+	background: #ccc;
+	padding: 2px 6px;
+}
+
+.moreButton:hover {
+	cursor: pointer;
+	background: #bbb;
+}

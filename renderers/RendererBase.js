@@ -1,3 +1,4 @@
+
 /**
  *  Basic functions intended to be shared by metadata renderers
  *  RendererBase.addMetadataDisplay is the key function here
@@ -42,6 +43,8 @@ RendererBase.addMetadataDisplay = function(container, url, clipping, renderer, o
   if (clipping != null) {
     if (clipping.metadata != null && clipping.mmd != null) {
       var task = new RenderingTask(url, true, null, null, container, null, renderer, clipping.mmd, clipping.metadata)
+      task.options = options;
+
       task.handler(task);
       if(options.callback){
         options.callback({mmd: clipping.mmd, metadata: clipping.metadata});
@@ -52,6 +55,7 @@ RendererBase.addMetadataDisplay = function(container, url, clipping, renderer, o
 
   //Otherwise, we prepare to call BigSemantics
   var task = new RenderingTask(url, true, clipping, null, container, null, renderer);
+    task.options = options;
 
   if (clipping != null) {
     if (!clipping.metadata && clipping.rawMetadata) {
@@ -77,10 +81,30 @@ RendererBase.addMetadataDisplay = function(container, url, clipping, renderer, o
         }
       });
     });
-  } else {
+  } 
+  else if(clipping != null && clipping.viewModel){
+	task.fields = clipping.viewModel.value;
+    task.style = {styles: miceStyles, type: clipping.mmdName};
+    if(clipping.viewModel['minkfav']){
+    	task.favicon = clipping.viewModel['minkfav'];
+    }
+    task.options = options;
+
+    task.renderer(task);
+    if(options.callback){
+    	options.callback(clipping);
+    }
+  }
+  
+  else {
+    task.options = options;
+
     bsService.onReady(function(){
       bsService.loadMetadata(url, options, function(err, md_and_mmd){
-        if (err) { console.error(err); return; }
+        if (err) {
+        	console.error(err); 
+        	return;
+        }
         
         if(bsService.constructor.name == "BSAutoSwitch"){
         	  console.log("loadMetadata result from " + bsService.bsImpl.constructor.name + ": ", md_and_mmd);
@@ -89,8 +113,7 @@ RendererBase.addMetadataDisplay = function(container, url, clipping, renderer, o
       	  console.log("loadMetadata result from " + bsService.constructor.name + ": ", md_and_mmd);
 
         }
-        	
-        
+       
         task.mmd = md_and_mmd.mmd;
         task.mmd = simpl.graphExpand(task.mmd);
         task.metadata = md_and_mmd.metadata;
@@ -102,7 +125,6 @@ RendererBase.addMetadataDisplay = function(container, url, clipping, renderer, o
 				veryBadAddMetadataToClippingStorage(task.metadata);
 			}	
         
-       
         task.handler(task);
         if(options.callback){
         	options.callback(md_and_mmd);
