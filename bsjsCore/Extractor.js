@@ -109,10 +109,10 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 					obj = page.URL;
 				}
 				
-				if (obj !== null)
+				if (obj)
 				{
 					e = false;
-					if (tag !== undefined){
+					if (tag){
 						d[tag] = obj;
 						if (!isNested && !isLowerLvl) {
 							upperLevel[page.URL][tag] = obj;
@@ -141,10 +141,10 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 				
 				if(!isObjEmpty(obj,page))
 				{
-					if(obj !== null)
+					if(obj)
 					{
 						e = false;
-						if (tag !== undefined){
+						if (tag){
 							d[tag] = obj;
 						} else {
 							d[name] = obj;
@@ -162,10 +162,10 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 					contextNode = defVars[field.context_node];
 				}
 				obj = getCollectionD(field,contextNode,recurse,parserContext,page);
-				if(obj !== null)
+				if(obj)
 				{
 					e = false;
-					if (tag !== undefined) {
+					if (tag) {
 						d[tag] = obj;
 					} else {
 						d[name] = obj;
@@ -280,7 +280,7 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 			data = dataFromKids(kids,contextNode,false,parserContext,page,true);
 		}  
 		
-		if(data !== null)
+		if(data)
 		{	
 			data.download_status = "UNPROCESSED";
 			
@@ -307,8 +307,7 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 		var x = null;
 		var data = null;
 		
-		if (field.hasOwnProperty("xpaths"))
-		{
+		if (field.hasOwnProperty("xpaths")) {
 			var fieldx = field.xpaths;
 			for (var j = 0; j < fieldx.length; j++) {
 				x = getCollectionData(field,fieldx[j],contextNode,page);
@@ -319,8 +318,7 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 			}
 		}	
 
-		if(data !== null)
-		{	
+		if(data) {	
 			return data;
 		}				
 		return null;
@@ -392,7 +390,7 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 
 		var node = nodes.snapshotItem(0);
 
-		if (node.textContent !== null) {
+		if (node.textContent) {
 			return node;
 		}
 		return null;
@@ -437,7 +435,7 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 	            //    var obj = dataFromKids(kids,newNode,false,null,page);
 	            //}
 
-				if (obj !== null)
+				if (obj)
 				{
 					if (f.scope.hasOwnProperty('resolved_generic_type_vars')) {
 						for (g in f.scope.resolved_generic_type_vars){
@@ -500,7 +498,7 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 			var concat = concatList[i];
 			if (concat.hasOwnProperty("from_scalar")){
 				var fromScalar = concat.from_scalar;
-				if (scalars[page.URL][fromScalar] !== undefined){
+				if (scalars[page.URL][fromScalar]){
 					concatString = concatString + scalars[page.URL][fromScalar];
 				}
 			}
@@ -557,7 +555,7 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
    */
   function sortKids(mmdKidsList) {
     var sortedList = [];
-    if (mmdKidsList !== null && mmdKidsList instanceof Array) {
+    if (mmdKidsList && mmdKidsList instanceof Array) {
       for (var i = 0; i < mmdKidsList.length; i++){
 		  if (mmdKidsList[i].scalar){
 			sortedList.push(mmdKidsList[i]);
@@ -610,7 +608,7 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 				var def = mmd.def_vars[i];
 				var path = def.xpaths[0];
 				var nodes = page.evaluate(path, page, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
-				if (nodes.snapshotLength !== null)
+				if (nodes.snapshotLength)
 				{
 					var n = def.name;
 					var snap = nodes.snapshotItem(0);
@@ -622,7 +620,7 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
     
     countXpaths(mmdKids, page);
     
-	if (type !== undefined) 
+	if (type) 
 	{
 		extractedMeta[type] = dataFromKids(mmdKids,contextNode,true,null,page);
 		extractedMeta[type].download_status = "DOWNLOAD_DONE";
