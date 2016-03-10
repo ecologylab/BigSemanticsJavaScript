@@ -433,8 +433,8 @@ MICE.buildImageField = function(metadataField, isChildTable, styleInfo, valueCol
 		{
 			var fieldLabel = document.createElement('p');
 				fieldLabel.className = styleInfo.styles.fieldLabel;
-				fieldLabel.innerText = BSUtils.toDisplayCase(label.value);
-				fieldLabel.textContent = BSUtils.toDisplayCase(label.value);
+				fieldLabel.innerText = BSUtils.removeLineBreaksAndCrazies(label.value);
+				fieldLabel.textContent = BSUtils.removeLineBreaksAndCrazies(label.value);
 
 			fieldLabelDiv.appendChild(fieldLabel);
 		}
@@ -624,7 +624,7 @@ MICE.buildCollectionLabelColumn = function(metadataField, nameCol, styleInfo, ex
 	var label = RendererBase.getFieldLabel(metadataField);
 
 	if(label.type == 'scalar'){
-		var data = label.value + " (" + metadataField.value.length + ")";
+		var data = BSUtils.toDisplayCase(label.value) + " (" + metadataField.value.length + ")";
 		var text = document.createTextNode(data);
 		fieldLabelDiv.appendChild(text);
 
