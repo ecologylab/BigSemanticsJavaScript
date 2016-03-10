@@ -7,6 +7,8 @@
     margin: 8px;
     padding: 8px;
     min-width: 640px;
+    
+    font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
 }
 .ecologylab-facetLabel{
 	float:left;
@@ -24,6 +26,8 @@
     line-height: 15px;
 
     position: relative;
+    
+    font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
 
 }
 
@@ -164,6 +168,7 @@
     width: 16px;
     height: 16px;
     padding: 2px 0px 1px 8px;
+    vertical-align: middle;
 }
 
 .ecologylab-metadataContainer .ecologylab-labelCol{
