@@ -13,7 +13,6 @@ minkApp.offScreenColumnsLeft = 0;
 minkApp.offScreenColumnsRight = 0;
 minkApp.favorites = [];
 minkApp.currentQuery = null;
-minkApp.linkToViewModelMap = new Map();
 minkApp.linkToMetadataMap = new Map();
 minkApp.queryMap = new Map();
 var bsService = new BSAutoSwitch(['eganfccpbldleckkpfomlgcbadhmjnlf', 'gdgmmfgjalcpnakohgcfflgccamjoipd', 'elkanacmmmdgbnhdjopfdeafchmhecbf']);
@@ -752,6 +751,27 @@ function toGoogleUrl(searchString){
 }
 
 
+
+minkApp.addSearchToQuery = function(parent, query, rooturl){
+
+		var wrapper= buildDiv('minkPileWrapper');
+		var row = buildDiv('minkPileRow');
+		var newPile = buildDiv('minkPile minkPileExpanded');
+		var pileId = pileIDGen(rooturl);
+		var pile = new minkPile(pileId, null, null, newPile, null, rooturl);
+		if(minkApp.currentQuery){
+			var facets = getFacetsFromHTML();
+		}
+		//pile.setAttribute('pileID', pileId);
+		row.appendChild(newPile);
+		wrapper.appendChild(row);
+		newPile.setAttribute('pileid', pileId);
+		parent.appendChild(wrapper);
+
+		return pile;
+
+}
+
 minkApp.exploreNewQuery = function(queryString){
 
 	if(minkApp.currentQuery){
@@ -784,7 +804,13 @@ minkApp.exploreNewQuery = function(queryString){
 		$('#minkColumns')[0].appendChild(column);
 	}
 	$('#contextTitle')[0].innerHTML = nQuery.contextTitle;
-	var pile = minkApp.buildPile(column, nQuery.urls, nQuery.urls[0], null, null, true);
+
+	var pile = minkApp.addSearchToQuery(column, nQuery, nQuery.urls[0]);
+	//Create a pile in the column. request md for it. then make cards, then ask minkComposer to deal with em
+	MinkOracle.getSearchMetadata(nQuery.urls[0], pile.HTML);
+
+
+
 	nQuery.pileMap.put(pileIDGen(nQuery.urls[0], null), pile);
 	nQuery.columns.push(column);
 
@@ -1089,7 +1115,46 @@ minkApp.minkEventHandler = function(event){
 
 
 
-	 }else if(event.detail.type == 'minkshowless'){
+	 }else if(event.detail.type == "searchmetadata"){
+
+
+		 var pileID = event.srcElement.getAttribute('pileID');
+		 var pile =  minkApp.currentQuery.pileMap.get(pileID);
+		 pile.semantics = event.detail.semantics;
+		 var wrapper = $(pile.HTML).closest('.minkPileWrapper')[0];
+		 $(pile).find('.minkLoadingSpinner').remove();
+		/*
+		if the iteration canary is visble, give the pile a new URL as the new results URL so that buildPile knows to make it
+		a  new card loader. If the canary has 'died' then delete any existing more loaders
+
+		*/
+		var semantics = event.detail.semantics;
+		var formerIndex = semantics.urlIndex;
+		var loader = $(pile.HTML).closest('.minkPileWrapper').find('.minkPileLoader')[0];
+		semantics.incrementUrl(loader);
+
+
+		var cards = minkApp.buildCards(pile.HTML, pile.semantics.results.links, true, null, pile.semantics.searchUrl);
+		pile.cards = cards;
+
+
+
+		if(minkApp.currentQuery){
+			var facets = getFacetsFromHTML();
+			applyFacets(minkApp.currentQuery, facets);
+
+		}
+	 if(semantics.canary){
+			minkApp.buildPileMoreLoader(wrapper, pile, semantics.iterableURL, semantics.searchUrl);
+		}
+
+		 console.log(event.detail.links);
+
+
+
+
+	 }
+	 else if(event.detail.type == 'minkshowless'){
 		 var id = pileIDGen(event.detail.rooturl, event.detail.collectionname);
 		 var pile = minkApp.currentQuery.pileMap.get(id);
 		 pile.rootHTML = event.srcElement;
@@ -1110,6 +1175,7 @@ minkApp.minkEventHandler = function(event){
 	 else if(event.detail.type=='minkfavorite'){
 		 minkApp.toggleFavorite(event.detail.url, event.detail.mdname, event.detail.favicon, event.detail.html);
 	 }else if(event.detail.type=='minksearchstripper'){
+
 
 		 var pileID = event.srcElement.getAttribute('pileID');
 		 var pile =  minkApp.currentQuery.pileMap.get(pileID);
@@ -1140,7 +1206,7 @@ minkApp.minkEventHandler = function(event){
 		//should be counted but i don't yet
 		pile.HTML.removeChild(pile.HTML.childNodes[formerIndex]);
 		event.detail.links.links.splice(5, 5);
-		var cards = minkApp.buildCards(pile.HTML, event.detail.links.links, true, pile);
+		var cards = minkApp.buildCards(pile.HTML, event.detail.links.links, true, pile, semantics.url);
 		pile.cards = pile.cards.concat(cards);
  		if(minkApp.currentQuery){
 			var facets = getFacetsFromHTML();
@@ -1503,7 +1569,7 @@ minkApp.getSearchResultLinks = function(task){
 
 minkApp.prepareSemantics = function(task){
 	var metadataFields = task.fields;
-	minkApp.linkToViewModelMap.put(task.url, task.fields);
+	MinkOracle.viewModelMap.put(task.url, task.fields);
 
 	if(task.mmd && task.mmd['meta_metadata'].extends == 'search'){
 		var minkLinks = minkApp.getSearchResultLinks(task);
@@ -1551,7 +1617,7 @@ minkApp.cardSemantics = function(cardDiv, link, clipping, options){
 }
 
 
-minkApp.buildCards = function(parent, links, expandCards, pile){
+minkApp.buildCards = function(parent, links, expandCards, pile, favUrl){
 	var cards = [];
 	parent.addEventListener('minkloaded', minkApp.addCardToPile);
 	//Note, in the future will use yin's structure from google doc. In the meantime, just gonna do it 'the easy way'
@@ -1559,7 +1625,7 @@ minkApp.buildCards = function(parent, links, expandCards, pile){
 	//Builds card
 	//parent.style.height = (links.length * 39 -2 ).toString() + "px";
 
-	var faviconLink = "";
+	var faviconLink = favUrl;
 	if(links[(links.length-1)].startsWith("fav::")){
 		faviconLink = links.pop();
 		faviconLink = faviconLink.substring(5);
@@ -1581,9 +1647,17 @@ minkApp.buildCards = function(parent, links, expandCards, pile){
 		var card = new minkCard(link, cardDiv, pile);
 		cards.push(card);
 
+
+		if(link == toGScholarUrl('curation')){
+			console.log('ENTERING NEW CODE');
+
+			MinkOracle.getSearchMetadata(link, cardHTML);
+			return cards;
+		}
+
 		//check to see if there's metadata contained therein{
 		if(link.startsWith('mink::')){
-			var metadata = minkApp.linkToViewModelMap.get(link);
+			var metadata = MinkOracle.viewModelMap.get(link);
 			metadata['minkfav'] = faviconLink;
 
 
@@ -1593,7 +1667,7 @@ minkApp.buildCards = function(parent, links, expandCards, pile){
 		    takes Source_info and processes it into a year field. Really shouldn't be done here but we're demo'ing
 		    */
 		    //here metadata is a viewmodel and md is just metadata
-	    	var metadata = minkApp.linkToViewModelMap.get(link);
+	    	var metadata = MinkOracle.viewModelMap.get(link);
 	    	var yr = minkApp.polishYear(metadata);
 	    	if(yr){
 	    		var year = parseInt(yr);
@@ -1609,10 +1683,10 @@ minkApp.buildCards = function(parent, links, expandCards, pile){
 		    }
 		    //devalue passed into mink?
 			var clipping = {viewModel: metadata};
-			minkApp.cardSemantics(cardDiv, link, clipping, {expand: true, callback: minkApp.contextualize, devalue: card.duplicate, viewmodel: minkApp.linkToViewModelMap});
+			minkApp.cardSemantics(cardDiv, link, clipping, {expand: true, callback: minkApp.contextualize, devalue: card.duplicate, viewmodel: MinkOracle.viewModelMap});
 
 		}else{
-			minkApp.cardSemantics(cardDiv, link, null, {expand: true, callback: minkApp.contextualize, devalue: card.duplicate, viewmodel: minkApp.linkToViewModelMap});
+			minkApp.cardSemantics(cardDiv, link, null, {expand: true, callback: minkApp.contextualize, devalue: card.duplicate, viewmodel: MinkOracle.viewModelMap});
 
 		}
 
