@@ -20,7 +20,9 @@ var BSExtension = (function() {
     if (!this.extractor && typeof extractMetadata == 'function') {
       this.extractor = extractMetadata;
     }
-
+	
+	this.bss = new BSService();
+	  
     var that = this;
     var extensionsLeftToCheck = this.extIds.length;
     function testExt(index) {
@@ -124,14 +126,33 @@ var BSExtension = (function() {
 
     if (options && options.page && this.extractor) {
       // we already have the DOM (in options.page)
+      var that = this;
       getMmd(function(err, mmd) {
         if (err) { callback(err, null); return; }
 
+		if (mmd.meta_metadata.filter_location){
+			location = PreFilter.filter(location, mmd.meta_metadata.filter_location);
+		}
         var response = { location: location, entity: options.page };
         console.log("Extracting in content script: " + location);
-        that.extractor(response, mmd, that, options, function(err, metadata) {
-          if (err) { callback(err, null); return; }
-          callback(null, { metadata: metadata, mmd: mmd });
+		MicroDataTools.useMicroDataToImproveMMD(response , mmd , that , function(err , newMMD) {
+          if ( err ) {
+            console.log("There was an error in using micro data to improve mmd");
+          } else {
+            mmd = newMMD;
+          }
+          if (mmd.meta_metadata.extract_with == "service"){
+            that.usedService = true; //so we can display in the slideout
+            options.useHttps = (window.location.protocol == 'https:'); //use Https if we are on an https page
+            that.bss.loadMetadata(location, options, callback);
+          }
+          else {
+            that.usedService = false;
+            that.extractor(response, mmd, that, options, function(err, metadata) {
+              if (err) { callback(err, null); return; }
+              callback(null, { metadata: metadata, mmd: mmd });
+            });
+          }
         });
       });
     } else {
@@ -141,19 +162,19 @@ var BSExtension = (function() {
         callback(err, result);
       });
     }
-  }
+  };
 
   BSExtension.prototype.loadInitialMetadata = function(location, options, callback) {
     var params = { location: location, options: options };
     this.sendMessageToExt('loadInitialMetadata', params, callback);
-  }
+  };
 
   BSExtension.prototype.loadMmd = function(name, options, callback) {
     var params = { name: name, options: options };
     this.sendMessageToExt('loadMmd', params, function(err, result) {
       callback(err, result);
     });
-  }
+  };
 
   BSExtension.prototype.selectMmd = function(location, options, callback) {
     var params = { location: location, options: options };

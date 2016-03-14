@@ -1,6 +1,6 @@
 
 /**
- * RenderingTask is essentially (though not techincally) and ectension of MetadataTask. The big difference is that
+ * RenderingTask is essentially (though not techincally) and extension of MetadataTask. The big difference is that
  * rendering task passes the metadata is recieves through the ViewModeler before giving it to the rendering function
  *
  * @param url of the document
@@ -41,7 +41,8 @@ function RenderingTask(url, isRoot, clipping, handler, container, extractor, ren
   this.renderer = renderer;
   this.extractor = extractor;
 
-}RenderingTask.prototype.idealRenderer = function(task){
+}
+RenderingTask.prototype.idealRenderer = function(task){
 	if(RendererBase.idealRenderer){
 		if(task.mmd.renderer == 'tweetbubble'|| task.constructor.name == "TweetBubbleRenderingTask"){
 			TwitterRenderer.render(task);
@@ -56,12 +57,15 @@ function RenderingTask(url, isRoot, clipping, handler, container, extractor, ren
 
 	}
 }
-RenderingTask.prototype.metadataToModel = function(task){
+RenderingTask.prototype.metadataToModel = function(task, options){
 
     var metadataFields =
     	ViewModeler.createMetadata(task.isRoot, task.mmd,
                                     task.metadata, task.url);
     // Is there any visable metadata?
+    
+    
+
     if (ViewModeler.hasVisibleMetadata(metadataFields))
     {	
     	
@@ -72,7 +76,14 @@ RenderingTask.prototype.metadataToModel = function(task){
      //Adds the metadata type as an attribute to the first field in the MD
       metadataFields[0].parentMDType = task.mmd.name;
       task.fields = metadataFields;
-      task.style = {styles: miceStyles, type: task.mmd.name};
+      task.style = {styles: miceStyles};
+      if(!task.options && options){
+      task.options = options;
+
+      }
+
+
+
       RenderingTask.prototype.idealRenderer(task);
       return task;
     }

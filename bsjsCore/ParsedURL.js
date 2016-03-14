@@ -1,6 +1,8 @@
 // ParsedURL.
 
 var ParsedURL = (function() {
+  var subdomainsAndHosts = ['www', 'en']; //we strip these from urls. 
+	
   function ParsedURL(url) {
     if (url) {
       this.raw = url;
@@ -17,13 +19,20 @@ var ParsedURL = (function() {
         this.port = hostSpec.port;
 
         // TODO a better way of getting the top level domain, see
-        // https://publicsuffix.org/list/public_suffix_list.dat
-        if (this.host.length >= 4 && this.host.substr(0, 4) == 'www.') {
-          this.domain = this.host.substr(4);
-        } else {
-          this.domain = this.host;
-        }
-
+        // https://publicsuffix.org/list/public_suffix_list.dat		
+		// this is better but not ideal
+		var strippedHost = this.host;
+		for (var i in subdomainsAndHosts){
+			var toStrip = subdomainsAndHosts[i] + '.';
+			var len = toStrip.length;
+			if (strippedHost.length >= len && strippedHost.substr(0, len) == toStrip){
+				strippedHost = strippedHost.substr(len);
+			}
+		}  
+          
+		this.domain = strippedHost;
+        
+		  
         this.path = matches[4];
         if (this.path.length == 0) {
           this.path = '/';
@@ -113,7 +122,7 @@ var ParsedURL = (function() {
     if (query && query.length > 0) {
       if (query[0] == '?') { query = query.substr(1); }
       var parts = query.split('&');
-      for (var i in parts) {
+      for (var i = 0; i < parts.length; i++) {
         var pair = parts[i].split('=');
         var name = pair[0];
         var val = decodeURIComponent(pair[1]);
@@ -132,7 +141,7 @@ var ParsedURL = (function() {
     }
     return result;
   }
-
+  
   return ParsedURL;
 })();
   
