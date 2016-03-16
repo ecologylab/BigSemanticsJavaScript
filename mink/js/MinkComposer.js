@@ -162,6 +162,10 @@ MinkComposer.createSpaceBelow = function(composeable, amount){
       sibling.reposition(sibling.y + amount);
 
     }
+    if(!composeable.isRoot()){
+      MinkComposer.createSpaceBelow(composeable.parent, amount);
+
+    }
 
   }
 
