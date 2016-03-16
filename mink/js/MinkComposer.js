@@ -49,7 +49,12 @@ Composeable.prototype.getHeight = function(){
 }
 Composeable.prototype.hasSilbings = function(){
   if(this.isRoot()){
-    return false
+    if(MinkComposer.rootComposeables.length > 1){
+      return true;
+    }else{
+      return false
+
+    }
   }else{
     if(this.parent.childComposables.length > 1){
       return true;
@@ -60,7 +65,15 @@ Composeable.prototype.hasSilbings = function(){
 }
 Composeable.prototype.getSiblings = function(){
   if(this.isRoot()){
-    return [];
+    var children = MinkComposer.rootComposeables;
+    var newChildren = [];
+    for (var i = 0; i < children.length; i++){
+      if(this.id != children[i].id){
+        newChildren.push(children[i]);
+      }
+
+    }
+    return newChildren;
   }else{
     var children = this.parent.childComposables;
     var newChildren = [];
@@ -97,7 +110,7 @@ MinkComposer.insertComposeable = function(composeable){
     if(index == 0){
       composeable.reposition(0);
     }else{
-      var ourElement = MinkComposer.rootComposeables[index-1].HTML.scrollHeight + MinkComposer.rootComposeables[index-1].y + 8;
+      var ourElement = MinkComposer.rootComposeables[index-1].HTML.scrollHeight + MinkComposer.rootComposeables[index-1].y;
       composeable.reposition(ourElement);
     }
   }else{
@@ -107,6 +120,7 @@ MinkComposer.insertComposeable = function(composeable){
       var currentScrollheight = composeable.HTML.scrollHeight;
 
       composeable.reposition(baseHeight);
+      parent.childrenHeight = composeable.HTML.scrollHeight;
 
     }else{
       //right now hard coded for two siblings
@@ -116,34 +130,49 @@ MinkComposer.insertComposeable = function(composeable){
         siblingsHeight = siblingsHeight + siblings[i].getHeight();
 
       }
-      var newY = siblingsHeight;
-      var totalHeight = siblingsHeight + composeable.getHeight();
-      var baseHeightOfSiblings = siblings[0].y;
-      composeable.parent.reposition((totalHeight/2) - (parent.getHeight()/2) + baseHeightOfSiblings);
+      var newY = siblingsHeight + siblings[0].y;
       composeable.reposition(newY);
+
+      composeable.parent.reposition(parent.y + (composeable.getHeight()/2));
+      MinkComposer.createSpaceBelow(parent, composeable.getHeight());
 
     }
   }
 
 
-  MinkComposer.createSpaceForComposeable(composeable);
+}
+
+MinkComposer.createSpaceBelow = function(composeable, amount){
+  if(composeable.hasSilbings()){
+
+    var siblingsIncludingComp;
+    if(composeable.isRoot()){
+      siblingsIncludingComp = MinkComposer.rootComposeables;
+
+    }else{
+      siblingsIncludingComp = composeable.parent.childComposables;
+
+    }
+
+    var index = siblingsIncludingComp.indexOf(composeable);
+
+
+    for (var i = index+1; i < siblingsIncludingComp.length; i++){
+      var sibling = siblingsIncludingComp[i];
+      sibling.reposition(sibling.y + amount);
+
+    }
+
+  }
+
 }
 
 MinkComposer.centerViewOnComposeable = function(composeable){
 
 }
 
-MinkComposer.createSpaceForComposeable = function(composeable){
-  // var parent = composeable.parent;
-  // if(!composeable.isRoot()){
-  //   var height = composeable.HTML.scrollHeight;
-  //   var parentNewY = parent.y + (height/2) - (parent.HTML.scrollHeight/2)
-  //   if(parentNewY < 0){
-  //     parentNewY = parent.y;
-  //   }
-  //   parent.reposition(parentNewY)
-  //   parent.childrenHeight = composeable.HTML.scrollHeight;
-  //
-  // }
-  console.log("SPACING CARD")
+MinkComposer.createSpaceForComposeable = function(composeable, amount){
+  //tells the other mink cards around an expanded parent to fuck off
+
+
 }

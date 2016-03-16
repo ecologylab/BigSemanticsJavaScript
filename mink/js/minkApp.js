@@ -1186,7 +1186,7 @@ minkApp.addParentlessPile = function(event){
 	var pileID = event.srcElement.getAttribute('pileID');
 	var pile =  minkApp.currentQuery.pileMap.get(pileID);
 	pile.semantics = event.detail.semantics;
-	pile.semantics.results.links = pile.semantics.results.links.slice(0, 4)
+	pile.semantics.results.links = pile.semantics.results.links.slice(0, 5)
 
 	var wrapper = $(pile.HTML).closest('.minkPileWrapper')[0];
 	$(pile).find('.minkLoadingSpinner').remove();
