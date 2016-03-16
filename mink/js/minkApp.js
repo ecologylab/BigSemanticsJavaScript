@@ -15,7 +15,7 @@ minkApp.favorites = [];
 minkApp.currentQuery = null;
 minkApp.linkToMetadataMap = new Map();
 minkApp.queryMap = new Map();
-var bsService = new BSAutoSwitch(['eganfccpbldleckkpfomlgcbadhmjnlf', 'gdgmmfgjalcpnakohgcfflgccamjoipd', 'elkanacmmmdgbnhdjopfdeafchmhecbf']);
+var bsService = new BSExtension(['eganfccpbldleckkpfomlgcbadhmjnlf', 'gdgmmfgjalcpnakohgcfflgccamjoipd', 'elkanacmmmdgbnhdjopfdeafchmhecbf']);
 //var bsService = new BSService();
 minkApp.cardDuplicateMap = new Map();
 
@@ -128,53 +128,53 @@ function getFacetsFromHTML(){
 Filter by year early
 */
 function applyFacets(query, facets){
-	//for now we support two facet types: keyword and year
-	//remove existing facet and replace with new one supplied by system
-	var numberFiltered = 0;
-	query.facets = facets;
-	//for all facets, deselect all cards that do not fit specifications
-
-	//Finds all the cards
-	var keys = query.pileMap.keys;
-	for (var i = 0; i < keys.length; i++){
-		var pile = query.pileMap.get(keys[i]);
-			var cards = pile.cards;
-
-			//for earch card compare to whichever facets we have
-
-		for (var j = 0; j < cards.length; j++){
-			var filtered = false;
-			for(var k = 0; k < query.facets.length; k++){
-				for(var l = 0; l < cards[j].facets.length; l++){
-					if(query.facets[k].name == cards[j].facets[l].name){
-						if(query.facets[k].name == "year"){
-							if(!(query.facets[k].value[0] <= cards[j].facets[l].value && query.facets[k].value[1] >= cards[j].facets[l].value)){
-								filtered = true;
-								numberFiltered++;
-							}
-
-						}
-					}
-
-				}
-
-			}
-
-			cards[j].filteredOut = filtered;
-			minkApp.updateCardDisplay(cards[j]);
-
-		}
-	}
-
-	var indicatorString = numberFiltered.toString() + " cards removed";
-	if(numberFiltered > 0){
-		$('#removeFacets').removeClass('hidden')
-		$("#minkFacetsRemovedIndicator")[0].innerHTML = indicatorString;
-
-		$('#minkFacetsRemovedIndicator').closest('.minkFacetMenuItem').removeClass('hidden')
-
-	}
-
+	// //for now we support two facet types: keyword and year
+	// //remove existing facet and replace with new one supplied by system
+	// var numberFiltered = 0;
+	// query.facets = facets;
+	// //for all facets, deselect all cards that do not fit specifications
+	//
+	// //Finds all the cards
+	// var keys = query.pileMap.keys;
+	// for (var i = 0; i < keys.length; i++){
+	// 	var pile = query.pileMap.get(keys[i]);
+	// 		var cards = pile.cards;
+	//
+	// 		//for earch card compare to whichever facets we have
+	//
+	// 	for (var j = 0; j < cards.length; j++){
+	// 		var filtered = false;
+	// 		for(var k = 0; k < query.facets.length; k++){
+	// 			for(var l = 0; l < cards[j].facets.length; l++){
+	// 				if(query.facets[k].name == cards[j].facets[l].name){
+	// 					if(query.facets[k].name == "year"){
+	// 						if(!(query.facets[k].value[0] <= cards[j].facets[l].value && query.facets[k].value[1] >= cards[j].facets[l].value)){
+	// 							filtered = true;
+	// 							numberFiltered++;
+	// 						}
+	//
+	// 					}
+	// 				}
+	//
+	// 			}
+	//
+	// 		}
+	//
+	// 		cards[j].filteredOut = filtered;
+	// 		minkApp.updateCardDisplay(cards[j]);
+	//
+	// 	}
+	// }
+	//
+	// var indicatorString = numberFiltered.toString() + " cards removed";
+	// if(numberFiltered > 0){
+	// 	$('#removeFacets').removeClass('hidden')
+	// 	$("#minkFacetsRemovedIndicator")[0].innerHTML = indicatorString;
+	//
+	// 	$('#minkFacetsRemovedIndicator').closest('.minkFacetMenuItem').removeClass('hidden')
+	//
+	// }
+	//
 
 }
 
@@ -454,7 +454,7 @@ minkApp.initialize = function(minkAppHTML){
 	//minkApp.currentQuery.columns = columns;
 	minkApp.leftMostCol = columns[0];
 	minkApp.rightMostCol = columns[0];
-	columns[0].setAttribute('column', '1');
+	columns[0].setAttribute('column', '0');
 	minkApp.maxCols = 3;
 	minkApp.HTML = minkAppHTML;
 
@@ -635,7 +635,7 @@ minkApp.nsearchKeypress = function(event){
 			minkApp.hidePreviousQuery();
 
 			column = minkApp.buildColumn($('#minkColumns')[0]);
-			column.setAttribute('column', '1');
+			column.setAttribute('column', '0');
 			$('#minkColumns')[0].appendChild(column);
 		}
 		$('#contextTitle')[0].innerHTML = nQuery.contextTitle;
@@ -720,7 +720,7 @@ minkApp.exploreURL = function(url){
 		minkApp.hidePreviousQuery();
 
 		column = minkApp.buildColumn($('#minkColumns')[0]);
-		column.setAttribute('column', '1');
+		column.setAttribute('column', '0');
 		$('#minkColumns')[0].appendChild(column);
 	}
 	var pile = minkApp.buildPile(column, [url], url, null, null);
@@ -800,14 +800,14 @@ minkApp.exploreNewQuery = function(queryString){
 		minkApp.hidePreviousQuery();
 
 		column = minkApp.buildColumn($('#minkColumns')[0]);
-		column.setAttribute('column', '1');
+		column.setAttribute('column', '0');
 		$('#minkColumns')[0].appendChild(column);
 	}
 	$('#contextTitle')[0].innerHTML = nQuery.contextTitle;
 
 	var pile = minkApp.addSearchToQuery(column, nQuery, nQuery.urls[0]);
 	//Create a pile in the column. request md for it. then make cards, then ask minkComposer to deal with em
-	MinkOracle.getSearchMetadata(nQuery.urls[0], pile.HTML);
+	MinkOracle.getSemantics(nQuery.urls[0], pile, "rootQueryMetadata", MinkOracle.prepareSearchSemantics);
 
 
 
@@ -823,104 +823,10 @@ minkApp.exploreNewQuery = function(queryString){
 }
 
 
-//if new Column is true, ignore code about opneing a new colun
-minkApp.moveForward = function(newColumn){
-	//
-
-	var already = false;
-	 for(var i = 0; i < minkApp.currentQuery.columns.length; i++){
-		  var colNo = parseInt(minkApp.currentQuery.columns[i].getAttribute('column'));
-
-		  if(colNo == 1){
-			  minkApp.currentQuery.columns[i].classList.add('minkDeletingColumn');
-			  minkApp.currentQuery.columns[i].addEventListener('animationend', minkApp.toggleDisplay)
-			  minkApp.currentQuery.columns[i].setAttribute('column', "0");
-
-			  }
-		  else if(colNo == 2){
-				  minkApp.leftMostCol = minkApp.currentQuery.columns[i];
-		  }
-
-		  if(colNo > 1 && (already == false))
-			  minkApp.currentQuery.columns[i].setAttribute('column', (colNo - 1).toString());
-
-
-		 if(colNo == (minkApp.maxCols) && (newColumn != true) && (already == false)){
-			  minkApp.currentQuery.columns[(i+1)].setAttribute('column', minkApp.maxCols.toString());
-			  minkApp.rightMostCol = minkApp.currentQuery.columns[(i+1)];
-			  minkApp.rightMostCol.style.display = '';
-			  $(minkApp.rightMostCol).removeClass("minkDeletingColumnRight");
-			  //this is a hacky way to ensure this code is only executed one
-			  already = true;
-
-		 }
-	 }
-		minkApp.offScreenColumnsLeft++;
-		if(minkApp.offScreenColumnsRight > 0){
-			minkApp.offScreenColumnsRight--;
-
-		}
-		$(".minkBackButton").css('display', '');
-		$(".leftPlaceholder").css('display', 'none');
-
-		if(minkApp.offScreenColumnsRight < 1){
-			$(".minkForwardButton").css('display', 'none');
-			$(".rightPlaceholder").css('display', '');
-
-		}
-		minkApp.currentQuery.column++;
-
-}
-minkApp.goBackwards = function(howMany){
-	 for(var i = 0; i < minkApp.currentQuery.columns.length; i++){
-		  var colNo = parseInt(minkApp.currentQuery.columns[i].getAttribute('column'));
-		  if(colNo == 1){
-			  minkApp.currentQuery.columns[(i-1)].setAttribute('column', "1");
-			  minkApp.leftMostCol = minkApp.currentQuery.columns[(i-1)];
-			  minkApp.leftMostCol.style.display = '';
-			  $(minkApp.leftMostCol).removeClass("minkDeletingColumn");
-
-
-		  }
-		  if(colNo == minkApp.maxCols){
-			  minkApp.currentQuery.columns[i].classList.add('minkDeletingColumnRight');
-			  minkApp.currentQuery.columns[i].addEventListener('animationend', minkApp.toggleDisplay)
-			  minkApp.currentQuery.columns[i].setAttribute('column', "0");
-
-
-		  }else if(colNo > 0){
-			  minkApp.currentQuery.columns[i].setAttribute('column', (colNo + 1).toString());
-
-		  }
-	 }
-	 minkApp.offScreenColumnsRight++;
-		minkApp.offScreenColumnsLeft--;
-
-	 $(".minkForwardButton").css('display', '');
-	 $(".rightPlaceholder").css('display', 'none');
-
-	 if(minkApp.offScreenColumnsLeft < 1){
-			$(".minkBackButton").css('display', 'none');
-			 $(".leftPlaceholder").css('display', '');
-
-		}
-	minkApp.currentQuery.column--;
-
-}
 minkApp.buildColumn = function(parent){
 	var column = buildDiv('minkColumn');
 	parent.appendChild(column);
 	return column;
-}
-minkApp.goBackHandler = function(event){
-	console.log('hahaha')
-	minkApp.goBackwards(1);
-
-}
-minkApp.goForwardsHandler = function(event){
-	console.log('hahaha')
-	minkApp.moveForward();
-
 }
 
 minkApp.toggleFavorite = function(url, mdName, faviconLink, srcHTML){
@@ -1039,64 +945,80 @@ minkApp.favoritesToggleHandler = function(event){
 
 
 }
+minkApp.buildChildPileContainer = function(parentPileId, targetColumn){
+	var newContainer = buildDiv('minkChildPileContainer');
+	newContainer.setAttribute('parentCard', parentPileId)
+	targetColumn.appendChild(newContainer);
+	//TODO COMPOSE
+	return newContainer;
+}
 
-minkApp.newPile = function(details, srcElement){
-	//Determine which column the event comes from
-	 var nextCol = null;
-	 var targetColumn = $(srcElement).closest(".minkColumn")[0];
-	 var columnNumber = parseInt(targetColumn.getAttribute('column'));
-	 console.log(columnNumber);
-	 if((targetColumn == minkApp.rightMostCol) || (minkApp.rightMostCol == null)){
-		 if(columnNumber < minkApp.maxCols){
-			 //makes new column and add it in
-			  nextCol = minkApp.buildColumn($(minkApp.HTML).find('.minkColumns')[0]);
-			  nextCol.setAttribute('column', (columnNumber+1).toString());
-			  minkApp.currentQuery.columns.push(nextCol);
-			  minkApp.rightMostCol = nextCol;
+minkApp.getCitationMetadata = function(){
 
-		 }else{
+}
 
-			  nextCol = minkApp.buildColumn($(minkApp.HTML).find('.minkColumns')[0]);
-				nextCol.setAttribute('column', (minkApp.maxCols).toString());
-				  minkApp.rightMostCol = nextCol;
+minkApp.addChildPile = function(details, srcElement){
 
-			  minkApp.moveForward(true);
-				minkApp.currentQuery.columns.push(nextCol);
+//Find which column to add new pile to
+ var nextCol = null;
+ var targetColumn = $(srcElement).closest(".minkColumn")[0];
+ var columnNumber = parseInt(targetColumn.getAttribute('column'));
+ var targetColumnNum = columnNumber + 1;
+ var columns = $('.minkColumn');
+ var targetColumn;
+ if(columns[targetColumnNum]){
+	 targetColumn = columns[targetColumnNum];
+ }else{
+	 targetColumn = buildDiv('minkColumn');
+	 targetColumn.setAttribute('column', targetColumnNum.toString());
+	 $('#minkColumns').append(targetColumn);
+ }
 
+ //Find the parentID. If parent doesn't have a childPile container, build one
+  var parentPileId = $(event.srcElement).closest('.minkPile').attr('pileid');
+  //get parentPile
+  var parentPile = minkApp.currentQuery.pileMap.get(parentPileId);
+  //get parentCard url
+  var parentCard;
+  for (var i = 0; i < parentPile.cards.length; i++){
+  	if(event.detail.rooturl == parentPile.cards[i].url){
+  		parentCard = parentPile.cards[i];
+  	}
+  }
+	//check for childPileContainer
+	var selector = '.minkChildPileContainer[parentCard="' + parentCard.url + '"]'
+	var childPileContainer;
+	if($(selector).length > 0){
+		 childPileContainer = $(selector)[0];
+	}else{
+		childPileContainer = minkApp.buildChildPileContainer(parentCard.url, targetColumn)
+	}
+	var pileId = pileIDGen(event.detail.rooturl, event.detail.collectionname);
 
-		 }
-		 //move forwards
-	 }/*else if(minkApp.rightMostCol == null){
- 		  nextCol = minkApp.buildColumn($(minkApp.HTML).find('.minkColumns')[0]);
-		  nextCol.setAttribute('column', (columnNumber+1).toString());
-		  minkApp.currentQuery.columns.push(nextCol);
-		  minkApp.rightMostCol = nextCol;
-	 }*/
-	 else{
-		 var searchForCol = (columnNumber+1).toString();
-		 nextCol = $("div[column='" + searchForCol + "']")[0];
+	var newPileHTML = buildDiv('minkPile minkPileExpanded');
+	newPileHTML.setAttribute('pileID', pileId)
 
+	var newPile;
 
+	newPile = new minkPile(pileId, null, parentPile.HTML, newPileHTML, parentPile, event.detail.links[0]);
+	minkApp.currentQuery.pileMap.put(pileId, newPile);
+	childPileContainer.appendChild(newPile.HTML);
+	for(var i = 0; i < event.detail.links.length; i++){
+		MinkOracle.getSemantics(event.detail.links[i], newPile, 'addCardsToPile');
 
-	 }
-	 //get parentCard
-	 var parentPileId = $(event.srcElement).closest('.minkPile').attr('pileid');
-	 //get parentPile
-	 var parentPile = minkApp.currentQuery.pileMap.get(parentPileId);
-	 //get parentCard url
-	 var parentCard;
-	 for (var i = 0; i < parentPile.cards.length; i++){
-	 	if(event.detail.rooturl == parentPile.cards[i].url){
-	 		parentCard = parentPile.cards[i];
-	 	}
-	 }
+	}
+	/*
 
-	 var pile = minkApp.buildPile(nextCol, event.detail.links, event.detail.rooturl, event.detail.collectionname, event.srcElement)
+	if(event.detail.links.length > 1){
+		MinkOracle.getSearchSemantics(event.detail.links[0], childPileContainer, 'childSearchMetadata');
 
-	minkApp.handleFacetEntry();
-	 minkApp.currentQuery.pileMap.put(pileIDGen(details.rooturl, details.collectionname), pile);
-	 srcElement.addEventListener('click', minkApp.showHidePileHandler);
-	 srcElement.removeEventListener('click', minkApp.showExplorableLinksHandler);
+	}else{
+//TODO COMPOSE
+		MinkOracle.getSearchSemantics(event.detail.links[0], newPileHTML, 'childSearchMetadata');
+	}*/
+	//  minkApp.currentQuery.pileMap.put(pileIDGen(details.rooturl, details.collectionname), pile);
+	//  srcElement.addEventListener('click', minkApp.showHidePileHandler);
+	//  srcElement.removeEventListener('click', minkApp.showExplorableLinksHandler);
 
 }
 
@@ -1111,48 +1033,14 @@ minkApp.minkEventHandler = function(event){
 
 	 if(event.detail.type == 'minknewpile'){
 
-		 minkApp.newPile(event.detail, event.srcElement);
+		 minkApp.addChildPile(event.detail, event.srcElement);
 
 
 
-	 }else if(event.detail.type == "searchmetadata"){
-
-
-		 var pileID = event.srcElement.getAttribute('pileID');
-		 var pile =  minkApp.currentQuery.pileMap.get(pileID);
-		 pile.semantics = event.detail.semantics;
-		 var wrapper = $(pile.HTML).closest('.minkPileWrapper')[0];
-		 $(pile).find('.minkLoadingSpinner').remove();
-		/*
-		if the iteration canary is visble, give the pile a new URL as the new results URL so that buildPile knows to make it
-		a  new card loader. If the canary has 'died' then delete any existing more loaders
-
-		*/
-		var semantics = event.detail.semantics;
-		var formerIndex = semantics.urlIndex;
-		var loader = $(pile.HTML).closest('.minkPileWrapper').find('.minkPileLoader')[0];
-		semantics.incrementUrl(loader);
-
-
-		var cards = minkApp.buildCards(pile.HTML, pile.semantics.results.links, true, null, pile.semantics.searchUrl);
-		pile.cards = cards;
-
-
-
-		if(minkApp.currentQuery){
-			var facets = getFacetsFromHTML();
-			applyFacets(minkApp.currentQuery, facets);
-
-		}
-	 if(semantics.canary){
-			minkApp.buildPileMoreLoader(wrapper, pile, semantics.iterableURL, semantics.searchUrl);
-		}
-
-		 console.log(event.detail.links);
-
-
-
-
+	 }else if(event.detail.type == "rootQueryMetadata"){
+		 minkApp.addParentlessPile(event);
+	 }else if(event.detail.type == "addCardsToPile"){
+		 	minkApp.addChildCards(event);
 	 }
 	 else if(event.detail.type == 'minkshowless'){
 		 var id = pileIDGen(event.detail.rooturl, event.detail.collectionname);
@@ -1174,50 +1062,140 @@ minkApp.minkEventHandler = function(event){
 	 }
 	 else if(event.detail.type=='minkfavorite'){
 		 minkApp.toggleFavorite(event.detail.url, event.detail.mdname, event.detail.favicon, event.detail.html);
-	 }else if(event.detail.type=='minksearchstripper'){
-
-
-		 var pileID = event.srcElement.getAttribute('pileID');
-		 var pile =  minkApp.currentQuery.pileMap.get(pileID);
-		 var wrapper = $(pile.HTML).closest('.minkPileWrapper')[0];
-		/*
-		if the iteration canary is visble, give the pile a new URL as the new results URL so that buildPile knows to make it
-		a  new card loader. If the canary has 'died' then delete any existing more loaders
-
-		*/
-
-		var loader = $(pile.HTML).closest('.minkPileWrapper').find('.minkPileLoader')[0];
-		/*
-		if the canary is dead, remove any existing more loader -- updating the existing loader is handled in "addnNewCards"
-		*/
-		var formerIndex = pile.urlIndex;
-		pile.urlIndex = pile.urlIndex + parseInt(event.detail.perPage);
-		if(loader){
-			if(!event.detail.canary){
-				$(loader).remove();
-			}
-
-		}else if(event.detail.canary){
-			minkApp.buildPileMoreLoader(wrapper, pile, event.detail.iterator, event.detail.url);
-			//if there's no pile loader then the card we should remove is at index 0
-		}
-		pile.perPage = parseInt(event.detail.perPage);
-		pile.cards.pop();
-		//should be counted but i don't yet
-		pile.HTML.removeChild(pile.HTML.childNodes[formerIndex]);
-		event.detail.links.links.splice(5, 5);
-		var cards = minkApp.buildCards(pile.HTML, event.detail.links.links, true, pile, semantics.url);
-		pile.cards = pile.cards.concat(cards);
- 		if(minkApp.currentQuery){
-			var facets = getFacetsFromHTML();
-			applyFacets(minkApp.currentQuery, facets);
-
-		}
-
-		 console.log(event.detail.links);
 	 }
 
 }
+
+minkApp.addChildCards = function(event){
+
+
+
+	var pileID = event.srcElement.getAttribute('pileID');
+	var pile =  minkApp.currentQuery.pileMap.get(pileID);
+	pile.semantics = event.detail.semantics;
+	var wrapper = $(pile.HTML).closest('.minkPileWrapper')[0];
+	$(pile).find('.minkLoadingSpinner').remove();
+	/*
+	if the iteration canary is visble, give the pile a new URL as the new results URL so that buildPile knows to make it
+	a  new card loader. If the canary has 'died' then delete any existing more loaders
+
+	*/
+	var semantics = event.detail.semantics;
+	var formerIndex = semantics.urlIndex;
+	var loader = $(pile.HTML).closest('.minkPileWrapper').find('.minkPileLoader')[0];
+	semantics.incrementUrl(loader);
+
+
+	var cards = minkApp.buildCards(pile);
+	pile.cards = cards;
+
+
+
+	if(minkApp.currentQuery){
+	 var facets = getFacetsFromHTML();
+	 applyFacets(minkApp.currentQuery, facets);
+
+	}
+	if(semantics.canary){
+	 minkApp.buildPileMoreLoader(wrapper, pile, semantics.iterableURL, semantics.searchUrl);
+	}
+
+}
+
+
+minkApp.attachCardRenderings = function(task){
+	minkRenderer.render(task);
+}
+
+//buildCards is used when and only when you already have a full set of metadata and mmd and viewmodels
+minkApp.buildCards = function(pile){
+	var parent = pile.HTML;
+	var links = pile.semantics.results.links;
+	var favUrl = pile.semantics.faviconLink
+	var cards = [];
+	parent.addEventListener('minkloaded', minkApp.addCardToPile);
+	//Note, in the future will use yin's structure from google doc. In the meantime, just gonna do it 'the easy way'
+	minkApp.counter = links.length;
+	//Builds card
+	//parent.style.height = (links.length * 39 -2 ).toString() + "px";
+
+	var faviconLink = favUrl;
+
+	for(var i = 0; i < links.length; i++){
+		var link = links[i];
+		var cardDiv = buildDiv('minkCardContainer');
+		cardDiv.addEventListener('mouseenter', minkApp.showCardControls);
+		cardDiv.addEventListener('mouseleave', minkApp.hideCardControls);
+
+	 	minkApp.buildCardControls(cardDiv, link);
+		parent.appendChild(cardDiv);
+
+		var spinner = document.createElement('img');
+		spinner.src = "./img/loading.gif";
+		spinner.className = "minkLoadingSpinner";
+		cardDiv.appendChild(spinner);
+		cardDiv.setAttribute('minkCardId', link)
+		var card = new minkCard(link, cardDiv, pile);
+
+    	var metadata = MinkOracle.viewModelMap.get(link);
+			metadata['minkfav'] = faviconLink;
+
+    	var yr = minkApp.polishYear(metadata);
+    	if(yr){
+				var year = parseInt(yr);
+		  	if(!isNaN(year)){
+
+		  	}
+	    	var yearFacet = new Facet('year', year, 'ordinal', 'num');
+	    	card.facets.push(yearFacet);
+			}
+			var clipping = {viewModel: metadata};
+			var options = {expand: true, callback: minkApp.contextualize, devalue: card.duplicate, viewmodel: MinkOracle.viewModelMap}
+			MinkSemantics.addMetadataDisplay(cardDiv, link, clipping, minkApp.attachCardRenderings, options);
+			cards.push(card)
+		}
+
+		return cards;
+
+}
+
+minkApp.addParentlessPile = function(event){
+	var pileID = event.srcElement.getAttribute('pileID');
+	var pile =  minkApp.currentQuery.pileMap.get(pileID);
+	pile.semantics = event.detail.semantics;
+	var wrapper = $(pile.HTML).closest('.minkPileWrapper')[0];
+	$(pile).find('.minkLoadingSpinner').remove();
+	/*
+	if the iteration canary is visble, give the pile a new URL as the new results URL so that buildPile knows to make it
+	a  new card loader. If the canary has 'died' then delete any existing more loaders
+
+	*/
+	var semantics = event.detail.semantics;
+	var formerIndex = semantics.urlIndex;
+	var loader = $(pile.HTML).closest('.minkPileWrapper').find('.minkPileLoader')[0];
+	semantics.incrementUrl(loader);
+
+
+	var cards = minkApp.buildCards(pile);
+	pile.cards = cards;
+
+
+
+	if(minkApp.currentQuery){
+	 var facets = getFacetsFromHTML();
+	 applyFacets(minkApp.currentQuery, facets);
+
+	}
+	if(semantics.canary){
+	 minkApp.buildPileMoreLoader(wrapper, pile, semantics.iterableURL, semantics.searchUrl);
+	}
+
+	console.log(event.detail.links);
+
+}
+
+
+
 minkApp.toggleDisplay = function(event){
 	if(event.target.style.display != 'none'){
 		event.target.style.display = 'none';
@@ -1567,157 +1545,7 @@ minkApp.getSearchResultLinks = function(task){
 
 
 
-minkApp.prepareSemantics = function(task){
-	var metadataFields = task.fields;
-	MinkOracle.viewModelMap.put(task.url, task.fields);
 
-	if(task.mmd && task.mmd['meta_metadata'].extends == 'search'){
-		var minkLinks = minkApp.getSearchResultLinks(task);
-
-		var metadata = BSUtils.unwrap(task.metadata);
-		var flink = "fav::" + task.url;
-		minkLinks.links.push(flink);
-		var iteratableURL = task.mmd['meta_metadata'].search_result_iterator;
-
-		/*
-		if there is an iteration canary in the first level of the task fields, signal to load more
-		*/
-		var canaryAlive = false;
-		var canaryField = task.mmd['meta_metadata'].final_page_canary;
-		if(metadata[canaryField] != null && metadata[canaryField] != ""){
-			canaryAlive = true;
-		}
-
-
-
-
-		var detailDetails = {type: 'minksearchstripper', links: minkLinks, iterator: iteratableURL, mmdtype: task.mmd['meta_metadata'].name, url: task.url, canary: canaryAlive, perPage: task.mmd['meta_metadata'].results_per_page};
-		var eventDetail = {detail: detailDetails, bubbles: true};
-		var myEvent = new CustomEvent("minkevent", eventDetail);
-		task.container.parentNode.dispatchEvent(myEvent);
-		//gs search hardcode for now
-		for(var j = 0; j < metadata.search_results.length; j++){
-			var url2 = "mink::" + metadata.search_results[j]['google_scholar_search_result'].document_link;
-			url2 = url2.toLowerCase();
-			var betterMD = metadata.search_results[j];
-			minkApp.linkToMetadataMap.put(url2, betterMD);
-
-		}
-		console.log(minkLinks);
-	}else{
-		minkRenderer.render(task)
-	}
-
-}
-
-minkApp.cardSemantics = function(cardDiv, link, clipping, options){
-
-	MinkSemantics.addMetadataDisplay(cardDiv, link, clipping, minkApp.prepareSemantics, options);
-
-}
-
-
-minkApp.buildCards = function(parent, links, expandCards, pile, favUrl){
-	var cards = [];
-	parent.addEventListener('minkloaded', minkApp.addCardToPile);
-	//Note, in the future will use yin's structure from google doc. In the meantime, just gonna do it 'the easy way'
-	minkApp.counter = links.length;
-	//Builds card
-	//parent.style.height = (links.length * 39 -2 ).toString() + "px";
-
-	var faviconLink = favUrl;
-	if(links[(links.length-1)].startsWith("fav::")){
-		faviconLink = links.pop();
-		faviconLink = faviconLink.substring(5);
-	}
-	for(var i = 0; i < links.length; i++){
-		var link = links[i];
-		//Right now I just tell mink to render it with a static message, but I should add loading icons and some kinda queue
-		//gonna look through kade's code
-		var cardDiv = buildDiv('minkCardContainer');
-		cardDiv.addEventListener('mouseenter', minkApp.showCardControls);
-		cardDiv.addEventListener('mouseleave', minkApp.hideCardControls);
-		minkApp.buildCardControls(cardDiv, link);
-		parent.appendChild(cardDiv);
-		var spinner = document.createElement('img');
-		spinner.src = "./img/loading.gif";
-		spinner.className = "minkLoadingSpinner";
-		cardDiv.appendChild(spinner);
-		cardDiv.setAttribute('minkCardId', link)
-		var card = new minkCard(link, cardDiv, pile);
-		cards.push(card);
-
-
-		if(link == toGScholarUrl('curation')){
-			console.log('ENTERING NEW CODE');
-
-			MinkOracle.getSearchMetadata(link, cardHTML);
-			return cards;
-		}
-
-		//check to see if there's metadata contained therein{
-		if(link.startsWith('mink::')){
-			var metadata = MinkOracle.viewModelMap.get(link);
-			metadata['minkfav'] = faviconLink;
-
-
-
-			/*
-		    VERY HACKY THING
-		    takes Source_info and processes it into a year field. Really shouldn't be done here but we're demo'ing
-		    */
-		    //here metadata is a viewmodel and md is just metadata
-	    	var metadata = MinkOracle.viewModelMap.get(link);
-	    	var yr = minkApp.polishYear(metadata);
-	    	if(yr){
-	    		var year = parseInt(yr);
-		    	if(!isNaN(year)){
-
-		    	}
-		    	var yearFacet = new Facet('year', year, 'ordinal', 'num');
-		    	card.facets.push(yearFacet);
-
-	    	}
-		    if(metadata['source_info']){
-
-		    }
-		    //devalue passed into mink?
-			var clipping = {viewModel: metadata};
-			minkApp.cardSemantics(cardDiv, link, clipping, {expand: true, callback: minkApp.contextualize, devalue: card.duplicate, viewmodel: MinkOracle.viewModelMap});
-
-		}else{
-			minkApp.cardSemantics(cardDiv, link, null, {expand: true, callback: minkApp.contextualize, devalue: card.duplicate, viewmodel: MinkOracle.viewModelMap});
-
-		}
-
-	}
-
-	return cards;
-
-}
-
-minkApp.addNewCardsToPile = function(event){
-
-//find pile from event
-	var src = event.srcElement;
-
-	var parent = $(src).closest('.minkPileWrapper').find('.minkPile')[0];
-	var pile = minkApp.currentQuery.pileMap.get(parent.getAttribute('pileid'));
-	var expandCards = true;
-	var urlToLoad = [src.getAttribute('loadnext') + pile.urlIndex.toString()];
-	var newCards = minkApp.buildCards(parent, urlToLoad, expandCards, pile);
-	pile.cards = pile.cards.concat(newCards);
-	if(minkApp.currentQuery){
-		var facets = getFacetsFromHTML();
-		applyFacets(minkApp.currentQuery, facets);
-
-	}
-
-//find url from loader
-//ask bs for cards just like buildPile
-//	pile.urlIndex = pile.urlIndex + pile.perPage;
-
-}
 
 minkApp.buildPileMoreLoader = function (parent, pile, pattern, url){
 	var loader = buildDiv('minkPileLoader');
@@ -1731,66 +1559,6 @@ minkApp.buildPileMoreLoader = function (parent, pile, pattern, url){
 	parent.appendChild(loader);
 }
 
-
-minkApp.buildPile = function(parent, links, rooturl, collectionname, src, expandChildren){
-	expandChildren = false;
-	console.log('links: ');
-	console.log(links);
-	var wrapper= buildDiv('minkPileWrapper');
-	var row = buildDiv('minkPileRow');
-
-	if(src){
-		var collapseButton = buildDiv('sampleCollapse');
-		collapseButton.addEventListener('click', minkApp.expandCollapsePile);
-		row.appendChild(collapseButton);
-
-
-	}
-
-	var newPile = buildDiv('minkPile minkPileExpanded');
-	parent.appendChild(wrapper);
-
-	var pileId = pileIDGen(rooturl, collectionname);
-	var parentPile = null;
-			var parentCard = null;
-
-	if(src){
-		var parentPileHTML = $(src).closest('.minkPile')[0];
-		parentPile = minkApp.currentQuery.pileMap.get(parentPileHTML.getAttribute('pileid'));
-		for(var i = 0; i < parentPile.cards.length; i++){
-			var intermediate = parentPile.cards[i].url.toLowerCase();
-			if (src.getAttribute('rooturl') == intermediate){
-				parentCard = parentPile.cards[i];
-			}
-		}
-
-
-	}
-	var pile = new minkPile(pileId, null, src, newPile, parentPile, rooturl, parentCard);
-
-	pile.cards = minkApp.buildCards(newPile, links, expandChildren, pile);
-
-	if(minkApp.currentQuery){
-		var facets = getFacetsFromHTML();
-		//applyFacets(minkApp.currentQuery, facets);
-
-	}
-
-	//pile.setAttribute('pileID', pileId);
-	row.appendChild(newPile);
-	wrapper.appendChild(row);
-	newPile.setAttribute('pileid', pileId);
-	minkApp.buildDuplicateCount(pile);
-	if(parentPile)
-		parentPile.kids.push(pile);
-
-
-
-
-	return pile;
-	//Logic to let varius maps and storage representations know about what's going one
-	//In thefuture will also need to handle stuff involving the canvas.
-}
 
 
 
@@ -1836,70 +1604,71 @@ minkApp.buildPile = function(parent, links, rooturl, collectionname, src, expand
 
  // start the mainloop
 function redrawCanvas(){
-	var canvas = document.getElementById('minkAppCanvas');
-	var ctx = canvas.getContext('2d');
-	ctx.clearRect ( 0 , 0 , canvas.width, canvas.height );
-	  ctx.canvas.height = document.body.clientHeight;
-
-	var canvasY = canvas.getBoundingClientRect().top;
-	var canvasX = canvas.getBoundingClientRect().left;
-	if(minkApp.currentQuery){
-		for (var i = 0; i < minkApp.currentQuery.pileMap.keys.length; i++){
-			var pile = minkApp.currentQuery.pileMap.get( minkApp.currentQuery.pileMap.keys[i]);
-
-//if root card isn't visible, don't show lines to it
-
-			if(pile.rootHTML){
-
-				if (pile.visible && $(pile.rootHTML.closest('.minkColumn')).is(':visible') && $(pile.HTML.closest('.minkColumn')).is(':visible')){
-
-
-					var rootRect = pile.rootHTML.getBoundingClientRect();
-					var rootAttachPointX = rootRect.left + rootRect.width - canvasX;
-					var rootAttachPointY = (rootRect.top + rootRect.height / 2) - canvasY;
-
-					var pileRect = $(pile.HTML).closest('.minkPileWrapper')[0].getBoundingClientRect();
-					var pileTopAttachPointX = pileRect.left - canvasX;
-					var pileTopAttachPointY = (pileRect.top) - canvasY;
-
-					var pileBotAttachPointX = pileRect.left - canvasX;
-					var pileBotAttachPointY = (pileRect.top) + pileRect.height - canvasY;
-
-
-					var pathSplitX = rootAttachPointX + 1/2 * (pileTopAttachPointX - rootAttachPointX);
-					var pathSplitY = (pileTopAttachPointY + pileRect.height/2);
-					if(pile.parentCard.displayed){
-						ctx.beginPath();
-						ctx.strokeStyle = '#999999';
-						ctx.moveTo(rootAttachPointX, rootAttachPointY);
-						ctx.bezierCurveTo((rootAttachPointX + (1/2 * Math.abs(pathSplitX - rootAttachPointX))), rootAttachPointY, pathSplitX - (1/2 * Math.abs((pathSplitX - rootAttachPointX))), pathSplitY, pathSplitX, pathSplitY);
-						ctx.stroke();
-					}else{
-						pathSplitX = pileTopAttachPointX - 40;
-					}
-
-
-					ctx.beginPath();
-					ctx.strokeStyle = '#999999';
-					ctx.moveTo(pathSplitX, pathSplitY);
-					ctx.bezierCurveTo((pathSplitX + (1/2 * Math.abs(pileTopAttachPointX - pathSplitX))), pathSplitY, pileTopAttachPointX - (1/2 * Math.abs((pileTopAttachPointX - pathSplitX))), pileTopAttachPointY, pileTopAttachPointX, pileTopAttachPointY);
-					ctx.stroke();
-
-					ctx.beginPath();
-					ctx.strokeStyle = '#999999';
-					ctx.moveTo(pathSplitX, pathSplitY);
-					ctx.bezierCurveTo((pathSplitX + (1/2 * Math.abs((pileBotAttachPointX - pathSplitX)))), pathSplitY, pileBotAttachPointX - (1/2 * Math.abs((pileBotAttachPointX - pathSplitX))), pileBotAttachPointY, pileBotAttachPointX, pileBotAttachPointY);
-					ctx.stroke();
-
-			}
-		}
-		}
-	}
+// 	var canvas = document.getElementById('minkAppCanvas');
+// 	var ctx = canvas.getContext('2d');
+// 	ctx.clearRect ( 0 , 0 , canvas.width, canvas.height );
+// 	  ctx.canvas.height = document.body.clientHeight;
+//
+// 	var canvasY = canvas.getBoundingClientRect().top;
+// 	var canvasX = canvas.getBoundingClientRect().left;
+// 	if(minkApp.currentQuery){
+// 		for (var i = 0; i < minkApp.currentQuery.pileMap.keys.length; i++){
+// 			var pile = minkApp.currentQuery.pileMap.get( minkApp.currentQuery.pileMap.keys[i]);
+//
+// //if root card isn't visible, don't show lines to it
+//
+// 			if(pile.rootHTML){
+//
+// 				if (pile.visible && $(pile.rootHTML.closest('.minkColumn')).is(':visible') && $(pile.HTML.closest('.minkColumn')).is(':visible')){
+//
+//
+// 					var rootRect = pile.rootHTML.getBoundingClientRect();
+// 					var rootAttachPointX = rootRect.left + rootRect.width - canvasX;
+// 					var rootAttachPointY = (rootRect.top + rootRect.height / 2) - canvasY;
+//
+// 					var pileRect = $(pile.HTML).closest('.minkPileWrapper')[0].getBoundingClientRect();
+// 					var pileTopAttachPointX = pileRect.left - canvasX;
+// 					var pileTopAttachPointY = (pileRect.top) - canvasY;
+//
+// 					var pileBotAttachPointX = pileRect.left - canvasX;
+// 					var pileBotAttachPointY = (pileRect.top) + pileRect.height - canvasY;
+//
+//
+// 					var pathSplitX = rootAttachPointX + 1/2 * (pileTopAttachPointX - rootAttachPointX);
+// 					var pathSplitY = (pileTopAttachPointY + pileRect.height/2);
+// 					if(pile.parentCard.displayed){
+// 						ctx.beginPath();
+// 						ctx.strokeStyle = '#999999';
+// 						ctx.moveTo(rootAttachPointX, rootAttachPointY);
+// 						ctx.bezierCurveTo((rootAttachPointX + (1/2 * Math.abs(pathSplitX - rootAttachPointX))), rootAttachPointY, pathSplitX - (1/2 * Math.abs((pathSplitX - rootAttachPointX))), pathSplitY, pathSplitX, pathSplitY);
+// 						ctx.stroke();
+// 					}else{
+// 						pathSplitX = pileTopAttachPointX - 40;
+// 					}
+//
+//
+// 					ctx.beginPath();
+// 					ctx.strokeStyle = '#999999';
+// 					ctx.moveTo(pathSplitX, pathSplitY);
+// 					ctx.bezierCurveTo((pathSplitX + (1/2 * Math.abs(pileTopAttachPointX - pathSplitX))), pathSplitY, pileTopAttachPointX - (1/2 * Math.abs((pileTopAttachPointX - pathSplitX))), pileTopAttachPointY, pileTopAttachPointX, pileTopAttachPointY);
+// 					ctx.stroke();
+//
+// 					ctx.beginPath();
+// 					ctx.strokeStyle = '#999999';
+// 					ctx.moveTo(pathSplitX, pathSplitY);
+// 					ctx.bezierCurveTo((pathSplitX + (1/2 * Math.abs((pileBotAttachPointX - pathSplitX)))), pathSplitY, pileBotAttachPointX - (1/2 * Math.abs((pileBotAttachPointX - pathSplitX))), pileBotAttachPointY, pileBotAttachPointX, pileBotAttachPointY);
+// 					ctx.stroke();
+//
+// 			}
+// 		}
+// 		}
+// 	}
 
 
 	//Find all expanded collections and draw lines to the top and bottom of their piles
 }
 function onBodyLoad() {
+
 	var minkapp = $("#minkAppContainer")[0];
 
 

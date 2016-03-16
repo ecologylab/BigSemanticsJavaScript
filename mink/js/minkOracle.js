@@ -49,7 +49,14 @@ MinkOracle.getSearchResultLinks = function(task){
 	}
 	return list[0];
 }
+MinkOracle.prepareGenericSemantics = function(task){
+  try{
+    minkRenderer.render(task)
 
+  }catch(e){
+
+  }
+}
 MinkOracle.prepareSearchSemantics = function(task){
 
   try{
@@ -78,12 +85,13 @@ MinkOracle.prepareSearchSemantics = function(task){
     }
     console.log(minkLinks);
 
+    var eventName = task.options.minkeventName;
 
     var semantics = new SearchSemantics(task, minkLinks, iteratableURL, canaryAlive);
-    var detailDetails = {type: 'searchmetadata', semantics: semantics};
+    var detailDetails = {type: eventName, semantics: semantics};
 
     var eventDetail = {detail: detailDetails, bubbles: true};
-    var myEvent = new CustomEvent("minkevent", eventDetail);
+    var myEvent = new CustomEvent('minkevent', eventDetail);
     task.container.dispatchEvent(myEvent);
 
   }catch (e){
@@ -95,9 +103,31 @@ MinkOracle.prepareSearchSemantics = function(task){
   Gets, sets appropriate metadata for  SEARCH url. MinkOracle.prepareSearchSemantics will send
   a minkevent to be handled by the minkEventHandler once it's done
 */
-MinkOracle.getSearchMetadata = function(url, pileHTML){
+MinkOracle.getSemantics = function(url, pile, minkeventName){
 
-  var options = {viewmodel: MinkOracle.viewModelMap};
-  MinkSemantics.addMetadataDisplay(pileHTML, url, null, MinkOracle.prepareSearchSemantics, options);
+
+  var opt = {url: url, pile: pile, minkeventName: minkeventName};
+  bsService.selectMmd(url, opt, function(err, result, options){
+      if (err){
+
+      }
+
+    try{
+      var newOptions = {viewmodel: MinkOracle.viewModelMap, minkeventName: options.minkeventName};
+      result = result['meta_metadata'];
+      if(result.name == "google_scholar_search"){
+        MinkSemantics.addMetadataDisplay(options.pile.HTML, options.url, null, MinkOracle.prepareSearchSemantics, newOptions);
+
+      }else if (result.name){
+        MinkSemantics.addMetadataDisplay(options.pile.HTML, options.url, null, MinkOracle.prepareGenericSemantics, newOptions);
+
+      }
+      console.log(result);
+    }catch(e){
+
+    }
+
+
+  });
 
 }
