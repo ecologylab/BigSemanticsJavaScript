@@ -755,6 +755,9 @@ function toGoogleUrl(searchString){
 minkApp.addSearchToQuery = function(parent, query, rooturl){
 
 		var wrapper= buildDiv('minkPileWrapper');
+		var id  = generateUUID();
+		wrapper.id = id;
+
 		var row = buildDiv('minkPileRow');
 		var newPile = buildDiv('minkPile minkPileExpanded');
 		var pileId = pileIDGen(rooturl);
@@ -946,8 +949,10 @@ minkApp.favoritesToggleHandler = function(event){
 
 }
 minkApp.buildChildPileContainer = function(parentPileId, targetColumn){
-	var newContainer = buildDiv('minkChildPileContainer');
+	var newContainer = buildDiv('minkPileWrapper');
 	newContainer.setAttribute('parentCard', parentPileId)
+	var id = generateUUID();
+	newContainer.id = id;
 	targetColumn.appendChild(newContainer);
 	//TODO COMPOSE
 	return newContainer;
@@ -976,6 +981,8 @@ minkApp.addChildPile = function(details, srcElement){
 
  //Find the parentID. If parent doesn't have a childPile container, build one
   var parentPileId = $(event.srcElement).closest('.minkPile').attr('pileid');
+	var parentComposeableId = $(event.srcElement).closest('.minkCardContainer')[0].id
+
   //get parentPile
   var parentPile = minkApp.currentQuery.pileMap.get(parentPileId);
   //get parentCard url
@@ -986,12 +993,13 @@ minkApp.addChildPile = function(details, srcElement){
   	}
   }
 	//check for childPileContainer
-	var selector = '.minkChildPileContainer[parentCard="' + parentCard.url + '"]'
+	var selector = '.minkPileWrapper[parentCard="' + parentCard.url + '"]'
 	var childPileContainer;
-	if($(selector).length > 0){
+	var alreadyComposed = ($(selector).length > 0);
+	if(alreadyComposed){
 		 childPileContainer = $(selector)[0];
 	}else{
-		childPileContainer = minkApp.buildChildPileContainer(parentCard.url, targetColumn)
+		childPileContainer = minkApp.buildChildPileContainer(parentComposeableId, targetColumn)
 	}
 	var pileId = pileIDGen(event.detail.rooturl, event.detail.collectionname);
 
@@ -1003,6 +1011,7 @@ minkApp.addChildPile = function(details, srcElement){
 	newPile = new minkPile(pileId, null, parentPile.HTML, newPileHTML, parentPile, event.detail.links[0]);
 	minkApp.currentQuery.pileMap.put(pileId, newPile);
 	childPileContainer.appendChild(newPile.HTML);
+
 	for(var i = 0; i < event.detail.links.length; i++){
 		MinkOracle.getSemantics(event.detail.links[i], newPile, 'addCardsToPile');
 
@@ -1073,6 +1082,7 @@ minkApp.addChildCards = function(event){
 	var pileID = event.srcElement.getAttribute('pileID');
 	var pile =  minkApp.currentQuery.pileMap.get(pileID);
 	pile.semantics = event.detail.semantics;
+	pile.semantics.results.links = pile.semantics.results.links.slice(0, 4)
 	var wrapper = $(pile.HTML).closest('.minkPileWrapper')[0];
 	$(pile).find('.minkLoadingSpinner').remove();
 	/*
@@ -1088,6 +1098,7 @@ minkApp.addChildCards = function(event){
 
 	var cards = minkApp.buildCards(pile);
 	pile.cards = cards;
+	var detailDetails = {type: 'makespace', container: pile.HTML};
 
 
 
@@ -1103,8 +1114,20 @@ minkApp.addChildCards = function(event){
 }
 
 
-minkApp.attachCardRenderings = function(task){
+minkApp.attachCard = function(task){
 	minkRenderer.render(task);
+	task.container.id = generateUUID();
+
+	var parentCardId = $(task.container).closest('.minkPileWrapper').attr('parentcard');
+	var composeable;
+
+	window.setTimeout(function(){
+		composeable = new Composeable(task.container, task.container.id, parentCardId);
+
+			MinkComposer.insertComposeable(composeable);
+	}, 1000)
+
+
 }
 
 //buildCards is used when and only when you already have a full set of metadata and mmd and viewmodels
@@ -1151,7 +1174,7 @@ minkApp.buildCards = function(pile){
 			}
 			var clipping = {viewModel: metadata};
 			var options = {expand: true, callback: minkApp.contextualize, devalue: card.duplicate, viewmodel: MinkOracle.viewModelMap}
-			MinkSemantics.addMetadataDisplay(cardDiv, link, clipping, minkApp.attachCardRenderings, options);
+			MinkSemantics.addMetadataDisplay(cardDiv, link, clipping, minkApp.attachCard, options);
 			cards.push(card)
 		}
 
@@ -1163,6 +1186,8 @@ minkApp.addParentlessPile = function(event){
 	var pileID = event.srcElement.getAttribute('pileID');
 	var pile =  minkApp.currentQuery.pileMap.get(pileID);
 	pile.semantics = event.detail.semantics;
+	pile.semantics.results.links = pile.semantics.results.links.slice(0, 4)
+
 	var wrapper = $(pile.HTML).closest('.minkPileWrapper')[0];
 	$(pile).find('.minkLoadingSpinner').remove();
 	/*
@@ -1178,7 +1203,6 @@ minkApp.addParentlessPile = function(event){
 
 	var cards = minkApp.buildCards(pile);
 	pile.cards = cards;
-
 
 
 	if(minkApp.currentQuery){
@@ -1711,6 +1735,8 @@ function onBodyLoad() {
 	RendererBase.idealRenderer = false;
 	$(".collapse").collapse();
 	minkapp.addEventListener('minkevent', minkApp.minkEventHandler);
+	minkapp.addEventListener('composerevent', MinkComposer.composeEventHandler);
+
 	minkApp.initialize(minkapp);
 
   //Try to get passed in parameter url

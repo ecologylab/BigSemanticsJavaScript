@@ -51,7 +51,8 @@ MinkOracle.getSearchResultLinks = function(task){
 }
 MinkOracle.prepareGenericSemantics = function(task){
   try{
-    minkRenderer.render(task)
+    minkApp.attachCard(task);
+    
 
   }catch(e){
 

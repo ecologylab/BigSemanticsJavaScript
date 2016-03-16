@@ -223,6 +223,8 @@ padding-right: 4px;
 	margin-right: 50px;
 	transition: margin-left 1s ease;
 	display: inline-block;
+	position: relative;
+
 
 }
 .minkFaveHeader{
@@ -412,7 +414,6 @@ opacity: 1;
 		display: inline-flex;
 	/*  max-width: 1800px;*/
 	  margin-left: 525px;
-    overflow-x: auto;
 }
 
 .contextTitle{
@@ -675,11 +676,8 @@ text-decoration: underline;
 	padding-top: 8px;
   padding-bottom: 4px;
   -webkit-transition: margin-top .5s ease, background-color .1s ease;
-  position: relative;
   margin-bottom: 12px;
   padding-right: 8px;
-  max-height: 600px;
-  overflow-y: auto;
   padding-left: 8px;
 }
 
@@ -715,10 +713,10 @@ text-decoration: underline;
 
 }
 .minkCardContainer{
-	position: relative;
+	position: absolute;
 	display: flex;
 	transition: all .25s ease;
-
+	margin-bottom: 12px;
 }
 .minkCardControls{
     width: 50px;

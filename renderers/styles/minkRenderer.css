@@ -43,8 +43,6 @@ flex-direction: column;
 position: relative;
 animation-name: cardSlideIn;
 animation-duration: .5s;
-margin-left: auto;
-margin-right: auto;
 background-color: white;
 border-bottom: solid 1px rgba(0,0,0, .54);
 /* margin-bottom: 8px; */
