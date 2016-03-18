@@ -1008,7 +1008,7 @@ minkApp.addChildPile = function(details, srcElement){
 
 	var newPile;
 
-	newPile = new minkPile(pileId, null, parentPile.HTML, newPileHTML, parentPile, event.detail.links[0]);
+	newPile = new minkPile(pileId, null, parentPile.HTML, newPileHTML, parentCard, event.detail.links[0]);
 	minkApp.currentQuery.pileMap.put(pileId, newPile);
 	childPileContainer.appendChild(newPile.HTML);
 
@@ -1626,71 +1626,6 @@ minkApp.buildPileMoreLoader = function (parent, pile, pattern, url){
      animFrame( recursiveAnim );
  };
 
- // start the mainloop
-function redrawCanvas(){
-// 	var canvas = document.getElementById('minkAppCanvas');
-// 	var ctx = canvas.getContext('2d');
-// 	ctx.clearRect ( 0 , 0 , canvas.width, canvas.height );
-// 	  ctx.canvas.height = document.body.clientHeight;
-//
-// 	var canvasY = canvas.getBoundingClientRect().top;
-// 	var canvasX = canvas.getBoundingClientRect().left;
-// 	if(minkApp.currentQuery){
-// 		for (var i = 0; i < minkApp.currentQuery.pileMap.keys.length; i++){
-// 			var pile = minkApp.currentQuery.pileMap.get( minkApp.currentQuery.pileMap.keys[i]);
-//
-// //if root card isn't visible, don't show lines to it
-//
-// 			if(pile.rootHTML){
-//
-// 				if (pile.visible && $(pile.rootHTML.closest('.minkColumn')).is(':visible') && $(pile.HTML.closest('.minkColumn')).is(':visible')){
-//
-//
-// 					var rootRect = pile.rootHTML.getBoundingClientRect();
-// 					var rootAttachPointX = rootRect.left + rootRect.width - canvasX;
-// 					var rootAttachPointY = (rootRect.top + rootRect.height / 2) - canvasY;
-//
-// 					var pileRect = $(pile.HTML).closest('.minkPileWrapper')[0].getBoundingClientRect();
-// 					var pileTopAttachPointX = pileRect.left - canvasX;
-// 					var pileTopAttachPointY = (pileRect.top) - canvasY;
-//
-// 					var pileBotAttachPointX = pileRect.left - canvasX;
-// 					var pileBotAttachPointY = (pileRect.top) + pileRect.height - canvasY;
-//
-//
-// 					var pathSplitX = rootAttachPointX + 1/2 * (pileTopAttachPointX - rootAttachPointX);
-// 					var pathSplitY = (pileTopAttachPointY + pileRect.height/2);
-// 					if(pile.parentCard.displayed){
-// 						ctx.beginPath();
-// 						ctx.strokeStyle = '#999999';
-// 						ctx.moveTo(rootAttachPointX, rootAttachPointY);
-// 						ctx.bezierCurveTo((rootAttachPointX + (1/2 * Math.abs(pathSplitX - rootAttachPointX))), rootAttachPointY, pathSplitX - (1/2 * Math.abs((pathSplitX - rootAttachPointX))), pathSplitY, pathSplitX, pathSplitY);
-// 						ctx.stroke();
-// 					}else{
-// 						pathSplitX = pileTopAttachPointX - 40;
-// 					}
-//
-//
-// 					ctx.beginPath();
-// 					ctx.strokeStyle = '#999999';
-// 					ctx.moveTo(pathSplitX, pathSplitY);
-// 					ctx.bezierCurveTo((pathSplitX + (1/2 * Math.abs(pileTopAttachPointX - pathSplitX))), pathSplitY, pileTopAttachPointX - (1/2 * Math.abs((pileTopAttachPointX - pathSplitX))), pileTopAttachPointY, pileTopAttachPointX, pileTopAttachPointY);
-// 					ctx.stroke();
-//
-// 					ctx.beginPath();
-// 					ctx.strokeStyle = '#999999';
-// 					ctx.moveTo(pathSplitX, pathSplitY);
-// 					ctx.bezierCurveTo((pathSplitX + (1/2 * Math.abs((pileBotAttachPointX - pathSplitX)))), pathSplitY, pileBotAttachPointX - (1/2 * Math.abs((pileBotAttachPointX - pathSplitX))), pileBotAttachPointY, pileBotAttachPointX, pileBotAttachPointY);
-// 					ctx.stroke();
-//
-// 			}
-// 		}
-// 		}
-// 	}
-
-
-	//Find all expanded collections and draw lines to the top and bottom of their piles
-}
 function onBodyLoad() {
 
 	var minkapp = $("#minkAppContainer")[0];
