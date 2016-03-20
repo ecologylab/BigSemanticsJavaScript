@@ -635,7 +635,9 @@ minkApp.nsearchKeypress = function(event){
 			minkApp.hidePreviousQuery();
 
 			column = minkApp.buildColumn($('#minkColumns')[0]);
+
 			column.setAttribute('column', '0');
+			var c = new Column(0, column);
 			$('#minkColumns')[0].appendChild(column);
 		}
 		$('#contextTitle')[0].innerHTML = nQuery.contextTitle;
@@ -721,6 +723,8 @@ minkApp.exploreURL = function(url){
 
 		column = minkApp.buildColumn($('#minkColumns')[0]);
 		column.setAttribute('column', '0');
+		var c = new Column(0, column);
+
 		$('#minkColumns')[0].appendChild(column);
 	}
 	var pile = minkApp.buildPile(column, [url], url, null, null);
@@ -804,6 +808,8 @@ minkApp.exploreNewQuery = function(queryString){
 
 		column = minkApp.buildColumn($('#minkColumns')[0]);
 		column.setAttribute('column', '0');
+		var c = new Column(0, column);
+
 		$('#minkColumns')[0].appendChild(column);
 	}
 	$('#contextTitle')[0].innerHTML = nQuery.contextTitle;
@@ -977,6 +983,8 @@ minkApp.addChildPile = function(details, srcElement){
 	 targetColumn = buildDiv('minkColumn');
 	 targetColumn.setAttribute('column', targetColumnNum.toString());
 	 $('#minkColumns').append(targetColumn);
+	 var c = new Column(targetColumnNum, targetColumn);
+
  }
 
  //Find the parentID. If parent doesn't have a childPile container, build one
@@ -1642,7 +1650,7 @@ function onBodyLoad() {
 	Material.addMaterial('minkToolbar', minkAppBar, 4);
 
 
-
+	var c = new Column(0, document.getElementById('minkC0'));
 
 	//SEMANTIC_SERVICE_URL = "http://128.194.128.84:8080/BigSemanticsService/";
 

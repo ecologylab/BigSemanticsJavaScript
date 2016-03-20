@@ -3,9 +3,19 @@ MinkComposer.composeableMap = new Map()
 MinkComposer.rootComposeables = [];
 MinkComposer.columns = [];
 
-function Column(number){
+function Column(number, HTML){
   this.number = number
+  this.HTML = HTML;
+  this.composeables = [];
   MinkComposer.columns.push(this)
+
+}
+
+Column.prototype.addComposeable = function(composeable){
+  this.composeables.push(composeable);
+  this.composeables.sort(function(a, b){
+    return a.y - b.y;
+  });
 
 }
 function Composeable(HTML, id, parentID){
@@ -39,11 +49,33 @@ function Composeable(HTML, id, parentID){
     this.root = null;
   }
 
-  this.container = $(HTML).closest('.minkColumn');
+  this.container = $(HTML).closest('.minkColumn')[0];
+  this.x = this.container.getAttribute('column');
+  MinkComposer.columns[this.x].addComposeable(this);
   this.childrenHeight = 0;
   MinkComposer.composeableMap.put(this.id, this);
   Material.addMaterial(this.id, $(this.HTML).find('.minkContainer')[0], 1)
 
+
+}
+
+
+Composeable.prototype.indexOfParent = function(){
+  try{
+    return MinkComposer.columns[this.parent.x].composeables.indexOf(this.parent);
+
+  }catch(err){
+    return -1;
+  }
+}
+
+Composeable.prototype.sameParent = function(b){
+  if(this.parent && b.parent){
+    if(this.parent.id == b.parent.id){
+      return true;
+    }
+  }
+  return false;
 }
 
 Composeable.prototype.isRoot = function(){
@@ -99,6 +131,9 @@ Composeable.prototype.getSiblings = function(){
 Composeable.prototype.reposition = function(y){
   this.y = y;
   this.HTML.style.top = (y.toString() + "px");
+  MinkComposer.columns[this.x].composeables.sort(function(a, b){
+    return a.y - b.y;
+  })
 }
 
 MinkComposer.composeEventHandler = function(event){
@@ -130,6 +165,7 @@ MinkComposer.insertComposeable = function(composeable){
 
       composeable.reposition(baseHeight);
       parent.childrenHeight = composeable.HTML.scrollHeight;
+      MinkComposer.createSpaceForSiblings(composeable, 0);
 
     }else{
       //right now hard coded for two siblings
@@ -143,15 +179,15 @@ MinkComposer.insertComposeable = function(composeable){
       composeable.reposition(newY);
 
       composeable.parent.reposition(parent.y + (composeable.getHeight()/2));
-      MinkComposer.createSpaceBelow(parent, composeable.getHeight());
-
+      MinkComposer.createSpaceAroundParent(parent, composeable.getHeight());
+      MinkComposer.createSpaceForSiblings(composeable, 0);
     }
   }
 
 
 }
 
-MinkComposer.createSpaceBelow = function(composeable, amount){
+MinkComposer.createSpaceAroundParent = function(composeable, amount){
   if(composeable.hasSilbings()){
 
     var siblingsIncludingComp;
@@ -172,7 +208,7 @@ MinkComposer.createSpaceBelow = function(composeable, amount){
 
     }
     if(!composeable.isRoot()){
-      MinkComposer.createSpaceBelow(composeable.parent, amount);
+      MinkComposer.createSpaceAroundParent(composeable.parent, amount);
 
     }
 
@@ -184,9 +220,89 @@ MinkComposer.centerViewOnComposeable = function(composeable){
 
 }
 
-MinkComposer.createSpaceForComposeable = function(composeable, amount){
+MinkComposer.createSpaceForSiblings = function(composeable, amount){
   //tells the other mink cards around an expanded parent to fuck off
 
+  //Start from the top. If there's an intersection, increase the amount and send it down
+
+
+  var column = MinkComposer.columns[composeable.x];
+
+  var indexOfParent = composeable.indexOfParent();
+  var parentColumn = MinkComposer.columns[composeable.parent.x];
+  //try and push out cards in piles above
+  var cardsThatShouldBeAbove = [];
+  for(var i = indexOfParent - 1; i >= 0; i--){
+    var cousinCompoaseables = parentColumn.composeables[i].childComposables;
+    cardsThatShouldBeAbove = cardsThatShouldBeAbove.concat(cousinCompoaseables);
+  }
+  var amountUp = 0;
+  for(var i = cardsThatShouldBeAbove.length - 1 ; i >= 0; i--){
+
+      var diff =  composeable.y - cardsThatShouldBeAbove[i].y - cardsThatShouldBeAbove[i].getHeight() ;
+      if (diff < -2){
+        amountUp = amountUp + diff;
+      }
+
+  }
+  composeable.reposition(composeable.y - amountUp)
+
+  var cardsThatShouldBeBelow = [];
+  for(var i = indexOfParent + 1; i < parentColumn.composeables.length; i++){
+    var cousinCompoaseables = parentColumn.composeables[i].childComposables;
+    cardsThatShouldBeBelow = cardsThatShouldBeBelow.concat(cousinCompoaseables);
+  }
+  var amountDown = 20;
+  for(var i = 0 ; i < cardsThatShouldBeBelow.length; i++){
+
+      var diff =  composeable.y + composeable.getHeight() - cardsThatShouldBeBelow[i].y  ;
+      if (diff >= 2){
+        amountUp = amountUp + diff;
+      }
+      cardsThatShouldBeBelow[i].reposition(cardsThatShouldBeBelow[i].y + amountUp);
+  }
+
+  //try and push out cards in piles below
+
+
+
+
+
+
+
+
+
+
+
+  //
+  //
+  // var index = column.composeables.indexOf(composeable);
+  // var composeableBottom = composeable.y + composeable.getHeight();
+  //
+  //
+  //
+  // //If we're running into another pile, create some extra space
+  //
+  //
+  //
+  //
+  // firstEncounteredStranger = true;
+  // for(var i = index + 1; i < column.composeables.length; i++){
+  //   if(!composeable.sameParent(column.composeables[i])){
+  //
+  //     if(firstEncounteredStranger){
+  //       amount = amount + 20;
+  //       firstEncounteredStranger = false;
+  //     }
+  //     var diff =  composeableBottom - column.composeables[i].y;
+  //     if (diff > 2){
+  //       amount = amount + diff;
+  //     }
+  //   }
+  //   column.composeables[i].reposition(column.composeables[i].y + amount)
+  // }
+  //
+  //
 
 }
 
