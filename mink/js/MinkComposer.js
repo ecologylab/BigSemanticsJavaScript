@@ -58,7 +58,18 @@ function Composeable(HTML, id, parentID){
 
 
 }
-
+Composeable.prototype.lowestChild = function(){
+  var lowest = {y: -1};
+  if(this.childComposables.length < 1){
+    return null;
+  }
+  for(var i = 0; i < this.childComposables.length; i++){
+    if(this.childComposables[i].y > lowest.y){
+      lowest = this.childComposables[i]
+    }
+  }
+  return lowest;
+}
 
 Composeable.prototype.indexOfParent = function(){
   try{
@@ -237,6 +248,11 @@ MinkComposer.createSpaceForSiblings = function(composeable, amount){
     cardsThatShouldBeAbove = cardsThatShouldBeAbove.concat(cousinCompoaseables);
   }
   var amountUp = 0;
+  //if this is the first inserted of a set of kids, move down a bit
+  if(!composeable.hasSilbings()){
+    amountUp = -20;
+  }
+
   for(var i = cardsThatShouldBeAbove.length - 1 ; i >= 0; i--){
 
       var diff =  composeable.y - cardsThatShouldBeAbove[i].y - cardsThatShouldBeAbove[i].getHeight() ;
@@ -256,10 +272,10 @@ MinkComposer.createSpaceForSiblings = function(composeable, amount){
   for(var i = 0 ; i < cardsThatShouldBeBelow.length; i++){
 
       var diff =  composeable.y + composeable.getHeight() - cardsThatShouldBeBelow[i].y  ;
-      if (diff >= 2){
-        amountUp = amountUp + diff;
+      if (diff >= 0){
+        amountDown = amountDown + diff;
       }
-      cardsThatShouldBeBelow[i].reposition(cardsThatShouldBeBelow[i].y + amountUp);
+      cardsThatShouldBeBelow[i].reposition(cardsThatShouldBeBelow[i].y + amountDown);
   }
 
   //try and push out cards in piles below
@@ -316,6 +332,9 @@ MinkComposer.findAttachmentPoint = function(composeable, childComposable){
     parentExplorableIDs.push((url + '|' + collection));
   }
 }
+
+
+
 MinkComposer.drawLinesToChildren = function(composeable, canvas, ctx){
   if(composeable.childComposables.length < 1){
     return;
@@ -342,7 +361,14 @@ MinkComposer.drawLinesToChildren = function(composeable, canvas, ctx){
 
       var pileCards = $(childPiles[i]).find('.minkCardContainer');
       var topCard = pileCards[0].getBoundingClientRect();
-      var bottomCard = pileCards[pileCards.length - 1].getBoundingClientRect();
+
+      var lowestCard = pileCards[0];
+      for(var q = 0; q < pileCards.length; q++){
+        if(parseFloat(pileCards[q].style.top) > parseFloat(lowestCard.style.top)){
+          lowestCard = pileCards[q];
+        }
+      }
+      var bottomCard = lowestCard.getBoundingClientRect();
       var pileTopAttachPointX = topCard.left - canvasX;
       var pileTopAttachPointY = (topCard.top) - canvasY;
       var pileBotAttachPointX = bottomCard.left - canvasX;
