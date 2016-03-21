@@ -437,7 +437,8 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 
 				if (obj)
 				{
-					if (f.scope.hasOwnProperty('resolved_generic_type_vars')) {
+					if (f.scope.resolved_generic_type_vars &&
+							f.scope.resolved_generic_type_vars.length > 0) {
 						for (g in f.scope.resolved_generic_type_vars){
 							generic_type_var = f.scope.resolved_generic_type_vars[g];
 							if (generic_type_var.name == f.type){
@@ -445,13 +446,13 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 							}
 						}
 					}
-					else if (f.hasOwnProperty('type')) {
+					else if (f.type) {
 						obj.mm_name = f.type;
 					} 
 					else {
 						obj.mm_name = f.name;
 					}
-					if (obj.hasOwnProperty('location')) {
+					if (obj.location) {
 						obj.download_status = "UNPROCESSED";
 					}
 					d.push(obj);
