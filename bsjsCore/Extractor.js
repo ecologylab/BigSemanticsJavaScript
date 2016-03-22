@@ -28,11 +28,36 @@ function extractMetadata(response, mmd, bigSemantics, options, callback) {
 function extractMetadataSync(response, mmd, bigSemantics, options) {
 	mmd = BSUtils.unwrapMmd(mmd);
 
-	/*
-	 * Helper functions in need of closure
-	 * 
-	 */
+	/* Helper functions, some ported from ParserBase in BigSemanticsJava */
+	function ammendXpath(xpath){
+		var result = xpath;
+		if(result){
+			result = absoluteToRelative(result);
+			result = joinLines(result);
+		}
+		return result;
+	}
 
+	function absoluteToRelative(xpath){
+		if(xpath.startsWith('/')){
+			xpath = '.' + xpath;
+		}
+		if(xpath.includes('(/')){
+			xpath.replace('(/', '(./');
+
+		}
+
+		return xpath;
+	}
+
+	function joinLines(xpath){
+		if (xpath.includes("\n") || xpath.includes("\r"))
+		{
+		  xpath = xpath.replace("\n", "").replace("\r", "");
+		}
+		return xpath;
+	}
+	
 	//store topmost xpaths for each field. used to tell if nested fields are inherited or not
 	function countXpaths(mmdKids, page){
 	    for (var i = 0; i < mmdKids.length; i++) {
@@ -56,11 +81,8 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 	        }
 	    }
 	}
-
-
-	/*
-	 * loops through the kids of the metadata field
-	 */
+	
+	/** loops through the kids of the metadata field */
 	function dataFromKids(mmdKids,contextNode,recurse,parserContext,page,isLowerLvl){
 		var d = { };
 		var e = true; //if object is empty
@@ -396,8 +418,7 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 		return null;
 	}
 
-	function getCollectionData(field,xpath,contextNode,page)
-	{
+	function getCollectionData(field,xpath,contextNode,page){
 		var d = null;
 		var fieldParserEl = field.field_parser;
 		var nodes, g, generic_type_var;
@@ -511,11 +532,8 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 	    return concatString;
 	}
 
-	/*
-	 * checks if composite has any significant info
-	 */
-	function isObjEmpty(o, page)
-	{
+	/** checks if composite has any significant info */
+	function isObjEmpty(o, page){
 		if (o === null) {
 			return true;
 		}	
@@ -551,33 +569,29 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 		return null;
 	}
 
-  /*
-   * recursion recuires that scalars be evaluated first
-   */
-  function sortKids(mmdKidsList) {
-    var sortedList = [];
-    if (mmdKidsList && mmdKidsList instanceof Array) {
-      for (var i = 0; i < mmdKidsList.length; i++){
-		  if (mmdKidsList[i].scalar){
-			sortedList.push(mmdKidsList[i]);
-		  }
-	  }
-      for (var j = 0; j < mmdKidsList.length; j++){
-		  if (!mmdKidsList[j].scalar){
-			sortedList.push(mmdKidsList[j]);
-		  }
-	  }
-    }
-    return sortedList;
-  }
+	/** recursion recuires that scalars be evaluated first */
+  	function sortKids(mmdKidsList) {
+		var sortedList = [];
+		if (mmdKidsList && mmdKidsList instanceof Array) {
+			for (var i = 0; i < mmdKidsList.length; i++){
+				if (mmdKidsList[i].scalar){
+					sortedList.push(mmdKidsList[i]);
+				}
+			}
+			for (var j = 0; j < mmdKidsList.length; j++){
+				if (!mmdKidsList[j].scalar){
+					sortedList.push(mmdKidsList[j]);
+				}
+			}
+		}
+		return sortedList;
+  	}
 
 	function secondaryExtractCallback(mmd, page){
-	    var md = extractMetadata(mmd, page);
-	    console.log(md);
+		var md = extractMetadata(mmd, page);
+		console.log(md);
 	}
 
-	
-	
 	var metadata = {};
 	var page = response.entity;
 	//Kade's code filters the URL here. I'm going to assume this is done earlier in the process
@@ -589,21 +603,20 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 	var upperXpath = {};
 	var defVars = {};
 	upperLevel[page.URL] = {}; //holds upperlevel metadata
-    scalars[page.URL] = {};
-    baseURL[page.URL] = "";
-    upperXpath[page.URL] = {};
-	
-    baseURL[page.URL] = page.URL.substring(0, getPosition(page.URL,"/",3));
-	
-    var extractedMeta = { };
+	scalars[page.URL] = {};
+	baseURL[page.URL] = "";
+	upperXpath[page.URL] = {};
+
+	baseURL[page.URL] = page.URL.substring(0, getPosition(page.URL,"/",3));
+
+	var extractedMeta = { };
 	var mmdKids = mmd.kids;
 	mmdKids = sortKids(mmdKids);
 	var contextNode = page;
 	var type = mmd.type;
 	var name = mmd.name;
-	
-	if (mmd.hasOwnProperty('def_vars')) 
-	{
+
+	if (mmd.hasOwnProperty('def_vars')) {
 		for (var i = 0; i < mmd.def_vars.length; i++) {
 			if (typeof mmd.def_vars[i].xpaths !== 'undefined'){ //in case someone writes a wrapper and doesn't define an xpath
 				var def = mmd.def_vars[i];
@@ -621,8 +634,7 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
     
     countXpaths(mmdKids, page);
     
-	if (type) 
-	{
+	if (type) {
 		extractedMeta[type] = dataFromKids(mmdKids,contextNode,true,null,page);
 		extractedMeta[type].download_status = "DOWNLOAD_DONE";
 		extractedMeta[type].mm_name = mmd.name;
@@ -632,10 +644,10 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 		extractedMeta[mmd.name].mm_name = mmd.name;
 	}
 
-  unwrapped = BSUtils.unwrap(extractedMeta);
-  unwrapped.location = response.location;
-  unwrapped.additionalLocations = response.otherLocations;
-  return extractedMeta;
+	unwrapped = BSUtils.unwrap(extractedMeta);
+	unwrapped.location = response.location;
+	unwrapped.additionalLocations = response.otherLocations;
+	return extractedMeta;
 }
 
 // for use in Node:
@@ -644,34 +656,4 @@ if (typeof module == 'object') {
     extractMetadata: extractMetadata,
     extractMetadataSync: extractMetadataSync
   };
-}
-
-//Helper functions, ported from ParserBase in BigSemanticsJava
-function ammendXpath(xpath){
-	var result = xpath;
-	if(result){
-		result = absoluteToRelative(result);
-		result = joinLines(result);
-	}
-	return result;
-}
-
-function absoluteToRelative(xpath){
-	if(xpath.startsWith('/')){
-		xpath = '.' + xpath;
-	}
-	if(xpath.includes('(/')){
-		xpath.replace('(/', '(./');
-		
-	}
-	
-	return xpath;
-}
-
-function joinLines(xpath){
-	if (xpath.includes("\n") || xpath.includes("\r"))
-    {
-      xpath = xpath.replace("\n", "").replace("\r", "");
-    }
-    return xpath;
 }
