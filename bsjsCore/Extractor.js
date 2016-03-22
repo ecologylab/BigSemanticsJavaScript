@@ -84,8 +84,8 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 	
 	/** loops through the kids of the metadata field */
 	function dataFromKids(mmdKids,contextNode,recurse,parserContext,page,isLowerLvl){
-		var d = { };
-		var e = true; //if object is empty
+		var data = { };
+		var isEmpty = true; //if object is empty
 	    var isNested = false;
 	    if (contextNode != page) isNested = true;
 	    
@@ -100,7 +100,10 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 			var tag;
 					
 	        var tmpField = field[Object.keys(field)[0]];
-	        if (tmpField.hasOwnProperty('xpaths') && tmpField.xpaths == upperXpath[page.URL][tmpField.name] && (isNested || isLowerLvl)){
+			
+			//TODO work out with Ajit and Yin if this is right behavior
+			// if the field has only the xpaths it inherited, or fewer xpaths, then do not try extraction
+			if (tmpField.hasOwnProperty('xpaths') && tmpField.xpaths == upperXpath[page.URL][tmpField.name] && (isNested || isLowerLvl)){
 	            continue;
 	        }
 			else if (tmpField.hasOwnProperty('xpaths') && upperXpath[page.URL][tmpField.name] && tmpField.xpaths.length < upperXpath[page.URL][tmpField.name].length){
@@ -110,8 +113,7 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 	            contextNode = page;
 	        }
 
-			if(field.scalar) 
-			{
+			if(field.scalar) {
 				field = field.scalar;
 				name = field.name;
 	            var hasContext = false;
@@ -131,16 +133,15 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 					obj = page.URL;
 				}
 				
-				if (obj)
-				{
-					e = false;
-					if (tag){
-						d[tag] = obj;
+				if (obj) {
+					isEmpty = false;
+					if (tag) {
+						data[tag] = obj;
 						if (!isNested && !isLowerLvl) {
 							upperLevel[page.URL][tag] = obj;
 						}
 					} else {
-						d[name] = obj;
+						data[name] = obj;
 						if (!isNested && !isLowerLvl) {
 							upperLevel[page.URL][name] = obj;
 						}
@@ -149,58 +150,52 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 				}
 			
 			}
-			else if (field.composite) 
-			{
+			else if (field.composite) {
 				field = field.composite;
 				name = field.name;
 				
-				if (field.hasOwnProperty('context_node'))
-				{
+				if (field.hasOwnProperty('context_node')) {
 					contextNode = defVars[field.context_node];
 				}			
 				
 				obj = getCompositeD(field,contextNode,recurse,parserContext,page);
 				
-				if(!isObjEmpty(obj,page))
-				{
-					if(obj)
-					{
-						e = false;
+				//TODO work out with Ajit and Yin if this is right behavior
+				//make sure the object actually contains new data.
+				if(!isObjEmpty(obj,page)) {
+					if(obj) {
+						isEmpty = false;
 						if (tag){
-							d[tag] = obj;
+							data[tag] = obj;
 						} else {
-							d[name] = obj;
+							data[name] = obj;
 						}			
 					}
 				}
 			}
-			else if (field.collection)
-			{
+			else if (field.collection) {
 				field = field.collection;
 				name = field.name;
 				
-				if (field.hasOwnProperty('context_node'))
-				{
+				if (field.hasOwnProperty('context_node')) {
 					contextNode = defVars[field.context_node];
 				}
 				obj = getCollectionD(field,contextNode,recurse,parserContext,page);
-				if(obj)
-				{
-					e = false;
+				if(obj) {
+					isEmpty = false;
 					if (tag) {
-						d[tag] = obj;
+						data[tag] = obj;
 					} else {
-						d[name] = obj;
+						data[name] = obj;
 					}
 				}			
 			}
 		}
 		
-		//if object is empty just return null
-		if (e) { 
+		if (isEmpty) { 
 			return null;
 		}	
-		return d;
+		return data;
 	}
 
 	function getScalarD(field,contextNode,recurse,parserContext,page){
@@ -217,8 +212,7 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 		if (field.hasOwnProperty('field_parser_key')) {
 			data = getFieldParserValueByKey(parserContext,field.field_parser_key);
 		}
-		else if (field.hasOwnProperty('xpaths') && field.xpaths.length > 0)
-		{
+		else if (field.hasOwnProperty('xpaths') && field.xpaths.length > 0) {
 			var fieldx = field.xpaths;
 			for (var j = 0; j < fieldx.length; j++) {
 				if (field.extract_as_html) {
@@ -234,18 +228,13 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 					data = x;
 					break;			
 				}
-
 			}
-					
 		}
 		
-		if(data !== null && data !== undefined)
-		{			
+		if(data !== null && data !== undefined) {			
 			data = data.trim();
-			if (field.hasOwnProperty('field_ops'))
-			{
-				for (var i = 0; i < field.field_ops.length; i++)
-				{
+			if (field.hasOwnProperty('field_ops')) {
+				for (var i = 0; i < field.field_ops.length; i++) {
 					var fieldOp = field.field_ops[i];
 					data = FieldOps.operate(data, fieldOp);
 				}
