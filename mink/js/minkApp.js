@@ -1123,8 +1123,23 @@ minkApp.addChildCards = function(event){
 
 
 minkApp.attachCard = function(task){
-	minkRenderer.render(task);
-	task.container.id = generateUUID();
+
+	if($(task.container).hasClass('minkCardContainer')){
+		task.container.id = generateUUID();
+		minkRenderer.render(task);
+
+	}else{
+		var cont = task.container;
+		var cardDiv = buildDiv('minkCardContainer');
+		minkApp.buildCardControls(cardDiv, task.url);
+		cardDiv.id = generateUUID();
+		task.container = cardDiv;
+		cont.appendChild(cardDiv);
+		minkRenderer.render(task);
+
+	}
+
+
 
 	var parentCardId = $(task.container).closest('.minkPileWrapper').attr('parentcard');
 	var composeable;
@@ -1580,7 +1595,7 @@ minkApp.getSearchResultLinks = function(task){
 
 
 minkApp.buildPileMoreLoader = function (parent, pile, pattern, url){
-	var loader = buildDiv('minkPileLoader');
+	/*var loader = buildDiv('minkPileLoader');
 	var urlToLoad = url + pattern;
 	loader.setAttribute('loadnext', urlToLoad);
 	loader.addEventListener('click', minkApp.addNewCardsToPile);
@@ -1588,7 +1603,7 @@ minkApp.buildPileMoreLoader = function (parent, pile, pattern, url){
 
 
 
-	parent.appendChild(loader);
+	parent.appendChild(loader);*/
 }
 
 

@@ -83,7 +83,19 @@ Composeable.prototype.highestChild = function(){
   }
   return highest;
 }
-
+Composeable.prototype.boundingYOfChildTree = function(){
+  var highest = this.highestChild();
+  while(highest.childComposables.length > 0){
+    highest = highest.highestChild();
+  }
+  var lowestChild = this.lowestChild();
+  while(lowestChild.childComposables.length > 0){
+    lowestChild = lowestChild.lowestChild();
+  }
+  var topY = highest.y;
+  var bottomY = lowestChild.y + lowestChild.getHeight();
+  return {top: topY, bottom: bottomY}
+}
 
 Composeable.prototype.indexOfParent = function(){
   try{
@@ -194,17 +206,74 @@ MinkComposer.composeEventHandler = function(event){
 
 }
 
-MinkComposer.recenterParent = function(composeableParent){
+MinkComposer.pushOutSiblings = function(composeable){
+  var boundingBox = composeable.boundingYOfChildTree();
+  var siblings = composeable.getSiblings();
+
+  var column = MinkComposer.columns[composeable.x];
+  var indexOf = column.composeables.indexOf(composeable);
+
+  var cardsThatShouldBeBelow = [];
+  for(var i = indexOf + 1; i < column.composeables.length; i++){
+    var siblings = column.composeables[i];
+    cardsThatShouldBeBelow = cardsThatShouldBeBelow.concat(siblings);
+  }
+  var moveDownBy = 0;
+  if(cardsThatShouldBeBelow.length > 0){
+
+    //check to make sure we don't get above the parent
+    var diff = boundingBox.bottom - cardsThatShouldBeBelow[0].y;
+    if(diff != 0){
+      var parentBottom = composeable.y + composeable.getHeight();
+      moveDownBy = moveDownBy + diff;
+      if(parentBottom > (cardsThatShouldBeBelow[0].y + moveDownBy)){
+        moveDownBy = parentBottom - cardsThatShouldBeBelow[0].y;
+      }
+
+      for(var i = 0; i < cardsThatShouldBeBelow.length; i++){
+          cardsThatShouldBeBelow[i].reposition(cardsThatShouldBeBelow[i].y + moveDownBy);
+          MinkComposer.moveKidsWithParent(cardsThatShouldBeBelow[i], moveDownBy)
+        }
+      }
+    }
+
+
+
+
+
+}
+
+MinkComposer.recenterParent = function(composeableParent, dontMoveSiblings){
   if(composeableParent){
     var highest = composeableParent.highestChild();
     var lowest = composeableParent.lowestChild();
     var middle = (highest.y + lowest.y + lowest.getHeight())/2 - composeableParent.getHeight()/2;
+    var accountForParentHeight = true;
+    if(middle < highest.y){
+      middle = highest.y;
+      accountForParentHeight = false;
+    }
+    var ogHeight = composeableParent.y;
+    var diff =  -ogHeight + middle;
+    var ogDiff = diff;
+    if(accountForParentHeight){
+      diff = diff - composeableParent.getHeight()/2
 
-
-
+    }
     composeableParent.reposition(middle);
+    MinkComposer.pushOutSiblings(composeableParent);
+
+
   }
 
+}
+//assumes the parent is in the right place but the kids gotta move
+MinkComposer.moveKidsWithParent = function(parentComposeable, diff){
+  for(var i = 0; i < parentComposeable.childComposables.length; i++){
+    var kid = parentComposeable.childComposables[i];
+    kid.reposition(kid.y + diff);
+    MinkComposer.moveKidsWithParent(kid, diff);
+  }
 }
 
 MinkComposer.addSpaceBelow = function(composeable, diff){
@@ -221,20 +290,22 @@ MinkComposer.addSpaceBelow = function(composeable, diff){
   var lastMovedComp;
   //push down siblings by diff, then push down others by partial diff
   for(var i = 0 ; i < cardsThatShouldBeBelow.length; i++){
-      if(cardsThatShouldBeBelow[i].parent.id == cardsThatShouldBeBelow[i].parent.id){
+
+
+  //    if(cardsThatShouldBeBelow[i].parent.id == composeable.parent.id){
         cardsThatShouldBeBelow[i].reposition(cardsThatShouldBeBelow[i].y + diff);
         MinkComposer.recenterParent(cardsThatShouldBeBelow[i].parent)
         lastMovedComp = cardsThatShouldBeBelow[i];
 
-      }else{
+      /*}else{
         var amountDown =  lastMovedComp.y + lastMovedComp.getHeight() - cardsThatShouldBeBelow[i].y  ;
         cardsThatShouldBeBelow[i].reposition(cardsThatShouldBeBelow[i].y + amountDown);
         MinkComposer.recenterParent(cardsThatShouldBeBelow[i].parent)
         lastMovedComp = cardsThatShouldBeBelow[i];
 
-      }
+      }*/
   }
-
+  MinkComposer.recenterParent(composeable.parent, false, true);
 
 
 
@@ -251,7 +322,7 @@ MinkComposer.removeExcessSpaceBelow = function(composeable, diff){
   var lastComposeable= composeable;
   for(var i = 0; i < cardsThatShouldBeBelow.length; i++){
     cardsThatShouldBeBelow[i].reposition(cardsThatShouldBeBelow[i].y + diff);
-    MinkComposer.recenterParent(cardsThatShouldBeBelow[i].parent)
+  //  MinkComposer.recenterParent(cardsThatShouldBeBelow[i].parent)
 
   }
   MinkComposer.recenterParent(composeable.parent)
@@ -316,7 +387,7 @@ MinkComposer.createSpaceAroundParent = function(composeable, amount){
     for (var i = index+1; i < siblingsIncludingComp.length; i++){
       var sibling = siblingsIncludingComp[i];
       sibling.reposition(sibling.y + amount);
-
+      MinkComposer.moveKidsWithParent(sibling, amount)
     }
     if(!composeable.isRoot()){
       MinkComposer.createSpaceAroundParent(composeable.parent, amount);
