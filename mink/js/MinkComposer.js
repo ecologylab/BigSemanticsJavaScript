@@ -84,7 +84,13 @@ Composeable.prototype.highestChild = function(){
   return highest;
 }
 Composeable.prototype.boundingYOfChildTree = function(){
+  if(this.childComposables.length < 1){
+    return {top: this.y, bottom: this.y + this.getHeight()}
+  }
+
   var highest = this.highestChild();
+
+
   while(highest.childComposables.length > 0){
     highest = highest.highestChild();
   }
@@ -222,7 +228,7 @@ MinkComposer.pushOutSiblings = function(composeable){
   if(cardsThatShouldBeBelow.length > 0){
 
     //check to make sure we don't get above the parent
-    var diff = boundingBox.bottom - cardsThatShouldBeBelow[0].y;
+    var diff = boundingBox.bottom - cardsThatShouldBeBelow[0].boundingYOfChildTree().top;
     if(diff != 0){
       var parentBottom = composeable.y + composeable.getHeight();
       moveDownBy = moveDownBy + diff;
@@ -237,20 +243,17 @@ MinkComposer.pushOutSiblings = function(composeable){
       }
     }
 
-
-
-
-
 }
 
 MinkComposer.recenterParent = function(composeableParent, dontMoveSiblings){
   if(composeableParent){
-    var highest = composeableParent.highestChild();
-    var lowest = composeableParent.lowestChild();
-    var middle = (highest.y + lowest.y + lowest.getHeight())/2 - composeableParent.getHeight()/2;
+    var bounding = composeableParent.boundingYOfChildTree();
+    var highest = bounding.top;
+    var lowest = bounding.bottom;
+    var middle = (highest + lowest)/2 - composeableParent.getHeight()/2;
     var accountForParentHeight = true;
-    if(middle < highest.y){
-      middle = highest.y;
+    if(middle < highest){
+      middle = highest;
       accountForParentHeight = false;
     }
     var ogHeight = composeableParent.y;
@@ -261,7 +264,8 @@ MinkComposer.recenterParent = function(composeableParent, dontMoveSiblings){
 
     }
     composeableParent.reposition(middle);
-    MinkComposer.pushOutSiblings(composeableParent);
+  //  if(!dontMoveSiblings)
+      MinkComposer.pushOutSiblings(composeableParent);
 
 
   }
@@ -292,18 +296,14 @@ MinkComposer.addSpaceBelow = function(composeable, diff){
   for(var i = 0 ; i < cardsThatShouldBeBelow.length; i++){
 
 
-  //    if(cardsThatShouldBeBelow[i].parent.id == composeable.parent.id){
+    if(!cardsThatShouldBeBelow[i].parent || (cardsThatShouldBeBelow[i].parent.id == composeable.parent.id)){
         cardsThatShouldBeBelow[i].reposition(cardsThatShouldBeBelow[i].y + diff);
         MinkComposer.recenterParent(cardsThatShouldBeBelow[i].parent)
         lastMovedComp = cardsThatShouldBeBelow[i];
+    }else{
+      MinkComposer.recenterParent(cardsThatShouldBeBelow[i].parent)
 
-      /*}else{
-        var amountDown =  lastMovedComp.y + lastMovedComp.getHeight() - cardsThatShouldBeBelow[i].y  ;
-        cardsThatShouldBeBelow[i].reposition(cardsThatShouldBeBelow[i].y + amountDown);
-        MinkComposer.recenterParent(cardsThatShouldBeBelow[i].parent)
-        lastMovedComp = cardsThatShouldBeBelow[i];
-
-      }*/
+    }
   }
   MinkComposer.recenterParent(composeable.parent, false, true);
 
@@ -322,10 +322,11 @@ MinkComposer.removeExcessSpaceBelow = function(composeable, diff){
   var lastComposeable= composeable;
   for(var i = 0; i < cardsThatShouldBeBelow.length; i++){
     cardsThatShouldBeBelow[i].reposition(cardsThatShouldBeBelow[i].y + diff);
-  //  MinkComposer.recenterParent(cardsThatShouldBeBelow[i].parent)
+
+    MinkComposer.recenterParent(cardsThatShouldBeBelow[i].parent)
 
   }
-  MinkComposer.recenterParent(composeable.parent)
+  MinkComposer.recenterParent(composeable.parent, true)
 
 }
 
