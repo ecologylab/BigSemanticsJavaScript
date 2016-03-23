@@ -84,8 +84,11 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 	
 	/** 
 	* loops through the kids of the metadata field 
+	* mmdKids : the scalars, composites, and collections to extract data for
 	* contextNode : the code html node that we are in context of. is whole page for 
 	* recurse : boolean, whether or not to recursively extract composites and collections
+	* page : the parent html page
+	* isLowerLvl : boolen, whether or not this is a first level extraction or second level
 	*/
 	function dataFromKids(mmdKids, contextNode, recurse, page, isLowerLvl){
 		var data = { };
