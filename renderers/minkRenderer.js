@@ -103,7 +103,7 @@ minkRenderer.render = function(task){
 			        setTimeout( function(){
 			        	var keyfields = $(task.visual).find('.minkKeyFields')[0];
 						$(keyfields).slideDownTransition();
-			        }, 250);
+					}, 1);
 
 
 				}else if(task.options.devalue){
@@ -111,7 +111,7 @@ minkRenderer.render = function(task){
 					setTimeout( function(){
 						minkRenderer.devalue(task.visual.childNodes[0]);
 
-					}, 250);
+					}, 1);
 				}
 			}
 
@@ -639,6 +639,35 @@ minkRenderer.signalExplorableLinks = function(event){
 
 }
 
+minkRenderer.signalShowMore = function(targetChild){
+	try{
+		var composeableHTML = $(targetChild).closest('.minkCardContainer');
+		var composeableID = composeableHTML.attr('id');
+
+		var detailDetails = {type: 'growbelow', composeableID: composeableID};
+		var eventDetail = {detail: detailDetails, bubbles: true};
+		var myEvent = new CustomEvent("composerevent", eventDetail);
+		targetChild.dispatchEvent(myEvent);
+
+	}catch(err){
+
+	}
+}
+minkRenderer.signalShowLess = function(targetChild){
+	try{
+		var composeableHTML = $(targetChild).closest('.minkCardContainer');
+		var composeableID = composeableHTML.attr('id');
+
+		var detailDetails = {type: 'pullup', composeableID: composeableID};
+		var eventDetail = {detail: detailDetails, bubbles: true};
+		var myEvent = new CustomEvent("composerevent", eventDetail);
+		targetChild.dispatchEvent(myEvent);
+
+	}catch(err){
+
+	}
+}
+
 
 minkRenderer.signalShowHideChild = function(expandables, target){
 	if(expandables.length < 1){
@@ -1043,15 +1072,16 @@ minkRenderer.grow = function(target, doNotUpdateStatus){
 		}
 		setTimeout(function(){
 			moreExpander.style.display = ''
-		}, 250, moreExpander);
+		}, 1, moreExpander);
 
 		$(minkExpander).removeClass('filledExpander');
 		$(minkExpander).addClass('unfilledExpander');
 
 		var detail = container.getElementsByClassName('minkDetailExpander')[0];
 		if (detail.getAttribute('revealme') == 'true'){
-			minkRenderer.showMore(detail);
+			minkRenderer.showMore(detail, true);
 		}
+		minkRenderer.signalShowMore(target);
 		minkRenderer.signalReAddButtons($(target).closest('.minkCardContainer')[0]);
 
 	}catch(err){
@@ -1119,13 +1149,15 @@ minkRenderer.shrink = function(target, doNotUpdateStatus){
 	moreExpander.style.display = 'none';
 	//Check to collapse table as well
 	var detail = container.getElementsByClassName('minkDetailExpander')[0];
-	minkRenderer.showLess(detail, null, true);
+	minkRenderer.showLess(detail, null, true, true);
 	$(mink).slideUpTransition(true);
+
 	minkRenderer.signalRemoveButtons($(target).closest('.minkCardContainer')[0]);
+	minkRenderer.signalShowLess(target);
 
 }
 
-minkRenderer.showMore = function(target){
+minkRenderer.showMore = function(target, doNotSignal){
 
 	try{
 		 target = $(target).closest('.minkDetailExpander')[0];
@@ -1164,14 +1196,15 @@ minkRenderer.showMore = function(target){
 		target.setAttribute('revealme', 'true');
 		target.removeEventListener('click', minkRenderer.showMoreHandler);
 		target.addEventListener('click', minkRenderer.showLessHandler);
-
+		if(!doNotSignal)
+			minkRenderer.signalShowMore(target);
 	}catch(err){
 
 	}
 
 }
 
-minkRenderer.showLess = function(target, keepClosed, absolutelyShrink){
+minkRenderer.showLess = function(target, keepClosed, absolutelyShrink, doNotSignal){
 
 	try{
 		target = $(target).closest('.minkDetailExpander')[0];
@@ -1221,6 +1254,9 @@ minkRenderer.showLess = function(target, keepClosed, absolutelyShrink){
 		}
 		target.removeEventListener('click', minkRenderer.showLessHandler);
 		target.addEventListener('click', minkRenderer.showMoreHandler);
+		if(!doNotSignal)
+			minkRenderer.signalShowLess(target);
+
 	}
 	catch(err){
 		console.log('empty container, removing');

@@ -70,6 +70,20 @@ Composeable.prototype.lowestChild = function(){
   }
   return lowest;
 }
+Composeable.prototype.highestChild = function(){
+  if(this.childComposables.length < 1){
+    return null;
+  }
+  var highest = this.childComposables[0];
+
+  for(var i = 0; i < this.childComposables.length; i++){
+    if(this.childComposables[i].y < highest.y){
+      highest = this.childComposables[i]
+    }
+  }
+  return highest;
+}
+
 
 Composeable.prototype.indexOfParent = function(){
   try{
@@ -148,16 +162,102 @@ Composeable.prototype.reposition = function(y){
 }
 
 MinkComposer.composeEventHandler = function(event){
-  var container = event.detail.container;
-  var compID = $(container).closest('.minkCardContainer')[0].id;
-  var composeable = MinkComposer.composeableMap.get(compID);
-  if (event.detail.type == 'makespace'){
-    window.setTimeout(function(){
-      MinkComposer.createSpaceForComposeable(composeable);
 
-    }, 1)
+  try{
+
+    if(event.detail.type == 'pullup'){
+      var composeable = MinkComposer.composeableMap.get(event.detail.composeableID);
+
+      var height = composeable.getHeight();
+
+      window.setTimeout(function(){
+        var newHeight = composeable.getHeight();
+        var diff = newHeight - height - 30;
+        MinkComposer.removeExcessSpaceBelow(composeable, diff);
+
+      }, 200);
+    }else if(event.detail.type == 'growbelow'){
+      var composeable = MinkComposer.composeableMap.get(event.detail.composeableID);
+      var height = composeable.getHeight();
+
+      window.setTimeout(function(){
+        var newHeight = composeable.getHeight();
+        var diff = newHeight - height ;
+
+        MinkComposer.addSpaceBelow(composeable, diff)
+
+      }, 200);
+    }
+  }catch(err){
+
   }
+
 }
+
+MinkComposer.recenterParent = function(composeableParent){
+  if(composeableParent){
+    var highest = composeableParent.highestChild();
+    var lowest = composeableParent.lowestChild();
+    var middle = (highest.y + lowest.y + lowest.getHeight())/2 - composeableParent.getHeight()/2;
+
+
+
+    composeableParent.reposition(middle);
+  }
+
+}
+
+MinkComposer.addSpaceBelow = function(composeable, diff){
+  var column = MinkComposer.columns[composeable.x];
+  var indexOf = column.composeables.indexOf(composeable);
+
+  var cardsThatShouldBeBelow = [];
+  for(var i = indexOf + 1; i < column.composeables.length; i++){
+    var siblings = column.composeables[i];
+    cardsThatShouldBeBelow = cardsThatShouldBeBelow.concat(siblings);
+  }
+
+
+  var lastMovedComp;
+  //push down siblings by diff, then push down others by partial diff
+  for(var i = 0 ; i < cardsThatShouldBeBelow.length; i++){
+      if(cardsThatShouldBeBelow[i].parent.id == cardsThatShouldBeBelow[i].parent.id){
+        cardsThatShouldBeBelow[i].reposition(cardsThatShouldBeBelow[i].y + diff);
+        MinkComposer.recenterParent(cardsThatShouldBeBelow[i].parent)
+        lastMovedComp = cardsThatShouldBeBelow[i];
+
+      }else{
+        var amountDown =  lastMovedComp.y + lastMovedComp.getHeight() - cardsThatShouldBeBelow[i].y  ;
+        cardsThatShouldBeBelow[i].reposition(cardsThatShouldBeBelow[i].y + amountDown);
+        MinkComposer.recenterParent(cardsThatShouldBeBelow[i].parent)
+        lastMovedComp = cardsThatShouldBeBelow[i];
+
+      }
+  }
+
+
+
+
+}
+MinkComposer.removeExcessSpaceBelow = function(composeable, diff){
+  var column = MinkComposer.columns[composeable.x];
+  var indexOf = column.composeables.indexOf(composeable);
+
+  var cardsThatShouldBeBelow = [];
+  for(var i = indexOf + 1; i < column.composeables.length; i++){
+    var siblings = column.composeables[i];
+    cardsThatShouldBeBelow = cardsThatShouldBeBelow.concat(siblings);
+  }
+  var lastComposeable= composeable;
+  for(var i = 0; i < cardsThatShouldBeBelow.length; i++){
+    cardsThatShouldBeBelow[i].reposition(cardsThatShouldBeBelow[i].y + diff);
+    MinkComposer.recenterParent(cardsThatShouldBeBelow[i].parent)
+
+  }
+  MinkComposer.recenterParent(composeable.parent)
+
+}
+
 
 MinkComposer.insertComposeable = function(composeable){
   if(composeable.isRoot()){

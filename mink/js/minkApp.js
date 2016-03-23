@@ -1133,7 +1133,7 @@ minkApp.attachCard = function(task){
 		composeable = new Composeable(task.container, task.container.id, parentCardId);
 
 			MinkComposer.insertComposeable(composeable);
-	}, 1000)
+	}, 350)
 
 
 }
