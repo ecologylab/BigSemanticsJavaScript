@@ -1147,8 +1147,8 @@ minkApp.attachCard = function(task){
 	window.setTimeout(function(){
 		composeable = new Composeable(task.container, task.container.id, parentCardId);
 
-			MinkComposer.insertComposeable(composeable);
-	}, 350)
+			MinkComposer.addComposeable(composeable);
+	}, 300)
 
 
 }
