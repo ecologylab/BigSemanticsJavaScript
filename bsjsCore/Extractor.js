@@ -82,8 +82,12 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 	    }
 	}
 	
-	/** loops through the kids of the metadata field */
-	function dataFromKids(mmdKids,contextNode,recurse,parserContext,page,isLowerLvl){
+	/** 
+	* loops through the kids of the metadata field 
+	* contextNode : the code html node that we are in context of. is whole page for 
+	* recurse : boolean, whether or not to recursively extract composites and collections
+	*/
+	function dataFromKids(mmdKids, contextNode, recurse, page, isLowerLvl){
 		var data = { };
 		var isEmpty = true; //if object is empty
 	    var isNested = false;
@@ -125,7 +129,7 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 	                hasContext = true;
 				}
 				
-				obj = getScalarD(field,contextNode,recurse,parserContext,page);
+				obj = getScalarD(field,contextNode,recurse,page);
 				tag = field.tag;
 				
 				//this is a remnant. not sure what it does, but I'm scared to remove it
@@ -158,7 +162,7 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 					contextNode = defVars[field.context_node];
 				}			
 				
-				obj = getCompositeD(field,contextNode,recurse,parserContext,page);
+				obj = getCompositeD(field,contextNode,recurse,page);
 				
 				//TODO work out with Ajit and Yin if this is right behavior
 				//make sure the object actually contains new data.
@@ -180,7 +184,7 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 				if (field.hasOwnProperty('context_node')) {
 					contextNode = defVars[field.context_node];
 				}
-				obj = getCollectionD(field,contextNode,recurse,parserContext,page);
+				obj = getCollectionD(field,contextNode,recurse,page);
 				if(obj) {
 					isEmpty = false;
 					if (tag) {
@@ -198,7 +202,7 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 		return data;
 	}
 
-	function getScalarD(field,contextNode,recurse,parserContext,page){
+	function getScalarD(field, contextNode, recurse, page){
 		var x = null;
 		var data = null;
 		
@@ -210,7 +214,7 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 		}
 		
 		if (field.hasOwnProperty('field_parser_key')) {
-			data = getFieldParserValueByKey(parserContext,field.field_parser_key);
+			data = null;
 		}
 		else if (field.hasOwnProperty('xpaths') && field.xpaths.length > 0) {
 			var fieldx = field.xpaths;
@@ -245,7 +249,7 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 		return null;
 	}
 
-	function getCompositeD(field,contextNode,recurse,parserContext,page){
+	function getCompositeD(field,contextNode,recurse,page){
 		var x = null;
 		var data = null;
 		var kids = field.kids;
@@ -280,15 +284,15 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 			}
 
 			if (newContextNode !== null && recurse && recurseNeeded) {
-				data = dataFromKids(kids,newContextNode,recurse,parserContext,page,true);
+				data = dataFromKids(kids,newContextNode,recurse,page,true);
 			}
 			else if (newContextNode !== null) {
-				data = dataFromKids(kids,newContextNode,false,parserContext,page,true);
+				data = dataFromKids(kids,newContextNode,false,page,true);
 			}
 			
 		} else if (recurse)
 		{
-			data = dataFromKids(kids,contextNode,false,parserContext,page,true);
+			data = dataFromKids(kids,contextNode,false,page,true);
 		}  
 		
 		if(data)
@@ -310,7 +314,7 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 		return null;		
 	}
 
-	function getCollectionD(field,contextNode,recurse,parserContext,page){
+	function getCollectionD(field,contextNode,recurse,page){
 		if (!recurse) {
 			return null;
 		}
@@ -437,13 +441,7 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 			
 			for (var i = 0; i < size; i++) {
 				var newNode = nodes.snapshotItem(i);
-	            // commented out code allows one level of recursion
-	            //if (contextNode == page){
-	                var obj = dataFromKids(kids,newNode,true,null,page);
-	            //}
-	            //else {
-	            //    var obj = dataFromKids(kids,newNode,false,null,page);
-	            //}
+	            var obj = dataFromKids(kids,newNode,true,page);
 
 				if (obj)
 				{
@@ -554,10 +552,6 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 		return false;
 	}
 
-	function getFieldParserValueByKey(fieldParserContext, fieldParserKey) {
-		return null;
-	}
-
 	/** recursion recuires that scalars be evaluated first */
   	function sortKids(mmdKidsList) {
 		var sortedList = [];
@@ -624,11 +618,11 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
     countXpaths(mmdKids, page);
     
 	if (type) {
-		extractedMeta[type] = dataFromKids(mmdKids,contextNode,true,null,page);
+		extractedMeta[type] = dataFromKids(mmdKids,contextNode,true,page);
 		extractedMeta[type].download_status = "DOWNLOAD_DONE";
 		extractedMeta[type].mm_name = mmd.name;
 	} else {
-		extractedMeta[mmd.name] = dataFromKids(mmdKids,contextNode,true,null,page);
+		extractedMeta[mmd.name] = dataFromKids(mmdKids,contextNode,true,page);
 		extractedMeta[mmd.name].download_status = "DOWNLOAD_DONE";
 		extractedMeta[mmd.name].mm_name = mmd.name;
 	}
