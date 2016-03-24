@@ -26,9 +26,10 @@ function extractMetadata(response, mmd, bigSemantics, options, callback) {
 }
 
 function extractMetadataSync(response, mmd, bigSemantics, options) {
+	
 	mmd = BSUtils.unwrapMmd(mmd);
 
-	/* Helper functions, some ported from ParserBase in BigSemanticsJava */
+	/* Helper functions for operating on xpaths, some ported from ParserBase in BigSemanticsJava */
 	function ammendXpath(xpath){
 		var result = xpath;
 		if(result){
@@ -37,25 +38,34 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 		}
 		return result;
 	}
-
-	function absoluteToRelative(xpath){
-		if(xpath.startsWith('/')){
-			xpath = '.' + xpath;
-		}
-		if(xpath.includes('(/')){
-			xpath.replace('(/', '(./');
-
-		}
-
-		return xpath;
-	}
-
+	
 	function joinLines(xpath){
 		if (xpath.includes("\n") || xpath.includes("\r"))
 		{
 		  xpath = xpath.replace("\n", "").replace("\r", "");
 		}
 		return xpath;
+	}
+	
+	function absoluteToRelative(xpath){
+		if(xpath.startsWith('/')){
+			xpath = '.' + xpath;
+		}
+		if(xpath.includes('(/')){
+			xpath.replace('(/', '(./');
+		}
+
+		return xpath;
+	}
+
+	function makeRelativeXpath(xpath, contextNode, page){
+		var evaluationPath;
+		if(contextNode != page){
+			evaluationPath = ammendXpath(xpath);
+		}else{
+			evaluationPath = xpath;
+		}
+		return evaluationPath;
 	}
 	
 	//store topmost xpaths for each field. used to tell if nested fields are inherited or not
@@ -110,12 +120,14 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 			
 			//TODO work out with Ajit and Yin if this is right behavior
 			// if the field has only the xpaths it inherited, or fewer xpaths, then do not try extraction
+			/* */
 			if (tmpField.hasOwnProperty('xpaths') && tmpField.xpaths == upperXpath[page.URL][tmpField.name] && (isNested || isLowerLvl)){
 	            continue;
 	        }
 			else if (tmpField.hasOwnProperty('xpaths') && upperXpath[page.URL][tmpField.name] && tmpField.xpaths.length < upperXpath[page.URL][tmpField.name].length){
 				continue;
 			}
+			
 	        if (!isNested){
 	            contextNode = page;
 	        }
@@ -167,9 +179,9 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 				
 				obj = getCompositeD(field,contextNode,recurse,page);
 				
-				//TODO work out with Ajit and Yin if this is right behavior
+				//TODO probably remove commented out code (and related code)
 				//make sure the object actually contains new data.
-				if(!isObjEmpty(obj,page)) {
+				//if(!isObjEmpty(obj,page)) {
 					if(obj) {
 						isEmpty = false;
 						if (tag){
@@ -178,7 +190,7 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 							data[name] = obj;
 						}			
 					}
-				}
+				//}
 			}
 			else if (field.collection) {
 				field = field.collection;
@@ -345,7 +357,8 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 	function getScalarNode(field,xpath,contextNode,page) {
 		var data;
 		try {
-			data = page.evaluate(xpath, contextNode, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null);
+			var evalXpath = makeRelativeXpath(xpath, contextNode, page);
+			data = page.evaluate(evalXpath, contextNode, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null);
 		} catch (err) {
 			return null;
 		}
@@ -356,7 +369,8 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 	    getScalarStringCalled++;
 		var data;
 		try {
-			data = page.evaluate(xpath, contextNode, null, XPathResult.STRING_TYPE, null);
+			var evalXpath = makeRelativeXpath(xpath, contextNode, page);
+			data = page.evaluate(evalXpath, contextNode, null, XPathResult.STRING_TYPE, null);
 		} catch (err) {
 			return null;
 		}
@@ -392,7 +406,8 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 		var nodes;
 		
 		try {
-			nodes = page.evaluate(xpath, contextNode, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);		
+			var evalXpath = makeRelativeXpath(xpath, contextNode, page);
+			nodes = page.evaluate(evalXpath, contextNode, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);		
 		} catch (e) {
 			return null;
 		}
@@ -419,13 +434,8 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 		var fieldParserEl = field.field_parser;
 		var nodes, g, generic_type_var;
 		try {
-			var evaluationPath;
-			if(contextNode != page){
-				evaluationPath = ammendXpath(xpath);
-			}else{
-				evaluationPath = xpath;
-			}
-			nodes = page.evaluate(evaluationPath, contextNode, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);		
+			var evalXpath = makeRelativeXpath(xpath, contextNode, page);
+			nodes = page.evaluate(evalXpath, contextNode, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);		
 		} catch (e) {
 			return null;
 		}
@@ -607,7 +617,8 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 			if (typeof mmd.def_vars[i].xpaths !== 'undefined'){ //in case someone writes a wrapper and doesn't define an xpath
 				var def = mmd.def_vars[i];
 				var path = def.xpaths[0];
-				var nodes = page.evaluate(path, page, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
+				var evalXpath = makeRelativeXpath(path, contextNode, page);
+				var nodes = page.evaluate(evalXpath, page, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
 				if (nodes.snapshotLength)
 				{
 					var n = def.name;
