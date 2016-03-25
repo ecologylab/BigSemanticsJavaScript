@@ -88,7 +88,7 @@ simpl.dfs = function(obj, options, handlers)
   // a recursive procedure that actually does the traversing.
   function helper(elem, parentElem, name)
   {
-    if (typeof elem == 'undefined')
+    if (typeof elem === 'undefined')
     {
       return;
     }
@@ -262,11 +262,11 @@ simpl.graphExpand = function(obj, options)
         var ref = simplObjs[refId]; // try to find the object by simpl_ref ID.
         if (ref)
         {
-          if (parentVal == null)
+          if (parentVal === null)
           {
             console.warn("WARN: parentObj is null, operation aborted.");
           }
-          if (name == null)
+          if (name === null)
           {
             console.warn("WARN: field name or index is null, operation aborted.");
           }
@@ -393,7 +393,7 @@ simpl.deserialize = function(str, options)
 }
 
 // for use in Node:
-if (module && typeof module === 'object')
+if (typeof module === 'object' && module)
 {
   module.exports = simpl;
 }
