@@ -20,6 +20,8 @@ var userid = null;
 var currentUrl = null;
 var instance = null;
 
+var bsService = new BSExtension(["gbkopldnfjodomdhihdhmbfbgapiipdb"]);
+
 //call to get and replace divs, queue w on-demand prioritizing
 function processPage()
 {
@@ -56,27 +58,30 @@ function downloadRequester(expandableItemUrl, container)
 			MetadataLoader.setMetadata(response.doc, false);
 			MetadataLoader.setMetaMetadata(response.mmd);
 		});
-		
-		//test api (timeline tweets)
-		if ((expandableItemUrl.indexOf("twitter.com") != -1)
-				&& (expandableItemUrl.indexOf("hashtag") == -1) 
-				&& (expandableItemUrl.indexOf("search") == -1))
+	}
+}
+
+function sendTrackRequest(expandableItemUrl)
+{
+	//test api (timeline tweets)
+	if ((expandableItemUrl.indexOf("twitter.com") != -1)
+			&& (expandableItemUrl.indexOf("hashtag") == -1) 
+			&& (expandableItemUrl.indexOf("search") == -1))
+	{
+		var last_index = expandableItemUrl.lastIndexOf('/');
+		if (last_index != -1)
 		{
-			var last_index = expandableItemUrl.lastIndexOf('/');
-			if (last_index != -1)
-			{
-				var username = expandableItemUrl.substr(last_index + 1);
-				TwitterRequests.getTimelineTweets(username, TwitterRequests.timelineTweetsCallback);
-			}
+			var username = expandableItemUrl.substr(last_index + 1);
+			TwitterRequests.getTimelineTweets(username, TwitterRequests.timelineTweetsCallback);
 		}
-		if ((expandableItemUrl.indexOf("twitter.com") != -1)
-				&& ((expandableItemUrl.indexOf("hashtag") != -1) 
-				|| (expandableItemUrl.indexOf("search") != -1)))
-		{
-			chrome.extension.sendRequest({track: expandableItemUrl}, function(response) {
-				
-			});
-		}
+	}
+	if ((expandableItemUrl.indexOf("twitter.com") != -1)
+			&& ((expandableItemUrl.indexOf("hashtag") != -1) 
+			|| (expandableItemUrl.indexOf("search") != -1)))
+	{
+		chrome.extension.sendRequest({track: expandableItemUrl}, function(response) {
+			
+		});
 	}
 }
 
@@ -148,6 +153,7 @@ function expandCollapseItem(event)
 
 				//request loading of webpage
 				//downloadRequester(expandableItemUrl, parent);
+				sendTrackRequest(expandableItemUrl);
 				instance.setCached(item);
 			}
 			else{
