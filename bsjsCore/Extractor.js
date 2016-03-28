@@ -58,7 +58,7 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 		return xpath;
 	}
 
-	function makeRelativeXpath(xpath, contextNode, page){
+	function makeRelativeXpath(xpath, contextNode){
 		var evaluationPath;
 		if(contextNode != page){
 			evaluationPath = ammendXpath(xpath);
@@ -69,7 +69,7 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 	}
 	
 	//store topmost xpaths for each field. used to tell if nested fields are inherited or not
-	function countXpaths(mmdKids, page){
+	function countXpaths(mmdKids){
 	    for (var i = 0; i < mmdKids.length; i++) {
 			var field = mmdKids[i];
 	        if(field.scalar) {
@@ -84,10 +84,10 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 			}
 	        var name = field.name;
 	        if ('xpaths' in field){
-	            upperXpath[page.URL][name] = field.xpaths;
+	            upperXpath[name] = field.xpaths;
 	        }
 	        else {
-	            upperXpath[page.URL][name] = [];
+	            upperXpath[name] = [];
 	        }
 	    }
 	}
@@ -97,10 +97,9 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 	* mmdKids : the scalars, composites, and collections to extract data for
 	* contextNode : the code html node that we are in context of. is whole page for 
 	* recurse : boolean, whether or not to recursively extract composites and collections
-	* page : the parent html page
-	* isLowerLvl : boolen, whether or not this is a first level extraction or second level
+    * isComplex : are we within a composite or collection
 	*/
-	function dataFromKids(mmdKids, contextNode, recurse, page, isLowerLvl){
+	function dataFromKids(mmdKids, contextNode, recurse, isComplex){
 		var data = { };
 		var isEmpty = true; //if object is empty
 	    var isNested = false;
@@ -109,7 +108,7 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 	    if (!mmdKids || mmdKids.length === 0) {
 	      return null; // Nothing to do here.
 	    }
-	    
+	   
 		for (var i = 0; i < mmdKids.length; i++) {
 			var field = mmdKids[i];
 			var name;
@@ -117,21 +116,32 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 			var tag;
 					
 	        var tmpField = field[Object.keys(field)[0]];
-			
-			//TODO work out with Ajit and Yin if this is right behavior
-			// if the field has only the xpaths it inherited, or fewer xpaths, then do not try extraction
+			         
+            //TODO work out the right behaviour for ignoring inherited xpaths
+            /*
+            //for composites/collections, ignore inherited (declaring mmd isn't the root mmd) composites/collections
+            if (isComplex && tmpField.declaring_mmd && tmpField.declaring_mmd !== mmd && !field.scalar){
+                continue;
+            }
+            //for composites/collections, ignore scalars that don't have xpaths
+            if (isComplex && !tmpField.hasOwnProperty('xpaths')){
+                continue;
+            }
+            */
+            
+            // within composites/collections if the field has only the xpaths it inherited, or fewer xpaths, then do not try extraction
 			/* */
-			if (tmpField.hasOwnProperty('xpaths') && tmpField.xpaths == upperXpath[page.URL][tmpField.name] && (isNested || isLowerLvl)){
+			if (isComplex && tmpField.hasOwnProperty('xpaths') && tmpField.xpaths == upperXpath[tmpField.name]){
 	            continue;
 	        }
-			else if (tmpField.hasOwnProperty('xpaths') && upperXpath[page.URL][tmpField.name] && tmpField.xpaths.length < upperXpath[page.URL][tmpField.name].length){
+			else if (tmpField.hasOwnProperty('xpaths') && upperXpath[tmpField.name] && tmpField.xpaths.length < upperXpath[tmpField.name].length){
 				continue;
 			}
 			
-	        if (!isNested){
+            if (!isNested){
 	            contextNode = page;
 	        }
-
+            
 			if(field.scalar) {
 				field = field.scalar;
 				name = field.name;
@@ -156,14 +166,8 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 					isEmpty = false;
 					if (tag) {
 						data[tag] = obj;
-						if (!isNested && !isLowerLvl) {
-							upperLevel[page.URL][tag] = obj;
-						}
 					} else {
 						data[name] = obj;
-						if (!isNested && !isLowerLvl) {
-							upperLevel[page.URL][name] = obj;
-						}
 					}
 					
 				}
@@ -177,20 +181,16 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 					contextNode = defVars[field.context_node];
 				}			
 				
-				obj = getCompositeD(field,contextNode,recurse,page);
+				obj = getCompositeD(field,contextNode,recurse);
 				
-				//TODO probably remove commented out code (and related code)
-				//make sure the object actually contains new data.
-				//if(!isObjEmpty(obj,page)) {
-					if(obj) {
-						isEmpty = false;
-						if (tag){
-							data[tag] = obj;
-						} else {
-							data[name] = obj;
-						}			
-					}
-				//}
+                if(obj) {
+                    isEmpty = false;
+                    if (tag){
+                        data[tag] = obj;
+                    } else {
+                        data[name] = obj;
+                    }			
+                }
 			}
 			else if (field.collection) {
 				field = field.collection;
@@ -199,7 +199,7 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 				if (field.hasOwnProperty('context_node')) {
 					contextNode = defVars[field.context_node];
 				}
-				obj = getCollectionD(field,contextNode,recurse,page);
+				obj = getCollectionD(field,contextNode,recurse);
 				if(obj) {
 					isEmpty = false;
 					if (tag) {
@@ -210,19 +210,19 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 				}			
 			}
 		}
-		
+        
 		if (isEmpty) { 
 			return null;
 		}	
 		return data;
 	}
 
-	function getScalarD(field, contextNode, recurse, page){
+	function getScalarD(field, contextNode, recurse){
 		var x = null;
 		var data = null;
 		
-		if (field.hasOwnProperty("concatenate_values") && field.concatenate_values.length > 1) {
-			data = concatValues(field.concatenate_values, page);
+		if (field.hasOwnProperty("concatenate_values")) {
+			data = concatValues(field.concatenate_values);
 			if (!recurse) {
 				return data;
 			}
@@ -235,13 +235,13 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 			var fieldx = field.xpaths;
 			for (var j = 0; j < fieldx.length; j++) {
 				if (field.extract_as_html) {
-					x = getScalarNode(field,fieldx[j],contextNode,page);
+					x = getScalarNode(field,fieldx[j],contextNode);
 					if (x) {
 						x = x.innerHTML;
 					}
 				}
 				else {
-					x = getScalarString(field,fieldx[j],contextNode,page);
+					x = getScalarString(field,fieldx[j],contextNode);
 				}				
 				if (x !== null && x !== "" && x !== "\n") {
 					data = x;
@@ -258,13 +258,13 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 					data = FieldOps.operate(data, fieldOp);
 				}
 			}
-	        scalars[page.URL][field.name] = data;
+	        scalars[field.name] = data;
 			return data;
 		} 
 		return null;
 	}
 
-	function getCompositeD(field,contextNode,recurse,page){
+	function getCompositeD(field,contextNode,recurse){
 		var x = null;
 		var data = null;
 		var kids = field.kids;
@@ -284,7 +284,7 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 		if (field.hasOwnProperty('xpaths')){
 			var fieldx = field.xpaths;
 			for (var j = 0; j < fieldx.length; j++) {
-				x = getCompositeObject(field, fieldx[j], contextNode,page);
+				x = getCompositeObject(field, fieldx[j], contextNode);
 				// if the result is not a node, assume there was a field parser that manually got data for us and return that data
 				if (x !== null && !("nodeType" in x)) {//x.prototype && !x.prototype.hasOwnProperty("nodeType")){
 					return x;
@@ -299,15 +299,15 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 			}
 
 			if (newContextNode !== null && recurse && recurseNeeded) {
-				data = dataFromKids(kids,newContextNode,recurse,page,true);
+				data = dataFromKids(kids,newContextNode,recurse, true);
 			}
 			else if (newContextNode !== null) {
-				data = dataFromKids(kids,newContextNode,false,page,true);
+				data = dataFromKids(kids,newContextNode,false, true);
 			}
 			
 		} else if (recurse)
 		{
-			data = dataFromKids(kids,contextNode,false,page,true);
+			data = dataFromKids(kids,contextNode,false,true, true);
 		}  
 		
 		if(data)
@@ -329,7 +329,7 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 		return null;		
 	}
 
-	function getCollectionD(field,contextNode,recurse,page){
+	function getCollectionD(field,contextNode,recurse){
 		if (!recurse) {
 			return null;
 		}
@@ -340,7 +340,7 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 		if (field.hasOwnProperty("xpaths")) {
 			var fieldx = field.xpaths;
 			for (var j = 0; j < fieldx.length; j++) {
-				x = getCollectionData(field,fieldx[j],contextNode,page);
+				x = getCollectionData(field,fieldx[j],contextNode);
 				if (x !== null && x !== "") {
 					data = x;
 	                break;
@@ -354,10 +354,10 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 		return null;
 	}
 
-	function getScalarNode(field,xpath,contextNode,page) {
+	function getScalarNode(field,xpath,contextNode) {
 		var data;
 		try {
-			var evalXpath = makeRelativeXpath(xpath, contextNode, page);
+			var evalXpath = makeRelativeXpath(xpath, contextNode);
 			data = page.evaluate(evalXpath, contextNode, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null);
 		} catch (err) {
 			return null;
@@ -365,11 +365,11 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 		return data.singleNodeValue;
 	}
 
-	function getScalarString(field,xpath,contextNode,page){
+	function getScalarString(field,xpath,contextNode){
 	    getScalarStringCalled++;
 		var data;
 		try {
-			var evalXpath = makeRelativeXpath(xpath, contextNode, page);
+			var evalXpath = makeRelativeXpath(xpath, contextNode);
 			data = page.evaluate(evalXpath, contextNode, null, XPathResult.STRING_TYPE, null);
 		} catch (err) {
 			return null;
@@ -381,7 +381,7 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 			if (string.charAt(0) == "/")
 			{
 				if (string.charAt(1) != "/") {
-					string = baseURL[page.URL].concat(string);
+					string = baseURL.concat(string);
 				} else {
 					var h = "http:";
 					string = h.concat(string);				
@@ -401,12 +401,12 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 		return string;
 	}
 
-	function getCompositeObject(field,xpath,contextNode,page){
+	function getCompositeObject(field,xpath,contextNode){
 		var fieldParserEl = field.field_parser;
 		var nodes;
 		
 		try {
-			var evalXpath = makeRelativeXpath(xpath, contextNode, page);
+			var evalXpath = makeRelativeXpath(xpath, contextNode);
 			nodes = page.evaluate(evalXpath, contextNode, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);		
 		} catch (e) {
 			return null;
@@ -429,12 +429,12 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 		return null;
 	}
 
-	function getCollectionData(field,xpath,contextNode,page){
+	function getCollectionData(field,xpath,contextNode){
 		var d = null;
 		var fieldParserEl = field.field_parser;
 		var nodes, g, generic_type_var;
 		try {
-			var evalXpath = makeRelativeXpath(xpath, contextNode, page);
+			var evalXpath = makeRelativeXpath(xpath, contextNode);
 			nodes = page.evaluate(evalXpath, contextNode, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);		
 		} catch (e) {
 			return null;
@@ -454,7 +454,7 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 			
 			for (var i = 0; i < size; i++) {
 				var newNode = nodes.snapshotItem(i);
-	            var obj = dataFromKids(kids,newNode,true,page);
+	            var obj = dataFromKids(kids,newNode,true, true);
 
 				if (obj)
 				{
@@ -513,15 +513,15 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 		return d;
 	}
 
-	function concatValues(concatList, page){	
+	function concatValues(concatList){	
 		var concatString = "";
 		
 		for (var i = 0; i < concatList.length; i++){
 			var concat = concatList[i];
 			if (concat.hasOwnProperty("from_scalar")){
 				var fromScalar = concat.from_scalar;
-				if (scalars[page.URL][fromScalar]){
-					concatString = concatString + scalars[page.URL][fromScalar];
+				if (scalars[fromScalar]){
+					concatString = concatString + scalars[fromScalar];
 				}
 			}
 	        else if (concat.hasOwnProperty("constant_value") && concat.constant_value !== ""){
@@ -530,39 +530,6 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 			}
 		}
 	    return concatString;
-	}
-
-	/** checks if composite has any significant info */
-	function isObjEmpty(o, page){
-		if (o === null) {
-			return true;
-		}	
-		var size = 0;
-		var matches = 0;
-
-		for (var x in o) {
-			
-			if (x == 'site_name' || x == "mm_name" || x == "download_status") {continue;}
-			
-			size++;
-			if (upperLevel[page.URL].hasOwnProperty(x)) {
-				//if the upperLevel[page.URL] has the same value as a property we deem it not significant
-				if (o[x] == upperLevel[page.URL][x]) {
-					matches++;
-				}
-				//or if the only the title is different, and it is just the page title we deem it not significant
-				//we might want to include title with this 
-				else if (x == "title" && o[x] == page.title) {
-					matches++;
-				}
-			}
-		}
-		
-		if (matches == size) {
-			return true;
-		}
-		
-		return false;
 	}
 
 	/** recursion recuires that scalars be evaluated first */
@@ -591,19 +558,14 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 	var metadata = {};
 	var page = response.entity;
 	//Kade's code filters the URL here. I'm going to assume this is done earlier in the process
-	var upperLevel = {}; //holds upperlevel metadata
 	var scalars = {};
-	var baseURL = {};
+	var baseURL = "";
 	var getScalarStringCalled = 0;
 	var getScalarStringCalledGotData = 0;
-	var upperXpath = {};
 	var defVars = {};
-	upperLevel[page.URL] = {}; //holds upperlevel metadata
-	scalars[page.URL] = {};
-	baseURL[page.URL] = "";
-	upperXpath[page.URL] = {};
+	var upperXpath = {};
 
-	baseURL[page.URL] = page.URL.substring(0, getPosition(page.URL,"/",3));
+	baseURL = page.URL.substring(0, getPosition(page.URL,"/",3));
 
 	var extractedMeta = { };
 	var mmdKids = mmd.kids;
@@ -617,7 +579,7 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 			if (typeof mmd.def_vars[i].xpaths !== 'undefined'){ //in case someone writes a wrapper and doesn't define an xpath
 				var def = mmd.def_vars[i];
 				var path = def.xpaths[0];
-				var evalXpath = makeRelativeXpath(path, contextNode, page);
+				var evalXpath = makeRelativeXpath(path, contextNode);
 				var nodes = page.evaluate(evalXpath, page, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
 				if (nodes.snapshotLength)
 				{
@@ -632,11 +594,11 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
     countXpaths(mmdKids, page);
     
 	if (type) {
-		extractedMeta[type] = dataFromKids(mmdKids,contextNode,true,page);
+		extractedMeta[type] = dataFromKids(mmdKids,contextNode,true, false);
 		extractedMeta[type].download_status = "DOWNLOAD_DONE";
 		extractedMeta[type].mm_name = mmd.name;
 	} else {
-		extractedMeta[mmd.name] = dataFromKids(mmdKids,contextNode,true,page);
+		extractedMeta[mmd.name] = dataFromKids(mmdKids,contextNode,true, false);
 		extractedMeta[mmd.name].download_status = "DOWNLOAD_DONE";
 		extractedMeta[mmd.name].mm_name = mmd.name;
 	}
