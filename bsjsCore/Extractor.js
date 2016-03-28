@@ -594,14 +594,14 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
     
     countXpaths(mmdKids, page);
     
-	if (type) {
-		extractedMeta[type] = dataFromKids(mmdKids,contextNode,true, false);
-		extractedMeta[type].download_status = "DOWNLOAD_DONE";
-		extractedMeta[type].mm_name = mmd.name;
-	} else {
+	if (name) {
 		extractedMeta[mmd.name] = dataFromKids(mmdKids,contextNode,true, false);
 		extractedMeta[mmd.name].download_status = "DOWNLOAD_DONE";
 		extractedMeta[mmd.name].mm_name = mmd.name;
+	} else {
+		extractedMeta[type] = dataFromKids(mmdKids,contextNode,true, false);
+		extractedMeta[type].download_status = "DOWNLOAD_DONE";
+		extractedMeta[type].mm_name = mmd.name;
 	}
 
 	unwrapped = BSUtils.unwrap(extractedMeta);
