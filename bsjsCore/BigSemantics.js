@@ -33,8 +33,12 @@ var BigSemantics = (function() {
     } else {
       this.setReady();
     }
-	this.metadataCache = new MetadataCache();	  
-	if (IframeExtractor !== undefined){
+	  
+	if (typeof MetadataCache === 'object' && MetadataCache){
+		this.metadataCache = new MetadataCache();
+	}
+	
+	if (typeof IframeExtractor === 'object' && IframeExtractor){
     	this.iframeExtractor = new IframeExtractor(this.metadataCache);
 	}
 
