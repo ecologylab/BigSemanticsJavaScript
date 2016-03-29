@@ -1047,7 +1047,8 @@ minkApp.hideButtons = function(container){
 
 }
 
-minkApp.hideChildPile = function(details, srcElement){
+minkApp.hideChildPile = function(composeableID, pileID){
+	MinkComposer.removeChildrenWithPileId(composeableID, pileID);
 	console.log('hiding the body')
 }
 minkApp.minkEventHandler = function(event){
@@ -1060,7 +1061,7 @@ minkApp.minkEventHandler = function(event){
 		 var possiblePileId = event.detail.rooturl + '|' + event.detail.collectionname;
 		 var expanded = MinkComposer.checkIfAttachmentIsExpanded(composeableID, possiblePileId);
 		 if(expanded){
-			 minkApp.hideChildPile(event.detail, event.srcElement);
+			 minkApp.hideChildPile(composeableID, possiblePileId);
 		 }else{
 			 minkApp.addChildPile(event.detail, event.srcElement);
 
