@@ -1046,11 +1046,25 @@ minkApp.hideButtons = function(container){
 	$(container).find('.minkCardControls').addClass('hidden');
 
 }
+
+minkApp.hideChildPile = function(details, srcElement){
+	console.log('hiding the body')
+}
 minkApp.minkEventHandler = function(event){
 
 	 if(event.detail.type == 'minknewpile'){
 
-		 minkApp.addChildPile(event.detail, event.srcElement);
+		 //Double check there isn't already a child pile for that expandable
+		 //if so, show/hide
+		 var composeableID = $(event.srcElement).closest('.minkCardContainer').attr('id');
+		 var possiblePileId = event.detail.rooturl + '|' + event.detail.collectionname;
+		 var expanded = MinkComposer.checkIfAttachmentIsExpanded(composeableID, possiblePileId);
+		 if(expanded){
+			 minkApp.hideChildPile(event.detail, event.srcElement);
+		 }else{
+			 minkApp.addChildPile(event.detail, event.srcElement);
+
+		 }
 
 
 

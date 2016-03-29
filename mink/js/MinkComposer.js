@@ -1,5 +1,5 @@
 var MinkComposer = {};
-MinkComposer.composeableMap = new Map()
+MinkComposer.composeableMap = new Map();
 MinkComposer.rootComposeables = [];
 MinkComposer.columns = [];
 
@@ -147,6 +147,22 @@ Composeable.prototype.hasSilbings = function(){
     }
   }
 }
+Composeable.prototype.getSiblingsBelow = function(){
+
+  var siblings = this.getSiblings()
+  var siblingsBelow = [];
+  if(siblings.length > 1){
+    for(var i = 0; i < siblings.length; i++){
+      if(siblings[i].y > this.y){
+        siblingsBelow.push(siblings[i]);
+      }
+    }
+    return siblingsBelow;
+  }else{
+    return [];
+  }
+
+}
 Composeable.prototype.getSiblings = function(){
   if(this.isRoot()){
     var children = MinkComposer.rootComposeables;
@@ -172,6 +188,26 @@ Composeable.prototype.getSiblings = function(){
   }
 }
 
+
+MinkComposer.checkIfAttachmentIsExpanded = function(composeableID, possiblePileId){
+  try{
+
+    var composeable = MinkComposer.composeableMap.get(composeableID);
+    for(var i = 0; i < composeable.childComposables.length; i++){
+      var kid = composeable.childComposables[i];
+      var pileid = $(kid.HTML).closest('.minkPile').attr('pileid');
+      if(pileid == possiblePileId){
+        return true;
+      }
+    }
+    return false;
+  }catch(e){
+    return false;
+
+  }
+
+}
+
 MinkComposer.composeEventHandler = function(event){
 
   try{
@@ -179,23 +215,24 @@ MinkComposer.composeEventHandler = function(event){
     if(event.detail.type == 'pullup'){
       var composeable = MinkComposer.composeableMap.get(event.detail.composeableID);
 
-      var height = composeable.getHeight();
+      var height = composeable.getChildrenBounds().bottom;
 
       window.setTimeout(function(){
-        var newHeight = composeable.getHeight();
-        var diff = newHeight - height - 30;
-        MinkComposer.removeExcessSpaceBelow(composeable, diff);
+        var newHeight = composeable.getChildrenBounds().bottom;
+        var diff = newHeight - height ;
+
+        MinkComposer.changeHeight(composeable, height, newHeight)
 
       }, 200);
     }else if(event.detail.type == 'growbelow'){
       var composeable = MinkComposer.composeableMap.get(event.detail.composeableID);
-      var height = composeable.getHeight();
+      var height = composeable.getChildrenBounds().bottom + 30;
 
       window.setTimeout(function(){
-        var newHeight = composeable.getHeight();
+        var newHeight = composeable.getChildrenBounds().bottom;
         var diff = newHeight - height ;
 
-        MinkComposer.addSpaceBelow(composeable, diff)
+        MinkComposer.changeHeight(composeable, height, newHeight)
 
       }, 200);
     }
@@ -237,6 +274,13 @@ MinkComposer.shiftFamilyDownBy = function(composeable, amount){
     MinkComposer.shiftFamilyDownBy(composeable.childComposables[i], amount);
   }
 }
+MinkComposer.shiftChildren = function(composeable, amount){
+  for(var i = 0; i < composeable.childComposables.length; i++){
+    composeable.childComposables[i].positionBy(amount);
+    MinkComposer.shiftFamilyDownBy(composeable.childComposables[i], amount);
+  }
+}
+
 MinkComposer.reflowAround = function(composeable, formerBottom, formerBoundingBottom){
   if(composeable){
     var cardsThatShouldBeBelow = [];
@@ -333,6 +377,20 @@ MinkComposer.centerWithinBounding = function(composeableParent, properlyPreppedB
   }
 }
 
+MinkComposer.changeHeight = function(composeable, oldHeight, newHeight){
+  //Pull up or push down siblings and their kids
+  var diff = newHeight - oldHeight;
+
+//  composeable.positionBy(diff/2);
+
+  var siblings = composeable.getSiblingsBelow();
+  for(var i = 0; i < siblings.length; i++){
+    MinkComposer.shiftFamilyDownBy(siblings[i], diff);
+  dfg
+  MinkComposer.centerWithinBounding(composeable.parent);
+
+  //center parent
+}
 
 
 
@@ -767,15 +825,12 @@ function redrawCanvas(){
  var ctx = canvas.getContext('2d');
  ctx.clearRect ( 0 , 0 , canvas.width, canvas.height );
  ctx.canvas.height = $(document).height();
- ctx.canvas.width = $(document).width();
+ ctx.canvas.width = $('html').width()
 
  if(minkApp.currentQuery){
    for(var i = 0; i < MinkComposer.rootComposeables.length; i++){
      MinkComposer.drawLinesToChildren(MinkComposer.rootComposeables[i], canvas, ctx);
    }
 
- }
-
-
- //Find all expanded collections and draw lines to the top and bottom of their piles
+ }//Find all expanded collections and draw lines to the top and bottom of their piles
 }
