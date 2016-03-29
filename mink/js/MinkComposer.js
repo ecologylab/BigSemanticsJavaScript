@@ -48,7 +48,8 @@ function Composeable(HTML, id, parentID){
     this.parent = null;
     this.root = null;
   }
-
+  this.pileIdToRemovedChildrenMap = new Map();
+  this.incidentallyRemovedKids = [];
   this.container = $(HTML).closest('.minkColumn')[0];
   this.x = this.container.getAttribute('column');
   MinkComposer.columns[this.x].addComposeable(this);
@@ -147,6 +148,23 @@ Composeable.prototype.hasSilbings = function(){
     }
   }
 }
+Composeable.prototype.getSiblingsAbove = function(){
+
+  var siblings = this.getSiblings()
+  var siblingsBelow = [];
+  if(siblings.length > 1){
+    for(var i = 0; i < siblings.length; i++){
+      if(siblings[i].y < this.y){
+        siblingsBelow.push(siblings[i]);
+      }
+    }
+    return siblingsBelow;
+  }else{
+    return [];
+  }
+
+}
+
 Composeable.prototype.getSiblingsBelow = function(){
 
   var siblings = this.getSiblings()
@@ -197,7 +215,7 @@ MinkComposer.composeEventHandler = function(event){
     if(event.detail.type == 'pullup'){
       var composeable = MinkComposer.composeableMap.get(event.detail.composeableID);
 
-      var height = composeable.getChildrenBounds().bottom;
+      var height = composeable.getChildrenBounds().bottom +30;
 
       window.setTimeout(function(){
         var newHeight = composeable.getChildrenBounds().bottom;
@@ -340,6 +358,10 @@ MinkComposer.centerWithinBounding = function(composeableParent, properlyPreppedB
     var middle = (highest + lowest)/2 - composeableParent.getHeight()/2;
     if(middle < highest){
       middle = highest;
+
+      //if the highest remaining kid is lower than it should be, move up
+
+
     }
     composeableParent.positionAt(middle);
     if(properlyPreppedBottom == null){
@@ -394,10 +416,11 @@ MinkComposer.checkIfAttachmentIsExpanded = function(composeableID, possiblePileI
 
 MinkComposer.removeRecursively = function(composeable){
 
-  MinkComposer.changeHeight(composeable, composeable.getChildrenBounds().bottom, 0);
+  MinkComposer.changeHeight(composeable, (composeable.getChildrenBounds().bottom - composeable.getChildrenBounds().top), 0);
   if(composeable.parent){
     //remove from parent
     composeable.parent.childComposables.splice(composeable.parent.childComposables.indexOf(composeable), 1);
+    composeable.parent.incidentallyRemovedKids.push(composeable);
 
   }
     //remove from column
@@ -407,6 +430,7 @@ MinkComposer.removeRecursively = function(composeable){
 
 
   //detach from the DOM
+  composeable.formerHTMLParent = composeable.HTML.parentNode;
   $(composeable.HTML).detach();
 
   //and the same for all the kiddies
@@ -417,7 +441,67 @@ MinkComposer.removeRecursively = function(composeable){
   for(var i = 0; i < listOfKids.length; i++){
     MinkComposer.removeRecursively(listOfKids[i]);
   }
+  if(composeable.parent){
+    MinkComposer.centerWithinBounding(composeable.parent);
+  }
 
+}
+
+
+
+
+
+
+
+MinkComposer.removeAllKidsrecursively = function(composeable){
+  var listOfKids = [];
+  for(var i = 0; i < composeable.childComposables.length; i++){
+    listOfKids.push(composeable.childComposables[i]);
+  }
+  for(var i = 0; i < listOfKids.length; i++){
+    MinkComposer.removeRecursively(listOfKids[i]);
+  }
+  composeable.incidentallyRemovedKids = composeable.incidentallyRemovedKids.concat(listOfKids);
+}
+MinkComposer.restoreRecursively = function(composeable){
+
+ if(composeable.parent){
+    composeable.parent.childComposables.push(composeable);
+  }
+  $(composeable.HTML).appendTo(composeable.formerHTMLParent);
+  MinkComposer.columns[composeable.x].addComposeable(composeable);
+  MinkComposer.addComposeable(composeable)
+  for(var i = 0; i < composeable.incidentallyRemovedKids.length; i++){
+    MinkComposer.restoreRecursively(composeable.incidentallyRemovedKids[i]);
+  }
+
+
+}
+MinkComposer.restoreKidsRecursively = function(composeableID, pileid){
+  var composeableParent = MinkComposer.composeableMap.get(composeableID);
+  var toAdd = composeableParent.pileIdToRemovedChildrenMap.get(pileid);
+/*  var pile = $('.minkPile[@pileid="pileid"]')[0];
+  pile.style.display = '';
+*/
+  for(var i = 0; i < toAdd.length; i++){
+    MinkComposer.restoreRecursively(toAdd[i]);
+  }
+}
+
+MinkComposer.snapUp = function(composeable){
+  try{
+    var above = composeable.getSiblingsAbove();
+    var highestSib = above[above.length - 1];
+    var bottom = highestSib.getChildrenBounds().bottom;
+    var myTop = composeable.getChildrenBounds().top;
+    var formerBottom = composeable.getChildrenBounds().bottom;
+    var diff = bottom - myTop;
+    if(diff > 0);
+    MinkComposer.shiftFamilyDownBy(composeable, diff);
+    MinkComposer.reflowAround(composeable, formerBottom)
+  }catch(err){
+
+  }
 
 }
 MinkComposer.removeChildrenWithPileId = function(composeableID, possiblePileId){
@@ -426,18 +510,24 @@ MinkComposer.removeChildrenWithPileId = function(composeableID, possiblePileId){
   var formerBoundingBottom = composeableParent.getChildrenBounds().bottom;
   var formerBottom = composeableParent.getHeight() + composeableParent.y;
   var pile;
+  var toRemove = [];
   for(var i = 0; i < composeableParent.childComposables.length; i++){
     var kid = composeableParent.childComposables[i];
     var pileid = $(kid.HTML).closest('.minkPile').attr('pileid');
 
     if(pileid == possiblePileId){
       pile = $(kid.HTML).closest('.minkPile');
-      MinkComposer.removeRecursively(kid);
+      toRemove.push(kid);
     }
   }
-  pile.detach();
-  MinkComposer.reflowAround(composeableParent, formerBottom, formerBoundingBottom);
+  for(var i = 0; i < toRemove.length; i++){
+    MinkComposer.removeRecursively(toRemove[i]);
 
+  }
+//  pile.style.display = 'none';
+  MinkComposer.centerWithinBounding(composeableParent, composeableParent.getChildrenBounds().bottom);
+  MinkComposer.snapUp(composeableParent)
+  composeableParent.pileIdToRemovedChildrenMap.put(pileid, toRemove);
 
 }
 
@@ -454,7 +544,7 @@ MinkComposer.findAttachmentPoint = function(composeable, childComposable){
 }
 
 
-
+}
 MinkComposer.drawLinesToChildren = function(composeable, canvas, ctx){
   if(composeable.childComposables.length < 1){
     return;
