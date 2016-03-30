@@ -310,7 +310,7 @@ MinkComposer.reflowAround = function(composeable, formerBottom, formerBoundingBo
     var column = composeable.getColumn();
     for(var i = 0; i < column.composeables.length; i++){
       var siblings = column.composeables[i];
-      if(siblings.getChildrenBounds().bottom >= formerBottom && siblings.id != composeable.id){
+      if(siblings.getChildrenBounds().top >= formerBottom && siblings.id != composeable.id){
         cardsThatShouldBeBelow = cardsThatShouldBeBelow.concat(siblings);
       }else if(siblings.isLeaf()){
         if(siblings.getChildrenBounds().bottom >= (composeable.y + composeable.getHeight()) && siblings.id != composeable.id){
@@ -374,8 +374,25 @@ MinkComposer.addComposeable = function(composeable){
     if(composeable.parent){
       //child element
       //for now we only care about one type of expandable
-      var formertop = composeable.parent.y
-      composeable.positionAt(formertop);
+      if(composeable.parent.getSiblingsAbove().length > 0){
+        var above = composeable.parent.getSiblingsAbove();
+
+        var lowest = above[above.length -1 ];
+        if(lowest.isLeaf()){
+          var formertop = composeable.parent.y
+          composeable.positionAt(formertop);
+
+        }else{
+          var bottom = lowest.getChildrenBounds().bottom;
+          composeable.positionAt(bottom);
+
+        }
+
+      }else{
+        var formertop = composeable.parent.y
+        composeable.positionAt(formertop);
+
+      }
 
       MinkComposer.centerWithinBounding(composeable.parent);
 
