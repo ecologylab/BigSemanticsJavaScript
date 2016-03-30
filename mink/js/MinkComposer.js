@@ -59,6 +59,16 @@ function Composeable(HTML, id, parentID){
 
 
 }
+
+Composeable.prototype.isLeaf = function(){
+  if(this.childComposables.length > 0){
+    return false;
+  }else{
+    return true;
+  }
+}
+
+
 Composeable.prototype.lowestChild = function(){
   var lowest = {y: -1};
   if(this.childComposables.length < 1){
@@ -281,15 +291,36 @@ MinkComposer.shiftChildren = function(composeable, amount){
   }
 }
 
+MinkComposer.matchToBottomOfPreviousSibling = function(composeable){
+  var above = composeable.getSiblingsAbove();
+  if(above.length > 0){
+    var highestSib = above[above.length - 1];
+    var bottom = highestSib.y + highestSib.getHeight();
+    var myTop = composeable.getChildrenBounds().top;
+    var diff = bottom - myTop;
+    MinkComposer.shiftFamilyDownBy(composeable, diff);
+//    MinkComposer.reflowAround(composeable, formerBottom)
+
+  }
+}
 MinkComposer.reflowAround = function(composeable, formerBottom, formerBoundingBottom){
   if(composeable){
     var cardsThatShouldBeBelow = [];
+    var cardsThatShouldBeAbove = [];
     var column = composeable.getColumn();
     for(var i = 0; i < column.composeables.length; i++){
       var siblings = column.composeables[i];
-      if(siblings.getChildrenBounds().top >= formerBottom && siblings.id != composeable.id){
+      if(siblings.getChildrenBounds().bottom >= formerBottom && siblings.id != composeable.id){
         cardsThatShouldBeBelow = cardsThatShouldBeBelow.concat(siblings);
+      }else if(siblings.isLeaf()){
+        if(siblings.getChildrenBounds().bottom >= (composeable.y + composeable.getHeight()) && siblings.id != composeable.id){
+          cardsThatShouldBeBelow = cardsThatShouldBeBelow.concat(siblings);
+
+        }
+      }else if(siblings.id != composeable.id){
+        cardsThatShouldBeAbove = cardsThatShouldBeAbove.concat(siblings);
       }
+
     }
     var boundingBox = composeable.getChildrenBounds();
     var moveDownBy = 0;
@@ -297,13 +328,19 @@ MinkComposer.reflowAround = function(composeable, formerBottom, formerBoundingBo
 
     if(cardsThatShouldBeBelow.length > 0){
       var diff = -1*(cardsThatShouldBeBelow[0].getChildrenBounds().top - composeable.getChildrenBounds().bottom);
-
        for(var i = 0; i < cardsThatShouldBeBelow.length; i++){
-          MinkComposer.shiftFamilyDownBy(cardsThatShouldBeBelow[i], diff);
+            if(cardsThatShouldBeBelow[i].isLeaf()){
+              MinkComposer.matchToBottomOfPreviousSibling(cardsThatShouldBeBelow[i])
+            }else{
+              MinkComposer.shiftFamilyDownBy(cardsThatShouldBeBelow[i], diff);
+
+            }
+
+          }
 
 
       }
-    }
+
   }
 
 
@@ -493,7 +530,6 @@ MinkComposer.snapUp = function(composeable){
     var above = composeable.getSiblingsAbove();
     if(above.length > 0){
       var highestSib = above[above.length - 1];
-
       var bottom = highestSib.getChildrenBounds().bottom;
       var myTop = composeable.getChildrenBounds().top;
       var formerBottom = composeable.getChildrenBounds().bottom;
