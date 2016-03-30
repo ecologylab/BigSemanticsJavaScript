@@ -491,14 +491,26 @@ MinkComposer.restoreKidsRecursively = function(composeableID, pileid){
 MinkComposer.snapUp = function(composeable){
   try{
     var above = composeable.getSiblingsAbove();
-    var highestSib = above[above.length - 1];
-    var bottom = highestSib.getChildrenBounds().bottom;
-    var myTop = composeable.getChildrenBounds().top;
-    var formerBottom = composeable.getChildrenBounds().bottom;
-    var diff = bottom - myTop;
-    if(diff > 0);
-    MinkComposer.shiftFamilyDownBy(composeable, diff);
-    MinkComposer.reflowAround(composeable, formerBottom)
+    if(above.length > 0){
+      var highestSib = above[above.length - 1];
+
+      var bottom = highestSib.getChildrenBounds().bottom;
+      var myTop = composeable.getChildrenBounds().top;
+      var formerBottom = composeable.getChildrenBounds().bottom;
+      var diff = bottom - myTop;
+      MinkComposer.shiftFamilyDownBy(composeable, diff);
+      MinkComposer.reflowAround(composeable, formerBottom)
+
+    }else{
+      var myTop = composeable.getChildrenBounds().top;
+      var formerBottom = composeable.getChildrenBounds().bottom;
+
+      var diff = 0 - myTop;
+
+      MinkComposer.shiftFamilyDownBy(composeable, diff);
+      MinkComposer.reflowAround(composeable, formerBottom)
+
+    }
   }catch(err){
 
   }
