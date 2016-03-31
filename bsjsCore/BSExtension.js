@@ -5,7 +5,7 @@ var BSExtension = (function() {
   // Array<String> extIds:
   //   A list (array) of IDs of extensions running BigSemantics in background.
   //   will be tried one by one in the constructor, and the first detected
-  //   extension will be used for all subsequent requests. 
+  //   extension will be used for all subsequent requests.
   //   - When used from content script, can be null.
   //   - When used from webpage, must NOT be null.
   // Object options:
@@ -20,9 +20,9 @@ var BSExtension = (function() {
     if (!this.extractor && typeof extractMetadata == 'function') {
       this.extractor = extractMetadata;
     }
-	
+
 	this.bss = new BSService();
-	  
+
     var that = this;
     var extensionsLeftToCheck = this.extIds.length;
     function testExt(index) {
@@ -89,7 +89,7 @@ var BSExtension = (function() {
         callback(new Error("No response from extension"), null);
       }
     }
-    
+
     var msg = { method: method, params: simpl.serialize(params) };
     try {
       if (extId) {
@@ -173,17 +173,16 @@ var BSExtension = (function() {
   BSExtension.prototype.loadMmd = function(name, options, callback) {
     var params = { name: name, options: options };
     this.sendMessageToExt('loadMmd', params, function(err, result) {
-      callback(err, result);
+      callback(err, result, options);
     });
   };
 
   BSExtension.prototype.selectMmd = function(location, options, callback) {
     var params = { location: location, options: options };
     this.sendMessageToExt('selectMmd', params, function(err, result) {
-      callback(err, result);
+      callback(err, result, options);
     });
   }
 
   return BSExtension;
 })();
-

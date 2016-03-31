@@ -1,7 +1,7 @@
 var MinkSemantics = {}
 
 /*
-	A reduced version of RendererBase used specifically for minkRenderer. 
+	A reduced version of RendererBase used specifically for minkRenderer.
 
 */
 
@@ -10,7 +10,7 @@ MinkSemantics.addMetadataDisplay = function(container, url, clipping, renderer, 
 	if(options == null){
 		options = {};
 	}
-    
+
     var task = new MinkRenderingTask(url, true, clipping, container, null, renderer, options.viewmodel);
     task.options = options;
 
@@ -18,7 +18,7 @@ MinkSemantics.addMetadataDisplay = function(container, url, clipping, renderer, 
 	if(clipping != null && clipping.viewModel){
 		task.fields = clipping.viewModel.value;
 		task.style = {styles: miceStyles, type: clipping.mmdName};
-	
+
 		if(clipping.viewModel['minkfav']){
 		task.favicon = clipping.viewModel['minkfav'];
 		}
@@ -29,16 +29,16 @@ MinkSemantics.addMetadataDisplay = function(container, url, clipping, renderer, 
 			options.callback(clipping);
 		}
 	}
-  
+
   else {
 
 	task.options = options;
 	bsService.onReady(function(){
 
 		bsService.loadMetadata(url, options, function(err, md_and_mmd){
-			
+
 			if (err) {
-				console.error(err); 
+				console.error(err);
 				return;
 			}
 
@@ -59,7 +59,7 @@ MinkSemantics.addMetadataDisplay = function(container, url, clipping, renderer, 
 			if(typeof veryBadAddMetadataToClippingStorage == 'function')
 			{
 				veryBadAddMetadataToClippingStorage(task.metadata);
-			}	
+			}
 
 			task.handler(task);
 			if(options.callback){
@@ -71,5 +71,5 @@ MinkSemantics.addMetadataDisplay = function(container, url, clipping, renderer, 
 	});
 	// MetadataLoader.getMetadata(url, "MetadataLoader.setMetadata", reloadMD);
 	}
-  
+
 }
