@@ -104,7 +104,7 @@ var BSExtension = (function() {
 
   BSExtension.prototype.loadMetadata = function(location, options, callback) {
     var that = this;
-
+	  
     // mmdCallback: (err, mmd) => void
     function getMmd(mmdCallback) {
       if (options && options.mmd) {
@@ -128,6 +128,7 @@ var BSExtension = (function() {
       // we already have the DOM (in options.page)
       var that = this;
       getMmd(function(err, mmd) {
+		  
         if (err) { callback(err, null); return; }
 
 		if (mmd.meta_metadata.filter_location){

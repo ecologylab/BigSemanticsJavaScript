@@ -34,11 +34,11 @@ var BigSemantics = (function() {
       this.setReady();
     }
 	  
-	if (typeof MetadataCache === 'object' && MetadataCache){
+	if (typeof MetadataCache === 'function' && MetadataCache){
 		this.metadataCache = new MetadataCache();
 	}
 	
-	if (typeof IframeExtractor === 'object' && IframeExtractor){
+	if (typeof IframeExtractor === 'function' && IframeExtractor){
     	this.iframeExtractor = new IframeExtractor();
 	}
 
