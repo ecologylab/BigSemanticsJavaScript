@@ -42,6 +42,10 @@ var BigSemantics = (function() {
     	this.iframeExtractor = new IframeExtractor();
 	}
 
+	if (typeof PopUnderExtractor === 'function' && PopUnderExtractor){
+    	this.popUnderExtractor = new PopUnderExtractor();
+	}  
+	  
     return this;
   }
   BigSemantics.prototype = Object.create(Readyable.prototype);
