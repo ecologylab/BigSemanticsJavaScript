@@ -1387,6 +1387,7 @@ TwitterRenderer.buildMetadataField = function(metadataField, isChildTable, field
 				var imgPnP = document.createElement('img');
 			    imgPnP.className = styleInfo.styles.tweetStreamIcon;
 			    imgPnP.src = TwitterRenderer.pauseIconPath;
+			    imgPnP.onclick = TwitterRenderer.playPauseStream;
 			    
 			    fieldLabelDiv.appendChild(imgPnP);
 			}
@@ -1938,17 +1939,29 @@ TwitterRenderer.renderUpdate = function(url, mmd, metadata)
 	var contentExpansions = TwitterRenderer.getDocumentContainersByUrl(url);
 	
 	for (var i = 0; i < contentExpansions.length; i++) {
-		var metadataTable = TwitterRenderer.buildMetadataTable(null, false, false, 
-				metadataFields, TwitterRenderer.FIRST_LEVEL_FIELDS, styleInfo, null, false);
-		if (metadataTable) {
-			////visual.metadataTable.title.tweets
-			//var rowDiv = contentExpansions[i].visual.firstChild.firstChild.nextSibling;
-			////row.td.td
-			//var tweetsCell = rowDiv.firstChild.nextSibling;
-			var streamIcon = contentExpansions[i].visual.getElementsByClassName(
-												styleInfo.styles.tweetStreamIcon)[0];
-			if (streamIcon)
+		var streamIcon = contentExpansions[i].visual.getElementsByClassName(
+				styleInfo.styles.tweetStreamIcon)[0];
+		
+		if (streamIcon)
+		{
+			if (!TwitterRenderer.isStreamPaused(streamIcon))
 			{
+				var metadataTable = TwitterRenderer.buildMetadataTable(null, false, false, 
+						metadataFields, TwitterRenderer.FIRST_LEVEL_FIELDS, styleInfo, null, false);
+			}
+			else
+			{
+				var metadataTable = TwitterRenderer.buildMetadataTable(null, false, false, 
+						metadataFields, 0, styleInfo, null, false);
+			}
+			
+			if (metadataTable) 
+			{
+				////visual.metadataTable.title.tweets
+				//var rowDiv = contentExpansions[i].visual.firstChild.firstChild.nextSibling;
+				////row.td.td
+				//var tweetsCell = rowDiv.firstChild.nextSibling;
+			
 				//fieldLabelDiv.labelCol.row
 				var labelRow = streamIcon.parentElement.parentElement.parentElement;
 				//row.table.td
@@ -1961,4 +1974,24 @@ TwitterRenderer.renderUpdate = function(url, mmd, metadata)
 			}
 		}
 	}
+}
+
+TwitterRenderer.playPauseStream = function(event)
+{
+	var streamIcon = event.target;
+	var paused = TwitterRenderer.isStreamPaused(streamIcon);
+	
+	if (paused)
+	{
+		streamIcon.src = TwitterRenderer.pauseIconPath;
+	}
+	else
+	{
+		streamIcon.src = TwitterRenderer.playIconPath;
+	}
+}
+
+TwitterRenderer.isStreamPaused = function(icon)
+{
+	return (icon.src == TwitterRenderer.playIconPath);
 }
