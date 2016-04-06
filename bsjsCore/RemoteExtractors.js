@@ -143,7 +143,7 @@ function PopUnderExtractor(){
 		else if(os.indexOf('Mac', 0) > -1){
 			popUnderAsPopup(senderId, url);
 		}
-		//TODO Ubuntu
+		//Ubuntu currently not supported
 	}
 
 	function onLoad(win){

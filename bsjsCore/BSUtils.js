@@ -136,6 +136,14 @@ function executeFunctionByName(functionName, context) {
   return context[func].apply(this, args);
 }
 
+BSUtils.arrayToHash = function(arr){
+	var obj = {};
+	for(var i = 0; i <  arr.length; i++) {
+    	obj[arr[i]] = true;
+	}
+	return obj;
+}
+
 // get base url
 function getPosition(str, m, i) 
 {
