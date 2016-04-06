@@ -427,11 +427,7 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 		} 
 
 		var node = nodes.snapshotItem(0);
-
-		if (node.textContent) {
-			return node;
-		}
-		return null;
+		return node;
 	}
 
 	function getCollectionData(field,xpath,contextNode){
