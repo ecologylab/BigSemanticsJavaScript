@@ -722,7 +722,7 @@ TwitterDocumentContainer.prototype.matches = function (url) {
  * @param fieldCount, the number of fields to render before cropping with a "More" button
  * @return HTML table of the metadata display
  */
-TwitterRenderer.buildMetadataTable = function (table, isChildTable, isRoot, metadataFields, fieldCount, styleInfo, bgColorObj, isMetadataDisplay) {
+TwitterRenderer.buildMetadataTable = function (table, isChildTable, isRoot, metadataFields, fieldCount, styleInfo, bgColorObj, isMetadataDisplay, streamIcon) {
     if (!table) {
         table = document.createElement('div');
 
@@ -780,10 +780,15 @@ TwitterRenderer.buildMetadataTable = function (table, isChildTable, isRoot, meta
             fieldValueDiv.appendChild(detailsSpan);
 
             valueCol.appendChild(fieldValueDiv);
-
+            
             row.appendChild(nameCol);
             row.appendChild(valueCol);
-
+            
+            if (streamIcon)
+			{
+            	var row1 = TwitterRenderer.getIconRow(styleInfo);
+            	table.appendChild(row1);
+			}
             table.appendChild(row);
 
             break;
@@ -1944,15 +1949,17 @@ TwitterRenderer.renderUpdate = function(url, mmd, metadata)
 		
 		if (streamIcon)
 		{
-			if (!TwitterRenderer.isStreamPaused(streamIcon))
+			var metadataTable = null;
+			var paused = TwitterRenderer.isStreamPaused(streamIcon);
+			if (!paused)
 			{
-				var metadataTable = TwitterRenderer.buildMetadataTable(null, false, false, 
+				metadataTable = TwitterRenderer.buildMetadataTable(null, false, false, 
 						metadataFields, TwitterRenderer.FIRST_LEVEL_FIELDS, styleInfo, null, false);
 			}
 			else
 			{
-				var metadataTable = TwitterRenderer.buildMetadataTable(null, false, false, 
-						metadataFields, 0, styleInfo, null, false);
+				metadataTable = TwitterRenderer.buildMetadataTable(null, false, false, 
+						metadataFields, 0, styleInfo, null, false, true);
 			}
 			
 			if (metadataTable) 
@@ -1994,4 +2001,31 @@ TwitterRenderer.playPauseStream = function(event)
 TwitterRenderer.isStreamPaused = function(icon)
 {
 	return (icon.src == TwitterRenderer.playIconPath);
+}
+
+TwitterRenderer.getIconRow = function(styleInfo)
+{
+	var row = document.createElement('div');
+    row.className = styleInfo.styles.metadataRow;
+    
+    var nameCol = document.createElement('div');
+    nameCol.className = styleInfo.styles.labelColShowDiv;
+
+    var valueCol = document.createElement('div');
+    valueCol.className = styleInfo.styles.valueColShowDiv;
+    
+    var fieldValueDiv = document.createElement('div');
+	fieldValueDiv.className = styleInfo.styles.fieldValueContainer;
+	
+	var imgPnP = document.createElement('img');
+    imgPnP.className = styleInfo.styles.tweetStreamIcon;
+    imgPnP.src = TwitterRenderer.playIconPath;
+    imgPnP.onclick = TwitterRenderer.playPauseStream;
+    
+    fieldValueDiv.appendChild(imgPnP);
+    valueCol.appendChild(fieldValueDiv);
+    row.appendChild(nameCol);
+    row.appendChild(valueCol);
+    
+    return row;
 }
