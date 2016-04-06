@@ -1,5 +1,5 @@
-/* jshint browser:true */
-/* global PreFilter */
+/* jshint browser:true, devel:true */
+/* global PreFilter, chrome, Util */
 
 /** 
  * Detailed spec: https://docs.google.com/document/d/1kjgonh8jp3vwLKajReEa2zfAYfodcKCc233n7kVu3tE
@@ -9,9 +9,6 @@ function RemoteExtractor() {
 
 	var requests = {};
 	var timeouts = {};
-		
-	//implemented by subclasses
-	this.ExtractionRequest = function(){};
 	
 	/** 
 	 * for http/https and www issues. not ideal, eventually needs to handle tougher redirects 
@@ -24,7 +21,7 @@ function RemoteExtractor() {
 		return strippedURL;
 	}
 	
-	this.extract = function(rawUrl, mmd, callback){	
+	this.extract = function(rawUrl, mmd, options, callback){	
 	
 		if (mmd.meta_metadata.filter_location){
 			rawUrl = PreFilter.filter(rawUrl, mmd.meta_metadata.filter_location);
@@ -33,7 +30,8 @@ function RemoteExtractor() {
 		
 		//case 1: new request
 		if (!requests[url]){
-			var req = new this.ExtractionRequest(rawUrl, mmd, callback);
+			var req = new ExtractionRequest(rawUrl, mmd, callback);
+			this.start(req, options);
 			requests[url] = req;
 			timeouts[url] = setTimeout(this.giveUp, WAIT_TIME, url);
 		}
@@ -47,7 +45,7 @@ function RemoteExtractor() {
 	this.doneWith = function(url, md){
 		url = sanitize(url);	
 		clearTimeout(timeouts[url]);
-		requests[url].finish(null, md);
+		this.finish(requests[url], null, md);
 	};
 	
 	/** answer whether a newly loaded page needs to be extracted */
@@ -58,94 +56,111 @@ function RemoteExtractor() {
 	
 	/** boradcast that extraction has failed and clean up */
 	this.giveUp = function(url){
-		requests[url].finish({error: 'remote extraction timed out on url: ' + url + '. sumtin went wrong'}, null);
+		this.finish(requests[url], {error: 'remote extraction timed out on url: ' + url + '. sumtin went wrong'}, null);
 	};
 }
 
-/*
-function ExtractionRequest(rawURL, metametadata, callback, onStart, onFinish){
+function ExtractionRequest(rawURL, metametadata, callback){
 	this.status = 'pending';
 	this.callbacks = [callback];
+	this.mmd = metametadata;
+	this.rawUrl = rawURL;
+}
 
-	var mmd = metametadata;
-	var rawUrl = rawURL;
+ExtractionRequest.prototype.cleanup = function(err, md){
+	for (var i = 0; i < this.callbacks.length; i++){
+		this.callbacks[i](err, md);
+	}
+	delete this.callbacks;
 
-	onStart();
-	
-	this.iframe = document.createElement('iframe');
-	this.iframe.setAttribute('src', rawUrl);
-	document.body.appendChild(this.iframe);
-
-	this.finish = function(err, md){
-		for (var i = 0; i < this.callbacks.length; i++){
-			this.callbacks[i](err, md);
-		}
-		delete this.callbacks;
-
-		onFinish();
-
-		this.status = (err) ?  'failed' : 'done';
-	};
+	this.status = (err) ?  'failed' : 'done';	
 };
-*/
 
+
+
+//each remote extractor inherits from the parent and implements two functions, start and finish
+//start creates the external extraction object (iframe or window)
+//finish deletes that object, and calls other functions associated with the request finishing
 function IframeExtractor(){
+	this.start = function(request, options){
+		request.iframe = document.createElement('iframe');
+		request.iframe.setAttribute('src', request.rawUrl);
+		document.body.appendChild(request.iframe);	
+	};
 	
-	//this.ExtractionRequest = new ExtractionRequest();
-	
-	//TODO OOP THIS
-	
-	this.ExtractionRequest = function(rawURL, metametadata, callback){
-		this.status = 'pending';
-		this.callbacks = [callback];
-
-		var mmd = metametadata;
-		var rawUrl = rawURL;
-
-		this.iframe = document.createElement('iframe');
-		this.iframe.setAttribute('src', rawUrl);
-		document.body.appendChild(this.iframe);
-
-		this.finish = function(err, md){
-			for (var i = 0; i < this.callbacks.length; i++){
-				this.callbacks[i](err, md);
-			}
-			delete this.callbacks;
-
-			if (this.iframe.parentNode){
-				this.iframe.parentNode.removeChild(this.iframe);
-			}
-			delete this.iframe;
-
-			this.status = (err) ?  'failed' : 'done';
-		};
+	this.finish = function(request, err, md){
+		if (request.iframe.parentNode){
+			request.iframe.parentNode.removeChild(request.iframe);
+		}
+		delete request.iframe;
+		request.cleanup(err, md);
 	};
 }
 IframeExtractor.prototype = new RemoteExtractor();
 IframeExtractor.constructor = IframeExtractor;
 
+
+
 function PopUnderExtractor(){
+
+	var focusOn;
+	var ids = {};
 	
-	this.ExtractionRequest = function(rawURL, metametadata, callback){
-		this.status = 'pending';
-		this.callbacks = [callback];
-
-		var mmd = metametadata;
-		var rawUrl = rawURL;
-
-		//TODO CREATE POPUNDER AND REFOCUS
-
-		this.finish = function(err, md){
-			for (var i = 0; i < this.callbacks.length; i++){
-				this.callbacks[i](err, md);
-			}
-			delete this.callbacks;
-
-			//TODO CLOSE POPUNDER
-			
-			this.status = (err) ?  'failed' : 'done';
-		};
+	this.start = function(request, options){
+		popBest(options.senderId, request.rawUrl);
 	};
+	
+	this.finish = function(request, err, md){
+		closeWindowOf(request.rawUrl);
+		request.cleanup(err, md);		
+	};
+	
+	function closeWindowOf(url){
+		chrome.windows.remove(ids[url]);
+	}
+	
+	function popMinimize(senderId, url){
+		focusOn = senderId;
+		chrome.windows.create({url: url, state : "minimized"}, onLoad);
+	}
+
+	function popUnderAsPopup(senderId, url){
+		focusOn = senderId;
+		chrome.windows.getCurrent(function(win){
+			var newTop = win.top + win.height - 200;
+			var newLeft = win.left + win.width - 300;
+			chrome.windows.create({url: url, type: "popup", state : "normal", focused: false, width: 10, height: 10, top: newTop, left: newLeft }, onLoad);
+		});
+	}
+
+	function popBest(senderId, url){
+		focusOn = senderId;
+		var os = Util.getOS();
+
+		if (os.indexOf('Windows', 0) > -1){
+			popMinimize(senderId, url);
+		}
+		else if(os.indexOf('Mac', 0) > -1){
+			popUnderAsPopup(senderId, url);
+		}
+		//TODO Ubuntu
+	}
+
+	function onLoad(win){
+		ids[win.tabs[0].url] = win.id;
+		chrome.windows.getLastFocused(function (window){
+			console.log('sender id: ' + focusOn);
+			console.log('focusing on ' + focusOn);    
+			chrome.windows.update(focusOn, {focused:true});
+		});
+	}
+
+	function closeEm(){
+		console.log('deleting');    
+		for (var key in ids){
+			chrome.windows.remove(ids[key]);
+		}
+	}
 }
 PopUnderExtractor.prototype = new RemoteExtractor();
 PopUnderExtractor.constructor = PopUnderExtractor;

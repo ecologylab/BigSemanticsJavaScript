@@ -102,7 +102,16 @@ var BigSemantics = (function() {
           options.userAgent = that.repoMan.userAgents[mmd.user_agent_name];
         }
 		if (mmd.meta_metadata.extract_with == 'iframe') {
-			that.iframeExtractor.extract(location, mmd, function(err, metadata){
+			that.iframeExtractor.extract(location, mmd, options, function(err, metadata){
+				if (err) { callback(err, null); return; }
+		    	callback(null, { metadata: metadata, mmd: mmd });	
+				if (!mmd.no_cache && that.metadataCache) {
+					that.metadataCache.add(location, metadata);
+				}
+			});
+		}
+		else if (mmd.meta_metadata.extract_with == 'popUnder') {
+			that.popUnderExtractor.extract(location, mmd, options, function(err, metadata){
 				if (err) { callback(err, null); return; }
 		    	callback(null, { metadata: metadata, mmd: mmd });	
 				if (!mmd.no_cache && that.metadataCache) {
