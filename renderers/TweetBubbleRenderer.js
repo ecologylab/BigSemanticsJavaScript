@@ -758,6 +758,8 @@ TwitterRenderer.buildMetadataTable = function (table, isChildTable, isRoot, meta
             valueCol.className = styleInfo.styles.valueColShowDiv;
             //TODO - add "more" expander
             var moreCount = metadataFields.length - i;
+            if (streamIcon)
+            	moreCount = metadataFields[0].value.length;
 
             var fieldValueDiv = document.createElement('div');
             fieldValueDiv.className = styleInfo.styles.moreButton;
@@ -1959,7 +1961,7 @@ TwitterRenderer.renderUpdate = function(url, mmd, metadata)
 			else
 			{
 				metadataTable = TwitterRenderer.buildMetadataTable(null, false, false, 
-						metadataFields, 0, styleInfo, null, false, true);
+						metadataFields, 0, styleInfo, null, false, streamIcon);
 			}
 			
 			if (metadataTable) 
@@ -1974,10 +1976,17 @@ TwitterRenderer.renderUpdate = function(url, mmd, metadata)
 				//row.table.td
 				var tweetsCell = labelRow.parentElement.parentElement;
 				tweetsCell.insertBefore(metadataTable, tweetsCell.firstChild);
-				
-				//remove previous icon
-				var iconParent = streamIcon.parentElement;
-				iconParent.removeChild(streamIcon);
+								
+				if (streamIcon.moreData) 
+				{
+					tweetsCell.removeChild(tweetsCell.firstChild.nextSibling);
+				}
+				else 
+				{
+					//remove previous icon
+					var iconParent = streamIcon.parentElement;
+					iconParent.removeChild(streamIcon);
+				}
 			}
 		}
 	}
@@ -2021,6 +2030,7 @@ TwitterRenderer.getIconRow = function(styleInfo)
     imgPnP.className = styleInfo.styles.tweetStreamIcon;
     imgPnP.src = TwitterRenderer.playIconPath;
     imgPnP.onclick = TwitterRenderer.playPauseStream;
+    imgPnP.moreData = true;
     
     fieldValueDiv.appendChild(imgPnP);
     valueCol.appendChild(fieldValueDiv);
