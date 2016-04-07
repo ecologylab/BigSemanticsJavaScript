@@ -105,7 +105,7 @@ var BigSemantics = (function() {
 			that.iframeExtractor.extract(location, mmd, options, function(err, metadata){
 				if (err) { callback(err, null); return; }
 		    	callback(null, { metadata: metadata, mmd: mmd });	
-				if (!mmd.no_cache && that.metadataCache) {
+				if (!mmd.meta_metadata.no_cache && that.metadataCache) {
 					that.metadataCache.add(location, metadata);
 				}
 			});
@@ -114,7 +114,7 @@ var BigSemantics = (function() {
 			that.popUnderExtractor.extract(location, mmd, options, function(err, metadata){
 				if (err) { callback(err, null); return; }
 		    	callback(null, { metadata: metadata, mmd: mmd });	
-				if (!mmd.no_cache && that.metadataCache) {
+				if (!mmd.meta_metadata.no_cache && that.metadataCache) {
 					that.metadataCache.add(location, metadata);
 				}
 			});
@@ -126,7 +126,7 @@ var BigSemantics = (function() {
 		  	that.extractor(response, mmd, that, options, function(err, metadata) {
 		    	if (err) { callback(err, null); return; }
 		    	callback(null, { metadata: metadata, mmd: mmd });
-				if (!mmd.no_cache && that.metadataCache) {
+				if (!mmd.meta_metadata.no_cache && that.metadataCache) {
 					that.metadataCache.add(location, metadata);
 				}				
 			});

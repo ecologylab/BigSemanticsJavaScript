@@ -28,7 +28,7 @@ function RemoteExtractor() {
 		}
 		var url = sanitize(rawUrl);
 		
-		//case 1: new request
+		//case 1: new request (or request has already finished and been deleted. this happens for things we don't cache)
 		if (!requests[url]){
 			var req = new ExtractionRequest(rawUrl, mmd, callback);
 			this.start(req, options);
@@ -46,6 +46,7 @@ function RemoteExtractor() {
 		url = sanitize(url);	
 		clearTimeout(timeouts[url]);
 		this.finish(requests[url], null, md);
+		delete requests[url];
 	};
 	
 	/** answer whether a newly loaded page needs to be extracted */
@@ -57,6 +58,7 @@ function RemoteExtractor() {
 	/** boradcast that extraction has failed and clean up */
 	this.giveUp = function(url){
 		this.finish(requests[url], {error: 'remote extraction timed out on url: ' + url + '. sumtin went wrong'}, null);
+		delete requests[url];
 	};
 }
 
