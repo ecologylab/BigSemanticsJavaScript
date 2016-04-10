@@ -118,7 +118,7 @@ function onBodyLoad() {
 	Material.addMaterial('minkToolbar', minkAppBar, 4);
 
 
-	var c = new Column(0, document.getElementById('minkC0'));
+	//var c = new Column(0, document.getElementById('minkC0'));
 
 	//SEMANTIC_SERVICE_URL = "http://128.194.128.84:8080/BigSemanticsService/";
 
@@ -513,10 +513,6 @@ minkApp.initialize = function(minkAppHTML){
 	minkApp.baseCol = minkAppHTML.childNodes[0];
 	var columns = $(minkAppHTML).find(".minkColumn");
 	//minkApp.currentQuery.columns = columns;
-	minkApp.leftMostCol = columns[0];
-	minkApp.rightMostCol = columns[0];
-	columns[0].setAttribute('column', '0');
-	minkApp.maxCols = 3;
 	minkApp.HTML = minkAppHTML;
 
 	$(".minkBackButton").css('display', 'none');
@@ -545,21 +541,11 @@ minkApp.markColumnOutOfView = function(column){
 }
 */
 minkApp.hidePreviousQuery = function(){
-	var keys = minkApp.currentQuery.pileMap.keys;
-	for (var i = 0; i < keys.length; i++){
-		var pile = minkApp.currentQuery.pileMap.get(keys[i]);
-		var cards = pile.cards;
-		for (var j = 0; j < cards.length; j++){
-			cards[j].inView = false;
-			cards[j].displayed = false;
 
-		}
-	}
-	$("#minkColumns").empty();
-	minkApp.leftMostCol =null;
-	minkApp.rightMostCol = null;
+//	MinkComposer.hideCurrentSpace();
+
+	$(".minkColumn").detach();
 	$('#contextTitle')[0].innerHTML = "";
-
 	//remove add query button visbility by default
 	$('.minkNewQueryButton').removeClass('visible');
 	//mak
@@ -685,10 +671,12 @@ minkApp.queryUnhighlight = function(event){
 minkApp.nsearchKeypress = function(event){
 	 if(event && event.keyCode == 13){
 		 var newQueryString = event.srcElement.value;
-		 var pid = event.srcElement.getAttribute('pid');
-		 var nQuery = new Query(newQueryString, ['google_scholar'], pid);
 
+		 minkApp.exploreNewQuery(newQueryString);
+	//	 var pid = event.srcElement.getAttribute('pid');
+	//	 var nQuery = new Query(newQueryString, ['google_scholar'], pid);
 
+/*
 		var column;
 		if(!minkApp.currentQuery){
 			column = minkApp.leftMostCol;
@@ -709,13 +697,13 @@ minkApp.nsearchKeypress = function(event){
 		minkApp.currentQuery = nQuery;
 		minkApp.explorationSpace.queries.push(nQuery);
 		$(('#' + minkApp.currentQuery.uuid)).children('.minkNewQueryButton').addClass('visible');
+*/
 
 
 
 
 
-
-	    $(event.srcElement.parentNode).remove();
+	//    $(event.srcElement.parentNode).remove();
 
 	 }
 
@@ -841,7 +829,6 @@ minkApp.addSearchToQuery = function(parent, query, rooturl){
 }
 
 minkApp.exploreNewQuery = function(queryString){
-
 	if(minkApp.currentQuery){
 		if(queryString === minkApp.currentQuery.query){
 			return;
@@ -862,19 +849,26 @@ minkApp.exploreNewQuery = function(queryString){
 
 	var nQuery = new Query(queryString, ['google_scholar']);
 	var column;
+	MinkComposer.newComposeableSpace();
+
 	if(!minkApp.currentQuery){
-		column = minkApp.leftMostCol;
 	}else{
 		minkApp.hidePreviousQuery();
 
-		column = minkApp.buildColumn($('#minkColumns')[0]);
+	/*	column = minkApp.buildColumn($('#minkColumns')[0]);
 		column.setAttribute('column', '0');
 		var c = new Column(0, column);
 
-		$('#minkColumns')[0].appendChild(column);
+		$('#minkColumns')[0].appendChild(column);*/
 	}
-	$('#contextTitle')[0].innerHTML = nQuery.contextTitle;
 
+	column = minkApp.buildColumn($('#minkColumns')[0]);
+	column.setAttribute('column', '0');
+	var c = new Column(0, column);
+
+ $('#minkColumns')[0].appendChild(column);
+
+	$('#contextTitle')[0].innerHTML = nQuery.contextTitle;
 	var pile = minkApp.addSearchToQuery(column, nQuery, nQuery.urls[0]);
 	//Create a pile in the column. request md for it. then make cards, then ask minkComposer to deal with em
 	MinkOracle.getSemantics(nQuery.urls[0], pile, "rootQueryMetadata", MinkOracle.prepareSearchSemantics);
