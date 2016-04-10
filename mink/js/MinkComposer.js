@@ -709,7 +709,7 @@ function redrawCanvas(){
  var ctx = canvas.getContext('2d');
  ctx.clearRect ( 0 , 0 , canvas.width, canvas.height );
  ctx.canvas.height = $(document).height();
- ctx.canvas.width = $('html').width();
+ ctx.canvas.width = $('#minkColumns').width();
 
  if(minkApp.currentQuery){
    for(var i = 0; i < MinkComposer.currentSpace.rootComposeables.length; i++){
