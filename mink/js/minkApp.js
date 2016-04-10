@@ -490,7 +490,7 @@ minkApp.restoreQueryFromHistory = function(event){
 	var cont = event.srcElement.parentNode;
 	var queryId = cont.getAttribute('id');
 	if (queryId == minkApp.currentQuery.uuid){
-		return
+		return;
 	}else{
 		try{
 			var q = minkApp.queryMap.get(queryId);
@@ -727,52 +727,6 @@ minkApp.newQueryBox = function(event){
 	//set event listeners
 
 }
-minkApp.exploreURL = function(url){
-	//checki
-	if(minkApp.currentQuery){
-		if(url === minkApp.currentQuery.query){
-			return;
-		}
-	}
-
-
-
-	for (var i = 0; i < minkApp.explorationSpace.queries.length; i++){
-		if(url === minkApp.explorationSpace.queries[i].query){
-			minkApp.hidePreviousQuery();
-			minkApp.explorationSpace.currentQuery = minkApp.explorationSpace.queries[i];
-			minkApp.rebuildCurrentQuery();
-			return;
-		}
-	}
-
-	//var explorationSpace = new ExplorationSpace(url, null);
-	var nQuery = new Query(url);
-	var column;
-	if(!minkApp.currentQuery){
-		column = minkApp.leftMostCol;
-	}else{
-		minkApp.hidePreviousQuery();
-
-		column = minkApp.buildColumn($('#minkColumns')[0]);
-		column.setAttribute('column', '0');
-		var c = new Column(0, column);
-
-		$('#minkColumns')[0].appendChild(column);
-	}
-	var pile = minkApp.buildPile(column, [url], url, null, null);
-	$('#contextTitle')[0].innerHTML = nQuery.contextTitle;
-
-	nQuery.pileMap.put(pileIDGen(url, null), pile);
-	nQuery.columns.push(column);
-	minkApp.currentQuery = nQuery;
-	minkApp.explorationSpace.queries.push(nQuery);
-
-	$(('#' + minkApp.currentQuery.uuid)).children('.minkNewQueryButton').addClass('visible');
-
-
-}
-
 function toGoogleUrl(searchString){
 
 
@@ -829,9 +783,14 @@ minkApp.exploreNewQuery = function(queryString){
 			return;
 		}
 	}
+	var nQuery;
+	if(isUrl(queryString)){
+		nQuery = new Query(queryString);
 
+	}else{
+		nQuery = new Query(queryString, ['google_scholar']);
 
-	var nQuery = new Query(queryString, ['google_scholar']);
+	}
 	var column;
 	nQuery.composeableSpace = MinkComposer.newComposeableSpace();
 
@@ -854,8 +813,14 @@ minkApp.exploreNewQuery = function(queryString){
 
 	$('#contextTitle')[0].innerHTML = nQuery.contextTitle;
 	var pile = minkApp.addSearchToQuery(column, nQuery, nQuery.urls[0]);
+	var type;
+	if(isUrl(queryString)){
+		type = "rootURL"
+	}else{
+		type = "rootQueryMetadata";
+	}
 	//Create a pile in the column. request md for it. then make cards, then ask minkComposer to deal with em
-	MinkOracle.getSemantics(nQuery.urls[0], pile, "rootQueryMetadata", MinkOracle.prepareSearchSemantics);
+	MinkOracle.getSemantics(nQuery.urls[0], pile, type, MinkOracle.prepareSearchSemantics);
 
 
 
@@ -1123,7 +1088,11 @@ minkApp.minkEventHandler = function(event){
 
 	 }else if(event.detail.type == "rootQueryMetadata"){
 		 minkApp.addParentlessPile(event);
-	 }else if(event.detail.type == "addCardsToPile"){
+	 }else if(event.detail.type == "rootURL"){
+		 minkApp.addParentlessCard(event);
+
+	 }
+	 else if(event.detail.type == "addCardsToPile"){
 		 	minkApp.addChildCards(event);
 	 }
 	 else if(event.detail.type == 'minkshowless'){
@@ -1154,7 +1123,7 @@ minkApp.addChildCards = function(event){
 
 
 
-	var pileID = event.srcElement.getAttribute('pileID');
+	var pileID = $(event.srcElement).closest('.minkPile')[0].getAttribute('pileID');
 	var pile =  minkApp.currentQuery.pileMap.get(pileID);
 	pile.semantics = event.detail.semantics;
 	pile.semantics.results.links = pile.semantics.results.links.slice(0, 4)
@@ -1272,6 +1241,12 @@ minkApp.buildCards = function(pile){
 
 }
 
+
+minkApp.addParentlessCard = function(event){
+	var pileID = event.srcElement.parentNode.getAttribute('pileID');
+	var pile =  minkApp.currentQuery.pileMap.get(pileID);
+	pile.cards = [new minkCard(event.detail.task.url, event.detail.task.container, pile)];
+}
 minkApp.addParentlessPile = function(event){
 	var pileID = event.srcElement.getAttribute('pileID');
 	var pile =  minkApp.currentQuery.pileMap.get(pileID);
@@ -1543,7 +1518,7 @@ function showMetadata(url)
 {
 	if (url){
 		if(isUrl(url)){
-			minkApp.exploreURL(url);
+			minkApp.exploreNewQuery(url);
 		}else{
 			minkApp.exploreNewQuery(url);
 		}
@@ -1551,7 +1526,7 @@ function showMetadata(url)
 	}else{
 		var url = document.getElementById("targetURL").value;
 		if(isUrl(url)){
-			minkApp.exploreURL(url);
+			minkApp.exploreNewQuery(url);
 		}else{
 			minkApp.exploreNewQuery(url);
 		}
