@@ -993,6 +993,7 @@ minkApp.addChildPile = function(details, srcElement){
 
  //Find the parentID. If parent doesn't have a childPile container, build one
   var parentPileId = $(event.srcElement).closest('.minkPile').attr('pileid');
+
 	var parentComposeableId = $(event.srcElement).closest('.minkCardContainer')[0].id
 
   //get parentPile
@@ -1024,8 +1025,14 @@ minkApp.addChildPile = function(details, srcElement){
 	minkApp.currentQuery.pileMap.put(pileId, newPile);
 	childPileContainer.appendChild(newPile.HTML);
 
+	//tests to see what semantics is right
+	var minkeventName = 'addCardsToPile';
+	if($(event.srcElement).closest('.minkPile')[0].getAttribute('URLKID')){
+		minkeventName = 'urlChildren';
+	}
+
 	for(var i = 0; i < event.detail.links.length; i++){
-		MinkOracle.getSemantics(event.detail.links[i], newPile, 'addCardsToPile');
+		MinkOracle.getSemantics(event.detail.links[i], newPile, minkeventName);
 
 	}
 	/*
@@ -1090,7 +1097,9 @@ minkApp.minkEventHandler = function(event){
 		 minkApp.addParentlessPile(event);
 	 }else if(event.detail.type == "rootURL"){
 		 minkApp.addParentlessCard(event);
-
+	 }
+	 else if (event.detail.type == 'urlChildren'){
+		 minkApp.addUrlKids(event);
 	 }
 	 else if(event.detail.type == "addCardsToPile"){
 		 	minkApp.addChildCards(event);
@@ -1118,7 +1127,32 @@ minkApp.minkEventHandler = function(event){
 	 }
 
 }
+minkApp.addUrlKids = function(event){
+	var pileID = $(event.srcElement).closest('.minkPile')[0].getAttribute('pileID');
+	var pile =  minkApp.currentQuery.pileMap.get(pileID);
+	$(event.srcElement).closest('.minkPile')[0].setAttribute('URLKID', 'true');
 
+	var wrapper = $(pile.HTML).closest('.minkPileWrapper')[0];
+	$(pile).find('.minkLoadingSpinner').remove();
+	/*
+	if the iteration canary is visble, give the pile a new URL as the new results URL so that buildPile knows to make it
+	a  new card loader. If the canary has 'died' then delete any existing more loaders
+
+	*/
+	if(pile.cards){
+		pile.cards.push(new minkCard(event.detail.task.url, event.detail.task.container, pile));
+	}else{
+		pile.cards = [new minkCard(event.detail.task.url, event.detail.task.container, pile)];
+
+	}
+	var detailDetails = {type: 'makespace', container: pile.HTML};
+	if(minkApp.currentQuery){
+	 var facets = getFacetsFromHTML();
+	 applyFacets(minkApp.currentQuery, facets);
+
+	}
+
+}
 minkApp.addChildCards = function(event){
 
 
@@ -1244,6 +1278,7 @@ minkApp.buildCards = function(pile){
 
 minkApp.addParentlessCard = function(event){
 	var pileID = event.srcElement.parentNode.getAttribute('pileID');
+	event.srcElement.parentNode.setAttribute('URLKID', 'true');
 	var pile =  minkApp.currentQuery.pileMap.get(pileID);
 	pile.cards = [new minkCard(event.detail.task.url, event.detail.task.container, pile)];
 }
