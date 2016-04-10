@@ -604,29 +604,13 @@ minkApp.rebuildCurrentQuery = function(){
 	//
 	minkApp.hidePreviousQuery();
 	//
-	var keys = minkApp.currentQuery.pileMap.keys;
-	for (var i = 0; i < keys.length; i++){
-		var pile = minkApp.currentQuery.pileMap.get(keys[i]);
-		var c = $(pile.HTML).closest('.minkColumn')[0];
-		var cnum = parseInt(c.getAttribute('column'));
-		if(cnum > 0 && cnum <= 3){
-			var cards = pile.cards;
-			for (var j = 0; j < cards.length; j++){
-				cards[j].inView = true;
-				minkApp.updateCardDisplay(cards[j]);
-			}
-			minkApp.updateDuplicateCount(pile);
-		}
-
-
-	}
 	$('#contextTitle')[0].innerHTML =  minkApp.currentQuery.contextTitle;
+	MinkComposer.switchSpaceTo(minkApp.currentQuery.composeableSpace);
 
-	var columns = minkApp.currentQuery.columns;
-	var cont = $('#minkColumns')[0];
-	for(var i = 0; i < columns.length; i++){
-		cont.appendChild(columns[i]);
-	}
+
+
+
+
 	$(('#' + minkApp.currentQuery.uuid)).children('.minkNewQueryButton').addClass('visible');
 
 
@@ -639,7 +623,7 @@ minkApp.rebuildCurrentQuery = function(){
 		$('#facetkeyword')[0].value = "";
 	}
 
-	applyFacets(minkApp.currentQuery, minkApp.currentQuery.facets);
+//	applyFacets(minkApp.currentQuery, minkApp.currentQuery.facets);
 
 
 
@@ -849,7 +833,7 @@ minkApp.exploreNewQuery = function(queryString){
 
 	var nQuery = new Query(queryString, ['google_scholar']);
 	var column;
-	MinkComposer.newComposeableSpace();
+	nQuery.composeableSpace = MinkComposer.newComposeableSpace();
 
 	if(!minkApp.currentQuery){
 	}else{

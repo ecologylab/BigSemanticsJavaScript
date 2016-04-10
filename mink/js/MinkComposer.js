@@ -15,7 +15,11 @@ MinkComposer.hideCurrentSpace = function(){
   }
 }
 MinkComposer.switchSpaceTo = function(space){
+  var columnHolder = $("#minkColumns");
   MinkComposer.currentSpace = space;
+    for(var i = 0; i < space.columns.length; i++){
+      columnHolder.append(space.columns[i].HTML);
+    }
 }
 function Column(number, HTML){
   this.number = number
