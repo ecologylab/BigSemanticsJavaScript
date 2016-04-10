@@ -34,14 +34,18 @@ var BigSemantics = (function() {
       this.setReady();
     }
 	  
-	if (typeof MetadataCache === 'object' && MetadataCache){
+	if (typeof MetadataCache === 'function' && MetadataCache){
 		this.metadataCache = new MetadataCache();
 	}
 	
-	if (typeof IframeExtractor === 'object' && IframeExtractor){
+	if (typeof IframeExtractor === 'function' && IframeExtractor){
     	this.iframeExtractor = new IframeExtractor();
 	}
 
+	if (typeof PopUnderExtractor === 'function' && PopUnderExtractor){
+    	this.popUnderExtractor = new PopUnderExtractor();
+	}  
+	  
     return this;
   }
   BigSemantics.prototype = Object.create(Readyable.prototype);
@@ -98,10 +102,19 @@ var BigSemantics = (function() {
           options.userAgent = that.repoMan.userAgents[mmd.user_agent_name];
         }
 		if (mmd.meta_metadata.extract_with == 'iframe') {
-			that.iframeExtractor.extract(location, mmd, function(err, metadata){
+			that.iframeExtractor.extract(location, mmd, options, function(err, metadata){
 				if (err) { callback(err, null); return; }
 		    	callback(null, { metadata: metadata, mmd: mmd });	
-				if (!mmd.no_cache && that.metadataCache) {
+				if (!mmd.meta_metadata.no_cache && that.metadataCache) {
+					that.metadataCache.add(location, metadata);
+				}
+			});
+		}
+		else if (mmd.meta_metadata.extract_with == 'popUnder') {
+			that.popUnderExtractor.extract(location, mmd, options, function(err, metadata){
+				if (err) { callback(err, null); return; }
+		    	callback(null, { metadata: metadata, mmd: mmd });	
+				if (!mmd.meta_metadata.no_cache && that.metadataCache) {
 					that.metadataCache.add(location, metadata);
 				}
 			});
@@ -113,7 +126,7 @@ var BigSemantics = (function() {
 		  	that.extractor(response, mmd, that, options, function(err, metadata) {
 		    	if (err) { callback(err, null); return; }
 		    	callback(null, { metadata: metadata, mmd: mmd });
-				if (!mmd.no_cache && that.metadataCache) {
+				if (!mmd.meta_metadata.no_cache && that.metadataCache) {
 					that.metadataCache.add(location, metadata);
 				}				
 			});

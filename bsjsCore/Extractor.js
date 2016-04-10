@@ -68,6 +68,20 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 		return evaluationPath;
 	}
 	
+	function removeInheritedXpaths(xpaths, name){
+		if (!upperXpath[name]){
+			return xpaths;
+		}
+		
+		var uniqPaths = [];
+		for (var i=0; i<xpaths.length; i++){
+			if (!(xpaths[i] in upperXpath[name])){
+				uniqPaths.push(xpaths[i]);
+			}
+		}
+		return uniqPaths;
+	}
+	
 	//store topmost xpaths for each field. used to tell if nested fields are inherited or not
 	function countXpaths(mmdKids){
 	    for (var i = 0; i < mmdKids.length; i++) {
@@ -84,7 +98,7 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 			}
 	        var name = field.name;
 	        if ('xpaths' in field){
-	            upperXpath[name] = field.xpaths;
+	            upperXpath[name] = BSUtils.arrayToHash(field.xpaths);
 	        }
 	        else {
 	            upperXpath[name] = [];
@@ -118,26 +132,16 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 					
 	        var tmpField = field[Object.keys(field)[0]];
 			         
-            //TODO work out the right behaviour for ignoring inherited xpaths
-            /*
-            //for composites/collections, ignore inherited (declaring mmd isn't the root mmd) composites/collections
-            if (isComplex && tmpField.declaring_mmd && tmpField.declaring_mmd !== mmd && !field.scalar){
-                continue;
-            }
-            //for composites/collections, ignore scalars that don't have xpaths
-            if (isComplex && !tmpField.hasOwnProperty('xpaths')){
-                continue;
-            }
-            */
-            
-            // within composites/collections if the field has only the xpaths it inherited, or fewer xpaths, then do not try extraction
-			/* */
-			if (isComplex && tmpField.hasOwnProperty('xpaths') && tmpField.xpaths == upperXpath[tmpField.name]){
-	            continue;
-	        }
-			else if (tmpField.hasOwnProperty('xpaths') && upperXpath[tmpField.name] && tmpField.xpaths.length < upperXpath[tmpField.name].length){
-				continue;
-			}
+            // within composites/collections don't use inherited xpaths
+			if (tmpField.hasOwnProperty('xpaths')){
+				if (isComplex) {
+					tmpField.importantXpaths = removeInheritedXpaths(tmpField.xpaths, tmpField.name);
+				}
+				else {
+					tmpField.importantXpaths = tmpField.xpaths;
+				}
+			} 
+
 			
             if (!isNested){
 	            contextNode = page;
@@ -232,8 +236,8 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 		if (field.hasOwnProperty('field_parser_key')) {
 			data = null;
 		}
-		else if (field.hasOwnProperty('xpaths') && field.xpaths.length > 0) {
-			var fieldx = field.xpaths;
+		else if (field.hasOwnProperty('importantXpaths') && field.importantXpaths.length > 0) {
+			var fieldx = field.importantXpaths;
 			for (var j = 0; j < fieldx.length; j++) {
 				if (field.extract_as_html) {
 					x = getScalarNode(field,fieldx[j],contextNode);
@@ -282,8 +286,8 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 				recurseNeeded=true;
 		}
 		
-		if (field.hasOwnProperty('xpaths')){
-			var fieldx = field.xpaths;
+		if (field.hasOwnProperty('importantXpaths') && field.importantXpaths.length > 0){
+			var fieldx = field.importantXpaths;
 			for (var j = 0; j < fieldx.length; j++) {
 				x = getCompositeObject(field, fieldx[j], contextNode);
 				// if the result is not a node, assume there was a field parser that manually got data for us and return that data
@@ -338,8 +342,8 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 		var x = null;
 		var data = null;
 		
-		if (field.hasOwnProperty("xpaths")) {
-			var fieldx = field.xpaths;
+		if (field.hasOwnProperty('importantXpaths') && field.importantXpaths.length > 0) {
+			var fieldx = field.importantXpaths;
 			for (var j = 0; j < fieldx.length; j++) {
 				x = getCollectionData(field,fieldx[j],contextNode);
 				if (x !== null && x !== "") {
@@ -423,11 +427,7 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 		} 
 
 		var node = nodes.snapshotItem(0);
-
-		if (node.textContent) {
-			return node;
-		}
-		return null;
+		return node;
 	}
 
 	function getCollectionData(field,xpath,contextNode){

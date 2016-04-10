@@ -1,6 +1,9 @@
 
 var MicroDataTools = {};
 
+//store mmd of types here after we have asked service for it to avoid redundant calls
+MicroDataTools.cachedMmd = {};
+
 // Convert schema name into metadata wrapper name
 MicroDataTools.getTypeName = function(microdata) {
     if (!microdata) {
@@ -48,14 +51,37 @@ MicroDataTools.getMicroDataAndMMD = function(page , bigSemantics, callback) {
     else {
         var typeName = MicroDataTools.getTypeName(microdata[0]);
 
-        bigSemantics.loadMmd(typeName, null, function (err, mmd) {
-			if (err) {
-                console.log("bigSemantics loadMMD failed");
-                callback(err, null);
-                return;
-            }
-            callback(null, {mmd: mmd, microdata: microdata});
-        });
+		if (MicroDataTools.cachedMmd[typeName]){
+			callback(null, {mmd: MicroDataTools.cachedMmd[typeName], microdata: microdata});
+		}
+		else if (event){
+			//here an event is occurring, so we assume extraction needs to be done synchronously.
+			//if we don't already have mmd for type we skip microdata and log
+			console.log("attempted to extract synchronously, but didn't have mmd cached for type: " + typeName);
+			//send to the logging service if we can
+			if (bigSemantics.logger) {
+				var eventObj = {
+					dnd_type_error: {
+						current_page: document.URL,
+						targt_page: page.URL,
+						type: typeName
+					}
+				}
+				bigSemantics.logger(eventObj);
+			}
+	        callback( null , null);
+		}
+		else {		//entering async land
+			bigSemantics.loadMmd(typeName, null, function (err, mmd) {
+				if (err) {
+					console.log("bigSemantics loadMMD failed");
+					callback(err, null);
+					return;
+				}
+				MicroDataTools.cachedMmd[typeName] = mmd;
+				callback(null, {mmd: mmd, microdata: microdata});
+			});
+		}
     }
 };
 
