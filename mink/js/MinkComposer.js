@@ -1,13 +1,31 @@
 var MinkComposer = {};
-MinkComposer.composeableMap = new Map();
-MinkComposer.rootComposeables = [];
-MinkComposer.columns = [];
 
+MinkComposer.newComposeableSpace = function(){
+
+    var newSpace = {};
+    newSpace.composeableMap = new Map();
+    newSpace.rootComposeables = [];
+    newSpace.columns = [];
+    MinkComposer.currentSpace = newSpace;
+    return newSpace;
+}
+MinkComposer.hideCurrentSpace = function(){
+  for (var i = 0; i < MinkComposer.currentSpace.columns.length; i++){
+    MinkComposer.currentSpace.columns[0].HTML.style.display = "none";
+  }
+}
+MinkComposer.switchSpaceTo = function(space){
+  var columnHolder = $("#minkColumns");
+  MinkComposer.currentSpace = space;
+    for(var i = 0; i < space.columns.length; i++){
+      columnHolder.append(space.columns[i].HTML);
+    }
+}
 function Column(number, HTML){
   this.number = number
   this.HTML = HTML;
   this.composeables = [];
-  MinkComposer.columns.push(this)
+  MinkComposer.currentSpace.columns.push(this)
 
 }
 
@@ -29,11 +47,11 @@ function Composeable(HTML, id, parentID){
   this.ancestors= [];
   this.childComposables = [];
   if(parentID){
-    var parent = MinkComposer.composeableMap.get(parentID)
+    var parent = MinkComposer.currentSpace.composeableMap.get(parentID)
     this.parent = parent;
 
   }else{
-    MinkComposer.rootComposeables.push(this)
+    MinkComposer.currentSpace.rootComposeables.push(this)
   }
   if(parent){
     parent.childComposables.push(this);
@@ -52,9 +70,9 @@ function Composeable(HTML, id, parentID){
   this.incidentallyRemovedKids = [];
   this.container = $(HTML).closest('.minkColumn')[0];
   this.x = this.container.getAttribute('column');
-  MinkComposer.columns[this.x].addComposeable(this);
+  MinkComposer.currentSpace.columns[this.x].addComposeable(this);
   this.childrenHeight = 0;
-  MinkComposer.composeableMap.put(this.id, this);
+  MinkComposer.currentSpace.composeableMap.put(this.id, this);
   Material.addMaterial(this.id, $(this.HTML).find('.minkContainer')[0], 1)
 
 
@@ -116,7 +134,7 @@ Composeable.prototype.getChildrenBounds = function(){
 
 Composeable.prototype.indexOfParent = function(){
   try{
-    return MinkComposer.columns[this.parent.x].composeables.indexOf(this.parent);
+    return MinkComposer.currentSpace.columns[this.parent.x].composeables.indexOf(this.parent);
 
   }catch(err){
     return -1;
@@ -144,7 +162,7 @@ Composeable.prototype.getHeight = function(){
 }
 Composeable.prototype.hasSilbings = function(){
   if(this.isRoot()){
-    if(MinkComposer.rootComposeables.length > 1){
+    if(MinkComposer.currentSpace.rootComposeables.length > 1){
       return true;
     }else{
       return false
@@ -193,7 +211,7 @@ Composeable.prototype.getSiblingsBelow = function(){
 }
 Composeable.prototype.getSiblings = function(){
   if(this.isRoot()){
-    var children = MinkComposer.rootComposeables;
+    var children = MinkComposer.currentSpace.rootComposeables;
     var newChildren = [];
     for (var i = 0; i < children.length; i++){
       if(this.id != children[i].id){
@@ -223,7 +241,7 @@ MinkComposer.composeEventHandler = function(event){
   try{
 
     if(event.detail.type == 'pullup'){
-      var composeable = MinkComposer.composeableMap.get(event.detail.composeableID);
+      var composeable = MinkComposer.currentSpace.composeableMap.get(event.detail.composeableID);
 
       var height = composeable.getChildrenBounds().bottom +30;
 
@@ -235,7 +253,7 @@ MinkComposer.composeEventHandler = function(event){
 
       }, 200);
     }else if(event.detail.type == 'growbelow'){
-      var composeable = MinkComposer.composeableMap.get(event.detail.composeableID);
+      var composeable = MinkComposer.currentSpace.composeableMap.get(event.detail.composeableID);
       var height = composeable.getChildrenBounds().bottom + 30;
 
       window.setTimeout(function(){
@@ -253,7 +271,7 @@ MinkComposer.composeEventHandler = function(event){
 }
 
 Composeable.prototype.getColumn = function(){
-  return MinkComposer.columns[this.x];
+  return MinkComposer.currentSpace.columns[this.x];
 
 }
 Composeable.prototype.getParentId = function(){
@@ -266,14 +284,14 @@ Composeable.prototype.getParentId = function(){
 Composeable.prototype.positionAt = function(y){
   this.y = y;
   this.HTML.style.top = (y.toString() + "px");
-  MinkComposer.columns[this.x].composeables.sort(function(a, b){
+  MinkComposer.currentSpace.columns[this.x].composeables.sort(function(a, b){
     return a.y - b.y;
   })
 }
 Composeable.prototype.positionBy = function(diff){
   this.y = this.y + diff;
   this.HTML.style.top = (this.y.toString() + "px");
-  MinkComposer.columns[this.x].composeables.sort(function(a, b){
+  MinkComposer.currentSpace.columns[this.x].composeables.sort(function(a, b){
     return a.y - b.y;
   })
 }
@@ -452,7 +470,7 @@ MinkComposer.changeHeight = function(composeable, oldHeight, newHeight){
 MinkComposer.checkIfAttachmentIsExpanded = function(composeableID, possiblePileId){
   try{
 
-    var composeable = MinkComposer.composeableMap.get(composeableID);
+    var composeable = MinkComposer.currentSpace.composeableMap.get(composeableID);
     for(var i = 0; i < composeable.childComposables.length; i++){
       var kid = composeable.childComposables[i];
       var pileid = $(kid.HTML).closest('.minkPile').attr('pileid');
@@ -523,7 +541,7 @@ MinkComposer.restoreRecursively = function(composeable){
     composeable.parent.childComposables.push(composeable);
   }
   $(composeable.HTML).appendTo(composeable.formerHTMLParent);
-  MinkComposer.columns[composeable.x].addComposeable(composeable);
+  MinkComposer.currentSpace.columns[composeable.x].addComposeable(composeable);
   MinkComposer.addComposeable(composeable)
   for(var i = 0; i < composeable.incidentallyRemovedKids.length; i++){
     MinkComposer.restoreRecursively(composeable.incidentallyRemovedKids[i]);
@@ -532,7 +550,7 @@ MinkComposer.restoreRecursively = function(composeable){
 
 }
 MinkComposer.restoreKidsRecursively = function(composeableID, pileid){
-  var composeableParent = MinkComposer.composeableMap.get(composeableID);
+  var composeableParent = MinkComposer.currentSpace.composeableMap.get(composeableID);
   var toAdd = composeableParent.pileIdToRemovedChildrenMap.get(pileid);
 /*  var pile = $('.minkPile[@pileid="pileid"]')[0];
   pile.style.display = '';
@@ -571,7 +589,7 @@ MinkComposer.snapUp = function(composeable){
 }
 MinkComposer.removeChildrenWithPileId = function(composeableID, possiblePileId){
 
-  var composeableParent = MinkComposer.composeableMap.get(composeableID);
+  var composeableParent = MinkComposer.currentSpace.composeableMap.get(composeableID);
   var formerBoundingBottom = composeableParent.getChildrenBounds().bottom;
   var formerBottom = composeableParent.getHeight() + composeableParent.y;
   var pile;
@@ -691,11 +709,11 @@ function redrawCanvas(){
  var ctx = canvas.getContext('2d');
  ctx.clearRect ( 0 , 0 , canvas.width, canvas.height );
  ctx.canvas.height = $(document).height();
- ctx.canvas.width = $('html').width();
+ ctx.canvas.width = $('#minkColumns').width();
 
  if(minkApp.currentQuery){
-   for(var i = 0; i < MinkComposer.rootComposeables.length; i++){
-     MinkComposer.drawLinesToChildren(MinkComposer.rootComposeables[i], canvas, ctx);
+   for(var i = 0; i < MinkComposer.currentSpace.rootComposeables.length; i++){
+     MinkComposer.drawLinesToChildren(MinkComposer.currentSpace.rootComposeables[i], canvas, ctx);
    }
 
  }//Find all expanded collections and draw lines to the top and bottom of their piles

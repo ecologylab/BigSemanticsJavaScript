@@ -118,7 +118,7 @@ function onBodyLoad() {
 	Material.addMaterial('minkToolbar', minkAppBar, 4);
 
 
-	var c = new Column(0, document.getElementById('minkC0'));
+	//var c = new Column(0, document.getElementById('minkC0'));
 
 	//SEMANTIC_SERVICE_URL = "http://128.194.128.84:8080/BigSemanticsService/";
 
@@ -490,7 +490,7 @@ minkApp.restoreQueryFromHistory = function(event){
 	var cont = event.srcElement.parentNode;
 	var queryId = cont.getAttribute('id');
 	if (queryId == minkApp.currentQuery.uuid){
-		return
+		return;
 	}else{
 		try{
 			var q = minkApp.queryMap.get(queryId);
@@ -513,10 +513,6 @@ minkApp.initialize = function(minkAppHTML){
 	minkApp.baseCol = minkAppHTML.childNodes[0];
 	var columns = $(minkAppHTML).find(".minkColumn");
 	//minkApp.currentQuery.columns = columns;
-	minkApp.leftMostCol = columns[0];
-	minkApp.rightMostCol = columns[0];
-	columns[0].setAttribute('column', '0');
-	minkApp.maxCols = 3;
 	minkApp.HTML = minkAppHTML;
 
 	$(".minkBackButton").css('display', 'none');
@@ -545,21 +541,11 @@ minkApp.markColumnOutOfView = function(column){
 }
 */
 minkApp.hidePreviousQuery = function(){
-	var keys = minkApp.currentQuery.pileMap.keys;
-	for (var i = 0; i < keys.length; i++){
-		var pile = minkApp.currentQuery.pileMap.get(keys[i]);
-		var cards = pile.cards;
-		for (var j = 0; j < cards.length; j++){
-			cards[j].inView = false;
-			cards[j].displayed = false;
 
-		}
-	}
-	$("#minkColumns").empty();
-	minkApp.leftMostCol =null;
-	minkApp.rightMostCol = null;
+//	MinkComposer.hideCurrentSpace();
+
+	$(".minkColumn").detach();
 	$('#contextTitle')[0].innerHTML = "";
-
 	//remove add query button visbility by default
 	$('.minkNewQueryButton').removeClass('visible');
 	//mak
@@ -618,29 +604,13 @@ minkApp.rebuildCurrentQuery = function(){
 	//
 	minkApp.hidePreviousQuery();
 	//
-	var keys = minkApp.currentQuery.pileMap.keys;
-	for (var i = 0; i < keys.length; i++){
-		var pile = minkApp.currentQuery.pileMap.get(keys[i]);
-		var c = $(pile.HTML).closest('.minkColumn')[0];
-		var cnum = parseInt(c.getAttribute('column'));
-		if(cnum > 0 && cnum <= 3){
-			var cards = pile.cards;
-			for (var j = 0; j < cards.length; j++){
-				cards[j].inView = true;
-				minkApp.updateCardDisplay(cards[j]);
-			}
-			minkApp.updateDuplicateCount(pile);
-		}
-
-
-	}
 	$('#contextTitle')[0].innerHTML =  minkApp.currentQuery.contextTitle;
+	MinkComposer.switchSpaceTo(minkApp.currentQuery.composeableSpace);
 
-	var columns = minkApp.currentQuery.columns;
-	var cont = $('#minkColumns')[0];
-	for(var i = 0; i < columns.length; i++){
-		cont.appendChild(columns[i]);
-	}
+
+
+
+
 	$(('#' + minkApp.currentQuery.uuid)).children('.minkNewQueryButton').addClass('visible');
 
 
@@ -653,7 +623,7 @@ minkApp.rebuildCurrentQuery = function(){
 		$('#facetkeyword')[0].value = "";
 	}
 
-	applyFacets(minkApp.currentQuery, minkApp.currentQuery.facets);
+//	applyFacets(minkApp.currentQuery, minkApp.currentQuery.facets);
 
 
 
@@ -685,10 +655,12 @@ minkApp.queryUnhighlight = function(event){
 minkApp.nsearchKeypress = function(event){
 	 if(event && event.keyCode == 13){
 		 var newQueryString = event.srcElement.value;
-		 var pid = event.srcElement.getAttribute('pid');
-		 var nQuery = new Query(newQueryString, ['google_scholar'], pid);
 
+		 minkApp.exploreNewQuery(newQueryString);
+	//	 var pid = event.srcElement.getAttribute('pid');
+	//	 var nQuery = new Query(newQueryString, ['google_scholar'], pid);
 
+/*
 		var column;
 		if(!minkApp.currentQuery){
 			column = minkApp.leftMostCol;
@@ -709,13 +681,13 @@ minkApp.nsearchKeypress = function(event){
 		minkApp.currentQuery = nQuery;
 		minkApp.explorationSpace.queries.push(nQuery);
 		$(('#' + minkApp.currentQuery.uuid)).children('.minkNewQueryButton').addClass('visible');
+*/
 
 
 
 
 
-
-	    $(event.srcElement.parentNode).remove();
+	//    $(event.srcElement.parentNode).remove();
 
 	 }
 
@@ -755,52 +727,6 @@ minkApp.newQueryBox = function(event){
 	//set event listeners
 
 }
-minkApp.exploreURL = function(url){
-	//checki
-	if(minkApp.currentQuery){
-		if(url === minkApp.currentQuery.query){
-			return;
-		}
-	}
-
-
-
-	for (var i = 0; i < minkApp.explorationSpace.queries.length; i++){
-		if(url === minkApp.explorationSpace.queries[i].query){
-			minkApp.hidePreviousQuery();
-			minkApp.explorationSpace.currentQuery = minkApp.explorationSpace.queries[i];
-			minkApp.rebuildCurrentQuery();
-			return;
-		}
-	}
-
-	//var explorationSpace = new ExplorationSpace(url, null);
-	var nQuery = new Query(url);
-	var column;
-	if(!minkApp.currentQuery){
-		column = minkApp.leftMostCol;
-	}else{
-		minkApp.hidePreviousQuery();
-
-		column = minkApp.buildColumn($('#minkColumns')[0]);
-		column.setAttribute('column', '0');
-		var c = new Column(0, column);
-
-		$('#minkColumns')[0].appendChild(column);
-	}
-	var pile = minkApp.buildPile(column, [url], url, null, null);
-	$('#contextTitle')[0].innerHTML = nQuery.contextTitle;
-
-	nQuery.pileMap.put(pileIDGen(url, null), pile);
-	nQuery.columns.push(column);
-	minkApp.currentQuery = nQuery;
-	minkApp.explorationSpace.queries.push(nQuery);
-
-	$(('#' + minkApp.currentQuery.uuid)).children('.minkNewQueryButton').addClass('visible');
-
-
-}
-
 function toGoogleUrl(searchString){
 
 
@@ -841,7 +767,6 @@ minkApp.addSearchToQuery = function(parent, query, rooturl){
 }
 
 minkApp.exploreNewQuery = function(queryString){
-
 	if(minkApp.currentQuery){
 		if(queryString === minkApp.currentQuery.query){
 			return;
@@ -858,26 +783,44 @@ minkApp.exploreNewQuery = function(queryString){
 			return;
 		}
 	}
+	var nQuery;
+	if(isUrl(queryString)){
+		nQuery = new Query(queryString);
 
+	}else{
+		nQuery = new Query(queryString, ['google_scholar']);
 
-	var nQuery = new Query(queryString, ['google_scholar']);
+	}
 	var column;
+	nQuery.composeableSpace = MinkComposer.newComposeableSpace();
+
 	if(!minkApp.currentQuery){
-		column = minkApp.leftMostCol;
 	}else{
 		minkApp.hidePreviousQuery();
 
-		column = minkApp.buildColumn($('#minkColumns')[0]);
+	/*	column = minkApp.buildColumn($('#minkColumns')[0]);
 		column.setAttribute('column', '0');
 		var c = new Column(0, column);
 
-		$('#minkColumns')[0].appendChild(column);
+		$('#minkColumns')[0].appendChild(column);*/
 	}
-	$('#contextTitle')[0].innerHTML = nQuery.contextTitle;
 
+	column = minkApp.buildColumn($('#minkColumns')[0]);
+	column.setAttribute('column', '0');
+	var c = new Column(0, column);
+
+ $('#minkColumns')[0].appendChild(column);
+
+	$('#contextTitle')[0].innerHTML = nQuery.contextTitle;
 	var pile = minkApp.addSearchToQuery(column, nQuery, nQuery.urls[0]);
+	var type;
+	if(isUrl(queryString)){
+		type = "rootURL"
+	}else{
+		type = "rootQueryMetadata";
+	}
 	//Create a pile in the column. request md for it. then make cards, then ask minkComposer to deal with em
-	MinkOracle.getSemantics(nQuery.urls[0], pile, "rootQueryMetadata", MinkOracle.prepareSearchSemantics);
+	MinkOracle.getSemantics(nQuery.urls[0], pile, type, MinkOracle.prepareSearchSemantics);
 
 
 
@@ -1050,6 +993,7 @@ minkApp.addChildPile = function(details, srcElement){
 
  //Find the parentID. If parent doesn't have a childPile container, build one
   var parentPileId = $(event.srcElement).closest('.minkPile').attr('pileid');
+
 	var parentComposeableId = $(event.srcElement).closest('.minkCardContainer')[0].id
 
   //get parentPile
@@ -1081,8 +1025,14 @@ minkApp.addChildPile = function(details, srcElement){
 	minkApp.currentQuery.pileMap.put(pileId, newPile);
 	childPileContainer.appendChild(newPile.HTML);
 
+	//tests to see what semantics is right
+	var minkeventName = 'addCardsToPile';
+	if($(event.srcElement).closest('.minkPile')[0].getAttribute('URLKID')){
+		minkeventName = 'urlChildren';
+	}
+
 	for(var i = 0; i < event.detail.links.length; i++){
-		MinkOracle.getSemantics(event.detail.links[i], newPile, 'addCardsToPile');
+		MinkOracle.getSemantics(event.detail.links[i], newPile, minkeventName);
 
 	}
 	/*
@@ -1145,7 +1095,13 @@ minkApp.minkEventHandler = function(event){
 
 	 }else if(event.detail.type == "rootQueryMetadata"){
 		 minkApp.addParentlessPile(event);
-	 }else if(event.detail.type == "addCardsToPile"){
+	 }else if(event.detail.type == "rootURL"){
+		 minkApp.addParentlessCard(event);
+	 }
+	 else if (event.detail.type == 'urlChildren'){
+		 minkApp.addUrlKids(event);
+	 }
+	 else if(event.detail.type == "addCardsToPile"){
 		 	minkApp.addChildCards(event);
 	 }
 	 else if(event.detail.type == 'minkshowless'){
@@ -1171,12 +1127,37 @@ minkApp.minkEventHandler = function(event){
 	 }
 
 }
+minkApp.addUrlKids = function(event){
+	var pileID = $(event.srcElement).closest('.minkPile')[0].getAttribute('pileID');
+	var pile =  minkApp.currentQuery.pileMap.get(pileID);
+	$(event.srcElement).closest('.minkPile')[0].setAttribute('URLKID', 'true');
 
+	var wrapper = $(pile.HTML).closest('.minkPileWrapper')[0];
+	$(pile).find('.minkLoadingSpinner').remove();
+	/*
+	if the iteration canary is visble, give the pile a new URL as the new results URL so that buildPile knows to make it
+	a  new card loader. If the canary has 'died' then delete any existing more loaders
+
+	*/
+	if(pile.cards){
+		pile.cards.push(new minkCard(event.detail.task.url, event.detail.task.container, pile));
+	}else{
+		pile.cards = [new minkCard(event.detail.task.url, event.detail.task.container, pile)];
+
+	}
+	var detailDetails = {type: 'makespace', container: pile.HTML};
+	if(minkApp.currentQuery){
+	 var facets = getFacetsFromHTML();
+	 applyFacets(minkApp.currentQuery, facets);
+
+	}
+
+}
 minkApp.addChildCards = function(event){
 
 
 
-	var pileID = event.srcElement.getAttribute('pileID');
+	var pileID = $(event.srcElement).closest('.minkPile')[0].getAttribute('pileID');
 	var pile =  minkApp.currentQuery.pileMap.get(pileID);
 	pile.semantics = event.detail.semantics;
 	pile.semantics.results.links = pile.semantics.results.links.slice(0, 4)
@@ -1294,6 +1275,13 @@ minkApp.buildCards = function(pile){
 
 }
 
+
+minkApp.addParentlessCard = function(event){
+	var pileID = event.srcElement.parentNode.getAttribute('pileID');
+	event.srcElement.parentNode.setAttribute('URLKID', 'true');
+	var pile =  minkApp.currentQuery.pileMap.get(pileID);
+	pile.cards = [new minkCard(event.detail.task.url, event.detail.task.container, pile)];
+}
 minkApp.addParentlessPile = function(event){
 	var pileID = event.srcElement.getAttribute('pileID');
 	var pile =  minkApp.currentQuery.pileMap.get(pileID);
@@ -1565,7 +1553,7 @@ function showMetadata(url)
 {
 	if (url){
 		if(isUrl(url)){
-			minkApp.exploreURL(url);
+			minkApp.exploreNewQuery(url);
 		}else{
 			minkApp.exploreNewQuery(url);
 		}
@@ -1573,7 +1561,7 @@ function showMetadata(url)
 	}else{
 		var url = document.getElementById("targetURL").value;
 		if(isUrl(url)){
-			minkApp.exploreURL(url);
+			minkApp.exploreNewQuery(url);
 		}else{
 			minkApp.exploreNewQuery(url);
 		}

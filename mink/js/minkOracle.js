@@ -52,7 +52,13 @@ MinkOracle.getSearchResultLinks = function(task){
 MinkOracle.prepareGenericSemantics = function(task){
   try{
     minkApp.attachCard(task);
-    
+    var eventName = task.options.minkeventName
+
+      var detailDetails = {type: eventName, task: task};
+      var eventDetail = {detail: detailDetails, bubbles: true};
+      var myEvent = new CustomEvent('minkevent', eventDetail);
+      task.container.dispatchEvent(myEvent);
+
 
   }catch(e){
 
