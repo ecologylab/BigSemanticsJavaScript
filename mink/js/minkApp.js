@@ -406,6 +406,7 @@ minkApp.buildLinkOutControl = function(parent, link){
 	olc.innerHTML = '<i class="material-icons">open_in_new</i>';
 	olc.addEventListener('click', minkApp.openLink);
 	olc.setAttribute('outlink', link)
+	olc.setAttribute('title', "view document");
 
 	//Material.addMaterial((link + "::o"), olc, 2);
 	parent.appendChild(olc);
@@ -417,7 +418,7 @@ minkApp.buildCardControls = function(parent, link){
 
 	r.innerHTML = '<i class="material-icons">remove_circle_outline</i>';
 	r.addEventListener('click', minkApp.removeButtonHandler)
-
+	r.setAttribute('title', "remove card");
 
 
 	//see if mink::uuid, link, or mink::lin;
@@ -426,6 +427,7 @@ minkApp.buildCardControls = function(parent, link){
 	var f = buildDiv('minkCardControl')
 	f.innerHTML = '<i class="material-icons">bookmark_border</i>';
 	f.addEventListener('click', minkApp.signalFavorite)
+	f.setAttribute('title', "add/remove favorite");
 
 
 	controlCont.appendChild(f);
