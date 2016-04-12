@@ -54,7 +54,7 @@ MinkOracle.prepareGenericSemantics = function(task){
     minkApp.attachCard(task);
     var eventName = task.options.minkeventName
 
-      var detailDetails = {type: eventName, task: task};
+      var detailDetails = {type: eventName, task: task, parentCard: task.options.parentCard};
       var eventDetail = {detail: detailDetails, bubbles: true};
       var myEvent = new CustomEvent('minkevent', eventDetail);
       task.container.dispatchEvent(myEvent);
@@ -95,7 +95,7 @@ MinkOracle.prepareSearchSemantics = function(task){
     var eventName = task.options.minkeventName;
 
     var semantics = new SearchSemantics(task, minkLinks, iteratableURL, canaryAlive);
-    var detailDetails = {type: eventName, semantics: semantics};
+    var detailDetails = {type: eventName, semantics: semantics, parentCard: task.options.parentCard};
 
     var eventDetail = {detail: detailDetails, bubbles: true};
     var myEvent = new CustomEvent('minkevent', eventDetail);
@@ -110,17 +110,17 @@ MinkOracle.prepareSearchSemantics = function(task){
   Gets, sets appropriate metadata for  SEARCH url. MinkOracle.prepareSearchSemantics will send
   a minkevent to be handled by the minkEventHandler once it's done
 */
-MinkOracle.getSemantics = function(url, pile, minkeventName){
+MinkOracle.getSemantics = function(url, pile, minkeventName, parentCard){
 
 
-  var opt = {url: url, pile: pile, minkeventName: minkeventName};
+  var opt = {url: url, pile: pile, minkeventName: minkeventName, parentCard: parentCard};
   bsService.selectMmd(url, opt, function(err, result, options){
       if (err){
 
       }
 
     try{
-      var newOptions = {viewmodel: MinkOracle.viewModelMap, minkeventName: options.minkeventName};
+      var newOptions = {viewmodel: MinkOracle.viewModelMap, minkeventName: options.minkeventName, parentCard: parentCard};
       result = result['meta_metadata'];
       if(result.name == "google_scholar_search"){
         MinkSemantics.addMetadataDisplay(options.pile.HTML, options.url, null, MinkOracle.prepareSearchSemantics, newOptions);

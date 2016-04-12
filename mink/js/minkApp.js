@@ -96,6 +96,14 @@ minkApp.handleFacetEntry = function(event){
 
 
 }
+
+minkApp.buildLoadingSpinner = function(parent){
+	var loader = document.createElement('img');
+	loader.className = "spinningLoader";
+	loader.src = "./img/loading.gif";
+	parent.appendChild(loader);
+}
+
 minkApp.handleFacetRemoval = function(event){
 	applyFacets(minkApp.currentQuery, []);
 	$('#removeFacets').addClass('hidden')
@@ -398,6 +406,7 @@ minkApp.buildLinkOutControl = function(parent, link){
 	olc.innerHTML = '<i class="material-icons">open_in_new</i>';
 	olc.addEventListener('click', minkApp.openLink);
 	olc.setAttribute('outlink', link)
+	olc.setAttribute('title', "view document");
 
 	//Material.addMaterial((link + "::o"), olc, 2);
 	parent.appendChild(olc);
@@ -409,7 +418,7 @@ minkApp.buildCardControls = function(parent, link){
 
 	r.innerHTML = '<i class="material-icons">remove_circle_outline</i>';
 	r.addEventListener('click', minkApp.removeButtonHandler)
-
+	r.setAttribute('title', "remove card");
 
 
 	//see if mink::uuid, link, or mink::lin;
@@ -418,6 +427,7 @@ minkApp.buildCardControls = function(parent, link){
 	var f = buildDiv('minkCardControl')
 	f.innerHTML = '<i class="material-icons">bookmark_border</i>';
 	f.addEventListener('click', minkApp.signalFavorite)
+	f.setAttribute('title', "add/remove favorite");
 
 
 	controlCont.appendChild(f);
@@ -1031,8 +1041,16 @@ minkApp.addChildPile = function(details, srcElement){
 		minkeventName = 'urlChildren';
 	}
 
+	var kidsloading = parentCard.kidsLoading;
+	if(!kidsloading){
+		kidsloading = 0;
+	}
+
+	kidsloading = kidsloading + event.detail.links.length;
+	parentCard.kidsLoading = kidsloading;
+
 	for(var i = 0; i < event.detail.links.length; i++){
-		MinkOracle.getSemantics(event.detail.links[i], newPile, minkeventName);
+		MinkOracle.getSemantics(event.detail.links[i], newPile, minkeventName, parentCard);
 
 	}
 	/*
@@ -1087,8 +1105,10 @@ minkApp.minkEventHandler = function(event){
 				 MinkComposer.restoreKidsRecursively(composeableID, possiblePileId);
 				 $(event.srcElement).attr('hiddenkids', 'false')
 			 }else{
-			 minkApp.addChildPile(event.detail, event.srcElement);
-		 }
+
+			 		minkApp.addChildPile(event.detail, event.srcElement);
+					minkApp.buildLoadingSpinner(event.srcElement.childNodes[1]);
+		 		}
 		 }
 
 
@@ -1139,6 +1159,22 @@ minkApp.addUrlKids = function(event){
 	a  new card loader. If the canary has 'died' then delete any existing more loaders
 
 	*/
+
+
+	var parentCard = event.detail.parentCard;
+	if(parentCard.kidsLoaded){
+		parentCard.kidsLoaded += 1;
+	}else{
+		parentCard.kidsLoaded = 1;
+	}
+	if(parentCard.kidsLoaded = parentCard.kidsLoading){
+		//for now I just naively kill all loaders
+		$(parentCard.html).find('.spinningLoader').remove();
+	}
+
+
+
+
 	if(pile.cards){
 		pile.cards.push(new minkCard(event.detail.task.url, event.detail.task.container, pile));
 	}else{
@@ -1178,8 +1214,16 @@ minkApp.addChildCards = function(event){
 	pile.cards = cards;
 	var detailDetails = {type: 'makespace', container: pile.HTML};
 
-
-
+	var parentCard = event.detail.parentCard;
+	if(parentCard.kidsLoaded){
+		parentCard.kidsLoaded += pile.semantics.results.links.length;
+	}else{
+		parentCard.kidsLoaded = pile.semantics.results.links.length;
+	}
+	if(parentCard.kidsLoaded = parentCard.kidsLoading){
+		//for now I just naively kill all loaders
+		$(parentCard.html).find('.spinningLoader').remove();
+	}
 	if(minkApp.currentQuery){
 	 var facets = getFacetsFromHTML();
 	 applyFacets(minkApp.currentQuery, facets);
@@ -1218,6 +1262,9 @@ minkApp.attachCard = function(task){
 		composeable = new Composeable(task.container, task.container.id, parentCardId);
 
 			MinkComposer.addComposeable(composeable);
+
+			//if all of a parent pile's composables are extant, remove loader
+			var parentPileId = $(task.container).closest('minkPile')
 	}, 300)
 
 
