@@ -21,6 +21,7 @@ function RemoteExtractor() {
 		return strippedURL;
 	}
 	
+	/** create a new request or update a pending ones callbacks */
 	this.extract = function(rawUrl, mmd, options, callback){	
 	
 		if (mmd.meta_metadata.filter_location){
@@ -123,7 +124,7 @@ function PopUnderExtractor(){
 	
 	function popMinimize(senderId, url){
 		focusOn = senderId;
-		chrome.windows.create({url: url, state : "minimized"}, onLoad);
+		chrome.windows.create({url: url, state : "minimized"}, onPopUnderLoad);
 	}
 
 	function popUnderAsPopup(senderId, url){
@@ -131,10 +132,11 @@ function PopUnderExtractor(){
 		chrome.windows.getCurrent(function(win){
 			var newTop = win.top + win.height - 200;
 			var newLeft = win.left + win.width - 300;
-			chrome.windows.create({url: url, type: "popup", state : "normal", focused: false, width: 10, height: 10, top: newTop, left: newLeft }, onLoad);
+			chrome.windows.create({url: url, type: "popup", state : "normal", focused: false, width: 10, height: 10, top: newTop, left: newLeft }, onPopUnderLoad);
 		});
 	}
 
+	/** decide how to pop based on operating system */
 	function popBest(senderId, url){
 		focusOn = senderId;
 		var os = Util.getOS();
@@ -148,20 +150,12 @@ function PopUnderExtractor(){
 		//Ubuntu currently not supported
 	}
 
-	function onLoad(win){
+	/** when a new window loads, refocus on the calling window */
+	function onPopUnderLoad(win){
 		ids[win.tabs[0].url] = win.id;
-		chrome.windows.getLastFocused(function (window){
-			console.log('sender id: ' + focusOn);
-			console.log('focusing on ' + focusOn);    
+		chrome.windows.getLastFocused(function (window){  
 			chrome.windows.update(focusOn, {focused:true});
 		});
-	}
-
-	function closeEm(){
-		console.log('deleting');    
-		for (var key in ids){
-			chrome.windows.remove(ids[key]);
-		}
 	}
 }
 PopUnderExtractor.prototype = new RemoteExtractor();
