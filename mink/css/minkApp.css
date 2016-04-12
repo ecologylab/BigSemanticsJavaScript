@@ -410,6 +410,11 @@ opacity: 1;
 	display: flex;
 	flex-direction: column;
 }
+
+.spinningLoader{
+	width: 20px;
+	-webkit-filter: brightness(10)
+}
 .minkColumns{
 		display: inline-flex;
 	/*  max-width: 1800px;*/
@@ -427,15 +432,17 @@ line-height: 34px;
     text-overflow: ellipsis;
     color: white;
     font-size: 16px;
+		display: none;
 }
 
 .minkToolbar.material{
 	width: 100%;
 	display: flex;
 	background-color: #0091EA;
-	justify-content: space-between;
+	justify-content: center;
 	margin-bottom: 10px;
 	min-height: 32px;
+
 	border-radius: 0;
 	position: absolute;
 

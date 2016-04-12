@@ -419,6 +419,8 @@ MinkComposer.addComposeable = function(composeable){
       composeable.positionAt(0);
 
     }
+
+    
 }
 
 MinkComposer.centerWithinBounding = function(composeableParent, properlyPreppedBottom){
