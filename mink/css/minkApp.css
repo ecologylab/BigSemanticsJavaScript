@@ -831,7 +831,7 @@ text-decoration: underline;
 .minkAppCanvas{
 	position: absolute;
 	pointer-events:none;
-	z-index: 100;
+	z-index: 2;
 	margin-left: 505px;
 }
 .animatingExpand{
