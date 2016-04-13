@@ -76,7 +76,7 @@ ExtractionRequest.prototype.cleanup = function(err, md){
 	}
 	delete this.callbacks;
 
-	this.status = (err) ?  'failed' : 'done';	
+	this.status = (err) ?  'failed' : 'done';
 };
 
 

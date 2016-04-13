@@ -105,18 +105,12 @@ var BigSemantics = (function() {
 			that.iframeExtractor.extract(location, mmd, options, function(err, metadata){
 				if (err) { callback(err, null); return; }
 		    	callback(null, { metadata: metadata, mmd: mmd });	
-				if (!mmd.meta_metadata.no_cache && that.metadataCache) {
-					that.metadataCache.add(location, metadata);
-				}
 			});
 		}
 		else if (mmd.meta_metadata.extract_with == 'popUnder') {
 			that.popUnderExtractor.extract(location, mmd, options, function(err, metadata){
 				if (err) { callback(err, null); return; }
 		    	callback(null, { metadata: metadata, mmd: mmd });	
-				if (!mmd.meta_metadata.no_cache && that.metadataCache) {
-					that.metadataCache.add(location, metadata);
-				}
 			});
 		}
 		else {
