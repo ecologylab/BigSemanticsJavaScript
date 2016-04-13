@@ -126,8 +126,8 @@ function onBodyLoad() {
 	var favoritesHTML = $('#minkFavorites')[0];
 	var queryHTML = $('#minkQueries')[0];
 	var minkAppBar = $('#minkToolbar')[0];
-	Material.addMaterial('minkFavorites', favoritesHTML, 2);
-	Material.addMaterial('minkQueries', queryHTML, 2);
+	Material.addMaterial('minkFavorites', favoritesHTML, 4);
+	Material.addMaterial('minkQueries', queryHTML, 4);
 	Material.addMaterial('minkToolbar', minkAppBar, 4);
 
 
@@ -304,15 +304,17 @@ minkApp.hideFacetMenu = function(facetColumn){
 	facetColumn.find('.facetMenuItems').addClass('collapsed').removeClass('open');
 	$('#minkColumns').removeClass('facetsMenuShowing');
 	$('#minkColumns').addClass('facetsMenuHiding');
+	$('.occludeMink').addClass('hiddenFacets');
 
 }
 
 minkApp.showFacetMenu = function(facetColumn){
 	facetColumn.removeClass('collapsed');
 	facetColumn.addClass('open');
+
 	facetColumn.find('.facetMenuItems').removeClass('collapsed').addClass('open');
 	$('#minkColumns').removeClass('facetsMenuHiding');
-
+	$('.occludeMink').removeClass('hiddenFacets');
 	$('#minkColumns').addClass('facetsMenuShowing');
 }
 
