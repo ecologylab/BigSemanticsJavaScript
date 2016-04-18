@@ -4,16 +4,16 @@ body{
 }
 .mink{
 	display: flex;
-	
+
 }
 
  .height-transition {
-      
-        transition: all 250ms cubic-bezier(0.250, 0.250, 0.750, 0.750);
-        overflow-y: hidden;            
+
+        transition: all 125ms cubic-bezier(0.250, 0.250, 0.750, 0.750);
+        overflow-y: hidden;
     }
-    .height-transition-hidden {            
-        max-height: 0;            
+    .height-transition-hidden {
+        max-height: 0;
     }
 @keyframes cardSlideIn{
 	from {opacity: 0; right: 30px;}
@@ -35,19 +35,16 @@ body{
 
 .minkContainer{
 	width: 500px;
-	/*border-radius: 8px;*/
-	/*background-color: #e6f2ff;*/
-	display:flex;
-	/*-webkit-box-shadow: 2px 2px 8px 0px rgba(0,0,0,0.4);*/
-	flex-direction: column;
-	position: relative;
-	animation-name: cardSlideIn;
-	animation-duration: .5s;
-	margin-left: auto;
-	margin-right: auto;
-	background-color: white;
-	margin-bottom: 8px;
-	
+/* border-radius: 8px; */
+/* background-color: #e6f2ff; */
+display: flex;
+/* -webkit-box-shadow: 2px 2px 8px 0px rgba(0,0,0,0.4); */
+flex-direction: column;
+position: relative;
+animation-name: cardSlideIn;
+animation-duration: .5s;
+background-color: white;
+/* margin-bottom: 8px; */
 }
 
 
@@ -66,7 +63,7 @@ body{
 	flex: 2;
 
 }.minkTableRow:hover {
-	
+
  background-color: lightblue;
 }
 .minkOtherContent{
@@ -80,17 +77,17 @@ body{
 	height: 50%;
 	display: flex;
 	max-height: 0;
-    border-bottom: 1px solid rgba(0,0,0, .2);
-    overflow-y: hidden;
+	/* border-bottom: 1px solid rgba(0,0,0, .2); */
+	overflow-y: hidden;
 	overflow-x: hidden;
-	
-	    align-items: flex-start;
+	align-items: flex-start;
 }
 .minkSnippet{
   display: flex;
   flex-direction: column;
   justify-content: center;
-      width: 100%;
+  width: 100%;
+	color: #727272;
 }
 .minkMediaContainer{
   display: inline-block;
@@ -128,7 +125,7 @@ position: relative;
 
 }
 .minkMedia{
-	
+
 }
 table{
 	width: 100%;
@@ -157,26 +154,24 @@ table#t01 th {
 	flex-direction: column;
 	max-width: 600px;
 	  margin-left: 8px;
-	
+
 }
 .minkTitleField{
-color: black;
-font-weight: bold;
-margin-left: 4px;
-
-    line-height: 32px;
-height: 30px;
-  vertical-align: middle;
-  display: -webkit-inline-box;
-    -webkit-box-orient: vertical;
-    max-width: 434px;
-  -webkit-line-clamp: 1;
-  overflow: hidden;
-    text-overflow: ellipsis;
-  
+	color: black;
+	/* font-weight: bold; */
+	margin-left: 4px;
+	font-size: 16px;
+	line-height: 32px;
+	height: 30px;
+	vertical-align: middle;
+	display: -webkit-inline-box;
+	-webkit-box-orient: vertical;
+	max-width: 434px;
+	-webkit-line-clamp: 1;
+	overflow: hidden;
+	text-overflow: ellipsis;
 }
 .minkTitleBar{
-    border-bottom: 1px solid rgba(0,0,0, .2);
 }
 .minkExpandSymbol{
     position: absolute;
@@ -184,8 +179,8 @@ height: 30px;
     width: 2px;
     height: 22px;
     margin-left: 15px;
-       margin-top: 4px; 
-    
+       margin-top: 4px;
+
     pointer-events: none;
 }
 
@@ -195,8 +190,8 @@ height: 30px;
     width: 22px;
     height: 2px;
         margin-top: 15px;
-   margin-left: 4px; 
-   
+   margin-left: 4px;
+
     pointer-events: none;
 }
 
@@ -216,7 +211,7 @@ height: 30px;
   max-height: 26px;
   line-height: 26px;
   margin-top: 6px;
-  
+
 }
 
 
@@ -246,7 +241,7 @@ color: white;
 ;
 	color: white;
 	  transition: all 0s cubic-bezier(0.250, 0.250, 0.750, 0.750);
-	
+
 }
 .minkExplorableFieldLabelPrefix{
 	line-height: 28px;
@@ -265,8 +260,8 @@ color: white;
   display: inline-flex;
   margin-bottom: 4px;
   min-height: 28px;
-	
-	
+
+
 }
  .minkExplorableField:hover{
 	cursor: pointer;
@@ -275,7 +270,7 @@ color: white;
 	color: white;
 }
 .minkExplorable:hover{
-	
+
 	cursor: pointer;
 	  background: -webkit-linear-gradient( #005485, white);
   -webkit-background-clip: initial;
@@ -300,11 +295,11 @@ color: white;
 		margin-left: 8px;
 	flex-wrap: wrap;
 		  margin-top: -4px;
-	
+
 }
 
 .minkExploreIcon{
-	
+
 	height: 14px;
 	width: 14px;
 	margin-right: 4px;
@@ -333,11 +328,11 @@ color: white;
   overflow: hidden;
  /* -webkit-box-orient: vertical;*/
     margin-bottom: 4px;
-    
+
 }
 .subtitle:hover{
 	 /* -webkit-line-clamp: 250;*/
-	
+
 }
 
 .minkSubtitleContainer{
@@ -356,7 +351,7 @@ color: white;
 }
 .minkControlIcon:hover{
 	cursor: pointer;
-} 
+}
 
 .fieldValueContainer{
   	max-width: 420px !important;
@@ -369,7 +364,7 @@ color: white;
 .minkTableRow{
 	display: flex;
 		justify-content: space-between;
-	
+
 }
 .rootRow.notBottom{
 	margin-bottom: 8px;
@@ -381,8 +376,8 @@ color: white;
 		display: flex;
 		flex: 1;
 				margin-right: 4px;
-		
-	
+
+
 }
 .minkTableValueCol{
 	display: flex;
@@ -390,21 +385,21 @@ color: white;
     flex: 16;
   flex-shrink: 2;
   flex-grow: 20.7;
-  
+
   }
 
 .nestedPadBorderless{
 	border-style: none;
-	    padding: 0px;   
-	
+	    padding: 0px;
+
 }
 
 .metadataRowBorderless{
 	 display: table-row;
-    
+
     margin-bottom: 0px;
 	border-style: none;
-	
+
 }
 .minkMoreButton{
 	  /* background-color: #C9D7E9; */
@@ -412,8 +407,8 @@ color: white;
   text-align: center;
   text-decoration: underline;
   color: #333333;
-  -webkit-user-select: none; /* Chrome/Safari */        
-  
+  -webkit-user-select: none; /* Chrome/Safari */
+
   border-width: 1px;
   border-color: #888888;
     height: 18px;
@@ -423,14 +418,14 @@ color: white;
   border-radius: 8px;
   text-align: center;
     text-decoration: underline;
-  -webkit-user-select: none; /* Chrome/Safari */        
-  
+  -webkit-user-select: none; /* Chrome/Safari */
+
   color: #333333;
   border-width: 1px;
   border-color: #888888;
       height: 18px;
-        
-  
+
+
 }
 .minkMoreButton:hover{
 	/*background-color: #AABFDD;*/
@@ -453,7 +448,7 @@ color: gray;
 .minkMoreButtonContainer{
 	display: flex;
 	font-style: italic;
-	
+
 }
 
 .minkMDContainer{
@@ -467,13 +462,13 @@ color: gray;
   overflow: hidden;
     border-bottom: lightgray 1px dashed;
   -webkit-box-orient: vertical;
-	
+
 }
 
 .minkFieldValue.focus{
 	-webkit-line-clamp: 255;
 	 	-webkit-box-shadow: inset 0px 0px 4px 0px rgba(255,128,171,1);
-	
+
 }
 
 .minkFieldValue.metadata_italic{
@@ -499,18 +494,18 @@ color: gray;
 
 .minkFieldLabelContainer{
   overflow: hidden;
-  	-webkit-line-clamp: 1;	
-  
+  	-webkit-line-clamp: 1;
+
 }
 .minkFieldLabelContainer:hover{
-		/*-webkit-line-clamp: 500;	
+		/*-webkit-line-clamp: 500;
 	*/
 
 height: auto}
 .minkFieldValueContainer:hover{
   /*-webkit-line-clamp: 250;
   height: auto;*/
-  
+
 
   }
  .minkFieldValue:hover{
@@ -526,7 +521,7 @@ height: auto}
   flex-grow: 6;
   overflow: hidden;
   text-overflow: ellipsis;
-	
+
 }
 .minkCollectionsExpander{
   border-color: lightgray;
@@ -534,7 +529,7 @@ height: auto}
   border-width: 0px 1px 1px 0px;
   max-height: 40px;
   min-width: 70px;
-  
+
   line-height: 12px;
 }
 .minkCollectionsExpander:hover{
@@ -557,16 +552,16 @@ height: auto}
   font-weight: bold;
   padding-left: 4px;
   border-radius: 30px 4px 0px 30px;
-  height: 31px; 
+  height: 31px;
    line-height: 30px;
   text-align: center;
   color: white;
   margin-bottom: -1px;
-       -webkit-transition: width 250ms cubic-bezier(0.250, 0.250, 0.750, 0.750); 
-   -moz-transition: width 250ms cubic-bezier(0.250, 0.250, 0.750, 0.750); 
-     -o-transition: width 250ms cubic-bezier(0.250, 0.250, 0.750, 0.750); 
+       -webkit-transition: width 250ms cubic-bezier(0.250, 0.250, 0.750, 0.750);
+   -moz-transition: width 250ms cubic-bezier(0.250, 0.250, 0.750, 0.750);
+     -o-transition: width 250ms cubic-bezier(0.250, 0.250, 0.750, 0.750);
         transition: width 250ms cubic-bezier(0.250, 0.250, 0.750, 0.750);
-        
+
   color: white;
    /* text-shadow: 0px 0px 1px #fff;*/
 }
@@ -579,30 +574,39 @@ height: auto}
 	overflow: hidden;
 	padding: 0px;
 	min-width: 0px;
-	
+
 }
 
 .minkExplorablesExpander:hover{
 	background: -webkit-linear-gradient( #005485, white);
 	color: white;
 	cursor: pointer;
-	
+
 }
 
 .minkDetailExpanderContainer{
-	width: 100%;
+	/* width: 100%; */
 	display: flex;
-	justify-content: center;
+	justify-content: flex-end;
 	position: relative;
-	  height: 20px;
+	height: 30px;
 	z-index: 2;
-	
+
 }
 .minkDetailExpander{
-	text-align: center;
-	border-radius: 20px;
-	height: 20px;
-	width: 400px;
+	/* text-align: center; */
+/* border-radius: 20px; */
+height: 24px;
+line-height: 24px;
+color: #727272;
+align-items: center;
+/* width: 400px; */
+display: flex;
+
+}
+.minkDetailExpanderLabel{
+	margin-right: 8px;
+	color: rgba(0,0,0, .54);
 
 }
 .minkDetailExpander:hover{
@@ -617,16 +621,16 @@ height: auto}
     margin-right: 7px;
     -webkit-filter: opacity(.5);
     margin-top: 3px;
-	
+
 }
 .minkPinIcon.favorited{
-	
+
 }
 .minkPinIcon.favorited:hover{
 		cursor: initial;
 	background-color: initial;
 	 -webkit-filter: ;
-	
+
 }
 .minkPinIcon:hover{
 	cursor: pointer;
@@ -638,7 +642,7 @@ height: auto}
 	overflow: hidden;
 	word-wrap: break-word;
 	margin-right: 8px;
-	
+
 }
 .minkTitleBar{
 	display: flex;

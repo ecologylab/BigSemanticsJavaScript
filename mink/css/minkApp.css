@@ -72,7 +72,7 @@ border-radius: 4px;
     line-height: 24px;
     margin-top: 8px;
     left: 432px;
-    
+
 }
 .minkFacetYear{
 	width: 42px;
@@ -88,12 +88,13 @@ border-radius: 4px;
     margin-top: 8px;
     width: 170px;
 
-    
+
 }
 .minkFacetColumn{
 	 flex-direction: column;
 	 justify-content: flex-start;
-	 position: absolute;
+	 position: fixed;
+	 z-index: 3;
     left: 432px;
 
 }
@@ -207,7 +208,7 @@ font-weight: normal;}
 padding-right: 4px;
 	justify-content: space-between;
 	cursor: pointer;
-	    
+
 }
 .eco-menuItem:hover{
 	background-color: #01579B;
@@ -223,6 +224,8 @@ padding-right: 4px;
 	margin-right: 50px;
 	transition: margin-left 1s ease;
 	display: inline-block;
+	position: relative;
+
 
 }
 .minkFaveHeader{
@@ -239,20 +242,21 @@ padding-right: 4px;
 	display: flex;
 	flex-direction: column;
 	margin-top: 8px;
-	position: absolute;
+	z-index: 3;
+	position: fixed;
 }
 .minkFavoritesMenu{
 height: 28px;
     -webkit-filter: invert(1) opacity(.7);
     margin-right: 12px;
     }
-    
+
 .minkFavoritesMenu:hover{
-	
-    -webkit-filter: invert(1);	
+
+    -webkit-filter: invert(1);
     cursor: pointer;
     }
-    
+
 .minkDupIndicator{
 	    font-style: italic;
     text-align: CENTER;
@@ -281,7 +285,7 @@ img{
     border: 0;
    }
    body{
-   	background-color: rgba(0,0,0, 0.03);
+   	background-color: rgba(247, 247, 247, 1);
    	font-size: 14px
    }
 .minkDeletingColumn{
@@ -312,7 +316,7 @@ img{
 	margin-top: 42px;
 }
 .minkQuery{
-	
+
      height: 30px;
     max-width: 380px;
     padding-left: 4px;
@@ -351,7 +355,7 @@ img{
     width: 400px;
    	max-width: 400px;
    	    min-width: 400px;
-   	
+
    	margin-left: 12px;
 	height: 100%;
 }
@@ -408,11 +412,15 @@ opacity: 1;
 	display: flex;
 	flex-direction: column;
 }
+
+.spinningLoader{
+	width: 20px;
+	-webkit-filter: brightness(10)
+}
 .minkColumns{
 		display: inline-flex;
 	/*  max-width: 1800px;*/
 	  margin-left: 525px;
-    overflow-x: auto;
 }
 
 .contextTitle{
@@ -426,17 +434,19 @@ line-height: 34px;
     text-overflow: ellipsis;
     color: white;
     font-size: 16px;
+		display: none;
 }
 
 .minkToolbar.material{
 	width: 100%;
 	display: flex;
 	background-color: #0091EA;
-	justify-content: space-between;
+	justify-content: center;
 	margin-bottom: 10px;
 	min-height: 32px;
+
 	border-radius: 0;
-	position: absolute;
+	position: fixed;
 
 }
 .minkBackButton{
@@ -452,7 +462,7 @@ line-height: 34px;
 	padding: 2px;
 	float: right;
 		display: inline-block;
-	
+
 }
 .leftPlaceholder{
 	display: inline-block;
@@ -475,11 +485,11 @@ line-height: 34px;
   text-align: center;
   width: 100px;
   /* border: solid 2px rgba(0,0,0,.4); */
-	
+
 }
 .minkFavoritesExpander:hover{
 	cursor: pointer;
-	text-decoration: underline;	
+	text-decoration: underline;
 
 
 }
@@ -515,7 +525,7 @@ line-height: 34px;
 	animation-name: expanderExpanding;
 	animation-duration: .5s;
 	animation-fill-mode: forwards;
-text-decoration: underline;	
+text-decoration: underline;
 
 }
 .minkFavoritesExpander.deflated{
@@ -639,7 +649,7 @@ text-decoration: underline;
 .minkForwardButton:hover{
 		background-color: lightgray;
 		cursor: pointer;
-	
+
 }
 
 .minkPileWrapper{
@@ -647,11 +657,11 @@ text-decoration: underline;
 	display: flex;
 	flex-direction: column;
 	margin-bottom: 12px;
-	
+
 }
 .minkPile:hover{
 	background-color: #FFEE99;
-	
+
 }
 .minkPileWrapperHide{
 	animation-name: hidePile;
@@ -673,16 +683,11 @@ text-decoration: underline;
 }
 .minkPile{
 	padding-top: 8px;
-	padding-bottom: 4px;
-	 /*   transition: height 1s ease-out;
-	    	 /*   transition: margin-top 1s ease-out;
-	    -webkit-transition: margin-top 1s ease;*/
-	-webkit-transition: margin-top .5s ease, background-color .1s ease;
-
-	position: relative;
-	margin-bottom: 12px;
-	padding-right: 8px;
-	padding-left: 8px;
+  padding-bottom: 4px;
+  -webkit-transition: margin-top .5s ease, background-color .1s ease;
+  margin-bottom: 12px;
+  padding-right: 8px;
+  padding-left: 8px;
 }
 
 
@@ -708,19 +713,19 @@ text-decoration: underline;
   border-radius: 40px;
   background-color: lightblue;
     -webkit-box-shadow: 0px 0px 3px #777777;
-  
+
   cursor: pointer;
   position: relative;
 }
 .sampleCollapse:hover{
 	background-color: lightgray;
-	
+
 }
 .minkCardContainer{
-	position: relative;
-	display: flex;	
-	transition: all .25s ease;	
-	
+	position: absolute;
+	display: flex;
+	transition: all .25s ease;
+	margin-bottom: 12px;
 }
 .minkCardControls{
     width: 50px;
@@ -731,11 +736,31 @@ text-decoration: underline;
     height: 90%;
     align-items: begin;
     margin-left: 8px;
-    
+
 }
 .minkCardControls.hidden{
 	display: none;
 }
+.minkCardControls:hover{
+	opacity: 1;
+}
+.minkCardControls.hidden:hover{
+	opacity: 0;
+}
+
+.occludeMink{
+	position: fixed;
+	margin-top: -10px;
+	height: 110%;
+	width: 610px;
+	background-color: rgba(247, 247, 247, 1);
+	z-index: 2;
+}
+.occludeMink.hiddenFacets{
+	width:  530px;
+
+}
+
 .minkCardControl{
 	    /* padding: 5px; */
     width: 24px;
@@ -748,21 +773,21 @@ text-decoration: underline;
     /* justify-content: space-around; */
     /* align-content: flex-end; */
 	margin-bottom: 8px;
-	
+
 }
 .minkCardControlIcon{
 	    width: 15px;
     height: 15px;
     margin-top: 10px;
     margin-left: 10px;
-	
+
 }
 
 .minkCardControl:hover{
 	cursor: pointer;
 	background-color: #CCC;
 
-	
+
 }
 
 .animatingRemoval{
@@ -806,7 +831,7 @@ text-decoration: underline;
 .minkAppCanvas{
 	position: absolute;
 	pointer-events:none;
-	z-index: 100;
+	z-index: 2;
 	margin-left: 505px;
 }
 .animatingExpand{

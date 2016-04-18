@@ -4,16 +4,6 @@
                   to work in browser environment.
  */
 
-// TODO Check for error cases
-function extractMetadataMicro(response, mmd, bigSemantics, options, callback) {
-    var extractedMeta = extractMetadataSyncMicro(response , mmd , bigSemantics,options , callback);
-    callback(null , extractedMeta);
-
-    // Ignore mmd
-    //mmd = null;
-    // Get microdata
-}
-
 function extractMetadataMicroSync(response , mmd , bigSemantics, options) {
     var microdata = MicroDataTools.parseMicroData(response.entity);
     var typeName = MicroDataTools.getTypeName(microdata[0]);

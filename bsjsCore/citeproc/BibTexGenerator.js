@@ -344,8 +344,14 @@ BibTexGenerator.prototype.bibFromMmd = function(bib, mmd, metadata){
 			kidType = kid.scalar.bibtex_field;
 		}
 		if(kidType){
-			if(!bib[kidType])
-				bib[kidType] = metadata[kidName];
+			if(!bib[kidType] && metadata[kidName]){
+				if (kid.scalar){
+					bib[kidType] = metadata[kidName];
+				}
+				else if (kid.composite){
+					bib[kidType] = metadata[kidName].title;
+				}
+			}
 		}
 	}
 }
