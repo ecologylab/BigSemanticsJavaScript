@@ -4,11 +4,11 @@ TrackRequests.requestQueue = [];
 
 TrackRequests.isTimerStarted = false;
 
-chrome.extension.onRequest.addListener(
+chrome.runtime.onMessage.addListener(
 	function(request, sender, sendResponse) {
-    	if (request.track != null)
+    	/*if (request.track != null)
     		TrackRequests.addRequest(request.track, sender, sendResponse);
-    	
+    	*/
     	return true;	// async response    		
 	}
 );
