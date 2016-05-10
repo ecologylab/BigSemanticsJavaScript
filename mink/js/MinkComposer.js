@@ -74,7 +74,33 @@ function Composeable(HTML, id, parentID){
   this.childrenHeight = 0;
   MinkComposer.currentSpace.composeableMap.put(this.id, this);
   Material.addMaterial(this.id, $(this.HTML).find('.minkContainer')[0], 1)
+  this.filteredOut = false;
 
+
+}
+
+MinkComposer.filterOutComposeable = function(composeable){
+  try{
+    if(!composeable.filteredOut){
+    composeable.filteredOut = true;
+    MinkComposer.removeRecursively(composeable);
+
+    }
+  }catch(err){
+
+  }
+
+}
+MinkComposer.filterInComposeable = function(composeable){
+  try{
+    if(composeable.filteredOut){
+      composeable.filteredOut = false;
+      MinkComposer.restoreRecursively(composeable);
+    }
+  }
+  catch(err){
+    
+  }
 
 }
 
@@ -243,7 +269,7 @@ MinkComposer.composeEventHandler = function(event){
     if(event.detail.type == 'pullup'){
       var composeable = MinkComposer.currentSpace.composeableMap.get(event.detail.composeableID);
 
-      var height = composeable.getChildrenBounds().bottom +30;
+      var height = composeable.getChildrenBounds().bottom;
 
       window.setTimeout(function(){
         var newHeight = composeable.getChildrenBounds().bottom;
@@ -254,7 +280,7 @@ MinkComposer.composeEventHandler = function(event){
       }, 200);
     }else if(event.detail.type == 'growbelow'){
       var composeable = MinkComposer.currentSpace.composeableMap.get(event.detail.composeableID);
-      var height = composeable.getChildrenBounds().bottom + 30;
+      var height = composeable.getChildrenBounds().bottom ;
 
       window.setTimeout(function(){
         var newHeight = composeable.getChildrenBounds().bottom;
@@ -420,7 +446,7 @@ MinkComposer.addComposeable = function(composeable){
 
     }
 
-    
+
 }
 
 MinkComposer.centerWithinBounding = function(composeableParent, properlyPreppedBottom){

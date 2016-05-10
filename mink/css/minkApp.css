@@ -93,7 +93,8 @@ border-radius: 4px;
 .minkFacetColumn{
 	 flex-direction: column;
 	 justify-content: flex-start;
-	 position: absolute;
+	 position: fixed;
+	 z-index: 3;
     left: 432px;
 
 }
@@ -241,7 +242,8 @@ padding-right: 4px;
 	display: flex;
 	flex-direction: column;
 	margin-top: 8px;
-	position: absolute;
+	z-index: 3;
+	position: fixed;
 }
 .minkFavoritesMenu{
 height: 28px;
@@ -283,7 +285,7 @@ img{
     border: 0;
    }
    body{
-   	background-color: rgba(0,0,0, 0.03);
+   	background-color: rgba(247, 247, 247, 1);
    	font-size: 14px
    }
 .minkDeletingColumn{
@@ -444,7 +446,7 @@ line-height: 34px;
 	min-height: 32px;
 
 	border-radius: 0;
-	position: absolute;
+	position: fixed;
 
 }
 .minkBackButton{
@@ -745,6 +747,20 @@ text-decoration: underline;
 .minkCardControls.hidden:hover{
 	opacity: 0;
 }
+
+.occludeMink{
+	position: fixed;
+	margin-top: -10px;
+	height: 110%;
+	width: 610px;
+	background-color: rgba(247, 247, 247, 1);
+	z-index: 2;
+}
+.occludeMink.hiddenFacets{
+	width:  530px;
+
+}
+
 .minkCardControl{
 	    /* padding: 5px; */
     width: 24px;
@@ -815,7 +831,7 @@ text-decoration: underline;
 .minkAppCanvas{
 	position: absolute;
 	pointer-events:none;
-	z-index: 100;
+	z-index: 2;
 	margin-left: 505px;
 }
 .animatingExpand{

@@ -15,6 +15,7 @@ minkApp.favorites = [];
 minkApp.currentQuery = null;
 minkApp.linkToMetadataMap = new Map();
 minkApp.queryMap = new Map();
+minkApp.cardMap = new Map();
 var bsService = new BSExtension(['eganfccpbldleckkpfomlgcbadhmjnlf', 'gdgmmfgjalcpnakohgcfflgccamjoipd', 'elkanacmmmdgbnhdjopfdeafchmhecbf']);
 //var bsService = new BSService();
 minkApp.cardDuplicateMap = new Map();
@@ -108,6 +109,10 @@ minkApp.handleFacetRemoval = function(event){
 	applyFacets(minkApp.currentQuery, []);
 	$('#removeFacets').addClass('hidden')
 	$('#minkFacetsRemovedIndicator').closest('.minkFacetMenuItem').addClass('hidden')
+	$('#startYear')[0].value = "1000";
+	$('#endYear')[0].value = "3000";
+	$('#facetkeyword')[0].value = "";
+	$('#minkFacetsRemovedIndicator')[0].innerHTML = "";
 
 }
 function onBodyLoad() {
@@ -121,8 +126,8 @@ function onBodyLoad() {
 	var favoritesHTML = $('#minkFavorites')[0];
 	var queryHTML = $('#minkQueries')[0];
 	var minkAppBar = $('#minkToolbar')[0];
-	Material.addMaterial('minkFavorites', favoritesHTML, 2);
-	Material.addMaterial('minkQueries', queryHTML, 2);
+	Material.addMaterial('minkFavorites', favoritesHTML, 4);
+	Material.addMaterial('minkQueries', queryHTML, 4);
 	Material.addMaterial('minkToolbar', minkAppBar, 4);
 
 
@@ -196,50 +201,57 @@ Filter by year early
 function applyFacets(query, facets){
 	// //for now we support two facet types: keyword and year
 	// //remove existing facet and replace with new one supplied by system
-	// var numberFiltered = 0;
-	// query.facets = facets;
-	// //for all facets, deselect all cards that do not fit specifications
+	var numberFiltered = 0;
+	query.facets = facets;
+	//for all facets, deselect all cards that do not fit specifications
+
+	//Finds all the cards
+
+	var keys = query.pileMap.keys;
+	for (var i = 0; i < keys.length; i++){
+		var pile = query.pileMap.get(keys[i]);
+			var cards = pile.cards;
+
+			//for earch card compare to whichever facets we have
+
+		for (var j = 0; j < cards.length; j++){
+			var filtered = false;
+			for(var k = 0; k < query.facets.length; k++){
+				for(var l = 0; l < cards[j].facets.length; l++){
+					if(query.facets[k].name == cards[j].facets[l].name){
+						if(query.facets[k].name == "year"){
+							if(!(query.facets[k].value[0] <= cards[j].facets[l].value && query.facets[k].value[1] >= cards[j].facets[l].value)){
+								filtered = true;
+								numberFiltered++;
+							}
+
+						}
+					}
+
+				}
+
+			}
+
+			cards[j].filteredOut = filtered;
+			if(cards[j].filteredOut){
+				MinkComposer.filterOutComposeable(cards[j].composeable);
+			}else{
+				MinkComposer.filterInComposeable(cards[j].composeable);
+
+			}
+	//		minkApp.updateCardDisplay(cards[j]);
+
+		}
+	}
+
+	var indicatorString = numberFiltered.toString() + " cards removed";
+	if(numberFiltered > 0){
+		$('#removeFacets').removeClass('hidden')
+		$("#minkFacetsRemovedIndicator")[0].innerHTML = indicatorString;
+
+		$('#minkFacetsRemovedIndicator').closest('.minkFacetMenuItem').removeClass('hidden')
 	//
-	// //Finds all the cards
-	// var keys = query.pileMap.keys;
-	// for (var i = 0; i < keys.length; i++){
-	// 	var pile = query.pileMap.get(keys[i]);
-	// 		var cards = pile.cards;
-	//
-	// 		//for earch card compare to whichever facets we have
-	//
-	// 	for (var j = 0; j < cards.length; j++){
-	// 		var filtered = false;
-	// 		for(var k = 0; k < query.facets.length; k++){
-	// 			for(var l = 0; l < cards[j].facets.length; l++){
-	// 				if(query.facets[k].name == cards[j].facets[l].name){
-	// 					if(query.facets[k].name == "year"){
-	// 						if(!(query.facets[k].value[0] <= cards[j].facets[l].value && query.facets[k].value[1] >= cards[j].facets[l].value)){
-	// 							filtered = true;
-	// 							numberFiltered++;
-	// 						}
-	//
-	// 					}
-	// 				}
-	//
-	// 			}
-	//
-	// 		}
-	//
-	// 		cards[j].filteredOut = filtered;
-	// 		minkApp.updateCardDisplay(cards[j]);
-	//
-	// 	}
-	// }
-	//
-	// var indicatorString = numberFiltered.toString() + " cards removed";
-	// if(numberFiltered > 0){
-	// 	$('#removeFacets').removeClass('hidden')
-	// 	$("#minkFacetsRemovedIndicator")[0].innerHTML = indicatorString;
-	//
-	// 	$('#minkFacetsRemovedIndicator').closest('.minkFacetMenuItem').removeClass('hidden')
-	//
-	// }
+	 }
 	//
 
 }
@@ -292,15 +304,17 @@ minkApp.hideFacetMenu = function(facetColumn){
 	facetColumn.find('.facetMenuItems').addClass('collapsed').removeClass('open');
 	$('#minkColumns').removeClass('facetsMenuShowing');
 	$('#minkColumns').addClass('facetsMenuHiding');
+	$('.occludeMink').addClass('hiddenFacets');
 
 }
 
 minkApp.showFacetMenu = function(facetColumn){
 	facetColumn.removeClass('collapsed');
 	facetColumn.addClass('open');
+
 	facetColumn.find('.facetMenuItems').removeClass('collapsed').addClass('open');
 	$('#minkColumns').removeClass('facetsMenuHiding');
-
+	$('.occludeMink').removeClass('hiddenFacets');
 	$('#minkColumns').addClass('facetsMenuShowing');
 }
 
@@ -574,35 +588,6 @@ minkApp.updateCardDisplay = function(card, reval){
 	var previousD = card.displayed;
 	card.displayed = !card.removed && !card.filteredOut;
 
-	if (card.displayed){
-
-		if(!previousD){
-			card.html.style.display = "";
-			$(card.html).addClass('animatingRestore');
-		}
-		if($(card.html).hasClass('devalued') && reval){
-			minkRenderer.revalue(card.html);
-			card.displayed = true;
-
-		}else if(card.duplicate){
-			minkRenderer.devalue(card.html);
-		}
-
-		minkApp.updateDuplicateCount(card.pile);
-
-	}else{
-		//only animate removal iff  not already removed
-		if(previousD){
-			$(card.html).removeClass('animatingRestore');
-
-			$(card.html).addClass('animatingRemoval');
-			card.html.addEventListener("animationend", minkApp.cardRemovalAfterAnimation);
-
-		}
-
-		minkApp.updateDuplicateCount(card.pile);
-
-	}
 }
 
 /*
@@ -633,7 +618,7 @@ minkApp.rebuildCurrentQuery = function(){
 		$('#facetkeyword')[0].value = "";
 	}
 
-//	applyFacets(minkApp.currentQuery, minkApp.currentQuery.facets);
+	applyFacets(minkApp.currentQuery, minkApp.currentQuery.facets);
 
 
 
@@ -1260,7 +1245,8 @@ minkApp.attachCard = function(task){
 
 	window.setTimeout(function(){
 		composeable = new Composeable(task.container, task.container.id, parentCardId);
-
+			var card = minkApp.cardMap.get(task.container.getAttribute('minkcardid'));
+			card.composeable = composeable;
 			MinkComposer.addComposeable(composeable);
 
 			//if all of a parent pile's composables are extant, remove loader

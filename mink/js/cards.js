@@ -4,7 +4,7 @@ function minkCard(url, div, pile){
 	this.facets = [];
 	this.filteredOut = false;
 	//is the cards pile in view?
-	this.inView = true;	
+	this.inView = true;
 	//is the card already displayed in another pile
 	this.displayed;
 	var bucket = minkApp.cardDuplicateMap.get(this.url)
@@ -21,6 +21,7 @@ function minkCard(url, div, pile){
 	}
 	this.pile = pile;
 	this.removed = false;
+	minkApp.cardMap.put(this.url, this)
 
 
 }
@@ -43,7 +44,7 @@ minkCard.prototype.setOnScreen = function(onScreen){
 	}
 	else{
 		this.displayed = 'none';
-		
+
 	}
 	this.updateDisplay();
 }
@@ -70,19 +71,19 @@ valuedByUser - User has manually expanded card
 valuedByUser :== true | false
 	true if user has expanded a devalued card
 	else false
-valuedByMink :== true | false 
-	true 
+valuedByMink :== true | false
+	true
 		if "first with URL to appear in the minkApp" and isDuplicate and not removed
 		if "no other valued cards in bucket*" and isDuplicate and not removed
 	else false
-	
-	
+
+
 	*stateful
 favorited :== none | thisCard | thisURL
 	thisCard if this particular card was favorited
 	thisURL if another card in bucket has been favorited
 	else none
-display :== none | valued | devalued 
+display :== none | valued | devalued
 	none if removed by user or offscreen
 	valued if (valuedByUser or valuedByMink) && onscreen && not removed
 	devalued if (!valuedByUser and !valuedByMink) && onscreen && not removed
