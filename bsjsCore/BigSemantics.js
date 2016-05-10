@@ -73,7 +73,7 @@ var BigSemantics = (function() {
         location = PreFilter.filter(location, mmd.filter_location);
       }
 
-	  if (that.metadataCache && that.metadataCache.contains(location)){
+	  if (that.metadataCache && that.metadataCache.contains(location) && !options.noCache){
 		  callback(null, { metadata: that.metadataCache.get(location), mmd: mmd });	
 		  return;
 	  }

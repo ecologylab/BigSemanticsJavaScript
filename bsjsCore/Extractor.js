@@ -120,7 +120,7 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 	    if (contextNode != page) isNested = true;
 
         
-	    if (mmdKids === null || mmdKids.length === 0) {
+	    if (mmdKids === null || mmdKids === undefined || mmdKids.length === 0) {
 	      return null; // Nothing to do here.
 	    }
 	   
