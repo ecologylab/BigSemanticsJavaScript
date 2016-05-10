@@ -3,29 +3,31 @@ function extractMetadataCombo(response, mmd, bigSemantics, options, callback) {
     //var extractedMeta = extractMetadataSyncCombo(response , mmd , bigSemantics,options , callback);
     //callback(null , extractedMeta);
 
+	mmd = BSUtils.unwrapMmd(mmd);
+	
     var metadataNormal = extractMetadataSync(response, mmd, bigSemantics, options);
     var metadataMicro  = extractMetadataMicroSync(response , mmd , bigSemantics, options);
-    metadataNormal = metadataNormal[mmd.meta_metadata.name];
-    metadataMicro  = metadataMicro[mmd.meta_metadata.name];
+    metadataNormal = metadataNormal[mmd.name];
+    metadataMicro  = metadataMicro[mmd.name];
 
 	var metadata = metadataNormal;
 	if (metadataMicro){
-    	metadata = mergeMetadata( metadataNormal , metadataMicro , mmd.meta_metadata);
+    	metadata = mergeMetadata( metadataNormal , metadataMicro , mmd);
 	}
 
 	var result = {};
-    result[mmd.meta_metadata.name] = metadata;
+    result[mmd.name] = metadata;
     callback ( null , result);
 }
 
 function pickBestMMD( mmd1 , mmd2) {
     // if mmd1 is child of mmd2 then pick mmd1
-    if ( isChild( mmd1 , mmd2.meta_metadata.name )) {
+    if ( isChild( mmd1 , mmd2.name )) {
         return mmd1;
     }
 
     // if mmd 2 is child of mmd1 then pick mmd2
-    if ( isChild( mmd2 , mmd1.meta_metadata.name )) {
+    if ( isChild( mmd2 , mmd1.name )) {
         return mmd2;
     }
 
@@ -34,12 +36,12 @@ function pickBestMMD( mmd1 , mmd2) {
     return mmd1;
 
     function isChild(mmd , parentName ) {
-        var superObj = mmd.meta_metadata.super_field;
+        var superObj = mmd.super_field;
         while( superObj ) {
-            if ( superObj.meta_metadata.name == parentName ) {
+            if ( superObj.name == parentName ) {
                 return true;
             }
-            superObj = superObj.meta_metadata.super_field;
+            superObj = superObj.super_field;
         }
         // Went all the way to base class so its not a child
         return false;

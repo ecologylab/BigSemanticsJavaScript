@@ -38,10 +38,10 @@ var RepoMan = (function() {
 	if (!source) { throw new Error("source required!"); }
 
     if (options && options.defaultDocumentType) {
-      this.defaultDocumentType = options.defaultDocumentType;
+      repoman.defaultDocumentType = options.defaultDocumentType;
     }
-    if (!this.defaultDocumentType) {
-      this.defaultDocumentType = 'rich_document';
+    if (!repoman.defaultDocumentType) {
+      repoman.defaultDocumentType = 'rich_document';
     }
 
     if (source.repo) {
