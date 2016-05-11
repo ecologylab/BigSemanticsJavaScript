@@ -413,6 +413,10 @@ var RepoMan = (function() {
     }
   }
 
+  RepoMan.prototype.getInfo = function(){
+	  return this.repo.build;
+  }
+  
   return RepoMan;
 })();
 
