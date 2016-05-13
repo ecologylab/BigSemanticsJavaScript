@@ -6,7 +6,8 @@
 
 // Global object.
 var OntoVis = {};
-OntoVis.dataFile = "/BigSemanticsService/onto/tree.json";
+//OntoVis.dataFile = "http://api.ecologylab.net/BigSemanticsService/onto/tree.json";
+OntoVis.dataFile = "/BigSemanticsService/mmdrepository.json";
 OntoVis.width = 3000;
 OntoVis.height = 3200;
 OntoVis.marginX = 80;
@@ -167,8 +168,60 @@ OntoVis.createLayout = function(rootNodeName) {
   OntoVis.layout = layout;
 
   // Load JSON data and initialize.
-  d3.json(OntoVis.dataFile, function(error, json) {
-    var root = json.node;
+  d3.xhr(OntoVis.dataFile, function(error, request) {
+    var json = simpl.deserialize(request.response);
+    var repo = json.meta_metadata_repository.repository_by_name;
+    
+    var types = {};
+    
+    //function so we can recursively visit super_fields of a type
+    var visit = function(mmd) {
+      //due to layout of this JSON file and simpl, we may have already visited this node
+      if(types[mmd.name])
+        return;
+        
+      //if we have a super field, visit it first
+      if(mmd.super_field) {
+        visit(mmd.super_field.meta_metadata);
+      }
+      
+      //get the example URL
+      var url = null;
+      if(mmd.example_urls) {
+        url = mmd.example_urls[0].url;
+      }
+      
+      //create a typenode
+      var typeNode = {
+        name: mmd.name,
+        example_url: url, 
+        subtypes: [],
+        parent: null,
+      };
+      
+      //add everything to the types list
+      types[mmd.name] = typeNode;
+      
+      //child node, add to parent
+      if(mmd.super_field) {
+        typeNode.parent = mmd.super_field.meta_metadata.name;
+        types[typeNode.parent].subtypes.push(typeNode);
+      }
+    };
+    
+    //visit every wrapper/type in repo
+    for(var key in repo) {
+      var wrapper = repo[key];
+      visit(wrapper);
+    }
+    
+    //now we find the root node
+    var root = null;
+    for(var key in types) {
+      if(types[key].parent == null) root = types[key];
+    }
+    
+    //var root = json.node;
     OntoVis.data_root = root;
     // Calculate subtree_size:
     OntoVis.traverse(root, null, function(node) {
