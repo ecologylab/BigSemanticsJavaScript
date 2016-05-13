@@ -69,15 +69,17 @@ var BigSemantics = (function() {
     getMmd(function(err, mmd) {
       if (err) { callback(err, null); return; }
 
+	  mmd = BSUtils.unwrapMmd(mmd);
+		
       if (mmd.filter_location) {
         location = PreFilter.filter(location, mmd.filter_location);
       }
 
-	  if (that.metadataCache && that.metadataCache.contains(location)){
+	  if (that.metadataCache && that.metadataCache.contains(location) && !options.noCache){
 		  callback(null, { metadata: that.metadataCache.get(location), mmd: mmd });	
 		  return;
 	  }
-	  if (mmd.meta_metadata.extract_with == "service"){ 
+	  if (mmd.extract_with == "service"){ 
 			options.useHttps = (window.location.protocol == 'https:'); //use Https if we are on an https page
 			that.bss.loadMetadata(location, options, callback);	  
 	  }	
@@ -101,13 +103,13 @@ var BigSemantics = (function() {
         } else if (mmd.user_agent_name && mmd.user_agent_name in that.repoMan.userAgents) {
           options.userAgent = that.repoMan.userAgents[mmd.user_agent_name];
         }
-		if (mmd.meta_metadata.extract_with == 'iframe') {
+		if (mmd.extract_with == 'iframe') {
 			that.iframeExtractor.extract(location, mmd, options, function(err, metadata){
 				if (err) { callback(err, null); return; }
 		    	callback(null, { metadata: metadata, mmd: mmd });	
 			});
 		}
-		else if (mmd.meta_metadata.extract_with == 'popUnder') {
+		else if (mmd.extract_with == 'popUnder') {
 			that.popUnderExtractor.extract(location, mmd, options, function(err, metadata){
 				if (err) { callback(err, null); return; }
 		    	callback(null, { metadata: metadata, mmd: mmd });	
@@ -120,7 +122,7 @@ var BigSemantics = (function() {
 		  	that.extractor(response, mmd, that, options, function(err, metadata) {
 		    	if (err) { callback(err, null); return; }
 		    	callback(null, { metadata: metadata, mmd: mmd });
-				if (!mmd.meta_metadata.no_cache && that.metadataCache) {
+				if (!mmd.no_cache && that.metadataCache) {
 					that.metadataCache.add(location, metadata);
 				}				
 			});

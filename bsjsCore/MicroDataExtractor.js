@@ -7,7 +7,7 @@
 function extractMetadataMicroSync(response , mmd , bigSemantics, options) {
     var microdata = MicroDataTools.parseMicroData(response.entity);
     var typeName = MicroDataTools.getTypeName(microdata[0]);
-    mmd = mmd.meta_metadata;
+	mmd = BSUtils.unwrapMmd(mmd);
     // TODO fix jesus
     var metadata = {};
     metadata[mmd.name] = mapMicroToMMD(microdata[0],  mmd);
