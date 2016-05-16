@@ -24,8 +24,8 @@ function RemoteExtractor() {
 	/** create a new request or update a pending ones callbacks */
 	this.extract = function(rawUrl, mmd, options, callback){	
 	
-		if (mmd.meta_metadata.filter_location){
-			rawUrl = PreFilter.filter(rawUrl, mmd.meta_metadata.filter_location);
+		if (mmd.filter_location){
+			rawUrl = PreFilter.filter(rawUrl, mmd.filter_location);
 		}
 		var url = sanitize(rawUrl);
 		

@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<meta charset="UTF-8" />
+
+<link href='http://fonts.googleapis.com/css?family=Roboto:100,300' rel='stylesheet'/>
+
+<script src="../libraries/jquery-2.0.0.min.js"></script>
+<script src="../libraries/d3.v3.min.js" charset="utf-8"></script>
+<script src="/bsjsCore/simpl/simplBase.js"></script>
+<script src="/bsjsCore/ParsedURL.js"></script>
+
+<link rel="stylesheet" href="css/nav.css"/>
+<link rel="stylesheet" href="../libraries/bootstrap/css/bootstrap.min.css"/>
+<script src="../libraries/bootstrap/js/bootstrap.min.js"></script>
+
+<style>
+#content {
+  margin-top: 70px;
+  margin-bottom: 70px;
+  width: 90%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+#content p.text {
+  margin-top: 30px;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 10px;
+  width: 80%;
+  font-weight: bold;
+  font-size: 14pt;
+  background-color: #FFCCDF;
+  border-radius: 10px;
+}
+
+#example_table {
+  margin-top: 30px;
+}
+
+#example_table thead {
+  background-color: #CCFFEC;
+}
+
+#example_table th {
+  text-align: center;
+}
+
+#example_table td {
+  vertical-align: middle;
+}
+
+td.domain {
+  font-weight: bold;
+}
+
+td.type {
+  font-family: Consolas, monospace;
+}
+
+img.nav-img {
+  margin-top: -10px;
+}
+</style>
+
+<title>BigSemantics Supported Domains, Types, and Examples</title>
+
+</head>
+
+<body>
+
+<div class="navbar navbar-inverse navbar-fixed-top">
+  <div class="navbar-inner form-inline">
+    <div class="container">
+      <div id="links">
+        <a href="index.html">
+          <span id="miceLink" class="navLink"><span class="navCircle">M</span> Metadata In-Context Expander (MICE)</span>
+        </a>
+        <a href="metametadata_ontology.html">
+          <span id="ovLink" class="navLink"><span class="navCircle">O</span> Ontology Visualizer</span>
+        </a>
+        <a href="domain_type_examples.html">
+          <span id="sdLink" class="navLink activeLink"><span class="navCircle">S</span> Supported Domains</span>
+        </a>
+      </div>
+      <ul class="nav pull-right">
+        <li><a target="_blank" href="//github.com/ecologylab/BigSemantics/wiki">BigSemantics</a></li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div class="navbar navbar-inverse navbar-fixed-bottom">
+  <div class="navbar-inner">
+    <div class="container">
+      <div class="nav" style="margin-top: 8px">
+      Background at the <a href="http://ecologylab.net/research/bigsemantics/" target="_blank">Big Semantics research page</a> and <a href="https://github.com/ecologylab/BigSemanticsJavaScript/wiki/Metadata-In-Context-Expander-(MICE)" target="_blank">MICE Wiki</a>
+      </div>
+      <ul class="nav pull-right">
+        <li><a href="http://ecologylab.net" target="_blank">Interface Ecology Lab</a></li>
+        <li><a href="http://ecologylab.net" target="_blank"><img class="nav-img pull-right" src="img/ecologylab.png" /></a></li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div id="content">
+  <p class="text">
+    Here is a complete list of BigSemantics supported domains, types, and
+    example documents (shown in MICE):
+  </p>
+  
+  <center style="margin-top: 50px" id="loadingText">
+    <h1>Loading...</h1>
+  </center>
+</div>
+
+<script src="js/nav.js"></script>
+<script src="js/domains.js"></script>
+
+</body>
+
+</html>
+

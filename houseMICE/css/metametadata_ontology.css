@@ -3,9 +3,9 @@
  * Author: Yin Qu (yin@ecologylab.net)
  */
 
-body {
+/*body {
   width: 3000px;
-}
+}*/
 
 #viz {
   margin-top: 60px;
@@ -33,3 +33,11 @@ body {
   stroke-width: 1.5px;
 }
 
+/*.navbar-fixed-bottom#container {
+  min-width: 1060px !important;
+  height: 40px;
+}*/
+
+img.nav-img {
+    margin-top: -10px;
+}

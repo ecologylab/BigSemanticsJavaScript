@@ -8,38 +8,62 @@ if (typeof require == 'function') {
 }
 
 var RepoMan = (function() {
-  // Constructor of RepoMan
-  //
-  // object source: indicating where to load the repo. required.
-  // object options: optional configurations.
-  function RepoMan(source, options) {
-    Readyable.call(this);
+	
+	//keep this for clearing to prevent race condition that can cause repo to get loaded multiple times at first
+	var loadInterval;
+	
+	// Constructor of RepoMan
+	// object source: indicating where to load the repo. required.
+	// object options: optional configurations.
+	function RepoMan(source, options) {
+		Readyable.call(this);
 
-    if (!source) { throw new Error("source required!"); }
+		loadRepo(this, source, options);
+
+		//refresh me later in case mmd repo changes
+		//I made loadRepo a seperate function to make wrangling scopes and timeouts easier
+		//could probably be refactored to make reloaded externaly available (which would be ideal)
+		clearInterval(loadInterval);
+		loadInterval = setInterval(loadRepo, 86400000, this, source, options);
+
+		return this;
+	}
+	
+  RepoMan.prototype = Object.create(Readyable.prototype);
+  RepoMan.prototype.constructor = RepoMan;
+
+  function loadRepo(repoman, source, options) {
+	console.log("loading repo");
+	  
+	if (!source) { throw new Error("source required!"); }
 
     if (options && options.defaultDocumentType) {
-      this.defaultDocumentType = options.defaultDocumentType;
+      repoman.defaultDocumentType = options.defaultDocumentType;
     }
-    if (!this.defaultDocumentType) {
-      this.defaultDocumentType = 'rich_document';
+    if (!repoman.defaultDocumentType) {
+      repoman.defaultDocumentType = 'rich_document';
     }
 
     if (source.repo) {
       // when the repo has been prepared by the caller
-      this.repo = source.repo;
+      repoman.repo = source.repo;
       if (source.repo.meta_metadata_repository) {
-        this.repo = source.repo.meta_metadata_repository;
+        repoman.repo = source.repo.meta_metadata_repository;
       }
-      this.initialize();
-    } else if (source.file) {
-      // only works in Node:
-      var that = this;
+      repoman.initialize();
+    } 
+	else if (source.file) {
+      
+	  // only works in Node:
+      var that = repoman;
       var fs = require('fs');
       fs.readFile(source.file, { encoding: 'utf8' }, function(err, content) {
         if (err) { that.setError(err); return; }
-        try {
+        
+		try {
           that.repo = simpl.deserialize(content);
-        } catch (err) {
+        } 
+		catch (err) {
           that.setError(err);
           return;
         }
@@ -48,24 +72,30 @@ var RepoMan = (function() {
         }
         that.initialize();
       });
-    } else if (source.url) {
-      var that = this;
+    } 
+	else if (source.url) {
+      
+	  var that = repoman;
       var downloader = null;
-      if (options && options.downloader) {
+	  if (options && options.downloader) {
         downloader = options.downloader;
-      } else {
+      } 
+      else {
         downloader = new Downloader();
       }
-      var dOpts = { responseType: 'json' };
+      
+	  var dOpts = { responseType: 'json' };
       downloader.httpGet(source.url, dOpts, function(err, response) {
         if (err) { that.setError(err); return; }
 
         if (response.entity) {
           that.repo = simpl.graphExpand(response.entity);
-        } else if (response.text) {
+        } 
+		else if (response.text) {
           try {
             that.repo = simpl.deserialize(response.text);
-          } catch (err) {
+          } 
+	      catch (err) {
             that.setError(err);
             return;
           }
@@ -76,17 +106,14 @@ var RepoMan = (function() {
         
         if (that.repo) {
           that.initialize();
-        } else {
+        } 
+		else {
           that.setError("Cannot obtain repository from " + source.url);
           return;
         }
       });
-    }
-
-    return this;
-  }
-  RepoMan.prototype = Object.create(Readyable.prototype);
-  RepoMan.prototype.constructor = RepoMan;
+	}
+  };
 
   // selectorMap: key => Array of selectors
   // key: can be stripped url, domain, etc
@@ -386,6 +413,10 @@ var RepoMan = (function() {
     }
   }
 
+  RepoMan.prototype.getInfo = function(){
+	  return this.repo.build;
+  }
+  
   return RepoMan;
 })();
 

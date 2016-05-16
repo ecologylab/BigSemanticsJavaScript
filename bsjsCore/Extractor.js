@@ -1,5 +1,5 @@
 /* jshint browser:true, devel:true, node:true */
-/* global BSUtils, FieldOps, getPosition, unwrapped:true */
+/* global BSUtils, FieldOps, getPosition */
 
 // Default metadata extractor.
 
@@ -120,7 +120,7 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 	    if (contextNode != page) isNested = true;
 
         
-	    if (mmdKids === null || mmdKids.length === 0) {
+	    if (mmdKids === null || mmdKids === undefined || mmdKids.length === 0) {
 	      return null; // Nothing to do here.
 	    }
 	   
@@ -604,9 +604,10 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 		extractedMeta[type].mm_name = mmd.name;
 	}
 
-	unwrapped = BSUtils.unwrap(extractedMeta);
-	unwrapped.location = response.location;
-	unwrapped.additionalLocations = response.otherLocations;
+	//unwrapped = BSUtils.unwrap(extractedMeta);
+	//unwrapped.location = response.location;
+	//unwrapped.additionalLocations = response.otherLocations;
+	
 	return extractedMeta;
 }
 
