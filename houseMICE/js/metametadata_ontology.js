@@ -6,7 +6,6 @@
 
 // Global object.
 var OntoVis = {};
-//OntoVis.dataFile = "http://api.ecologylab.net/BigSemanticsService/onto/tree.json";
 OntoVis.dataFile = "/BigSemanticsService/mmdrepository.json";
 OntoVis.width = 3000;
 OntoVis.height = 3200;
@@ -171,7 +170,7 @@ OntoVis.createLayout = function(rootNodeName) {
   d3.xhr(OntoVis.dataFile, function(error, request) {
     var json = simpl.deserialize(request.response);
     var repo = json.meta_metadata_repository.repository_by_name;
-    
+    var root = null;
     var types = {};
     
     //function so we can recursively visit super_fields of a type
@@ -206,6 +205,9 @@ OntoVis.createLayout = function(rootNodeName) {
       if(mmd.super_field) {
         typeNode.parent = mmd.super_field.meta_metadata.name;
         types[typeNode.parent].subtypes.push(typeNode);
+      } else { 
+        //if no super field, this must be the root node of the tree
+        root = typeNode;
       }
     };
     
@@ -215,11 +217,7 @@ OntoVis.createLayout = function(rootNodeName) {
       visit(wrapper);
     }
     
-    //now we find the root node
-    var root = null;
-    for(var key in types) {
-      if(types[key].parent == null) root = types[key];
-    }
+    $("#loadingText").hide();
     
     //var root = json.node;
     OntoVis.data_root = root;

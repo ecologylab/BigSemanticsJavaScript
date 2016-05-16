@@ -18,17 +18,19 @@ function showTable() {
     for(var wrapperID in repo) {
       var wrapper = repo[wrapperID];
       
-      //no selector, no domain
+      //no selector and no example urls, no domain
       if((wrapper.selectors == undefined || wrapper.selectors[0].domain == undefined) && (wrapper.example_urls == undefined || wrapper.example_urls.length <= 0))
         continue;
         
+      //use the selector for the domain
       var domain = wrapper.selectors[0].domain;
       if(domain == undefined || domain.trim() == "") {
+        //but if it's undefined or empty, use an example URL
         domain = ParsedURL(wrapper.example_urls[0].url).domain;
       }
       
+      //represents a processed domain
       var processed = {};
-      
       if(processedRepo[domain]) {
         processed = processedRepo[domain];
       } else {
@@ -39,8 +41,10 @@ function showTable() {
         }
       }
       
+      //add this wrapper to the domain's types
       processed.types.push(wrapper.name);
       
+      //add each example URL
       for(var key in wrapper.example_urls) {
         var url = wrapper.example_urls[key].url;
         
@@ -51,10 +55,14 @@ function showTable() {
       processedRepo[domain] = processed;
     }
     
+    //create an array of domains, so that the old code can use it
     processedArr = [];
     for(var key in processedRepo) {
       processedArr.push(processedRepo[key]);
     }
+    
+    //hide loading text
+    $("#loadingText").hide();
     
     var table =
       d3.select("#content").append("table").attr("id", "example_table");
@@ -69,7 +77,7 @@ function showTable() {
       .attr("class", "domain")
       .text(function(d) {
         return d.domain;
-      });
+    });
     var td1 = row.append("td")
                 .attr("class", "type")
                 .append("ul")
