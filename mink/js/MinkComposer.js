@@ -26,7 +26,7 @@ function Column(number, HTML){
   this.HTML = HTML;
   this.composeables = [];
   MinkComposer.currentSpace.columns.push(this)
-
+  this.floatingComposeables = [];
 }
 
 Column.prototype.addComposeable = function(composeable){
@@ -66,6 +66,7 @@ function Composeable(HTML, id, parentID){
     this.parent = null;
     this.root = null;
   }
+  this.column = this.getColumn();
   this.pileIdToRemovedChildrenMap = new Map();
   this.incidentallyRemovedKids = [];
   this.container = $(HTML).closest('.minkColumn')[0];
@@ -75,6 +76,65 @@ function Composeable(HTML, id, parentID){
   MinkComposer.currentSpace.composeableMap.put(this.id, this);
   Material.addMaterial(this.id, $(this.HTML).find('.minkContainer')[0], 1)
   this.filteredOut = false;
+
+}
+/*
+  Unlike "real" composeables, which have some materiality and can force
+  other objects out of their way, FloatingComposeables are anchored relative to a composeable,
+  but they don't direct traffic on their own
+*/
+function FloatingComposeable(HTML){
+  this.HTML = HTML;
+  var that = this;
+
+  setTimeout(function(){
+    var pile = $(that.HTML).closest('.minkPile');
+    var anchorHTML = pile.find('.minkCardContainer');
+    if(anchorHTML.length > 0){
+
+
+      anchorHTML = anchorHTML[0];
+      var composeable = MinkComposer.currentSpace.composeableMap.get(anchorHTML.getAttribute('id'));
+
+
+      //pixel x,y via java convention (origin is in top left and 1,1 would be the bottom right)
+      that.y = 0;
+      that.id = generateUUID();
+      that.anchor = composeable;
+      that.column = that.anchor.column;
+      that.column.floatingComposeables.push(that);
+      that.reanchor();
+    }
+  },350)
+
+
+
+
+
+
+}
+FloatingComposeable.prototype.positionAt = function(y){
+    this.y = y;
+    this.HTML.style.top = (y.toString() + "px");
+
+}
+FloatingComposeable.prototype.snapToAnchor = function(){
+  var newY = this.anchor.getHeight() + this.anchor.y;
+  this.positionAt(newY)
+}
+FloatingComposeable.prototype.reanchor = function(){
+  //find lowest sibling of anchor
+  var sibs = this.anchor.getSiblings()
+  if(sibs.length > 0){
+    var newAnchor = sibs[(sibs.length - 1)];
+    if(newAnchor.y > this.anchor.y){
+      this.anchor = newAnchor;
+
+    }
+    this.snapToAnchor();
+  }else{
+    this.snapToAnchor();
+  }
 
 
 }
@@ -99,7 +159,7 @@ MinkComposer.filterInComposeable = function(composeable){
     }
   }
   catch(err){
-    
+
   }
 
 }
@@ -269,11 +329,10 @@ MinkComposer.composeEventHandler = function(event){
     if(event.detail.type == 'pullup'){
       var composeable = MinkComposer.currentSpace.composeableMap.get(event.detail.composeableID);
 
-      var height = composeable.getChildrenBounds().bottom;
+      var height = composeable.getChildrenBounds().bottom + 30;
 
       window.setTimeout(function(){
         var newHeight = composeable.getChildrenBounds().bottom;
-        var diff = newHeight - height ;
 
         MinkComposer.changeHeight(composeable, height, newHeight)
 
@@ -327,6 +386,8 @@ MinkComposer.shiftFamilyDownBy = function(composeable, amount){
   for(var i = 0; i < composeable.childComposables.length; i++){
     MinkComposer.shiftFamilyDownBy(composeable.childComposables[i], amount);
   }
+  MinkComposer.reanchorFloatingInColumn(composeable.column);
+
 }
 MinkComposer.shiftChildren = function(composeable, amount){
   for(var i = 0; i < composeable.childComposables.length; i++){
@@ -344,6 +405,7 @@ MinkComposer.matchToBottomOfPreviousSibling = function(composeable){
     var diff = bottom - myTop;
     MinkComposer.shiftFamilyDownBy(composeable, diff);
 //    MinkComposer.reflowAround(composeable, formerBottom)
+  MinkComposer.reanchorFloatingInColumn(composeable.column);
 
   }
 }
@@ -383,14 +445,20 @@ MinkComposer.reflowAround = function(composeable, formerBottom, formerBoundingBo
           }
 
 
-      }
+    }
+    MinkComposer.reanchorFloatingInColumn(composeable.column);
 
   }
 
 
 
 }
+MinkComposer.reanchorFloatingInColumn = function(column){
+  for(var i = 0; i < column.floatingComposeables.length; i++){
+    column.floatingComposeables[i].reanchor();
+  }
 
+}
 MinkComposer.addComposeable = function(composeable){
   //go through column composeables and find which to insert below
 
@@ -446,6 +514,7 @@ MinkComposer.addComposeable = function(composeable){
 
     }
 
+    MinkComposer.reanchorFloatingInColumn(composeable.column);
 
 }
 
@@ -477,6 +546,7 @@ MinkComposer.centerWithinBounding = function(composeableParent, properlyPreppedB
 
 
     MinkComposer.centerWithinBounding(composeableParent.parent, bottom, lowest);
+    MinkComposer.reanchorFloatingInColumn(composeableParent.column);
 
   }
 }
@@ -492,6 +562,7 @@ MinkComposer.changeHeight = function(composeable, oldHeight, newHeight){
     MinkComposer.shiftFamilyDownBy(siblings[i], diff);
   }
   MinkComposer.centerWithinBounding(composeable.parent);
+  MinkComposer.reanchorFloatingInColumn(composeable.column);
 
   //center parent
 }
@@ -544,6 +615,7 @@ MinkComposer.removeRecursively = function(composeable){
   if(composeable.parent){
     MinkComposer.centerWithinBounding(composeable.parent);
   }
+  MinkComposer.reanchorFloatingInColumn(composeable.column);
 
 }
 
@@ -562,6 +634,8 @@ MinkComposer.removeAllKidsrecursively = function(composeable){
     MinkComposer.removeRecursively(listOfKids[i]);
   }
   composeable.incidentallyRemovedKids = composeable.incidentallyRemovedKids.concat(listOfKids);
+  MinkComposer.reanchorFloatingInColumn(composeable.column);
+
 }
 MinkComposer.restoreRecursively = function(composeable){
 
@@ -575,6 +649,7 @@ MinkComposer.restoreRecursively = function(composeable){
     MinkComposer.restoreRecursively(composeable.incidentallyRemovedKids[i]);
   }
 
+  MinkComposer.reanchorFloatingInColumn(composeable.column);
 
 }
 MinkComposer.restoreKidsRecursively = function(composeableID, pileid){
@@ -586,11 +661,14 @@ MinkComposer.restoreKidsRecursively = function(composeableID, pileid){
   for(var i = 0; i < toAdd.length; i++){
     MinkComposer.restoreRecursively(toAdd[i]);
   }
+
 }
 
 MinkComposer.snapUp = function(composeable){
   try{
+
     var above = composeable.getSiblingsAbove();
+
     if(above.length > 0){
       var highestSib = above[above.length - 1];
       var bottom = highestSib.getChildrenBounds().bottom;
@@ -610,9 +688,15 @@ MinkComposer.snapUp = function(composeable){
       MinkComposer.reflowAround(composeable, formerBottom)
 
     }
+
+
+    MinkComposer.reanchorFloatingInColumn(composeable.column);
+
   }catch(err){
 
   }
+
+}
 
 }
 MinkComposer.removeChildrenWithPileId = function(composeableID, possiblePileId){
@@ -655,7 +739,7 @@ MinkComposer.findAttachmentPoint = function(composeable, childComposable){
 }
 
 
-}
+
 MinkComposer.drawLinesToChildren = function(composeable, canvas, ctx){
   if(composeable.childComposables.length < 1){
     return;
@@ -684,6 +768,10 @@ MinkComposer.drawLinesToChildren = function(composeable, canvas, ctx){
       var topCard = pileCards[0].getBoundingClientRect();
 
       var lowestCard = pileCards[0];
+
+      if(!topCard || !lowestCard){
+        continue;
+      }
       for(var q = 0; q < pileCards.length; q++){
         if(parseFloat(pileCards[q].style.top) > parseFloat(lowestCard.style.top)){
           lowestCard = pileCards[q];
