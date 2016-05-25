@@ -146,7 +146,7 @@ var ParsedURL = (function() {
 })();
   
 // for use in Node:
-if (typeof module == 'object') {
+if (typeof module === 'object' && module) {
   module.exports = ParsedURL;
 }
 

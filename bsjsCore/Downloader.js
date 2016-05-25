@@ -5,7 +5,7 @@ var JS_REDIRECT_LOOP = -1;
 var JS_REDIRECT_ERR = -2;
 
 // for use with Node:
-if (typeof require == 'function') {
+if (typeof require === 'function') {
   XMLHttpRequest = require('xmlhttprequest').XMLHttpRequest;
   ParsedURL = require('./ParsedURL.js');
 }
