@@ -1,0 +1,43 @@
+/*
+ * MetaMetadata Ontology Visualizer Styles.
+ * Author: Yin Qu (yin@ecologylab.net)
+ */
+
+/*body {
+  width: 3000px;
+}*/
+
+#viz {
+  margin-top: 60px;
+}
+
+.text {
+  font-family: "Roboto", sans-serif;
+  font-size: 11pt;
+  font-weight: 300;
+  cursor: default;
+}
+
+.text.subtree {
+  font-size: 13pt;
+  font-weight: 800;
+}
+
+.text:hover {
+  stroke: #100873;
+}
+
+.link {
+  fill: none;
+  stroke: gray;
+  stroke-width: 1.5px;
+}
+
+/*.navbar-fixed-bottom#container {
+  min-width: 1060px !important;
+  height: 40px;
+}*/
+
+img.nav-img {
+    margin-top: -10px;
+}

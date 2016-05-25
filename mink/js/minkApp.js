@@ -117,7 +117,7 @@ minkApp.handleFacetRemoval = function(event){
 }
 function onBodyLoad() {
 
-	var minkapp = $("#minkAppContainer")[0];
+	var minkappHTML = $("#minkAppContainer")[0];
 
 
 	/*
@@ -135,33 +135,36 @@ function onBodyLoad() {
 
 	//SEMANTIC_SERVICE_URL = "http://128.194.128.84:8080/BigSemanticsService/";
 
-	  if (document.URL.indexOf("http://localhost:") > -1 || document.URL.indexOf("file:///") > -1){
+  if (document.URL.indexOf("http://localhost:") > -1 || document.URL.indexOf("file:///") > -1){
 
 
-			SEMANTIC_SERVICE_URL = "http://localhost:8080/BigSemanticsService/";
+		SEMANTIC_SERVICE_URL = "http://localhost:8080/BigSemanticsService/";
 
-	  }
-	  else{
-		   SEMANTIC_SERVICE_URL = "http://ecology-service.cse.tamu.edu/BigSemanticsService/";
+  }
+  else{
+	   SEMANTIC_SERVICE_URL = "http://ecology-service.cse.tamu.edu/BigSemanticsService/";
 
-	  }
+  }
+	//Needs breakpoint or else FAILS
 	var canvas = document.createElement('canvas');
 	canvas.className = "minkAppCanvas";
 	canvas.width = 1800;
 	canvas.height = 1480;
 	canvas.id = 'minkAppCanvas';
+	//starts animating lines
 	animFrame(recursiveAnim);
 
 
 
-	$(minkapp).prepend(canvas);
+	$(minkappHTML).prepend(canvas);
 
 	RendererBase.idealRenderer = false;
 	$(".collapse").collapse();
-	minkapp.addEventListener('minkevent', minkApp.minkEventHandler);
-	minkapp.addEventListener('composerevent', MinkComposer.composeEventHandler);
+	//TODO RENAME
+	minkappHTML.addEventListener('minkevent', minkApp.minkEventHandler);
+	minkappHTML.addEventListener('composerevent', MinkComposer.composeEventHandler);
 
-	minkApp.initialize(minkapp);
+	minkApp.initialize(minkappHTML);
 
   //Try to get passed in parameter url
   var n = getParameter("url");
@@ -381,7 +384,7 @@ minkApp.signalFavorite = function(event){
 	event.target.dispatchEvent(myEvent);
 }
 minkApp.removeButtonHandler = function(event){
-	var composeable = MinkComposer.composeableMap.get($(event.srcElement).closest('.minkCardContainer').attr('id'));
+	var composeable = MinkComposer.currentSpace.composeableMap.get($(event.srcElement).closest('.minkCardContainer').attr('id'));
 	MinkComposer.removeRecursively(composeable)
 	// var minkCardHTML = $(event.srcElement).closest('.minkCardContainer')[0];
 	// var pileId = minkCardHTML.parentNode.getAttribute('pileid');
@@ -1132,6 +1135,32 @@ minkApp.minkEventHandler = function(event){
 	 }
 
 }
+
+
+
+minkApp.loadMoreFromPile = function(event){
+	var target = event.srcElement;
+	var pileID = target.getAttribute('pileid');
+	var parentPile = minkApp.currentQuery.pileMap.get(pileID);
+	var url = target.getAttribute('loadme');
+	//GET CURRENT pile
+	//ADJUST pile
+	//GET ASK MinkOracle
+
+
+	 //tests to see what semantics is right
+	 var minkeventName = 'addCardsToPile';
+	 if(parentPile.HTML.getAttribute('URLKID')){
+		 minkeventName = 'urlChildren';
+	 }
+
+	MinkOracle.getSemantics(url, parentPile, minkeventName);
+
+
+}
+
+
+
 minkApp.addUrlKids = function(event){
 	var pileID = $(event.srcElement).closest('.minkPile')[0].getAttribute('pileID');
 	var pile =  minkApp.currentQuery.pileMap.get(pileID);
@@ -1192,7 +1221,7 @@ minkApp.addChildCards = function(event){
 	var semantics = event.detail.semantics;
 	var formerIndex = semantics.urlIndex;
 	var loader = $(pile.HTML).closest('.minkPileWrapper').find('.minkPileLoader')[0];
-	semantics.incrementUrl(loader);
+	semantics.incrementUrl(loader, pile.HTML);
 
 
 	var cards = minkApp.buildCards(pile);
@@ -1200,15 +1229,24 @@ minkApp.addChildCards = function(event){
 	var detailDetails = {type: 'makespace', container: pile.HTML};
 
 	var parentCard = event.detail.parentCard;
-	if(parentCard.kidsLoaded){
-		parentCard.kidsLoaded += pile.semantics.results.links.length;
-	}else{
-		parentCard.kidsLoaded = pile.semantics.results.links.length;
+	if(parentCard){
+		if(parentCard.kidsLoaded){
+			parentCard.kidsLoaded += pile.semantics.results.links.length;
+		}else{
+			parentCard.kidsLoaded = pile.semantics.results.links.length;
+		}
+		if(parentCard.kidsLoaded = parentCard.kidsLoading){
+			//for now I just naively kill all loaders
+			$(parentCard.html).find('.spinningLoader').remove();
+		}
+
 	}
-	if(parentCard.kidsLoaded = parentCard.kidsLoading){
-		//for now I just naively kill all loaders
-		$(parentCard.html).find('.spinningLoader').remove();
+	//if loaded by a "more loader"
+	else{
+		//TODO: more loaded remove loading gif
 	}
+	semantics.incrementUrl(loader, pile.HTML);
+
 	if(minkApp.currentQuery){
 	 var facets = getFacetsFromHTML();
 	 applyFacets(minkApp.currentQuery, facets);
@@ -1331,7 +1369,6 @@ minkApp.addParentlessPile = function(event){
 	var semantics = event.detail.semantics;
 	var formerIndex = semantics.urlIndex;
 	var loader = $(pile.HTML).closest('.minkPileWrapper').find('.minkPileLoader')[0];
-	semantics.incrementUrl(loader);
 
 
 	var cards = minkApp.buildCards(pile);
@@ -1346,6 +1383,7 @@ minkApp.addParentlessPile = function(event){
 	if(semantics.canary){
 	 minkApp.buildPileMoreLoader(wrapper, pile, semantics.iterableURL, semantics.searchUrl);
 	}
+	semantics.incrementUrl(loader, pile.HTML);
 
 	console.log(event.detail.links);
 
@@ -1585,11 +1623,7 @@ function isUrl(string){
 function showMetadata(url)
 {
 	if (url){
-		if(isUrl(url)){
 			minkApp.exploreNewQuery(url);
-		}else{
-			minkApp.exploreNewQuery(url);
-		}
 
 	}else{
 		var url = document.getElementById("targetURL").value;

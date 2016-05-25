@@ -78,6 +78,7 @@ MicroDataTools.getMicroDataAndMMD = function(page , bigSemantics, callback) {
 					callback(err, null);
 					return;
 				}
+				mmd = BSUtils.unwrapMmd(mmd);
 				MicroDataTools.cachedMmd[typeName] = mmd;
 				callback(null, {mmd: mmd, microdata: microdata});
 			});

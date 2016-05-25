@@ -7,50 +7,51 @@
     </script>
     
     <!-- CSS! -->
-    <link href="css/bootstrap.min.css" rel="stylesheet" media="screen">
+    <link href="../libraries/bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
 
     <link href="css/prettify.css" type="text/css" rel="stylesheet" />
     
     <link href="css/mdc.css" rel="stylesheet" media="screen">
+    <link href="css/nav.css" rel="stylesheet" media="screen">
     <link href="../renderers/styles/metadataRenderer.css" rel="stylesheet" type="text/css">
     <link href="../renderers/styles/twitterMice.css" rel="stylesheet" type="text/css">
     
-	<!--  TweetBubble Stuff, currently ommited due to restructure testing
+    <!--  TweetBubble Stuff, currently ommited due to restructure testing
 		
-	<link href="../TweetBubble/Plugin/chrome/content_script/css/twitterMice.css" rel="stylesheet" type="text/css"> 
+    <link href="../TweetBubble/Plugin/chrome/content_script/css/twitterMice.css" rel="stylesheet" type="text/css"> 
 
     <script type="text/javascript" src="../TweetBubble/Plugin/chrome/content_script/js/renderingTask.js"></script>
-	<script type="text/javascript" src="../TweetBubble/Plugin/chrome/content_script/js/twitterMice.js"></script>
-	<script type="text/javascript" src="../TweetBubble/Plugin/chrome/content_script/js/twitterICE.js"></script>
-	<script type="text/javascript" src="../TweetBubble/Plugin/chrome/content_script/js/ICE.js"></script>
-	-->
+    <script type="text/javascript" src="../TweetBubble/Plugin/chrome/content_script/js/twitterMice.js"></script>
+    <script type="text/javascript" src="../TweetBubble/Plugin/chrome/content_script/js/twitterICE.js"></script>
+    <script type="text/javascript" src="../TweetBubble/Plugin/chrome/content_script/js/ICE.js"></script>
+    -->
     
     <!-- Libaries! -->
     <script src="../libraries/jquery-2.0.0.min.js"></script>
     <script src="../libraries/bootstrap/js/bootstrap.min.js"></script>
     <script type="text/javascript" src="js/prettify.js"></script>
    
-   <!-- bsjsCore Files -->
-         <script type="text/javascript" src="../bsjsCore/Readyable.js"></script>
+    <!-- bsjsCore Files -->
+    <script type="text/javascript" src="../bsjsCore/Readyable.js"></script>
 
-   <script type="text/javascript" src="../bsjsCore/BSAutoSwitch.js"></script>   
-      <script type="text/javascript" src="../bsjsCore/BSService.js"></script>   
+    <script type="text/javascript" src="../bsjsCore/BSAutoSwitch.js"></script>   
+    <script type="text/javascript" src="../bsjsCore/BSService.js"></script>   
 
-   <script type="text/javascript" src="../bsjsCore/BSExtension.js"></script>   
+    <script type="text/javascript" src="../bsjsCore/BSExtension.js"></script>   
 
-   <script type="text/javascript" src="../bsjsCore/BSUtils.js"></script>
-   <script type="text/javascript" src="../bsjsCore/MetadataTask.js"></script>   
-   <script type="text/javascript" src="../bsjsCore/MetadataViewModel.js"></script>
-      <script type="text/javascript" src="../bsjsCore/Readyable.js"></script>
-      <script type="text/javascript" src="../bsjsCore/Downloader.js"></script>
-      <script type="text/javascript" src="../bsjsCore/ParsedURL.js"></script>
-      <script type="text/javascript" src="../bsjsCore/Downloader.js"></script>
+    <script type="text/javascript" src="../bsjsCore/BSUtils.js"></script>
+    <script type="text/javascript" src="../bsjsCore/MetadataTask.js"></script>   
+    <script type="text/javascript" src="../bsjsCore/MetadataViewModel.js"></script>
+    <script type="text/javascript" src="../bsjsCore/Readyable.js"></script>
+    <script type="text/javascript" src="../bsjsCore/Downloader.js"></script>
+    <script type="text/javascript" src="../bsjsCore/ParsedURL.js"></script>
+    <script type="text/javascript" src="../bsjsCore/Downloader.js"></script>
 
-   <script type="text/javascript" src="../bsjsCore/RepoMan.js"></script>
+    <script type="text/javascript" src="../bsjsCore/RepoMan.js"></script>
    
-   <!-- Required renderer files -->
+    <!-- Required renderer files -->
     <script type="text/javascript" src="../renderers/interfaceStyle.js"></script>
-   <!--
+    <!--
     <script type="text/javascript" src="../renderers/TweetBubbleRenderingTask.js"></script>
     <script type="text/javascript" src="../renderers/TweetBubbleRenderer.js"></script>-->
     
@@ -61,10 +62,10 @@
     
     <script type="text/javascript" src="../renderers/VanillaMICE.js"></script>
 	
-	<!-- Just the simpl things -->    
-	<script type="text/javascript" src="../bsjsCore/simpl/simplBase.js"></script>
+    <!-- Just the simpl things -->    
+    <script type="text/javascript" src="../bsjsCore/simpl/simplBase.js"></script>
 	
-	<!-- HouseMice specifics -->
+    <!-- HouseMice specifics -->
     <script type="text/javascript" src="js/mdc.js"></script>
 
     <script>
@@ -96,55 +97,60 @@
     <div class="navbar navbar-inverse navbar-fixed-top">
       <div class="navbar-inner form-inline">
         <div class="container">
-          <a class="brand">Metadata In-Context Expander (MICE)</a>
-						
-            <form class="navbar-form pull-right" action="" onsubmit="return false;">
-              
-              <input type="text" size="500" class="span5" id="targetURL" onkeydown="onEnterShowMetadata(event);" value="http://www.amazon.com/Discovery-Daft-Punk/dp/B000059MEK/ref=sr_1_1?s=music&ie=UTF8&qid=1365793732"/>
-              <button type="button" class="btn" onclick="showMetadata();">Go!</button>
-              <button type="button" class="btn" data-toggle="modal" data-target="#linkModal" onclick="setLinkValue();"><i class="icon-bookmark"></i></button>
-            	
-            </form>
- 						<!-- <div class="checkbox " style="position:relative; top:10px"  title="When checked, the service will not use any cached metadata for a page.">
-	                  <label>
-	                    <input type="checkbox" name="force_reload" id='force_reload'>Refresh MD
-	                    
-	                 </label>
-             </div> -->
-	                  <label style="position:relative; top:10px" title="When checked, the service will not use any cached metadata for a page.">
-	                    <input type="checkbox" name="force_reload" id='force_reload' style="position: relative;bottom: 2.5px;" onclick="toggleReload()">Refresh MD
-	                    
-	                 </label>
-			<label style="position:relative; top:10px" title="When checked, always extract with Service.">
-	                    <input type="checkbox" name="force_service" id='force_service' style="position: relative;bottom: 2.5px;" onclick="toggleReload()">Extract w/ Service
-	                    
-	                 </label>
-	                
-	                
+          <div id="links">
+            <a href="index.html">
+              <span id="miceLink" class="navLink activeLink"><span class="navCircle">M</span> Metadata In-Context Expander (MICE)</span>
+            </a>
+            <a href="metametadata_ontology.html">
+              <span id="ovLink" class="navLink"><span class="navCircle">O</span> Ontology Visualizer</span>
+            </a>
+            <a href="domain_type_examples.html">
+              <span id="sdLink" class="navLink"><span class="navCircle">S</span> Supported Domains</span>
+            </a>
+          </div>
         </div>
-          
       </div>
     </div>
 
     <div class="navbar navbar-inverse navbar-fixed-bottom">
       <div class="navbar-inner">
         <div class="container">
+          <div class="nav" style="margin-top: 8px">
+          Background at the <a href="http://ecologylab.net/research/bigsemantics/" target="_blank">Big Semantics research page</a> and <a href="https://github.com/ecologylab/BigSemanticsJavaScript/wiki/Metadata-In-Context-Expander-(MICE)" target="_blank">MICE Wiki</a>
+          </div>
           <ul class="nav pull-right">
             <li><a href="http://ecologylab.net" target="_blank">Interface Ecology Lab</a></li>
             <li><a href="http://ecologylab.net" target="_blank"><img class="nav-img pull-right" src="img/ecologylab.png" /></a></li>
           </ul>
-				
         </div>
       </div>
     </div>
 
-
     <!-- Content -->
     <div class ="container">
       <div class="row">
+        <div class="span11">
+          <form action="" class="form" onsubmit="return false;" style="margin-top: 10px">
+            <input type="text" size="500" style="width: 100%" id="targetURL" onkeydown="onEnterShowMetadata(event);" value="http://www.amazon.com/Discovery-Daft-Punk/dp/B000059MEK/ref=sr_1_1?s=music&ie=UTF8&qid=1365793732"/>
+            <div class="pull-right">
+              <button type="button" class="btn" onclick="showMetadata();">Go!</button>
+              <button type="button" class="btn" data-toggle="modal" data-target="#linkModal" onclick="setLinkValue();"><i class="icon-bookmark"></i></button>
+            </div>
+            <div class="pull-left form-inline">
+              <label style="position:relative; top:10px" title="When checked, the service will not use any cached metadata for a page.">
+                <input type="checkbox" name="force_reload" id='force_reload' style="position: relative;bottom: 2.5px;" onclick="toggleReload()"> Refresh MD
+              </label>
+              &nbsp;
+              <label style="position:relative; top:10px" title="When checked, always extract with Service.">
+                <input type="checkbox" name="force_service" id='force_service' style="position: relative;bottom: 2.5px;" onclick="toggleReload()"> Extract w/ Service
+              </label>
+            </div>
+          </form>
+        </div>
+      </div>
+      
+      <div class="row">
         <div class="span9 title right">
-          <p>
-                    Background at the <a href="http://ecologylab.net/research/bigsemantics/" target="_blank">Big Semantics research page</a> and <a href="https://github.com/ecologylab/BigSemantics/wiki/Metadata-In-Context-Expander-%28MICE%29" target="_blank">MICE Wiki</a>.</p>
         </div>
       </div>
 
@@ -206,29 +212,24 @@ Wrappers can be reused and extended as types, in a polymorphic metadata type sys
 
 					<div id="dataDrop" class="collapse in">
 
-<p class="left">
-The Metadata tab shows metadata extracted via <a target="_blank" href="https://github.com/ecologylab/BigSemantics/wiki/Use-BigSemantics-Service">the BigSemantics Service</a> in JSON, using a wrapper from the repository, for the given URL.
-The wrapper, authored in the Meta-Metadata language, defines the data structure, extraction rules, and presentation guidelines for corresponding metadata.
-The wrapper shown here contains nested structures inherited from its base types; see <a target="_blank" href="https://github.com/ecologylab/BigSemantics/wiki#wiki-Wrapper_Repository">the wrapper repository</a> for their original forms, and <a target="_blank" href="https://github.com/ecologylab/BigSemantics/wiki">the BigSemantics wiki</a> for how to author them.
-</p>
-
-
+            <p class="left">
+            The Metadata tab shows metadata extracted via <a target="_blank" href="https://github.com/ecologylab/BigSemantics/wiki/Use-BigSemantics-Service">the BigSemantics Service</a> in JSON, using a wrapper from the repository, for the given URL.
+            The wrapper, authored in the Meta-Metadata language, defines the data structure, extraction rules, and presentation guidelines for corresponding metadata.
+            The wrapper shown here contains nested structures inherited from its base types; see <a target="_blank" href="https://github.com/ecologylab/BigSemantics/wiki#wiki-Wrapper_Repository">the wrapper repository</a> for their original forms, and <a target="_blank" href="https://github.com/ecologylab/BigSemantics/wiki">the BigSemantics wiki</a> for how to author them.
+            </p>
           </div>   
-
         </div>
       </div>
-
       <div class="row">
         <div class="span9 content" id="mdcJson">
           <pre class="prettyprint languague-css" id="mdcJsonPP"></pre>
         </div>
       </div> 
-      
-       </div>
-
+    </div>
+    
+    <script type="text/javascript" src="js/nav.js"></script>
     <script>
     MICE.initialize();
     </script>
 
   </body>
-</html>

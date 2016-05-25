@@ -9,16 +9,42 @@ function SearchSemantics(task, resultIDs, iterableURL, canary){
   this.results = resultIDs;
   this.iterableURL = iterableURL;
   this.mmdType = task.mmd['meta_metadata'].name;
+  this.urlIndex = 0;
 }
 
-SearchSemantics.prototype.incrementUrl = function(loaderButtonHTML){
+SearchSemantics.prototype.incrementUrl = function(loaderButtonHTML, pileHTML){
 
   this.urlIndex = this.urlIndex + parseInt(this.perPage);
   if(loaderButtonHTML){
-    if(!this.canary){
+   if(!this.canary){
       $(loader).remove();
+    }else{
+      var nextCardUrl = this.searchUrl;
+      var queryStart = nextCardUrl.indexOf(this.iterableURL);
+      if(queryStart > 0){
+        nextCardUrl = nextCardUrl.substring(0, queryStart);
+      }
+      nextCardUrl = nextCardUrl + this.iterableURL + this.urlIndex.toString();
+      loader.setAttribute('loadme', nextCardUrl);
+
     }
 
+  }else{
+      //build the html for the "load more cards button"
+      var loader = buildDiv('minkPileLoader');
+      loader.innerHTML = "load more results";
+      loader.alt = "adds the next page of results to the search environment";
+      var nextCardUrl = this.searchUrl;
+      var queryStart = nextCardUrl.indexOf(this.iterableURL);
+      if(queryStart > 0){
+        nextCardUrl = nextCardUrl.substring(0, queryStart);
+      }
+      nextCardUrl = nextCardUrl + this.iterableURL + this.urlIndex.toString();
+      loader.setAttribute('loadme', nextCardUrl);
+      loader.setAttribute('pileid', pileHTML.getAttribute('pileid'));
+      pileHTML.appendChild(loader);
+      loader.addEventListener('click', minkApp.loadMoreFromPile);
+      var loaderComp = new FloatingComposeable(loader);
   }
 }
 

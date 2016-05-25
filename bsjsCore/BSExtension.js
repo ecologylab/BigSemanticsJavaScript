@@ -131,8 +131,10 @@ var BSExtension = (function() {
 		  
         if (err) { callback(err, null); return; }
 
-		if (mmd.meta_metadata.filter_location){
-			location = PreFilter.filter(location, mmd.meta_metadata.filter_location);
+  	  	mmd = BSUtils.unwrapMmd(mmd);
+		  
+		if (mmd.filter_location){
+			location = PreFilter.filter(location, mmd.filter_location);
 		}
         var response = { location: location, entity: options.page };
         console.log("Extracting in content script: " + location);
@@ -142,7 +144,7 @@ var BSExtension = (function() {
           } else {
             mmd = newMMD;
           }
-          if (mmd.meta_metadata.extract_with == "service"){
+          if (mmd.extract_with == "service"){
             that.usedService = true; //so we can display in the slideout
             options.useHttps = (window.location.protocol == 'https:'); //use Https if we are on an https page
             that.bss.loadMetadata(location, options, callback);

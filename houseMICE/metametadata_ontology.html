@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<meta charset="UTF-8" />
+
+<link href='http://fonts.googleapis.com/css?family=Roboto:100,300,800' rel='stylesheet'/>
+<script src="../libraries/jquery-2.0.0.min.js"></script>
+<script src="../libraries/d3.v3.min.js" charset="utf-8"></script>
+
+<link rel="stylesheet" href="../libraries/bootstrap/css/bootstrap.min.css" />
+<script src="../libraries/bootstrap/js/bootstrap.min.js"></script>
+<script src="/bsjsCore/simpl/simplBase.js"></script>
+
+<link rel="stylesheet" href="css/nav.css" />
+<link rel="stylesheet" href="css/metametadata_ontology.css"/>
+<script type="text/javascript" src="js/metametadata_ontology.js"></script>
+
+<title>BigSemantics Ontology Visualizer</title>
+
+</head>
+
+<body>
+
+<div class="navbar navbar-inverse navbar-fixed-top">
+  <div class="navbar-inner form-inline">
+    <div class="container">
+      <div id="links">
+        <a href="index.html">
+          <span class="navLink"><span class="navCircle">M</span> Metadata In-Context Expander (MICE)</span>
+        </a>
+        <a href="metametadata_ontology.html">
+          <span class="navLink activeLink"><span class="navCircle">O</span> Ontology Visualizer</span>
+        </a>
+        <a href="domain_type_examples.html">
+          <span class="navLink"><span class="navCircle">S</span> Supported Domains</span>
+        </a>
+      </div>
+      <ul class="nav navbar-nav pull-right">
+        <li class="dropdown">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+            Change Root Wrapper <b class="caret"></b>
+          </a>
+          <ul class="dropdown-menu">
+            <li><a href="#" title="document">document</a></li>
+            <li><a href="#" title="metadata">metadata</a></li>
+            <li><a href="#" title="creative_work">creative_work</a></li>
+            <li><a href="#" title="product">product</a></li>
+          </ul>
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div class="navbar navbar-inverse navbar-fixed-bottom">
+  <div class="navbar-inner">
+    <div class="container">
+      <div class="nav" style="margin-top: 8px">
+      Background at the <a href="http://ecologylab.net/research/bigsemantics/" target="_blank">Big Semantics research page</a> and <a href="https://github.com/ecologylab/BigSemanticsJavaScript/wiki/Metadata-In-Context-Expander-(MICE)" target="_blank">MICE Wiki</a>
+      </div>
+      <ul class="nav pull-right">
+        <li><a href="http://ecologylab.net" target="_blank">Interface Ecology Lab</a></li>
+        <li><a href="http://ecologylab.net" target="_blank"><img class="nav-img pull-right" src="img/ecologylab.png" /></a></li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<center style="margin-top: 100px" id="loadingText">
+  <h1>Loading...</h1>
+</center>
+  
+<div id="viz">
+</div>
+
+<script type="text/javascript" src="js/nav.js"></script>
+<script type="text/javascript">
+// Utility functions.
+var Utils = {};
+
+// Returns the value of a query parameter from the URL.
+Utils.getQueryVariable = function(param_name) {
+  var query = window.location.search.substring(1);
+  var vars = query.split("&");
+  for (var i=0; i<vars.length; i++) {
+    var pair = vars[i].split("=");
+    if (pair[0] == param_name) {
+      return pair[1];
+    }
+  }
+  return false;
+};
+
+$(document).ready(function() {
+  var rootNodeName = Utils.getQueryVariable("root");
+  OntoVis.createLayout(rootNodeName);
+});
+
+$("ul.dropdown-menu > li > a").click(function(){
+  var rootNodeName = $(this).attr("title");
+  if (rootNodeName) {
+    OntoVis.show(rootNodeName);
+  }
+});
+</script>
+
+</body>
+
+</html>
+

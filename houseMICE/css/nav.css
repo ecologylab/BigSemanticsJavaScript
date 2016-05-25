@@ -1,0 +1,40 @@
+#links {
+    display: inline-block;
+    text-align: center;    
+}
+
+#links a {
+    color: white;
+}
+
+#links a:link {
+    text-decoration: none;
+}
+
+.navCircle {
+    color: white;
+    text-align: center;
+    background-color: cadetblue;
+    display: inline-block;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    line-height: 30px;
+    border: 1px solid black;
+}
+
+.navLink {
+    margin-top: 4px;
+    display: inline-block;
+    height: 32px;
+    width: 32px;
+    overflow: hidden;
+    /* this allows us to get actual width in JS through ele.scrollWidth */
+    white-space: nowrap; 
+}
+
+.activeLink {
+    width: auto !important;
+    font-size: 18px;
+    color: #52c5ff;
+}
