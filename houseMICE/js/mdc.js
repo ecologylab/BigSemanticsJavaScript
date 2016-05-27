@@ -184,10 +184,10 @@ function onBodyLoad() {
 			  host: hostname,
 			  port: port,
 			}); 
-
+      
   }
   else{
-	  bsService = new BSAutoSwitch(['elkanacmmmdgbnhdjopfdeafchmhecbf', 'kjcmbmjeibippleoeigafbpffkemokck ']);
+	  bsService = new BSAutoSwitch(['elkanacmmmdgbnhdjopfdeafchmhecbf', 'kjcmbmjeibippleoeigafbpffkemokck']);
   }
  
 

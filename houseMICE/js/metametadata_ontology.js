@@ -3,7 +3,7 @@
 //
 // The alignment-baseline property is SVG standard, but Firefox does not support
 // it yet. Thus this will work worse in Firefox.
-
+  
 // Global object.
 var OntoVis = {};
 OntoVis.dataFile = "/BigSemanticsService/mmdrepository.json";
@@ -16,6 +16,27 @@ OntoVis.nodePaddingY = 3;
 OntoVis.duration = 500;
 OntoVis.maxLevelDistance = 350;
 OntoVis.rootSizeThresh = 10;
+
+function getRepo(callback) {
+  var bsService;
+  if (document.URL.indexOf("http://localhost:") > -1) {
+      var hostname = window.location.hostname;
+      var port = window.location.port;
+      bsService = new BSAutoSwitch(['elkanacmmmdgbnhdjopfdeafchmhecbf', 'kjcmbmjeibippleoeigafbpffkemokck'], {
+          host: hostname,
+          port: port,
+      }); 
+  } else {
+    bsService = new BSAutoSwitch(['elkanacmmmdgbnhdjopfdeafchmhecbf', 'kjcmbmjeibippleoeigafbpffkemokck']);
+  }
+  
+  bsService.onReady(function() {
+    bsService.getRepoSource(function(err, source) {
+      OntoVis.dataFile = source.url;
+      callback();
+    });
+  });
+}
 
 // For generating the link to the MICE demo using example URL.
 OntoVis.getMiceUrl = function(url) {

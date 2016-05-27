@@ -15,6 +15,12 @@
 
 <link rel="stylesheet" href="css/nav.css" />
 <link rel="stylesheet" href="css/metametadata_ontology.css"/>
+
+<script type="text/javascript" src="../bsjsCore/Readyable.js"></script>
+<script type="text/javascript" src="../bsjsCore/BSAutoSwitch.js"></script>   
+<script type="text/javascript" src="../bsjsCore/BSService.js"></script>   
+<script type="text/javascript" src="../bsjsCore/BSExtension.js"></script> 
+
 <script type="text/javascript" src="js/metametadata_ontology.js"></script>
 
 <title>BigSemantics Ontology Visualizer</title>
@@ -95,7 +101,10 @@ Utils.getQueryVariable = function(param_name) {
 
 $(document).ready(function() {
   var rootNodeName = Utils.getQueryVariable("root");
-  OntoVis.createLayout(rootNodeName);
+  
+  getRepo(function() {
+    OntoVis.createLayout(rootNodeName);
+  });
 });
 
 $("ul.dropdown-menu > li > a").click(function(){
