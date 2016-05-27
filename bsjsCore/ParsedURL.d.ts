@@ -1,6 +1,6 @@
 // Type declaration for ParsedURL. For use with TypeScript.
 
-export class ParsedURL {
+export declare class ParsedURL {
   raw: string;
   stripped: string;
 
@@ -18,4 +18,3 @@ export class ParsedURL {
 
   constructor(rawUrl: string);
 }
-

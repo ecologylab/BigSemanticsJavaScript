@@ -1,8 +1,17 @@
-// Downloader interface and an implementation using XHR.
+// Downloader type definition.
 
-/// <reference path="bstypes.d.ts" />
+export interface Response {
+  location: string;
+  otherLocations?: Array<string>;
 
-import { Response } from "./bstypes";
+  code: number;
+  contentType?: string;
+  charset?: string;
+
+  entity?: Object;
+  xml?: Object;
+  text?: string;
+}
 
 export interface IDownloader {
   httpGet(
@@ -13,11 +22,10 @@ export interface IDownloader {
 }
 
 export declare class Downloader implements IDownloader {
-  constructor(options);
+  constructor(options: any);
   httpGet(
     location: string,
-    options: Object,
+    options: any,
     callback: (err: any, resp: Response)=>void
   ): void;
 }
-

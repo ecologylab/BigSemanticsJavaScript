@@ -1,7 +1,7 @@
 // Facade of BigSemantics.
 
 // for use in Node:
-if (typeof require == 'function') {
+if (typeof require === 'function') {
   Readyable = require('./Readyable');
   PreFilter = require('./FieldOps').PreFilter;
 }
@@ -21,7 +21,7 @@ var BigSemantics = (function() {
     if (!this.extractor) {
       this.extractor = extractMetadata;
     }
-	this.bss = new BSService();
+    this.bss = new BSService();
     if (!this.repoMan) {
       this.repoMan = new RepoMan(repoSource, options);
       var that = this;
@@ -33,19 +33,19 @@ var BigSemantics = (function() {
     } else {
       this.setReady();
     }
-	  
-	if (typeof MetadataCache === 'function' && MetadataCache){
-		this.metadataCache = new MetadataCache();
-	}
-	
-	if (typeof IframeExtractor === 'function' && IframeExtractor){
-    	this.iframeExtractor = new IframeExtractor();
-	}
 
-	if (typeof PopUnderExtractor === 'function' && PopUnderExtractor){
-    	this.popUnderExtractor = new PopUnderExtractor();
-	}  
-	  
+    if (typeof MetadataCache === 'function' && MetadataCache){
+      this.metadataCache = new MetadataCache();
+    }
+
+    if (typeof IframeExtractor === 'function' && IframeExtractor){
+        this.iframeExtractor = new IframeExtractor();
+    }
+
+    if (typeof PopUnderExtractor === 'function' && PopUnderExtractor){
+        this.popUnderExtractor = new PopUnderExtractor();
+    }
+
     return this;
   }
   BigSemantics.prototype = Object.create(Readyable.prototype);
@@ -69,20 +69,21 @@ var BigSemantics = (function() {
     getMmd(function(err, mmd) {
       if (err) { callback(err, null); return; }
 
-	  mmd = BSUtils.unwrapMmd(mmd);
-		
+      mmd = BSUtils.unwrapMmd(mmd);
+
       if (mmd.filter_location) {
         location = PreFilter.filter(location, mmd.filter_location);
       }
 
-	  if (that.metadataCache && that.metadataCache.contains(location) && !options.noCache){
-		  callback(null, { metadata: that.metadataCache.get(location), mmd: mmd });	
-		  return;
-	  }
-	  if (mmd.extract_with == "service"){ 
-			options.useHttps = (window.location.protocol == 'https:'); //use Https if we are on an https page
-			that.bss.loadMetadata(location, options, callback);	  
-	  }	
+      if (that.metadataCache && that.metadataCache.contains(location) && !options.noCache){
+        callback(null, { metadata: that.metadataCache.get(location), mmd: mmd });
+        return;
+      }
+
+      if (mmd.extract_with == "service"){
+        options.useHttps = (window.location.protocol == 'https:'); //use Https if we are on an https page
+        that.bss.loadMetadata(location, options, callback);
+      }
       else if (options.page && that.extractor) {
         // we already have the DOM
         var response = {
@@ -92,44 +93,46 @@ var BigSemantics = (function() {
         that.extractor(response, mmd, that, options, function(err, metadata) {
           if (err) { callback(err, null); return; }
           callback(null, { metadata: metadata, mmd: mmd });
-		  if (!mmd.no_cache && that.metadataCache) {
-			  that.metadataCache.add(location, metadata);
-		  }
+          if (!mmd.no_cache && that.metadataCache) {
+            that.metadataCache.add(location, metadata);
+          }
         });
-      } else {
+      }
+      else {
         // we don't really have the DOM
         if (mmd.user_agent_string) {
           options.userAgent = mmd.user_agent_string;
-        } else if (mmd.user_agent_name && mmd.user_agent_name in that.repoMan.userAgents) {
+        }
+        else if (mmd.user_agent_name && mmd.user_agent_name in that.repoMan.userAgents) {
           options.userAgent = that.repoMan.userAgents[mmd.user_agent_name];
         }
-		if (mmd.extract_with == 'iframe') {
-			that.iframeExtractor.extract(location, mmd, options, function(err, metadata){
-				if (err) { callback(err, null); return; }
-		    	callback(null, { metadata: metadata, mmd: mmd });	
-			});
-		}
-		else if (mmd.extract_with == 'popUnder') {
-			that.popUnderExtractor.extract(location, mmd, options, function(err, metadata){
-				if (err) { callback(err, null); return; }
-		    	callback(null, { metadata: metadata, mmd: mmd });	
-			});
-		}
-		else {
-		  that.downloader.httpGet(location, options, function(err, response) {
-		  	if (err) { callback(err, null); return; }
 
-		  	that.extractor(response, mmd, that, options, function(err, metadata) {
-		    	if (err) { callback(err, null); return; }
-		    	callback(null, { metadata: metadata, mmd: mmd });
-				if (!mmd.no_cache && that.metadataCache) {
-					that.metadataCache.add(location, metadata);
-				}				
-			});
-		  });
-		}
+        if (mmd.extract_with == 'iframe') {
+          that.iframeExtractor.extract(location, mmd, options, function(err, metadata){
+            if (err) { callback(err, null); return; }
+            callback(null, { metadata: metadata, mmd: mmd });
+          });
+        }
+        else if (mmd.extract_with == 'popUnder') {
+          that.popUnderExtractor.extract(location, mmd, options, function(err, metadata){
+            if (err) { callback(err, null); return; }
+            callback(null, { metadata: metadata, mmd: mmd });
+          });
+        }
+        else {
+          that.downloader.httpGet(location, options, function(err, response) {
+            if (err) { callback(err, null); return; }
+
+            that.extractor(response, mmd, that, options, function(err, metadata) {
+              if (err) { callback(err, null); return; }
+              callback(null, { metadata: metadata, mmd: mmd });
+              if (!mmd.no_cache && that.metadataCache) {
+                that.metadataCache.add(location, metadata);
+              }
+            });
+          });
+        }
       }
-		
     });
   };
 
@@ -151,11 +154,11 @@ var BigSemantics = (function() {
   BigSemantics.prototype.selectMmd = function(location, options, callback) {
     this.repoMan.selectMmd(location, options, callback);
   };
-  
+
   return BigSemantics;
 })();
 
 // for use in Node:
-if (typeof module == 'object') {
+if (typeof module === 'object') {
   module.exports = BigSemantics;
 }

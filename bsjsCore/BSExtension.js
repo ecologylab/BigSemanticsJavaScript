@@ -21,7 +21,7 @@ var BSExtension = (function() {
       this.extractor = extractMetadata;
     }
 
-	this.bss = new BSService();
+  	this.bss = new BSService();
 
     var that = this;
     var extensionsLeftToCheck = this.extIds.length;
@@ -104,7 +104,7 @@ var BSExtension = (function() {
 
   BSExtension.prototype.loadMetadata = function(location, options, callback) {
     var that = this;
-	  
+
     // mmdCallback: (err, mmd) => void
     function getMmd(mmdCallback) {
       if (options && options.mmd) {
@@ -128,22 +128,24 @@ var BSExtension = (function() {
       // we already have the DOM (in options.page)
       var that = this;
       getMmd(function(err, mmd) {
-		  
+
         if (err) { callback(err, null); return; }
 
   	  	mmd = BSUtils.unwrapMmd(mmd);
-		  
-		if (mmd.filter_location){
-			location = PreFilter.filter(location, mmd.filter_location);
-		}
+
+    		if (mmd.filter_location){
+    			location = PreFilter.filter(location, mmd.filter_location);
+    		}
+
         var response = { location: location, entity: options.page };
         console.log("Extracting in content script: " + location);
-		MicroDataTools.useMicroDataToImproveMMD(response , mmd , that , function(err , newMMD) {
-          if ( err ) {
+    		MicroDataTools.useMicroDataToImproveMMD(response, mmd, that, function(err, newMMD) {
+          if (err) {
             console.log("There was an error in using micro data to improve mmd");
           } else {
             mmd = newMMD;
           }
+
           if (mmd.extract_with == "service"){
             that.usedService = true; //so we can display in the slideout
             options.useHttps = (window.location.protocol == 'https:'); //use Https if we are on an https page

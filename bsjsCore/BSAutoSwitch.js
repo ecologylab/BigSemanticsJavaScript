@@ -15,7 +15,7 @@ var BSAutoSwitch = (function() {
     // always available.
     this.bsSvc = new BSService(serviceLocation, options);
     this.bsImpl = this.bsSvc;
-    
+
     // If the extension is available, switch to it.
     var that = this;
     var bsExt = new BSExtension(idList, options);
@@ -25,7 +25,7 @@ var BSAutoSwitch = (function() {
         that.setReady();
       }
     });
-   
+
     var timeoutForExtension = 1000;
     if (options && options.timeoutForExtension) {
       timeoutForExtension = options.timeoutForExtension;
@@ -51,7 +51,7 @@ var BSAutoSwitch = (function() {
       if(!options){
     	  options = {};
       }
-	  options.useHttps = (window.location.protocol == 'https:');		
+  	  options.useHttps = (window.location.protocol == 'https:');
       bs.loadMetadata(location, options, callback);
     });
   }
@@ -78,7 +78,7 @@ var BSAutoSwitch = (function() {
     	  options = {};
       }
 
-	  options.useHttps = (window.location.protocol == 'https:');
+  	  options.useHttps = (window.location.protocol == 'https:');
       bs.loadMmd(name, options, callback);
     });
   }
@@ -96,4 +96,3 @@ var BSAutoSwitch = (function() {
 
   return BSAutoSwitch;
 })();
-
