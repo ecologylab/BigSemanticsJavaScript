@@ -36,7 +36,8 @@ var RepoMan = (function() {
 	console.log("loading repo");
 	  
 	if (!source) { throw new Error("source required!"); }
-
+    
+    repoman.source = source;
     if (options && options.defaultDocumentType) {
       repoman.defaultDocumentType = options.defaultDocumentType;
     }
@@ -415,6 +416,10 @@ var RepoMan = (function() {
 
   RepoMan.prototype.getInfo = function(){
 	  return this.repo.build;
+  }
+  
+  RepoMan.prototype.getSource = function() {
+    return this.source;
   }
   
   return RepoMan;

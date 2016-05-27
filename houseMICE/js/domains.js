@@ -3,6 +3,27 @@ var dataFile = '/BigSemanticsService/mmdrepository.json';
 var miceBaseUrl = 'http://ecologylab.net/mice?url=';
 var urlLen = 70;
 
+function getRepo(callback) {
+  var bsService;
+  if (document.URL.indexOf("http://localhost:") > -1) {
+      var hostname = window.location.hostname;
+      var port = window.location.port;
+      bsService = new BSAutoSwitch(['elkanacmmmdgbnhdjopfdeafchmhecbf', 'kjcmbmjeibippleoeigafbpffkemokck'], {
+          host: hostname,
+          port: port,
+      }); 
+  } else {
+    bsService = new BSAutoSwitch(['elkanacmmmdgbnhdjopfdeafchmhecbf', 'kjcmbmjeibippleoeigafbpffkemokck']);
+  }
+  
+  bsService.onReady(function() {
+    bsService.getRepoSource(function(err, source) {
+      dataFile = source.url;
+      callback();
+    });
+  });
+}
+
 function getMiceUrl(url) {
   return miceBaseUrl + encodeURIComponent(url);
 }
@@ -109,5 +130,7 @@ function showTable() {
 }
 
 $(document).ready(function() {
-  showTable();
+  getRepo(function() {
+    showTable();
+  });
 });

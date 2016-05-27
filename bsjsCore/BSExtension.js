@@ -102,6 +102,10 @@ var BSExtension = (function() {
     }
   }
 
+  BSExtension.prototype.getRepoSource = function(callback) {
+    this.sendMessageToExt('getRepoSource', null, callback);
+  }
+  
   BSExtension.prototype.loadMetadata = function(location, options, callback) {
     var that = this;
 
