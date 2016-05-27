@@ -41,6 +41,18 @@ var BSAutoSwitch = (function() {
 
   // delegate calls to the underlying implementation
 
+  BSAutoSwitch.prototype.getRepoSource = function(callback) {
+    var that = this;
+    this.bsImpl.onReady(function(err, bs) {
+      if (err) {
+        if (that.bsImpl instanceof BSExtension) { bs = that.bsSvc; }
+        else { callback(err, null); return; }
+      }
+
+      bs.getRepoSource(callback);
+    });
+  }
+  
   BSAutoSwitch.prototype.loadMetadata = function(location, options, callback) {
     var that = this;
     this.bsImpl.onReady(function(err, bs) {

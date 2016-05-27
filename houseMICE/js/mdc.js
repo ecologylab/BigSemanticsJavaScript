@@ -180,14 +180,14 @@ function onBodyLoad() {
    if (document.URL.indexOf("http://localhost:") > -1){
 	  var hostname = window.location.hostname;
 	  var port = window.location.port;
-	  bsService = new BSAutoSwitch(['elkanacmmmdgbnhdjopfdeafchmhecbf', 'gdgmmfgjalcpnakohgcfflgccamjoipd'],  {
+	  bsService = new BSAutoSwitch(['elkanacmmmdgbnhdjopfdeafchmhecbf', 'kjcmbmjeibippleoeigafbpffkemokck'],  {
 			  host: hostname,
 			  port: port,
 			}); 
 
   }
   else{
-	  bsService = new BSAutoSwitch(['elkanacmmmdgbnhdjopfdeafchmhecbf', 'gdgmmfgjalcpnakohgcfflgccamjoipd ']);
+	  bsService = new BSAutoSwitch(['elkanacmmmdgbnhdjopfdeafchmhecbf', 'kjcmbmjeibippleoeigafbpffkemokck ']);
   }
  
 

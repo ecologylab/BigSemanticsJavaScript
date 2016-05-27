@@ -1,5 +1,9 @@
 // BigSemantics Service facade.
 
+if (typeof require == 'function') {
+  Readyable = require('./Readyable');
+}
+
 var BSService = (function() {
   // serviceLocation: {
   //   host: the host name
@@ -33,10 +37,11 @@ var BSService = (function() {
     port: 80,
     securePort: 443
   };
+  BSService.REPO_PATH = '/BigSemanticsService/mmdrepository.json';
   BSService.METADATA_PATH = '/BigSemanticsService/metadata.json';
   BSService.MMD_PATH = '/BigSemanticsService/mmd.json';
   BSService.STUB_PATH = '/BigSemanticsService/metadata_or_stub.json';
-
+  
   BSService.getServiceUrl = function(serviceLocation, path, options, params) {
     var scheme = 'http';
     var host = serviceLocation.host;
@@ -67,6 +72,21 @@ var BSService = (function() {
     return obj;
   }
 
+  // Returns the URL of the mmd repo
+  // callback: function(error, result)
+  BSService.prototype.getRepoSource = function(callback) {
+    var scheme = 'http';
+    var host = this.serviceLocation.host;
+    var port = this.serviceLocation.port;
+    
+    if(this.options && this.options.useHttps) {
+      scheme = 'https';
+      port = serviceLocation.securePort;
+    }
+    
+    callback(null, { url: scheme + '://' + host + ':' + port + BSService.REPO_PATH });
+  }
+  
   BSService.prototype.loadMetadata = function(location, options, callback) {
     var purl = new ParsedURL(location);
 
@@ -130,3 +150,6 @@ var BSService = (function() {
   return BSService;
 })();
 
+if (typeof module == "object") {
+  module.exports = BSService;
+}
