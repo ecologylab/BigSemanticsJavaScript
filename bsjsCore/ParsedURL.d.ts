@@ -1,6 +1,6 @@
 // Type declaration for ParsedURL. For use with TypeScript.
 
-export declare class ParsedURL {
+export default class ParsedURL {
   raw: string;
   stripped: string;
 
