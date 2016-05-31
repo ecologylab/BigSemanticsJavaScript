@@ -40,7 +40,7 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 	}
 	
 	function joinLines(xpath){
-		if (xpath.includes("\n") || xpath.includes("\r"))
+		if (xpath.indexOf("\n") !== -1 || xpath.indexOf("\r") !== -1)
 		{
 		  xpath = xpath.replace("\n", "").replace("\r", "");
 		}
@@ -48,10 +48,10 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 	}
 	
 	function absoluteToRelative(xpath){
-		if(xpath.startsWith('/')){
+		if(xpath.indexOf('/') === 0){
 			xpath = '.' + xpath;
 		}
-		if(xpath.includes('(/')){
+		if(xpath.indexOf('(/') !== -1){
 			xpath.replace('(/', '(./');
 		}
 
