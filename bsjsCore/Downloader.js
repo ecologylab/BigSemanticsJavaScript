@@ -226,5 +226,6 @@ var Downloader = (function() {
 // for use in Node:
 if (typeof module == 'object') {
   module.exports = Downloader;
+  module.exports.default = Downloader;
 }
 

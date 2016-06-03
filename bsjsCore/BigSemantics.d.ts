@@ -1,6 +1,7 @@
 // BigSemantics type definition.
 
 import { Readyable } from './Readyable';
+import RepoMan from './RepoMan';
 
 export interface MetaMetadata {
   name: string;
@@ -42,6 +43,8 @@ export interface IBigSemantics {
 
 export declare class BigSemantics extends Readyable implements IBigSemantics {
   constructor(repoSource: any, options: any);
+  
+  protected repoMan: RepoMan;
 
   loadMetadata(location, options, callback);
   loadInitialMetadata(location, options, callback);
@@ -49,3 +52,5 @@ export declare class BigSemantics extends Readyable implements IBigSemantics {
   selectMmd(location, options, callback);
   getRepoSource(callback);
 }
+
+export default BigSemantics;

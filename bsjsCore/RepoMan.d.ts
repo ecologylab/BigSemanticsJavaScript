@@ -3,7 +3,7 @@
 import { Readyable } from './Readyable';
 import { MetaMetadata } from './BigSemantics';
 
-export class RepoMan extends Readyable {
+export default class RepoMan extends Readyable {
   constructor(source: any, options: any);
 
   loadMmd(

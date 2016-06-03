@@ -2,7 +2,9 @@
 
 import { Metadata } from './BigSemantics';
 
-export var BSUtils: {
-  unwrap(target: Object): Metadata;
-  getType(metadata: Metadata): string;
+export class BSUtils {
+  static unwrap(target: Object): Metadata;
+  static getType(metadata: Metadata): string;
 }
+
+export default BSUtils;

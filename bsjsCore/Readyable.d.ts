@@ -17,3 +17,5 @@ export declare class Readyable implements IReadyable {
   setReady(): void;
   setError(err: Error): void;
 }
+
+export default Readyable;

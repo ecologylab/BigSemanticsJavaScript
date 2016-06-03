@@ -3,7 +3,10 @@
 // for use in Node:
 if (typeof require === 'function') {
   Readyable = require('./Readyable');
+  RepoMan = require('./RepoMan');
   PreFilter = require('./FieldOps').PreFilter;
+  BSService = require('./BSService');
+  BSUtils = require('./BSUtils');
 }
 
 var BigSemantics = (function() {
@@ -161,4 +164,5 @@ var BigSemantics = (function() {
 // for use in Node:
 if (typeof module === 'object') {
   module.exports = BigSemantics;
+  module.exports.default = BigSemantics;
 }

@@ -365,6 +365,7 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 			var evalXpath = makeRelativeXpath(xpath, contextNode);
 			data = page.evaluate(evalXpath, contextNode, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null);
 		} catch (err) {
+			console.error(err);
 			return null;
 		}
 		return data.singleNodeValue;
@@ -377,6 +378,7 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 			var evalXpath = makeRelativeXpath(xpath, contextNode);
 			data = page.evaluate(evalXpath, contextNode, null, XPathResult.STRING_TYPE, null);
 		} catch (err) {
+			console.error(err);
 			return null;
 		}
 		var string = data.stringValue;
@@ -414,6 +416,7 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 			var evalXpath = makeRelativeXpath(xpath, contextNode);
 			nodes = page.evaluate(evalXpath, contextNode, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);		
 		} catch (e) {
+			console.error(e);
 			return null;
 		}
 		var size = nodes.snapshotLength;
@@ -438,6 +441,7 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 			var evalXpath = makeRelativeXpath(xpath, contextNode);
 			nodes = page.evaluate(evalXpath, contextNode, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);		
 		} catch (e) {
+			console.error(e);
 			return null;
 		}
 		var size = nodes.snapshotLength;

@@ -45,5 +45,6 @@ var Readyable = (function() {
 // for use in Node:
 if (typeof module == 'object') {
   module.exports = Readyable;
+  module.exports.default = Readyable;
 }
 

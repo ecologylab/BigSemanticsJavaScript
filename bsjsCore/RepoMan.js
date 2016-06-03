@@ -428,5 +428,6 @@ var RepoMan = (function() {
 // for use in Node:
 if (typeof module == 'object') {
   module.exports = RepoMan;
+  module.exports.default = RepoMan;
 }
 

@@ -22,10 +22,12 @@ export interface IDownloader {
 }
 
 export declare class Downloader implements IDownloader {
-  constructor(options: any);
+  constructor(options?: any);
   httpGet(
     location: string,
     options: any,
     callback: (err: any, resp: Response)=>void
   ): void;
 }
+
+export default Downloader;

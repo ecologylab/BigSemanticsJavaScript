@@ -148,5 +148,6 @@ var ParsedURL = (function() {
 // for use in Node:
 if (typeof module === 'object' && module) {
   module.exports = ParsedURL;
+  module.exports.default = ParsedURL;
 }
 
