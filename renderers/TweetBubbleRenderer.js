@@ -71,12 +71,17 @@ TwitterRenderer.render = function (task) {
             while (task.container.hasChildNodes())
                 task.container.removeChild(task.container.lastChild);
         }
+        
+        //TODO: metadata attribute
+		feedControls = new FeedControls();
+		feedControlsDiv = feedControls.constructControlsDiv();
 
         // Add the HTML5 canvas for the drawing of connection lines
         var canvas = document.createElement("canvas");
         canvas.className = styleInfo.styles.lineCanvas;
 
         // Add the table and canvas to the interior container
+        task.visual.appendChild(feedControlsDiv);
         task.visual.appendChild(metadataTable);
         task.visual.appendChild(canvas);
 
@@ -786,11 +791,11 @@ TwitterRenderer.buildMetadataTable = function (table, isChildTable, isRoot, meta
             row.appendChild(nameCol);
             row.appendChild(valueCol);
             
-            if (streamIcon)
+            /*if (streamIcon)
 			{
             	var row1 = TwitterRenderer.getIconRow(styleInfo);
             	table.appendChild(row1);
-			}
+			}*/
             table.appendChild(row);
 
             break;
@@ -1389,16 +1394,6 @@ TwitterRenderer.buildMetadataField = function(metadataField, isChildTable, field
 					fieldLabelDiv.appendChild(img);
 			}		
 			
-			if (metadataField.child_type == "tweet")
-			{
-				var imgPnP = document.createElement('img');
-			    imgPnP.className = styleInfo.styles.tweetStreamIcon;
-			    imgPnP.src = TwitterRenderer.pauseIconPath;
-			    imgPnP.onclick = TwitterRenderer.playPauseStream;
-			    
-			    fieldLabelDiv.appendChild(imgPnP);
-			}
-			
 			nameCol.appendChild(fieldLabelDiv);
 		}
 			
@@ -1936,8 +1931,8 @@ TwitterRenderer.getTweetSemanticsDiv = function (tweetId, styleInfo) {
 TwitterRenderer.renderUpdate = function(url, mmd, metadata)
 {
 	//TODO: generalize (streaming directives in mmd)
-	if (metadata.title)
-		delete metadata["title"];
+	//if (metadata.title)
+		//delete metadata["title"];
 		
 	var metadataFields = ViewModeler.createMetadata(false, mmd, metadata, url);
 	var miceStyles = InterfaceStyle.getMiceStyleDictionary("twitter");
@@ -1946,8 +1941,14 @@ TwitterRenderer.renderUpdate = function(url, mmd, metadata)
 	var contentExpansions = TwitterRenderer.getDocumentContainersByUrl(url);
 	
 	for (var i = 0; i < contentExpansions.length; i++) {
-		var streamIcon = contentExpansions[i].visual.getElementsByClassName(
-				styleInfo.styles.tweetStreamIcon)[0];
+		var feedControls = contentExpansions[i].visual.getElementsByClassName("feedControls")[0];
+		var streamIcon = null;
+		if (feedControls)
+			streamIcon = feedControls.getElementsByClassName(styleInfo.styles.tweetStreamIcon)[0];
+		
+		//if(!streamIcon) 
+		//	streamIcon = contentExpansions[i].visual.parentElement.parentElement.getElementsByClassName(
+		//		styleInfo.styles.tweetStreamIcon)[0];
 		
 		if (streamIcon)
 		{
@@ -1972,12 +1973,13 @@ TwitterRenderer.renderUpdate = function(url, mmd, metadata)
 				//var tweetsCell = rowDiv.firstChild.nextSibling;
 			
 				//fieldLabelDiv.labelCol.row
-				var labelRow = streamIcon.parentElement.parentElement.parentElement;
+				//var labelRow = streamIcon.parentElement.parentElement.parentElement;
 				//row.table.td
-				var tweetsCell = labelRow.parentElement.parentElement;
-				tweetsCell.insertBefore(metadataTable, tweetsCell.firstChild);
+				//var tweetsCell = labelRow.parentElement.parentElement;
+				feedControls.nextSibling.removeChild(feedControls.nextSibling.firstChild);
+				feedControls.parentElement.insertBefore(metadataTable, feedControls.nextSibling);
 								
-				if (streamIcon.moreData) 
+				/*if (streamIcon.moreData) 
 				{
 					tweetsCell.removeChild(tweetsCell.firstChild.nextSibling);
 				}
@@ -1986,7 +1988,7 @@ TwitterRenderer.renderUpdate = function(url, mmd, metadata)
 					//remove previous icon
 					var iconParent = streamIcon.parentElement;
 					iconParent.removeChild(streamIcon);
-				}
+				}*/
 			}
 		}
 	}
@@ -2012,7 +2014,7 @@ TwitterRenderer.isStreamPaused = function(icon)
 	return (icon.src == TwitterRenderer.playIconPath);
 }
 
-TwitterRenderer.getIconRow = function(styleInfo)
+/*TwitterRenderer.getIconRow = function(styleInfo)
 {
 	var row = document.createElement('div');
     row.className = styleInfo.styles.metadataRow;
@@ -2038,4 +2040,4 @@ TwitterRenderer.getIconRow = function(styleInfo)
     row.appendChild(valueCol);
     
     return row;
-}
+}*/
