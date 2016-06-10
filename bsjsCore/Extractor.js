@@ -463,7 +463,7 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 
 				if (obj)
 				{
-					if (f.scope.resolved_generic_type_vars &&
+					if (f.scope && f.scope.resolved_generic_type_vars &&
 							f.scope.resolved_generic_type_vars.length > 0) {
 						for (g in f.scope.resolved_generic_type_vars){
 							generic_type_var = f.scope.resolved_generic_type_vars[g];
