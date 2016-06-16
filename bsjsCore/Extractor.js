@@ -113,7 +113,7 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 	* recurse : boolean, whether or not to recursively extract composites and collections
     * isComplex : are we within a composite or collection
 	*/
-	function dataFromKids(mmdKids, contextNode, recurse, isComplex){
+	function dataFromKids(mmdKids, contextNode, recurse, isComplex, nodeNum){
 		var data = { };
 		var isEmpty = true; //if object is empty
 	    var isNested = false;
@@ -159,7 +159,7 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 	                hasContext = true;
 				}
 				
-				obj = getScalarD(field,contextNode,recurse,page);
+				obj = getScalarD(field,contextNode,recurse,page,nodeNum);
 				tag = field.tag;
 				
 				//this is a remnant. not sure what it does, but I'm scared to remove it
@@ -186,7 +186,7 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 					contextNode = defVars[field.context_node];
 				}			
 				
-				obj = getCompositeD(field,contextNode,recurse);
+				obj = getCompositeD(field,contextNode,recurse,nodeNum);
 				
                 if(obj) {
                     isEmpty = false;
@@ -204,7 +204,7 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 				if (field.hasOwnProperty('context_node')) {
 					contextNode = defVars[field.context_node];
 				}
-				obj = getCollectionD(field,contextNode,recurse);
+				obj = getCollectionD(field,contextNode,recurse,nodeNum);
 				if(obj) {
 					isEmpty = false;
 					if (tag) {
@@ -222,7 +222,7 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 		return data;
 	}
 
-	function getScalarD(field, contextNode, recurse){
+	function getScalarD(field, contextNode, recurse, nodeNum){
 		var x = null;
 		var data = null;
 		
@@ -240,13 +240,13 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 			var fieldx = field.importantXpaths;
 			for (var j = 0; j < fieldx.length; j++) {
 				if (field.extract_as_html) {
-					x = getScalarNode(field,fieldx[j],contextNode);
+					x = getScalarNode(field,fieldx[j],contextNode,nodeNum);
 					if (x) {
 						x = x.innerHTML;
 					}
 				}
 				else {
-					x = getScalarString(field,fieldx[j],contextNode);
+					x = getScalarString(field,fieldx[j],contextNode,nodeNum);
 				}				
 				if (x !== null && x !== "" && x !== "\n") {
 					data = x;
@@ -269,7 +269,7 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 		return null;
 	}
 
-	function getCompositeD(field,contextNode,recurse){
+	function getCompositeD(field,contextNode,recurse,nodeNum){
 		var x = null;
 		var data = null;
 		var kids = field.kids;
@@ -289,7 +289,7 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 		if (field.hasOwnProperty('importantXpaths') && field.importantXpaths.length > 0){
 			var fieldx = field.importantXpaths;
 			for (var j = 0; j < fieldx.length; j++) {
-				x = getCompositeObject(field, fieldx[j], contextNode);
+				x = getCompositeObject(field, fieldx[j], contextNode, nodeNum);
 				// if the result is not a node, assume there was a field parser that manually got data for us and return that data
 				if (x !== null && !("nodeType" in x)) {//x.prototype && !x.prototype.hasOwnProperty("nodeType")){
 					return x;
@@ -304,15 +304,15 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 			}
 
 			if (newContextNode !== null && recurse && recurseNeeded) {
-				data = dataFromKids(kids,newContextNode,recurse, true);
+				data = dataFromKids(kids,newContextNode,recurse, true, nodeNum);
 			}
 			else if (newContextNode !== null) {
-				data = dataFromKids(kids,newContextNode,false, true);
+				data = dataFromKids(kids,newContextNode,false, true, nodeNum);
 			}
 			
 		} else if (recurse)
 		{
-			data = dataFromKids(kids,contextNode,false,true, true);
+			data = dataFromKids(kids,contextNode,false,true, true, nodeNum);
 		}  
 		
 		if(data)
@@ -334,7 +334,7 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 		return null;		
 	}
 
-	function getCollectionD(field,contextNode,recurse){
+	function getCollectionD(field,contextNode,recurse,nodeNum){
 		if (!recurse) {
 			return null;
 		}
@@ -345,7 +345,7 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 		if (field.hasOwnProperty('importantXpaths') && field.importantXpaths.length > 0) {
 			var fieldx = field.importantXpaths;
 			for (var j = 0; j < fieldx.length; j++) {
-				x = getCollectionData(field,fieldx[j],contextNode);
+				x = getCollectionData(field,fieldx[j],contextNode, nodeNum);
 				if (x !== null && x !== "") {
 					data = x;
 	                break;
@@ -359,10 +359,11 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 		return null;
 	}
 
-	function getScalarNode(field,xpath,contextNode) {
+	function getScalarNode(field,xpath,contextNode, nodeNum) {
 		var data;
 		try {
 			var evalXpath = makeRelativeXpath(xpath, contextNode);
+			evalXpath = evalXpath.replace("$i", nodeNum);
 			data = page.evaluate(evalXpath, contextNode, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null);
 		} catch (err) {
 			console.error(err);
@@ -371,11 +372,12 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 		return data.singleNodeValue;
 	}
 
-	function getScalarString(field,xpath,contextNode){
+	function getScalarString(field,xpath,contextNode, nodeNum) {
 	    getScalarStringCalled++;
 		var data;
 		try {
 			var evalXpath = makeRelativeXpath(xpath, contextNode);
+			evalXpath = evalXpath.replace("$i", nodeNum);
 			data = page.evaluate(evalXpath, contextNode, null, XPathResult.STRING_TYPE, null);
 		} catch (err) {
 			console.error(err);
@@ -408,12 +410,13 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 		return string;
 	}
 
-	function getCompositeObject(field,xpath,contextNode){
+	function getCompositeObject(field,xpath,contextNode,nodeNum){
 		var fieldParserEl = field.field_parser;
 		var nodes;
 		
 		try {
 			var evalXpath = makeRelativeXpath(xpath, contextNode);
+			evalXpath = evalXpath.replace("$i", nodeNum);
 			nodes = page.evaluate(evalXpath, contextNode, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);		
 		} catch (e) {
 			console.error(e);
@@ -433,12 +436,13 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 		return node;
 	}
 
-	function getCollectionData(field,xpath,contextNode){
+	function getCollectionData(field,xpath,contextNode,nodeNum){
 		var d = null;
 		var fieldParserEl = field.field_parser;
 		var nodes, g, generic_type_var;
 		try {
 			var evalXpath = makeRelativeXpath(xpath, contextNode);
+			evalXpath = evalXpath.replace("$i", nodeNum);
 			nodes = page.evaluate(evalXpath, contextNode, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);		
 		} catch (e) {
 			console.error(e);
@@ -459,7 +463,7 @@ function extractMetadataSync(response, mmd, bigSemantics, options) {
 			
 			for (var i = 0; i < size; i++) {
 				var newNode = nodes.snapshotItem(i);
-	            var obj = dataFromKids(kids,newNode,true, true);
+	            var obj = dataFromKids(kids,newNode,true, true, i + 1);
 
 				if (obj)
 				{
