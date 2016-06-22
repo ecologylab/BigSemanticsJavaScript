@@ -1878,29 +1878,28 @@ TwitterRenderer.renderUpdate = function(url, mmd, metadata)
 	
 	for (var i = 0; i < contentExpansions.length; i++) {
 		var feedControls = contentExpansions[i].visual.getElementsByClassName("feedControls")[0];
-		var streamIcon = null;
 		if (feedControls) {
-			streamIcon = feedControls.getElementsByClassName(styleInfo.styles.tweetStreamIcon)[0];
-		}
-		if (streamIcon)
-		{
-			var metadataTable = null;
-			var paused = TwitterRenderer.isStreamPaused(streamIcon);
-			if (!paused)
+			var streamIcon = feedControls.getElementsByClassName(styleInfo.styles.tweetStreamIcon)[0];
+			if (streamIcon)
 			{
-				metadataTable = TwitterRenderer.buildMetadataTable(null, false, false, 
-						metadataFields, TwitterRenderer.FIRST_LEVEL_FIELDS, styleInfo, null, false);
-			}
-			else
-			{
-				metadataTable = TwitterRenderer.buildMetadataTable(null, false, false, 
-						metadataFields, 0, styleInfo, null, false, streamIcon);
-			}
-			
-			if (metadataTable) 
-			{
-				feedControls.nextSibling.removeChild(feedControls.nextSibling.firstChild);
-				feedControls.parentElement.insertBefore(metadataTable, feedControls.nextSibling);
+				var metadataTable = null;
+				var paused = TwitterRenderer.isStreamPaused(streamIcon);
+				if (!paused)
+				{
+					metadataTable = TwitterRenderer.buildMetadataTable(null, false, false, 
+							metadataFields, TwitterRenderer.FIRST_LEVEL_FIELDS, styleInfo, null, false);
+				}
+				else
+				{
+					metadataTable = TwitterRenderer.buildMetadataTable(null, false, false, 
+							metadataFields, 0, styleInfo, null, false, streamIcon);
+				}
+				
+				if (metadataTable) 
+				{
+					feedControls.nextSibling.removeChild(feedControls.nextSibling.firstChild);
+					feedControls.parentElement.insertBefore(metadataTable, feedControls.nextSibling);
+				}
 			}
 		}
 	}
