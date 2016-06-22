@@ -222,39 +222,6 @@ TwitterRenderer.addMetadataDisplay = function(container, url, clipping, renderer
   
 }
 
-/*TwitterRenderer.addMetadataDisplay = function (container, url, isRoot, clipping, requestMD, reloadMD, expandedItem) {
-    var visual = null;
-    var bgColor = null;
-    var bgColorObj = null;
-    if ((url.indexOf("twitter.com") != -1 || application_name == "tweetbubble") ||
-			(expandedItem && ((expandedItem.mmdType && expandedItem.mmdType.indexOf("twitter") != -1)
-							 || (expandedItem.className && expandedItem.className.indexOf("pretty-link twitter-timeline-link") != -1)))) {
-        bgColor = TwitterRenderer.getNextColor(container);
-        bgColorObj = { color: bgColor, bFirstField: true };
-
-        if (expandedItem)
-            expandedItem.mmdType = "twitter";
-
-        if (isRoot)
-            visual = TwitterRenderer.renderInitial(container, url, isRoot, expandedItem, bgColorObj);
-    }
-
-    // Add the rendering task to the queue
-    var task = new TweetBubbleRenderingTask(url, container, isRoot, clipping, TwitterRenderer.render, expandedItem, visual, bgColorObj);
-    MetadataLoader.queue.push(task);
-
-    if (clipping != null && clipping.rawMetadata != null) {
-        clipping.rawMetadata.deserialized = true;
-        MetadataLoader.setMetadata(clipping.rawMetadata);
-    }
-    else {
-        var requestMetadata = (typeof requestMD === "undefined") || requestMD == true;
-
-        // Fetch the metadata from the service
-        if (!isExtension && requestMetadata)
-            MetadataLoader.getMetadata(url, "MetadataLoader.setMetadata", reloadMD);
-    }
-}*/
 
 TwitterRenderer.renderInitial = function (container, url, isRoot, expandedItem, bgColorObj) {
     var miceStyles = InterfaceStyle.getMiceStyleDictionary("twitter");
@@ -528,32 +495,6 @@ TwitterRenderer.downloadAndDisplayDocument = function(event)
 			expandedItem: button
 		};
 		TwitterRenderer.addMetadataDisplay(table.parentElement, location, null, TwitterRenderer.render, options);
-		
-		/*if (!requestMD)
-		{
-			if (!isExtension)
-			{
-				//document.dispatchEvent(new Event("tweetbubbleExternal"));
-				var message = {
-					type : "extractionRequest",
-					sender : table.parentElement,
-					detail : {
-						url : location
-					}
-				};
-				ExtensionInterface.dispatchMessage(message);
-				console.log("requested extension for metadata: " + location);
-	
-				window.setTimeout(function()
-				{
-					MetadataLoader.checkForMetadataFromExtension();
-				}, 3000);
-			}
-			else if (requestDocumentDownload)
-			{
-				requestDocumentDownload(location);
-			}
-		}*/
 	}
 	// If there was no document location then the table must be a non-document composite in which case just expand
 	else
@@ -791,11 +732,6 @@ TwitterRenderer.buildMetadataTable = function (table, isChildTable, isRoot, meta
             row.appendChild(nameCol);
             row.appendChild(valueCol);
             
-            /*if (streamIcon)
-			{
-            	var row1 = TwitterRenderer.getIconRow(styleInfo);
-            	table.appendChild(row1);
-			}*/
             table.appendChild(row);
 
             break;
@@ -1943,13 +1879,9 @@ TwitterRenderer.renderUpdate = function(url, mmd, metadata)
 	for (var i = 0; i < contentExpansions.length; i++) {
 		var feedControls = contentExpansions[i].visual.getElementsByClassName("feedControls")[0];
 		var streamIcon = null;
-		if (feedControls)
+		if (feedControls) {
 			streamIcon = feedControls.getElementsByClassName(styleInfo.styles.tweetStreamIcon)[0];
-		
-		//if(!streamIcon) 
-		//	streamIcon = contentExpansions[i].visual.parentElement.parentElement.getElementsByClassName(
-		//		styleInfo.styles.tweetStreamIcon)[0];
-		
+		}
 		if (streamIcon)
 		{
 			var metadataTable = null;
@@ -1967,28 +1899,8 @@ TwitterRenderer.renderUpdate = function(url, mmd, metadata)
 			
 			if (metadataTable) 
 			{
-				////visual.metadataTable.title.tweets
-				//var rowDiv = contentExpansions[i].visual.firstChild.firstChild.nextSibling;
-				////row.td.td
-				//var tweetsCell = rowDiv.firstChild.nextSibling;
-			
-				//fieldLabelDiv.labelCol.row
-				//var labelRow = streamIcon.parentElement.parentElement.parentElement;
-				//row.table.td
-				//var tweetsCell = labelRow.parentElement.parentElement;
 				feedControls.nextSibling.removeChild(feedControls.nextSibling.firstChild);
 				feedControls.parentElement.insertBefore(metadataTable, feedControls.nextSibling);
-								
-				/*if (streamIcon.moreData) 
-				{
-					tweetsCell.removeChild(tweetsCell.firstChild.nextSibling);
-				}
-				else 
-				{
-					//remove previous icon
-					var iconParent = streamIcon.parentElement;
-					iconParent.removeChild(streamIcon);
-				}*/
 			}
 		}
 	}
@@ -2007,37 +1919,11 @@ TwitterRenderer.playPauseStream = function(event)
 	{
 		streamIcon.src = TwitterRenderer.playIconPath;
 	}
+	
+	event.stopPropagation();
 }
 
 TwitterRenderer.isStreamPaused = function(icon)
 {
 	return (icon.src == TwitterRenderer.playIconPath);
 }
-
-/*TwitterRenderer.getIconRow = function(styleInfo)
-{
-	var row = document.createElement('div');
-    row.className = styleInfo.styles.metadataRow;
-    
-    var nameCol = document.createElement('div');
-    nameCol.className = styleInfo.styles.labelColShowDiv;
-
-    var valueCol = document.createElement('div');
-    valueCol.className = styleInfo.styles.valueColShowDiv;
-    
-    var fieldValueDiv = document.createElement('div');
-	fieldValueDiv.className = styleInfo.styles.fieldValueContainer;
-	
-	var imgPnP = document.createElement('img');
-    imgPnP.className = styleInfo.styles.tweetStreamIcon;
-    imgPnP.src = TwitterRenderer.playIconPath;
-    imgPnP.onclick = TwitterRenderer.playPauseStream;
-    imgPnP.moreData = true;
-    
-    fieldValueDiv.appendChild(imgPnP);
-    valueCol.appendChild(fieldValueDiv);
-    row.appendChild(nameCol);
-    row.appendChild(valueCol);
-    
-    return row;
-}*/
