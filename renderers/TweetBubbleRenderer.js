@@ -703,9 +703,11 @@ TwitterRenderer.buildMetadataTable = function (table, isChildTable, isRoot, meta
             var valueCol = document.createElement('div');
             valueCol.className = styleInfo.styles.valueColShowDiv;
             //TODO - add "more" expander
+            if (streamIcon && streamIcon.data) {
+        		metadataFields = metadataFields.concat(streamIcon.data);
+        		streamIcon.data = metadataFields;
+        	}
             var moreCount = metadataFields.length - i;
-            if (streamIcon)
-            	moreCount = metadataFields[0].value.length;
 
             var fieldValueDiv = document.createElement('div');
             fieldValueDiv.className = styleInfo.styles.moreButton;
@@ -1888,17 +1890,34 @@ TwitterRenderer.renderUpdate = function(url, mmd, metadata)
 				{
 					metadataTable = TwitterRenderer.buildMetadataTable(null, false, false, 
 							metadataFields, TwitterRenderer.FIRST_LEVEL_FIELDS, styleInfo, null, false);
+					streamIcon.moreCount = 0;
+					streamIcon.data = [];
 				}
 				else
 				{
 					metadataTable = TwitterRenderer.buildMetadataTable(null, false, false, 
 							metadataFields, 0, styleInfo, null, false, streamIcon);
+					streamIcon.moreCount += metadataFields[0].value.length;
+					if (!streamIcon.data)
+						streamIcon.data = [];
 				}
 				
 				if (metadataTable) 
 				{
-					feedControls.nextSibling.removeChild(feedControls.nextSibling.firstChild);
-					feedControls.parentElement.insertBefore(metadataTable, feedControls.nextSibling);
+					/*var opacity = 0;
+					function animateUpdateRendering(feedControls, metadataTable)
+					{
+						metadataTable.style.opacity = opacity;
+						opacity += 0.1;
+						if (opacity <= 1.0) {
+							setTimeout(animateUpdateRendering, 100, feedControls, metadataTable);
+						}
+					*/	
+						feedControls.nextSibling.removeChild(feedControls.nextSibling.firstChild);
+						feedControls.parentElement.insertBefore(metadataTable, feedControls.nextSibling);
+					/*}
+					animateUpdateRendering(feedControls, metadataTable);
+					*/
 				}
 			}
 		}
