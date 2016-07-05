@@ -1,0 +1,68 @@
+<html>
+
+<head>
+<title>Test Extraction</title>
+
+<script src="../../libraries/jquery-2.0.0.min.js"></script>
+
+<script src="../simpl/simplBase.js"></script>
+<script src="../ParsedURL.js"></script>
+<script src="../BSUtils.js"></script>
+<script src="../Readyable.js"></script>
+<script src="../RepoMan.js"></script>
+<script src="../Downloader.js"></script>
+<script src="../Extractor.js"></script>
+<script src="../FieldOps.js"></script>
+<script src="../BigSemantics.js"></script>
+</head>
+
+<body>
+
+<div class="wrap">
+  URL: <input id="url" type="text" size="100" />
+  <input id="load" type="button" value="Load" />
+</div>
+
+<div class="wrap">
+  <pre><code id="json"></code></pre>
+</div>
+
+<script>
+  var url = "test-amazon_product-1.html";
+  $('#url').text(url);
+
+  var downloader = new Downloader();
+  var dOpts = {
+    responseType: 'document',
+  };
+  downloader.httpGet(url, null, function(err, resp) {
+    if (err) {
+      return console.error(err);
+    }
+
+    // TODO serve mmdrepository.json through web service.
+    var repoMan = new RepoMan({
+      url: 'mmdrepository.json',
+    });
+    repoMan.onReady(function(err) {
+      if (err) {
+        return console.error(err);
+      }
+
+      repoMan.loadMmd('amazon_product', null, function(err, mmd) {
+        if (err) {
+          return console.error(err);
+        }
+
+        extractMetadata(resp, mmd, null, null, function(err, metadata) {
+          simpl.graphCollapse(metadata);
+          var json = JSON.stringify(metadata, null, 4);
+          $('#json').text(json);
+        });
+      });
+    });
+  });
+</script>
+</body>
+
+</html>
