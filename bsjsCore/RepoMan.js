@@ -8,35 +8,39 @@ if (typeof require == 'function') {
 }
 
 var RepoMan = (function() {
-	
-	//keep this for clearing to prevent race condition that can cause repo to get loaded multiple times at first
-	var loadInterval;
-	
-	// Constructor of RepoMan
-	// object source: indicating where to load the repo. required.
-	// object options: optional configurations.
-	function RepoMan(source, options) {
-		Readyable.call(this);
 
-		loadRepo(this, source, options);
+  // keep this for clearing to prevent race condition that can cause repo to get
+  // loaded multiple times at first
+  var loadInterval;
 
-		//refresh me later in case mmd repo changes
-		//I made loadRepo a seperate function to make wrangling scopes and timeouts easier
-		//could probably be refactored to make reloaded externaly available (which would be ideal)
-		clearInterval(loadInterval);
-		loadInterval = setInterval(loadRepo, 86400000, this, source, options);
+  // Constructor of RepoMan
+  // object source: indicating where to load the repo. required.
+  // object options: optional configurations.
+  function RepoMan(source, options) {
+    Readyable.call(this);
 
-		return this;
-	}
-	
+    loadRepo(this, source, options);
+
+    // refresh me later in case mmd repo changes
+    // I made loadRepo a seperate function to make wrangling scopes and timeouts
+    // easier could probably be refactored to make reloaded externaly available
+    // (which would be ideal)
+    clearInterval(loadInterval);
+    loadInterval = setInterval(loadRepo, 86400000, this, source, options);
+
+    return this;
+  }
+
   RepoMan.prototype = Object.create(Readyable.prototype);
   RepoMan.prototype.constructor = RepoMan;
 
   function loadRepo(repoman, source, options) {
-	console.log("loading repo");
-	  
-	if (!source) { throw new Error("source required!"); }
-    
+    console.log("loading repo");
+
+    if (!source) {
+      throw new Error("source required!");
+    }
+
     repoman.source = source;
     if (options && options.defaultDocumentType) {
       repoman.defaultDocumentType = options.defaultDocumentType;
@@ -52,19 +56,23 @@ var RepoMan = (function() {
         repoman.repo = source.repo.meta_metadata_repository;
       }
       repoman.initialize();
-    } 
-	else if (source.file) {
-      
-	  // only works in Node:
+    }
+    else if (source.file) {
+      // only works in Node:
       var that = repoman;
       var fs = require('fs');
-      fs.readFile(source.file, { encoding: 'utf8' }, function(err, content) {
-        if (err) { that.setError(err); return; }
-        
-		try {
+      fs.readFile(source.file, {
+        encoding: 'utf8'
+      }, function(err, content) {
+        if (err) {
+          that.setError(err);
+          return;
+        }
+
+        try {
           that.repo = simpl.deserialize(content);
-        } 
-		catch (err) {
+        }
+        catch (err) {
           that.setError(err);
           return;
         }
@@ -73,30 +81,34 @@ var RepoMan = (function() {
         }
         that.initialize();
       });
-    } 
-	else if (source.url) {
-      
-	  var that = repoman;
+    }
+    else if (source.url) {
+      var that = repoman;
       var downloader = null;
-	  if (options && options.downloader) {
+      if (options && options.downloader) {
         downloader = options.downloader;
-      } 
+      }
       else {
         downloader = new Downloader();
       }
-      
-	  var dOpts = { responseType: 'json' };
+
+      var dOpts = {
+        responseType: 'json'
+      };
       downloader.httpGet(source.url, dOpts, function(err, response) {
-        if (err) { that.setError(err); return; }
+        if (err) {
+          that.setError(err);
+          return;
+        }
 
         if (response.entity) {
           that.repo = simpl.graphExpand(response.entity);
-        } 
-		else if (response.text) {
+        }
+        else if (response.text) {
           try {
             that.repo = simpl.deserialize(response.text);
-          } 
-	      catch (err) {
+          }
+          catch (err) {
             that.setError(err);
             return;
           }
@@ -104,16 +116,16 @@ var RepoMan = (function() {
         if (that.repo && that.repo.meta_metadata_repository) {
           that.repo = that.repo.meta_metadata_repository;
         }
-        
+
         if (that.repo) {
           that.initialize();
-        } 
-		else {
+        }
+        else {
           that.setError("Cannot obtain repository from " + source.url);
           return;
         }
       });
-	}
+    }
   };
 
   // selectorMap: key => Array of selectors
@@ -125,7 +137,8 @@ var RepoMan = (function() {
         selectorMap[key] = [];
       }
       selectorMap[key].push(selector);
-    } else {
+    }
+    else {
       console.warn("Missing key for selector: ", selector);
     }
   }
@@ -135,7 +148,9 @@ var RepoMan = (function() {
     function removeLast(s, c) {
       if (s) {
         var l = s.length;
-        if (l > 0 && s[l-1] == c) { return s.substr(0, l-1); }
+        if (l > 0 && s[l - 1] == c) {
+          return s.substr(0, l - 1);
+        }
       }
       return s;
     }
@@ -151,7 +166,8 @@ var RepoMan = (function() {
     }
     if (!domain) {
       console.warn("WARN: Missing domain: ", selector);
-    } else {
+    }
+    else {
       RepoMan.addToSelectorMap(selectorMap, domain, selector);
     }
   }
@@ -159,11 +175,21 @@ var RepoMan = (function() {
   // helper function for adding <url_regex> and <url_regex_fragment> selector.
   RepoMan.addUrlPattern = function(selectorMap, selector) {
     function prependIfMissing(s, c) {
-      if (s) { if (s.length == 0 || s[0] != c) { return c+s; } }
+      if (s) {
+        if (s.length == 0 || s[0] != c) {
+          return c + s;
+        }
+      }
       return s;
     }
+
     function appendIfMissing(s, c) {
-      if (s) { var l = s.length; if (l == 0 || s[l-1] != c) { return s+c; } }
+      if (s) {
+        var l = s.length;
+        if (l == 0 || s[l - 1] != c) {
+          return s + c;
+        }
+      }
       return s;
     }
     try {
@@ -172,7 +198,8 @@ var RepoMan = (function() {
         selector.url_regex = appendIfMissing(selector.url_regex, '$');
       }
       RepoMan.addToSelectorMap(selectorMap, selector.domain, selector);
-    } catch (err) {
+    }
+    catch (err) {
       console.warn("WARN: Malformed: ", selector, "; Error: ", err);
     }
   }
@@ -180,17 +207,23 @@ var RepoMan = (function() {
   // pre-condition: this.repo is loaded, e.g. deserialized from a JSON dump.
   // called in the end of this constructor.
   RepoMan.prototype.initialize = function() {
-    if (!this.repo) { setError("No Repo Loaded!"); return; }
-    if (!this.repo.repository_by_name) { setError("Invalid Repo!"); return; }
+    if (!this.repo) {
+      setError("No Repo Loaded!");
+      return;
+    }
+    if (!this.repo.repository_by_name) {
+      setError("Invalid Repo!");
+      return;
+    }
 
     this.mmds = {};
-    for (var i = 0; i <  this.repo.repository_by_name.length; i++) {
+    for (var i = 0; i < this.repo.repository_by_name.length; i++) {
       var mmd = this.repo.repository_by_name[i];
       this.mmds[mmd.name] = mmd;
     }
     if (this.repo.alt_names) {
       var altNames = this.repo.alt_names;
-      for (var i =0; i < altNames.length; i++) {
+      for (var i = 0; i < altNames.length; i++) {
         var name = altNames[i].name;
         var mmd = altNames[i].mmd;
         this.mmds[name] = mmd;
@@ -223,14 +256,18 @@ var RepoMan = (function() {
           selector.targetType = mmd.name;
           if (selector.url_stripped) {
             RepoMan.addUrlStripped(this.urlStripped, selector);
-          } else if (selector.url_path_tree) {
+          }
+          else if (selector.url_path_tree) {
             RepoMan.addUrlPath(this.urlPath, selector);
-          } else if (selector.url_regex || selector.url_regex_fragment) {
+          }
+          else if (selector.url_regex || selector.url_regex_fragment) {
             RepoMan.addUrlPattern(this.urlRegex, selector);
           } // TODO more cases: mime types, suffixes, etc ...
         }
       }
     }
+
+    // TODO sort xpaths based on where they were initially written
 
     this.setReady();
   }
@@ -238,8 +275,11 @@ var RepoMan = (function() {
   // callback: (err, mmd) => void
   RepoMan.prototype.loadMmd = function(name, options, callback) {
     if (this.mmds && name in this.mmds) {
-      callback(null, { meta_metadata: this.mmds[name] });
-    } else {
+      callback(null, {
+        meta_metadata: this.mmds[name]
+      });
+    }
+    else {
       callback(new Error("Cannot find target mmd"), null);
     }
   }
@@ -270,15 +310,25 @@ var RepoMan = (function() {
   RepoMan.nextPart = function(str, start, sep) {
     if (str && str.length > 0) {
       var i = start;
-      while (i < str.length && str[i] != sep) { i++; }
+      while (i < str.length && str[i] != sep) {
+        i++;
+      }
       i++; // now i points to the next position that is not the sep
       if (i < str.length) {
         var j = i;
-        while (j < str.length && str[j] != sep) { j++; }
-        return { part: str.substring(i, j), nextPos: j }
+        while (j < str.length && str[j] != sep) {
+          j++;
+        }
+        return {
+          part: str.substring(i, j),
+          nextPos: j
+        }
       }
     }
-    return { part: '', nextPos: start };
+    return {
+      part: '',
+      nextPos: start
+    };
   }
 
   // takes the domain, the path tree spec, and the location; returns true if and
@@ -295,8 +345,8 @@ var RepoMan = (function() {
       if (p1.part.length == 0) {
         return true;
       }
-      if (p1.part == '*' && p2.part.length == 0  ||
-          p1.part != '*' && p1.part != p2.part) {
+      if (p1.part == '*' && p2.part.length == 0 ||
+        p1.part != '*' && p1.part != p2.part) {
         return false;
       }
     }
@@ -333,7 +383,8 @@ var RepoMan = (function() {
           if (purl.raw.match(selector.url_regex)) {
             results.push(selector);
           }
-        } else if (selector.url_regex_fragment) {
+        }
+        else if (selector.url_regex_fragment) {
           if (purl.raw.match(selector.url_regex_fragment)) {
             results.push(selector);
           }
@@ -349,11 +400,15 @@ var RepoMan = (function() {
     for (var i in paramSpecs) {
       var spec = paramSpecs[i];
       var val = actualParams[spec.name];
-      if (!val) { val = ''; }
+      if (!val) {
+        val = '';
+      }
       if (spec.value && spec.value.length > 0) {
         var allowEmpty = String(spec.allow_empty_value) == 'true';
         var allowAndIsEmpty = allowEmpty && val.length == 0;
-        if (!allowAndIsEmpty && !spec.value == val) { return false; }
+        if (!allowAndIsEmpty && !spec.value == val) {
+          return false;
+        }
       }
       if (spec.value_is_not && spec.value_is_not.length > 0) {
         if (spec.value_is_not == val) {
@@ -405,23 +460,27 @@ var RepoMan = (function() {
 
     if (results.length == 0) {
       console.log("Use default document type for " + location);
-      callback(null, { meta_metadata: this.mmds[this.defaultDocumentType] });
-    } else if (results.length == 1) {
+      callback(null, {
+        meta_metadata: this.mmds[this.defaultDocumentType]
+      });
+    }
+    else if (results.length == 1) {
       this.loadMmd(results[0].targetType, options, callback);
-    } else {
+    }
+    else {
       console.warn("Multiple mmds matched for " + location + ": ", results);
       this.loadMmd(results[0].targetType, options, callback);
     }
   }
 
-  RepoMan.prototype.getInfo = function(){
-	  return this.repo.build;
+  RepoMan.prototype.getInfo = function() {
+    return this.repo.build;
   }
-  
+
   RepoMan.prototype.getSource = function() {
     return this.source;
   }
-  
+
   return RepoMan;
 })();
 
@@ -430,4 +489,3 @@ if (typeof module == 'object') {
   module.exports = RepoMan;
   module.exports.default = RepoMan;
 }
-

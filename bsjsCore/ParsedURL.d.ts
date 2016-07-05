@@ -16,5 +16,5 @@ export default class ParsedURL {
   query: Object; // param key-value pairs
   fragmentId: string;
 
-  constructor(rawUrl: string);
+  constructor(url: string, base?: string);
 }

@@ -10,7 +10,7 @@ if (typeof require == 'function') {
 /**
  * Semantics that transforms locations for managing variability in Document
  * locations.
- * 
+ *
  * @author kade
  */
 var PreFilter = {};
@@ -19,7 +19,7 @@ PreFilter.filter = function(location, filterObj) {
   var newLocation = location;
   for (var i in filterObj.ops){
     var fieldOp = filterObj.ops[i];
-    newLocation = FieldOps.operate(newLocation, fieldOp);
+    newLocation = FieldOps.operateOne(newLocation, fieldOp);
   }
   return newLocation;
 };
@@ -30,7 +30,20 @@ PreFilter.filter = function(location, filterObj) {
  */
 var FieldOps = {};
 
-FieldOps.operate = function(str, fieldOp){
+FieldOps.operate = function(str, fieldOps) {
+  if (fieldOps instanceof Array) {
+    for (var i in fieldOps) {
+      var op = fieldOps[i];
+      var result = FieldOps.operateOne(str, op);
+      str = result;
+    }
+    return str;
+  } else {
+    return FieldOps.operateOne(str, fieldOps);
+  }
+}
+
+FieldOps.operateOne = function(str, fieldOp) {
   try {
     if (fieldOp.append)
       str = FieldOps.append(str, fieldOp.append.value);
@@ -64,8 +77,7 @@ FieldOps.operate = function(str, fieldOp){
 
 // Append value to str
 FieldOps.append = function(str, value) {
-  if (str === undefined || str == null) { return value; }
-  return str + value;
+  return str ? (str + value) : value;
 }
 
 // Decode URL (when a URL is used as a URL parameter in another URL).
@@ -75,11 +87,11 @@ FieldOps.decodeUrl = function(str) {
 
 // Retrieve parameter from URL if exists.
 FieldOps.getParam = function(url, name, otherwise) {
-  if (typeof url == 'string' && typeof name == 'string') {
+  if (url && name) {
     var purl = new ParsedURL(url);
     if (purl.query && name in purl.query) {
       return purl.query[name];
-    } else if (otherwise !== undefined && otherwise !== null) {
+    } else if (otherwise) {
       return otherwise;
     }
   }
@@ -89,40 +101,33 @@ FieldOps.getParam = function(url, name, otherwise) {
 // Regex Match. You can use on_match, on_find, and on_fail to specify special
 // values instead of the match result.
 FieldOps.match = function(str, opts) {
-  if (typeof str == 'string' && opts && typeof opts.pattern == 'string') {
+  if (str && opts && opts.pattern) {
     var result = str.match(new RegExp(opts.pattern));
-    if (typeof opts.on_match == 'string' && result) {
+    if (opts.on_match && result) {
       return opts.on_match;
     }
     if (result) {
-      if (typeof opts.on_find == 'string') {
+      if (opts.on_find) {
         return opts.on_find;
       } else {
-        if (typeof opts.group != 'undefined' && opts.group != null) {
-          return result[Number(opts.group)];
-        } else {
-          return result[0];
-        }
+        return result[opts.group ? Number(opts.group) : 0];
       }
     }
-    if (typeof opts.on_fail == 'string') {
+    if (opts.on_fail) {
       return opts.on_fail;
     }
   }
   return str;
 }
 
-// Replaces params before the # with the ones after. 
+// Replaces params before the # with the ones after.
 FieldOps.overrideParams = function(url) {
-  if (typeof url == 'string') {
+  if (url) {
     var purl = new ParsedURL(url);
-    var frag = purl.fragmentId;
-    if (typeof frag == 'string') {
-      var fragParams = ParsedURL.parseQueryParams(frag);
-      if (fragParams != null && Object.keys(fragParams).length > 0) {
-        if (purl.query === undefined || purl.query == null) {
-          purl.query = new Object();
-        }
+    if (purl.fragmentId) {
+      var fragParams = ParsedURL.parseQueryParams(purl.fragmentId);
+      if (fragParams && Object.keys(fragParams).length > 0) {
+        purl.query = purl.query || new Object();
         for (var name in fragParams) {
           purl.query[name] = fragParams[name];
         }
@@ -135,13 +140,12 @@ FieldOps.overrideParams = function(url) {
 
 // Prepend value to str.
 FieldOps.prepend = function(str, value) {
-  if (str === undefined || str == null) { return value; }
-  return value + str;
+  return str ? (value + str) : value;
 }
 
 // Replace pattern with specified value.
 FieldOps.replace = function(str, opts) {
-  if (typeof str == 'string' && opts && typeof opts.pattern == 'string') {
+  if (str && opts && opts.pattern) {
     if (opts.first_only) {
       return str.replace(new RegExp(opts.pattern), opts.to);
     } else {
@@ -153,12 +157,13 @@ FieldOps.replace = function(str, opts) {
 
 // Set given parameter to a specified value for a URL.
 FieldOps.setParam = function(url, opts) {
-  if (typeof url == 'string' && opts
-      && typeof opts.name == 'string' && typeof opts.value == 'string') {
+  if (url && opts && opts.name && opts.value) {
     var purl = new ParsedURL(url);
-    var onlyWhenNotSet = opts.only_when_not_set === 'false'
-                         || opts.only_when_not_set === false;
-    if (!onlyWhenNotSet || !(opts.name in purl.query)) {
+    var onlyWhenNotSet = opts.only_when_not_set;
+    if (typeof onlyWhenNotSet === 'string') {
+      onlyWhenNotSet = (onlyWhenNotSet === 'true')||(onlyWhenNotSet === 'yes');
+    }
+    if (!(onlyWhenNotSet && opts.name in purl.query)) {
       purl.query[opts.name] = opts.value;
     }
     return purl.toString();
@@ -168,26 +173,24 @@ FieldOps.setParam = function(url, opts) {
 
 // Strip characters off the head and tail of the given str.
 FieldOps.strip = function(str, anyOf) {
-  if (typeof str == 'string') {
-    if (anyOf === undefined || anyOf == null || anyOf == '') {
-      return str.trim();
+  if (str) {
+    if (anyOf && anyOf.length > 0) {
+      var containsAny = function(s, c) {
+        return s.indexOf(c) >= 0;
+      }
+      var a = 0, b = str.length - 1;
+      while (a <= b && containsAny(anyOf, str[a])) { a++; }
+      while (b >= a && containsAny(anyOf, str[b])) { b--; }
+      return (a <= b) ? str.substring(a, b+1) : '';
     }
-
-    var containsAny = function(s, c) {
-      return s.indexOf(c) >= 0;
-    }
-
-    var a = 0, b = str.length - 1;
-    while (a <= b && containsAny(anyOf, str[a])) { a++; }
-    while (b >= a && containsAny(anyOf, str[b])) { b--; }
-    return (a <= b) ? str.substring(a, b+1) : '';
+    return str.trim();
   }
   return str;
 }
 
 // Strip parameter from URL.
 FieldOps.stripParam = function(url, name) {
-  if (typeof url == 'string' && typeof name == 'string') {
+  if (url && name) {
     var purl = new ParsedURL(url);
     if (name in purl.query) {
       delete purl.query[name];
@@ -199,7 +202,7 @@ FieldOps.stripParam = function(url, name) {
 
 // Keep specified parameters and strip all other parameters off a URL.
 FieldOps.stripParamsBut = function(url, names) {
-  if (typeof url == 'string' && names instanceof Array) {
+  if (url && names instanceof Array) {
     var purl = new ParsedURL(url);
     var keys = Object.keys(purl.query).slice(); // slice in case it changes
     for (var i in keys) {
@@ -223,7 +226,7 @@ FieldOps.stripParamsBut = function(url, names) {
 //   begin: index of the beginning position.
 //   end: index of the position immediately past the last position.
 FieldOps.substring = function(str, substringOp) {
-  if (typeof str == 'string') {
+  if (str) {
     var a = 0;
     if (substringOp.after) {
       var p = str.indexOf(substringOp.after);
@@ -253,16 +256,38 @@ FieldOps.substring = function(str, substringOp) {
     } else {
       b = (substringOp.end === 0) ? str.length : substringOp.end;
     }
+
     return str.substring(a, b);
   }
   return str;
+}
+
+FieldOps.concatenateValues = function(values, scope) {
+  if (values instanceof Array) {
+    var result = new Array();
+    for (var i in values) {
+      var value = values[i];
+      if (value.from_scalar) {
+        var v = scope.trace(value.from_scalar, 'value');
+        if (v) { result.push(v); }
+      }
+      else if (value.from_val) {
+        var v = scope.trace(value.from_val, 'vars');
+        if (v) { result.push(v); }
+      }
+      else if (value.constant_value) {
+        result.push(value.constant_value);
+      }
+    }
+    return result.join('');
+  }
+  return null;
 }
 
 // for use in Node:
 if (typeof module == 'object') {
   module.exports = {
     PreFilter: PreFilter,
-    FieldOps: FieldOps
+    FieldOps: FieldOps,
   }
 }
-

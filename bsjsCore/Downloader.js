@@ -88,7 +88,7 @@ var Downloader = (function() {
                 return JS_REDIRECT_OK;
               }
               else {
-            	return JS_REDIRECT_LOOP; 
+            	return JS_REDIRECT_LOOP;
               }
             }
           }
@@ -98,8 +98,17 @@ var Downloader = (function() {
     return JS_REDIRECT_ERR;
   };
 
-  /** Load with XMLHttpRequest */
+  // Load with XMLHttpRequest.
+  // location: the URL to the resource
+  // options: object containing option key value pairs. Nullable.
+  //   responseType: for XHR. e.g. 'document', 'text', 'json'
+  //   acceptType: for filtering responses.
+  // callback: (err, resp)=>void
   Downloader.prototype.httpGet = function(location, options, callback) {
+    options = options || {};
+    if (!options.responseType) {
+      options.responseType = 'document'; // default response type
+    }
     var purl = new ParsedURL(location);
     var that = this;
 
@@ -117,15 +126,12 @@ var Downloader = (function() {
       }
 
       var response = null;
-      if (options && options.response) { response = options.response; }
+      if (options.response) { response = options.response; }
       else { response = { location: location, code: 0 }; }
 
 	  var xhr = new XMLHttpRequest();
       xhr.first300 = true;
-      xhr.responseType = 'document';
-      if (options && options.responseType) {
-        xhr.responseType = options.responseType;
-      }
+      xhr.responseType = options.responseType;
       xhr.onreadystatechange = function() {
         response.code = xhr.status;
         var ok = false;
@@ -219,7 +225,7 @@ var Downloader = (function() {
 
     doHttpGet();
   };
-	
+
   return Downloader;
 })();
 
@@ -228,4 +234,3 @@ if (typeof module == 'object') {
   module.exports = Downloader;
   module.exports.default = Downloader;
 }
-

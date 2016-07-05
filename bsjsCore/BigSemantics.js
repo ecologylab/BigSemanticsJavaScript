@@ -10,6 +10,14 @@ if (typeof require === 'function') {
 }
 
 var BigSemantics = (function() {
+  /**
+   * A BigSemantics Facade.
+   * @constructor
+   * @param {Object} repoSource
+   *   Same as the first argument to RepoMan.
+   * @param {Object} options
+   *   Additional options. Can contain 'downloader', 'extractor', or 'repoMan'.
+   */
   function BigSemantics(repoSource, options) {
     Readyable.call(this);
 
