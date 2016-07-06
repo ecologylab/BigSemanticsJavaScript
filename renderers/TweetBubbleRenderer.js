@@ -668,7 +668,7 @@ TwitterDocumentContainer.prototype.matches = function (url) {
  * @param fieldCount, the number of fields to render before cropping with a "More" button
  * @return HTML table of the metadata display
  */
-TwitterRenderer.buildMetadataTable = function (table, isChildTable, isRoot, metadataFields, fieldCount, styleInfo, bgColorObj, isMetadataDisplay, streamIcon) {
+TwitterRenderer.buildMetadataTable = function (table, isChildTable, isRoot, metadataFields, fieldCount, styleInfo, bgColorObj, isMetadataDisplay) {
     if (!table) {
         table = document.createElement('div');
 
@@ -702,11 +702,8 @@ TwitterRenderer.buildMetadataTable = function (table, isChildTable, isRoot, meta
 
             var valueCol = document.createElement('div');
             valueCol.className = styleInfo.styles.valueColShowDiv;
+            
             //TODO - add "more" expander
-            if (streamIcon && streamIcon.data) {
-        		metadataFields = metadataFields.concat(streamIcon.data);
-        		streamIcon.data = metadataFields;
-        	}
             var moreCount = metadataFields.length - i;
 
             var fieldValueDiv = document.createElement('div');
@@ -1890,16 +1887,15 @@ TwitterRenderer.renderUpdate = function(url, mmd, metadata)
 				{
 					metadataTable = TwitterRenderer.buildMetadataTable(null, false, false, 
 							metadataFields, TwitterRenderer.FIRST_LEVEL_FIELDS, styleInfo, null, false);
-					streamIcon.moreCount = 0;
-					streamIcon.data = [];
 				}
 				else
 				{
+					var moreDataSpan = feedControls.nextSibling.firstChild.getElementsByTagName("span")[0];
+					if (moreDataSpan) {
+						metadataFields = metadataFields.concat(JSON.parse(moreDataSpan.textContent).data);
+					}
 					metadataTable = TwitterRenderer.buildMetadataTable(null, false, false, 
-							metadataFields, 0, styleInfo, null, false, streamIcon);
-					streamIcon.moreCount += metadataFields[0].value.length;
-					if (!streamIcon.data)
-						streamIcon.data = [];
+							metadataFields, 0, styleInfo, null, false);
 				}
 				
 				if (metadataTable) 
