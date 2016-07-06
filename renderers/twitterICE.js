@@ -581,6 +581,11 @@ this.logScrolledTweetIds = function(prevYOffset, newYOffset)
 	
 };
 
+this.getRenderer = function()
+{
+	return TwitterRenderer;
+}
+
 }
 
 function getICEInstance()

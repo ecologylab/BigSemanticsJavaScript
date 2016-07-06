@@ -19,6 +19,7 @@ var userid = null;
 
 var currentUrl = null;
 var instance = null;
+var instanceRenderer = null;
 
 var bsService = new BSExtension(["gbkopldnfjodomdhihdhmbfbgapiipdb"]);
 
@@ -121,7 +122,7 @@ function expandCollapseItem(event)
 	if (collapse)
 	{
 		expandCollapseIcon.src = expandIconPath;
-		TwitterRenderer.hideMetadataDisplay(item);
+		instanceRenderer.hideMetadataDisplay(item);
 	}
 	else
 	{
@@ -129,7 +130,7 @@ function expandCollapseItem(event)
 		
 		if (instance.isCached(item))
 		{
-			TwitterRenderer.showMetadataDisplay(item);
+			instanceRenderer.showMetadataDisplay(item);
 		}
 		else
 		{
@@ -147,7 +148,7 @@ function expandCollapseItem(event)
 				isRoot: true,
 				expandedItem: item
 			};
-			TwitterRenderer.addMetadataDisplay(parent, expandableItemUrl, null, TwitterRenderer.render, options);
+			instanceRenderer.addMetadataDisplay(parent, expandableItemUrl, null, instanceRenderer.render, options);
 
 			if(application_name != 'mdc'){
 
@@ -196,11 +197,11 @@ function scrollBackAndCollpaseHandler(event)
 		for (var i = 0; i < containers.length; i++)
 		{
 			documentContainers = 
-					documentContainers.concat(TwitterRenderer.getDocumentContainersByContainer(containers[i]));
+					documentContainers.concat(instanceRenderer.getDocumentContainersByContainer(containers[i]));
 		}
 		
 		if (documentContainers.length > 0)
-			TwitterRenderer.animateScrollBackAndCollapse(y, 
+			instanceRenderer.animateScrollBackAndCollapse(y, 
 					{content_expansions: documentContainers, metadata_expansion_buttons: []});
 	}
 }
@@ -402,16 +403,17 @@ function processUrlChange(newUrl)
 function run_script(userid, cond, username)
 {
 	instance = getICEInstance();
+	instanceRenderer = instance.getRenderer();
 	
 	if(experiment_condition == mice_condition)
 	{
-//		TwitterRenderer.initialize();
+//		instanceRenderer.initialize();
 
-		if (TwitterRenderer.setMetadataProcessor)
-			TwitterRenderer.setMetadataProcessor(processMetadata);
+		if (instanceRenderer.setMetadataProcessor)
+			instanceRenderer.setMetadataProcessor(processMetadata);
 
-		if (TwitterRenderer.setDocumentDownloader)
-			TwitterRenderer.setDocumentDownloader(downloadRequester);
+		if (instanceRenderer.setDocumentDownloader)
+			instanceRenderer.setDocumentDownloader(downloadRequester);
 
 //		if (isExtension)
 //		{
@@ -599,7 +601,7 @@ if (isExtension)
 			processUrlChange(request.url);
 		else if (request.update != null) {
 			console.log(request.update);
-			TwitterRenderer.renderUpdate(request.update.url, request.update.mmd, 
+			instanceRenderer.renderUpdate(request.update.url, request.update.mmd, 
 													request.update.metadata);
 		}
 	});
@@ -607,17 +609,17 @@ if (isExtension)
 
 function updateIconsPath(imgDir)
 {
-	TwitterRenderer.imgDir = imgDir;
+	instanceRenderer.imgDir = imgDir;
 	iconDir = imgDir;
 	
-	TwitterRenderer.replyIconPath1 = TwitterRenderer.imgDir + "reply_221.png";
-	TwitterRenderer.retweetIconPath1 = TwitterRenderer.imgDir + "retweet_221.png";
-	TwitterRenderer.favoriteIconPath1 = TwitterRenderer.imgDir + "favorite_221.png";
-	TwitterRenderer.replyIconPath2 = TwitterRenderer.imgDir + "reply_153.png";
-	TwitterRenderer.retweetIconPath2 = TwitterRenderer.imgDir + "retweet_153.png";
-	TwitterRenderer.favoriteIconPath2 = TwitterRenderer.imgDir + "favorite_153.png";
-	TwitterRenderer.retweetIconPath3 = TwitterRenderer.imgDir + "retweet_on.png";
-	TwitterRenderer.favoriteIconPath3 = TwitterRenderer.imgDir + "favorite_on.png";
+	instanceRenderer.replyIconPath1 = instanceRenderer.imgDir + "reply_221.png";
+	instanceRenderer.retweetIconPath1 = instanceRenderer.imgDir + "retweet_221.png";
+	instanceRenderer.favoriteIconPath1 = instanceRenderer.imgDir + "favorite_221.png";
+	instanceRenderer.replyIconPath2 = instanceRenderer.imgDir + "reply_153.png";
+	instanceRenderer.retweetIconPath2 = instanceRenderer.imgDir + "retweet_153.png";
+	instanceRenderer.favoriteIconPath2 = instanceRenderer.imgDir + "favorite_153.png";
+	instanceRenderer.retweetIconPath3 = instanceRenderer.imgDir + "retweet_on.png";
+	instanceRenderer.favoriteIconPath3 = instanceRenderer.imgDir + "favorite_on.png";
 
 	expandIconPath =  iconDir + "expand_icon.png";
 	collapseIconPath = iconDir + "collapse_icon.png";
