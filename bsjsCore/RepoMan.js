@@ -53,6 +53,19 @@ var RepoMan = (function() {
       }
       repoman.initialize();
     } 
+  else if (source.str) {
+    try {
+      repoman.repo = simpl.deserialize(source.str);
+    } catch (err) {
+      repoman.setError(err);
+      return;
+    }
+
+    if(repoman.repo.meta_metadata_repository)
+      repoman.repo = repoman.repo.meta_metadata_repository;
+
+    repoman.initialize();
+  }
 	else if (source.file) {
       
 	  // only works in Node:
@@ -115,6 +128,14 @@ var RepoMan = (function() {
       });
 	}
   };
+
+  var cachedRepo = null;
+  RepoMan.prototype.getRepository = function() {
+    if(cachedRepo) return cachedRepo;
+
+    cachedRepo = simpl.serialize({meta_metadata_repository: this.repo });
+    return cachedRepo;
+  }
 
   // selectorMap: key => Array of selectors
   // key: can be stripped url, domain, etc

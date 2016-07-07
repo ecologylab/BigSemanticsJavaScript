@@ -35,16 +35,18 @@ export interface IBigSemantics {
     options: any,
     callback: (err: Error, mmd: MetaMetadata)=>void
   ): void;
-
+  
   getRepoSource(
     callback: (err: Error, repoSource: any)=>void
   ): void;
+
+  repoMan: RepoMan;
 }
 
 export declare class BigSemantics extends Readyable implements IBigSemantics {
   constructor(repoSource: any, options: any);
   
-  protected repoMan: RepoMan;
+  public repoMan: RepoMan;
 
   loadMetadata(location, options, callback);
   loadInitialMetadata(location, options, callback);
