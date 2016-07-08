@@ -489,7 +489,8 @@ Extraction.prototype.start = function(callback) {
   this.scope.rootNode = this.rootNode;
   this.scope.node = this.rootNode;
 
-  this.metadata = this.extractComposite(this.mmd, this.scope);
+  this.metadata = new Object();
+  this.metadata[this.mmd.tag || this.mmd.name] = this.extractComposite(this.mmd, this.scope);
   console.log("Extraction finished: %O", this.metadata);
   callback(null, this.metadata);
 }
@@ -510,4 +511,14 @@ Extraction.prototype.start = function(callback) {
 function extractMetadata(resp, mmd, bsFacade, options, callback) {
   var extraction = new Extraction(resp, mmd, bsFacade, options);
   extraction.start(callback);
+}
+
+/**
+ * @deprecated
+ * This is added for debugging. This synchronous version will be removed soon.
+ */
+function extractMetadataSync(resp, mmd, bsFacade, options) {
+  var extraction = new Extraction(resp, mmd, bsFacade, options);
+  extraction.start(function() {});
+  return extraction.metadata;
 }
