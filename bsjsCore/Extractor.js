@@ -82,13 +82,13 @@ Extraction.prototype.isCompositeCollection = function(field) {
   return (field.collection && field.collection.child_type) ? true : false;
 }
 
-Extraction.prototype.getContextNode = function(field, scope) {
+Extraction.prototype.getContextNode = function(field, parentScope) {
   var result = null;
   if (field.context_node) {
-    result = scope.trace(field.context_node, 'vars');
+    result = parentScope.trace(field.context_node, 'vars');
   }
   else {
-    result = scope.node;
+    result = parentScope.node;
   }
   if (result === null) {
     console.error("Context node is null: something is definitely wrong!");
@@ -130,7 +130,7 @@ Extraction.prototype.handleDefVars = function(field, localScope) {
   return empty ? null : result;
 }
 
-Extraction.prototype.amendXpath = function(xpath) {
+Extraction.prototype.amendXpath = function(xpath, parentScope) {
   var result = xpath;
   if (typeof result === 'string') {
     // join multiple lines
@@ -144,18 +144,23 @@ Extraction.prototype.amendXpath = function(xpath) {
     if (result.indexOf('(/') === 0) {
       result = result.replace('(/', '(./');
     }
+
+    // replace $i to index in the parent which must be collection
+    if (parentScope && parentScope.collectionIndex && result.indexOf('$i') >= 0) {
+      result = result.replace('$i', parentScope.collectionIndex);
+    }
   }
   return result;
 }
 
-Extraction.prototype.evaluateFirstNode = function(xpath, node) {
-  xpath = this.amendXpath(xpath);
-  return this.rootNode.evaluate(xpath, node, null, XPathResult.FIRST_ORDERED_NODE_TYPE);
+Extraction.prototype.evaluateFirstNode = function(xpath, contextNode, parentScope) {
+  xpath = this.amendXpath(xpath, parentScope);
+  return this.rootNode.evaluate(xpath, contextNode, null, XPathResult.FIRST_ORDERED_NODE_TYPE);
 }
 
-Extraction.prototype.evaluateAllNodes = function(xpath, node) {
-  xpath = this.amendXpath(xpath);
-  return this.rootNode.evaluate(xpath, node, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE);
+Extraction.prototype.evaluateAllNodes = function(xpath, contextNode, parentScope) {
+  xpath = this.amendXpath(xpath, parentScope);
+  return this.rootNode.evaluate(xpath, contextNode, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE);
 }
 
 Extraction.prototype.toTypedScalar = function(val, scalarType) {
@@ -183,9 +188,9 @@ Extraction.prototype.toTypedScalar = function(val, scalarType) {
   return val;
 }
 
-Extraction.prototype.extractScalar = function(field, scope) {
+Extraction.prototype.extractScalar = function(field, parentScope) {
   // step 1: prepare objects used in extraction
-  var contextNode = this.getContextNode(field, scope);
+  var contextNode = this.getContextNode(field, parentScope);
   var value = null;
 
   // step 2: do extraction
@@ -196,7 +201,7 @@ Extraction.prototype.extractScalar = function(field, scope) {
   if (!value && contextNode && field.xpaths instanceof Array) {
     for (var i = 0; i < field.xpaths.length; ++i) {
       var xpath = field.xpaths[i];
-      var xres = this.evaluateFirstNode(xpath, contextNode);
+      var xres = this.evaluateFirstNode(xpath, contextNode, parentScope);
       if (xres && xres.singleNodeValue && xres.singleNodeValue.textContent) {
         value = xres.singleNodeValue.textContent.trim();
         break;
@@ -209,16 +214,16 @@ Extraction.prototype.extractScalar = function(field, scope) {
     value = FieldOps.operate(value, field.field_ops);
   }
   if (field.concatenate_values) {
-    FieldOps.concatenateValues(field.concatenate_values, scope);
+    FieldOps.concatenateValues(field.concatenate_values, parentScope);
   }
 
   value = this.toTypedScalar(value, field.scalar_type);
   return value;
 }
 
-Extraction.prototype.extractScalarCollection = function(field, scope) {
+Extraction.prototype.extractScalarCollection = function(field, parentScope) {
   // step 1: prepare objects used in extraction
-  var contextNode = this.getContextNode(field, scope);
+  var contextNode = this.getContextNode(field, parentScope);
   var value = new Array();
 
   // step 2: do extraction
@@ -229,8 +234,7 @@ Extraction.prototype.extractScalarCollection = function(field, scope) {
   if (!value && contextNode && field.xpaths instanceof Array) {
     for (var i = 0; i < field.xpaths.length; ++i) {
       var xpath = field.xpaths[i];
-      xpath.replace('$i', String(i + 1));
-      var xres = this.evaluateAllNodes(xpath, contextNode);
+      var xres = this.evaluateAllNodes(xpath, contextNode, parentScope);
       if (xres && xres.snapshotLength > 0) {
         for (var j = 0; j < xres.snapshotLength; ++j) {
           var item = xres.snapshotItem(j).textContent;
@@ -256,53 +260,53 @@ Extraction.prototype.extractScalarCollection = function(field, scope) {
   return null;
 }
 
-Extraction.prototype.extractComposite = function(field, scope) {
-  // step 1: prepare local scope for extracting this field
-  var lscope = new Scope(field.name, scope);
-  lscope.contextNode = this.getContextNode(field, scope);
-  lscope.vars = this.handleDefVars(field, lscope);
-  lscope.value = null;
+Extraction.prototype.extractComposite = function(field, parentScope) {
+  // step 1: prepare local scope for extracting nested fields
+  var localScope = new Scope(field.name, parentScope);
+  localScope.contextNode = this.getContextNode(field, parentScope);
+  localScope.vars = this.handleDefVars(field, localScope);
+  localScope.value = null;
 
   // case 1.1: extract root metadata as composite
-  if (scope.rootNode) {
-    lscope.value = {
+  if (parentScope.rootNode) {
+    localScope.value = {
       location: this.response.location,
       additional_locations: this.response.otherLocations,
     };
-    lscope.node = scope.rootNode;
+    localScope.node = parentScope.rootNode;
   }
 
   // TODO case 1.2: extract from previous field op result
 
   // case 1.3: regular xpath extraction
   // TODO allow composite to not have xpath?
-  if (lscope.contextNode && field.xpaths instanceof Array) {
+  if (localScope.contextNode && field.xpaths instanceof Array) {
     for (var i = 0; i < field.xpaths.length; ++i) {
       var xpath = field.xpaths[i];
-      var xres = this.evaluateFirstNode(xpath, lscope.contextNode);
+      var xres = this.evaluateFirstNode(xpath, localScope.contextNode, parentScope);
       if (xres && xres.singleNodeValue) {
-        lscope.node = xres.singleNodeValue;
-        lscope.value = lscope.value || new Object();
+        localScope.node = xres.singleNodeValue;
+        localScope.value = localScope.value || new Object();
         break;
       }
     }
   }
 
-  // step 2: do extraction using information in the scope
-  if (lscope.value) {
-    lscope.value.meta_metadata_name = field.type || field.name;
-    this.extract(field.kids, lscope, lscope.value);
-    if (Object.keys(lscope.value).length > 1) {
+  // step 2: extract nested fields using the newly created local scope
+  if (localScope.value) {
+    localScope.value.meta_metadata_name = field.type || field.name;
+    this.extract(field.kids, localScope, localScope.value);
+    if (Object.keys(localScope.value).length > 1) {
       // TODO change meta_metadata_name based on location
-      return lscope.value;
+      return localScope.value;
     }
-    lscope.value = null;
+    localScope.value = null;
   }
 
   return null;
 }
 
-Extraction.prototype.extractCompositeCollection = function(field, scope) {
+Extraction.prototype.extractCompositeCollection = function(field, parentScope) {
   var surrogateComposite = null;
   if (field.kids instanceof Array && field.kids.length === 1) {
     surrogateComposite = field.kids[0].composite;
@@ -312,12 +316,12 @@ Extraction.prototype.extractCompositeCollection = function(field, scope) {
     return;
   }
 
-  // step 1: prepare local scope for extracting this field
-  var lscope = new Scope(field.name, scope);
-  lscope.contextNode = this.getContextNode(field, scope);
-  lscope.vars = this.handleDefVars(field, lscope);
-  lscope.value = new Array();
-  lscope.count = 0;
+  // step 1: prepare local scope for extracting nested fields
+  var localScope = new Scope(field.name, parentScope);
+  localScope.contextNode = this.getContextNode(field, parentScope);
+  localScope.vars = this.handleDefVars(field, localScope);
+  localScope.value = new Array();
+  localScope.count = 0;
 
   // TODO case 1.1: extract from previous field op result
 
@@ -326,37 +330,37 @@ Extraction.prototype.extractCompositeCollection = function(field, scope) {
   if (field.xpaths instanceof Array) {
     for (var i = 0; i < field.xpaths.length; ++i) {
       var xpath = field.xpaths[i];
-      xpath.replace('$i', String(i + 1));
-      var xres = this.evaluateAllNodes(xpath, lscope.contextNode);
+      var xres = this.evaluateAllNodes(xpath, localScope.contextNode, parentScope);
       if (xres && xres.snapshotLength > 0) {
-        lscope.count = xres.snapshotLength;
-        lscope.nodes = new Array();
+        localScope.count = xres.snapshotLength;
+        localScope.nodes = new Array();
         for (var j = 0; j < xres.snapshotLength; ++j) {
-          lscope.nodes.push(xres.snapshotItem(j));
+          localScope.nodes.push(xres.snapshotItem(j));
         }
         break;
       }
     }
   }
 
-  // step 2: do extraction using information in the scope
-  for (var i = 0; i < lscope.count; ++i) {
-    var lscopei = new Scope('$' + i, lscope);
-    lscopei.node = lscope.nodes[i];
+  // step 2: extract nested fields using newly created local scope
+  for (var i = 0; i < localScope.count; ++i) {
+    var lscopei = new Scope('$' + i, localScope);
+    lscopei.collectionIndex = i+1;
+    lscopei.node = localScope.nodes[i];
     var item = {
       meta_metadata_name: surrogateComposite.type || surrogateComposite.name,
     };
     this.extract(surrogateComposite.kids, lscopei, item);
     if (Object.keys(item).length > 1) {
       // TODO change meta_metadata_name based on location
-      lscope.value.push(item);
+      localScope.value.push(item);
     }
   }
 
-  if (lscope.value.length > 0) {
-    return lscope.value;
+  if (localScope.value.length > 0) {
+    return localScope.value;
   }
-  lscope.value = null;
+  localScope.value = null;
   return null;
 }
 
@@ -364,12 +368,12 @@ Extraction.prototype.extractCompositeCollection = function(field, scope) {
  * Recursively extract semantics from contextNode, according to fieldList.
  * @param  {Array<MetaMetadataField>} fieldList
  *   The list of nested fields.
- * @param  {Scope} scope
+ * @param  {Scope} parentScope
  *   The lexical scope to store intermediate results.
  * @param  {metadata} obj
  *   The result / intermediate metadata object.
  */
-Extraction.prototype.extract = function(fieldList, scope, obj) {
+Extraction.prototype.extract = function(fieldList, parentScope, obj) {
   if (fieldList instanceof Array) {
     var sorted = new Array();
     for (var i = 0; i < fieldList.length; ++i) {
@@ -390,16 +394,16 @@ Extraction.prototype.extract = function(fieldList, scope, obj) {
       var field = fieldList[i];
       var value = null;
       if (this.isScalar(field)) {
-        value = this.extractScalar(field.scalar, scope);
+        value = this.extractScalar(field.scalar, parentScope);
       }
       else if (this.isScalarCollection(field)) {
-        value = this.extractScalarCollection(field.collection, scope);
+        value = this.extractScalarCollection(field.collection, parentScope);
       }
       else if (this.isComposite(field)) {
-        value = this.extractComposite(field.composite, scope);
+        value = this.extractComposite(field.composite, parentScope);
       }
       else if (this.isCompositeCollection(field)) {
-        value = this.extractCompositeCollection(field.collection, scope);
+        value = this.extractCompositeCollection(field.collection, parentScope);
       }
       else {
         console.warn("Unknown field type: ", field);
