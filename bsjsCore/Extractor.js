@@ -203,7 +203,11 @@ Extraction.prototype.extractScalar = function(field, parentScope) {
       var xpath = field.xpaths[i];
       var xres = this.evaluateFirstNode(xpath, contextNode, parentScope);
       if (xres && xres.singleNodeValue && xres.singleNodeValue.textContent) {
-        value = xres.singleNodeValue.textContent.trim();
+        if (field.extract_as_html) {
+          value = xres.singleNodeValue.innerHTML;
+        } else {
+          value = xres.singleNodeValue.textContent.trim();
+        }
         break;
       }
     }
