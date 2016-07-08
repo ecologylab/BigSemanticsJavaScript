@@ -1900,7 +1900,7 @@ TwitterRenderer.renderUpdate = function(url, mmd, metadata)
 				
 				if (metadataTable) 
 				{
-					/*var opacity = 0;
+					var opacity = 0;
 					function animateUpdateRendering(feedControls, metadataTable)
 					{
 						metadataTable.style.opacity = opacity;
@@ -1908,12 +1908,12 @@ TwitterRenderer.renderUpdate = function(url, mmd, metadata)
 						if (opacity <= 1.0) {
 							setTimeout(animateUpdateRendering, 100, feedControls, metadataTable);
 						}
-					*/	
-						feedControls.nextSibling.removeChild(feedControls.nextSibling.firstChild);
-						feedControls.parentElement.insertBefore(metadataTable, feedControls.nextSibling);
-					/*}
-					animateUpdateRendering(feedControls, metadataTable);
-					*/
+					}	
+					feedControls.nextSibling.removeChild(feedControls.nextSibling.firstChild);
+					feedControls.parentElement.insertBefore(metadataTable, feedControls.nextSibling);
+					if (!paused) {
+						animateUpdateRendering(feedControls, metadataTable);
+					}
 				}
 			}
 		}
