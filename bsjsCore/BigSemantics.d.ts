@@ -39,6 +39,8 @@ export interface IBigSemantics {
   getRepoSource(
     callback: (err: Error, repoSource: any)=>void
   ): void;
+
+  getRepoString(): string;
 }
 
 export declare class BigSemantics extends Readyable implements IBigSemantics {
@@ -51,6 +53,7 @@ export declare class BigSemantics extends Readyable implements IBigSemantics {
   loadMmd(name, options, callback);
   selectMmd(location, options, callback);
   getRepoSource(callback);
+  getRepoString(): string;
 }
 
 export default BigSemantics;

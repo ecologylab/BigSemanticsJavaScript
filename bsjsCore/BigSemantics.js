@@ -166,6 +166,10 @@ var BigSemantics = (function() {
     this.repoMan.selectMmd(location, options, callback);
   };
 
+  BigSemantics.prototype.getRepoString = function() {
+    return this.repoMan.getRepoString();
+  };
+
   return BigSemantics;
 })();
 
