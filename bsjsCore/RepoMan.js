@@ -128,12 +128,8 @@ var RepoMan = (function() {
     }
   };
 
-  var cachedRepo = null;
-  RepoMan.prototype.getRepoString = function() {
-    if(cachedRepo) return cachedRepo;
-
-    cachedRepo = simpl.serialize({meta_metadata_repository: this.repo });
-    return cachedRepo;
+  RepoMan.prototype.getRepo = function() {
+    return { meta_metadata_repository: this.repo };
   }
 
   // selectorMap: key => Array of selectors

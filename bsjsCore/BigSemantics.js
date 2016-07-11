@@ -166,8 +166,8 @@ var BigSemantics = (function() {
     this.repoMan.selectMmd(location, options, callback);
   };
 
-  BigSemantics.prototype.getRepoString = function() {
-    return this.repoMan.getRepoString();
+  BigSemantics.prototype.getRepo = function() {
+    return this.repoMan.getRepo();
   };
 
   return BigSemantics;
