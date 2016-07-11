@@ -4,6 +4,7 @@
 <title>Test Extraction</title>
 
 <script src="../../libraries/jquery-2.0.0.min.js"></script>
+<script src="../../libraries/bluebird-3.4.1.min.js"></script>
 
 <script src="../simpl/simplBase.js"></script>
 <script src="../ParsedURL.js"></script>
@@ -28,39 +29,105 @@
 </div>
 
 <script>
-  var url = "test-amazon_product-1.html";
-  $('#url').text(url);
-
-  var downloader = new Downloader();
-  var dOpts = {
-    responseType: 'document',
-  };
-  downloader.httpGet(url, null, function(err, resp) {
-    if (err) {
-      return console.error(err);
-    }
-
-    // TODO serve mmdrepository.json through web service.
-    var repoMan = new RepoMan({
-      url: 'mmdrepository.json',
-    });
-    repoMan.onReady(function(err) {
-      if (err) {
-        return console.error(err);
+  var relToAbs = (function() {
+    var a = null;
+    return function(relUrl) {
+      if (!a) {
+        a = document.createElement('a');
       }
+      a.setAttribute('href', relUrl);
+      return a.href;
+    };
+  })();
 
-      repoMan.loadMmd('amazon_product', null, function(err, mmd) {
-        if (err) {
-          return console.error(err);
-        }
-
-        extractMetadata(resp, mmd, null, null, function(err, metadata) {
-          simpl.graphCollapse(metadata);
-          var json = JSON.stringify(metadata, null, 4);
-          $('#json').text(json);
+  function httpGet(url, opts) {
+    if (typeof url === 'string') {
+      var downloader = new Downloader();
+      return new Promise(function(resolve, reject) {
+        downloader.httpGet(url, opts, function(err, resp) {
+          if (err) {
+            reject(err);
+          }
+          else {
+            resolve(resp);
+          }
         });
       });
+    }
+  }
+
+  function loadMmd(repoUrl, mmdName, opts) {
+    if (typeof repoUrl === 'string' && typeof mmdName === 'string') {
+      opts = opts || {};
+
+      if (opts.noRepoMan) {
+        return httpGet(repoUrl, {
+          responseType: 'json',
+        }).then(function(resp) {
+          var repo = resp.entity.meta_metadata_repository;
+          simpl.graphExpand(repo);
+          var mmd = null;
+          for (var i in repo.repository_by_name) {
+            mmd = repo.repository_by_name[i];
+            if (mmd.name === mmdName) break;
+          }
+          return mmd;
+        });
+      }
+      else {
+        return new Promise(function(resolve, reject) {
+          var repoMan = new RepoMan({
+            url: repoUrl,
+          });
+          repoMan.onReady(function(err) {
+            if (err) {
+              reject(err);
+            }
+            else {
+              repoMan.loadMmd(mmdName, null, function(err, mmd) {
+                if (err) {
+                  reject(err);
+                }
+                else {
+                  resolve(mmd);
+                }
+              });
+            }
+          });
+        });
+      }
+    }
+  }
+
+  function displayMetadata(err, metadata) {
+    simpl.graphCollapse(metadata);
+    var json = JSON.stringify(metadata, null, 4);
+    $('#json').text(json);
+  }
+
+  /*
+  var url = relToAbs('../../../src/bscore/test/testInheritedXpaths.html');
+  $('#url').val(url);
+  loadMmd('../../../src/bscore/test/testInheritedXpaths.json', 'acm_article', {
+    noRepoMan: true,
+  }).then(function(mmd) {
+    return httpGet(url).then(function(resp) {
+      extractMetadata(resp, mmd, null, null, displayMetadata);
     });
+  }).catch(function(err) {
+    console.error(err);
+  });
+  */
+
+  // var url = relToAbs('test-amazon_product-1.html');
+  var url = relToAbs('../../../src/bscore/test/testInheritedXpaths.html');
+  $('#url').val(url);
+  loadMmd('mmdrepository.json', 'amazon_product').then(function(mmd) {
+    return httpGet(url).then(function(resp) {
+      extractMetadata(resp, mmd, null, null, displayMetadata);
+    });
+  }).catch(function(err) {
+    console.error(err);
   });
 </script>
 </body>

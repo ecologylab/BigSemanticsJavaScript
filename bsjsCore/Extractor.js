@@ -17,7 +17,7 @@ function Scope(id, parent) {
   this._id = (parent ? (parent._id + '.') : '') + id;
   if (parent instanceof Scope) {
     this._parent = parent;
-    parent.subscopes = parent.subscopes || new Array();
+    parent.subscopes = parent.subscopes || [];
     parent.subscopes.push(this);
   }
 }
@@ -104,7 +104,7 @@ Extraction.prototype.getContextNode = function(field, parentScope) {
  *   The extraction scope for this field.
  */
 Extraction.prototype.handleDefVars = function(field, localScope) {
-  var result = new Object();
+  var result = {};
   var empty = true;
   if (field.def_vars instanceof Array) {
     for (var i = 0; i < field.def_vars.length; ++i) {
@@ -137,7 +137,7 @@ Extraction.prototype.amendXpath = function(xpath, parentScope) {
     result = result.replace('\n', '').replace('\r', '');
 
     // absolute to relative
-    // TODO use a real xpath parser, e.g. https://github.com/dodo/xpath-parser
+    // FIXME use a real xpath parser, e.g. https://github.com/dodo/xpath-parser
     if (result.indexOf('/') === 0) {
       result = '.' + result;
     }
@@ -180,7 +180,7 @@ Extraction.prototype.toTypedScalar = function(val, scalarType) {
       case 'URL':
       case 'ParsedURL':
         var purl = new ParsedURL(val, this.location.base);
-        // TODO filter purl asynchronously
+        // FIXME filter purl asynchronously
         val = purl.toString();
         break;
     }
@@ -228,7 +228,7 @@ Extraction.prototype.extractScalar = function(field, parentScope) {
 Extraction.prototype.extractScalarCollection = function(field, parentScope) {
   // step 1: prepare objects used in extraction
   var contextNode = this.getContextNode(field, parentScope);
-  var value = new Array();
+  var value = [];
 
   // step 2: do extraction
 
@@ -255,7 +255,7 @@ Extraction.prototype.extractScalarCollection = function(field, parentScope) {
 
   if (value.length > 0) {
     var raw = value;
-    value = new Array();
+    value = [];
     for (var i in raw) {
       value.push(this.toTypedScalar(raw[i], field.child_scalar_type));
     }
@@ -271,6 +271,8 @@ Extraction.prototype.extractComposite = function(field, parentScope) {
   localScope.vars = this.handleDefVars(field, localScope);
   localScope.value = null;
 
+  // FIXME detect and prevent infinite recursion
+
   // case 1.1: extract root metadata as composite
   if (parentScope.rootNode) {
     localScope.value = {
@@ -283,14 +285,17 @@ Extraction.prototype.extractComposite = function(field, parentScope) {
   // TODO case 1.2: extract from previous field op result
 
   // case 1.3: regular xpath extraction
-  // TODO allow composite to not have xpath?
   if (localScope.contextNode && field.xpaths instanceof Array) {
-    for (var i = 0; i < field.xpaths.length; ++i) {
+    var xpaths = field.xpaths.slice();
+    // a composite field may just specify a nested structure without descending
+    // the DOM tree:
+    xpaths.push('.');
+    for (var i = 0; i < xpaths.length; ++i) {
       var xpath = field.xpaths[i];
       var xres = this.evaluateFirstNode(xpath, localScope.contextNode, parentScope);
       if (xres && xres.singleNodeValue) {
         localScope.node = xres.singleNodeValue;
-        localScope.value = localScope.value || new Object();
+        localScope.value = localScope.value || {};
         break;
       }
     }
@@ -301,7 +306,12 @@ Extraction.prototype.extractComposite = function(field, parentScope) {
     localScope.value.meta_metadata_name = field.type || field.name;
     this.extract(field.kids, localScope, localScope.value);
     if (Object.keys(localScope.value).length > 1) {
-      // TODO change meta_metadata_name based on location
+      if (field.polymorphic_scope || field.polymorphic_classes) {
+        // TODO change meta_metadata_name based on location
+        var wrapper = {};
+        wrapper[localScope.value.meta_metadata_name] = localScope.value;
+        localScope.value = wrapper;
+      }
       return localScope.value;
     }
     localScope.value = null;
@@ -324,20 +334,21 @@ Extraction.prototype.extractCompositeCollection = function(field, parentScope) {
   var localScope = new Scope(field.name, parentScope);
   localScope.contextNode = this.getContextNode(field, parentScope);
   localScope.vars = this.handleDefVars(field, localScope);
-  localScope.value = new Array();
+  localScope.value = [];
   localScope.count = 0;
+
+  // FIXME detect and prevent infinite recursion
 
   // TODO case 1.1: extract from previous field op result
 
   // case 1.2: regular xpath extraction
-  // TODO allow composite to not have xpath?
   if (field.xpaths instanceof Array) {
     for (var i = 0; i < field.xpaths.length; ++i) {
       var xpath = field.xpaths[i];
       var xres = this.evaluateAllNodes(xpath, localScope.contextNode, parentScope);
       if (xres && xres.snapshotLength > 0) {
         localScope.count = xres.snapshotLength;
-        localScope.nodes = new Array();
+        localScope.nodes = [];
         for (var j = 0; j < xres.snapshotLength; ++j) {
           localScope.nodes.push(xres.snapshotItem(j));
         }
@@ -348,15 +359,20 @@ Extraction.prototype.extractCompositeCollection = function(field, parentScope) {
 
   // step 2: extract nested fields using newly created local scope
   for (var i = 0; i < localScope.count; ++i) {
-    var lscopei = new Scope('$' + i, localScope);
-    lscopei.collectionIndex = i+1;
-    lscopei.node = localScope.nodes[i];
+    var localScopei = new Scope('$' + i, localScope);
+    localScopei.collectionIndex = i+1;
+    localScopei.node = localScope.nodes[i];
     var item = {
       meta_metadata_name: surrogateComposite.type || surrogateComposite.name,
     };
-    this.extract(surrogateComposite.kids, lscopei, item);
+    this.extract(surrogateComposite.kids, localScopei, item);
     if (Object.keys(item).length > 1) {
-      // TODO change meta_metadata_name based on location
+      if (field.polymorphic_scope || field.polymorphic_classes) {
+        // TODO change meta_metadata_name based on location
+        var wrapper = {};
+        wrapper[item.meta_metadata_name] = item;
+        item = wrapper;
+      }
       localScope.value.push(item);
     }
   }
@@ -379,7 +395,7 @@ Extraction.prototype.extractCompositeCollection = function(field, parentScope) {
  */
 Extraction.prototype.extract = function(fieldList, parentScope, obj) {
   if (fieldList instanceof Array) {
-    var sorted = new Array();
+    var sorted = [];
     for (var i = 0; i < fieldList.length; ++i) {
       var field = fieldList[i];
       if (this.isScalar(field)) {
@@ -436,9 +452,9 @@ Extraction.prototype.unwrapField = function(field) {
 
 Extraction.prototype.sortFieldsByDependency = function(fieldList) {
   if (fieldList instanceof Array) {
-    var result = new Array();
+    var result = [];
 
-    var map = new Object(); // name => field
+    var map = {}; // name => field
     for (var i = 0; i < fieldList.length; ++i) {
       var field = fieldList[i];
       map[this.unwrapField(field).name] = field;
@@ -497,7 +513,7 @@ Extraction.prototype.start = function(callback) {
   this.scope.rootNode = this.rootNode;
   this.scope.node = this.rootNode;
 
-  this.metadata = new Object();
+  this.metadata = {};
   this.metadata[this.mmd.tag || this.mmd.name] = this.extractComposite(this.mmd, this.scope);
   console.log("Extraction finished: %O", this.metadata);
   callback(null, this.metadata);
