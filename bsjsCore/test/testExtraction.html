@@ -25,6 +25,11 @@
 </div>
 
 <div class="wrap">
+  <input type="button" onclick="test1()" value="test 1 (inherited xpaths)"></input>
+  <input type="button" onclick="test2()" value="test 2 (amazon product)"></input>
+</div>
+
+<div class="wrap">
   <pre><code id="json"></code></pre>
 </div>
 
@@ -105,30 +110,31 @@
     $('#json').text(json);
   }
 
-  /*
-  var url = relToAbs('../../../src/bscore/test/testInheritedXpaths.html');
-  $('#url').val(url);
-  loadMmd('../../../src/bscore/test/testInheritedXpaths.json', 'acm_article', {
-    noRepoMan: true,
-  }).then(function(mmd) {
-    return httpGet(url).then(function(resp) {
-      extractMetadata(resp, mmd, null, null, displayMetadata);
+  function test1() {
+    var url = relToAbs('../../../src/bscore/test/testInheritedXpaths.html');
+    $('#url').val(url);
+    loadMmd('../../../src/bscore/test/testInheritedXpaths.json', 'acm_article', {
+      noRepoMan: true,
+    }).then(function(mmd) {
+      return httpGet(url).then(function(resp) {
+        extractMetadata(resp, mmd, null, null, displayMetadata);
+      });
+    }).catch(function(err) {
+      console.error(err);
     });
-  }).catch(function(err) {
-    console.error(err);
-  });
-  */
+  }
 
-  // var url = relToAbs('test-amazon_product-1.html');
-  var url = relToAbs('../../../src/bscore/test/testInheritedXpaths.html');
-  $('#url').val(url);
-  loadMmd('mmdrepository.json', 'amazon_product').then(function(mmd) {
-    return httpGet(url).then(function(resp) {
-      extractMetadata(resp, mmd, null, null, displayMetadata);
+  function test2() {
+    var url = relToAbs('test-amazon_product-1.html');
+    $('#url').val(url);
+    loadMmd('mmdrepository.json', 'amazon_product').then(function(mmd) {
+      return httpGet(url).then(function(resp) {
+        extractMetadata(resp, mmd, null, null, displayMetadata);
+      });
+    }).catch(function(err) {
+      console.error(err);
     });
-  }).catch(function(err) {
-    console.error(err);
-  });
+  }
 </script>
 </body>
 

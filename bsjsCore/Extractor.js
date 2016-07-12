@@ -2,7 +2,7 @@
  * Default metadata extractor.
  */
 
-// TODO inherited xpath issue
+// TODO inherited xpath issue: we need more test cases to actually address this
 // TODO more field ops: predicates, parallels, pattern matchers, etc
 
 /**
@@ -22,6 +22,16 @@ function Scope(id, parent) {
   }
 }
 
+/**
+ * Trace a value in this scope and its ancestors for a given key.
+ * @param  {string} key
+ *   The key to the value to be traced.
+ * @param  {string} component
+ *   The name of the component to trace in this scope and its ancestors. Each
+ *   scope can have multiple components.
+ * @return {Object} The first value with the given key (and in the component, if
+ * specified) in this scope or in its ancestors.
+ */
 Scope.prototype.trace = function(key, component) {
   var obj = this;
   while (obj) {
@@ -82,6 +92,14 @@ Extraction.prototype.isCompositeCollection = function(field) {
   return (field.collection && field.collection.child_type) ? true : false;
 }
 
+/**
+ * Find the context node for a given field and its parent scope.
+ * @param  {MetaMetadataField} field
+ *   The mmd field potentially specifying context node.
+ * @param  {Scope} parentScope
+ *   The parent scope of the field.
+ * @return {Node} The context node.
+ */
 Extraction.prototype.getContextNode = function(field, parentScope) {
   var result = null;
   if (field.context_node) {
@@ -97,15 +115,15 @@ Extraction.prototype.getContextNode = function(field, parentScope) {
 }
 
 /**
- * Handles def_vars defined inside a field.
+ * Handles def_vars defined inside a field, using its local scope.
  * @param  {MetaMetadataField} field
  *   The mmd field containing def_vars.
  * @param  {Scope} localScope
  *   The extraction scope for this field.
+ * @return {Object} An object containing def var names and values.
  */
 Extraction.prototype.handleDefVars = function(field, localScope) {
   var result = {};
-  var empty = true;
   if (field.def_vars instanceof Array) {
     for (var i = 0; i < field.def_vars.length; ++i) {
       var defVar = field.def_vars[i];
@@ -116,7 +134,6 @@ Extraction.prototype.handleDefVars = function(field, localScope) {
             var targetNode = this.evaluateFirstNode(xpath, localScope.contextNode);
             if (targetNode) {
               result[defVar.name] = targetNode.singleNodeValue;
-              empty = false;
               break;
             }
           }
@@ -127,9 +144,20 @@ Extraction.prototype.handleDefVars = function(field, localScope) {
       }
     }
   }
-  return empty ? null : result;
+  return Object.keys(result).length > 0 ? result : null;
 }
 
+/**
+ * Amends an XPath. This mainly includes joining multiple lines if any, turning
+ * absolute XPaths to relative ones, and resolving metadata-related variables in
+ * the XPath.
+ * @param  {string} xpath
+ *   The XPath to amend.
+ * @param  {Scope} parentScope
+ *   The parent scope of the field that has the XPath. Used to resolve
+ *   metadata-related variables.
+ * @return {string} Amended XPath.
+ */
 Extraction.prototype.amendXpath = function(xpath, parentScope) {
   var result = xpath;
   if (typeof result === 'string') {
@@ -163,9 +191,19 @@ Extraction.prototype.evaluateAllNodes = function(xpath, contextNode, parentScope
   return this.rootNode.evaluate(xpath, contextNode, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE);
 }
 
+/**
+ * Turns a scalar value represented in raw string to a typed value.
+ * @param  {string} val
+ *   The scalar value in a raw string.
+ * @param  {string} scalarType
+ *   The scalar type.
+ * @return {any} The converted, typed value.
+ */
 Extraction.prototype.toTypedScalar = function(val, scalarType) {
   if (val && scalarType) {
     switch (scalarType) {
+      case 'String':
+        break;
       case 'Int':
       case 'Integer':
       case 'Float':
@@ -183,6 +221,8 @@ Extraction.prototype.toTypedScalar = function(val, scalarType) {
         // FIXME filter purl asynchronously
         val = purl.toString();
         break;
+      default:
+        console.warn("Scalar type unsupported yet: " + scalarType + "; for value: " + val);
     }
   }
   return val;
@@ -228,7 +268,7 @@ Extraction.prototype.extractScalar = function(field, parentScope) {
 Extraction.prototype.extractScalarCollection = function(field, parentScope) {
   // step 1: prepare objects used in extraction
   var contextNode = this.getContextNode(field, parentScope);
-  var value = [];
+  var value = null;
 
   // step 2: do extraction
 
@@ -240,6 +280,7 @@ Extraction.prototype.extractScalarCollection = function(field, parentScope) {
       var xpath = field.xpaths[i];
       var xres = this.evaluateAllNodes(xpath, contextNode, parentScope);
       if (xres && xres.snapshotLength > 0) {
+        value = [];
         for (var j = 0; j < xres.snapshotLength; ++j) {
           var item = xres.snapshotItem(j).textContent;
           if (item) {
@@ -253,25 +294,75 @@ Extraction.prototype.extractScalarCollection = function(field, parentScope) {
 
   // TODO step 3: apply field ops
 
-  if (value.length > 0) {
-    var raw = value;
-    value = [];
-    for (var i in raw) {
-      value.push(this.toTypedScalar(raw[i], field.child_scalar_type));
+  if (value && value.length > 0) {
+    var typed = [];
+    for (var i in value) {
+      typed.push(this.toTypedScalar(value[i], field.child_scalar_type));
     }
-    return value;
+    return typed;
   }
   return null;
+}
+
+/**
+ * If srcField is inheriting from targetField.
+ * @param {MetaMetadataField} srcField
+ * @param {MetaMetadataField} targetField
+ * @return {Boolean}
+ */
+Extraction.prototype.isFieldInheritingFrom = function(srcField, targetField) {
+  if (srcField) {
+    var f = targetField;
+    while (f) {
+      f = this.unwrapField(f);
+      if (srcField.name !== f.name) return false;
+      if (srcField === f) return true;
+      f = f.super_field;
+    }
+  }
+  return false;
+}
+
+/**
+ * If we will result in infinite recursion with the input scope (which
+ * represents a stage of the extraction process).
+ * @param {Scope} scope
+ *   The current scope.
+ * @return {Boolean}
+ */
+Extraction.prototype.isInfiniteRecursion = function(scope) {
+  if (scope) {
+    var field = scope.field;
+    var contextNode = scope.contextNode;
+    if (field && contextNode) {
+      var ancestor = scope._parent;
+      while (ancestor) {
+        var inheriting = this.isFieldInheritingFrom(field, ancestor.field);
+        var inherited = this.isFieldInheritingFrom(ancestor.field, field);
+        if ((inheriting || inherited) && ancestor.contextNode === contextNode) {
+          return true;
+        }
+        ancestor = ancestor._parent;
+      }
+      return false;
+    }
+  }
+  return true;
 }
 
 Extraction.prototype.extractComposite = function(field, parentScope) {
   // step 1: prepare local scope for extracting nested fields
   var localScope = new Scope(field.name, parentScope);
+  localScope.field = field;
   localScope.contextNode = this.getContextNode(field, parentScope);
   localScope.vars = this.handleDefVars(field, localScope);
   localScope.value = null;
+  var done = false; // true iff localScope is ready for extraction
 
-  // FIXME detect and prevent infinite recursion
+  // detect and prevent infinite recursion
+  if (this.isInfiniteRecursion(localScope)) {
+    return null;
+  }
 
   // case 1.1: extract root metadata as composite
   if (parentScope.rootNode) {
@@ -282,29 +373,64 @@ Extraction.prototype.extractComposite = function(field, parentScope) {
     localScope.node = parentScope.rootNode;
   }
 
-  // TODO case 1.2: extract from previous field op result
+  // TODO case 1.2: extract from previous field op result (and set done)
 
   // case 1.3: regular xpath extraction
-  if (localScope.contextNode && field.xpaths instanceof Array) {
-    var xpaths = field.xpaths.slice();
-    // a composite field may just specify a nested structure without descending
-    // the DOM tree:
-    xpaths.push('.');
-    for (var i = 0; i < xpaths.length; ++i) {
-      var xpath = field.xpaths[i];
-      var xres = this.evaluateFirstNode(xpath, localScope.contextNode, parentScope);
-      if (xres && xres.singleNodeValue) {
-        localScope.node = xres.singleNodeValue;
-        localScope.value = localScope.value || {};
-        break;
-      }
+  if (!done && localScope.contextNode) {
+    var xpaths = field.xpaths || [];
+    /* FIXME this solution to the inherited xpath issue doesn't work for all
+     * cases. we need to have more test cases to address it.
+    var superFieldXpaths = this.unwrapField(field.super_field || {}).xpaths || [];
+    if (!parentScope.rootNode && xpaths.length === superFieldXpaths.length) {
+      localScope.node = localScope.contextNode;
+      localScope.authoredKidsOnly = true;
+      localScope.value = localScope.value || {};
+      done = true;
     }
+    else {
+    */
+      for (var i = 0; i < xpaths.length; ++i) {
+        var xpath = xpaths[i];
+        var xres = this.evaluateFirstNode(xpath, localScope.contextNode, parentScope);
+        if (xres && xres.singleNodeValue) {
+          localScope.node = xres.singleNodeValue;
+          localScope.value = localScope.value || {};
+          done = true;
+          break;
+        }
+      }
+    /* FIXME (solution to the inherited xpath issue)
+    }
+    */
   }
 
   // step 2: extract nested fields using the newly created local scope
   if (localScope.value) {
     localScope.value.meta_metadata_name = field.type || field.name;
-    this.extract(field.kids, localScope, localScope.value);
+    var kids = field.kids || [];
+    /* FIXME (solution to the inherited xpath issue)
+    // if we only allow authored kids to be extracted, filter `kids`.
+    if (localScope.authoredKidsOnly) {
+      if (!field._authored_kids) {
+        field._authored_kids = [];
+        var superkids = this.unwrapField(field.super_field || {}).kids || [];
+        for (var i = 0; i < field.kids.length; ++i) {
+          var kid = kids[i];
+          var found = false;
+          for (var j = 0; j < superkids.length; ++j) {
+            var superkid = superkids[j];
+            if (this.unwrapField(kid) === this.unwrapField(superkid)) {
+              found = true;
+              break;
+            }
+          }
+          if (!found) field._authored_kids.push(kid);
+        }
+      }
+      kids = field._authored_kids;
+    }
+    */
+    this.extractFields(kids, localScope, localScope.value);
     if (Object.keys(localScope.value).length > 1) {
       if (field.polymorphic_scope || field.polymorphic_classes) {
         // TODO change meta_metadata_name based on location
@@ -327,22 +453,27 @@ Extraction.prototype.extractCompositeCollection = function(field, parentScope) {
   }
   if (!surrogateComposite) {
     console.warn("Invalid surrogate composite on %s: %O", field.name, field);
-    return;
+    return null;
   }
 
   // step 1: prepare local scope for extracting nested fields
   var localScope = new Scope(field.name, parentScope);
+  localScope.field = field;
   localScope.contextNode = this.getContextNode(field, parentScope);
   localScope.vars = this.handleDefVars(field, localScope);
   localScope.value = [];
   localScope.count = 0;
+  var done = false;
 
-  // FIXME detect and prevent infinite recursion
+  // detect and prevent infinite recursion
+  if (this.isInfiniteRecursion(localScope)) {
+    return null;
+  }
 
   // TODO case 1.1: extract from previous field op result
 
   // case 1.2: regular xpath extraction
-  if (field.xpaths instanceof Array) {
+  if (!done && field.xpaths instanceof Array) {
     for (var i = 0; i < field.xpaths.length; ++i) {
       var xpath = field.xpaths[i];
       var xres = this.evaluateAllNodes(xpath, localScope.contextNode, parentScope);
@@ -352,6 +483,7 @@ Extraction.prototype.extractCompositeCollection = function(field, parentScope) {
         for (var j = 0; j < xres.snapshotLength; ++j) {
           localScope.nodes.push(xres.snapshotItem(j));
         }
+        done = true;
         break;
       }
     }
@@ -365,7 +497,7 @@ Extraction.prototype.extractCompositeCollection = function(field, parentScope) {
     var item = {
       meta_metadata_name: surrogateComposite.type || surrogateComposite.name,
     };
-    this.extract(surrogateComposite.kids, localScopei, item);
+    this.extractFields(surrogateComposite.kids, localScopei, item);
     if (Object.keys(item).length > 1) {
       if (field.polymorphic_scope || field.polymorphic_classes) {
         // TODO change meta_metadata_name based on location
@@ -377,7 +509,7 @@ Extraction.prototype.extractCompositeCollection = function(field, parentScope) {
     }
   }
 
-  if (localScope.value.length > 0) {
+  if (done && localScope.value.length > 0) {
     return localScope.value;
   }
   localScope.value = null;
@@ -393,7 +525,7 @@ Extraction.prototype.extractCompositeCollection = function(field, parentScope) {
  * @param  {metadata} obj
  *   The result / intermediate metadata object.
  */
-Extraction.prototype.extract = function(fieldList, parentScope, obj) {
+Extraction.prototype.extractFields = function(fieldList, parentScope, obj) {
   if (fieldList instanceof Array) {
     var sorted = [];
     for (var i = 0; i < fieldList.length; ++i) {
@@ -411,7 +543,7 @@ Extraction.prototype.extract = function(fieldList, parentScope, obj) {
     }
 
     for (var i = 0; i < sorted.length; ++i) {
-      var field = fieldList[i];
+      var field = sorted[i];
       var value = null;
       if (this.isScalar(field)) {
         value = this.extractScalar(field.scalar, parentScope);
@@ -437,6 +569,12 @@ Extraction.prototype.extract = function(fieldList, parentScope, obj) {
   }
 }
 
+/**
+ * Unwrap a meta-metadata field.
+ * @param {MetaMetadataField} field
+ * @return {Object} The unwrapped field, if `field` is a wrapped
+ * MetaMetadataField, or the input itself unchanged.
+ */
 Extraction.prototype.unwrapField = function(field) {
   if (field.scalar) {
     return field.scalar;
@@ -450,6 +588,13 @@ Extraction.prototype.unwrapField = function(field) {
   return field;
 }
 
+/**
+ * Sort the input list of fields by dependency, i.e. if A depends on B, in the
+ * output, B precedes A.
+ * @param {Array<MetaMetadataField>} fieldList
+ *   The list of fields to be sorted.
+ * @return {Array<MetaMetadataField} The sorted list of fields.
+ */
 Extraction.prototype.sortFieldsByDependency = function(fieldList) {
   if (fieldList instanceof Array) {
     var result = [];
@@ -477,8 +622,7 @@ Extraction.prototype.sortFieldsByDependency = function(fieldList) {
     function visit(name) {
       var field = map[name];
       if (name in marked) {
-        console.warn("Cyclic dependency among fields detected in %O",
-          fieldList);
+        console.warn("Cyclic dependency among fields detected in %O", fieldList);
         return fieldList;
       }
       if (!(name in visited)) {
@@ -504,12 +648,13 @@ Extraction.prototype.sortFieldsByDependency = function(fieldList) {
 }
 
 /**
- * Start extraction.
+ * Start extraction. Calls callback when finished.
  * @param  {(err, metadata)=>void} callback
  *   Callback function to receive result. Result metadata is wrapped.
  */
-Extraction.prototype.start = function(callback) {
+Extraction.prototype.extract = function(callback) {
   this.scope = new Scope('$');
+  this.scope.field = this.mmd;
   this.scope.rootNode = this.rootNode;
   this.scope.node = this.rootNode;
 
@@ -534,15 +679,16 @@ Extraction.prototype.start = function(callback) {
  */
 function extractMetadata(resp, mmd, bsFacade, options, callback) {
   var extraction = new Extraction(resp, mmd, bsFacade, options);
-  extraction.start(callback);
+  extraction.extract(callback);
 }
 
 /**
  * @deprecated
  * This is added for debugging. This synchronous version will be removed soon.
+ * TODO remove this.
  */
 function extractMetadataSync(resp, mmd, bsFacade, options) {
   var extraction = new Extraction(resp, mmd, bsFacade, options);
-  extraction.start(function() {});
+  extraction.extract(function() {});
   return extraction.metadata;
 }
