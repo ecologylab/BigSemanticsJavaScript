@@ -1,0 +1,1257 @@
+{
+  "meta_metadata_repository": {
+    "package": "test-inherited-xpath",
+    "repository_by_name": [
+      {
+        "simpl.id": "932607259",
+        "name": "metadata",
+        "inherit_done": "true",
+        "new_metadata_class": "true",
+        "visibility": "GLOBAL",
+        "kids": [
+          {
+            "scalar": {
+              "simpl.id": "985922955",
+              "name": "meta_metadata_name",
+              "inherit_done": "true",
+              "scalar_type": "String",
+              "declaring_mmd": {
+                "simpl.ref": "932607259"
+              },
+              "kids": [
+
+              ]
+            }
+          }
+        ],
+        "scope": {
+          "id": "MetaMetadata<metadata>"
+        }
+      },
+      {
+        "simpl.id": "1682092198",
+        "name": "document",
+        "inherit_done": "true",
+        "new_metadata_class": "true",
+        "extends": "metadata",
+        "visibility": "GLOBAL",
+        "super_field": {
+          "meta_metadata": {
+            "simpl.ref": "932607259"
+          }
+        },
+        "kids": [
+          {
+            "scalar": {
+              "simpl.id": "1435804085",
+              "name": "location",
+              "inherit_done": "true",
+              "scalar_type": "ParsedURL",
+              "declaring_mmd": {
+                "simpl.ref": "1682092198"
+              },
+              "kids": [
+
+              ]
+            }
+          },
+          {
+            "collection": {
+              "simpl.id": "1784662007",
+              "name": "other_locations",
+              "inherit_done": "true",
+              "child_scalar_type": "ParsedURL",
+              "declaring_mmd": {
+                "simpl.ref": "1682092198"
+              },
+              "kids": [
+
+              ],
+              "scope": {
+                "id": "MetaMetadataCollectionField<document><other_locations>"
+              }
+            }
+          },
+          {
+            "scalar": {
+              "simpl.ref": "985922955"
+            }
+          }
+        ],
+        "scope": {
+          "id": "MetaMetadata<document>"
+        }
+      },
+      {
+        "simpl.id": "2137589296",
+        "name": "rich_document",
+        "inherit_done": "true",
+        "new_metadata_class": "true",
+        "extends": "document",
+        "visibility": "GLOBAL",
+        "super_field": {
+          "meta_metadata": {
+            "simpl.ref": "1682092198"
+          }
+        },
+        "kids": [
+          {
+            "scalar": {
+              "simpl.id": "997110508",
+              "name": "meta_metadata_name",
+              "hide": "true",
+              "inherit_done": "true",
+              "scalar_type": "String",
+              "super_field": {
+                "scalar": {
+                  "simpl.ref": "985922955"
+                }
+              },
+              "kids": [
+
+              ]
+            }
+          },
+          {
+            "scalar": {
+              "simpl.id": "1854778591",
+              "name": "location",
+              "hide": "true",
+              "inherit_done": "true",
+              "scalar_type": "ParsedURL",
+              "super_field": {
+                "scalar": {
+                  "simpl.ref": "1435804085"
+                }
+              },
+              "kids": [
+
+              ]
+            }
+          },
+          {
+            "collection": {
+              "simpl.id": "885951223",
+              "name": "other_locations",
+              "hide": "true",
+              "inherit_done": "true",
+              "child_scalar_type": "ParsedURL",
+              "super_field": {
+                "collection": {
+                  "simpl.ref": "1784662007"
+                }
+              },
+              "kids": [
+                {
+                  "composite": {
+                    "name": "other_locations",
+                    "kids": [
+
+                    ],
+                    "scope": {
+                      "simpl.id": "796533847",
+                      "id": "MetaMetadataCollectionField<rich_document><other_locations>"
+                    }
+                  }
+                }
+              ],
+              "scope": {
+                "simpl.ref": "796533847"
+              }
+            }
+          },
+          {
+            "scalar": {
+              "simpl.id": "2054798982",
+              "name": "title",
+              "style_name": "h1",
+              "inherit_done": "true",
+              "scalar_type": "String",
+              "xpaths": [
+                "\/\/meta[@property='og:title']\/@content",
+                "\/html\/head\/title"
+              ],
+              "declaring_mmd": {
+                "simpl.ref": "2137589296"
+              },
+              "kids": [
+
+              ]
+            }
+          },
+          {
+            "scalar": {
+              "simpl.id": "509886383",
+              "name": "description",
+              "inherit_done": "true",
+              "scalar_type": "String",
+              "xpaths": [
+                "\/\/meta[@property='og:description']\/@content",
+                "\/\/meta[@name='description']\/@content"
+              ],
+              "declaring_mmd": {
+                "simpl.ref": "2137589296"
+              },
+              "kids": [
+
+              ]
+            }
+          },
+          {
+            "collection": {
+              "simpl.id": "142666848",
+              "name": "main_images",
+              "inherit_done": "true",
+              "child_type": "document",
+              "xpaths": [
+                "\/\/meta[@property='og:image']"
+              ],
+              "declaring_mmd": {
+                "simpl.ref": "2137589296"
+              },
+              "kids": [
+                {
+                  "composite": {
+                    "name": "document",
+                    "tag": "document",
+                    "inherit_done": "true",
+                    "type": "document",
+                    "declaring_mmd": {
+                      "simpl.ref": "2137589296"
+                    },
+                    "kids": [
+                      {
+                        "scalar": {
+                          "name": "location",
+                          "inherit_done": "true",
+                          "scalar_type": "ParsedURL",
+                          "xpaths": [
+                            ".\/@content"
+                          ],
+                          "super_field": {
+                            "scalar": {
+                              "simpl.ref": "1435804085"
+                            }
+                          },
+                          "kids": [
+
+                          ]
+                        }
+                      },
+                      {
+                        "scalar": {
+                          "simpl.ref": "985922955"
+                        }
+                      },
+                      {
+                        "collection": {
+                          "simpl.ref": "1784662007"
+                        }
+                      }
+                    ],
+                    "type_mmd": {
+                      "simpl.ref": "1682092198"
+                    },
+                    "scope": {
+                      "simpl.id": "1627960023",
+                      "id": "MetaMetadataCollectionField<rich_document><main_images>"
+                    }
+                  }
+                }
+              ],
+              "type_mmd": {
+                "simpl.ref": "1682092198"
+              },
+              "scope": {
+                "simpl.ref": "1627960023"
+              }
+            }
+          }
+        ],
+        "scope": {
+          "id": "MetaMetadata<rich_document>"
+        }
+      },
+      {
+        "simpl.id": "1811044090",
+        "name": "creative_work",
+        "inherit_done": "true",
+        "new_metadata_class": "true",
+        "extends": "rich_document",
+        "visibility": "GLOBAL",
+        "super_field": {
+          "meta_metadata": {
+            "simpl.ref": "2137589296"
+          }
+        },
+        "kids": [
+          {
+            "scalar": {
+              "simpl.id": "873415566",
+              "name": "title",
+              "style_name": "caption",
+              "inherit_done": "true",
+              "scalar_type": "String",
+              "xpaths": [
+                "\/\/meta[@property='og:title']\/@content",
+                "\/html\/head\/title"
+              ],
+              "super_field": {
+                "scalar": {
+                  "simpl.ref": "2054798982"
+                }
+              },
+              "kids": [
+
+              ]
+            }
+          },
+          {
+            "collection": {
+              "simpl.id": "1531333864",
+              "name": "authors",
+              "inherit_done": "true",
+              "child_type": "rich_document",
+              "xpaths": [
+                "\/\/meta[@property='og:author']",
+                "\/\/meta[@name='author']"
+              ],
+              "declaring_mmd": {
+                "simpl.ref": "1811044090"
+              },
+              "kids": [
+                {
+                  "composite": {
+                    "simpl.id": "114132791",
+                    "name": "rich_document",
+                    "tag": "rich_document",
+                    "inherit_done": "true",
+                    "type": "rich_document",
+                    "declaring_mmd": {
+                      "simpl.ref": "1811044090"
+                    },
+                    "kids": [
+                      {
+                        "scalar": {
+                          "simpl.id": "818403870",
+                          "name": "title",
+                          "style_name": "h1",
+                          "inherit_done": "true",
+                          "scalar_type": "String",
+                          "xpaths": [
+                            ".\/@content",
+                            "\/\/meta[@property='og:title']\/@content",
+                            "\/html\/head\/title"
+                          ],
+                          "super_field": {
+                            "scalar": {
+                              "simpl.ref": "2054798982"
+                            }
+                          },
+                          "kids": [
+
+                          ]
+                        }
+                      },
+                      {
+                        "scalar": {
+                          "simpl.ref": "997110508"
+                        }
+                      },
+                      {
+                        "scalar": {
+                          "simpl.ref": "509886383"
+                        }
+                      },
+                      {
+                        "scalar": {
+                          "simpl.ref": "1854778591"
+                        }
+                      },
+                      {
+                        "collection": {
+                          "simpl.ref": "885951223"
+                        }
+                      },
+                      {
+                        "collection": {
+                          "simpl.ref": "142666848"
+                        }
+                      }
+                    ],
+                    "type_mmd": {
+                      "simpl.ref": "2137589296"
+                    },
+                    "scope": {
+                      "simpl.id": "586617651",
+                      "id": "MetaMetadataCollectionField<creative_work><authors>"
+                    }
+                  }
+                }
+              ],
+              "type_mmd": {
+                "simpl.ref": "2137589296"
+              },
+              "scope": {
+                "simpl.ref": "586617651"
+              }
+            }
+          },
+          {
+            "composite": {
+              "simpl.id": "1360767589",
+              "name": "source",
+              "inherit_done": "true",
+              "type": "creative_work",
+              "declaring_mmd": {
+                "simpl.ref": "1811044090"
+              },
+              "kids": [
+                {
+                  "collection": {
+                    "simpl.id": "920011586",
+                    "name": "citations",
+                    "inherit_done": "true",
+                    "child_type": "creative_work",
+                    "xpaths": [
+                      "\/\/*[@itemprop='citation']"
+                    ],
+                    "declaring_mmd": {
+                      "simpl.ref": "1811044090"
+                    },
+                    "kids": [
+                      {
+                        "composite": {
+                          "simpl.id": "328638398",
+                          "name": "creative_work",
+                          "tag": "creative_work",
+                          "inherit_done": "true",
+                          "type": "creative_work",
+                          "declaring_mmd": {
+                            "simpl.ref": "1811044090"
+                          },
+                          "kids": [
+                            {
+                              "scalar": {
+                                "simpl.id": "1060830840",
+                                "name": "location",
+                                "hide": "true",
+                                "inherit_done": "true",
+                                "scalar_type": "ParsedURL",
+                                "xpaths": [
+                                  ".\/@href",
+                                  ".\/\/a\/@href"
+                                ],
+                                "super_field": {
+                                  "scalar": {
+                                    "simpl.ref": "1854778591"
+                                  }
+                                },
+                                "kids": [
+
+                                ]
+                              }
+                            },
+                            {
+                              "scalar": {
+                                "simpl.id": "2137211482",
+                                "name": "title",
+                                "style_name": "caption",
+                                "inherit_done": "true",
+                                "scalar_type": "String",
+                                "xpaths": [
+                                  ".",
+                                  "\/\/meta[@property='og:title']\/@content",
+                                  "\/html\/head\/title"
+                                ],
+                                "super_field": {
+                                  "scalar": {
+                                    "simpl.ref": "873415566"
+                                  }
+                                },
+                                "kids": [
+
+                                ]
+                              }
+                            },
+                            {
+                              "collection": {
+                                "simpl.ref": "920011586"
+                              }
+                            },
+                            {
+                              "collection": {
+                                "simpl.id": "968514068",
+                                "name": "references",
+                                "inherit_done": "true",
+                                "child_type": "creative_work",
+                                "declaring_mmd": {
+                                  "simpl.ref": "1811044090"
+                                },
+                                "kids": [
+                                  {
+                                    "composite": {
+                                      "simpl.id": "1789550256",
+                                      "name": "creative_work",
+                                      "tag": "creative_work",
+                                      "inherit_done": "true",
+                                      "type": "creative_work",
+                                      "declaring_mmd": {
+                                        "simpl.ref": "1811044090"
+                                      },
+                                      "kids": [
+                                        {
+                                          "collection": {
+                                            "simpl.ref": "920011586"
+                                          }
+                                        },
+                                        {
+                                          "collection": {
+                                            "simpl.ref": "968514068"
+                                          }
+                                        },
+                                        {
+                                          "scalar": {
+                                            "simpl.ref": "997110508"
+                                          }
+                                        },
+                                        {
+                                          "scalar": {
+                                            "simpl.ref": "509886383"
+                                          }
+                                        },
+                                        {
+                                          "scalar": {
+                                            "simpl.ref": "1854778591"
+                                          }
+                                        },
+                                        {
+                                          "composite": {
+                                            "simpl.ref": "1360767589"
+                                          }
+                                        },
+                                        {
+                                          "scalar": {
+                                            "simpl.ref": "873415566"
+                                          }
+                                        },
+                                        {
+                                          "collection": {
+                                            "simpl.ref": "1531333864"
+                                          }
+                                        },
+                                        {
+                                          "collection": {
+                                            "simpl.ref": "885951223"
+                                          }
+                                        },
+                                        {
+                                          "collection": {
+                                            "simpl.ref": "142666848"
+                                          }
+                                        }
+                                      ],
+                                      "type_mmd": {
+                                        "simpl.ref": "1811044090"
+                                      },
+                                      "scope": {
+                                        "simpl.id": "3447021",
+                                        "id": "MetaMetadataCollectionField<creative_work><references>"
+                                      }
+                                    }
+                                  }
+                                ],
+                                "type_mmd": {
+                                  "simpl.ref": "1811044090"
+                                },
+                                "scope": {
+                                  "simpl.ref": "3447021"
+                                }
+                              }
+                            },
+                            {
+                              "scalar": {
+                                "simpl.ref": "997110508"
+                              }
+                            },
+                            {
+                              "scalar": {
+                                "simpl.ref": "509886383"
+                              }
+                            },
+                            {
+                              "composite": {
+                                "simpl.ref": "1360767589"
+                              }
+                            },
+                            {
+                              "collection": {
+                                "simpl.ref": "1531333864"
+                              }
+                            },
+                            {
+                              "collection": {
+                                "simpl.ref": "885951223"
+                              }
+                            },
+                            {
+                              "collection": {
+                                "simpl.ref": "142666848"
+                              }
+                            }
+                          ],
+                          "type_mmd": {
+                            "simpl.ref": "1811044090"
+                          },
+                          "scope": {
+                            "simpl.id": "440434003",
+                            "id": "MetaMetadataCollectionField<creative_work><citations>"
+                          }
+                        }
+                      }
+                    ],
+                    "type_mmd": {
+                      "simpl.ref": "1811044090"
+                    },
+                    "scope": {
+                      "simpl.ref": "440434003"
+                    }
+                  }
+                },
+                {
+                  "collection": {
+                    "simpl.ref": "968514068"
+                  }
+                },
+                {
+                  "scalar": {
+                    "simpl.ref": "997110508"
+                  }
+                },
+                {
+                  "scalar": {
+                    "simpl.ref": "509886383"
+                  }
+                },
+                {
+                  "scalar": {
+                    "simpl.ref": "1854778591"
+                  }
+                },
+                {
+                  "composite": {
+                    "simpl.ref": "1360767589"
+                  }
+                },
+                {
+                  "scalar": {
+                    "simpl.ref": "873415566"
+                  }
+                },
+                {
+                  "collection": {
+                    "simpl.ref": "1531333864"
+                  }
+                },
+                {
+                  "collection": {
+                    "simpl.ref": "885951223"
+                  }
+                },
+                {
+                  "collection": {
+                    "simpl.ref": "142666848"
+                  }
+                }
+              ],
+              "type_mmd": {
+                "simpl.ref": "1811044090"
+              },
+              "scope": {
+                "id": "MetaMetadataCompositeField<creative_work><source>"
+              }
+            }
+          },
+          {
+            "collection": {
+              "simpl.ref": "968514068"
+            }
+          },
+          {
+            "collection": {
+              "simpl.ref": "920011586"
+            }
+          },
+          {
+            "scalar": {
+              "simpl.ref": "997110508"
+            }
+          },
+          {
+            "scalar": {
+              "simpl.ref": "509886383"
+            }
+          },
+          {
+            "scalar": {
+              "simpl.ref": "1854778591"
+            }
+          },
+          {
+            "collection": {
+              "simpl.ref": "885951223"
+            }
+          },
+          {
+            "collection": {
+              "simpl.ref": "142666848"
+            }
+          }
+        ],
+        "scope": {
+          "id": "MetaMetadata<creative_work>"
+        }
+      },
+      {
+        "name": "acm_article",
+        "inherit_done": "true",
+        "new_metadata_class": "true",
+        "extends": "creative_work",
+        "visibility": "GLOBAL",
+        "super_field": {
+          "meta_metadata": {
+            "simpl.ref": "1811044090"
+          }
+        },
+        "kids": [
+          {
+            "collection": {
+              "name": "authors",
+              "inherit_done": "true",
+              "child_type": "rich_document",
+              "xpaths": [
+                "\/\/div[@id='authors']\/a",
+                "\/\/meta[@property='og:author']",
+                "\/\/meta[@name='author']"
+              ],
+              "super_field": {
+                "collection": {
+                  "simpl.ref": "1531333864"
+                }
+              },
+              "kids": [
+                {
+                  "composite": {
+                    "name": "authors",
+                    "tag": "rich_document",
+                    "inherit_done": "true",
+                    "type": "rich_document",
+                    "super_field": {
+                      "composite": {
+                        "simpl.ref": "114132791"
+                      }
+                    },
+                    "kids": [
+                      {
+                        "scalar": {
+                          "name": "location",
+                          "hide": "true",
+                          "inherit_done": "true",
+                          "scalar_type": "ParsedURL",
+                          "xpaths": [
+                            ".\/@href"
+                          ],
+                          "super_field": {
+                            "scalar": {
+                              "simpl.ref": "1854778591"
+                            }
+                          },
+                          "kids": [
+
+                          ]
+                        }
+                      },
+                      {
+                        "scalar": {
+                          "name": "title",
+                          "style_name": "h1",
+                          "label": "name",
+                          "inherit_done": "true",
+                          "scalar_type": "String",
+                          "xpaths": [
+                            ".\/text()",
+                            ".\/@content",
+                            "\/\/meta[@property='og:title']\/@content",
+                            "\/html\/head\/title"
+                          ],
+                          "super_field": {
+                            "scalar": {
+                              "simpl.ref": "818403870"
+                            }
+                          },
+                          "kids": [
+
+                          ]
+                        }
+                      },
+                      {
+                        "scalar": {
+                          "simpl.ref": "997110508"
+                        }
+                      },
+                      {
+                        "scalar": {
+                          "simpl.ref": "509886383"
+                        }
+                      },
+                      {
+                        "collection": {
+                          "simpl.ref": "885951223"
+                        }
+                      },
+                      {
+                        "collection": {
+                          "simpl.ref": "142666848"
+                        }
+                      }
+                    ],
+                    "type_mmd": {
+                      "simpl.ref": "2137589296"
+                    },
+                    "scope": {
+                      "simpl.id": "1720435669",
+                      "id": "MetaMetadataCollectionField<acm_article><authors>"
+                    }
+                  }
+                }
+              ],
+              "type_mmd": {
+                "simpl.ref": "2137589296"
+              },
+              "scope": {
+                "simpl.ref": "1720435669"
+              }
+            }
+          },
+          {
+            "composite": {
+              "name": "source",
+              "inherit_done": "true",
+              "type": "creative_work",
+              "super_field": {
+                "composite": {
+                  "simpl.ref": "1360767589"
+                }
+              },
+              "kids": [
+                {
+                  "scalar": {
+                    "name": "title",
+                    "style_name": "caption",
+                    "inherit_done": "true",
+                    "scalar_type": "String",
+                    "xpaths": [
+                      "\/\/div[@id='source']\/a",
+                      "\/\/meta[@property='og:title']\/@content",
+                      "\/html\/head\/title"
+                    ],
+                    "super_field": {
+                      "scalar": {
+                        "simpl.ref": "873415566"
+                      }
+                    },
+                    "kids": [
+
+                    ]
+                  }
+                },
+                {
+                  "scalar": {
+                    "name": "location",
+                    "hide": "true",
+                    "inherit_done": "true",
+                    "scalar_type": "ParsedURL",
+                    "xpaths": [
+                      "\/\/div[@id='source']\/a\/@href"
+                    ],
+                    "super_field": {
+                      "scalar": {
+                        "simpl.ref": "1854778591"
+                      }
+                    },
+                    "kids": [
+
+                    ]
+                  }
+                },
+                {
+                  "collection": {
+                    "simpl.ref": "920011586"
+                  }
+                },
+                {
+                  "collection": {
+                    "simpl.ref": "968514068"
+                  }
+                },
+                {
+                  "scalar": {
+                    "simpl.ref": "997110508"
+                  }
+                },
+                {
+                  "scalar": {
+                    "simpl.ref": "509886383"
+                  }
+                },
+                {
+                  "composite": {
+                    "simpl.ref": "1360767589"
+                  }
+                },
+                {
+                  "collection": {
+                    "simpl.ref": "1531333864"
+                  }
+                },
+                {
+                  "collection": {
+                    "simpl.ref": "885951223"
+                  }
+                },
+                {
+                  "collection": {
+                    "simpl.ref": "142666848"
+                  }
+                }
+              ],
+              "type_mmd": {
+                "simpl.ref": "1811044090"
+              },
+              "scope": {
+                "id": "MetaMetadataCompositeField<acm_article><source>"
+              }
+            }
+          },
+          {
+            "collection": {
+              "name": "references",
+              "inherit_done": "true",
+              "child_type": "creative_work",
+              "xpaths": [
+                "\/\/div[@id='references']\/\/a"
+              ],
+              "super_field": {
+                "collection": {
+                  "simpl.ref": "968514068"
+                }
+              },
+              "kids": [
+                {
+                  "composite": {
+                    "name": "references",
+                    "tag": "creative_work",
+                    "inherit_done": "true",
+                    "type": "creative_work",
+                    "super_field": {
+                      "composite": {
+                        "simpl.ref": "1789550256"
+                      }
+                    },
+                    "kids": [
+                      {
+                        "scalar": {
+                          "name": "description",
+                          "style_name": "abstract",
+                          "inherit_done": "true",
+                          "scalar_type": "String",
+                          "xpaths": [
+                            "..\/p[@class='abstract']",
+                            "\/\/meta[@property='og:description']\/@content",
+                            "\/\/meta[@name='description']\/@content"
+                          ],
+                          "super_field": {
+                            "scalar": {
+                              "simpl.ref": "509886383"
+                            }
+                          },
+                          "kids": [
+
+                          ]
+                        }
+                      },
+                      {
+                        "scalar": {
+                          "name": "location",
+                          "hide": "true",
+                          "inherit_done": "true",
+                          "scalar_type": "ParsedURL",
+                          "xpaths": [
+                            ".\/@href"
+                          ],
+                          "super_field": {
+                            "scalar": {
+                              "simpl.ref": "1854778591"
+                            }
+                          },
+                          "kids": [
+
+                          ]
+                        }
+                      },
+                      {
+                        "scalar": {
+                          "name": "title",
+                          "style_name": "reference_caption",
+                          "inherit_done": "true",
+                          "scalar_type": "String",
+                          "xpaths": [
+                            ".",
+                            "\/\/meta[@property='og:title']\/@content",
+                            "\/html\/head\/title"
+                          ],
+                          "super_field": {
+                            "scalar": {
+                              "simpl.ref": "873415566"
+                            }
+                          },
+                          "kids": [
+
+                          ]
+                        }
+                      },
+                      {
+                        "collection": {
+                          "simpl.ref": "920011586"
+                        }
+                      },
+                      {
+                        "collection": {
+                          "simpl.ref": "968514068"
+                        }
+                      },
+                      {
+                        "scalar": {
+                          "simpl.ref": "997110508"
+                        }
+                      },
+                      {
+                        "composite": {
+                          "simpl.ref": "1360767589"
+                        }
+                      },
+                      {
+                        "collection": {
+                          "simpl.ref": "1531333864"
+                        }
+                      },
+                      {
+                        "collection": {
+                          "simpl.ref": "885951223"
+                        }
+                      },
+                      {
+                        "collection": {
+                          "simpl.ref": "142666848"
+                        }
+                      }
+                    ],
+                    "type_mmd": {
+                      "simpl.ref": "1811044090"
+                    },
+                    "scope": {
+                      "simpl.id": "1068934215",
+                      "id": "MetaMetadataCollectionField<acm_article><references>"
+                    }
+                  }
+                }
+              ],
+              "type_mmd": {
+                "simpl.ref": "1811044090"
+              },
+              "scope": {
+                "simpl.ref": "1068934215"
+              }
+            }
+          },
+          {
+            "collection": {
+              "name": "citations",
+              "inherit_done": "true",
+              "child_type": "creative_work",
+              "xpaths": [
+                "\/\/div[@id='citations']\/\/a",
+                "\/\/*[@itemprop='citation']"
+              ],
+              "super_field": {
+                "collection": {
+                  "simpl.ref": "920011586"
+                }
+              },
+              "kids": [
+                {
+                  "composite": {
+                    "name": "citations",
+                    "tag": "creative_work",
+                    "inherit_done": "true",
+                    "type": "creative_work",
+                    "super_field": {
+                      "composite": {
+                        "simpl.ref": "328638398"
+                      }
+                    },
+                    "kids": [
+                      {
+                        "scalar": {
+                          "name": "description",
+                          "style_name": "abstract",
+                          "inherit_done": "true",
+                          "scalar_type": "String",
+                          "xpaths": [
+                            "..\/p[@class='abstract']",
+                            "\/\/meta[@property='og:description']\/@content",
+                            "\/\/meta[@name='description']\/@content"
+                          ],
+                          "super_field": {
+                            "scalar": {
+                              "simpl.ref": "509886383"
+                            }
+                          },
+                          "kids": [
+
+                          ]
+                        }
+                      },
+                      {
+                        "scalar": {
+                          "name": "location",
+                          "hide": "true",
+                          "inherit_done": "true",
+                          "scalar_type": "ParsedURL",
+                          "xpaths": [
+                            ".\/@href",
+                            ".\/\/a\/@href"
+                          ],
+                          "super_field": {
+                            "scalar": {
+                              "simpl.ref": "1060830840"
+                            }
+                          },
+                          "kids": [
+
+                          ]
+                        }
+                      },
+                      {
+                        "scalar": {
+                          "name": "title",
+                          "style_name": "citation_caption",
+                          "inherit_done": "true",
+                          "scalar_type": "String",
+                          "xpaths": [
+                            ".",
+                            "\/\/meta[@property='og:title']\/@content",
+                            "\/html\/head\/title"
+                          ],
+                          "super_field": {
+                            "scalar": {
+                              "simpl.ref": "2137211482"
+                            }
+                          },
+                          "kids": [
+
+                          ]
+                        }
+                      },
+                      {
+                        "collection": {
+                          "simpl.ref": "920011586"
+                        }
+                      },
+                      {
+                        "collection": {
+                          "simpl.ref": "968514068"
+                        }
+                      },
+                      {
+                        "scalar": {
+                          "simpl.ref": "997110508"
+                        }
+                      },
+                      {
+                        "composite": {
+                          "simpl.ref": "1360767589"
+                        }
+                      },
+                      {
+                        "collection": {
+                          "simpl.ref": "1531333864"
+                        }
+                      },
+                      {
+                        "collection": {
+                          "simpl.ref": "885951223"
+                        }
+                      },
+                      {
+                        "collection": {
+                          "simpl.ref": "142666848"
+                        }
+                      }
+                    ],
+                    "type_mmd": {
+                      "simpl.ref": "1811044090"
+                    },
+                    "scope": {
+                      "simpl.id": "1798286609",
+                      "id": "MetaMetadataCollectionField<acm_article><citations>"
+                    }
+                  }
+                }
+              ],
+              "type_mmd": {
+                "simpl.ref": "1811044090"
+              },
+              "scope": {
+                "simpl.ref": "1798286609"
+              }
+            }
+          },
+          {
+            "scalar": {
+              "simpl.ref": "997110508"
+            }
+          },
+          {
+            "scalar": {
+              "simpl.ref": "509886383"
+            }
+          },
+          {
+            "scalar": {
+              "simpl.ref": "1854778591"
+            }
+          },
+          {
+            "scalar": {
+              "simpl.ref": "873415566"
+            }
+          },
+          {
+            "collection": {
+              "simpl.ref": "885951223"
+            }
+          },
+          {
+            "collection": {
+              "simpl.ref": "142666848"
+            }
+          }
+        ],
+        "scope": {
+          "id": "MetaMetadata<acm_article>"
+        }
+      }
+    ]
+  }
+}

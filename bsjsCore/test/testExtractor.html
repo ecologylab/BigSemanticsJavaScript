@@ -1,0 +1,159 @@
+<html>
+
+<head>
+<title>Test Extraction</title>
+
+<link rel="stylesheet" href="../../libraries/jquery.jsonview.min.css" />
+
+<script src="../../libraries/bluebird-3.4.1.min.js"></script>
+<script src="../../libraries/jquery-2.0.0.min.js"></script>
+<script src="../../libraries/jquery.jsonview.min.js"></script>
+
+<script src="../simpl/simplBase.js"></script>
+<script src="../ParsedURL.js"></script>
+<script src="../BSUtils.js"></script>
+<script src="../Readyable.js"></script>
+<script src="../RepoMan.js"></script>
+<script src="../Downloader.js"></script>
+<script src="../Extractor.js"></script>
+<script src="../FieldOps.js"></script>
+
+<style>
+.wrap {
+  margin: 0.5em;
+  padding: 1em;
+  background-color: #C7EDDA;
+}
+
+.error {
+  color: red;
+}
+</style>
+</head>
+
+<body>
+
+<div class="wrap">
+  <select id="testlist">
+    <option value="choose">Choose ...</option>
+  </select>
+</div>
+
+<div class="wrap">
+  <p>Repository: <span id='repo'><a href="#"></a></span></p>
+  <p>Document: <span id='doc'><a href="#"></a></span></p>
+  <p>Description: <span id="description"></span></p>
+  <p id="error" class="error"></p>
+</div>
+
+<div class="wrap">
+  <div id="metadata"></div>
+</div>
+
+<script>
+  function httpGet(url, opts) {
+    if (typeof url === 'string') {
+      var downloader = new Downloader();
+      return new Promise(function(resolve, reject) {
+        downloader.httpGet(url, opts, function(err, resp) {
+          if (err) {
+            reject(err);
+          }
+          else {
+            resolve(resp);
+          }
+        });
+      });
+    }
+  }
+
+  function loadMmd(repoUrl, mmdName, opts) {
+    if (typeof repoUrl === 'string' && typeof mmdName === 'string') {
+      opts = opts || {};
+
+      return new Promise(function(resolve, reject) {
+        var repoMan = new RepoMan({
+          url: repoUrl,
+        });
+        repoMan.onReady(function(err) {
+          if (err) {
+            reject(err);
+          }
+          else {
+            repoMan.loadMmd(mmdName, null, function(err, mmd) {
+              if (err) {
+                reject(err);
+              }
+              else {
+                resolve(mmd);
+              }
+            });
+          }
+        });
+      });
+    }
+  }
+
+  function displayMetadata(err, metadata) {
+    simpl.graphCollapse(metadata);
+    var json = JSON.stringify(metadata, null, 4);
+    $('#metadata').JSONView(json);
+  }
+
+  var specs = {};
+
+  function setupTest(spec) {
+    if (spec) {
+      var option = $('<option></option>').val(spec.name).text(spec.displayName);
+      $('#testlist').append(option);
+      specs[spec.name] = spec;
+    }
+  }
+
+  function switchToTest(spec) {
+    $('#repo > a').attr('href', spec.repoUrl).text(spec.repoUrl);
+    $('#doc > a').attr('href', spec.docUrl).text(spec.docUrl);
+    $('#description').text(spec.description);
+    $('#error').text('');
+    $('#metadata').empty();
+    loadMmd(spec.repoUrl, spec.mmdName, spec.repoOpts).then(function(mmd) {
+      return httpGet(spec.docUrl).then(function(resp) {
+        extractMetadata(resp, mmd, null, null, displayMetadata);
+      });
+    }).catch(function(err) {
+      console.error(err);
+      $('#error').text(err.stack);
+    })
+  }
+
+  $('#testlist').on('change', function() {
+    var spec = specs[this.value];
+    if (spec) {
+      switchToTest(spec);
+    }
+  });
+
+  setupTest({
+    name: 'inherited-xpath-amazon_product',
+    displayName: 'Test inherited xpaths with amazon product',
+    repoUrl: 'repo-all-160711.json',
+    mmdName: 'amazon_product',
+    docUrl: 'amazon_product.html',
+    description: 'Test inherited xpaths with amazon product. The department\
+    field should not contain page-level information, such as description and\
+    main_images.',
+  });
+
+  setupTest({
+    name: 'inherited-xpath-fake_acm_article',
+    displayName: 'Test inherited xpaths with fake ACM article',
+    repoUrl: 'repo-inherited-xpaths.json',
+    mmdName: 'acm_article',
+    docUrl: 'fake-acm_article.html',
+    description: 'Test inherited xpaths with fake ACM article. There should be\
+    a source field.',
+  });
+</script>
+</body>
+
+</html>

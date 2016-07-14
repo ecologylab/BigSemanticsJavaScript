@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<meta_metadata_repository package="test-inherited-xpath">
+
+  <meta_metadata name="metadata">
+    <scalar name="meta_metadata_name" scalar_type="String" />
+  </meta_metadata>
+
+
+
+  <meta_metadata name="document" extends="metadata">
+    <scalar name="location" scalar_type="ParsedURL" />
+    <collection name="other_locations" child_scalar_type="ParsedURL" />
+  </meta_metadata>
+
+  <meta_metadata name="rich_document" extends="document">
+    <scalar name="meta_metadata_name" hide="true" />
+    <scalar name="location" hide="true" />
+    <collection name="other_locations" hide="true" />
+
+    <scalar name="title" scalar_type="String" style_name="h1">
+      <xpath>//meta[@property='og:title']/@content</xpath>
+      <xpath>/html/head/title</xpath>
+    </scalar>
+    <scalar name="description" scalar_type="String">
+      <xpath>//meta[@property='og:description']/@content</xpath>
+      <xpath>//meta[@name='description']/@content</xpath>
+    </scalar>
+    <collection name="main_images" child_type="document">
+      <xpath>//meta[@property='og:image']</xpath>
+      <scalar name="location">
+        <xpath>./@content</xpath>
+      </scalar>
+    </collection>
+  </meta_metadata>
+
+
+
+  <meta_metadata name="creative_work" extends="rich_document">
+    <scalar name="title" style_name="caption" />
+
+    <collection name="authors" child_type="rich_document">
+      <xpath>//meta[@property='og:author']</xpath>
+      <xpath>//meta[@name='author']</xpath>
+      <scalar name="title">
+        <xpath>./@content</xpath>
+      </scalar>
+    </collection>
+
+    <composite name="source" type="creative_work">
+      <scalar name="title">
+        <xpath>//*[@itemprop='source']</xpath>
+      </scalar>
+    </composite>
+
+    <collection name="references" child_type="creative_work" />
+
+    <collection name="citations" child_type="creative_work">
+      <xpath>//*[@itemprop='citation']</xpath>
+      <scalar name="title">
+        <xpath>.</xpath>
+      </scalar>
+      <scalar name="location">
+        <xpath>./@href</xpath>
+        <xpath>.//a/@href</xpath>
+      </scalar>
+    </collection>
+  </meta_metadata>
+
+
+
+  <meta_metadata name="acm_article" extends="creative_work">
+    <collection name="authors">
+      <xpath>//div[@id='authors']/a</xpath>
+      <scalar name="title" label="name">
+        <xpath>./text()</xpath>
+      </scalar>
+      <scalar name="location">
+        <xpath>./@href</xpath>
+      </scalar>
+    </collection>
+
+    <composite name="source">
+      <scalar name="title">
+        <xpath>//div[@id='source']/a</xpath>
+      </scalar>
+      <scalar name="location">
+        <xpath>//div[@id='source']/a/@href</xpath>
+      </scalar>
+    </composite>
+
+    <collection name="references" child_type="acm_article">
+      <xpath>//div[@id='references']//a</xpath>
+      <scalar name="title" style_name="reference_caption">
+        <xpath>.</xpath>
+      </scalar>
+      <scalar name="location">
+        <xpath>./@href</xpath>
+      </scalar>
+      <scalar name="description" style_name="abstract">
+        <xpath>../p[@class='abstract']</xpath>
+      </scalar>
+    </collection>
+
+    <collection name="citations" child_type="acm_article">
+      <xpath>//div[@id='citations']//a</xpath>
+      <scalar name="title" style_name="citation_caption">
+        <xpath>.</xpath>
+      </scalar>
+      <scalar name="location">
+        <xpath>./@href</xpath>
+      </scalar>
+      <scalar name="description" style_name="abstract">
+        <xpath>../p[@class='abstract']</xpath>
+      </scalar>
+    </collection>
+  </meta_metadata>
+
+</meta_metadata_repository>"

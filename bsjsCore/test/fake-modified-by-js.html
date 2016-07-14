@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Content Modified by JS</title>
+<script type="text/javascript">
+    function modify() {
+        var ele = document.getElementById("target");
+        ele.innerHTML = ele.innerHTML.substring(0, 15) + "...";
+    }
+</script>
+</head>
+<body onload="modify()">
+    <p id="target">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+
+    <p id="withInnerHtml"><b>Bold Tag</b></p>
+
+    <a id="link" href="https://www.amazon.com/Lexar-Professional-UHS-I-Rescue-Software/dp/B00VBNQK0E/ref=pd_sim_421_1?ie=UTF8&dpID=51JWfSABvnL&dpSrc=sims&preST=_AC_UL160_SR120%2C160_&refRID=Y4PJ2N121VPAWTY4V0MR">
+</body>
+
+</html>
