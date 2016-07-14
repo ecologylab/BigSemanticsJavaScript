@@ -5,19 +5,20 @@ function extractMetadataCombo(response, mmd, bigSemantics, options, callback) {
 
 	mmd = BSUtils.unwrapMmd(mmd);
 	
-    var metadataNormal = extractMetadataSync(response, mmd, bigSemantics, options);
-    var metadataMicro  = extractMetadataMicroSync(response , mmd , bigSemantics, options);
-    metadataNormal = metadataNormal[mmd.name];
-    metadataMicro  = metadataMicro[mmd.name];
+    extractMetadata(response, mmd, bigSemantics, options, function(err, metadataNormal) {
+        var metadataMicro  = extractMetadataMicroSync(response , mmd , bigSemantics, options);
+        metadataNormal = metadataNormal[mmd.name];
+        metadataMicro  = metadataMicro[mmd.name];
 
-	var metadata = metadataNormal;
-	if (metadataMicro){
-    	metadata = mergeMetadata( metadataNormal , metadataMicro , mmd);
-	}
+        var metadata = metadataNormal;
+        if (metadataMicro){
+            metadata = mergeMetadata( metadataNormal , metadataMicro , mmd);
+        }
 
-	var result = {};
-    result[mmd.name] = metadata;
-    callback ( null , result);
+        var result = {};
+        result[mmd.name] = metadata;
+        callback ( null , result);
+    });
 }
 
 function pickBestMMD( mmd1 , mmd2) {
