@@ -57,8 +57,21 @@ var RepoMan = (function() {
       }
       repoman.initialize();
     }
-    else if (source.file) {
-      // only works in Node:
+    else if (source.str) {
+      try {
+        repoman.repo = simpl.deserialize(source.str);
+      } catch (err) {
+        repoman.setError(err);
+        return;
+      }
+
+      if(repoman.repo.meta_metadata_repository)
+        repoman.repo = repoman.repo.meta_metadata_repository;
+
+      repoman.initialize();
+    }
+  	else if (source.file) {
+  	  // only works in Node:
       var that = repoman;
       var fs = require('fs');
       fs.readFile(source.file, {
@@ -128,8 +141,11 @@ var RepoMan = (function() {
     }
   };
 
-  RepoMan.prototype.getRepo = function() {
-    return { meta_metadata_repository: this.repo };
+  RepoMan.prototype.getRepository = function() {
+    if (this.cachedRepo) return this.cachedRepo;
+
+    this.cachedRepo = simpl.serialize({meta_metadata_repository: this.repo });
+    return this.cachedRepo;
   }
 
   // selectorMap: key => Array of selectors

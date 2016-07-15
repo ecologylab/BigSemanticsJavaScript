@@ -16,5 +16,7 @@ export default class RepoMan extends Readyable {
     location: string,
     options: any,
     callback: (err: any, mmd: MetaMetadata)=>void
-  ): void;
+  ): MetaMetadata;
+
+  getRepository(): string;
 }
