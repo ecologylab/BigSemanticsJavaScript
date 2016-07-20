@@ -141,11 +141,8 @@ var RepoMan = (function() {
     }
   };
 
-  RepoMan.prototype.getRepository = function() {
-    if (this.cachedRepo) return this.cachedRepo;
-
-    this.cachedRepo = simpl.serialize({meta_metadata_repository: this.repo });
-    return this.cachedRepo;
+  RepoMan.prototype.getRepo = function() {
+    return { meta_metadata_repository: this.repo }
   }
 
   // selectorMap: key => Array of selectors
