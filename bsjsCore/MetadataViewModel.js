@@ -595,7 +595,9 @@ ViewModeler.isVisibleMediaField = function(mmdField, parentField)
  */
 ViewModeler.getFieldValue = function(mmdField, metadata)
 {
-  
+  if(metadata == null)
+  	return null;
+  	
   if (mmdField.tag != null) {
     if (metadata[mmdField.tag] != null) {
       return metadata[mmdField.tag];
