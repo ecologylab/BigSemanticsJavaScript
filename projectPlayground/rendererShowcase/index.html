@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Renderer Showcase</title>
+    
+    <!-- CSS! -->
+    <link href="showcase.css" rel="stylesheet" type="text/css">   
+      
+    <!-- bsjsCore Files -->
+    <script type="text/javascript" src="../../bsjsCore/Readyable.js"></script>
+
+    <script type="text/javascript" src="../../bsjsCore/BSAutoSwitch.js"></script>   
+    <script type="text/javascript" src="../../bsjsCore/BSService.js"></script>   
+
+    <script type="text/javascript" src="../../bsjsCore/BSExtension.js"></script>   
+
+    <script type="text/javascript" src="../../bsjsCore/BSUtils.js"></script>
+    <script type="text/javascript" src="../../bsjsCore/MetadataTask.js"></script>   
+    <script type="text/javascript" src="../../bsjsCore/MetadataViewModel.js"></script>
+    <script type="text/javascript" src="../../bsjsCore/Readyable.js"></script>
+    <script type="text/javascript" src="../../bsjsCore/Downloader.js"></script>
+    <script type="text/javascript" src="../../bsjsCore/ParsedURL.js"></script>
+    <script type="text/javascript" src="../../bsjsCore/Downloader.js"></script>
+
+    <script type="text/javascript" src="../../bsjsCore/RepoMan.js"></script>
+   
+    <!-- Required renderer files -->
+    <script type="text/javascript" src="../../renderers/interfaceStyle.js"></script>
+    
+    <script type="text/javascript" src="../../renderers/RendererBase.js"></script>
+    <script type="text/javascript" src="../../renderers/RenderingTask.js"></script>
+    
+    <script type="text/javascript" src="../../renderers/VanillaMICE.js"></script>
+      
+    <link href="../../renderers/styles/metadataRenderer.css" rel="stylesheet" type="text/css">
+	
+    <!-- Just the simpl things -->    
+    <script type="text/javascript" src="../../bsjsCore/simpl/simplBase.js"></script>
+	
+    <!-- showcase specifics -->
+    <script type="text/javascript" src="showcase.js"></script>
+    <script type="text/javascript" src="SemanticSultan.js"></script>
+
+  </head>
+    
+  <body onload="onBodyLoad()"> 
+
+    <!-- Content -->
+    <div class ="container">
+
+        <div id="inputArea">
+          <form action="" class="form" onsubmit="return false;" style="margin-top: 10px">
+            
+              <input type="text" size="500" style="width: 100%" id="targetURL" onkeydown="onEnterShowMetadata(event);" value="http://www.amazon.com/Discovery-Daft-Punk/dp/B000059MEK/ref=sr_1_1?s=music&ie=UTF8&qid=1365793732"/>
+            
+              <div class="pull-right">
+                <button type="button" class="btn" onclick="renderMetadata();">Go!</button>
+              </div>
+              
+          </form>
+            
+        </div>
+        
+        <div id="rendererPlaceholder">
+            
+             <div id="rendererInner" class="ecologylab-metadataContainer">
+                        
+            
+            </div>
+            
+        </div>
+      
+    </div>
+      
+  </body>

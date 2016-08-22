@@ -1,0 +1,38 @@
+* {
+    padding: 0px;
+    margin: 0px;
+}
+
+body {
+    background: lightgray;
+}
+
+#inputArea {
+    width: 80%;
+    text-align: center;
+    margin-left: 10%;
+}
+
+#rendererPlaceholder {
+  width: 600px;
+  height: 500px;
+  background: white;
+  position: fixed;
+  display: block;
+  margin-left: calc(50% - 300px);
+  margin-top: 10%;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  visibility: visible;
+  transition: visibility 0.333s linear 0.333s, opacity 0.333s ease, height 0.333s ease;
+  overflow: hidden;
+  opacity: 1.0;
+  background-color: #f4f4f4;
+}
+
+#rendererInner {
+    background-color: white;
+    height: 100%;
+    width: 100%;
+    overflow-x: hidden;
+    overflow-y: scroll;
+}
