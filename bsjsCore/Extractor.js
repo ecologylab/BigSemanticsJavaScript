@@ -406,7 +406,7 @@ Extraction.prototype.extractComposite = function(field, parentScope) {
 
   // step 2: extract nested fields using the newly created local scope
   if (localScope.value) {
-    localScope.value.meta_metadata_name = field.type || field.name;
+    localScope.value.mm_name = field.type || field.name;
     var kids = field.kids || [];
     /* FIXME (solution to the inherited xpath issue)
     // if we only allow authored kids to be extracted, filter `kids`.
@@ -433,9 +433,9 @@ Extraction.prototype.extractComposite = function(field, parentScope) {
     this.extractFields(kids, localScope, localScope.value);
     if (Object.keys(localScope.value).length > 1) {
       if (field.polymorphic_scope || field.polymorphic_classes) {
-        // TODO change meta_metadata_name based on location
+        // TODO change mm_name based on location
         var wrapper = {};
-        wrapper[localScope.value.meta_metadata_name] = localScope.value;
+        wrapper[localScope.value.mm_name] = localScope.value;
         localScope.value = wrapper;
       }
       return localScope.value;
@@ -495,14 +495,14 @@ Extraction.prototype.extractCompositeCollection = function(field, parentScope) {
     localScopei.collectionIndex = i+1;
     localScopei.node = localScope.nodes[i];
     var item = {
-      meta_metadata_name: surrogateComposite.type || surrogateComposite.name,
+      mm_name: surrogateComposite.type || surrogateComposite.name,
     };
     this.extractFields(surrogateComposite.kids, localScopei, item);
     if (Object.keys(item).length > 1) {
       if (field.polymorphic_scope || field.polymorphic_classes) {
-        // TODO change meta_metadata_name based on location
+        // TODO change mm_name based on location
         var wrapper = {};
-        wrapper[item.meta_metadata_name] = item;
+        wrapper[item.mm_name] = item;
         item = wrapper;
       }
       localScope.value.push(item);
