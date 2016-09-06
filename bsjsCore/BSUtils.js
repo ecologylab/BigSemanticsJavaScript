@@ -18,6 +18,17 @@ BSUtils.toDisplayCase = function(string)
   return display;
 }
 
+BSUtils.toFancyCase = function(string)
+{  
+  var strings = string.split('_');
+  var display = "";
+  for (var s = 0; s < strings.length; s++)
+  {
+    display += strings[s].charAt(0).toUpperCase() + strings[s].slice(1) + " ";
+  }
+  return display;
+}
+
 // Unwrap a metadata object.
 //
 // For example: an Amazon Product metadata object sometimes takes the form of

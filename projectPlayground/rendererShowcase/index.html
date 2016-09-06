@@ -30,9 +30,12 @@
     <script type="text/javascript" src="../../renderers/RendererBase.js"></script>
     <script type="text/javascript" src="../../renderers/RenderingTask.js"></script>
     
+    <script type="text/javascript" src="../../renderers/TabbyCat.js"></script>
+
     <script type="text/javascript" src="../../renderers/VanillaMICE.js"></script>
       
     <link href="../../renderers/styles/metadataRenderer.css" rel="stylesheet" type="text/css">
+    <link href="../../renderers/styles/tabbyRenderer.css" rel="stylesheet" type="text/css">
 	
     <!-- Just the simpl things -->    
     <script type="text/javascript" src="../../bsjsCore/simpl/simplBase.js"></script>
@@ -51,7 +54,7 @@
         <div id="inputArea">
           <form action="" class="form" onsubmit="return false;" style="margin-top: 10px">
             
-              <input type="text" size="500" style="width: 100%" id="targetURL" onkeydown="onEnterShowMetadata(event);" value="http://www.amazon.com/Discovery-Daft-Punk/dp/B000059MEK/ref=sr_1_1?s=music&ie=UTF8&qid=1365793732"/>
+              <input type="text" size="500" style="width: 100%" id="targetURL" value="http://www.amazon.com/Discovery-Daft-Punk/dp/B000059MEK/ref=sr_1_1?s=music&ie=UTF8&qid=1365793732"/>
             
               <div class="pull-right">
                 <button type="button" class="btn" onclick="renderMetadata();">Go!</button>
@@ -63,7 +66,7 @@
         
         <div id="rendererPlaceholder">
             
-             <div id="rendererInner" class="ecologylab-metadataContainer">
+             <div id="rendererInner" class="">
                         
             
             </div>

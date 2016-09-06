@@ -20,7 +20,7 @@ body {
   position: fixed;
   display: block;
   margin-left: calc(50% - 300px);
-  margin-top: 10%;
+  margin-top: 2%;
   box-shadow: 0 2px 6px rgba(0,0,0,0.2);
   visibility: visible;
   transition: visibility 0.333s linear 0.333s, opacity 0.333s ease, height 0.333s ease;
@@ -34,5 +34,5 @@ body {
     height: 100%;
     width: 100%;
     overflow-x: hidden;
-    overflow-y: scroll;
+    overflow-y: auto;
 }

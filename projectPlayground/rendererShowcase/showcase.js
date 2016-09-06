@@ -2,8 +2,14 @@ var docToRender = null;
 
 function onBodyLoad()
 {
+    docToRender = {  
+        location: "",
+        metadata: null,
+        mmd: null
+    };
+
     SemanticSultan.init();
-  //document.getElementById("rendererPlaceholder").innerHTML = "<h1>waddup</h1>";  
+    //document.getElementById("rendererPlaceholder").innerHTML = "<h1>waddup</h1>";  
 };
 
 function renderMetadata()
@@ -11,11 +17,14 @@ function renderMetadata()
     var targetURL = document.getElementById("targetURL").value;
     document.getElementById("rendererInner").innerHTML = "Loading metadata and mmd for: " + targetURL;
     
-    docToRender = {  
+    if(docToRender.location != targetURL)
+    {
+        docToRender = {  
             location: targetURL,
             metadata: null,
             mmd: null
         };
+    }
     
     if(SemanticSultan.getImmediately(docToRender))
     {
@@ -44,9 +53,11 @@ function renderSemantics()
 
             var metadataFields = ViewModeler.createMetadata(true, mmd, docToRender.metadata, docToRender.location);
 
-            var mice = MICE.buildMetadataTable(null, false, true, metadataFields, FIRST_LEVEL_FIELDS, DEFAULT_MICE_STYLE);
+            var tabbyHTML = TabbyCat.buildMetadataDisplay(metadataFields, TABBY_STYLE.styles);
+            document.getElementById("rendererInner").innerHTML = tabbyHTML;
 
-             document.getElementById("rendererInner").innerHTML = nodeToString(mice);
+            //var mice = MICE.buildMetadataTable(null, false, true, metadataFields, FIRST_LEVEL_FIELDS, DEFAULT_MICE_STYLE);
+            //document.getElementById("rendererInner").innerHTML = nodeToString(mice);
         }
     }
 };

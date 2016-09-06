@@ -112,6 +112,7 @@ var SemanticSultan = {
 	{
 		if(this.documentMap.has(newDoc.location) && newDoc.metadata != null)
 		{
+			console.log(newDoc.metadata);
 			this.documentMap.get(newDoc.location).metadata = newDoc.metadata;
 			this.documentMap.get(newDoc.location).origin = newDoc.origin;
 			this.documentMap.get(newDoc.location).extractionTime = newDoc.extractionTime;

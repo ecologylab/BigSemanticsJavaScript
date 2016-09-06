@@ -3,6 +3,23 @@
  * 
  */
 
+var TABBY_STYLE = {
+	styles : {
+	    metadataContainer : "tabby-metadataContainer",
+	    titleRow : "tabby-title-row",
+	    title : "tabby-title",
+	    imageRow : "tabby-image-row",
+	    mainImage : "tabby-main-image",
+	    subImage : "tabby-sub-image",
+	    row : "tabby-row",
+	    fieldLabel : "tabby-label",
+	    fieldValue : "tabby-value",
+	    fieldCount : "tabby-field-count",
+	    fieldLink : "tabby-field-link",
+	    favicon : "tabby-favicon"
+	}
+}
+
 var DEFAULT_MICE_STYLE = {
 	styles : {
 	    metadataRendering : "ecologylab-metadataRendering",
