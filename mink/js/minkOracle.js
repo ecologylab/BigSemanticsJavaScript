@@ -4,11 +4,11 @@ MinkOracle.viewModelMap = new Map();
 function SearchSemantics(task, resultIDs, iterableURL, canary){
   this.searchUrl = task.url;
   this.canary = canary;
-  this.perPage = parseInt(task.mmd['meta_metadata'].results_per_page);
+  this.perPage = parseInt(task.mmd['wrapper'].results_per_page);
   this.faviconLink = BSUtils.getFaviconURL(this.searchUrl);
   this.results = resultIDs;
   this.iterableURL = iterableURL;
-  this.mmdType = task.mmd['meta_metadata'].name;
+  this.mmdType = task.mmd['wrapper'].name;
   this.urlIndex = 0;
 }
 
@@ -97,12 +97,12 @@ MinkOracle.prepareSearchSemantics = function(task){
     var minkLinks = MinkOracle.getSearchResultLinks(task);
     var metadata = BSUtils.unwrap(task.metadata);
     //a link to the associated
-    var iteratableURL = task.mmd['meta_metadata'].search_result_iterator;
+    var iteratableURL = task.mmd['wrapper'].search_result_iterator;
     /*
     if there is are more children to load, set the canary to be true/alive
     */
     var canaryAlive = false;
-    var canaryField = task.mmd['meta_metadata'].final_page_canary;
+    var canaryField = task.mmd['wrapper'].final_page_canary;
     if(metadata[canaryField] != null && metadata[canaryField] != ""){
       canaryAlive = true;
     }
@@ -147,7 +147,7 @@ MinkOracle.getSemantics = function(url, pile, minkeventName, parentCard){
 
     try{
       var newOptions = {viewmodel: MinkOracle.viewModelMap, minkeventName: options.minkeventName, parentCard: parentCard};
-      result = result['meta_metadata'];
+      result = result['wrapper'];
       if(result.name == "google_scholar_search"){
         MinkSemantics.addMetadataDisplay(options.pile.HTML, options.url, null, MinkOracle.prepareSearchSemantics, newOptions);
 

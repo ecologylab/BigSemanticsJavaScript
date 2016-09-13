@@ -293,7 +293,7 @@ var RepoMan = (function() {
   RepoMan.prototype.loadMmd = function(name, options, callback) {
     if (this.mmds && name in this.mmds) {
       callback(null, {
-        meta_metadata: this.mmds[name]
+        wrapper: this.mmds[name]
       });
     }
     else {
@@ -478,7 +478,7 @@ var RepoMan = (function() {
     if (results.length == 0) {
       console.log("Use default document type for " + location);
       callback(null, {
-        meta_metadata: this.mmds[this.defaultDocumentType]
+        wrapper: this.mmds[this.defaultDocumentType]
       });
     }
     else if (results.length == 1) {

@@ -386,7 +386,7 @@ BibTexGenerator.prototype.createBib	= function(document, that){
 		if(document.mmd == 'skip'){
 			return {};
 		}
-		var mmd = document.mmd['meta_metadata'];
+		var mmd = document.mmd['wrapper'];
 		if(!mmd){
 			mmd = document.mmd;
 		}

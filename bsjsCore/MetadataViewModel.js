@@ -62,11 +62,13 @@ function MetadataViewModel(mmdField)
 ViewModeler.createMetadata = function(isRoot, mmd, metadata, taskUrl)
 {
   var mmdToMake;
-  if(mmd['meta_metadata']!= null){
-	  mmdToMake = mmd['meta_metadata'];
-  }else{
-	  mmdToMake = mmd;
+
+  if(mmd.wrapper) {
+    mmdToMake = mmd.wrapper;
+  } else {
+    mmdToMake = mmd;
   }
+
   var metadataFields =
 	  ViewModeler.getMetadataViewModel(mmdToMake, mmdToMake["kids"], metadata, 0, null, taskUrl);
   

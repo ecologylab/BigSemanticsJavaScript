@@ -202,7 +202,7 @@ OntoVis.createLayout = function(rootNodeName) {
         
       //if we have a super field, visit it first
       if(mmd.super_field) {
-        visit(mmd.super_field.meta_metadata);
+        visit(mmd.super_field.wrapper);
       }
       
       //get the example URL
@@ -224,7 +224,7 @@ OntoVis.createLayout = function(rootNodeName) {
       
       //child node, add to parent
       if(mmd.super_field) {
-        typeNode.parent = mmd.super_field.meta_metadata.name;
+        typeNode.parent = mmd.super_field.wrapper.name;
         types[typeNode.parent].subtypes.push(typeNode);
       } else { 
         //if no super field, this must be the root node of the tree

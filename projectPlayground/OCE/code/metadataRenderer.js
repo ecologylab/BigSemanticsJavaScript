@@ -141,8 +141,7 @@ MetadataRenderer.setMetaMetadata = function(mmd)
 {
 	simplDeserialize(mmd);
 	
-	//console.log("Retrieved meta-metadata: " + mmd["meta_metadata"].name);
-	var tasks = MetadataRenderer.getTasksFromQueueByType(mmd["meta_metadata"].name);
+	var tasks = MetadataRenderer.getTasksFromQueueByType(mmd.wrapper.name);
 	
 	if(tasks.length > 0)
 	{
@@ -156,7 +155,7 @@ MetadataRenderer.setMetaMetadata = function(mmd)
 		}
 	}
 	else
-		console.error("Retreived meta-metadata: " + mmd["meta_metadata"].name + "  but it doesn't match a document from the queue.");
+		console.error("Retreived meta-metadata: " + mmd.wrapper.name + "  but it doesn't match a document from the queue.");
 }
 
 /**

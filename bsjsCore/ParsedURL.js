@@ -5,7 +5,14 @@ var ParsedURL = (function() {
 
   function ParsedURL(url, base) {
     if (url) {
-      if (url.length > 0 && url[0] === '/' && base) {
+      if(url.indexOf("//") === 0 && base) {
+        // if we have a protocol-less url
+        // add the protocol from the base URL
+        if(base.indexOf("://") !== -1) {
+          var protocol = base.substr(0, base.indexOf("://") + 1);
+          url = protocol + url;
+        }
+      } else if (url.length > 0 && url[0] === '/' && base) {
         var p = base.length - 1;
         while (p >= 0 && base[p] === '/') { p--; }
         base = base.substr(0, p+1);

@@ -116,7 +116,7 @@ function getJSONData (targeturl)
 function updateJSONVars(md_and_metadata){
 
 	  MDC_rawMMD = simpl.graphCollapse(md_and_metadata.mmd);
-	  MDC_rawMetadata = simpl.graphCollapse(md_and_metadata.metadata);
+	  MDC_rawMetadata = simpl.graphCollapse(md_and_metadata.metadata);//.metadata;
 	  updateJSON(true);
 }
 

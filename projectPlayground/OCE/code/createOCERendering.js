@@ -11,7 +11,7 @@
 MetadataRenderer.buildMetadataDisplay = function(isRoot, mmd, metadata)
 {
 	// Convert the metadata into a list of MetadataFields using the meta-metadata.
-	var metadataFields = MetadataRenderer.getMetadataFields(mmd["meta_metadata"]["kids"], metadata, 0);
+	var metadataFields = MetadataRenderer.getMetadataFields(mmd["wrapper"]["kids"], metadata, 0);
 	
 	// Is there any visable metadata?
 	if(MetadataRenderer.hasVisibleMetadata(metadataFields))

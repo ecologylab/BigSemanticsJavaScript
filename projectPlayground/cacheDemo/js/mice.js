@@ -163,8 +163,7 @@ MetadataRenderer.setMetaMetadata = function(mmd)
 {
 	simplDeserialize(mmd);
 	
-	//console.log("Retrieved meta-metadata: " + mmd["meta_metadata"].name);
-	var tasks = MetadataRenderer.getTasksFromQueueByType(mmd["meta_metadata"].name);
+	var tasks = MetadataRenderer.getTasksFromQueueByType(mmd["wrapper"].name);
 	
 	if(tasks.length > 0)
 	{
@@ -178,7 +177,7 @@ MetadataRenderer.setMetaMetadata = function(mmd)
 		}
 	}
 	else
-		console.error("Retreived meta-metadata: " + mmd["meta_metadata"].name + "  but it doesn't match a document from the queue.");
+		console.error("Retreived meta-metadata: " + mmd["wrapper"].name + "  but it doesn't match a document from the queue.");
 }
 
 /**
@@ -1029,7 +1028,7 @@ var FIELDS_TO_EXPAND = 10;
 MetadataRenderer.buildMetadataDisplay = function(isRoot, mmd, metadata)
 {
 	// Convert the metadata into a list of MetadataFields using the meta-metadata.
-	var metadataFields = MetadataRenderer.getMetadataFields(mmd["meta_metadata"]["kids"], metadata, 0);
+	var metadataFields = MetadataRenderer.getMetadataFields(mmd["wrapper"]["kids"], metadata, 0);
 	
 	// Is there any visable metadata?
 	if(MetadataRenderer.hasVisibleMetadata(metadataFields))
