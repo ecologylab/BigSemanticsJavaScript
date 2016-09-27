@@ -39,7 +39,7 @@ BSUtils.toFancyCase = function(string)
 // 'mm_name' field. This function unwraps the (first) real metadata object if
 // found in the input target. Otherwise, it returns the input target unchanged.
 BSUtils.unwrap = function(target) {
-  if(target.metadata) {
+  if (target && target.metadata) {
     target = target.metadata;
   }
 
