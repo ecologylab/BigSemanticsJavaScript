@@ -126,6 +126,9 @@ var RepoMan = (function() {
             return;
           }
         }
+        if (that.repo && that.repo.repository) {
+          that.repo = that.repo.repository;
+        }
         if (that.repo && that.repo.meta_metadata_repository) {
           that.repo = that.repo.meta_metadata_repository;
         }
@@ -225,11 +228,11 @@ var RepoMan = (function() {
   // called in the end of this constructor.
   RepoMan.prototype.initialize = function() {
     if (!this.repo) {
-      setError("No Repo Loaded!");
+      this.setError("No Repo Loaded!");
       return;
     }
     if (!this.repo.repository_by_name) {
-      setError("Invalid Repo!");
+      this.setError("Invalid Repo!");
       return;
     }
 

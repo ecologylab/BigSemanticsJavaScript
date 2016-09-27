@@ -41,7 +41,7 @@ var BSService = (function() {
   BSService.METADATA_PATH = '/BigSemanticsService/metadata.json';
   BSService.MMD_PATH = '/BigSemanticsService/mmd.json';
   BSService.STUB_PATH = '/BigSemanticsService/metadata_or_stub.json';
-  
+
   BSService.getServiceUrl = function(serviceLocation, path, options, params) {
     var scheme = 'http';
     var host = serviceLocation.host;
@@ -78,15 +78,15 @@ var BSService = (function() {
     var scheme = 'http';
     var host = this.serviceLocation.host;
     var port = this.serviceLocation.port;
-    
+
     if(this.options && this.options.useHttps) {
       scheme = 'https';
       port = serviceLocation.securePort;
     }
-    
+
     callback(null, { url: scheme + '://' + host + ':' + port + BSService.REPO_PATH });
   }
-  
+
   BSService.prototype.loadMetadata = function(location, options, callback) {
     var purl = new ParsedURL(location);
 
@@ -99,6 +99,9 @@ var BSService = (function() {
     this.downloader.httpGet(serviceUrl, downloadOpts, function(err, response) {
       if (err) { callback(err, null); return; }
       var metadata = BSService.prepResponse(response);
+      if (metadata && metadata.metadata) {
+        metadata = metadata.metadata;
+      }
       var unwrappedMetadata = BSUtils.unwrap(metadata);
       var mmdName = unwrappedMetadata.meta_metadata_name;
       that.loadMmd(mmdName, options, function(err, mmd) {
@@ -117,6 +120,9 @@ var BSService = (function() {
     this.downloader.httpGet(serviceUrl, downloadOpts, function(err, response) {
       if (err) { callback(err, null); return; }
       var metadata = BSService.prepResponse(response);
+      if (metadata && metadata.metadata) {
+        metadata = metadata.metadata;
+      }
       callback(null, metadata);
     });
   }
@@ -130,6 +136,9 @@ var BSService = (function() {
     this.downloader.httpGet(serviceUrl, downloadOpts, function(err, response) {
       if (err) { callback(err, null); return; }
       var mmd = BSService.prepResponse(response);
+      if (mmd && mmd.wrapper) {
+        mmd = mmd.wrapper;
+      }
       callback(null, mmd);
     });
   }
@@ -143,6 +152,9 @@ var BSService = (function() {
     this.downloader.httpGet(serviceUrl, downloadOpts, function(err, response) {
       if (err) { callback(err, null); return; }
       var mmd = BSService.prepResponse(response);
+      if (mmd && mmd.wrapper) {
+        mmd = mmd.wrapper;
+      }
       callback(null, mmd);
     });
   }

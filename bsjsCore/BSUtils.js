@@ -2,13 +2,13 @@
 
 var BSUtils = {};
 
-/** 
- * Make the string prettier by replacing underscores with spaces  
+/**
+ * Make the string prettier by replacing underscores with spaces
  * @param string to make over
  * @return hansome string, a real genlteman
  */
 BSUtils.toDisplayCase = function(string)
-{  
+{
   var strings = string.split('_');
   var display = "";
   for (var s = 0; s < strings.length; s++)
@@ -19,7 +19,7 @@ BSUtils.toDisplayCase = function(string)
 }
 
 BSUtils.toFancyCase = function(string)
-{  
+{
   var strings = string.split('_');
   var display = "";
   for (var s = 0; s < strings.length; s++)
@@ -39,7 +39,7 @@ BSUtils.toFancyCase = function(string)
 // 'mm_name' field. This function unwraps the (first) real metadata object if
 // found in the input target. Otherwise, it returns the input target unchanged.
 BSUtils.unwrap = function(target) {
-  if(target.metadata) {
+  if (target && target.metadata) {
     target = target.metadata;
   }
 
@@ -115,7 +115,7 @@ BSUtils.getType = function(metadata) {
 BSUtils.removeLineBreaksAndCrazies = function(string)
 {
   if (typeof string === 'string') {
-    string = string.replace(/(\r\n|\n|\r)/gm," ");  
+    string = string.replace(/(\r\n|\n|\r)/gm," ");
     var result = "";
     for (var i = 0; i < string.length; i++)
     {
@@ -138,7 +138,7 @@ BSUtils.removeLineBreaksAndCrazies = function(string)
  */
 BSUtils.getFaviconURL = function(url)
 {
-	return "http://www.google.com/s2/favicons?domain_url=" + url;	
+	return "http://www.google.com/s2/favicons?domain_url=" + url;
 }
 
 // src: http://stackoverflow.com/questions/359788/how-to-execute-a-javascript-function-when-i-have-its-name-as-a-string
@@ -161,7 +161,7 @@ BSUtils.arrayToHash = function(arr){
 }
 
 // get base url
-function getPosition(str, m, i) 
+function getPosition(str, m, i)
 {
   return str.split(m, i).join(m).length;
 }
@@ -170,4 +170,3 @@ function getPosition(str, m, i)
 if (typeof module == 'object') {
   module.exports = BSUtils;
 }
-

@@ -30,7 +30,7 @@ var Readyable = (function() {
 
   Readyable.prototype.setError = function(err) {
     this.ready = false;
-    if (typeof err == 'string') { this.error = new Error(msg); }
+    if (typeof err == 'string') { this.error = new Error(err); }
     else { this.error = err; }
     for (var i in this.callbackQueue) {
       var callback = this.callbackQueue[i];
@@ -47,4 +47,3 @@ if (typeof module == 'object') {
   module.exports = Readyable;
   module.exports.default = Readyable;
 }
-
