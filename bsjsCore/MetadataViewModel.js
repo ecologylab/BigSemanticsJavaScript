@@ -63,8 +63,10 @@ ViewModeler.createMetadata = function(isRoot, mmd, metadata, taskUrl)
 {
   var mmdToMake;
 
-  if(mmd.wrapper) {
+  if (mmd.wrapper) {
     mmdToMake = mmd.wrapper;
+  } else if (mmd.meta_metadata) {
+    mmdToMake = mmd.meta_metadata;
   } else {
     mmdToMake = mmd;
   }
