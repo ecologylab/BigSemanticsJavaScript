@@ -123,6 +123,7 @@ var RepoMan = (function() {
           }
           catch (err) {
             that.setError(err);
+            console.error("Failed to load repository from " + source.url);
             return;
           }
         }
