@@ -1,0 +1,22 @@
+{
+  "name": "bigsemantics-core",
+  "version": "2.0.0",
+  "description": "The core of the new BigSemantics.",
+  "main": "build/index.js",
+  "dependencies": {
+    "bluebird": "^3.4.0"
+  },
+  "devDependencies": {
+    "browserify": "^13.1.0",
+    "gulp": "^3.9.1",
+    "gulp-browserify": "^0.5.1",
+    "gulp-jasmine": "^2.3.0",
+    "gulp-rename": "^1.2.2",
+    "gulp-typescript": "^2.13.5"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Interface Ecology Lab",
+  "license": "MIT"
+}

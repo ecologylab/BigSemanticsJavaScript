@@ -13,3 +13,10 @@ RemoteSystemsTempFiles/
 # work in progress
 _wip_*
 
+# JavaScript
+node_modules
+build
+browserified
+
+# TypeScript
+typings
