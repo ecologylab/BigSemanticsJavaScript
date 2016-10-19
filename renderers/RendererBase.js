@@ -183,10 +183,16 @@ RendererBase.getFieldLabel = function(metadataField)
 	var label = {};
 	if (metadataField.value_as_label != "")
 	{
-		if (metadataField.value_as_label.type == "scalar" && metadataField.value_as_label.value.trim() != "")
+		if (metadataField.value_as_label.type == "scalar" && typeof metadataField.value_as_label.value == "string")
 		{
-			label.type = "scalar";
-			label.value = metadataField.value_as_label.value;
+			if(metadataField.value_as_label.value.trim() != ""){
+				label.type = "scalar";
+				label.value = metadataField.value_as_label.value;
+			}else{
+				label.type = "scalar";
+				label.value = metadataField.name;
+
+			}
 		}
 		else if (metadataField.value_as_label.type == "image" && ViewModeler.getImageSource(metadataField.value_as_label.value))
 		{
