@@ -23,10 +23,19 @@ export interface QueryMap {
  * A parsed URL representation.
  */
 export default class ParsedURL {
+  private static readonly noBase = '$NOBASE$';
   static readonly subdomainsToStrip = [ 'www', 'en' ];
+
+  static get(url: string | ParsedURL, base: string | ParsedURL = null): ParsedURL {
+    if (url instanceof ParsedURL) {
+      return url;
+    }
+    return url ? new ParsedURL(url, base) : null;
+  }
 
   /**
    * Parse a host specification in the form of [user[:password]@]host[:port]
+   *
    * @param {string} hostSpec
    * @return {HostSpec}
    */
@@ -54,6 +63,28 @@ export default class ParsedURL {
       result.host = hostSpec;
     }
 
+    return result;
+  }
+
+  /**
+   * Convert a HostSpec to string, in the form of [user[:password]@]host[:port]
+   *
+   * @param {HostSpec} hostSpec
+   * @return {string}
+   */
+  static hostSpecToString(hostSpec: HostSpec): string {
+    let result: string = '';
+    if (hostSpec.user) {
+      result += encodeURIComponent(hostSpec.user);
+      if (hostSpec.password) {
+        result += ':' + encodeURIComponent(hostSpec.password);
+      }
+      result += '@';
+    }
+    result += hostSpec.host;
+    if (hostSpec.port) {
+      result += ':' + hostSpec.port;
+    }
     return result;
   }
 
@@ -95,8 +126,36 @@ export default class ParsedURL {
     return result;
   }
 
+  /**
+   * Convert a QueryMap to a string representation.
+   *
+   * @param {QueryMap} queryMap
+   * @return {string}
+   */
+  static queryMapToString(queryMap: QueryMap): string {
+    let result = '';
+    if (queryMap) {
+      let parts = [];
+      for (let key in queryMap) {
+        let val = queryMap[key];
+        if (val instanceof Array) {
+          for (let elem of val) {
+            parts.push(encodeURIComponent(key) + '=' + encodeURIComponent(elem));
+          }
+        } else {
+          parts.push(encodeURIComponent(key) + '=' + encodeURIComponent(val));
+        }
+      }
+      if (parts.length > 0) {
+        result += '?' + parts.join('&');
+      }
+    }
+    return result;
+  }
+
   raw: string;
-  base: string;
+  base: ParsedURL;
+
   stripped: string;
 
   scheme: string;
@@ -119,59 +178,96 @@ export default class ParsedURL {
    * @param {string} url
    *   The raw URL string.
    * @param {string = null} base
-   *   The base URL, if 'url' is a relative one.
+   *   The base URL, if 'url' is a relative one. Must be absolute.
    */
-  constructor(url: string, base: string = null) {
-    if (url.indexOf('//') === 0 && base) {
-      let p = base.indexOf('://');
-      if (p !== -1) {
-        this.scheme = base.substr(0, p);
-        url = this.scheme + ':' + url;
-      }
-    } else if (url.length > 0 && url[0] === '/' && base) {
-      let p = base.length - 1;
-      while (p >= 0 && base[p] === '/') p--;
-      base = base.substr(0, p+1);
-      url = base + url;
-    }
-
+  constructor(url: string, base: string | ParsedURL = null) {
     this.raw = url;
-    let matches = url.match(/^(((\w+)\:\/\/([^\/?#]+))([^?#]*))(\?[^#]*)?(#.*)?/);
-    if (matches) {
-      this.stripped = matches[1];
+    this.base = this.getBase(base);
 
-      this.base = matches[2];
-
-      this.scheme = matches[3];
-
-      let hostSpec = ParsedURL.parseHostSpec(matches[4]);
-      this.user = hostSpec.user;
-      this.password = hostSpec.password;
-      this.host = hostSpec.host;
-      this.port = hostSpec.port;
-
-      // TODO a better way of getting the top level domain, see
-      // https://publicsuffix.org/list/public_suffix_list.dat
-  		// this is better but not ideal
-  		let strippedHost = this.host;
-  		for (let toStrip of ParsedURL.subdomainsToStrip) {
-        toStrip += '.';
-  			let l = toStrip.length;
-  			if (strippedHost.length >= l && strippedHost.substr(0, l) === toStrip) {
-  				strippedHost = strippedHost.substr(l);
-  			}
-  		}
-  		this.domain = strippedHost;
-
-      this.path = matches[5];
-      if (this.path.length === 0) {
-        this.path = '/';
-      }
-
-      this.query = ParsedURL.parseQueryParams(matches[6]);
-      let fragId = matches[7];
-      if (fragId) this.fragmentId = fragId.substr(1);
+    let m = null;
+    m = url.match(/^(\w+)\:\/\/([^\/?#]+)([^?#]*)(\?[^#]*)?(#.*)?/);
+    if (m) {
+      // url is absolute, with scheme and host
+      let hostSpec = ParsedURL.parseHostSpec(m[2]);
+      this.initialize(m[1], hostSpec, m[3], m[4], m[5]);
+      return;
     }
+
+    if (!this.base) {
+      throw new Error("Missing base URL");
+    }
+
+    m = url.match(/^\/\/([^\/?#]+)([^?#]*)(\?[^#]*)?(#.*)?/);
+    if (m) {
+      // url is absolute, without scheme, with host
+      let hostSpec = ParsedURL.parseHostSpec(m[1]);
+      this.initialize(this.base.scheme, hostSpec, m[2], m[3], m[4]);
+      return;
+    }
+
+    m = url.match(/^(\/[^?#]*)(\?[^#]*)?(#.*)?/);
+    if (m) {
+      // url is absolute, without scheme, without host
+      this.initialize(this.base.scheme, this.base, m[1], m[2], m[3]);
+      return;
+    }
+
+    m = url.match(/([^?#]+)(\?[^#]*)?(#.*)?/);
+    if (m) {
+      // url is relative
+      let path = this.base.path;
+      let i = path.lastIndexOf('/');
+      path = path.substr(0, i+1) + m[1];
+      this.initialize(this.base.scheme, this.base, path, m[2], m[3]);
+      return;
+    }
+
+    throw new Error("Invalid URL: " + url);
+  }
+
+  private initialize(scheme: string, hostSpec: HostSpec, path: string, query: string, frag: string): void {
+    this.scheme = scheme;
+
+    this.user = hostSpec.user;
+    this.password = hostSpec.password;
+    this.host = hostSpec.host;
+    this.port = hostSpec.port;
+
+    // TODO a better way of getting the top level domain, see
+    // https://publicsuffix.org/list/public_suffix_list.dat
+		// this is better but not ideal
+		let strippedHost = this.host;
+		for (let toStrip of ParsedURL.subdomainsToStrip) {
+      toStrip += '.';
+			let l = toStrip.length;
+			if (strippedHost.length >= l && strippedHost.substr(0, l) === toStrip) {
+				strippedHost = strippedHost.substr(l);
+			}
+		}
+		this.domain = strippedHost.length > 0 ? strippedHost : this.host;
+
+    this.path = path;
+    if (this.path.length === 0) {
+      this.path = '/';
+    }
+
+    this.stripped = this.scheme + '://' + ParsedURL.hostSpecToString(this) + this.path;
+
+    this.query = ParsedURL.parseQueryParams(query);
+
+    if (frag && frag.length > 1) {
+      this.fragmentId = frag.substr(1);
+    }
+  }
+
+  private getBase(base: string | ParsedURL = null) {
+    if (base === ParsedURL.noBase) {
+      return null;
+    }
+    if (!base && typeof window === 'object' && window.location && window.location.href) {
+      return ParsedURL.get(window.location.href, ParsedURL.noBase);
+    }
+    return ParsedURL.get(base, ParsedURL.noBase);
   }
 
   /**
@@ -184,27 +280,12 @@ export default class ParsedURL {
       let result = '';
       if (this.scheme) result += this.scheme + ':';
       result += '//';
-      if (this.user) {
-        result += encodeURIComponent(this.user);
-        if (this.password) result += ':' + encodeURIComponent(this.password);
-        result += '@';
-      }
-      if (this.port) result += ':' + this.port;
+      result += ParsedURL.hostSpecToString(this);
       result += this.path;
-      if (this.query) {
-        let parts = [];
-        for (let key in this.query) {
-          let val = this.query[key];
-          if (val instanceof Array) {
-            for (let elem of val) parts.push(key + '=' + elem);
-          } else {
-            parts.push(key + '=' + val);
-          }
-        }
-        result += '?' + parts.join('&');
+      result += ParsedURL.queryMapToString(this.query);
+      if (this.fragmentId) {
+        result += '#' + this.fragmentId;
       }
-      if (this.fragmentId) result += this.fragmentId;
-
       this.cachedString = result;
     }
     return this.cachedString;

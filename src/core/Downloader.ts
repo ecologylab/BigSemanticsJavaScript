@@ -95,15 +95,7 @@ export class BaseDownloader implements Downloader {
     if (!options.responseType) {
       options.responseType = 'document';
     }
-    let url: string = null, purl: ParsedURL = null;
-    if (location instanceof ParsedURL) {
-      purl = location as ParsedURL;
-      url = purl.toString();
-    } else {
-      url = location as string;
-      purl = new ParsedURL(url);
-    }
-
+    let purl = ParsedURL.get(location);
     return this.doHttpGet(purl, options);
   }
 

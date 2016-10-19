@@ -363,8 +363,9 @@ export default class RepoMan extends Readyable {
    * @param  {RepoOptions} options [description]
    */
   // constructor(source?: RepoSource, options?: RepoOptions) {
-  constructor(repository?: Repository | TypedRepository, options?: RepoOptions) {
+  constructor(repository: Repository | TypedRepository = null, options: RepoOptions = {}) {
     super();
+    this.options = options;
     if (repository) {
       this.load(repository, options);
     }
@@ -509,6 +510,8 @@ export default class RepoMan extends Readyable {
    */
   // private loadFromInstance(instance: Repository | TypedRepository, callback: (err: Error)=>void): void {
   load(repository: Repository | TypedRepository, options: RepoOptions = {}): void {
+    this.reset();
+    this.options = options;
     if ((repository as TypedRepository).meta_metadata_repository) {
       this.repository = (repository as TypedRepository).meta_metadata_repository;
     } else if ((repository as Repository).repository_by_name){
@@ -671,14 +674,8 @@ export default class RepoMan extends Readyable {
           return;
         }
 
-        let url: string = null, purl: ParsedURL = null;
-        if (location instanceof String) {
-          url = location as string;
-          purl = new ParsedURL(url);
-        } else {
-          purl = location as ParsedURL;
-          url = purl.toString();
-        }
+        let purl = ParsedURL.get(location);
+
         let result = RepoMan.matchUrlStripped(this.urlStripped, purl);
         if (result.length === 0) {
           result = RepoMan.matchUrlPath(this.urlPath, purl);

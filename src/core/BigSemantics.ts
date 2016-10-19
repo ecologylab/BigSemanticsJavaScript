@@ -139,14 +139,7 @@ export class BaseBigSemantics extends Readyable implements BigSemantics {
           return;
         }
 
-        let url: string = null, purl: ParsedURL = null;
-        if (location instanceof String) {
-          url = location as string;
-          purl = new ParsedURL(url);
-        } else {
-          purl = location as ParsedURL;
-          url = purl.toString();
-        }
+        let purl = ParsedURL.get(location);
 
         let mmd: MetaMetadata = null;
         let getMmd = () => {
@@ -180,7 +173,7 @@ export class BaseBigSemantics extends Readyable implements BigSemantics {
           return downloader.httpGet(purl, options.requestOptions);
         };
 
-        let metadata = this.metadataCache.get(url, url => {
+        let metadata = this.metadataCache.get(purl.toString(), url => {
           return Promise.all([getMmd(), getResp()]).then(result => {
             let extractor: Extractor = null;
             for (let name in this.extractors) {

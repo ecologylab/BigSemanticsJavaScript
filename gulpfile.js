@@ -8,10 +8,10 @@ var rename = require('gulp-rename');
 var tsProject = ts.createProject('tsconfig.json');
 
 gulp.task('tsc', function() {
-  return tsProject.src().pipe(ts(tsProject)).js.pipe(gulp.dest('build'));
+  return tsProject.src().pipe(tsProject()).js.pipe(gulp.dest('build'));
 });
 
-gulp.task('browserify', function() {
+gulp.task('browserify', [ 'tsc' ], function() {
   gulp.src('build/core/index.js').pipe(browserify({
     standalone: 'bigsemantics',
   })).pipe(rename('bigsemantics-core.js')).pipe(gulp.dest('browserified'));

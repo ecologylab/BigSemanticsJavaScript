@@ -100,18 +100,11 @@ export default class XhrDownloader extends BaseDownloader {
    * @return {Promise<HttpResponse>}
    */
   protected doHttpGet(location: string | ParsedURL, options: RequestOptions = {}): Promise<HttpResponse> {
-    let url: string = null, purl: ParsedURL = null;
-    if (location instanceof ParsedURL) {
-      purl = location as ParsedURL;
-      url = purl.toString();
-    } else {
-      url = location;
-      purl = new ParsedURL(url);
-    }
+    let purl = ParsedURL.get(location);
 
     let result = new Promise<HttpResponse>((resolve, reject) => {
       let response: HttpResponse = options.response || {
-        location: location as string,
+        location: purl.toString(),
         code: 0,
       };
 
@@ -129,7 +122,7 @@ export default class XhrDownloader extends BaseDownloader {
             } else if (xhr.status >= 300 && xhr.status !== 304) {
               // handle redirects
               let newLocation = xhr.getResponseHeader('Location');
-              console.log("Redirect: " + location + " => " + newLocation);
+              console.log("Redirect: " + purl.toString() + " => " + newLocation);
               if (!XhrDownloader.addNewLocation(response, newLocation)) {
                 err = new Error("Redirection loop detected");
                 console.warn(err);
@@ -151,7 +144,7 @@ export default class XhrDownloader extends BaseDownloader {
               }
             }
             if (err) {
-              console.warn("Aborting XHR for " + location);
+              console.warn("Aborting XHR for " + purl.toString());
               xhr.abort();
               reject(err);
             }
@@ -189,7 +182,7 @@ export default class XhrDownloader extends BaseDownloader {
             break;
         }
       };
-      xhr.open('GET', location as string, true);
+      xhr.open('GET', purl.toString(), true);
       if (purl.domain !== 'twitter.com') {
         xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
       }

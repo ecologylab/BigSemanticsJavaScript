@@ -143,18 +143,21 @@ export class Extraction {
     let result: Vars = {};
     if (field.def_vars instanceof Array) {
       for (let defVar of field.def_vars) {
-        if (defVar.type === 'node') {
-          if (defVar.name && defVar.xpaths instanceof Array) {
-            for (let xpath of defVar.xpaths) {
-              let targetNode = this.evaluateFirstNode(xpath, localScope.contextNode);
-              if (targetNode) {
-                result[defVar.name] = targetNode;
-                break;
+        switch (defVar.type) {
+          case 'node':
+            if (defVar.name && defVar.xpaths instanceof Array) {
+              for (let xpath of defVar.xpaths) {
+                let targetNode = this.evaluateFirstNode(xpath, localScope.contextNode);
+                if (targetNode) {
+                  result[defVar.name] = targetNode;
+                  break;
+                }
               }
             }
-          }
-        } else {
-          throw new Error("Unknown def_let type: " + defVar.type);
+            break;
+          default:
+            let err = new Error("Unknown def_var type: " + defVar.type);
+            console.warn(err);
         }
       }
     }
@@ -229,6 +232,14 @@ export class Extraction {
       switch (scalarType) {
         case 'String':
           break;
+        case 'URL':
+        case 'ParsedURL':
+          if (!val || val.length == 0) {
+            val = null;
+          }
+          // TODO use ParsedURL for this case
+          // TODO filter ParsedURL
+          break;
         case 'Int':
         case 'Integer':
         case 'Float':
@@ -240,13 +251,9 @@ export class Extraction {
         case 'Boolean':
           result = Boolean(val);
           break;
-        case 'URL':
-        case 'ParsedURL':
-          result = new ParsedURL(val, this.location.base);
-          // FIXME filter purl asynchronously
-          break;
         default:
-          throw new Error("Invalid scalar type: " + scalarType);
+          let err = new Error("Invalid scalar type: " + scalarType);
+          console.warn(err);
       }
     }
     return result;
@@ -574,61 +581,68 @@ export class Extraction {
       }
     }
 
-    let promises: Promise<Metadata>[] = [];
+    let promise: Promise<Metadata> = Promise.resolve(obj);
     for (let field of fieldList) {
       if (this.isScalar(field)) {
-        promises.push(this.extractScalar(field.scalar, parentScope).then(scalar => {
-          if (scalar) {
-            if (!(scalar instanceof String) || scalar.length > 0) {
-              obj[field.scalar.tag || field.scalar.name] = scalar;
-            }
-          }
-          return obj;
-        }));
-      } else if (this.isScalarCollection(field)) {
-        promises.push(this.extractScalarCollection(field.collection, parentScope).then(scalars => {
-          if (scalars instanceof Array && scalars.length > 0) {
-            obj[field.scalar.tag || field.scalar.name] = scalars;
-          }
-          return obj;
-        }));
-      } else if (this.isComposite(field)) {
-        promises.push(this.extractComposite(field.composite, parentScope).then(composite => {
-          if (composite && Object.keys(composite).length > 1) {
-            if (field.composite.polymorphic_scope || field.composite.polymorphic_classes) {
-              // TODO change mm_name based on location
-              obj[field.composite.name][composite.mm_name] = composite;
-            } else {
-              obj[field.composite.tag || field.composite.name] = composite;
-            }
-          }
-          return obj;
-        }));
-      } else if (this.isCompositeCollection(field)) {
-        promises.push(this.extractCompositeCollection(field.collection, parentScope).then(composites => {
-          if (composites instanceof Array && composites.length > 0) {
-            if (field.collection.polymorphic_scope || field.collection.polymorphic_classes) {
-              obj[field.collection.name] = [];
-              for (let composite of composites) {
-                // TODO change mm_name based on location
-                let typedComposite: TypedMetadata = {};
-                typedComposite[composite.mm_name] = composite;
-                obj[field.collection.name].push(typedComposite);
+        promise = promise.then(() => {
+          return this.extractScalar(field.scalar, parentScope).then(scalar => {
+            if (scalar) {
+              if (typeof scalar !== 'string' || scalar.length > 0) {
+                obj[field.scalar.tag || field.scalar.name] = scalar;
               }
-            } else {
-              obj[field.collection.tag || field.collection.name] = composites;
             }
-          }
-          return obj;
-        }));
+            return obj;
+          });
+        });
+      } else if (this.isScalarCollection(field)) {
+        promise = promise.then(() => {
+          return this.extractScalarCollection(field.collection, parentScope).then(scalars => {
+            if (scalars instanceof Array && scalars.length > 0) {
+              obj[field.scalar.tag || field.scalar.name] = scalars;
+            }
+            return obj;
+          });
+        });
+      } else if (this.isComposite(field)) {
+        promise = promise.then(() => {
+          return this.extractComposite(field.composite, parentScope).then(composite => {
+            if (composite && Object.keys(composite).length > 1) {
+              if (field.composite.polymorphic_scope || field.composite.polymorphic_classes) {
+                // TODO change mm_name based on location
+                obj[field.composite.name][composite.mm_name] = composite;
+              } else {
+                obj[field.composite.tag || field.composite.name] = composite;
+              }
+            }
+            return obj;
+          });
+        });
+      } else if (this.isCompositeCollection(field)) {
+        promise = promise.then(() => {
+          return this.extractCompositeCollection(field.collection, parentScope).then(composites => {
+            if (composites instanceof Array && composites.length > 0) {
+              if (field.collection.polymorphic_scope || field.collection.polymorphic_classes) {
+                obj[field.collection.name] = [];
+                for (let composite of composites) {
+                  // TODO change mm_name based on location
+                  let typedComposite: TypedMetadata = {};
+                  typedComposite[composite.mm_name] = composite;
+                  obj[field.collection.name].push(typedComposite);
+                }
+              } else {
+                obj[field.collection.tag || field.collection.name] = composites;
+              }
+            }
+            return obj;
+          });
+        });
       } else {
-        console.warn("Ignoring unknown field type: " + field);
+        let err = "Ignoring unknown field type: " + field;
+        console.warn(err);
       }
     }
 
-    return Promise.all(promises).then(() => {
-      return obj;
-    });
+    return promise;
   }
 
   /**
@@ -726,6 +740,7 @@ export class Extraction {
     this.scope.node = this.rootNode;
 
     return this.extractComposite(this.mmd, this.scope).then(metadata => {
+      this.metadata = metadata;
       console.log("Extraction finished: %O", this.metadata);
       this.typeTag = this.mmd.tag || this.mmd.name;
       this.typedMetadata = {};

@@ -2,6 +2,7 @@
  * Index of BigSemantics classes.
  */
 
+export { SimplHandlers, default as simpl } from './simpl/simplBase';
 export { HostSpec, QueryMap, default as ParsedURL } from './ParsedURL';
 export * from './Cache';
 export { default as Scope } from './Scope';
