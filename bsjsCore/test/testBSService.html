@@ -1,44 +1,67 @@
 <html>
 
 <head>
-<title>ServiceProxy Test</title>
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+  <title>BSService Test</title>
 
-<script src="../simpl/simplBase.js"></script>
-<script src="../ParsedURL.js"></script>
-<script src="../BSUtils.js"></script>
-<script src="../Downloader.js"></script>
-<script src="../Readyable.js"></script>
-<script src="../BSService.js"></script>
+  <link rel="stylesheet" href="../../libraries/jquery.jsonview.min.css" />
+
+  <script src="../../libraries/jquery-2.0.0.min.js"></script>
+  <script src="../../libraries/jquery.jsonview.min.js"></script>
+
+  <script src="../../build/bigsemantics-core.js"></script>
+
+  <style>
+    .wrap {
+      margin: 0.5em;
+      padding: 1em;
+      background-color: #C7EDDA;
+    }
+
+    .error {
+      color: red;
+    }
+  </style>
 </head>
 
 <body>
+  <div class="wrap">
+    URL: <input id="url" type="text" size="100" />
+    <input id="load" type="button" value="Load" />
+  </div>
 
-<div class="wrap">
-  URL: <input id="url" type="text" size="100" />
-  <input id="load" type="button" value="Load" />
-</div>
+  <div class="wrap">
+    <div id="error" class="error"></div>
+    <div id="metadata"></div>
+  </div>
 
-<div class="wrap">
-  <p id="json"></p>
-</div>
-
-<script>
-$('document').ready(function() {
-  var bss = new BSService();
-  bss.onReady(function(err, bss) {
-    if (err) { console.error(err); return; }
-    var url = "http://www.amazon.com/gp/product/B00I8BIBCW/";
-    bss.loadMetadata(url, {}, function(err, metadata) {
-      if (err) { console.error(err); return; }
-
-      var json = simpl.serialize(metadata);
-      $('#json').text(json);
+  <script>
+    var bss = new bigsemantics.BSService('https://api.ecologylab.net:9443/BigSemanticsService/', {
+      appId: 'test-bs-service',
+      appVer: '0.0.0',
     });
-  });
-});
-</script>
+
+    function loadMetadata(url) {
+      bss.loadMetadata(url).then(metadataResult => {
+        bigsemantics.simpl.graphCollapse(metadataResult);
+        var json = JSON.stringify(metadataResult, null, 4);
+        $('#metadata').JSONView(json);
+      }).catch(err => {
+        console.error(err);
+        $('#error').text(err.stack);
+      });
+    }
+
+    var initialUrl = "http://www.amazon.com/gp/product/B00I8BIBCW/";
+    $('#url').val(initialUrl);
+    loadMetadata(initialUrl);
+
+    $('#load').click(() => {
+      $('#metadata').text('');
+      $('#error').text('');
+      var url = $('#url').val();
+      loadMetadata(url);
+    });
+  </script>
 </body>
 
 </html>
-

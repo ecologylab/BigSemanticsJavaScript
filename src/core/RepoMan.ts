@@ -42,6 +42,8 @@ export interface RepoOptions {
   userAgents?: { [name: string]: string };
   domainIntervals?: { [domain: string]: number };
 
+  timeout?: number // TODO implement support for timeout
+
   // downloader?: Downloader;
   // downloaderOptions?: DownloaderOptions;
   // requestOptions?: RequestOptions;
@@ -51,7 +53,7 @@ export interface RepoOptions {
  * Options for calls to the repoMan.
  */
 export interface RepoCallOptions {
-  // TODO
+  timeout?: number // TODO implement support for timeout
 }
 
 /**
@@ -62,9 +64,37 @@ interface SelectorMap {
 }
 
 /**
+ * An interface for repository management service.
+ */
+export interface RepoManService {
+  getUserAgentString(userAgentName: string): Promise<string>;
+  getDomainInterval(domain: string): Promise<number>;
+  loadMmd(name: string, options?: RepoCallOptions): Promise<MetaMetadata>;
+  selectMmd(location: string | ParsedURL, options?: RepoCallOptions): Promise<MetaMetadata>;
+  normalizeLocation(location: string | ParsedURL, options?: RepoCallOptions): Promise<string>;
+  untypeMetadata(typedMetadata: TypedMetadata, options?: RepoCallOptions): Promise<Metadata>;
+  serializeRepository(options?: RepoCallOptions): Promise<string>;
+}
+
+/**
+ * An interface for reloadable repository management service.
+ */
+export interface ReloadableRepoManService extends RepoManService {
+  reload(): void;
+}
+
+/**
+ * An interface for repository management service that can load from a different
+ * repository.
+ */
+export interface LoadableRepoManService extends ReloadableRepoManService {
+  load(repository: Repository | TypedRepository, options?: RepoOptions): void;
+}
+
+/**
  * A meta-metadata repository manager.
  */
-export default class RepoMan extends Readyable {
+export default class RepoMan extends Readyable implements LoadableRepoManService {
   /**
    * Add a selector to the given selector map with a specified key.
    * @param {SelectorMap} selectorMap
@@ -387,128 +417,11 @@ export default class RepoMan extends Readyable {
     this.cachedSerialization = null;
   }
 
-  // /**
-  //  * Load repository from where source specifies.
-  //  * @param {RepoSource}  source  [description]
-  //  * @param {RepoOptions} options [description]
-  //  */
-  // load(source: RepoSource, options?: RepoOptions): void {
-  //   this.reset();
-  //
-  //   this.source = source;
-  //   this.options = options || {};
-  //
-  //   let callback = err => {
-  //     if (err) {
-  //       this.setError(err);
-  //     } else {
-  //       this.initialize();
-  //     }
-  //   }
-  //
-  //   if (this.source.repo) {
-  //     this.loadFromInstance(this.source.repo, callback);
-  //   } else if (this.source.serialization) {
-  //     this.loadFromSerialization(this.source.serialization, callback);
-  //   } else if (this.source.file) {
-  //     this.loadFromFile(this.source.file, callback);
-  //   } else if (this.source.url) {
-  //     this.loadFromUrl(this.source.url, callback);
-  //   } else {
-  //     this.setError(new Error("Invalid repository source: " + this.source));
-  //   }
-  // }
-
-  // /**
-  //  * Load repository from a file.
-  //  * @param  {string}   filePath [description]
-  //  * @param  {Function} callback [description]
-  //  */
-  // private loadFromFile(filePath: string, callback: (err: Error)=>void): void {
-  //   if (typeof require === 'function') {
-  //     let fs: any = require('fs');
-  //     fs.readFile(filePath, { encoding: 'utf8' }, (err, content) => {
-  //       this.loadFromSerialization(content, callback);
-  //     });
-  //   } else {
-  //     callback(new Error("Loading from file only supported on Node"));
-  //   }
-  // }
-
-  // /**
-  //  * Load repository from a URL. This uses a Downloader implementation, such as
-  //  * a XhrDownloader or RequestDownloader (depending on the runtime
-  //  * environment), to download the serialized repository, and parse it.
-  //  *
-  //  * @param  {string}   url      [description]
-  //  * @param  {Function} callback [description]
-  //  */
-  // private loadFromUrl(url: string, callback: (err: Error)=>void): void {
-  //   let downloader = this.options.downloader;
-  //   if (!downloader) {
-  //     if (typeof window === 'undefined') {
-  //       // in node
-  //       let RequestDownloader = require('./RequestDownloader').default;
-  //       downloader = new RequestDownloader(this.options.downloaderOptions);
-  //     } else {
-  //       // in browser
-  //       downloader = new XhrDownloader(this.options.downloaderOptions);
-  //     }
-  //   }
-  //   let reqOptions = this.options.requestOptions || {};
-  //   if (!reqOptions.responseType) {
-  //     reqOptions.responseType = 'json';
-  //   }
-  //   downloader.httpGet(url, reqOptions, (err, resp) => {
-  //     if (err) {
-  //       return callback(err);
-  //     }
-  //     let repoInstance: any = null;
-  //     try {
-  //       if (resp.entity) {
-  //         repoInstance = resp.entity;
-  //         simpl.graphExpand(repoInstance);
-  //       } else if (resp.text) {
-  //         repoInstance = simpl.deserialize(resp.text);
-  //       }
-  //       if (!repoInstance) {
-  //         return callback(new Error("Empty response"));
-  //       }
-  //       if (repoInstance.repository) {
-  //         repoInstance = repoInstance.repository;
-  //       }
-  //       this.loadFromInstance(repoInstance, callback);
-  //     } catch (exception) {
-  //       callback(exception);
-  //     }
-  //   });
-  // }
-
-  // /**
-  //  * Load the repository from a serialized form.
-  //  * @param  {string}   serialization [description]
-  //  * @param  {Function} callback      [description]
-  //  */
-  // private loadFromSerialization(serialization: string, callback: (err: Error)=>void): void {
-  //   let instance: any = null;
-  //   try {
-  //     instance = simpl.deserialize(serialization);
-  //     if (instance.repository) {
-  //       // instance is a RepositoryResponse
-  //       instance = instance.repository;
-  //     }
-  //     this.loadFromInstance(instance, callback);
-  //   } catch (exception) {
-  //     return callback(new Error("Failed to deserialize repository: " + serialization));
-  //   }
-  // }
-
   /**
    * Load the repository from another instance.
    * @param  {Repository | TypedRepository} instance [description]
    * @param  {Function}                     callback [description]
    */
-  // private loadFromInstance(instance: Repository | TypedRepository, callback: (err: Error)=>void): void {
   load(repository: Repository | TypedRepository, options: RepoOptions = {}): void {
     this.reset();
     this.options = options;
@@ -601,18 +514,11 @@ export default class RepoMan extends Readyable {
    * @return {Promise<string>} callback
    */
   getUserAgentString(userAgentName: string): Promise<string> {
-    return new Promise<string>((resolve, reject) => {
-      this.onReady(err => {
-        if (err) {
-          reject(err);
-          return;
-        }
-        if (this.options.userAgents && userAgentName in this.options.userAgents) {
-          resolve(this.options.userAgents[userAgentName]);
-          return;
-        }
-        reject(new Error("Unknown user agent name: " + userAgentName));
-      });
+    return this.onReadyP().then(() => {
+      if (this.options.userAgents && userAgentName in this.options.userAgents) {
+        return this.options.userAgents[userAgentName];
+      }
+      throw new Error("Unknown user agent name: " + userAgentName);
     });
   }
 
@@ -622,18 +528,11 @@ export default class RepoMan extends Readyable {
    * @return {Promise<number>}
    */
   getDomainInterval(domain: string): Promise<number> {
-    return new Promise<number>((resolve, reject) => {
-      this.onReady(err => {
-        if (err) {
-          reject(err);
-          return;
-        }
-        if (this.options.domainIntervals && domain in this.options.domainIntervals) {
-          resolve(this.options.domainIntervals[domain]);
-          return;
-        }
-        resolve(0);
-      });
+    return this.onReadyP().then(() => {
+      if (this.options.domainIntervals && domain in this.options.domainIntervals) {
+        return this.options.domainIntervals[domain];
+      }
+      return 0;
     });
   }
 
@@ -645,17 +544,11 @@ export default class RepoMan extends Readyable {
    * @return {Promise<MetaMetadata>}
    */
   loadMmd(name: string, options: RepoCallOptions = {}): Promise<MetaMetadata> {
-    return new Promise<MetaMetadata>((resolve, reject) => {
-      this.onReady(err => {
-        if (err) {
-          reject(err);
-          return;
-        }
-        if (this.mmds && name in this.mmds) {
-          resolve(this.mmds[name]);
-        }
-        reject(new Error("Wrapper not found: " + name));
-      });
+    return this.onReadyP().then(() => {
+      if (this.mmds && name in this.mmds) {
+        return this.mmds[name];
+      }
+      throw new Error("Wrapper not found: " + name);
     });
   }
 
@@ -666,41 +559,32 @@ export default class RepoMan extends Readyable {
    * @param {RepoCallOptions} options
    * @return {Promise<MetaMetadata>}
    */
-  selectMmd(location: string|ParsedURL, options: RepoCallOptions = {}): Promise<MetaMetadata> {
-    return new Promise<MetaMetadata>((resolve, reject) => {
-      this.onReady(err => {
-        if (err) {
-          reject(err);
-          return;
-        }
+  selectMmd(location: string | ParsedURL, options: RepoCallOptions = {}): Promise<MetaMetadata> {
+    return this.onReadyP().then(() => {
+      let purl = ParsedURL.get(location);
 
-        let purl = ParsedURL.get(location);
+      let result = RepoMan.matchUrlStripped(this.urlStripped, purl);
+      if (result.length === 0) {
+        result = RepoMan.matchUrlPath(this.urlPath, purl);
+      }
+      if (result.length === 0) {
+        result = RepoMan.matchUrlPattern(this.urlRegex, purl);
+      }
 
-        let result = RepoMan.matchUrlStripped(this.urlStripped, purl);
-        if (result.length === 0) {
-          result = RepoMan.matchUrlPath(this.urlPath, purl);
-        }
-        if (result.length === 0) {
-          result = RepoMan.matchUrlPattern(this.urlRegex, purl);
-        }
+      result = RepoMan.filterByParams(result, purl);
 
-        result = RepoMan.filterByParams(result, purl);
+      // TODO content-based selection
 
-        // TODO content-based selection
-
-        switch (result.length) {
-          case 0:
-            resolve(this.mmds[this.options.defaultDocumentType]);
-            break;
-          case 1:
-            resolve(this.loadMmd(result[0].targetType, options));
-            break;
-          default:
-            console.warn("Multiple mmds matched for " + location + ": " + result);
-            resolve(this.loadMmd(result[0].targetType, options));
-            break;
-        }
-      });
+      switch (result.length) {
+        case 0:
+          return this.mmds[this.options.defaultDocumentType];
+        case 1:
+          return this.loadMmd(result[0].targetType, options);
+        default:
+          let err = new Error("Multiple mmds matched for " + location + ": " + result);
+          console.warn(err);
+          return this.loadMmd(result[0].targetType, options);
+      }
     });
   }
 
@@ -712,30 +596,15 @@ export default class RepoMan extends Readyable {
    * @return {Promise<string>}
    */
   normalizeLocation(location: string | ParsedURL, options: RepoCallOptions = {}): Promise<string> {
-    return new Promise<string>((resolve, reject) => {
-      this.onReady(err => {
-        if (err) {
-          reject(err);
-          return;
+    return this.onReadyP().then(() => {
+      let purl = ParsedURL.get(location);
+      let url = purl.toString();
+      return this.selectMmd(purl, options).then(mmd => {
+        if (mmd && mmd.filter_location) {
+          let filteredLocation = PreFilter.filter(url, mmd.filter_location);
+          return filteredLocation;
         }
-
-        let url: string = null;
-        let purl: ParsedURL = null;
-        if (location instanceof ParsedURL) {
-          purl = location;
-          url = purl.toString();
-        } else {
-          url = location;
-          purl = new ParsedURL(url);
-        }
-
-        resolve(this.selectMmd(purl, options).then(mmd => {
-          if (mmd && mmd.filter_location) {
-            let filteredLocation = PreFilter.filter(url, mmd.filter_location);
-            return filteredLocation;
-          }
-          return url;
-        }));
+        return url;
       });
     });
   }
@@ -748,26 +617,17 @@ export default class RepoMan extends Readyable {
    * @return {Promise<Metadata>}
    */
   untypeMetadata(typedMetadata: TypedMetadata, options: RepoCallOptions = {}): Promise<Metadata> {
-    return new Promise<Metadata>((resolve, reject) => {
-      this.onReady(err => {
-        if (err) {
-          reject(err);
-          return;
-        }
-
-        for (let fieldName in typedMetadata) {
-          if (fieldName in this.mmds) {
-            let val = typedMetadata[fieldName];
-            let mm_name = val.mm_name || val.meta_metadata_name;
-            if (mm_name === fieldName) {
-              resolve(val as Metadata);
-              return;
-            }
+    return this.onReadyP().then(() => {
+      for (let fieldName in typedMetadata) {
+        if (fieldName in this.mmds) {
+          let val = typedMetadata[fieldName];
+          let mm_name = val.mm_name || val.meta_metadata_name;
+          if (mm_name === fieldName) {
+            return val as Metadata;
           }
         }
-
-        reject(new Error("Invalid typed metadata: " + typedMetadata));
-      });
+      }
+      throw new Error("Invalid typed metadata: " + typedMetadata);
     });
   }
 
@@ -778,18 +638,11 @@ export default class RepoMan extends Readyable {
    * @return {Promise<string>}
    */
   serializeRepository(options: RepoCallOptions = {}): Promise<string> {
-    return new Promise<string>((resolve, reject) => {
-      this.onReady(err => {
-        if (err) {
-          reject(err);
-          return;
-        }
-
-        if (!this.cachedSerialization) {
-          this.cachedSerialization = simpl.serialize(this.repository);
-        }
-        resolve(this.cachedSerialization);
-      });
+    return this.onReadyP().then(() => {
+      if (!this.cachedSerialization) {
+        this.cachedSerialization = simpl.serialize(this.repository);
+      }
+      return this.cachedSerialization;
     });
   }
 }

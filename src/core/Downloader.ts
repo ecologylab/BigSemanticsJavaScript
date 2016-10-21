@@ -69,7 +69,7 @@ export interface Downloader {
  * A base implementation of the Downloader interface.
  * Deals with download intervals.
  */
-export class BaseDownloader implements Downloader {
+export abstract class BaseDownloader implements Downloader {
   name = 'base';
   protected options: DownloaderOptions;
   protected lastHits: { [domain: number]: number };
@@ -99,7 +99,5 @@ export class BaseDownloader implements Downloader {
     return this.doHttpGet(purl, options);
   }
 
-  protected doHttpGet(location: string | ParsedURL, options: RequestOptions = {}): Promise<HttpResponse> {
-    return Promise.reject(new Error("Not implemented"));
-  }
+  protected abstract doHttpGet(location: string | ParsedURL, options?: RequestOptions): Promise<HttpResponse>;
 }

@@ -8,8 +8,8 @@
 /// <reference path="../../typings/index.d.ts" />
 
 import * as Promise from 'bluebird';
-import ParsedURL from './ParsedURL';
-import Scope from './Scope';
+import ParsedURL from '../core/ParsedURL';
+import Scope from '../core/Scope';
 import {
   HttpResponse,
   DefVar,
@@ -21,10 +21,10 @@ import {
   MetaMetadata,
   Metadata,
   TypedMetadata,
-} from './types';
-import { FieldOps } from './FieldOps';
-import { ExtractionOptions, Extractor } from './Extractor';
-import { BigSemantics } from './BigSemantics';
+} from '../core/types';
+import { FieldOps } from '../core/FieldOps';
+import { ExtractionOptions, Extractor } from '../core/Extractor';
+import { BigSemantics } from '../core/BigSemantics';
 
 
 interface Vars {
@@ -750,7 +750,7 @@ export class Extraction {
   }
 }
 
-export default class XpathExtractor implements Extractor {
+export default class XPathExtractor implements Extractor {
   name = 'xpath';
 
   extractMetadata(response: HttpResponse,

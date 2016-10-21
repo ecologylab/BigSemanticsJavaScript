@@ -106,7 +106,7 @@ export default class ParsedURL {
       let parts = query.split('&');
       for (let part of parts) {
         let pair = part.split('=');
-        let name = pair[0];
+        let name = decodeURIComponent(pair[0]);
         let val = decodeURIComponent(pair[1]);
         let currVal = result[name]
         if (typeof currVal === 'undefined') {
@@ -181,48 +181,52 @@ export default class ParsedURL {
    *   The base URL, if 'url' is a relative one. Must be absolute.
    */
   constructor(url: string, base: string | ParsedURL = null) {
-    this.raw = url;
-    this.base = this.getBase(base);
+    if (url) {
+      this.raw = url;
+      this.base = this.getBase(base);
 
-    let m = null;
-    m = url.match(/^(\w+)\:\/\/([^\/?#]+)([^?#]*)(\?[^#]*)?(#.*)?/);
-    if (m) {
-      // url is absolute, with scheme and host
-      let hostSpec = ParsedURL.parseHostSpec(m[2]);
-      this.initialize(m[1], hostSpec, m[3], m[4], m[5]);
-      return;
+      let m = null;
+      m = url.match(/^(\w+)\:\/\/([^\/?#]+)([^?#]*)(\?[^#]*)?(#.*)?/);
+      if (m) {
+        // url is absolute, with scheme and host
+        let hostSpec = ParsedURL.parseHostSpec(m[2]);
+        this.initialize(m[1], hostSpec, m[3], m[4], m[5]);
+        return;
+      }
+
+      if (!this.base) {
+        throw new Error("Missing base URL");
+      }
+
+      m = url.match(/^\/\/([^\/?#]+)([^?#]*)(\?[^#]*)?(#.*)?/);
+      if (m) {
+        // url is absolute, without scheme, with host
+        let hostSpec = ParsedURL.parseHostSpec(m[1]);
+        this.initialize(this.base.scheme, hostSpec, m[2], m[3], m[4]);
+        return;
+      }
+
+      m = url.match(/^(\/[^?#]*)(\?[^#]*)?(#.*)?/);
+      if (m) {
+        // url is absolute, without scheme, without host
+        this.initialize(this.base.scheme, this.base, m[1], m[2], m[3]);
+        return;
+      }
+
+      // TODO deal with relative paths starting with ./ or ../
+
+      m = url.match(/([^?#]+)(\?[^#]*)?(#.*)?/);
+      if (m) {
+        // url is relative
+        let path = this.base.path;
+        let i = path.lastIndexOf('/');
+        path = path.substr(0, i+1) + m[1];
+        this.initialize(this.base.scheme, this.base, path, m[2], m[3]);
+        return;
+      }
+
+      throw new Error("Invalid URL: " + url);
     }
-
-    if (!this.base) {
-      throw new Error("Missing base URL");
-    }
-
-    m = url.match(/^\/\/([^\/?#]+)([^?#]*)(\?[^#]*)?(#.*)?/);
-    if (m) {
-      // url is absolute, without scheme, with host
-      let hostSpec = ParsedURL.parseHostSpec(m[1]);
-      this.initialize(this.base.scheme, hostSpec, m[2], m[3], m[4]);
-      return;
-    }
-
-    m = url.match(/^(\/[^?#]*)(\?[^#]*)?(#.*)?/);
-    if (m) {
-      // url is absolute, without scheme, without host
-      this.initialize(this.base.scheme, this.base, m[1], m[2], m[3]);
-      return;
-    }
-
-    m = url.match(/([^?#]+)(\?[^#]*)?(#.*)?/);
-    if (m) {
-      // url is relative
-      let path = this.base.path;
-      let i = path.lastIndexOf('/');
-      path = path.substr(0, i+1) + m[1];
-      this.initialize(this.base.scheme, this.base, path, m[2], m[3]);
-      return;
-    }
-
-    throw new Error("Invalid URL: " + url);
   }
 
   private initialize(scheme: string, hostSpec: HostSpec, path: string, query: string, frag: string): void {
@@ -289,5 +293,47 @@ export default class ParsedURL {
       this.cachedString = result;
     }
     return this.cachedString;
+  }
+
+  clone(): ParsedURL {
+    let result: ParsedURL = new ParsedURL(null);
+
+    result.scheme = this.scheme;
+    result.user = this.user;
+    result.password = this.password;
+    result.host = this.host;
+    result.port = this.port;
+    result.domain = this.domain;
+    result.path = this.path;
+    result.query = {};
+    for (let name in this.query) {
+      let val = this.query[name];
+      if (val instanceof Array) {
+        result.query[name] = [];
+        for (let item in val) {
+          (result.query[name] as string[]).push(item);
+        }
+      } else {
+        result.query[name] = val;
+      }
+    }
+    result.fragmentId = this.fragmentId;
+    result.stripped = this.stripped;
+
+    return result;
+  }
+
+  withQuery(queryMap: QueryMap): ParsedURL {
+    if (!queryMap) {
+      return this;
+    }
+    let result = this.clone();
+    for (let name in queryMap) {
+      let val = queryMap[name];
+      if (val) {
+        result.query[name] = val;
+      }
+    }
+    return result;
   }
 }

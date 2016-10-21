@@ -2,6 +2,10 @@
  * A base class for things that can take time to get ready.
  */
 
+/// <reference path="../../typings/index.d.ts" />
+
+import * as Promise from 'bluebird';
+
 /**
  * A convenience interface for callbacks.
  */
@@ -40,6 +44,21 @@ export default class Readyable {
       return;
     }
     this.callbackQueue.push(callback);
+  }
+
+  /**
+   * A promisified version of onReady().
+   */
+  onReadyP(): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      this.onReady(err => {
+        if (err) {
+          reject(err);
+          return;
+        }
+        resolve();
+      });
+    });
   }
 
   /**

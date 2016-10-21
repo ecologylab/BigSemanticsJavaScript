@@ -215,6 +215,8 @@ export interface MetaMetadata extends MetaMetadataCompositeField {
   selectors?: Selector[];
   filter_location?: FilterLocation;
 
+  extract_with?: string;
+  
   kids: TypedMetaMetadataField[];
 }
 
@@ -279,4 +281,18 @@ export interface Metadata {
  */
 export interface TypedMetadata {
   // nothing
+}
+
+export interface BSRequest {
+  appId?: string;
+  userId?: string;
+  sessionId?: string;
+  reqId?: string;
+}
+
+export interface BSResponse extends BSRequest {
+  id?: string;
+  repository?: Repository;
+  wrapper?: MetaMetadata;
+  metadata?: TypedMetadata;
 }

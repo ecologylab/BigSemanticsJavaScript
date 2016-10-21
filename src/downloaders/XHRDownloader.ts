@@ -5,18 +5,18 @@
 /// <reference path="../../typings/index.d.ts" />
 
 import * as Promise from 'bluebird';
-import ParsedURL from './ParsedURL';
-import { HttpResponse } from './types';
+import ParsedURL from '../core/ParsedURL';
+import { HttpResponse } from '../core/types';
 import {
   DownloaderOptions,
   RequestOptions,
   BaseDownloader,
-} from './Downloader';
+} from '../core/Downloader';
 
 /**
  * A Downloader implementation using XMLHttpRequest.
  */
-export default class XhrDownloader extends BaseDownloader {
+export default class XHRDownloader extends BaseDownloader {
   name = 'xhr';
 
   /**
@@ -123,7 +123,7 @@ export default class XhrDownloader extends BaseDownloader {
               // handle redirects
               let newLocation = xhr.getResponseHeader('Location');
               console.log("Redirect: " + purl.toString() + " => " + newLocation);
-              if (!XhrDownloader.addNewLocation(response, newLocation)) {
+              if (!XHRDownloader.addNewLocation(response, newLocation)) {
                 err = new Error("Redirection loop detected");
                 console.warn(err);
               }
@@ -138,7 +138,7 @@ export default class XhrDownloader extends BaseDownloader {
                 response.contentType = matches[1];
                 response.charset = matches[3];
               }
-              if (!XhrDownloader.isContentTypeAcceptable(response.contentType, options)) {
+              if (!XHRDownloader.isContentTypeAcceptable(response.contentType, options)) {
                 err = new Error("Unsupported content type: " + response.contentType);
                 console.warn(err);
               }
@@ -151,10 +151,10 @@ export default class XhrDownloader extends BaseDownloader {
             break;
           case xhr.DONE:
             if (err || xhr.status !== 200) break;
-            XhrDownloader.addNewLocation(response, (xhr as any).responseURL);
-            let jsRedirectLocation = XhrDownloader.checkJsContentRedirect(xhr);
+            XHRDownloader.addNewLocation(response, (xhr as any).responseURL);
+            let jsRedirectLocation = XHRDownloader.checkJsContentRedirect(xhr);
             if (jsRedirectLocation) {
-              if (!XhrDownloader.addNewLocation(response, jsRedirectLocation)) {
+              if (!XHRDownloader.addNewLocation(response, jsRedirectLocation)) {
                 err = new Error("JavaScript Redirection loop detected");
                 console.warn(err);
               }

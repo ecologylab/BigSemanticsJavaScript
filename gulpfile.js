@@ -1,6 +1,7 @@
 // Build new BigSemantics
 
 var gulp = require('gulp');
+var del = require('del');
 var ts = require('gulp-typescript');
 var browserify = require('gulp-browserify');
 var rename = require('gulp-rename');
@@ -12,9 +13,13 @@ gulp.task('tsc', function() {
 });
 
 gulp.task('browserify', [ 'tsc' ], function() {
-  gulp.src('build/core/index.js').pipe(browserify({
+  gulp.src('build/index.js').pipe(browserify({
     standalone: 'bigsemantics',
-  })).pipe(rename('bigsemantics-core.js')).pipe(gulp.dest('browserified'));
+  })).pipe(rename('bigsemantics-core.js')).pipe(gulp.dest('build'));
 });
+
+gulp.task('clean', function() {
+  del.sync(['build']);
+})
 
 gulp.task('default', ['tsc', 'browserify']);

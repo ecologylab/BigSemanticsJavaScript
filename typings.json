@@ -1,8 +1,10 @@
 {
   "name": "bigsemantics",
-  "dependencies": {
-  },
+  "dependencies": {},
   "globalDependencies": {
-    "bluebird": "registry:dt/bluebird#3.0.0+20160928162057"
+    "bluebird": "registry:dt/bluebird#3.0.0+20160928162057",
+    "chrome": "registry:dt/chrome#0.0.0+20160724063844",
+    "filesystem": "registry:dt/filesystem#0.0.0+20160316155526",
+    "filewriter": "registry:dt/filewriter#0.0.0+20160316155526"
   }
 }
