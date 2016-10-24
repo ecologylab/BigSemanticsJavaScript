@@ -10,17 +10,19 @@ import simpl from '../core/simpl/simplBase';
 import ParsedURL from '../core/ParsedURL';
 import { uuid } from '../core/utils';
 import {
+  BuildInfo,
   MetaMetadata,
+  TypedRepository,
   Metadata,
   TypedMetadata,
 } from '../core/types';
 import RepoMan, {
   RepoCallOptions,
-  ReloadableRepoManService,
 } from '../core/RepoMan';
 import {
+  BigSemanticsComponents,
   BigSemanticsOptions,
-  MetadataOptions,
+  BigSemanticsCallOptions,
   MetadataResult,
   AbstractBigSemantics,
 } from '../core/BigSemantics';
@@ -34,34 +36,28 @@ export interface Request {
   params?: Params;
 }
 
-/**
- * [BigSemantics description]
- * @type {[type]}
- */
-export default class BSExtension extends AbstractBigSemantics implements ReloadableRepoManService {
-  name = 'bsext_' + uuid(3);
+export interface BSExtensionOptions extends BigSemanticsOptions {
+  extensionIds: string[];
+}
 
-  private extIds: string[];
+export default class BSExtension extends AbstractBigSemantics {
   private activeExtId: string;
 
-  constructor(extIds: string[], options: BigSemanticsOptions) {
-    super({}, options);
-    this.extIds = extIds;
+  initialize(options: BSExtensionOptions, components: BigSemanticsComponents): void {
+    super.initialize(options, components);
+    if (!this.activeExtId) {
+      this.pickExt();
+    }
   }
 
   getActiveExtensionId(): string {
     return this.activeExtId;
   }
 
-  reset(): void {
-    super.reset();
-    this.activeExtId = null;
-  }
-
   private sendMsg(extId: string, req: Request): Promise<any> {
     return new Promise<any>((resolve, reject) => {
       let msg = simpl.graphCollapse(req);
-      chrome.runtime.sendMessage(extId, msg, resp => {
+      let callback = resp => {
         if (!resp) {
           reject(new Error("Null response"));
         }
@@ -73,40 +69,64 @@ export default class BSExtension extends AbstractBigSemantics implements Reloada
           return;
         }
         resolve(resp.result);
-      });
+      };
+      if (extId) {
+        chrome.runtime.sendMessage(extId, msg, callback);
+      } else {
+        chrome.runtime.sendMessage(msg, callback);
+      }
     });
   }
 
   private pickExt(): Promise<void> {
-    let tryExt = i => {
-      if (i >= this.extIds.length) {
+    let extIds = (this.options as BSExtensionOptions).extensionIds;
+    let tryExt = (extIds, i) => {
+      if (i >= extIds.length) {
         return Promise.reject(new Error("No available extension"));
       }
-      this.sendMsg(this.extIds[i], {
+      this.sendMsg(extIds[i], {
         method: 'extensionInfo',
       }).then(result => {
-        this.activeExtId = this.extIds[i];
+        this.activeExtId = extIds[i];
         return Promise.resolve();
       }).catch(err => {
-        return tryExt(i+1);
+        return tryExt(extIds, i+1);
       })
     }
-    return tryExt(0);
+    return tryExt(extIds, 0);
   }
 
-  reload(): void {
-    this.reset();
-    this.pickExt();
-    this.sendMsg(this.activeExtId, {
-      method: 'reload',
-    }).then(result => {
-      this.setReady();
-    }).catch(err => {
-      this.setError(err);
+  reloadRepo(): void {
+    this.onReadyP().then(() => {
+      this.sendMsg(this.activeExtId, {
+        method: 'reloadRepo',
+      });
     });
   }
 
-  loadMetadata(location: string | ParsedURL, options: MetadataOptions = {}): Promise<MetadataResult> {
+  getBuildInfo(options?: BigSemanticsCallOptions): Promise<BuildInfo> {
+    return this.onReadyP().then(() => {
+      return this.sendMsg(this.activeExtId, {
+        method: 'getBuildInfo',
+        params: {
+          options: options,
+        },
+      });
+    });
+  }
+
+  getRepository(options?: RepoCallOptions): Promise<TypedRepository> {
+    return this.onReadyP().then(() => {
+      return this.sendMsg(this.activeExtId, {
+        method: 'getRepository',
+        params: {
+          options: options,
+        },
+      });
+    });
+  }
+
+  loadMetadata(location: string | ParsedURL, options: BigSemanticsCallOptions = {}): Promise<MetadataResult> {
     return this.onReadyP().then(() => {
       let purl = ParsedURL.get(location);
       return this.sendMsg(this.activeExtId, {
@@ -186,17 +206,6 @@ export default class BSExtension extends AbstractBigSemantics implements Reloada
         method: 'untypeMetadata',
         params: {
           typedMetadata: tm,
-          options: options,
-        },
-      });
-    });
-  }
-
-  serializeRepository(options?: RepoCallOptions): Promise<string> {
-    return this.onReadyP().then(() => {
-      return this.sendMsg(this.activeExtId, {
-        method: 'serializeRepository',
-        params: {
           options: options,
         },
       });

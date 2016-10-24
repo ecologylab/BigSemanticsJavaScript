@@ -1,137 +1,87 @@
 /**
- * This module enables using BigSemantics in a vanilla web application.
+ * This module enables using BigSemantics through (potentially cross-origin)
+ * XHR.
  */
 
 /// <reference path="../../typings/index.d.ts" />
 
 import * as Promise from 'bluebird';
 import simpl from '../core/simpl/simplBase';
-import ParsedURL from '../core/ParsedURL';
+import ParsedURL, { QueryMap } from '../core/ParsedURL';
 import { uuid } from '../core/utils';
 import Readyable from '../core/Readyable';
+import { PreFilter } from '../core/FieldOps';
 import {
   MetaMetadata,
-  Repository,
   TypedRepository,
   Metadata,
   TypedMetadata,
   BSResponse,
 } from '../core/types';
-import RepoMan, {
-  RepoOptions,
-  RepoCallOptions,
-  ReloadableRepoManService,
-} from '../core/RepoMan';
-import { Downloader } from '../core/Downloader';
+import { RepoCallOptions, RepoManService } from '../core/RepoMan';
+import { RequestOptions } from '../core/Downloader';
 import {
+  BigSemanticsComponents,
   BigSemanticsOptions,
-  MetadataOptions,
+  BigSemanticsCallOptions,
   MetadataResult,
-  ReloadableBaseBigSemantics,
+  BaseBigSemantics,
 } from '../core/BigSemantics';
-import JSONPHelper, { JSONPHelperOptions } from './JSONPHelper';
+import XHRDownloader from '../downloaders/XHRDownloader';
+
+export interface BSServiceOptions extends BigSemanticsOptions {
+  appId: string;
+  appVer: string;
+  serviceBase: string | ParsedURL;
+}
 
 /**
- * [BigSemantics description]
- * @type {[type]}
+ * A BigSemantics implementation using the BigSemantics web service through
+ * (potentially cross-origin) XHR.
  */
-export default class BSService extends ReloadableBaseBigSemantics {
-  name = 'bssvc_' + uuid(3);
-
-  private jsonp: JSONPHelper;
+export default class BSService extends BaseBigSemantics {
+  protected options: BSServiceOptions;
 
   private serviceBase: ParsedURL;
   private repositoryBase: ParsedURL;
   private wrapperBase: ParsedURL;
   private metadataBase: ParsedURL;
 
-  constructor(serviceBase: string | ParsedURL, options: BigSemanticsOptions) {
-    super({
-      repoMan: new RepoMan(null, options.repoOptions),
-    }, options);
+  private commonQueries: QueryMap;
 
-    this.jsonp = new JSONPHelper({
-      callbackParamName: 'callback',
-      extraQuery: {
-        aid: this.options.appId,
-        av: this.options.appVer,
-      },
-      timeout: options.timeout,
-    });
+  private repoDownloader: XHRDownloader;
 
-    this.serviceBase = ParsedURL.get(serviceBase);
+  initialize(options: BSServiceOptions, components: BigSemanticsComponents): void {
+    super.initialize(options, components);
+
+    this.serviceBase = ParsedURL.get(options.serviceBase);
     this.repositoryBase = ParsedURL.get('repository.jsonp', this.serviceBase);
     this.wrapperBase = ParsedURL.get('wrapper.jsonp', this.serviceBase);
     this.metadataBase = ParsedURL.get('metadata.jsonp', this.serviceBase);
 
-    this.reload();
+    this.commonQueries = {
+      aid: options.appId,
+      av: options.appVer,
+    };
+
+    this.repoDownloader = new XHRDownloader();
+
+    this.repoMan.reset();
+    this.httpGet(this.repositoryBase).then(bsresp => {
+      this.repoMan.load(bsresp.repository, options.repoOptions);
+    });
+    this.setReady();
   }
 
-  reload(): void {
-    this.jsonp.call(this.name + '_repo', this.repositoryBase).then(args => {
-      if (!args || args.length == 0) {
-        throw new Error("Invalid server response");
+  private httpGet(purl: ParsedURL, query: QueryMap = {}, options: RequestOptions = {}): Promise<BSResponse> {
+    let reqUrl = purl.withQuery(this.commonQueries).withQuery(query);
+    options.responseType = 'json';
+    return this.repoDownloader.httpGet(reqUrl, options).then(resp => {
+      if (!resp || !resp.entity) {
+        throw new Error("Missing or invalid response");
       }
-      let repo = (simpl.graphExpand(args[0]) as BSResponse).repository;
-      this.repoMan.load(repo, this.options.repoOptions);
-      this.repoMan.onReady(err => {
-        if (err) {
-          this.setError(err);
-          return;
-        }
-        this.setReady();
-      });
-    });
-  }
-
-  loadMetadata(location: string | ParsedURL, options: MetadataOptions = {}): Promise<MetadataResult> {
-    return this.onReadyP().then(() => {
-      let id = this.name + '_M' + uuid();
-      let purl = ParsedURL.get(location);
-      let reqUrl = this.metadataBase.withQuery({
-        url: purl.toString(),
-        uid: options.userId,
-        sid: options.sessionId,
-      });
-      return this.jsonp.call(id, reqUrl, {
-        timeout: options.timeout || this.options.timeout,
-      }).then(args => {
-        if (!args || args.length === 0) {
-          throw new Error("Invalid server response");
-        }
-        let resp = simpl.graphExpand(args[0]) as BSResponse;
-        if (options.includeMmdInResult) {
-          return this.selectMmd(purl, options).then(mmd => {
-            return {
-              metadata: resp.metadata,
-              mmd: mmd,
-            } as MetadataResult;
-          });
-        }
-        return { metadata: resp.metadata };
-      });
-    });
-  }
-
-  loadInitialMetadata(location: string | ParsedURL, options: MetadataOptions = {}): Promise<MetadataResult> {
-    return this.onReadyP().then(() => {
-      let purl = ParsedURL.get(location);
-
-      return this.selectMmd(purl, options.repoCallOptions).then(mmd => {
-        let typeTag = mmd.tag || mmd.name;
-        let metadata = {
-          mm_name: typeTag,
-        }
-        let typedMetadata: TypedMetadata = {};
-        typedMetadata[typeTag] = metadata;
-        let result: MetadataResult = {
-          metadata: typedMetadata,
-        };
-        if (options.includeMmdInResult) {
-          result.mmd = mmd;
-        }
-        return result;
-      });
+      let bsresp = simpl.graphExpand(resp) as BSResponse;
+      return bsresp;
     });
   }
 }

@@ -23,16 +23,6 @@ import { PreFilter } from './FieldOps';
 // for dynamic loading in Node.
 declare function require(moduleName: string): any;
 
-// /**
-//  * Indicating where to load the wrapper repository.
-//  */
-// export interface RepoSource {
-//   repo?: Repository | TypedRepository;
-//   serialization?: string;
-//   file?: string;
-//   url?: string;
-// }
-
 /**
  * Options for the repoMan.
  */
@@ -42,18 +32,14 @@ export interface RepoOptions {
   userAgents?: { [name: string]: string };
   domainIntervals?: { [domain: string]: number };
 
-  timeout?: number // TODO implement support for timeout
-
-  // downloader?: Downloader;
-  // downloaderOptions?: DownloaderOptions;
-  // requestOptions?: RequestOptions;
+  timeout?: number; // TODO implement support for timeout
 }
 
 /**
  * Options for calls to the repoMan.
  */
 export interface RepoCallOptions {
-  timeout?: number // TODO implement support for timeout
+  timeout?: number; // TODO implement support for timeout
 }
 
 /**
@@ -67,36 +53,23 @@ interface SelectorMap {
  * An interface for repository management service.
  */
 export interface RepoManService {
-  getUserAgentString(userAgentName: string): Promise<string>;
-  getDomainInterval(domain: string): Promise<number>;
+  getBuildInfo(options?: RepoCallOptions): Promise<BuildInfo>;
+  getRepository(options?: RepoCallOptions): Promise<TypedRepository>;
+  getUserAgentString(userAgentName: string, options?: RepoCallOptions): Promise<string>;
+  getDomainInterval(domain: string, options?: RepoCallOptions): Promise<number>;
   loadMmd(name: string, options?: RepoCallOptions): Promise<MetaMetadata>;
   selectMmd(location: string | ParsedURL, options?: RepoCallOptions): Promise<MetaMetadata>;
   normalizeLocation(location: string | ParsedURL, options?: RepoCallOptions): Promise<string>;
   untypeMetadata(typedMetadata: TypedMetadata, options?: RepoCallOptions): Promise<Metadata>;
-  serializeRepository(options?: RepoCallOptions): Promise<string>;
-}
-
-/**
- * An interface for reloadable repository management service.
- */
-export interface ReloadableRepoManService extends RepoManService {
-  reload(): void;
-}
-
-/**
- * An interface for repository management service that can load from a different
- * repository.
- */
-export interface LoadableRepoManService extends ReloadableRepoManService {
-  load(repository: Repository | TypedRepository, options?: RepoOptions): void;
 }
 
 /**
  * A meta-metadata repository manager.
  */
-export default class RepoMan extends Readyable implements LoadableRepoManService {
+export default class RepoMan extends Readyable {
   /**
    * Add a selector to the given selector map with a specified key.
+   *
    * @param {SelectorMap} selectorMap
    * @param {string}      key
    * @param {Selector}    selector
@@ -114,6 +87,7 @@ export default class RepoMan extends Readyable implements LoadableRepoManService
 
   /**
    * Helper function for adding a <url_stripped> selector.
+   *
    * @param {SelectorMap} selectorMap
    * @param {Selector}    selector
    */
@@ -133,6 +107,7 @@ export default class RepoMan extends Readyable implements LoadableRepoManService
 
   /**
    * Helper function for adding <url_path_tree> selector.
+   *
    * @param {SelectorMap} selectorMap
    * @param {Selector}    selector
    */
@@ -150,6 +125,7 @@ export default class RepoMan extends Readyable implements LoadableRepoManService
 
   /**
    * Helper function for adding <url_regex> and <url_regex_fragment> selector.
+   *
    * @param {SelectorMap} selectorMap
    * @param {Selector}    selector
    */
@@ -186,6 +162,7 @@ export default class RepoMan extends Readyable implements LoadableRepoManService
 
   /**
    * Helper for matching using <url_stripped> selectors.
+   *
    * @param  {SelectorMap} selectors
    * @param  {ParsedURL}   purl
    * @return {Selector[]}
@@ -242,6 +219,7 @@ export default class RepoMan extends Readyable implements LoadableRepoManService
 
   /**
    * Match the location to a path tree spec.
+   *
    * @param  {string}  domain
    * @param  {string}  path
    * @param  {string}  location
@@ -267,6 +245,7 @@ export default class RepoMan extends Readyable implements LoadableRepoManService
 
   /**
    * Helper for matching using <url_path_tree> selectors.
+   *
    * @param  {SelectorMap} selectorMap
    * @param  {ParsedURL}   purl
    * @return {Selector[]}
@@ -288,6 +267,7 @@ export default class RepoMan extends Readyable implements LoadableRepoManService
 
   /**
    * Helper for matching using <url_regex> and <url_regex_fragment> selectors.
+   *
    * @param  {SelectorMap} selectors
    * @param  {ParsedURL}   purl
    * @return {Selector[]}
@@ -313,6 +293,7 @@ export default class RepoMan extends Readyable implements LoadableRepoManService
 
   /**
    * Match a query map object with a set of param specs.
+   *
    * @param  {QueryMap}        queryMap
    * @param  {SelectorParam[]} paramSpecs
    * @return {boolean} True iff the query map meets all param specs.
@@ -330,7 +311,7 @@ export default class RepoMan extends Readyable implements LoadableRepoManService
       }
       if (spec.value && spec.value.length > 0) {
         let allowEmpty = String(spec.allow_empty_value) === 'true';
-        let allowAndIsEmpty = allowEmpty && val.length === 0;
+        let allowAndIsEmpty = allowEmpty && typeof val === 'string' && val.length === 0;
         if (!allowAndIsEmpty && spec.value !== valstr) {
           return false;
         }
@@ -346,6 +327,7 @@ export default class RepoMan extends Readyable implements LoadableRepoManService
 
   /**
    * Filter an array of selectors by <param> specs.
+   *
    * @param  {Selector[]} selectors
    * @param  {ParsedURL}  purl
    * @return {Selector[]}
@@ -362,63 +344,24 @@ export default class RepoMan extends Readyable implements LoadableRepoManService
     return results;
   }
 
-  // /**
-  //  * Specify where the repository should be / has been loaded.
-  //  * @type {RepoSource}
-  //  */
-  // source: RepoSource;
-
   /**
    * Options for RepoMan itself.
-   * @type {RepoOptions}
    */
   options: RepoOptions;
 
   /**
    * The actual meta-metadata repository.
-   * @type {Repository}
    */
-  repository: Repository;
+  private repository: Repository;
 
-  private cachedSerialization: string;
   private mmds: { [name: string]: MetaMetadata };
   private urlStripped: { [strippedUrl: string]: Selector[] };
   private urlPath: { [domain: string]: Selector[] };
   private urlRegex: { [domain: string]: Selector[] };
 
   /**
-   * Construct an empty RepoMan. If source specified, load the repository.
-   * @constructor
-   * @param  {RepoSource}  source  [description]
-   * @param  {RepoOptions} options [description]
-   */
-  // constructor(source?: RepoSource, options?: RepoOptions) {
-  constructor(repository: Repository | TypedRepository = null, options: RepoOptions = {}) {
-    super();
-    this.options = options;
-    if (repository) {
-      this.load(repository, options);
-    }
-  }
-
-  /**
-   * Reset the RepoMan to its initial state.
-   */
-  reset(): void {
-    super.reset();
-    // this.source = null;
-    this.repository = null;
-    this.options = null;
-    this.repository = null;
-    this.mmds = null;
-    this.urlStripped = null;
-    this.urlPath = null;
-    this.urlRegex = null;
-    this.cachedSerialization = null;
-  }
-
-  /**
    * Load the repository from another instance.
+   *
    * @param  {Repository | TypedRepository} instance [description]
    * @param  {Function}                     callback [description]
    */
@@ -502,18 +445,46 @@ export default class RepoMan extends Readyable implements LoadableRepoManService
   }
 
   /**
-   * Reload the repository using previous source and options.
+   * Reset the RepoMan to its initial state.
    */
-  reload(): void {
-    this.load(this.repository, this.options);
+  reset(): void {
+    super.reset();
+    this.repository = null;
+    this.options = null;
+    this.repository = null;
+    this.mmds = null;
+    this.urlStripped = null;
+    this.urlPath = null;
+    this.urlRegex = null;
+  }
+
+  getBuildInfo(options?: RepoCallOptions): Promise<BuildInfo> {
+    return this.onReadyP().then(() => {
+      return this.repository.build;
+    });
+  }
+
+  /**
+   * Get the raw TypedRepository object.
+   *
+   * @param {RepoCallOptions} options
+   * @return {Promise<TypedRepository>}
+   */
+  getRepository(options: RepoCallOptions = {}): Promise<TypedRepository> {
+    return this.onReadyP().then(() => {
+      return {
+        meta_metadata_repository: this.repository,
+      };
+    });
   }
 
   /**
    * Get a user agent string by its name.
+   *
    * @param {string} userAgentName
    * @return {Promise<string>} callback
    */
-  getUserAgentString(userAgentName: string): Promise<string> {
+  getUserAgentString(userAgentName: string, options: RepoCallOptions = {}): Promise<string> {
     return this.onReadyP().then(() => {
       if (this.options.userAgents && userAgentName in this.options.userAgents) {
         return this.options.userAgents[userAgentName];
@@ -524,10 +495,11 @@ export default class RepoMan extends Readyable implements LoadableRepoManService
 
   /**
    * Get the minimum download interval (in millisecond) for a domain.
+   *
    * @param {string} domain
    * @return {Promise<number>}
    */
-  getDomainInterval(domain: string): Promise<number> {
+  getDomainInterval(domain: string, options: RepoCallOptions = {}): Promise<number> {
     return this.onReadyP().then(() => {
       if (this.options.domainIntervals && domain in this.options.domainIntervals) {
         return this.options.domainIntervals[domain];
@@ -628,21 +600,6 @@ export default class RepoMan extends Readyable implements LoadableRepoManService
         }
       }
       throw new Error("Invalid typed metadata: " + typedMetadata);
-    });
-  }
-
-  /**
-   * Get the serialized form of the repository.
-   *
-   * @param {RepoCallOptions} options
-   * @return {Promise<string>}
-   */
-  serializeRepository(options: RepoCallOptions = {}): Promise<string> {
-    return this.onReadyP().then(() => {
-      if (!this.cachedSerialization) {
-        this.cachedSerialization = simpl.serialize(this.repository);
-      }
-      return this.cachedSerialization;
     });
   }
 }

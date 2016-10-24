@@ -35,9 +35,11 @@
   </div>
 
   <script>
-    var bss = new bigsemantics.BSService('https://api.ecologylab.net:9443/BigSemanticsService/', {
+    var bss = new bigsemantics.BSWebApp();
+    bss.initialize({
       appId: 'test-bs-service',
       appVer: '0.0.0',
+      serviceBase: 'https://api.ecologylab.net:9443/BigSemanticsService/',
     });
 
     function loadMetadata(url) {

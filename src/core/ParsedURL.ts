@@ -16,7 +16,7 @@ export interface HostSpec {
  * Convenience type declaration.
  */
 export interface QueryMap {
-  [name: string]: string|string[];
+  [name: string]: boolean|string|string[];
 }
 
 /**
@@ -107,14 +107,18 @@ export default class ParsedURL {
       for (let part of parts) {
         let pair = part.split('=');
         let name = decodeURIComponent(pair[0]);
-        let val = decodeURIComponent(pair[1]);
-        let currVal = result[name]
+        let val = pair[1] ? decodeURIComponent(pair[1]) : null;
+        let currVal = result[name];
         if (typeof currVal === 'undefined') {
           // first entry with this name
-          result[name] = val;
-        } else if (typeof currVal === 'string') {
+          if (val) {
+            result[name] = val;
+          } else {
+            result[name] = true;
+          }
+        } else if (typeof currVal === 'string' || typeof currVal === 'boolean') {
           // second entry with this name
-          let arr = [ currVal, val ];
+          let arr = [ String(currVal), String(val) ];
           result[name] = arr;
         } else {
           // third or later entry with this name
@@ -143,7 +147,11 @@ export default class ParsedURL {
             parts.push(encodeURIComponent(key) + '=' + encodeURIComponent(elem));
           }
         } else {
-          parts.push(encodeURIComponent(key) + '=' + encodeURIComponent(val));
+          if (typeof val === 'boolean') {
+            parts.push(encodeURIComponent(key));
+          } else {
+            parts.push(encodeURIComponent(key) + '=' + encodeURIComponent(val));
+          }
         }
       }
       if (parts.length > 0) {

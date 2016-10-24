@@ -43,9 +43,11 @@
 
   <script>
     var repoMan = new bigsemantics.RepoMan();
-    var bs = new bigsemantics.BaseBigSemantics({
+    var bs = new bigsemantics.BaseBigSemantics();
+    bs.initialize({
       appId: 'test-base-bigsemantics',
       appVer: '0.0.0',
+    }, {
       repoMan: repoMan,
       downloaders: {
         'xhr': new bigsemantics.XHRDownloader(),

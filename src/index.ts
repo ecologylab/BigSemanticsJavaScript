@@ -21,5 +21,9 @@ export * from './core/BigSemantics';
 export { default as XHRDownloader } from './downloaders/XHRDownloader';
 export { default as XPathExtractor } from './extractors/XPathExtractor';
 
+export { default as BSWebApp } from './api/BSWebApp';
+export * from './api/BSWebApp';
 export { default as BSService } from './api/BSService';
+export * from './api/BSService';
 export { default as BSExtension } from './api/BSExtension';
+export * from './api/BSExtension';

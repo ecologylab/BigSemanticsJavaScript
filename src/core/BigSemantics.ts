@@ -6,30 +6,34 @@
 
 import * as Promise from 'bluebird';
 import ParsedURL from './ParsedURL';
-import { uuid } from '../core/utils';
 import Readyable from './Readyable';
 import {
   HttpResponse,
   MetaMetadata,
+  BuildInfo,
   Repository,
   TypedRepository,
   Metadata,
   TypedMetadata,
 } from './types';
+import { PreFilter } from './FieldOps';
 import RepoMan, {
   RepoOptions,
   RepoCallOptions,
   RepoManService,
-  LoadableRepoManService,
 } from './RepoMan';
 import { RequestOptions, Downloader } from './Downloader';
 import { ExtractionOptions, Extractor } from './Extractor';
 import { Cache, BaseCache } from './Cache';
 
-export interface BigSemanticsOptions extends RepoOptions {
-  appId: string;
-  appVer: string;
+export interface BigSemanticsComponents {
+  repoMan?: RepoMan;
+  metadataCache?: Cache<TypedMetadata>;
+  downloaders?: {[name: string]: Downloader};
+  extractors?: {[name: string]: Extractor};
+}
 
+export interface BigSemanticsOptions extends RepoOptions {
   timeout?: number; // TODO implement support for timeout
 
   repoOptions?: RepoOptions;
@@ -38,7 +42,7 @@ export interface BigSemanticsOptions extends RepoOptions {
 /**
  * Options for extracting a metadata instance.
  */
-export interface MetadataOptions {
+export interface BigSemanticsCallOptions extends RepoCallOptions {
   userId?: string;
   sessionId?: string;
   reqId?: string;
@@ -70,12 +74,7 @@ export interface MetadataResult {
 /**
  * A general interface for BigSemantics.
  */
-export interface BigSemantics {
-  /**
-   * A unique name identifying this implementation.
-   */
-  name: string;
-
+export interface BigSemantics extends RepoManService {
   /**
    * Loads a metadata instance from the given location.
    *
@@ -83,7 +82,7 @@ export interface BigSemantics {
    * @param {MetadataOptions} options
    * @return {Promise<MetadataResult>}
    */
-  loadMetadata(location: string | ParsedURL, options?: MetadataOptions): Promise<MetadataResult>;
+  loadMetadata(location: string | ParsedURL, options?: BigSemanticsCallOptions): Promise<MetadataResult>;
 
   /**
    * Loads an initial metadata instance from the given location.
@@ -95,59 +94,44 @@ export interface BigSemantics {
    * @return {Promise<MetadataResult>}
    *   Note that the result contains an initial, thus incomplete, metadata.
    */
-  loadInitialMetadata(location: string | ParsedURL, options?: MetadataOptions): Promise<MetadataResult>;
+  loadInitialMetadata(location: string | ParsedURL, options?: BigSemanticsCallOptions): Promise<MetadataResult>;
+
+  getBuildInfo(options?: BigSemanticsCallOptions): Promise<BuildInfo>;
+  getRepository(options?: BigSemanticsCallOptions): Promise<TypedRepository>;
+  getUserAgentString(userAgentName: string, options?: BigSemanticsCallOptions): Promise<string>;
+  getDomainInterval(domain: string, options?: BigSemanticsCallOptions): Promise<number>;
+  loadMmd(name: string, options?: BigSemanticsCallOptions): Promise<MetaMetadata>;
+  selectMmd(location: string | ParsedURL, options?: BigSemanticsCallOptions): Promise<MetaMetadata>;
+  normalizeLocation(location: string | ParsedURL, options?: BigSemanticsCallOptions): Promise<string>;
+  untypeMetadata(typedMetadata: TypedMetadata, options?: BigSemanticsCallOptions): Promise<Metadata>;
 }
 
-/**
- * Components used by BigSemantics.
- */
-export interface Components {
-  repoMan?: RepoMan;
-  metadataCache?: Cache<TypedMetadata>;
-  downloaders?: {[name: string]: Downloader};
-  extractors?: {[name: string]: Extractor};
-}
-
-export abstract class AbstractBigSemantics extends Readyable implements BigSemantics, RepoManService {
-  name = 'bsabs_' + uuid(3);
-
+export abstract class AbstractBigSemantics extends Readyable implements BigSemantics {
   protected options: BigSemanticsOptions;
+  protected metadataCache: Cache<TypedMetadata> = new BaseCache<TypedMetadata>();
+  protected downloaders: { [name: string]: Downloader } = {};
+  protected extractors: { [name: string]: Extractor } = {};
 
-  protected metadataCache: Cache<TypedMetadata>;
-  protected downloaders: { [name: string]: Downloader };
-  protected extractors: { [name: string]: Extractor };
-
-  constructor(components: Components, options: BigSemanticsOptions) {
-    super();
-
+  initialize(options: BigSemanticsOptions = {}, components: BigSemanticsComponents = {}): void {
     this.options = options;
-
-    this.metadataCache = components.metadataCache || new BaseCache<TypedMetadata>();
-    this.downloaders = components.downloaders || {};
-    this.extractors = components.extractors || {};
-    /*
-    this.repoMan.onReady(err => {
-      if (err) {
-        this.setError(err);
-        return;
-      }
-      for (let name in this.downloaders) {
-        let downloader = this.downloaders[name];
-        downloader.setDomainIntervals(this.repoMan.options.domainIntervals);
-      }
-      this.setReady();
-    });
-    */
-
-    // if (typeof IframeExtractor === 'function' && IframeExtractor){
-    //     this.iframeExtractor = new IframeExtractor();
-    // }
-    // if (typeof PopUnderExtractor === 'function' && PopUnderExtractor){
-    //     this.popUnderExtractor = new PopUnderExtractor();
-    // }
+    if (components.metadataCache) {
+      this.metadataCache = components.metadataCache;
+    }
+    if (components.downloaders) {
+      this.downloaders = components.downloaders;
+    }
+    if (components.extractors) {
+      this.extractors = components.extractors;
+    }
   }
 
-  loadMetadata(location: string | ParsedURL, options: MetadataOptions = {}): Promise<MetadataResult> {
+  getMetadataCache(): Promise<Cache<TypedMetadata>> {
+    return this.onReadyP().then(() => {
+      return this.metadataCache;
+    });
+  }
+
+  loadMetadata(location: string | ParsedURL, options: BigSemanticsCallOptions = {}): Promise<MetadataResult> {
     return this.onReadyP().then(() => {
       let purl = ParsedURL.get(location);
 
@@ -220,6 +204,7 @@ export abstract class AbstractBigSemantics extends Readyable implements BigSeman
           }
 
           // TODO iframe / popunder extractor
+          // TODO extract_with === 'service'
 
           if (!extractor) {
             // otherwise, use first extractor that is available.
@@ -245,22 +230,21 @@ export abstract class AbstractBigSemantics extends Readyable implements BigSeman
         }
         return result;
       });
-
-      // if (mmd.extract_with == "service"){
-      //   options.useHttps = (window.location.protocol == 'https:'); //use Https if we are on an https page
-      //   that.bss.loadMetadata(location, options, callback);
-      // }
     });
   }
 
-  loadInitialMetadata(location: string | ParsedURL, options: MetadataOptions = {}): Promise<MetadataResult> {
+  loadInitialMetadata(location: string | ParsedURL, options: BigSemanticsCallOptions = {}): Promise<MetadataResult> {
     return this.onReadyP().then(() => {
       let purl = ParsedURL.get(location);
-
       return this.selectMmd(purl, options.repoCallOptions).then(mmd => {
         let typeTag = mmd.tag || mmd.name;
-        let metadata = {
+        let metadata: Metadata = {
           mm_name: typeTag,
+        }
+        if (mmd.filter_location) {
+          metadata.location = PreFilter.filter(purl.toString(), mmd.filter_location);
+        } else {
+          metadata.location = purl.toString();
         }
         let typedMetadata: TypedMetadata = {};
         typedMetadata[typeTag] = metadata;
@@ -275,38 +259,42 @@ export abstract class AbstractBigSemantics extends Readyable implements BigSeman
     });
   }
 
-  abstract getUserAgentString(userAgentName: string): Promise<string>;
-  abstract getDomainInterval(domain: string): Promise<number>;
-  abstract loadMmd(name: string, options?: RepoCallOptions): Promise<MetaMetadata>;
-  abstract selectMmd(location: string | ParsedURL, options?: RepoCallOptions): Promise<MetaMetadata>;
-  abstract normalizeLocation(location: string | ParsedURL, options?: RepoCallOptions): Promise<string>;
-  abstract untypeMetadata(typedMetadata: TypedMetadata, options?: RepoCallOptions): Promise<Metadata>;
-  abstract serializeRepository(options?: RepoCallOptions): Promise<string>;
+  abstract getBuildInfo(options?: BigSemanticsCallOptions): Promise<BuildInfo>;
+  abstract getUserAgentString(userAgentName: string, options?: BigSemanticsCallOptions): Promise<string>;
+  abstract getDomainInterval(domain: string, options?: BigSemanticsCallOptions): Promise<number>;
+  abstract loadMmd(name: string, options?: BigSemanticsCallOptions): Promise<MetaMetadata>;
+  abstract selectMmd(location: string | ParsedURL, options?: BigSemanticsCallOptions): Promise<MetaMetadata>;
+  abstract normalizeLocation(location: string | ParsedURL, options?: BigSemanticsCallOptions): Promise<string>;
+  abstract untypeMetadata(typedMetadata: TypedMetadata, options?: BigSemanticsCallOptions): Promise<Metadata>;
+  abstract getRepository(options?: BigSemanticsCallOptions): Promise<TypedRepository>;
 }
 
 /**
  * A basic implementation of BigSemantics.
  */
 export class BaseBigSemantics extends AbstractBigSemantics {
-  name = 'bsbas_' + uuid(3);
+  protected repoMan: RepoMan = new RepoMan();
 
-  protected repoMan: RepoMan;
-
-  constructor(components: Components, options: BigSemanticsOptions) {
-    super(components, options);
-
-    this.repoMan = components.repoMan;
-    this.repoMan.onReady(err => {
-      if (err) {
-        this.setError(err);
-        return;
-      }
+  initialize(options: BigSemanticsOptions = {}, components: BigSemanticsComponents = {}): void {
+    super.initialize(options, components);
+    if (components.repoMan) {
+      this.repoMan = components.repoMan;
+    }
+    this.repoMan.onReadyP().then(() => {
       for (let name in this.downloaders) {
         let downloader = this.downloaders[name];
         downloader.setDomainIntervals(this.repoMan.options.domainIntervals);
       }
-      this.setReady();
     });
+    this.setReady();
+  }
+
+  getBuildInfo(options?: BigSemanticsCallOptions): Promise<BuildInfo> {
+    return this.repoMan.getBuildInfo(options);
+  }
+
+  getRepository(options?: BigSemanticsCallOptions): Promise<TypedRepository> {
+    return this.repoMan.getRepository(options);
   }
 
   getUserAgentString(userAgentName: string): Promise<string> {
@@ -317,63 +305,19 @@ export class BaseBigSemantics extends AbstractBigSemantics {
     return this.repoMan.getDomainInterval(domain);
   }
 
-  loadMmd(name: string, options?: RepoCallOptions): Promise<MetaMetadata> {
+  loadMmd(name: string, options?: BigSemanticsCallOptions): Promise<MetaMetadata> {
     return this.repoMan.loadMmd(name, options);
   }
 
-  selectMmd(location: string | ParsedURL, options?: RepoCallOptions): Promise<MetaMetadata> {
+  selectMmd(location: string | ParsedURL, options?: BigSemanticsCallOptions): Promise<MetaMetadata> {
     return this.repoMan.selectMmd(location, options);
   }
 
-  normalizeLocation(location: string | ParsedURL, options?: RepoCallOptions): Promise<string> {
+  normalizeLocation(location: string | ParsedURL, options?: BigSemanticsCallOptions): Promise<string> {
     return this.repoMan.normalizeLocation(location, options);
   }
 
-  untypeMetadata(typedMetadata: TypedMetadata, options?: RepoCallOptions): Promise<Metadata> {
+  untypeMetadata(typedMetadata: TypedMetadata, options?: BigSemanticsCallOptions): Promise<Metadata> {
     return this.repoMan.untypeMetadata(typedMetadata, options);
-  }
-
-  serializeRepository(options?: RepoCallOptions): Promise<string> {
-    return this.repoMan.serializeRepository(options);
-  }
-}
-
-export class ReloadableBaseBigSemantics extends BaseBigSemantics {
-  name = 'bsbasr_' + uuid(3);
-
-  constructor(components: Components, options: BigSemanticsOptions) {
-    super(components, options);
-  }
-
-  reload(): void {
-    this.reset();
-    this.repoMan.reload();
-    this.repoMan.onReady(err => {
-      if (err) {
-        this.setError(err);
-        return;
-      }
-      this.setReady();
-    });
-  }
-}
-
-export class LoadableBaseBigSemantics extends ReloadableBaseBigSemantics {
-  name = 'bsbasl_' + uuid(3);
-
-  constructor(components: Components, options: BigSemanticsOptions) {
-    super(components, options);
-  }
-
-  load(repository: Repository|TypedRepository, options?: RepoOptions): void {
-    this.reset();
-    this.repoMan.load(repository, options);
-    this.repoMan.onReady(err => {
-      if (err) {
-        this.setError(err);
-        return;
-      }
-      this.setReady();
-    });
   }
 }
