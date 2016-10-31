@@ -30,10 +30,17 @@ import {
 import XHRDownloader from '../downloaders/XHRDownloader';
 import XPathExtractor from '../extractors/XPathExtractor';
 
+/**
+ *
+ */
 export interface BSServiceReloadOptions extends BigSemanticsOptions {
   serviceBase: string | ParsedURL;
+  minReloadInterval?: number;
 }
 
+/**
+ *
+ */
 export interface BSServiceOptions extends BSServiceReloadOptions {
   appId: string;
   appVer: string;
@@ -48,24 +55,25 @@ export default class BSService extends BaseBigSemantics {
 
   private serviceBase: ParsedURL;
   private repositoryBase: ParsedURL;
-  private wrapperBase: ParsedURL;
-  private metadataBase: ParsedURL;
 
   private commonQueries: QueryMap;
 
   private repoDownloader: XHRDownloader;
 
-  initialize(options: BSServiceOptions, components: BigSemanticsComponents = {}): Promise<void> {
+  getServiceBase(): ParsedURL {
+    return this.serviceBase;
+  }
+
+  protected doLoad(options: BSServiceOptions, components: BigSemanticsComponents = {}): Promise<void> {
     let comps: BigSemanticsComponents = {};
     comps.repoMan = components.repoMan || new RepoMan();
+    comps.metadataCache = components.metadataCache;
     comps.downloaders = components.downloaders || { xhr: new XHRDownloader() };
     comps.extractors = components.extractors || { xpath: new XPathExtractor() };
-    super.initialize(options, comps);
+    super.doLoad(options, comps);
 
     this.serviceBase = ParsedURL.get(options.serviceBase);
     this.repositoryBase = ParsedURL.get('repository.json', this.serviceBase);
-    this.wrapperBase = ParsedURL.get('wrapper.json', this.serviceBase);
-    this.metadataBase = ParsedURL.get('metadata.json', this.serviceBase);
 
     this.commonQueries = {
       aid: options.appId,
@@ -75,15 +83,17 @@ export default class BSService extends BaseBigSemantics {
     return this.reload(options);
   }
 
-  getServiceBase(): ParsedURL {
-    return this.serviceBase;
-  }
-
+  /**
+   * Reinitialize this object with the same components.
+   *
+   * @param {BSServiceReloadOptions} options
+   * @return {Promise<void>}
+   */
   reload(options: BSServiceReloadOptions): Promise<void> {
     this.reset();
 
     this.repoDownloader = new XHRDownloader({
-      minGlobalInterval: 60000,
+      minGlobalInterval: this.options.minReloadInterval || 10000,
     });
 
     this.repoMan.reset();

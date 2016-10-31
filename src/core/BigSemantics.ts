@@ -26,6 +26,9 @@ import { RequestOptions, Downloader } from './Downloader';
 import { ExtractionOptions, Extractor } from './Extractor';
 import { Cache, BaseCache } from './Cache';
 
+/**
+ * Components of a BigSemantics implementation.
+ */
 export interface BigSemanticsComponents {
   repoMan?: RepoMan;
   metadataCache?: Cache<TypedMetadata>;
@@ -33,6 +36,9 @@ export interface BigSemanticsComponents {
   extractors?: {[name: string]: Extractor};
 }
 
+/**
+ * Options for a BigSemantics implementation.
+ */
 export interface BigSemanticsOptions extends RepoOptions {
   timeout?: number; // TODO implement support for timeout
 
@@ -103,16 +109,44 @@ export interface BigSemantics extends RepoManService {
   loadMmd(name: string, options?: BigSemanticsCallOptions): Promise<MetaMetadata>;
   selectMmd(location: string | ParsedURL, options?: BigSemanticsCallOptions): Promise<MetaMetadata>;
   normalizeLocation(location: string | ParsedURL, options?: BigSemanticsCallOptions): Promise<string>;
-  untypeMetadata(typedMetadata: TypedMetadata, options?: BigSemanticsCallOptions): Promise<Metadata>;
+  getType(typedMetadata: TypedMetadata, options?: BigSemanticsCallOptions): Promise<string>;
 }
 
+/**
+ * An abstract implementation of BigSemanticsService, providing (1) a method,
+ * load(), to (re)initialize the implementation, and (2) basic implementations
+ * for loadMetadata() and loadInitialMetadata().
+ */
 export abstract class AbstractBigSemantics extends Readyable implements BigSemantics {
   protected options: BigSemanticsOptions;
   protected metadataCache: Cache<TypedMetadata> = new BaseCache<TypedMetadata>();
   protected downloaders: { [name: string]: Downloader } = {};
   protected extractors: { [name: string]: Extractor } = {};
 
-  initialize(options: BigSemanticsOptions = {}, components: BigSemanticsComponents = {}): Promise<void> {
+  /**
+   * (Re)Initialize this object. Subclasses should not override this method, but
+   * doLoad(), to customize this process.
+   *
+   * @param {BigSemanticsOptions} options
+   * @param {BigSemanticsComponents} components
+   * @return {Promise<void>}
+   */
+  load(options: BigSemanticsOptions = {}, components: BigSemanticsComponents = {}): Promise<void> {
+    return this.doLoad(options, components).then(() => {
+      this.setReady();
+    }).catch(err => {
+      this.setError(err);
+    });
+  }
+
+  /**
+   * Actually (re)initialize this object.
+   *
+   * @param {BigSemanticsOptions} options
+   * @param {BigSemanticsComponents} components
+   * @return {Promise<void>}
+   */
+  protected doLoad(options: BigSemanticsOptions = {}, components: BigSemanticsComponents = {}): Promise<void> {
     this.options = options;
     if (components.metadataCache) {
       this.metadataCache = components.metadataCache;
@@ -138,8 +172,12 @@ export abstract class AbstractBigSemantics extends Readyable implements BigSeman
 
       let mmd: MetaMetadata = null;
       let getMmd = () => {
-        if (mmd || options.mmd) {
-          return Promise.resolve(mmd || options.mmd);
+        if (mmd) {
+          return Promise.resolve(mmd);
+        }
+        if (options.mmd) {
+          mmd = options.mmd;
+          return Promise.resolve(options.mmd);
         }
         let result: Promise<MetaMetadata> = null;
         if (options.mmdName) {
@@ -206,6 +244,7 @@ export abstract class AbstractBigSemantics extends Readyable implements BigSeman
 
           // TODO iframe / popunder extractor
           // TODO extract_with === 'service'
+          // TODO mmd.no_cache == true
 
           if (!extractor) {
             // otherwise, use first extractor that is available.
@@ -266,18 +305,21 @@ export abstract class AbstractBigSemantics extends Readyable implements BigSeman
   abstract loadMmd(name: string, options?: BigSemanticsCallOptions): Promise<MetaMetadata>;
   abstract selectMmd(location: string | ParsedURL, options?: BigSemanticsCallOptions): Promise<MetaMetadata>;
   abstract normalizeLocation(location: string | ParsedURL, options?: BigSemanticsCallOptions): Promise<string>;
-  abstract untypeMetadata(typedMetadata: TypedMetadata, options?: BigSemanticsCallOptions): Promise<Metadata>;
+  abstract getType(typedMetadata: TypedMetadata, options?: BigSemanticsCallOptions): Promise<string>;
   abstract getRepository(options?: BigSemanticsCallOptions): Promise<TypedRepository>;
 }
 
 /**
- * A basic implementation of BigSemantics.
+ * A basic implementation of AbstractBigSemantics.
+ *
+ * Users need to set up components, including RepoMan, Downloaders, and
+ * Extractors.
  */
 export class BaseBigSemantics extends AbstractBigSemantics {
   protected repoMan: RepoMan = new RepoMan();
 
-  initialize(options: BigSemanticsOptions = {}, components: BigSemanticsComponents = {}): Promise<void> {
-    super.initialize(options, components);
+  protected doLoad(options: BigSemanticsOptions = {}, components: BigSemanticsComponents = {}): Promise<void> {
+    super.doLoad(options, components);
     if (components.repoMan) {
       this.repoMan = components.repoMan;
     }
@@ -318,7 +360,7 @@ export class BaseBigSemantics extends AbstractBigSemantics {
     return this.repoMan.normalizeLocation(location, options);
   }
 
-  untypeMetadata(typedMetadata: TypedMetadata, options?: BigSemanticsCallOptions): Promise<Metadata> {
-    return this.repoMan.untypeMetadata(typedMetadata, options);
+  getType(typedMetadata: TypedMetadata, options?: BigSemanticsCallOptions): Promise<string> {
+    return this.repoMan.getType(typedMetadata, options);
   }
 }

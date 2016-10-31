@@ -27,19 +27,31 @@ import {
   AbstractBigSemantics,
 } from '../core/BigSemantics';
 
+/**
+ *
+ */
 export interface Params {
   [key: string]: any;
 }
 
+/**
+ *
+ */
 export interface Request {
   method: string;
   params?: Params;
 }
 
+/**
+ *
+ */
 export interface BSExtensionOptions extends BigSemanticsOptions {
   extensionIds: string[];
 }
 
+/**
+ * A BigSemantics implementation that talks to a Chrome extension to do its job.
+ */
 export default class BSExtension extends AbstractBigSemantics {
   private activeExtId: string;
 
@@ -49,14 +61,22 @@ export default class BSExtension extends AbstractBigSemantics {
       let callback = resp => {
         if (!resp) {
           reject(new Error("Null response"));
+          return;
         }
+
         if (resp instanceof Object) {
           resp = simpl.graphExpand(resp);
         }
+
         if (resp.error) {
-          reject(resp.error);
+          if (resp.error instanceof Error) {
+            reject(resp.error);
+          } else {
+            reject(new Error(resp.error));
+          }
           return;
         }
+
         resolve(resp.result);
       };
       if (extId) {
@@ -71,12 +91,15 @@ export default class BSExtension extends AbstractBigSemantics {
     let extIds = (this.options as BSExtensionOptions).extensionIds;
     let tryExt = (extIds, i) => {
       if (i >= extIds.length) {
-        return Promise.reject(new Error("No available extension"));
+        let err = new Error("No available extension");
+        this.setError(err);
+        return Promise.reject(err);
       }
-      this.sendMsg(extIds[i], {
+      return this.sendMsg(extIds[i], {
         method: 'extensionInfo',
       }).then(result => {
         this.activeExtId = extIds[i];
+        this.setReady();
         return Promise.resolve();
       }).catch(err => {
         return tryExt(extIds, i+1);
@@ -85,11 +108,15 @@ export default class BSExtension extends AbstractBigSemantics {
     return tryExt(extIds, 0);
   }
 
-  initialize(options: BSExtensionOptions, components: BigSemanticsComponents = {}): Promise<void> {
-    super.initialize(options, components);
+  protected doLoad(options: BSExtensionOptions, components: BigSemanticsComponents = {}): Promise<void> {
+    super.doLoad(options, components);
     return this.pickExt();
   }
 
+  /**
+   * Ask the underlying extension to reload its BigSemantics implementation
+   * (which involves reloading its wrapper repository).
+   */
   reload(): void {
     this.onReadyP().then(() => {
       this.sendMsg(this.activeExtId, {
@@ -100,6 +127,14 @@ export default class BSExtension extends AbstractBigSemantics {
 
   getActiveExtensionId(): string {
     return this.activeExtId;
+  }
+
+  getServiceBase(options?: BigSemanticsCallOptions): Promise<ParsedURL> {
+    return this.onReadyP().then(() => {
+      return this.sendMsg(this.activeExtId, {
+        method: 'getServiceBase',
+      });
+    });
   }
 
   getBuildInfo(options?: BigSemanticsCallOptions): Promise<BuildInfo> {
@@ -127,6 +162,9 @@ export default class BSExtension extends AbstractBigSemantics {
   loadMetadata(location: string | ParsedURL, options: BigSemanticsCallOptions = {}): Promise<MetadataResult> {
     return this.onReadyP().then(() => {
       let purl = ParsedURL.get(location);
+      if (options.response) {
+        return super.loadMetadata(purl, options);
+      }
       return this.sendMsg(this.activeExtId, {
         method: 'loadMetadata',
         params: {
@@ -197,13 +235,12 @@ export default class BSExtension extends AbstractBigSemantics {
     });
   }
 
-  untypeMetadata(typedMetadata: TypedMetadata, options?: RepoCallOptions): Promise<Metadata> {
-    let tm = simpl.graphCollapse(typedMetadata);
+  getType(typedMetadata: TypedMetadata, options?: RepoCallOptions): Promise<string> {
     return this.onReadyP().then(() => {
       return this.sendMsg(this.activeExtId, {
-        method: 'untypeMetadata',
+        method: 'getType',
         params: {
-          typedMetadata: tm,
+          typedMetadata: typedMetadata,
           options: options,
         },
       });

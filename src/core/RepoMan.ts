@@ -60,13 +60,13 @@ export interface RepoManService {
   loadMmd(name: string, options?: RepoCallOptions): Promise<MetaMetadata>;
   selectMmd(location: string | ParsedURL, options?: RepoCallOptions): Promise<MetaMetadata>;
   normalizeLocation(location: string | ParsedURL, options?: RepoCallOptions): Promise<string>;
-  untypeMetadata(typedMetadata: TypedMetadata, options?: RepoCallOptions): Promise<Metadata>;
+  getType(typedMetadata: TypedMetadata, options?: RepoCallOptions): Promise<string>;
 }
 
 /**
  * A meta-metadata repository manager.
  */
-export default class RepoMan extends Readyable {
+export default class RepoMan extends Readyable implements RepoManService {
   /**
    * Add a selector to the given selector map with a specified key.
    *
@@ -298,27 +298,29 @@ export default class RepoMan extends Readyable {
    * @param  {SelectorParam[]} paramSpecs
    * @return {boolean} True iff the query map meets all param specs.
    */
-  static checkForParams(queryMap: QueryMap, paramSpecs: SelectorParam[]): boolean {
-    for (let spec of paramSpecs) {
-      let val = queryMap[spec.name];
-      let valstr = '';
-      if (val) {
-        if (val instanceof Array) {
-          valstr = val.join(',');
-        } else {
-          valstr = val as string;
+  static checkForParams(queryMap: QueryMap, paramSpecs?: SelectorParam[]): boolean {
+    if (paramSpecs) {
+      for (let spec of paramSpecs) {
+        let val = queryMap[spec.name];
+        let valstr = '';
+        if (val) {
+          if (val instanceof Array) {
+            valstr = val.join(',');
+          } else {
+            valstr = val as string;
+          }
         }
-      }
-      if (spec.value && spec.value.length > 0) {
-        let allowEmpty = String(spec.allow_empty_value) === 'true';
-        let allowAndIsEmpty = allowEmpty && typeof val === 'string' && val.length === 0;
-        if (!allowAndIsEmpty && spec.value !== valstr) {
-          return false;
+        if (spec.value && spec.value.length > 0) {
+          let allowEmpty = String(spec.allow_empty_value) === 'true';
+          let allowAndIsEmpty = allowEmpty && typeof val === 'string' && val.length === 0;
+          if (!allowAndIsEmpty && spec.value !== valstr) {
+            return false;
+          }
         }
-      }
-      if (spec.value_is_not && spec.value_is_not.length > 0) {
-        if (spec.value_is_not === valstr) {
-          return false;
+        if (spec.value_is_not && spec.value_is_not.length > 0) {
+          if (spec.value_is_not === valstr) {
+            return false;
+          }
         }
       }
     }
@@ -582,20 +584,20 @@ export default class RepoMan extends Readyable {
   }
 
   /**
-   * Convert a typed metadata object to an untyped metadata object.
+   * Get the type name of a typed metadata object.
    *
    * @param {TypedMetadata} typedMetadata
    * @param {RepoCallOptions} options
    * @return {Promise<Metadata>}
    */
-  untypeMetadata(typedMetadata: TypedMetadata, options: RepoCallOptions = {}): Promise<Metadata> {
+  getType(typedMetadata: TypedMetadata, options: RepoCallOptions = {}): Promise<string> {
     return this.onReadyP().then(() => {
       for (let fieldName in typedMetadata) {
         if (fieldName in this.mmds) {
           let val = typedMetadata[fieldName];
           let mm_name = val.mm_name || val.meta_metadata_name;
           if (mm_name === fieldName) {
-            return val as Metadata;
+            return fieldName;
           }
         }
       }

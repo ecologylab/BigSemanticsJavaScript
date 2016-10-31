@@ -263,7 +263,7 @@ let simpl = {
    */
   graphCollapse: function(obj: Object, options?: SimplOptions): Object
   {
-    if (typeof obj !== 'object' || !obj) return obj;
+    if (!obj || typeof obj != 'object') return obj;
 
     // it works by doing a DFS traversing and replacing recurring objects with a
     // stub like { 'simpl_id': '1234' } through the onObjectRevisit() callback.
@@ -292,7 +292,7 @@ let simpl = {
    */
   graphExpand: function(obj: Object, options?: SimplOptions): Object
   {
-    if (typeof obj !== 'object' || !obj) return obj;
+    if (!obj || typeof obj != 'object') return obj;
 
     // book keeping
     let simplObjs: any = {};
@@ -382,6 +382,10 @@ let simpl = {
    */
   serialize: function(obj: Object, options?: SimplOptions): string
   {
+    if (!obj || typeof obj != 'object') {
+      return obj as string;
+    }
+
     /**
      * Helper function to add multiple strings into an array.
      *
@@ -481,7 +485,15 @@ let simpl = {
    */
   deserialize: function(serial: string, options?: SimplOptions): Object
   {
-    return simpl.graphExpand(JSON.parse(serial), options);
+    if (typeof serial == 'string' && serial.length > 0) {
+      try {
+        let obj = JSON.parse(serial);
+        return simpl.graphExpand(obj, options);
+      } catch (err) {
+        return serial;
+      }
+    }
+    return null;
   }
 };
 

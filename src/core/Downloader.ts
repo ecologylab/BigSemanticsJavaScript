@@ -73,7 +73,7 @@ export interface Downloader {
 export abstract class BaseDownloader implements Downloader {
   name = 'base';
   protected options: DownloaderOptions;
-  protected lastHits: { [domain: number]: number };
+  protected lastHits: { [domain: number]: number } = {};
 
   constructor(options: DownloaderOptions = {}) {
     this.options = options;

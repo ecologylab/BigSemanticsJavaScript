@@ -32,10 +32,16 @@ import {
 } from '../core/BigSemantics';
 import JSONPHelper, { JSONPHelperOptions } from '../downloaders/JSONPHelper';
 
+/**
+ *
+ */
 export interface BSWebAppReloadOptions extends BigSemanticsOptions {
   serviceBase: string | ParsedURL;
 }
 
+/**
+ *
+ */
 export interface BSWebAppOptions extends BSWebAppReloadOptions {
   appId: string;
   appVer: string;
@@ -56,11 +62,17 @@ export default class BSWebApp extends BaseBigSemantics {
   private wrapperBase: ParsedURL;
   private metadataBase: ParsedURL;
 
-  initialize(options: BSWebAppOptions, components: BigSemanticsComponents = {}): Promise<void> {
-    super.initialize(options, components);
+  protected doLoad(options: BSWebAppOptions, components: BigSemanticsComponents = {}): Promise<void> {
+    super.doLoad(options, components);
     return this.reload(options);
   }
 
+  /**
+   * Reinitialize this object with the same components.
+   *
+   * @param {BSWebAppReloadOptions} options
+   * @return {Promise<void>}
+   */
   reload(options: BSWebAppReloadOptions): Promise<void> {
     this.reset();
 
