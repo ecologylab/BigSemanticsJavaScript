@@ -43,17 +43,6 @@ export interface BSExtensionOptions extends BigSemanticsOptions {
 export default class BSExtension extends AbstractBigSemantics {
   private activeExtId: string;
 
-  initialize(options: BSExtensionOptions, components: BigSemanticsComponents): void {
-    super.initialize(options, components);
-    if (!this.activeExtId) {
-      this.pickExt();
-    }
-  }
-
-  getActiveExtensionId(): string {
-    return this.activeExtId;
-  }
-
   private sendMsg(extId: string, req: Request): Promise<any> {
     return new Promise<any>((resolve, reject) => {
       let msg = simpl.graphCollapse(req);
@@ -96,12 +85,21 @@ export default class BSExtension extends AbstractBigSemantics {
     return tryExt(extIds, 0);
   }
 
-  reloadRepo(): void {
+  initialize(options: BSExtensionOptions, components: BigSemanticsComponents = {}): Promise<void> {
+    super.initialize(options, components);
+    return this.pickExt();
+  }
+
+  reload(): void {
     this.onReadyP().then(() => {
       this.sendMsg(this.activeExtId, {
         method: 'reloadRepo',
       });
     });
+  }
+
+  getActiveExtensionId(): string {
+    return this.activeExtId;
   }
 
   getBuildInfo(options?: BigSemanticsCallOptions): Promise<BuildInfo> {

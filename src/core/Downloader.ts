@@ -20,6 +20,7 @@ export interface DomainIntervals {
  */
 export interface DownloaderOptions {
   domainIntervals?: DomainIntervals;
+  minGlobalInterval?: number;
 }
 
 /**
@@ -96,6 +97,27 @@ export abstract class BaseDownloader implements Downloader {
       options.responseType = 'document';
     }
     let purl = ParsedURL.get(location);
+
+    let interval = this.options.minGlobalInterval || 0;
+    if (purl.domain in this.options.domainIntervals) {
+      interval = this.options.domainIntervals[purl.domain];
+    }
+    if (interval > 0) {
+      if (purl.domain in this.lastHits) {
+        let elapsed = Date.now() - this.lastHits[purl.domain];
+        if (elapsed < interval) {
+          return new Promise<HttpResponse>((resolve, reject) => {
+            setTimeout(() => {
+              this.doHttpGet(purl, options).then(resp => {
+                resolve(resp);
+              }).catch(err => {
+                reject(err);
+              });
+            }, interval - elapsed);
+          });
+        }
+      }
+    }
     return this.doHttpGet(purl, options);
   }
 

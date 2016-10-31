@@ -32,10 +32,13 @@ import {
 } from '../core/BigSemantics';
 import JSONPHelper, { JSONPHelperOptions } from '../downloaders/JSONPHelper';
 
-export interface BSWebAppOptions extends BigSemanticsOptions {
+export interface BSWebAppReloadOptions extends BigSemanticsOptions {
+  serviceBase: string | ParsedURL;
+}
+
+export interface BSWebAppOptions extends BSWebAppReloadOptions {
   appId: string;
   appVer: string;
-  serviceBase: string | ParsedURL;
 }
 
 /**
@@ -53,16 +56,21 @@ export default class BSWebApp extends BaseBigSemantics {
   private wrapperBase: ParsedURL;
   private metadataBase: ParsedURL;
 
-  initialize(options: BSWebAppOptions, components: BigSemanticsComponents): void {
+  initialize(options: BSWebAppOptions, components: BigSemanticsComponents = {}): Promise<void> {
     super.initialize(options, components);
+    return this.reload(options);
+  }
+
+  reload(options: BSWebAppReloadOptions): Promise<void> {
+    this.reset();
 
     this.jsonp = new JSONPHelper({
       callbackParamName: 'callback',
       extraQuery: {
-        aid: options.appId,
-        av: options.appVer,
+        aid: this.options.appId,
+        av: this.options.appVer,
       },
-      timeout: options.timeout,
+      timeout: this.options.timeout,
     });
 
     this.serviceBase = ParsedURL.get(options.serviceBase);
@@ -71,8 +79,8 @@ export default class BSWebApp extends BaseBigSemantics {
     this.metadataBase = ParsedURL.get('metadata.jsonp', this.serviceBase);
 
     this.repoMan.reset();
-    let id = [options.appId, options.appVer, 'repo'].join('_').replace(/[^\w_]/g, '_');
-    this.jsonp.call(id, this.repositoryBase).then(args => {
+    let id = [this.options.appId, this.options.appVer, 'repo'].join('_').replace(/[^\w_]/g, '_');
+    return this.jsonp.call(id, this.repositoryBase).then(args => {
       if (!args || args.length == 0) {
         throw new Error("Invalid server response");
       }
@@ -81,8 +89,7 @@ export default class BSWebApp extends BaseBigSemantics {
         throw new Error("Missing repository in server response");
       }
       this.repoMan.load(repo, this.options.repoOptions);
-    }).catch(err => {
-      this.setError(err);
+      this.setReady();
     });
   }
 

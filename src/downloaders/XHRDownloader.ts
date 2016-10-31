@@ -101,8 +101,7 @@ export default class XHRDownloader extends BaseDownloader {
    */
   protected doHttpGet(location: string | ParsedURL, options: RequestOptions = {}): Promise<HttpResponse> {
     let purl = ParsedURL.get(location);
-
-    let result = new Promise<HttpResponse>((resolve, reject) => {
+    return new Promise<HttpResponse>((resolve, reject) => {
       let response: HttpResponse = options.response || {
         location: purl.toString(),
         code: 0,
@@ -188,18 +187,5 @@ export default class XHRDownloader extends BaseDownloader {
       }
       xhr.send();
     });
-
-    let domain = purl.domain;
-    if (domain in this.options.domainIntervals) {
-      if (domain in this.lastHits) {
-        let elapsed = Date.now() - this.lastHits[domain];
-        let interval = this.options.domainIntervals[domain];
-        if (elapsed < interval) {
-          return result.delay(interval - elapsed);
-        }
-      }
-      this.lastHits[domain] = Date.now();
-    }
-    return result;
   }
 }

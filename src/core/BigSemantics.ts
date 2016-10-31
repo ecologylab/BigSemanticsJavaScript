@@ -112,7 +112,7 @@ export abstract class AbstractBigSemantics extends Readyable implements BigSeman
   protected downloaders: { [name: string]: Downloader } = {};
   protected extractors: { [name: string]: Extractor } = {};
 
-  initialize(options: BigSemanticsOptions = {}, components: BigSemanticsComponents = {}): void {
+  initialize(options: BigSemanticsOptions = {}, components: BigSemanticsComponents = {}): Promise<void> {
     this.options = options;
     if (components.metadataCache) {
       this.metadataCache = components.metadataCache;
@@ -123,6 +123,7 @@ export abstract class AbstractBigSemantics extends Readyable implements BigSeman
     if (components.extractors) {
       this.extractors = components.extractors;
     }
+    return Promise.resolve();
   }
 
   getMetadataCache(): Promise<Cache<TypedMetadata>> {
@@ -275,18 +276,18 @@ export abstract class AbstractBigSemantics extends Readyable implements BigSeman
 export class BaseBigSemantics extends AbstractBigSemantics {
   protected repoMan: RepoMan = new RepoMan();
 
-  initialize(options: BigSemanticsOptions = {}, components: BigSemanticsComponents = {}): void {
+  initialize(options: BigSemanticsOptions = {}, components: BigSemanticsComponents = {}): Promise<void> {
     super.initialize(options, components);
     if (components.repoMan) {
       this.repoMan = components.repoMan;
     }
-    this.repoMan.onReadyP().then(() => {
+    return this.repoMan.onReadyP().then(() => {
       for (let name in this.downloaders) {
         let downloader = this.downloaders[name];
         downloader.setDomainIntervals(this.repoMan.options.domainIntervals);
       }
+      this.setReady();
     });
-    this.setReady();
   }
 
   getBuildInfo(options?: BigSemanticsCallOptions): Promise<BuildInfo> {

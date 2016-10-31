@@ -46,6 +46,9 @@ export default class JSONPHelper {
 
       let script = document.createElement('script');
       script.src = purl.toString();
+      script.onerror = event => {
+        reject(event.error);
+      };
       window[callbackName] = (...args: any[]) => {
         resolve(args);
         document.getElementsByTagName('head')[0].removeChild(script);

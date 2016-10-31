@@ -18,7 +18,7 @@ import {
   TypedMetadata,
   BSResponse,
 } from '../core/types';
-import { RepoCallOptions, RepoManService } from '../core/RepoMan';
+import RepoMan, { RepoCallOptions, RepoManService } from '../core/RepoMan';
 import { RequestOptions } from '../core/Downloader';
 import {
   BigSemanticsComponents,
@@ -28,11 +28,15 @@ import {
   BaseBigSemantics,
 } from '../core/BigSemantics';
 import XHRDownloader from '../downloaders/XHRDownloader';
+import XPathExtractor from '../extractors/XPathExtractor';
 
-export interface BSServiceOptions extends BigSemanticsOptions {
+export interface BSServiceReloadOptions extends BigSemanticsOptions {
+  serviceBase: string | ParsedURL;
+}
+
+export interface BSServiceOptions extends BSServiceReloadOptions {
   appId: string;
   appVer: string;
-  serviceBase: string | ParsedURL;
 }
 
 /**
@@ -51,37 +55,47 @@ export default class BSService extends BaseBigSemantics {
 
   private repoDownloader: XHRDownloader;
 
-  initialize(options: BSServiceOptions, components: BigSemanticsComponents): void {
-    super.initialize(options, components);
+  initialize(options: BSServiceOptions, components: BigSemanticsComponents = {}): Promise<void> {
+    let comps: BigSemanticsComponents = {};
+    comps.repoMan = components.repoMan || new RepoMan();
+    comps.downloaders = components.downloaders || { xhr: new XHRDownloader() };
+    comps.extractors = components.extractors || { xpath: new XPathExtractor() };
+    super.initialize(options, comps);
 
     this.serviceBase = ParsedURL.get(options.serviceBase);
-    this.repositoryBase = ParsedURL.get('repository.jsonp', this.serviceBase);
-    this.wrapperBase = ParsedURL.get('wrapper.jsonp', this.serviceBase);
-    this.metadataBase = ParsedURL.get('metadata.jsonp', this.serviceBase);
+    this.repositoryBase = ParsedURL.get('repository.json', this.serviceBase);
+    this.wrapperBase = ParsedURL.get('wrapper.json', this.serviceBase);
+    this.metadataBase = ParsedURL.get('metadata.json', this.serviceBase);
 
     this.commonQueries = {
       aid: options.appId,
       av: options.appVer,
     };
 
-    this.repoDownloader = new XHRDownloader();
-
-    this.repoMan.reset();
-    this.httpGet(this.repositoryBase).then(bsresp => {
-      this.repoMan.load(bsresp.repository, options.repoOptions);
-    });
-    this.setReady();
+    return this.reload(options);
   }
 
-  private httpGet(purl: ParsedURL, query: QueryMap = {}, options: RequestOptions = {}): Promise<BSResponse> {
-    let reqUrl = purl.withQuery(this.commonQueries).withQuery(query);
-    options.responseType = 'json';
-    return this.repoDownloader.httpGet(reqUrl, options).then(resp => {
+  getServiceBase(): ParsedURL {
+    return this.serviceBase;
+  }
+
+  reload(options: BSServiceReloadOptions): Promise<void> {
+    this.reset();
+
+    this.repoDownloader = new XHRDownloader({
+      minGlobalInterval: 60000,
+    });
+
+    this.repoMan.reset();
+    let reqUrl = this.repositoryBase.withQuery(this.commonQueries);
+    let reqOptions = { responseType: 'json' };
+    return this.repoDownloader.httpGet(reqUrl, reqOptions).then(resp => {
       if (!resp || !resp.entity) {
         throw new Error("Missing or invalid response");
       }
-      let bsresp = simpl.graphExpand(resp) as BSResponse;
-      return bsresp;
+      let bsresp = simpl.graphExpand(resp.entity) as BSResponse;
+      this.repoMan.load(bsresp.repository, options.repoOptions);
+      this.setReady();
     });
   }
 }

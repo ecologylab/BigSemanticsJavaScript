@@ -191,10 +191,9 @@ export default class ParsedURL {
   constructor(url: string, base: string | ParsedURL = null) {
     if (url) {
       this.raw = url;
-      this.base = this.getBase(base);
 
       let m = null;
-      m = url.match(/^(\w+)\:\/\/([^\/?#]+)([^?#]*)(\?[^#]*)?(#.*)?/);
+      m = url.match(/^([A-Za-z0-9_-]+)\:\/\/([^\/?#]+)([^?#]*)(\?[^#]*)?(#.*)?/);
       if (m) {
         // url is absolute, with scheme and host
         let hostSpec = ParsedURL.parseHostSpec(m[2]);
@@ -202,6 +201,7 @@ export default class ParsedURL {
         return;
       }
 
+      this.base = this.getBase(base);
       if (!this.base) {
         throw new Error("Missing base URL");
       }
@@ -221,7 +221,7 @@ export default class ParsedURL {
         return;
       }
 
-      // TODO deal with relative paths starting with ./ or ../
+      // TODO deal with relative paths starting with .. or .
 
       m = url.match(/([^?#]+)(\?[^#]*)?(#.*)?/);
       if (m) {
