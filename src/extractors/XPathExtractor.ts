@@ -598,7 +598,7 @@ export class Extraction {
         promise = promise.then(() => {
           return this.extractScalarCollection(field.collection, parentScope).then(scalars => {
             if (scalars instanceof Array && scalars.length > 0) {
-              obj[field.scalar.tag || field.scalar.name] = scalars;
+              obj[field.collection.tag || field.collection.name] = scalars;
             }
             return obj;
           });

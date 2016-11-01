@@ -57,7 +57,7 @@ export default class BSExtension extends AbstractBigSemantics {
 
   private sendMsg(extId: string, req: Request): Promise<any> {
     return new Promise<any>((resolve, reject) => {
-      let msg = simpl.graphCollapse(req);
+      simpl.graphCollapse(req);
       let callback = resp => {
         if (!resp) {
           reject(new Error("Null response"));
@@ -80,10 +80,11 @@ export default class BSExtension extends AbstractBigSemantics {
         resolve(resp.result);
       };
       if (extId) {
-        chrome.runtime.sendMessage(extId, msg, callback);
+        chrome.runtime.sendMessage(extId, req, callback);
       } else {
-        chrome.runtime.sendMessage(msg, callback);
+        chrome.runtime.sendMessage(req, callback);
       }
+      simpl.graphExpand(req);
     });
   }
 
