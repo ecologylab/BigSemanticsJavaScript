@@ -370,6 +370,9 @@ export default class RepoMan extends Readyable implements RepoManService {
   load(repository: Repository | TypedRepository, options: RepoOptions = {}): void {
     this.reset();
     this.options = options;
+    if (!this.options.defaultDocumentType) {
+      this.options.defaultDocumentType = 'rich_document';
+    }
     if ((repository as TypedRepository).meta_metadata_repository) {
       this.repository = (repository as TypedRepository).meta_metadata_repository;
     } else if ((repository as Repository).repository_by_name){
