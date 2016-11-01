@@ -181,6 +181,12 @@ export default class XHRDownloader extends BaseDownloader {
             break;
         }
       };
+      xhr.onerror = () => {
+        reject(new Error("Network request failed"));
+      };
+      xhr.ontimeout = () => {
+        reject(new Error("Network request timed out"));
+      };
       xhr.open('GET', purl.toString(), true);
       if (purl.domain !== 'twitter.com') {
         xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');

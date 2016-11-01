@@ -124,29 +124,16 @@ export abstract class AbstractBigSemantics extends Readyable implements BigSeman
   protected extractors: { [name: string]: Extractor } = {};
 
   /**
-   * (Re)Initialize this object. Subclasses should not override this method, but
-   * doLoad(), to customize this process.
+   * (Re)Load this object.
    *
    * @param {BigSemanticsOptions} options
+   *   Options for this object.
    * @param {BigSemanticsComponents} components
-   * @return {Promise<void>}
+   *   Components specified in this object will replace those in this object.
    */
-  load(options: BigSemanticsOptions = {}, components: BigSemanticsComponents = {}): Promise<void> {
-    return this.doLoad(options, components).then(() => {
-      this.setReady();
-    }).catch(err => {
-      this.setError(err);
-    });
-  }
+  load(options: BigSemanticsOptions = {}, components: BigSemanticsComponents = {}): void {
+    this.reset();
 
-  /**
-   * Actually (re)initialize this object.
-   *
-   * @param {BigSemanticsOptions} options
-   * @param {BigSemanticsComponents} components
-   * @return {Promise<void>}
-   */
-  protected doLoad(options: BigSemanticsOptions = {}, components: BigSemanticsComponents = {}): Promise<void> {
     this.options = options;
     if (components.metadataCache) {
       this.metadataCache = components.metadataCache;
@@ -157,7 +144,8 @@ export abstract class AbstractBigSemantics extends Readyable implements BigSeman
     if (components.extractors) {
       this.extractors = components.extractors;
     }
-    return Promise.resolve();
+
+    this.setReady();
   }
 
   getMetadataCache(): Promise<Cache<TypedMetadata>> {
@@ -316,20 +304,35 @@ export abstract class AbstractBigSemantics extends Readyable implements BigSeman
  * Extractors.
  */
 export class BaseBigSemantics extends AbstractBigSemantics {
-  protected repoMan: RepoMan = new RepoMan();
+  protected repoMan: RepoMan;
 
-  protected doLoad(options: BigSemanticsOptions = {}, components: BigSemanticsComponents = {}): Promise<void> {
-    super.doLoad(options, components);
+  load(options: BigSemanticsOptions = {}, components: BigSemanticsComponents = {}): void {
+    this.reset();
+
+    this.options = options;
+
     if (components.repoMan) {
       this.repoMan = components.repoMan;
     }
-    return this.repoMan.onReadyP().then(() => {
+
+    if (!this.repoMan) {
+      this.setError(new Error("Missing repoMan"));
+      return;
+    }
+
+    this.repoMan.onReady((err) => {
+      if (err) {
+        this.setError(err);
+        return;
+      }
       for (let name in this.downloaders) {
         let downloader = this.downloaders[name];
         downloader.setDomainIntervals(this.repoMan.options.domainIntervals);
       }
       this.setReady();
     });
+
+    super.load(options, components);
   }
 
   getBuildInfo(options?: BigSemanticsCallOptions): Promise<BuildInfo> {

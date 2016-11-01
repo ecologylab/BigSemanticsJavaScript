@@ -33,17 +33,11 @@ import XPathExtractor from '../extractors/XPathExtractor';
 /**
  *
  */
-export interface BSServiceReloadOptions extends BigSemanticsOptions {
-  serviceBase: string | ParsedURL;
-  minReloadInterval?: number;
-}
-
-/**
- *
- */
-export interface BSServiceOptions extends BSServiceReloadOptions {
+export interface BSServiceOptions extends BigSemanticsOptions {
   appId: string;
   appVer: string;
+  serviceBase: string | ParsedURL;
+  minReloadInterval?: number;
 }
 
 /**
@@ -64,13 +58,10 @@ export default class BSService extends BaseBigSemantics {
     return this.serviceBase;
   }
 
-  protected doLoad(options: BSServiceOptions, components: BigSemanticsComponents = {}): Promise<void> {
-    let comps: BigSemanticsComponents = {};
-    comps.repoMan = components.repoMan || new RepoMan();
-    comps.metadataCache = components.metadataCache;
-    comps.downloaders = components.downloaders || { xhr: new XHRDownloader() };
-    comps.extractors = components.extractors || { xpath: new XPathExtractor() };
-    super.doLoad(options, comps);
+  load(options: BSServiceOptions, components: BigSemanticsComponents = {}): void {
+    this.reset();
+
+    this.options = options;
 
     this.serviceBase = ParsedURL.get(options.serviceBase);
     this.repositoryBase = ParsedURL.get('repository.json', this.serviceBase);
@@ -80,32 +71,43 @@ export default class BSService extends BaseBigSemantics {
       av: options.appVer,
     };
 
-    return this.reload(options);
-  }
+    if (components.downloaders) {
+      this.downloaders = components.downloaders;
+    }
+    if (!this.downloaders || Object.keys(this.downloaders).length == 0) {
+      this.downloaders = { xhr: new XHRDownloader() };
+    }
+    if (components.extractors) {
+      this.extractors = components.extractors;
+    }
+    if (!this.extractors || Object.keys(this.extractors).length == 0) {
+      this.extractors = { xpath: new XPathExtractor() };
+    }
 
-  /**
-   * Reinitialize this object with the same components.
-   *
-   * @param {BSServiceReloadOptions} options
-   * @return {Promise<void>}
-   */
-  reload(options: BSServiceReloadOptions): Promise<void> {
-    this.reset();
-
+    // specification of repoMan is disallowed for this class.
+    components.repoMan = null;
+    if (this.repoMan) {
+      this.repoMan.reset();
+    } else {
+      this.repoMan = new RepoMan();
+    }
     this.repoDownloader = new XHRDownloader({
-      minGlobalInterval: this.options.minReloadInterval || 10000,
+      minGlobalInterval: options.minReloadInterval || 10000,
     });
-
-    this.repoMan.reset();
     let reqUrl = this.repositoryBase.withQuery(this.commonQueries);
     let reqOptions = { responseType: 'json' };
-    return this.repoDownloader.httpGet(reqUrl, reqOptions).then(resp => {
+    this.repoDownloader.httpGet(reqUrl, reqOptions).then(resp => {
       if (!resp || !resp.entity) {
         throw new Error("Missing or invalid response");
       }
       let bsresp = simpl.graphExpand(resp.entity) as BSResponse;
+      if (!bsresp.repository) {
+        throw new Error("Missing repository in server response");
+      }
       this.repoMan.load(bsresp.repository, options.repoOptions);
-      this.setReady();
+      super.load(options, components);
+    }).catch(err => {
+      this.setError(err);
     });
   }
 }

@@ -35,16 +35,10 @@ import JSONPHelper, { JSONPHelperOptions } from '../downloaders/JSONPHelper';
 /**
  *
  */
-export interface BSWebAppReloadOptions extends BigSemanticsOptions {
-  serviceBase: string | ParsedURL;
-}
-
-/**
- *
- */
-export interface BSWebAppOptions extends BSWebAppReloadOptions {
+export interface BSWebAppOptions extends BigSemanticsOptions {
   appId: string;
   appVer: string;
+  serviceBase: string | ParsedURL;
 }
 
 /**
@@ -55,53 +49,50 @@ export interface BSWebAppOptions extends BSWebAppReloadOptions {
 export default class BSWebApp extends BaseBigSemantics {
   protected options: BSWebAppOptions;
 
-  private jsonp: JSONPHelper;
-
   private serviceBase: ParsedURL;
   private repositoryBase: ParsedURL;
   private wrapperBase: ParsedURL;
   private metadataBase: ParsedURL;
+  private jsonp: JSONPHelper;
 
-  protected doLoad(options: BSWebAppOptions, components: BigSemanticsComponents = {}): Promise<void> {
-    super.doLoad(options, components);
-    return this.reload(options);
-  }
-
-  /**
-   * Reinitialize this object with the same components.
-   *
-   * @param {BSWebAppReloadOptions} options
-   * @return {Promise<void>}
-   */
-  reload(options: BSWebAppReloadOptions): Promise<void> {
+  load(options: BSWebAppOptions, components: BigSemanticsComponents = {}): void {
     this.reset();
 
-    this.jsonp = new JSONPHelper({
-      callbackParamName: 'callback',
-      extraQuery: {
-        aid: this.options.appId,
-        av: this.options.appVer,
-      },
-      timeout: this.options.timeout,
-    });
+    this.options = options;
 
     this.serviceBase = ParsedURL.get(options.serviceBase);
     this.repositoryBase = ParsedURL.get('repository.jsonp', this.serviceBase);
     this.wrapperBase = ParsedURL.get('wrapper.jsonp', this.serviceBase);
     this.metadataBase = ParsedURL.get('metadata.jsonp', this.serviceBase);
+    this.jsonp = new JSONPHelper({
+      callbackParamName: 'callback',
+      extraQuery: {
+        aid: options.appId,
+        av: options.appVer,
+      },
+      timeout: options.timeout,
+    });
 
-    this.repoMan.reset();
-    let id = [this.options.appId, this.options.appVer, 'repo'].join('_').replace(/[^\w_]/g, '_');
-    return this.jsonp.call(id, this.repositoryBase).then(args => {
+    // specification of repoMan is disallowed for this class.
+    components.repoMan = null;
+    if (this.repoMan) {
+      this.repoMan.reset();
+    } else {
+      this.repoMan = new RepoMan();
+    }
+    let id = [options.appId, options.appVer, 'repo'].join('_').replace(/[^\w_]/g, '_');
+    this.jsonp.call(id, this.repositoryBase).then(args => {
       if (!args || args.length == 0) {
         throw new Error("Invalid server response");
       }
-      let repo = (simpl.graphExpand(args[0]) as BSResponse).repository;
-      if (!repo) {
+      let bsresp = simpl.graphExpand(args[0]) as BSResponse
+      if (!bsresp.repository) {
         throw new Error("Missing repository in server response");
       }
-      this.repoMan.load(repo, this.options.repoOptions);
-      this.setReady();
+      this.repoMan.load(bsresp.repository, options.repoOptions);
+      super.load(options, components);
+    }).catch(err => {
+      this.setError(err);
     });
   }
 

@@ -108,9 +108,17 @@ export default class BSExtension extends AbstractBigSemantics {
     return tryExt(extIds, 0);
   }
 
-  protected doLoad(options: BSExtensionOptions, components: BigSemanticsComponents = {}): Promise<void> {
-    super.doLoad(options, components);
-    return this.pickExt();
+  load(options: BSExtensionOptions, components: BigSemanticsComponents = {}): void {
+    this.options = options;
+    if (options.extensionIds) {
+      this.pickExt().then(() => {
+        super.load(options, components);
+      }).catch(err => {
+        this.setError(err);
+      })
+    } else {
+      super.load(options, components);
+    }
   }
 
   /**
