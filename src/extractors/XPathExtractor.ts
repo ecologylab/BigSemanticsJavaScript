@@ -27,7 +27,7 @@ import { ExtractionOptions, Extractor } from '../core/Extractor';
 import { BigSemantics } from '../core/BigSemantics';
 
 
-interface Vars {
+export interface Vars {
   [varName: string]: any;
 }
 /**
