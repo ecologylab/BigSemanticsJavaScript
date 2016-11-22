@@ -4,7 +4,8 @@
     "module": "commonjs",
     "rootDir": "src",
     "outDir": "build",
-    "target": "es5"
+    "target": "es5",
+    "declaration": true
   },
   "exclude": [
     "node_modules",
@@ -12,3 +13,4 @@
     "build"
   ]
 }
+ 
