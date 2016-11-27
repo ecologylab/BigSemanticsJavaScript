@@ -16,7 +16,7 @@ export interface HostSpec {
  * Convenience type declaration.
  */
 export interface QueryMap {
-  [name: string]: boolean|string|string[];
+  [name: string]: boolean|number|number[]|string|string[];
 }
 
 /**
@@ -108,7 +108,7 @@ export default class ParsedURL {
         let pair = part.split('=');
         let name = decodeURIComponent(pair[0]);
         let val = pair[1] ? decodeURIComponent(pair[1]) : null;
-        let currVal = result[name];
+        let currVal = result[name] as boolean|number|string|string[];
         if (typeof currVal === 'undefined') {
           // first entry with this name
           if (val) {
@@ -116,7 +116,11 @@ export default class ParsedURL {
           } else {
             result[name] = true;
           }
-        } else if (typeof currVal === 'string' || typeof currVal === 'boolean') {
+        } else if (
+          typeof currVal === 'string'
+          || typeof currVal === 'boolean'
+          || typeof currVal === 'number'
+        ) {
           // second entry with this name
           let arr = [ String(currVal), String(val) ];
           result[name] = arr;
@@ -144,13 +148,13 @@ export default class ParsedURL {
         let val = queryMap[key];
         if (val instanceof Array) {
           for (let elem of val) {
-            parts.push(encodeURIComponent(key) + '=' + encodeURIComponent(elem));
+            parts.push(encodeURIComponent(key) + '=' + encodeURIComponent('' + elem));
           }
         } else {
           if (typeof val === 'boolean') {
             parts.push(encodeURIComponent(key));
           } else {
-            parts.push(encodeURIComponent(key) + '=' + encodeURIComponent(val));
+            parts.push(encodeURIComponent(key) + '=' + encodeURIComponent('' + val));
           }
         }
       }

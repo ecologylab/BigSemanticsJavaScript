@@ -2,8 +2,6 @@
  * A downloader using XMLHttpRequest.
  */
 
-/// <reference path="../../typings/index.d.ts" />
-
 import * as Promise from 'bluebird';
 import ParsedURL from '../core/ParsedURL';
 import { HttpResponse } from '../core/types';
@@ -127,7 +125,9 @@ export default class XHRDownloader extends BaseDownloader {
                 console.warn(err);
               }
             } else if (xhr.status === 304) {
-              // TODO hanlde 'not modified' -- read from cache
+              // the XHR spec requires browsers to return 200 when 304 is
+              // encountered, unless special request headers (e.g.
+              // If-None-Match, If-Modified-Since) are used.
               err = new Error("Unimplemented: 304 Not Modified");
               console.warn(err);
             } else {

@@ -2,8 +2,6 @@
  * A general interface for extractors.
  */
 
-/// <reference path="../../typings/index.d.ts" />
-
 import * as Promise from 'bluebird';
 import { HttpResponse, MetaMetadata, TypedMetadata } from './types';
 import { BigSemantics } from './BigSemantics';
@@ -33,8 +31,10 @@ export interface Extractor {
    * @param {ExtractionOptions} options
    * @return {Promise<TypedMetadata>}
    */
-  extractMetadata(response: HttpResponse,
-                  mmd: MetaMetadata,
-                  bigSemanticsApi?: BigSemantics,
-                  options?: ExtractionOptions): Promise<TypedMetadata>;
+  extractMetadata(
+    response: HttpResponse,
+    mmd: MetaMetadata,
+    bigSemanticsApi?: BigSemantics,
+    options?: ExtractionOptions
+  ): Promise<TypedMetadata>;
 }

@@ -2,10 +2,8 @@
  * A class to make JSONP easier.
  */
 
-/// <reference path="../../typings/index.d.ts" />
-
 import * as Promise from 'bluebird';
-import simpl from '../core/simpl/simplBase';
+import * as simpl from 'simpl.js';
 import ParsedURL, { QueryMap } from '../core/ParsedURL';
 
 export interface JSONPHelperOptions {

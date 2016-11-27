@@ -2,8 +2,6 @@
  * A general Downloader interface.
  */
 
-/// <reference path="../../typings/index.d.ts" />
-
 import * as Promise from 'bluebird';
 import ParsedURL from './ParsedURL';
 import { HttpResponse } from './types';

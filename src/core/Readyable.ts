@@ -2,8 +2,6 @@
  * A base class for things that can take time to get ready.
  */
 
-/// <reference path="../../typings/index.d.ts" />
-
 import * as Promise from 'bluebird';
 
 /**

@@ -39,12 +39,12 @@
     bss.load({
       appId: 'test-bs-service',
       appVer: '0.0.0',
-      serviceBase: 'https://api.ecologylab.net:9443/BigSemanticsService/',
+      serviceBase: 'https://api.ecologylab.net/BigSemanticsService/',
     });
 
     function loadMetadata(url) {
       bss.loadMetadata(url).then(metadataResult => {
-        bigsemantics.simpl.graphCollapse(metadataResult);
+        bigsemantics.graphCollapse(metadataResult);
         var json = JSON.stringify(metadataResult, null, 4);
         $('#metadata').JSONView(json);
       }).catch(err => {

@@ -215,8 +215,9 @@ export interface MetaMetadata extends MetaMetadataCompositeField {
   selectors?: Selector[];
   filter_location?: FilterLocation;
 
+  parser?: string;
   extract_with?: string;
-  
+
   kids: TypedMetaMetadataField[];
 }
 
@@ -228,7 +229,7 @@ export type Wrapper = MetaMetadata;
 export interface Repository {
   default_cache_life?: string;
   build?: BuildInfo;
-  user_agents?: { name: string, string: string }[];
+  user_agents?: { name: string, string: string, default?: boolean }[];
   sites?: { domain: string, min_download_interval: number }[];
   named_styles?: { name: string }[];
   repository_by_name: MetaMetadata[];
@@ -264,35 +265,33 @@ export interface Metadata {
 /**
  * A marker interface for simpl-typed metadata instances.
  *
- * Instance should contain a field named with a metadata type, and valued with
- * the actual metadata. For example:
+ * Instance should contain:
+ * - a field named with a metadata type, and valued with the actual metadata.
+ * - an optional mm_name field valued with the metadata type. This can be
+ * convenient for various use cases.
+ *
+ * For example:
  *
  * ```javascript
  * // instance of TypedMetadata
  * {
  *   amazon_product: {
  *     mm_name: 'amazon_product',
- *     title: 'Some Awesome Product',
- *     location: 'http://www.amazon.com/some-awesome-product',
+ *     title: 'Awesome Product',
+ *     location: 'http://www.amazon.com/awesome-product',
  *     ...
- *   }
+ *   },
+ *   mm_name: 'amazon_product'
  * }
  * ```
  */
 export interface TypedMetadata {
+  type: string;
   // nothing
 }
 
-export interface BSRequest {
-  appId?: string;
-  userId?: string;
-  sessionId?: string;
-  reqId?: string;
-}
-
-export interface BSResponse extends BSRequest {
-  id?: string;
+export interface BSResponse {
   repository?: Repository;
-  wrapper?: MetaMetadata;
+  mmd?: MetaMetadata;
   metadata?: TypedMetadata;
 }

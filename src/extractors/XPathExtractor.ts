@@ -5,8 +5,6 @@
 // TODO inherited xpath issue: we need more test cases to actually address this
 // TODO more field ops: predicates, parallels, pattern matchers, etc
 
-/// <reference path="../../typings/index.d.ts" />
-
 import * as Promise from 'bluebird';
 import ParsedURL from '../core/ParsedURL';
 import Scope from '../core/Scope';
@@ -22,6 +20,7 @@ import {
   Metadata,
   TypedMetadata,
 } from '../core/types';
+import { reflect, allSettled } from '../core/utils';
 import { FieldOps } from '../core/FieldOps';
 import { ExtractionOptions, Extractor } from '../core/Extractor';
 import { BigSemantics } from '../core/BigSemantics';
@@ -77,12 +76,17 @@ export class Extraction {
    *   Must contain 'entity' as root DOM element.
    * @param {MetaMetadata} mmd
    *   The meta-metadata used for extraction.
-   * @param {BigSemantics} bsFacade
+   * @param {BigSemantics} bigsemanticsApi
    *   BigSemantics facade. Nullable.
    * @param {Object} options
    *   Additional options. Nullable.
    */
-  constructor(resp: HttpResponse, mmd: MetaMetadata, bigsemanticsApi: BigSemantics, options: ExtractionOptions = {}) {
+  constructor(
+    resp: HttpResponse,
+    mmd: MetaMetadata,
+    bigsemanticsApi: BigSemantics,
+    options: ExtractionOptions = {}
+  ) {
     if (!resp.entity) {
       throw new Error("Response (resp) must have entity, the root DOM");
     }
@@ -198,15 +202,35 @@ export class Extraction {
     return result;
   }
 
-  evaluateFirstNode(xpath: string, contextNode: Node, parentScope: ExtractionScope = null): Node {
+  evaluateFirstNode(
+    xpath: string,
+    contextNode: Node,
+    parentScope: ExtractionScope = null
+  ): Node {
     xpath = this.amendXpath(xpath, parentScope);
-    let xres = this.rootNode.evaluate(xpath, contextNode, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null);
+    let xres = this.rootNode.evaluate(
+      xpath,
+      contextNode,
+      null,
+      XPathResult.FIRST_ORDERED_NODE_TYPE,
+      null
+    );
     return xres ? xres.singleNodeValue : null;
   }
 
-  evaluateAllNodes(xpath: string, contextNode: Node, parentScope: ExtractionScope = null): Node[] {
+  evaluateAllNodes(
+    xpath: string,
+    contextNode: Node,
+    parentScope: ExtractionScope = null
+  ): Node[] {
     xpath = this.amendXpath(xpath, parentScope);
-    let xres = this.rootNode.evaluate(xpath, contextNode, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
+    let xres = this.rootNode.evaluate(
+      xpath,
+      contextNode,
+      null,
+      XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,
+      null
+    );
     let result = [];
     if (xres) {
       for (let i = 0; i < xres.snapshotLength; ++i) {
@@ -267,39 +291,44 @@ export class Extraction {
    * @return {Promise<any>}
    */
   extractScalar(field: MetaMetadataScalarField, parentScope: ExtractionScope): Promise<any> {
-    // step 1: prepare objects used in extraction
-    let contextNode = this.getContextNode(field, parentScope);
-    let value = null;
+    return Promise.resolve().then(() => {
+      // step 1: prepare objects used in extraction
+      let contextNode = this.getContextNode(field, parentScope);
+      let value = null;
 
-    // step 2: do extraction
+      // step 2: do extraction
 
-    // TODO case 2.1: extract from previous field op result
+      // TODO case 2.1: extract from previous field op result
 
-    // case 2.2: regular xpath extraction
-    if (!value && contextNode && field.xpaths instanceof Array) {
-      for (let xpath of field.xpaths) {
-        let node = this.evaluateFirstNode(xpath, contextNode, parentScope);
-        if (node) {
-          if (field.extract_as_html && node instanceof Element) {
-            value = node.innerHTML;
-          } else {
-            value = node.textContent.trim();
+      // case 2.2: regular xpath extraction
+      if (!value && contextNode && field.xpaths instanceof Array) {
+        for (let xpath of field.xpaths) {
+          let node = this.evaluateFirstNode(xpath, contextNode, parentScope);
+          if (node) {
+            if (field.extract_as_html && node instanceof Element) {
+              value = node.innerHTML;
+            } else {
+              value = node.textContent.trim();
+            }
+            break;
           }
-          break;
         }
       }
-    }
 
-    // step 3: apply field ops
-    if (field.field_ops) {
-      value = FieldOps.operate(value, field.field_ops);
-    }
-    if (field.concatenate_values) {
-      FieldOps.concatenateValues(field.concatenate_values, parentScope);
-    }
+      // step 3: apply field ops
+      if (field.field_ops) {
+        value = FieldOps.operate(value, field.field_ops);
+      }
+      if (field.concatenate_values) {
+        FieldOps.concatenateValues(field.concatenate_values, parentScope);
+      }
 
-    value = this.toTypedScalar(value, field.scalar_type);
-    return Promise.resolve(value);
+      value = this.toTypedScalar(value, field.scalar_type);
+      return value;
+    }).catch(err => {
+      console.warn("Failed to extract scalar field " + field.name);
+      console.warn(err);
+    });
   }
 
   /**
@@ -310,42 +339,47 @@ export class Extraction {
    * @return {Promise<any[]>}
    */
   extractScalarCollection(field: MetaMetadataCollectionField, parentScope: ExtractionScope): Promise<any[]> {
-    // step 1: prepare objects used in extraction
-    let contextNode = this.getContextNode(field, parentScope);
-    let value = null;
+    return Promise.resolve().then(() => {
+      // step 1: prepare objects used in extraction
+      let contextNode = this.getContextNode(field, parentScope);
+      let value = null;
 
-    // step 2: do extraction
+      // step 2: do extraction
 
-    // TODO case 2.1: extract from previous field op result
+      // TODO case 2.1: extract from previous field op result
 
-    // case 2.2: regular xpath extraction
-    if (!value && contextNode && field.xpaths instanceof Array) {
-      for (let xpath of field.xpaths) {
-        let nodes = this.evaluateAllNodes(xpath, contextNode, parentScope);
-        if (nodes.length > 0) {
-          value = [];
-          for (let node of nodes) {
-            if (field.extract_as_html && node instanceof Element) {
-              value.push(node.innerHTML);
-            } else {
-              value.push(node.textContent.trim());
+      // case 2.2: regular xpath extraction
+      if (!value && contextNode && field.xpaths instanceof Array) {
+        for (let xpath of field.xpaths) {
+          let nodes = this.evaluateAllNodes(xpath, contextNode, parentScope);
+          if (nodes.length > 0) {
+            value = [];
+            for (let node of nodes) {
+              if (field.extract_as_html && node instanceof Element) {
+                value.push(node.innerHTML);
+              } else {
+                value.push(node.textContent.trim());
+              }
             }
+            break;
           }
-          break;
         }
       }
-    }
 
-    // TODO step 3: apply field ops
+      // TODO step 3: apply field ops
 
-    if (value && value.length > 0) {
-      let typed = [];
-      for (let i in value) {
-        typed.push(this.toTypedScalar(value[i], field.child_scalar_type));
+      if (value && value.length > 0) {
+        let typed = [];
+        for (let i in value) {
+          typed.push(this.toTypedScalar(value[i], field.child_scalar_type));
+        }
+        return value;
       }
-      return Promise.resolve(value);
-    }
-    return Promise.resolve(null);
+      return null;
+    }).catch(err => {
+      console.warn("Failed to extract scalar collection field " + field.name);
+      console.warn(err);
+    });
   }
 
   /**
@@ -404,90 +438,94 @@ export class Extraction {
    * @return {Promise<Metadata>}
    */
   extractComposite(field: MetaMetadataCompositeField, parentScope: ExtractionScope): Promise<Metadata> {
-    // step 1: prepare local scope for extracting nested fields
-    let localScope = new ExtractionScope(field.name, parentScope);
-    localScope.field = field;
-    localScope.contextNode = this.getContextNode(field, parentScope);
-    localScope.vars = this.handleDefVars(field, localScope);
-    localScope.value = null;
-    let done = false; // true iff localScope is ready for extraction
+    return Promise.resolve().then(() => {
+      // step 1: prepare local scope for extracting nested fields
+      let localScope = new ExtractionScope(field.name, parentScope);
+      localScope.field = field;
+      localScope.contextNode = this.getContextNode(field, parentScope);
+      localScope.vars = this.handleDefVars(field, localScope);
+      localScope.value = null;
+      let done = false; // true iff localScope is ready for extraction
 
-    // detect and prevent infinite recursion
-    if (this.isInfiniteRecursion(localScope)) {
-      // console.warn("Infinite recursion detected on " + field.name);
-      return Promise.resolve(null);
-    }
-
-    // case 1.1: extract root metadata as composite
-    if (parentScope.rootNode) {
-      localScope.value = {
-        mm_name: null,
-        location: this.response.location,
-        additional_locations: this.response.otherLocations,
-      };
-      localScope.node = parentScope.rootNode;
-    }
-
-    // TODO case 1.2: extract from previous field op result (and set done)
-
-    // case 1.3: regular xpath extraction
-    if (!done && localScope.contextNode) {
-      let xpaths = field.xpaths || [];
-      /* FIXME this solution to the inherited xpath issue doesn't work for all
-       * cases. we need to have more test cases to address it.
-      let superFieldXpaths = this.unwrapField(field.super_field || {}).xpaths || [];
-      if (!parentScope.rootNode && xpaths.length === superFieldXpaths.length) {
-        localScope.node = localScope.contextNode;
-        localScope.authoredKidsOnly = true;
-        localScope.value = localScope.value || {};
-        done = true;
+      // detect and prevent infinite recursion
+      if (this.isInfiniteRecursion(localScope)) {
+        // console.warn("Infinite recursion detected on " + field.name);
+        return null;
       }
-      else {
-      */
-        for (let xpath of xpaths) {
-          let node = this.evaluateFirstNode(xpath, localScope.contextNode, parentScope);
-          if (node) {
-            localScope.node = node;
-            localScope.value = localScope.value || { mm_name: null };
-            done = true;
-            break;
-          }
+
+      // case 1.1: extract root metadata as composite
+      if (parentScope.rootNode) {
+        localScope.value = {
+          mm_name: null,
+          location: this.response.location,
+          additional_locations: this.response.otherLocations,
+        };
+        localScope.node = parentScope.rootNode;
+      }
+
+      // TODO case 1.2: extract from previous field op result (and set done)
+
+      // case 1.3: regular xpath extraction
+      if (!done && localScope.contextNode) {
+        let xpaths = field.xpaths || [];
+        /* FIXME this solution to the inherited xpath issue doesn't work for all
+         * cases. we need to have more test cases to address it.
+        let superFieldXpaths = this.unwrapField(field.super_field || {}).xpaths || [];
+        if (!parentScope.rootNode && xpaths.length === superFieldXpaths.length) {
+          localScope.node = localScope.contextNode;
+          localScope.authoredKidsOnly = true;
+          localScope.value = localScope.value || {};
+          done = true;
         }
-      /* FIXME (solution to the inherited xpath issue)
-      }
-      */
-    }
-
-    // step 2: extract nested fields using the newly created local scope
-    if (localScope.value) {
-      (localScope.value as Metadata).mm_name = field.type || field.name;
-      let kids = field.kids || [];
-      /* FIXME (solution to the inherited xpath issue)
-      // if we only allow authored kids to be extracted, filter `kids`.
-      if (localScope.authoredKidsOnly) {
-        if (!field._authored_kids) {
-          field._authored_kids = [];
-          let superkids = this.unwrapField(field.super_field || {}).kids || [];
-          for (let i = 0; i < field.kids.length; ++i) {
-            let kid = kids[i];
-            let found = false;
-            for (let j = 0; j < superkids.length; ++j) {
-              let superkid = superkids[j];
-              if (this.unwrapField(kid) === this.unwrapField(superkid)) {
-                found = true;
-                break;
-              }
+        else {
+        */
+          for (let xpath of xpaths) {
+            let node = this.evaluateFirstNode(xpath, localScope.contextNode, parentScope);
+            if (node) {
+              localScope.node = node;
+              localScope.value = localScope.value || { mm_name: null };
+              done = true;
+              break;
             }
-            if (!found) field._authored_kids.push(kid);
           }
+        /* FIXME (solution to the inherited xpath issue)
         }
-        kids = field._authored_kids;
+        */
       }
-      */
-      return this.extractFields(kids, localScope, localScope.value as Metadata);
-    }
 
-    return Promise.resolve(null);
+      // step 2: extract nested fields using the newly created local scope
+      if (localScope.value) {
+        (localScope.value as Metadata).mm_name = field.type || field.name;
+        let kids = field.kids || [];
+        /* FIXME (solution to the inherited xpath issue)
+        // if we only allow authored kids to be extracted, filter `kids`.
+        if (localScope.authoredKidsOnly) {
+          if (!field._authored_kids) {
+            field._authored_kids = [];
+            let superkids = this.unwrapField(field.super_field || {}).kids || [];
+            for (let i = 0; i < field.kids.length; ++i) {
+              let kid = kids[i];
+              let found = false;
+              for (let j = 0; j < superkids.length; ++j) {
+                let superkid = superkids[j];
+                if (this.unwrapField(kid) === this.unwrapField(superkid)) {
+                  found = true;
+                  break;
+                }
+              }
+              if (!found) field._authored_kids.push(kid);
+            }
+          }
+          kids = field._authored_kids;
+        }
+        */
+        return this.extractFields(kids, localScope, localScope.value as Metadata);
+      }
+      return null;
+    }).catch(err => {
+      console.warn("Failed to extract composite field " + field.name);
+      console.warn(err);
+    });
   }
 
   /**
@@ -498,60 +536,71 @@ export class Extraction {
    * @return {Promise<Metadata[]>}
    */
   extractCompositeCollection(field: MetaMetadataCollectionField, parentScope: ExtractionScope): Promise<Metadata[]> {
-    let surrogateComposite = null;
-    if (field.kids instanceof Array && field.kids.length === 1) {
-      surrogateComposite = field.kids[0].composite;
-    }
-    if (!surrogateComposite) {
-      console.warn("Invalid surrogate composite on " + field.name);
-      return Promise.resolve(null);
-    }
+    return Promise.resolve().then(() => {
+      let surrogateComposite = null;
+      if (field.kids instanceof Array && field.kids.length === 1) {
+        surrogateComposite = field.kids[0].composite;
+      }
+      if (!surrogateComposite) {
+        console.warn("Invalid surrogate composite on " + field.name);
+        return null;
+      }
 
-    // step 1: prepare local scope for extracting nested fields
-    let localScope = new ExtractionScope(field.name, parentScope);
-    localScope.field = field;
-    localScope.contextNode = this.getContextNode(field, parentScope);
-    localScope.vars = this.handleDefVars(field, localScope);
-    localScope.value = [];
-    let done = false;
+      // step 1: prepare local scope for extracting nested fields
+      let localScope = new ExtractionScope(field.name, parentScope);
+      localScope.field = field;
+      localScope.contextNode = this.getContextNode(field, parentScope);
+      localScope.vars = this.handleDefVars(field, localScope);
+      localScope.value = [];
+      let done = false;
 
-    // detect and prevent infinite recursion
-    if (this.isInfiniteRecursion(localScope)) {
-      // console.warn("Infinite recursion detected on " + field.name);
-      return Promise.resolve(null);
-    }
+      // detect and prevent infinite recursion
+      if (this.isInfiniteRecursion(localScope)) {
+        // console.warn("Infinite recursion detected on " + field.name);
+        return null;
+      }
 
-    // TODO case 1.1: extract from previous field op result
+      // TODO case 1.1: extract from previous field op result
 
-    // case 1.2: regular xpath extraction
-    if (!done && field.xpaths instanceof Array) {
-      for (let xpath of field.xpaths) {
-        localScope.nodes = this.evaluateAllNodes(xpath, localScope.contextNode, parentScope);
-        if (localScope.nodes.length > 0) {
-          done = true;
-          break;
+      // case 1.2: regular xpath extraction
+      if (!done && field.xpaths instanceof Array) {
+        for (let xpath of field.xpaths) {
+          localScope.nodes = this.evaluateAllNodes(xpath, localScope.contextNode, parentScope);
+          if (localScope.nodes.length > 0) {
+            done = true;
+            break;
+          }
         }
       }
-    }
 
-    // step 2: extract nested fields using newly created local scope
-    if (done) {
-      let promises: Promise<Metadata>[] = [];
-      for (let i = 0; i < localScope.nodes.length; ++i) {
-        let localScopei = new ExtractionScope('$' + i, localScope);
-        localScopei.collectionIndex = i+1;
-        localScopei.node = localScope.nodes[i];
-        localScopei.value = {
-          mm_name: surrogateComposite.type || surrogateComposite.name,
-        };
-        promises.push(this.extractFields(surrogateComposite.kids, localScopei, localScopei.value as Metadata));
+      // step 2: extract nested fields using newly created local scope
+      if (done) {
+        let promises: Promise<Metadata>[] = [];
+        for (let i = 0; i < localScope.nodes.length; ++i) {
+          let localScopei = new ExtractionScope('$' + i, localScope);
+          localScopei.collectionIndex = i+1;
+          localScopei.node = localScope.nodes[i];
+          localScopei.value = {
+            mm_name: surrogateComposite.type || surrogateComposite.name,
+          };
+          promises.push(this.extractFields(surrogateComposite.kids, localScopei, localScopei.value as Metadata));
+        }
+        return allSettled(promises).then(elems => {
+          let vals: Metadata[] = [];
+          for (let elem of elems) {
+            if (!(elem instanceof Error)) {
+              vals.push(elem);
+            }
+          }
+          localScope.value = vals;
+          return vals;
+        });
       }
-      return Promise.all(promises).then(() => {
-        return localScope.value;
-      });
-    }
-
-    return Promise.resolve(null);
+      return null;
+    }).catch(err => {
+      console.warn("Failed to extract composite collection field " + field.name);
+      console.warn(err);
+    });
   }
 
   /**
@@ -585,8 +634,8 @@ export class Extraction {
     for (let field of fieldList) {
       if (this.isScalar(field)) {
         promise = promise.then(() => {
-          return this.extractScalar(field.scalar, parentScope).then(scalar => {
-            if (scalar) {
+          return reflect(this.extractScalar(field.scalar, parentScope)).then(scalar => {
+            if (scalar && !(scalar instanceof Error)) {
               if (typeof scalar !== 'string' || scalar.length > 0) {
                 obj[field.scalar.tag || field.scalar.name] = scalar;
               }
@@ -596,8 +645,8 @@ export class Extraction {
         });
       } else if (this.isScalarCollection(field)) {
         promise = promise.then(() => {
-          return this.extractScalarCollection(field.collection, parentScope).then(scalars => {
-            if (scalars instanceof Array && scalars.length > 0) {
+          return reflect(this.extractScalarCollection(field.collection, parentScope)).then(scalars => {
+            if (scalars && scalars instanceof Array && scalars.length > 0) {
               obj[field.collection.tag || field.collection.name] = scalars;
             }
             return obj;
@@ -605,8 +654,8 @@ export class Extraction {
         });
       } else if (this.isComposite(field)) {
         promise = promise.then(() => {
-          return this.extractComposite(field.composite, parentScope).then(composite => {
-            if (composite && Object.keys(composite).length > 1) {
+          return reflect(this.extractComposite(field.composite, parentScope)).then(composite => {
+            if (composite && !(composite instanceof Error) && Object.keys(composite).length > 1) {
               if (field.composite.polymorphic_scope || field.composite.polymorphic_classes) {
                 // TODO change mm_name based on location
                 obj[field.composite.name][composite.mm_name] = composite;
@@ -619,13 +668,15 @@ export class Extraction {
         });
       } else if (this.isCompositeCollection(field)) {
         promise = promise.then(() => {
-          return this.extractCompositeCollection(field.collection, parentScope).then(composites => {
-            if (composites instanceof Array && composites.length > 0) {
+          return reflect(this.extractCompositeCollection(field.collection, parentScope)).then(composites => {
+            if (composites && composites instanceof Array && composites.length > 0) {
               if (field.collection.polymorphic_scope || field.collection.polymorphic_classes) {
                 obj[field.collection.name] = [];
                 for (let composite of composites) {
                   // TODO change mm_name based on location
-                  let typedComposite: TypedMetadata = {};
+                  let typedComposite: TypedMetadata = {
+                    type: composite.mm_name,
+                  };
                   typedComposite[composite.mm_name] = composite;
                   obj[field.collection.name].push(typedComposite);
                 }
@@ -743,7 +794,9 @@ export class Extraction {
       this.metadata = metadata;
       console.log("Extraction finished: %O", this.metadata);
       this.typeTag = this.mmd.tag || this.mmd.name;
-      this.typedMetadata = {};
+      this.typedMetadata = {
+        type: this.typeTag,
+      };
       this.typedMetadata[this.typeTag] = this.metadata;
       return this.typedMetadata;
     });

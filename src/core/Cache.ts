@@ -2,8 +2,6 @@
  * A general cache interface.
  */
 
-/// <reference path="../../typings/index.d.ts" />
-
 import * as Promise from 'bluebird';
 
 /**

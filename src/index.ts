@@ -2,8 +2,7 @@
  * Index of BigSemantics classes.
  */
 
-export * from './core/simpl/simplBase';
-export { default as simpl } from './core/simpl/simplBase';
+export * from 'simpl.js';
 export * from './core/ParsedURL';
 export { default as ParsedURL } from './core/ParsedURL';
 export * from './core/Cache';
@@ -19,11 +18,25 @@ export * from './core/Extractor';
 export * from './core/BigSemantics';
 
 export { default as XHRDownloader } from './downloaders/XHRDownloader';
-export { default as XPathExtractor } from './extractors/XPathExtractor';
+export { default as ServiceHelper } from './downloaders/ServiceHelper';
+export { default as RepoServiceHelper } from './downloaders/RepoServiceHelper';
 
+export { default as XPathExtractor } from './extractors/XPathExtractor';
+export * from './extractors/RemoteExtractor';
+export { default as IframeExtractor } from './extractors/IframeExtractor';
+export * from './extractors/IframeExtractor';
+export { default as PopUnderExtractor } from './extractors/PopUnderExtractor';
+export * from './extractors/PopUnderExtractor';
+export { default as ServiceExtractor } from './extractors/ServiceExtractor';
+export * from './extractors/ServiceExtractor';
+
+export * from './api/AbstractBigSemantics';
+export * from './api/BaseBigSemantics';
 export { default as BSWebApp } from './api/BSWebApp';
 export * from './api/BSWebApp';
-export { default as BSService } from './api/BSService';
-export * from './api/BSService';
 export { default as BSExtension } from './api/BSExtension';
 export * from './api/BSExtension';
+export { default as BSAutoSwitch } from './api/BSAutoSwitch';
+export * from './api/BSAutoSwitch';
+export { default as BSDefault } from './api/BSDefault';
+export * from './api/BSDefault';

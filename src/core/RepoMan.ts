@@ -2,10 +2,8 @@
  * A meta-metadata repository manager.
  */
 
-/// <reference path="../../typings/index.d.ts" />
-
 import * as Promise from 'bluebird';
-import simpl from './simpl/simplBase';
+import * as simpl from 'simpl.js';
 import ParsedURL, { QueryMap } from './ParsedURL';
 import Readyable from './Readyable';
 import {
@@ -60,7 +58,6 @@ export interface RepoManService {
   loadMmd(name: string, options?: RepoCallOptions): Promise<MetaMetadata>;
   selectMmd(location: string | ParsedURL, options?: RepoCallOptions): Promise<MetaMetadata>;
   normalizeLocation(location: string | ParsedURL, options?: RepoCallOptions): Promise<string>;
-  getType(typedMetadata: TypedMetadata, options?: RepoCallOptions): Promise<string>;
 }
 
 /**
@@ -583,28 +580,6 @@ export default class RepoMan extends Readyable implements RepoManService {
         }
         return url;
       });
-    });
-  }
-
-  /**
-   * Get the type name of a typed metadata object.
-   *
-   * @param {TypedMetadata} typedMetadata
-   * @param {RepoCallOptions} options
-   * @return {Promise<Metadata>}
-   */
-  getType(typedMetadata: TypedMetadata, options: RepoCallOptions = {}): Promise<string> {
-    return this.onReadyP().then(() => {
-      for (let fieldName in typedMetadata) {
-        if (fieldName in this.mmds) {
-          let val = typedMetadata[fieldName];
-          let mm_name = val.mm_name || val.meta_metadata_name;
-          if (mm_name === fieldName) {
-            return fieldName;
-          }
-        }
-      }
-      throw new Error("Invalid typed metadata: " + typedMetadata);
     });
   }
 }
