@@ -43,7 +43,7 @@ export interface RepoCallOptions {
 /**
  * A map from key to selector array.
  */
-interface SelectorMap {
+export interface SelectorMap {
   [key: string]: Selector[];
 }
 

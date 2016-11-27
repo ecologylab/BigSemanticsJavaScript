@@ -7,7 +7,7 @@ import * as Promise from 'bluebird';
 /**
  * A convenience interface for callbacks.
  */
-interface Callback<Value> {
+export interface Callback<Value> {
   (err: Error, val?: Value): void;
 }
 
