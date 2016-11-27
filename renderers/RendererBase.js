@@ -85,6 +85,9 @@ RendererBase.addMetadataDisplay = function(container, url, clipping, renderer, o
       }
       task.mmd = mmd;
       task.metadata = clipping.metadata;
+      if (task.metadata.type && task.metadata[task.metadata.type]) {
+        task.metadata = task.metadata[task.metadata.type];
+      }
       task.handler(task);
 
       if (options.callback) {

@@ -81,17 +81,22 @@ var BSExtension = (function() {
 
     function onResponse(response) {
       if (response) {
+        if (response.error) {
+          callback(new Error(response.error));
+          return;
+        }
         if (response.result && typeof response.result == 'string') {
           response.result = simpl.deserialize(response.result);
         }
-        callback(response.error, response.result);
+        callback(null, response.result);
       } else {
         callback(new Error("No response from extension"), null);
       }
     }
 
-    var msg = { method: method, params: simpl.serialize(params) };
+    var msg = { method: method, params: params };
     try {
+      simpl.graphCollapse(msg);
       if (extId) {
         chrome.runtime.sendMessage(extId, msg, onResponse);
       } else {
@@ -99,6 +104,8 @@ var BSExtension = (function() {
       }
     } catch (err) {
       callback(err, null);
+    } finally {
+      simpl.graphExpand(msg);
     }
   }
 
