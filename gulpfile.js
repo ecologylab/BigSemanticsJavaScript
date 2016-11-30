@@ -12,9 +12,9 @@ var buffer = require('vinyl-buffer');
 var gutil = require('gulp-util');
 var del = require('del');
 
-var env = argv.env || 'dev';
-var isDev = env !== 'prod';
-console.log("Environment: " + env);
+var env = argv.env || 'prod';
+var isDev = env === 'dev';
+console.log("Environment (specify with --env when calling gulp): " + env);
 
 var tsProject = typescript.createProject('tsconfig.json');
 
@@ -38,7 +38,7 @@ gulp.task('bundle', [ 'compile' ], function() {
     debug: isDev,
   });
 
-  var bundleFileName = isDev ? 'bigsemantics-core.js' : 'bigsemantics-core.min.js';
+  var bundleFileName = isDev ? 'bigsemantics-core.bundle.js' : 'bigsemantics-core.min.js';
 
   var stream = bundle
     .bundle()

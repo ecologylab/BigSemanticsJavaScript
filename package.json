@@ -1,11 +1,31 @@
 {
-  "name": "bigsemantics-core",
+  "name": "bigsemantics-core.js",
   "version": "3.0.0",
-  "description": "The core of the new BigSemantics.",
-  "main": "build/index.js",
+  "description": "The core JavaScript library of BigSemantics.",
+  "main": "build/bigsemantics-core.min.js",
+  "types": "build/index.d.js",
+  "scripts": {
+    "prepublish": "gulp",
+    "install": "gulp",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ecologylab/BigSemanticsJavaScript.git"
+  },
+  "keywords": [
+    "semantics",
+    "extraction"
+  ],
+  "author": "Interface Ecology Lab",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ecologylab/BigSemanticsJavaScript/issues"
+  },
+  "homepage": "https://github.com/ecologylab/BigSemanticsJavaScript#readme",
   "dependencies": {
     "bluebird": "^3.4.0",
-    "simpl.js": "^0.1.1"
+    "simpl.js": "^0.1.2"
   },
   "devDependencies": {
     "@types/bluebird": "^3.0.35",
@@ -25,10 +45,5 @@
     "vinyl-buffer": "^1.0.0",
     "vinyl-source-stream": "^1.1.0",
     "yargs": "^6.3.0"
-  },
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "author": "Interface Ecology Lab",
-  "license": "MIT"
+  }
 }
