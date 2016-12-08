@@ -211,13 +211,14 @@ export interface FilterLocation {
 export interface MetaMetadata extends MetaMetadataCompositeField {
   name: string;
   extends?: string;
+  hashCode?: number;
 
   selectors?: Selector[];
   filter_location?: FilterLocation;
 
   parser?: string;
   extract_with?: string;
-
+  
   kids: TypedMetaMetadataField[];
 }
 

@@ -32,3 +32,17 @@ export function reflect<T>(promise: Promise<T>): Promise<T|Error> {
 export function allSettled<T>(promises: Promise<T>[]): Promise<(T|Error)[]> {
   return Promise.all(promises.map(reflect));
 }
+
+// hash function similar to one used in Java
+export function hashCode(str: string): number {
+  let hash = 0;
+  if(str.length === 0) return hash;
+
+  for(let i = 0; i < str.length; i++) {
+    let ch = str.charCodeAt(i);
+    hash = ((hash << 5) - hash) + ch;
+    hash |= 0;
+  }
+
+  return hash;
+}
