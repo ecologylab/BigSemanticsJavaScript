@@ -71,6 +71,8 @@ export default class BSExtension extends BaseBigSemantics {
       this.pickExt().catch(err => {
         this.setError(err);
       });
+    } else {
+      this.setReady();
     }
   }
 
