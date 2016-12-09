@@ -282,7 +282,7 @@ export interface Metadata {
  *     location: 'http://www.amazon.com/awesome-product',
  *     ...
  *   },
- *   mm_name: 'amazon_product'
+ *   type: 'amazon_product'
  * }
  * ```
  */
