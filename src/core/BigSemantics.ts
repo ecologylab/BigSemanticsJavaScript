@@ -13,6 +13,7 @@ import {
   TypedRepository,
   Metadata,
   TypedMetadata,
+  BSResult,
 } from './types';
 import { PreFilter } from './FieldOps';
 import RepoMan, {
@@ -23,16 +24,6 @@ import RepoMan, {
 import { RequestOptions, Downloader } from './Downloader';
 import { ExtractionOptions, Extractor } from './Extractor';
 import { Cache, BaseCache } from './Cache';
-
-/**
- * Components of a BigSemantics implementation.
- */
-export interface BigSemanticsComponents {
-  repoMan?: RepoMan;
-  metadataCache?: Cache<TypedMetadata>;
-  downloaders?: {[name: string]: Downloader};
-  extractors?: {[name: string]: Extractor};
-}
 
 /**
  * Options for a BigSemantics implementation.
@@ -63,14 +54,6 @@ export interface BigSemanticsCallOptions extends RepoCallOptions {
 }
 
 /**
- * Result of extracting a metadata instance.
- */
-export interface MetadataResult {
-  metadata: TypedMetadata,
-  mmd?: MetaMetadata,
-}
-
-/**
  * A general interface for BigSemantics.
  */
 export interface BigSemantics extends RepoManService {
@@ -81,7 +64,7 @@ export interface BigSemantics extends RepoManService {
    * @param {MetadataOptions} options
    * @return {Promise<MetadataResult>}
    */
-  loadMetadata(location: string | ParsedURL, options?: BigSemanticsCallOptions): Promise<MetadataResult>;
+  loadMetadata(location: string | ParsedURL, options?: BigSemanticsCallOptions): Promise<BSResult>;
 
   /**
    * Loads an initial metadata instance from the given location.
@@ -93,7 +76,7 @@ export interface BigSemantics extends RepoManService {
    * @return {Promise<MetadataResult>}
    *   Note that the result contains an initial, thus incomplete, metadata.
    */
-  loadInitialMetadata(location: string | ParsedURL, options?: BigSemanticsCallOptions): Promise<MetadataResult>;
+  loadInitialMetadata(location: string | ParsedURL, options?: BigSemanticsCallOptions): Promise<BSResult>;
 
   getBuildInfo(options?: BigSemanticsCallOptions): Promise<BuildInfo>;
   getRepository(options?: BigSemanticsCallOptions): Promise<TypedRepository>;

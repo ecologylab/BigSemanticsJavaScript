@@ -17,6 +17,7 @@ import {
   BuildInfo,
 } from './types';
 import { PreFilter } from './FieldOps';
+import { hashCode } from './utils';
 
 // for dynamic loading in Node.
 declare function require(moduleName: string): any;
@@ -396,6 +397,7 @@ export default class RepoMan extends Readyable implements RepoManService {
     this.mmds = {};
     for (let mmd of this.repository.repository_by_name) {
       this.mmds[mmd.name] = mmd;
+      mmd.hashCode = this.computeMmdHash(mmd);
     }
     if (this.repository.alt_names) {
       for (let item of this.repository.alt_names) {
@@ -444,6 +446,59 @@ export default class RepoMan extends Readyable implements RepoManService {
     }
 
     this.setReady();
+  }
+
+  /**
+   * Compute the hash of an mmd, for use in caching 
+   */
+  private computeMmdHash(mmd: MetaMetadata): number {
+    let fingerprint = "";
+    let stack = [mmd] as any[];
+    let visited = [];
+
+    while (stack.length > 0) {
+      let obj = stack.pop();
+      let visited = [];
+
+      // somethings we push in strings and the like
+      if (typeof obj !== "object") {
+        continue;
+      }
+
+      if (obj.visited) continue;
+      obj.visited = true;
+      visited += obj;
+
+      // skip past wrappers for these
+      if (obj.meta_metadata) obj = obj.meta_metadata;
+      if (obj.scalar) obj = obj.scalar;
+      if (obj.composite) obj = obj.composite;
+      if (obj.collection) obj = obj.collection;
+
+      // likely need to consider more fields
+      fingerprint +=
+        obj.name +
+        obj.parser +
+        (obj.xpaths && obj.xpaths.join("")) +
+        (obj.selectors && obj.selectors.map(s => s["url_regex_fragment"] + s["domain"]).join(""));
+
+      if (obj.super_field) {
+        stack.push(obj.super_field);
+      }
+
+      if (obj.kids) {
+        for (let child of obj.kids) {
+          stack.push(child);
+        }
+      }
+    }
+
+    // delete all visited tags
+    for(let i = 0; i < visited.length; i++) {
+      delete visited[i].visited;
+    }
+
+    return hashCode(fingerprint);
   }
 
   /**

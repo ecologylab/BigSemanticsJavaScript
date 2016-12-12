@@ -30,7 +30,11 @@ export default class ServiceExtractor implements Extractor {
   private serviceHelper: ServiceHelper = new ServiceHelper();
 
   constructor(serviceBase: string | ParsedURL, appId?: string, appVer?: string) {
-    this.serviceHelper.load(serviceBase, appId, appVer);
+    this.serviceHelper.load({
+      appId: appId,
+      appVer: appVer,
+      serviceBase: serviceBase
+    });
   }
 
   extractMetadata(

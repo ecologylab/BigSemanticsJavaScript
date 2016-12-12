@@ -211,13 +211,14 @@ export interface FilterLocation {
 export interface MetaMetadata extends MetaMetadataCompositeField {
   name: string;
   extends?: string;
+  hashCode?: number;
 
   selectors?: Selector[];
   filter_location?: FilterLocation;
 
   parser?: string;
   extract_with?: string;
-
+  
   kids: TypedMetaMetadataField[];
 }
 
@@ -281,7 +282,7 @@ export interface Metadata {
  *     location: 'http://www.amazon.com/awesome-product',
  *     ...
  *   },
- *   mm_name: 'amazon_product'
+ *   type: 'amazon_product'
  * }
  * ```
  */
@@ -290,7 +291,7 @@ export interface TypedMetadata {
   // nothing
 }
 
-export interface BSResponse {
+export interface BSResult {
   repository?: Repository;
   mmd?: MetaMetadata;
   metadata?: TypedMetadata;

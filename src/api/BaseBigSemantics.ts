@@ -12,13 +12,13 @@ import {
   TypedRepository,
   Metadata,
   TypedMetadata,
+  BSResult,
 } from '../core/types';
 import { PreFilter } from '../core/FieldOps';
 import RepoMan from '../core/RepoMan';
 import { Extractor } from '../core/Extractor';
 import {
   BigSemanticsCallOptions,
-  MetadataResult,
   BigSemantics,
 } from '../core/BigSemantics';
 import { AbstractBigSemantics } from "./AbstractBigSemantics";
@@ -27,7 +27,7 @@ import { AbstractBigSemantics } from "./AbstractBigSemantics";
  * A basic implementation providing a template for loadMetadata().
  */
 export abstract class BaseBigSemantics extends AbstractBigSemantics {
-  loadMetadata(location: string | ParsedURL, options: BigSemanticsCallOptions = {}): Promise<MetadataResult> {
+  loadMetadata(location: string | ParsedURL, options: BigSemanticsCallOptions = {}): Promise<BSResult> {
     let purl = ParsedURL.get(location);
     return this.getMmd(purl, options).then(mmd => {
       return this.getResponse(purl, options).then(resp => {
@@ -37,7 +37,7 @@ export abstract class BaseBigSemantics extends AbstractBigSemantics {
           throw new Error("Can't find extractor: " + extractorNames.join(" or "));
         }
         return extractor.extractMetadata(resp, mmd, this, options.extractionOptions).then(metadata => {
-          let result: MetadataResult = {
+          let result: BSResult = {
             metadata: metadata,
           };
           if (options.includeMmdInResult) {

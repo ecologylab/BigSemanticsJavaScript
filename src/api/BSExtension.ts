@@ -16,13 +16,13 @@ import {
   TypedRepository,
   Metadata,
   TypedMetadata,
+  BSResult,
 } from '../core/types';
 import RepoMan from '../core/RepoMan';
 import { Extractor } from '../core/Extractor';
 import {
   BigSemanticsOptions,
   BigSemanticsCallOptions,
-  MetadataResult,
 } from '../core/BigSemantics';
 import { BaseBigSemantics } from "./BaseBigSemantics";
 
@@ -71,6 +71,8 @@ export default class BSExtension extends BaseBigSemantics {
       this.pickExt().catch(err => {
         this.setError(err);
       });
+    } else {
+      this.setReady();
     }
   }
 
@@ -163,7 +165,7 @@ export default class BSExtension extends BaseBigSemantics {
     });
   }
 
-  loadMetadata(location: string | ParsedURL, options: BigSemanticsCallOptions = {}): Promise<MetadataResult> {
+  loadMetadata(location: string | ParsedURL, options: BigSemanticsCallOptions = {}): Promise<BSResult> {
     return this.onReadyP().then(() => {
       let purl = ParsedURL.get(location);
       if (options.response) {

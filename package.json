@@ -6,7 +6,6 @@
   "types": "build/index.d.js",
   "scripts": {
     "prepublish": "gulp",
-    "install": "gulp",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -25,7 +24,7 @@
   "homepage": "https://github.com/ecologylab/BigSemanticsJavaScript#readme",
   "dependencies": {
     "bluebird": "^3.4.0",
-    "simpl.js": "^0.1.2"
+    "simpl.js": "^0.1.4"
   },
   "devDependencies": {
     "@types/bluebird": "^3.0.35",
@@ -41,9 +40,9 @@
     "gulp-typescript": "^3.0.2",
     "gulp-uglify": "^2.0.0",
     "gulp-util": "^3.0.7",
-    "typescript": "^2.0.9",
+    "typescript": "^2.1.4",
     "vinyl-buffer": "^1.0.0",
     "vinyl-source-stream": "^1.1.0",
-    "yargs": "^6.3.0"
+    "yargs": "^6.5.0"
   }
 }

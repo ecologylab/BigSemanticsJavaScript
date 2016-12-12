@@ -25,6 +25,7 @@ export interface DownloaderOptions {
  * Options for individual requests.
  */
 export interface RequestOptions {
+  userAgent?: string;
   responseType?: string;
   response?: HttpResponse;
   acceptTypes?: string[];

@@ -5,39 +5,52 @@
 import * as Promise from 'bluebird';
 import * as simpl from 'simpl.js';
 import ParsedURL, { QueryMap } from '../core/ParsedURL';
-import { BSResponse } from '../core/types';
-import { RequestOptions } from '../core/Downloader';
+import { BSResult } from '../core/types';
+import { RequestOptions, Downloader } from '../core/Downloader';
 import XHRDownloader from '../downloaders/XHRDownloader';
+
+/**
+ *
+ */
+export interface ServiceHelperOptions {
+  appId?: string;
+  appVer?: string;
+  serviceBase: string | ParsedURL;
+  requesterFactory?: ()=>Downloader;
+}
 
 /**
  * Helper for calling BigSemantics web service.
  */
 export default class ServiceHelper {
+  private options: ServiceHelperOptions;
   serviceBase: ParsedURL;
-  appId: string;
-  appVer: string;
 
-  load(serviceBase: string | ParsedURL, appId?: string, appVer?: string): void {
-    this.appId = appId || 'Unknown App';
-    this.appVer = appVer || 'Unknown Version';
-    this.serviceBase = ParsedURL.get(serviceBase);
+  load(options: ServiceHelperOptions): void {
+    this.options = options;
+    this.serviceBase = ParsedURL.get(options.serviceBase);
   }
 
-  callJSONService(endpoint: string, params: QueryMap = {}, options: RequestOptions = {}): Promise<BSResponse> {
-    let url = ParsedURL.get(endpoint, this.serviceBase).withQuery({
-      aid: this.appId,
-      av: this.appVer,
+  callJSONService(endpoint: string, params: QueryMap = {}, options: RequestOptions = {}): Promise<BSResult> {
+    let url = ParsedURL.get(endpoint, this.options.serviceBase).withQuery({
+      aid: this.options.appId,
+      av: this.options.appVer,
     }).withQuery(params);
     if (!options.responseType) {
       options.responseType = 'json';
     }
-    let requester = new XHRDownloader();
+    let requester: Downloader = null;
+    if (this.options.requesterFactory) {
+      requester = this.options.requesterFactory();
+    } else {
+      requester = new XHRDownloader();
+    }
     return requester.httpGet(url, options).then(resp => {
       if (resp.entity) {
         simpl.graphExpand(resp.entity);
-        return resp.entity as BSResponse;
+        return resp.entity as BSResult;
       }
-      let bsresp = simpl.deserialize(resp.text) as BSResponse;
+      let bsresp = simpl.deserialize(resp.text) as BSResult;
       return bsresp;
     });
   }

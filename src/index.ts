@@ -13,13 +13,15 @@ export * from './core/types';
 export * from './core/FieldOps';
 export * from './core/RepoMan';
 export { default as RepoMan } from './core/RepoMan';
+export { RepoLoader, DefaultRepoLoaderOptions, DefaultRepoLoader } from './core/RepoLoader';
 export * from './core/Downloader';
 export * from './core/Extractor';
 export * from './core/BigSemantics';
 
 export { default as XHRDownloader } from './downloaders/XHRDownloader';
 export { default as ServiceHelper } from './downloaders/ServiceHelper';
-export { default as RepoServiceHelper } from './downloaders/RepoServiceHelper';
+export { default as ServiceRepoLoader } from './downloaders/ServiceRepoLoader';
+export * from './downloaders/ServiceRepoLoader';
 
 export { default as XPathExtractor } from './extractors/XPathExtractor';
 export * from './extractors/RemoteExtractor';

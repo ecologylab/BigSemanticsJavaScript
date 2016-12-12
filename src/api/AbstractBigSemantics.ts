@@ -11,12 +11,12 @@ import {
   TypedRepository,
   Metadata,
   TypedMetadata,
+  BSResult,
 } from '../core/types';
 import { PreFilter } from '../core/FieldOps';
 import RepoMan from '../core/RepoMan';
 import {
   BigSemanticsCallOptions,
-  MetadataResult,
   BigSemantics,
 } from '../core/BigSemantics';
 
@@ -25,9 +25,9 @@ import {
  * for loadInitialMetadata().
  */
 export abstract class AbstractBigSemantics extends Readyable implements BigSemantics {
-  abstract loadMetadata(location: string | ParsedURL, options?: BigSemanticsCallOptions): Promise<MetadataResult>;
+  abstract loadMetadata(location: string | ParsedURL, options?: BigSemanticsCallOptions): Promise<BSResult>;
 
-  loadInitialMetadata(location: string | ParsedURL, options: BigSemanticsCallOptions = {}): Promise<MetadataResult> {
+  loadInitialMetadata(location: string | ParsedURL, options: BigSemanticsCallOptions = {}): Promise<BSResult> {
     let purl = ParsedURL.get(location);
     let url = purl.toString();
     return this.selectMmd(purl, options.repoCallOptions).then(mmd => {
@@ -52,7 +52,7 @@ export abstract class AbstractBigSemantics extends Readyable implements BigSeman
       };
       typedMetadata[type] = metadata;
 
-      let result: MetadataResult = {
+      let result: BSResult = {
         metadata: typedMetadata,
       };
       if (options.includeMmdInResult) {

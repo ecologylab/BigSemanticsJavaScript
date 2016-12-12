@@ -13,19 +13,18 @@ import {
   TypedRepository,
   Metadata,
   TypedMetadata,
-  BSResponse,
+  BSResult,
 } from '../core/types';
 import { PreFilter } from '../core/FieldOps';
 import RepoMan, { RepoOptions, RepoCallOptions, } from '../core/RepoMan';
 import { RequestOptions, Downloader } from '../core/Downloader';
 import XHRDownloader from '../downloaders/XHRDownloader';
+import ServiceRepoLoader from '../downloaders/ServiceRepoLoader';
 import {
   BigSemanticsOptions,
   BigSemanticsCallOptions,
-  MetadataResult,
 } from '../core/BigSemantics';
 import { AbstractBigSemantics } from "./AbstractBigSemantics";
-import RepoServiceHelper from "../downloaders/RepoServiceHelper";
 
 /**
  * Options for BSWebApp.
@@ -34,6 +33,7 @@ export interface BSWebAppOptions extends BigSemanticsOptions {
   appId: string;
   appVer: string;
   serviceBase: string | ParsedURL;
+  repoOptions?: RepoOptions;
   cacheRepoFor?: string; // e.g. 30d, 20h, 30m, 5d12h30m
 }
 
@@ -44,7 +44,7 @@ export interface BSWebAppOptions extends BigSemanticsOptions {
  */
 export default class BSWebApp extends AbstractBigSemantics {
   private options: BSWebAppOptions;
-  private repoServiceHelper: RepoServiceHelper;
+  private serviceRepoLoader: ServiceRepoLoader;
 
   /**
    * (Re)Load this instance with specified options.
@@ -55,18 +55,12 @@ export default class BSWebApp extends AbstractBigSemantics {
     this.reset();
 
     this.options = options;
-    this.repoServiceHelper = new RepoServiceHelper();
-    this.repoServiceHelper.load(
-      options.serviceBase,
-      options.cacheRepoFor,
-      options.repoOptions,
-      options.appId,
-      options.appVer,
-    );
+    this.serviceRepoLoader = new ServiceRepoLoader();
+    this.serviceRepoLoader.load(options);
 
-    this.repoServiceHelper.repoMan.onReadyP().then(() => {
+    this.serviceRepoLoader.getRepoMan().then(repoMan => repoMan.onReadyP().then(() => {
       this.setReady();
-    });
+    }));
   }
 
   /**
@@ -74,16 +68,16 @@ export default class BSWebApp extends AbstractBigSemantics {
    * last used service.
    */
   reload(): void {
-    this.repoServiceHelper.reload();
+    this.serviceRepoLoader.reload();
   }
 
   getServiceBase(): ParsedURL {
-    return this.repoServiceHelper.serviceBase;
+    return this.serviceRepoLoader.getServiceBase();
   }
 
-  loadMetadata(location: string | ParsedURL, options: BigSemanticsCallOptions = {}): Promise<MetadataResult> {
+  loadMetadata(location: string | ParsedURL, options: BigSemanticsCallOptions = {}): Promise<BSResult> {
     let purl = ParsedURL.get(location);
-    return this.repoServiceHelper.callJSONService('metadata.json', {
+    return this.serviceRepoLoader.getServiceHelper().callJSONService('metadata.json', {
       url: purl.toString(),
       t: options.timeout || this.options.timeout,
       w: options.includeMmdInResult,
@@ -94,7 +88,7 @@ export default class BSWebApp extends AbstractBigSemantics {
       if (options.includeMmdInResult && !bsresp.mmd) {
         throw new Error("Wrapper should be included in service response");
       }
-      let result: MetadataResult = {
+      let result: BSResult = {
         metadata: bsresp.metadata,
       };
       if (options.includeMmdInResult) {
@@ -105,18 +99,18 @@ export default class BSWebApp extends AbstractBigSemantics {
   }
 
   getBuildInfo(options: BigSemanticsCallOptions = {}): Promise<BuildInfo> {
-    if (this.repoServiceHelper.repoMan) {
-      return this.repoServiceHelper.repoMan.getBuildInfo(options);
+    if (this.serviceRepoLoader.isLoaded()) {
+      return this.serviceRepoLoader.getRepoMan().then(repoMan => repoMan.getBuildInfo(options));
     } else {
-      return this.repoServiceHelper.loadRepositoryFromService().then(repo => repo.build);
+      return this.serviceRepoLoader.reloadRepo().then(repo => repo.build);
     }
   }
 
   getRepository(options: BigSemanticsCallOptions = {}): Promise<TypedRepository> {
-    if (this.repoServiceHelper.repoMan) {
-      return this.repoServiceHelper.repoMan.getRepository(options);
+    if (this.serviceRepoLoader.isLoaded()) {
+      return this.serviceRepoLoader.getRepoMan().then(repoMan => repoMan.getRepository(options));
     } else {
-      return this.repoServiceHelper.loadRepositoryFromService().then(repo => {
+      return this.serviceRepoLoader.reloadRepo().then(repo => {
         return {
           meta_metadata_repository: repo,
         };
@@ -125,10 +119,10 @@ export default class BSWebApp extends AbstractBigSemantics {
   }
 
   getUserAgentString(userAgentName: string, options: BigSemanticsCallOptions = {}): Promise<string> {
-    if (this.repoServiceHelper.repoMan) {
-      return this.repoServiceHelper.repoMan.getUserAgentString(userAgentName, options);
+    if (this.serviceRepoLoader.isLoaded()) {
+      return this.serviceRepoLoader.getRepoMan().then(repoMan => repoMan.getUserAgentString(userAgentName, options));
     } else {
-      return this.repoServiceHelper.loadRepositoryFromService().then(repo => {
+      return this.serviceRepoLoader.reloadRepo().then(repo => {
         let defaultAgentString: string = null;
         for (let agent of repo.user_agents) {
           if (agent.name === userAgentName) {
@@ -144,10 +138,10 @@ export default class BSWebApp extends AbstractBigSemantics {
   }
 
   getDomainInterval(domain: string, options: BigSemanticsCallOptions = {}): Promise<number> {
-    if (this.repoServiceHelper.repoMan) {
-      return this.repoServiceHelper.repoMan.getDomainInterval(domain, options);
+    if (this.serviceRepoLoader.isLoaded()) {
+      return this.serviceRepoLoader.getRepoMan().then(repoMan => repoMan.getDomainInterval(domain, options));
     } else {
-      return this.repoServiceHelper.loadRepositoryFromService().then(repo => {
+      return this.serviceRepoLoader.reloadRepo().then(repo => {
         for (let site of repo.sites) {
           if (site.domain === domain) {
             return site.min_download_interval * 1000;
@@ -159,10 +153,10 @@ export default class BSWebApp extends AbstractBigSemantics {
   }
 
   loadMmd(name: string, options: BigSemanticsCallOptions = {}): Promise<MetaMetadata> {
-    if (this.repoServiceHelper.repoMan) {
-      return this.repoServiceHelper.repoMan.loadMmd(name, options);
+    if (this.serviceRepoLoader.isLoaded()) {
+      return this.serviceRepoLoader.getRepoMan().then(repoMan => repoMan.loadMmd(name, options));
     } else {
-      return this.repoServiceHelper.callJSONService('wrapper.json', {
+      return this.serviceRepoLoader.getServiceHelper().callJSONService('wrapper.json', {
         name: name,
       }).then(bsresp => {
         if (!bsresp.mmd) {
@@ -175,10 +169,10 @@ export default class BSWebApp extends AbstractBigSemantics {
 
   selectMmd(location: string | ParsedURL, options: BigSemanticsCallOptions = {}): Promise<MetaMetadata> {
     let purl = ParsedURL.get(location);
-    if (this.repoServiceHelper.repoMan) {
-      return this.repoServiceHelper.repoMan.selectMmd(purl, options);
+    if (this.serviceRepoLoader.isLoaded()) {
+      return this.serviceRepoLoader.getRepoMan().then(repoMan => repoMan.selectMmd(purl, options));
     } else {
-      return this.repoServiceHelper.callJSONService('wrapper.json', {
+      return this.serviceRepoLoader.getServiceHelper().callJSONService('wrapper.json', {
         url: purl.toString(),
       }).then(bsresp => {
         if (!bsresp.mmd) {

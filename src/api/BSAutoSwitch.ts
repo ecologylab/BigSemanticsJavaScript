@@ -13,13 +13,13 @@ import {
   TypedRepository,
   Metadata,
   TypedMetadata,
+  BSResult,
 } from '../core/types';
 import RepoMan, { RepoCallOptions } from '../core/RepoMan';
 import { Extractor } from '../core/Extractor';
 import {
   BigSemanticsOptions,
   BigSemanticsCallOptions,
-  MetadataResult,
   BigSemantics,
 } from '../core/BigSemantics';
 import BSExtension, { BSExtensionOptions } from './BSExtension';
@@ -98,7 +98,7 @@ export default class BSAutoSwitch extends Readyable implements BigSemantics {
     this.bsImpl.reload();
   }
 
-  loadMetadata(location: string | ParsedURL, options: BigSemanticsCallOptions = {}): Promise<MetadataResult> {
+  loadMetadata(location: string | ParsedURL, options: BigSemanticsCallOptions = {}): Promise<BSResult> {
     if (!(this.bsImpl instanceof BSWebApp)) {
       return this.selectMmd(location, options).then(mmd => {
         if (mmd.extract_with === 'service') {
@@ -114,7 +114,7 @@ export default class BSAutoSwitch extends Readyable implements BigSemantics {
     }
   }
 
-  loadInitialMetadata(location: string | ParsedURL, options: BigSemanticsCallOptions = {}): Promise<MetadataResult> {
+  loadInitialMetadata(location: string | ParsedURL, options: BigSemanticsCallOptions = {}): Promise<BSResult> {
     return this.bsImpl.loadInitialMetadata(location, options);
   }
 
