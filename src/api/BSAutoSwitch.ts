@@ -10,12 +10,13 @@ import {
   HttpResponse,
   BuildInfo,
   MetaMetadata,
-  TypedRepository,
+  Repository,
   Metadata,
   TypedMetadata,
   BSResult,
 } from '../core/types';
-import RepoMan, { RepoCallOptions } from '../core/RepoMan';
+import RepoMan, { RepoOptions, RepoCallOptions } from '../core/RepoMan';
+import { Downloader } from '../core/Downloader';
 import { Extractor } from '../core/Extractor';
 import {
   BigSemanticsOptions,
@@ -33,7 +34,10 @@ export interface BSAutoSwitchOptions extends BigSemanticsOptions {
   appVer: string;
   extensionIds: string[];
   serviceBase: string | ParsedURL;
+  repoOptions?: RepoOptions;
   cacheRepoFor?: string;
+  disableRepoCaching?: boolean;
+  requesterFactory?: ()=>Downloader;
 }
 
 /**
@@ -122,7 +126,7 @@ export default class BSAutoSwitch extends Readyable implements BigSemantics {
     return this.bsImpl.getBuildInfo(options);
   }
 
-  getRepository(options: BigSemanticsCallOptions = {}): Promise<TypedRepository> {
+  getRepository(options: BigSemanticsCallOptions = {}): Promise<Repository> {
     return this.bsImpl.getRepository(options);
   }
 

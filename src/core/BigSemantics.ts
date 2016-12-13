@@ -23,7 +23,6 @@ import RepoMan, {
 } from './RepoMan';
 import { RequestOptions, Downloader } from './Downloader';
 import { ExtractionOptions, Extractor } from './Extractor';
-import { Cache, BaseCache } from './Cache';
 
 /**
  * Options for a BigSemantics implementation.
@@ -79,7 +78,7 @@ export interface BigSemantics extends RepoManService {
   loadInitialMetadata(location: string | ParsedURL, options?: BigSemanticsCallOptions): Promise<BSResult>;
 
   getBuildInfo(options?: BigSemanticsCallOptions): Promise<BuildInfo>;
-  getRepository(options?: BigSemanticsCallOptions): Promise<TypedRepository>;
+  getRepository(options?: BigSemanticsCallOptions): Promise<Repository>;
   getUserAgentString(userAgentName: string, options?: BigSemanticsCallOptions): Promise<string>;
   getDomainInterval(domain: string, options?: BigSemanticsCallOptions): Promise<number>;
   loadMmd(name: string, options?: BigSemanticsCallOptions): Promise<MetaMetadata>;

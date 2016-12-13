@@ -17,6 +17,38 @@ export interface RepoLoader {
 /**
  *
  */
+export interface RepoLoaderFactory {
+  (options?: Object): RepoLoader;
+}
+
+let factories: RepoLoaderFactory[] = [];
+
+/**
+ * @param {RepoLoaderFactory} factory
+ */
+export function registerFactory(factory: RepoLoaderFactory): void {
+  factories.unshift(factory);
+}
+
+/**
+ * @param {Object} options
+ * @return {RepoLoader}
+ */
+export function create(options?: Object): RepoLoader {
+  for (let factory of factories) {
+    let result = factory(options);
+    if (result) {
+      return result;
+    }
+  }
+  let err = new Error("Cannot find a suitable RepoLoader factory");
+  console.error(err);
+  return null;
+}
+
+/**
+ *
+ */
 export interface DefaultRepoLoaderOptions {
   repository?: Repository | TypedRepository;
 }
@@ -25,7 +57,6 @@ export interface DefaultRepoLoaderOptions {
  *
  */
 export class DefaultRepoLoader implements RepoLoader {
-
   private typedRepository: TypedRepository;
   private repoMan: RepoMan;
 
@@ -53,5 +84,13 @@ export class DefaultRepoLoader implements RepoLoader {
     this.repoMan.load(this.typedRepository);
     return Promise.resolve(this.repoMan);
   }
-
 }
+
+registerFactory(options => {
+  if ('repository' in options) {
+    let result = new DefaultRepoLoader();
+    result.load(options as DefaultRepoLoaderOptions);
+    return result;
+  }
+  return null;
+});

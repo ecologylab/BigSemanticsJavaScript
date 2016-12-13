@@ -16,9 +16,9 @@ import {
 import { RepoOptions } from '../core/RepoMan';
 import { Downloader } from '../core/Downloader';
 import { Extractor } from '../core/Extractor';
-import { RepoLoader, DefaultRepoLoaderOptions, DefaultRepoLoader } from '../core/RepoLoader';
+import { RepoLoader, create as createRepoLoader } from '../core/RepoLoader';
+import ServiceRepoLoader from '../downloaders/ServiceRepoLoader';
 import XHRDownloader from '../downloaders/XHRDownloader';
-import ServiceRepoLoader, { ServiceRepoLoaderOptions } from '../downloaders/ServiceRepoLoader';
 import XPathExtractor from '../extractors/XPathExtractor';
 import { BigSemanticsOptions, BigSemanticsCallOptions } from '../core/BigSemantics';
 import { BaseBigSemantics } from './BaseBigSemantics';
@@ -34,7 +34,9 @@ export interface BSDefaultOptions extends BigSemanticsOptions {
 
   serviceBase?: string | ParsedURL;
   repoOptions?: RepoOptions;
-  cacheRepoFor?: string; // e.g. 30d, 20h, 30m, 5d12h30m
+  cacheRepoFor?: string;
+  disableRepoCaching?: boolean;
+  requesterFactory?: ()=>Downloader;
 }
 
 /**
@@ -50,7 +52,7 @@ export default class BSDefault extends BaseBigSemantics {
 
   getServiceBase(): ParsedURL {
     if (this.repoLoader instanceof ServiceRepoLoader) {
-      return this.repoLoader.getServiceBase();
+      return this.repoLoader.getServiceHelper().getServiceBase();
     }
     return null;
   }
@@ -78,32 +80,20 @@ export default class BSDefault extends BaseBigSemantics {
       this.extractors = { xpath: new XPathExtractor() };
     }
 
-    if (options.repository) {
-      this.repoLoader = new DefaultRepoLoader();
-      (this.repoLoader as DefaultRepoLoader).load(options as DefaultRepoLoaderOptions);
-    } else if (options.serviceBase) {
-      this.repoLoader = new ServiceRepoLoader();
-      if (!options.cacheRepoFor) {
-        options.cacheRepoFor = '1d';
-      }
-      (this.repoLoader as ServiceRepoLoader).load(options as ServiceRepoLoaderOptions);
-    } else {
-      let err = new Error("Failed to create repoLoader");
-      console.error(err);
-    }
+    this.repoLoader = createRepoLoader(options);
 
     this.repoLoader.getRepoMan().then(() => {
       this.setReady();
+    }).catch(err => {
+      this.setError(err);
     });
   }
 
   reload(): void {
-    if (this.repoLoader instanceof DefaultRepoLoader) {
-      this.repoLoader.reload();
-    } else if (this.repoLoader instanceof ServiceRepoLoader) {
-      this.repoLoader.reload();
+    if (typeof this.repoLoader['reload'] === 'function') {
+      this.repoLoader['reload']();
     } else {
-      let err = new Error("Unknown type for repoLoader");
+      let err = new Error("repoLoader not reloadable");
       console.error(err);
     }
   }
@@ -148,7 +138,7 @@ export default class BSDefault extends BaseBigSemantics {
     return this.repoLoader.getRepoMan().then(repoMan => repoMan.getBuildInfo(options));
   }
 
-  getRepository(options: BigSemanticsCallOptions = {}): Promise<TypedRepository> {
+  getRepository(options: BigSemanticsCallOptions = {}): Promise<Repository> {
     return this.repoLoader.getRepoMan().then(repoMan => repoMan.getRepository(options));
   }
 

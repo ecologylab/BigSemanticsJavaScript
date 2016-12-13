@@ -38,7 +38,7 @@ gulp.task('bundle', [ 'compile' ], function() {
     debug: isDev,
   });
 
-  var bundleFileName = isDev ? 'bigsemantics-core.bundle.js' : 'bigsemantics-core.min.js';
+  var bundleFileName = 'bigsemantics-core.bundle.js';
 
   var stream = bundle
     .bundle()

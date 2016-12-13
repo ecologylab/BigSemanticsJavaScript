@@ -13,7 +13,7 @@ import {
   HttpResponse,
   BuildInfo,
   MetaMetadata,
-  TypedRepository,
+  Repository,
   Metadata,
   TypedMetadata,
   BSResult,
@@ -208,7 +208,7 @@ export default class BSExtension extends BaseBigSemantics {
     });
   }
 
-  getRepository(options: BigSemanticsCallOptions = {}): Promise<TypedRepository> {
+  getRepository(options: BigSemanticsCallOptions = {}): Promise<Repository> {
     return this.onReadyP().then(() => {
       return this.sendMsg(this.activeExtId, {
         method: 'getRepository',

@@ -1,8 +1,8 @@
 {
   "name": "bigsemantics-core.js",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "description": "The core JavaScript library of BigSemantics.",
-  "main": "build/bigsemantics-core.min.js",
+  "main": "build/index.js",
   "types": "build/index.d.js",
   "scripts": {
     "prepublish": "gulp",

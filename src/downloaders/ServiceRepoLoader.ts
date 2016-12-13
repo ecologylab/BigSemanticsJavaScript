@@ -7,7 +7,7 @@ import ParsedURL from '../core/ParsedURL';
 import { Repository } from '../core/types';
 import RepoMan, { RepoOptions } from '../core/RepoMan';
 import { Downloader } from '../core/Downloader';
-import { RepoLoader } from '../core/RepoLoader';
+import { RepoLoader, registerFactory } from '../core/RepoLoader';
 import ServiceHelper from "./ServiceHelper";
 
 /**
@@ -16,9 +16,21 @@ import ServiceHelper from "./ServiceHelper";
 export interface ServiceRepoLoaderOptions {
   appId?: string;
   appVer?: string;
+
   serviceBase: string | ParsedURL;
+
   repoOptions?: RepoOptions;
+
+  /**
+   * Format: "1d", "1d12h", "5h30m", "100m"
+   * Minimum: 10 min
+   * Default value: 1d.
+   * @type {[type]}
+   */
   cacheRepoFor?: string;
+
+  disableRepoCaching?: boolean;
+
   requesterFactory?: ()=>Downloader;
 }
 
@@ -32,8 +44,8 @@ export default class ServiceRepoLoader implements RepoLoader {
   private repoManLife: number = 0;
   private repoManTimer: any = undefined;
 
-  getServiceBase(): ParsedURL {
-    return this.serviceHelper.serviceBase;
+  getOptions(): ServiceRepoLoaderOptions {
+    return this.options;
   }
 
   getServiceHelper(): ServiceHelper {
@@ -44,8 +56,9 @@ export default class ServiceRepoLoader implements RepoLoader {
     this.options = options;
     this.serviceHelper = new ServiceHelper();
     this.serviceHelper.load(options);
-    if (options.cacheRepoFor) {
-      let match = options.cacheRepoFor.match(/((\d+)d)?((\d+)h)?((\d+)m)?/i);
+    if (!options.disableRepoCaching) {
+      let cacheRepoFor = options.cacheRepoFor || '1d';
+      let match = cacheRepoFor.match(/((\d+)d)?((\d+)h)?((\d+)m)?/i);
       if (!match) {
         throw new Error("Invalid cache life: " + options.cacheRepoFor);
       }
@@ -53,9 +66,13 @@ export default class ServiceRepoLoader implements RepoLoader {
       let h = match[4] ? Number(match[4]) : 0;
       let m = match[6] ? Number(match[6]) : 0;
       this.repoManLife = d*86400000 + h*3600000 + m*60000;
+      if (this.repoManLife < 3600000) {
+        console.warn("Minimal repository cache life: 10min");
+        this.repoManLife = 600000;
+      }
       this.getRepoMan();
     } else {
-      this.repoMan = null;
+      console.log("Repository caching disabled.");
     }
   }
 
@@ -69,21 +86,8 @@ export default class ServiceRepoLoader implements RepoLoader {
     }
   }
 
-  isLoaded(): boolean {
-    return !!this.repoMan;
-  }
-
-  reloadRepo(): Promise<Repository> {
-    return this.serviceHelper.callJSONService('repository.json').then(bsresp => {
-      if (!bsresp.repository) {
-        throw new Error("Missing repository in server response");
-      }
-      return bsresp.repository;
-    });
-  }
-
   getRepoMan(): Promise<RepoMan> {
-    if (this.repoMan) {
+    if (this.repoMan && !this.options.disableRepoCaching) {
       return Promise.resolve(this.repoMan);
     }
     return this.reloadRepoMan();
@@ -96,20 +100,33 @@ export default class ServiceRepoLoader implements RepoLoader {
       this.repoMan = new RepoMan();
     }
 
-    this.reloadRepo().then(repo => {
-      this.repoMan.load(repo, this.options.repoOptions);
+    return this.serviceHelper.callJSONService('repository.json').then(result => {
+      if (!result.repository) {
+        throw new Error("Missing repository in server response");
+      }
+
+      this.repoMan.load(result.repository, this.options.repoOptions);
       if (this.repoManLife > 0) {
         if (this.repoManTimer) {
           clearTimeout(this.repoManTimer);
         }
         this.repoManTimer = setTimeout(() => {
-          this.getRepoMan();
+          this.reloadRepoMan();
         }, this.repoManLife);
       }
+
+      return this.repoMan.onReadyP();
     }).catch(err => {
       this.repoMan.setError(err);
     });
-
-    return Promise.resolve(this.repoMan);
   }
 }
+
+registerFactory(options => {
+  if ('serviceBase' in options) {
+    let result = new ServiceRepoLoader;
+    result.load(options as ServiceRepoLoaderOptions);
+    return result;
+  }
+  return null;
+});

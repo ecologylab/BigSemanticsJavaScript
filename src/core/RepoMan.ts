@@ -53,7 +53,7 @@ export interface SelectorMap {
  */
 export interface RepoManService {
   getBuildInfo(options?: RepoCallOptions): Promise<BuildInfo>;
-  getRepository(options?: RepoCallOptions): Promise<TypedRepository>;
+  getRepository(options?: RepoCallOptions): Promise<Repository>;
   getUserAgentString(userAgentName: string, options?: RepoCallOptions): Promise<string>;
   getDomainInterval(domain: string, options?: RepoCallOptions): Promise<number>;
   loadMmd(name: string, options?: RepoCallOptions): Promise<MetaMetadata>;
@@ -449,7 +449,7 @@ export default class RepoMan extends Readyable implements RepoManService {
   }
 
   /**
-   * Compute the hash of an mmd, for use in caching 
+   * Compute the hash of an mmd, for use in caching
    */
   private computeMmdHash(mmd: MetaMetadata): number {
     let fingerprint = "";
@@ -527,11 +527,9 @@ export default class RepoMan extends Readyable implements RepoManService {
    * @param {RepoCallOptions} options
    * @return {Promise<TypedRepository>}
    */
-  getRepository(options: RepoCallOptions = {}): Promise<TypedRepository> {
+  getRepository(options: RepoCallOptions = {}): Promise<Repository> {
     return this.onReadyP().then(() => {
-      return {
-        meta_metadata_repository: this.repository,
-      };
+      return this.repository;
     });
   }
 

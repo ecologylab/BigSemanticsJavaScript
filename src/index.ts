@@ -5,7 +5,6 @@
 export * from 'simpl.js';
 export * from './core/ParsedURL';
 export { default as ParsedURL } from './core/ParsedURL';
-export * from './core/Cache';
 export { default as Scope } from './core/Scope';
 export { default as Readyable } from './core/Readyable';
 export * from './core/utils';

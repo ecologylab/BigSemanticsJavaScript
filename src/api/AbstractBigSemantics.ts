@@ -8,7 +8,7 @@ import Readyable from '../core/Readyable';
 import {
   MetaMetadata,
   BuildInfo,
-  TypedRepository,
+  Repository,
   Metadata,
   TypedMetadata,
   BSResult,
@@ -48,7 +48,7 @@ export abstract class AbstractBigSemantics extends Readyable implements BigSeman
       }
 
       let typedMetadata: TypedMetadata = {
-        type: type,
+        metadata_type_name: type,
       };
       typedMetadata[type] = metadata;
 
@@ -68,5 +68,5 @@ export abstract class AbstractBigSemantics extends Readyable implements BigSeman
   abstract loadMmd(name: string, options?: BigSemanticsCallOptions): Promise<MetaMetadata>;
   abstract selectMmd(location: string | ParsedURL, options?: BigSemanticsCallOptions): Promise<MetaMetadata>;
   abstract normalizeLocation(location: string | ParsedURL, options?: BigSemanticsCallOptions): Promise<string>;
-  abstract getRepository(options?: BigSemanticsCallOptions): Promise<TypedRepository>;
+  abstract getRepository(options?: BigSemanticsCallOptions): Promise<Repository>;
 }

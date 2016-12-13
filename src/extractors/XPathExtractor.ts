@@ -675,7 +675,7 @@ export class Extraction {
                 for (let composite of composites) {
                   // TODO change mm_name based on location
                   let typedComposite: TypedMetadata = {
-                    type: composite.mm_name,
+                    metadata_type_name: composite.mm_name,
                   };
                   typedComposite[composite.mm_name] = composite;
                   obj[field.collection.name].push(typedComposite);
@@ -795,7 +795,7 @@ export class Extraction {
       console.log("Extraction finished: %O", this.metadata);
       this.typeTag = this.mmd.tag || this.mmd.name;
       this.typedMetadata = {
-        type: this.typeTag,
+        metadata_type_name: this.typeTag,
       };
       this.typedMetadata[this.typeTag] = this.metadata;
       return this.typedMetadata;

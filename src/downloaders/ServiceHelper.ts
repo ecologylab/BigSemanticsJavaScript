@@ -24,7 +24,11 @@ export interface ServiceHelperOptions {
  */
 export default class ServiceHelper {
   private options: ServiceHelperOptions;
-  serviceBase: ParsedURL;
+  private serviceBase: ParsedURL;
+
+  getServiceBase(): ParsedURL {
+    return this.serviceBase;
+  }
 
   load(options: ServiceHelperOptions): void {
     this.options = options;

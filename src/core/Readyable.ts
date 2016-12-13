@@ -47,14 +47,14 @@ export default class Readyable {
   /**
    * A promisified version of onReady().
    */
-  onReadyP(): Promise<void> {
-    return new Promise<void>((resolve, reject) => {
+  onReadyP(): Promise<this> {
+    return new Promise<this>((resolve, reject) => {
       this.onReady(err => {
         if (err) {
           reject(err);
           return;
         }
-        resolve();
+        resolve(this);
       });
     });
   }

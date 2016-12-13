@@ -4,23 +4,14 @@
 
 import * as Promise from 'bluebird';
 import ParsedURL from '../core/ParsedURL';
-import Readyable from '../core/Readyable';
 import {
   HttpResponse,
   MetaMetadata,
-  BuildInfo,
-  TypedRepository,
-  Metadata,
   TypedMetadata,
   BSResult,
 } from '../core/types';
-import { PreFilter } from '../core/FieldOps';
-import RepoMan from '../core/RepoMan';
 import { Extractor } from '../core/Extractor';
-import {
-  BigSemanticsCallOptions,
-  BigSemantics,
-} from '../core/BigSemantics';
+import { BigSemanticsCallOptions, } from '../core/BigSemantics';
 import { AbstractBigSemantics } from "./AbstractBigSemantics";
 
 /**

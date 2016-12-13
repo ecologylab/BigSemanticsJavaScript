@@ -218,11 +218,9 @@ export interface MetaMetadata extends MetaMetadataCompositeField {
 
   parser?: string;
   extract_with?: string;
-  
+
   kids: TypedMetaMetadataField[];
 }
-
-export type Wrapper = MetaMetadata;
 
 /**
  * A wrapper repository.
@@ -287,10 +285,18 @@ export interface Metadata {
  * ```
  */
 export interface TypedMetadata {
-  type: string;
-  // nothing
+  // To make differentiating Metadata and TypedMetadata easier, this field is
+  // intentionally named NOT as mm_name
+  metadata_type_name: string;
+
+  // a field:
+  //   - named with a meta-metadata type, e.g. amazon_product
+  //   - valued with a Metadata object
 }
 
+/**
+ * Wrapper for a result.
+ */
 export interface BSResult {
   repository?: Repository;
   mmd?: MetaMetadata;
