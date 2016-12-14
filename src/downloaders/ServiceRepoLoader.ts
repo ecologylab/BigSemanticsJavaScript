@@ -124,7 +124,7 @@ export default class ServiceRepoLoader implements RepoLoader {
 
 registerFactory(options => {
   if ('serviceBase' in options) {
-    let result = new ServiceRepoLoader;
+    let result = new ServiceRepoLoader();
     result.load(options as ServiceRepoLoaderOptions);
     return result;
   }

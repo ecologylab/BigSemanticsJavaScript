@@ -32,7 +32,9 @@ import BSWebApp, { BSWebAppOptions } from './BSWebApp';
 export interface BSAutoSwitchOptions extends BigSemanticsOptions {
   appId: string;
   appVer: string;
+
   extensionIds: string[];
+
   serviceBase: string | ParsedURL;
   repoOptions?: RepoOptions;
   cacheRepoFor?: string;
@@ -48,7 +50,7 @@ export default class BSAutoSwitch extends Readyable implements BigSemantics {
   private bsWebApp: BSWebApp;
   bsImpl: BSExtension | BSWebApp = undefined;
 
-  load(options: BSAutoSwitchOptions, extractors: { [name: string]: Extractor } = {}): void {
+  load(options: BSAutoSwitchOptions): void {
     let loadBSExt = (options: BSAutoSwitchOptions) => {
       if (!options.extensionIds) {
         return Promise.reject(new Error("Extension IDs not specified"));

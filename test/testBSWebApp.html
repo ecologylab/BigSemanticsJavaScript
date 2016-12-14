@@ -1,0 +1,69 @@
+<html>
+
+<head>
+  <title>Test BSWebApp</title>
+
+  <link rel="stylesheet" href="../libraries/jquery.jsonview.min.css" />
+
+  <script src="../libraries/jquery-2.0.0.min.js"></script>
+  <script src="../libraries/jquery.jsonview.min.js"></script>
+
+  <script src="../build/bigsemantics-core.bundle.js"></script>
+
+  <style>
+    .wrap {
+      margin: 0.5em;
+      padding: 1em;
+      background-color: #C7EDDA;
+    }
+
+    .error {
+      color: red;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    URL: <input id="url" type="text" size="100" />
+    <input id="load" type="button" value="Load" />
+  </div>
+
+  <div class="wrap">
+    <div id="error" class="error"></div>
+    <div id="metadata"></div>
+  </div>
+
+  <script>
+    var bs = new bigsemantics.BSWebApp();
+    bs.load({
+      appId: 'test-bswebapp',
+      appVer: '0.0.0',
+      serviceBase: 'https://api.ecologylab.net/BigSemanticsService/',
+    });
+
+    function loadMetadata(url) {
+      bs.loadMetadata(url).then(metadataResult => {
+        bigsemantics.graphCollapse(metadataResult);
+        var json = JSON.stringify(metadataResult, null, 4);
+        $('#metadata').JSONView(json);
+      }).catch(err => {
+        console.error(err);
+        $('#error').text(err.stack);
+      });
+    }
+
+    var initialUrl = "http://www.amazon.com/gp/product/B00I8BIBCW/";
+    $('#url').val(initialUrl);
+    loadMetadata(initialUrl);
+
+    $('#load').click(() => {
+      $('#metadata').text('');
+      $('#error').text('');
+      var url = $('#url').val();
+      loadMetadata(url);
+    });
+  </script>
+</body>
+
+</html>

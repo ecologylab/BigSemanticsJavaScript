@@ -12,7 +12,7 @@ var buffer = require('vinyl-buffer');
 var gutil = require('gulp-util');
 var del = require('del');
 
-var env = argv.env || 'prod';
+var env = argv.env || 'dev';
 var isDev = env === 'dev';
 console.log("Environment (specify with --env when calling gulp): " + env);
 
@@ -31,7 +31,7 @@ gulp.task('compile', function() {
 });
 
 gulp.task('bundle', [ 'compile' ], function() {
-  var mainFile = 'build/index.js';
+  var mainFile = 'build/bigsemantics-core.js';
   var bundle = browserify({
     entries: mainFile,
     standalone: 'bigsemantics',

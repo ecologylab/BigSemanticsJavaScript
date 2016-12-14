@@ -10,7 +10,6 @@ import {
   MetaMetadata,
   BuildInfo,
   Repository,
-  TypedRepository,
   Metadata,
   TypedMetadata,
   BSResult,

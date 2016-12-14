@@ -1,11 +1,11 @@
 {
   "name": "bigsemantics-core.js",
-  "version": "3.0.1",
+  "version": "3.0.2",
   "description": "The core JavaScript library of BigSemantics.",
-  "main": "build/index.js",
-  "types": "build/index.d.js",
+  "main": "build/bigsemantics-core.js",
+  "types": "build/bigsemantics-core.d.js",
   "scripts": {
-    "prepublish": "gulp",
+    "prepublish": "gulp --env=prod",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -28,9 +28,9 @@
   },
   "devDependencies": {
     "@types/bluebird": "^3.0.35",
-    "@types/chrome": "0.0.35",
-    "@types/filesystem": "0.0.28",
-    "@types/filewriter": "0.0.28",
+    "@types/chrome": "^0.0.36",
+    "@types/filesystem": "^0.0.28",
+    "@types/filewriter": "^0.0.28",
     "babel-preset-es2015": "^6.18.0",
     "browserify": "^13.1.1",
     "del": "^2.2.2",

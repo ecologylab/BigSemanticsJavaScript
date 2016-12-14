@@ -25,7 +25,7 @@ export interface HttpResponse {
   contentType?: string;
   charset?: string;
 
-  entity?: Document;
+  entity?: Document | Object;
   xml?: Object;
   text?: string;
 }

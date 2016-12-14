@@ -32,11 +32,16 @@ export interface BSDefaultOptions extends BigSemanticsOptions {
 
   repository?: Repository | TypedRepository;
 
+  repositoryUrl?: string | ParsedURL;
+
   serviceBase?: string | ParsedURL;
   repoOptions?: RepoOptions;
   cacheRepoFor?: string;
   disableRepoCaching?: boolean;
   requesterFactory?: ()=>Downloader;
+
+  downloaders?: { [name: string]: Downloader };
+  extractors?: { [name: string]: Extractor };
 }
 
 /**
@@ -57,24 +62,20 @@ export default class BSDefault extends BaseBigSemantics {
     return null;
   }
 
-  load(
-    options: BSDefaultOptions,
-    downloaders?: { [name: string]: Downloader },
-    extractors?: { [name: string]: Extractor },
-  ): void {
+  load(options: BSDefaultOptions): void {
     this.reset();
 
     this.options = options;
 
-    if (downloaders) {
-      this.downloaders = downloaders;
+    if (options.downloaders) {
+      this.downloaders = options.downloaders;
     }
     if (!this.downloaders || Object.keys(this.downloaders).length == 0) {
       this.downloaders = { xhr: new XHRDownloader() };
     }
 
-    if (extractors) {
-      this.extractors = extractors;
+    if (options.extractors) {
+      this.extractors = options.extractors;
     }
     if (!this.extractors || Object.keys(this.extractors).length == 0) {
       this.extractors = { xpath: new XPathExtractor() };

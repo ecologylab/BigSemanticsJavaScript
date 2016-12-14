@@ -46,6 +46,7 @@ interface Request {
  */
 export interface BSExtensionOptions extends BigSemanticsOptions {
   extensionIds?: string[];
+  extractors?: { [name: string]: Extractor };
 }
 
 /**
@@ -63,9 +64,9 @@ export default class BSExtension extends BaseBigSemantics {
    *
    * @param {BSExtensionOptions} options
    */
-  load(options: BSExtensionOptions = {}, extractors: { [name: string]: Extractor } = {}): void {
+  load(options: BSExtensionOptions = {}): void {
     this.options = options;
-    this.extractors = extractors;
+    this.extractors = options.extractors || {};
 
     if (options.extensionIds) {
       this.pickExt().catch(err => {

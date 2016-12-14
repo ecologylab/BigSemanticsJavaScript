@@ -1,0 +1,110 @@
+<html>
+
+<head>
+  <title>Test BSDefault</title>
+
+  <link rel="stylesheet" href="../libraries/jquery.jsonview.min.css" />
+
+  <script src="../libraries/jquery-2.0.0.min.js"></script>
+  <script src="../libraries/jquery.jsonview.min.js"></script>
+
+  <script src="../build/bigsemantics-core.bundle.js"></script>
+
+  <style>
+  .wrap {
+    margin: 0.5em;
+    padding: 1em;
+    background-color: #C7EDDA;
+  }
+
+  .error {
+    color: red;
+  }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <select id="testlist">
+      <option value="choose">Choose ...</option>
+    </select>
+  </div>
+
+  <div class="wrap">
+    <p>Repository: <span id='repo'><a href="#"></a></span></p>
+    <p>Document: <span id='doc'><a href="#"></a></span></p>
+    <p>Description: <span id="description"></span></p>
+    <p id="error" class="error"></p>
+  </div>
+
+  <div class="wrap">
+    <div id="metadata"></div>
+  </div>
+
+  <script>
+    let specs = {};
+    function setupTest(spec) {
+      if (spec) {
+        let option = $('<option></option>').val(spec.name).text(spec.displayName);
+        $('#testlist').append(option);
+        specs[spec.name] = spec;
+      }
+    }
+
+    function switchToTest(spec) {
+      $('#repo > a').attr('href', spec.repoUrl).text(spec.repoUrl);
+      $('#doc > a').attr('href', spec.docUrl).text(spec.docUrl);
+      $('#description').text(spec.description);
+      $('#error').text('');
+      $('#metadata').empty();
+
+      let bs = new bigsemantics.BSDefault();
+      bs.load({
+        appId: 'test-bsdefault',
+        appVer: '0.0.0',
+        repositoryUrl: spec.repoUrl,
+      });
+
+      bs.loadMetadata(spec.docUrl, {
+        mmdName: spec.mmdName,
+      }).then(metadataResult => {
+        bigsemantics.graphCollapse(metadataResult);
+        var json = JSON.stringify(metadataResult, null, 4);
+        $('#metadata').JSONView(json);
+      }).catch(err => {
+        console.error(err);
+        $('#error').text(err.stack);
+      });
+    }
+
+    $('#testlist').on('change', function() {
+      var spec = specs[this.value];
+      if (spec) {
+        switchToTest(spec);
+      }
+    });
+
+    setupTest({
+      name: 'inherited-xpath-amazon_product',
+      displayName: 'Test inherited xpaths with amazon product',
+      repoUrl: 'repo-all-160711.json',
+      mmdName: 'amazon_product',
+      docUrl: 'amazon_product.html',
+      description: 'Test inherited xpaths with amazon product. The department\
+      field should not contain page-level information, such as description and\
+      main_images.',
+    });
+
+    setupTest({
+      name: 'inherited-xpath-fake_acm_article',
+      displayName: 'Test inherited xpaths with fake ACM article',
+      repoUrl: 'repo-inherited-xpaths.json',
+      mmdName: 'acm_article',
+      docUrl: 'fake-acm_article.html',
+      description: 'Test inherited xpaths with fake ACM article. There should be\
+      a source field.',
+    });
+  </script>
+</body>
+
+</html>

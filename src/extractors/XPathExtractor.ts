@@ -92,7 +92,7 @@ export class Extraction {
     }
     this.response = resp;
     this.location = new ParsedURL(this.response.location);
-    this.rootNode = resp.entity;
+    this.rootNode = resp.entity as Document;
     this.mmd = mmd;
     this.bigsemanticsApi = bigsemanticsApi;
     this.options = options;
@@ -810,7 +810,11 @@ export default class XPathExtractor implements Extractor {
                   mmd: MetaMetadata,
                   bigsemanticsApi: BigSemantics,
                   options?: ExtractionOptions): Promise<TypedMetadata> {
-    let extraction = new Extraction(response, mmd, bigsemanticsApi, options);
-    return extraction.extract();
+    if (response.entity instanceof Document) {
+      let extraction = new Extraction(response, mmd, bigsemanticsApi, options);
+      return extraction.extract();
+    } else {
+      return Promise.reject(new Error("For XPathExtractor, response.entity must be a Document instance"));
+    }
   }
 }
