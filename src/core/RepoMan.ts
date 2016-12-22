@@ -30,15 +30,12 @@ export interface RepoOptions {
 
   userAgents?: { [name: string]: string };
   domainIntervals?: { [domain: string]: number };
-
-  timeout?: number; // TODO implement support for timeout
 }
 
 /**
  * Options for calls to the repoMan.
  */
 export interface RepoCallOptions {
-  timeout?: number; // TODO implement support for timeout
 }
 
 /**
@@ -54,6 +51,7 @@ export interface SelectorMap {
 export interface RepoManService {
   getBuildInfo(options?: RepoCallOptions): Promise<BuildInfo>;
   getRepository(options?: RepoCallOptions): Promise<Repository>;
+  getSerializedRepository(options?: RepoCallOptions): Promise<string>;
   getUserAgentString(userAgentName: string, options?: RepoCallOptions): Promise<string>;
   getDomainInterval(domain: string, options?: RepoCallOptions): Promise<number>;
   loadMmd(name: string, options?: RepoCallOptions): Promise<MetaMetadata>;
@@ -64,7 +62,7 @@ export interface RepoManService {
 /**
  * A meta-metadata repository manager.
  */
-export default class RepoMan extends Readyable implements RepoManService {
+export class RepoMan extends Readyable implements RepoManService {
   /**
    * Add a selector to the given selector map with a specified key.
    *
@@ -353,6 +351,7 @@ export default class RepoMan extends Readyable implements RepoManService {
    * The actual meta-metadata repository.
    */
   private repository: Repository;
+  private serializedRepository: string;
 
   private mmds: { [name: string]: MetaMetadata };
   private urlStripped: { [strippedUrl: string]: Selector[] };
@@ -397,7 +396,7 @@ export default class RepoMan extends Readyable implements RepoManService {
     this.mmds = {};
     for (let mmd of this.repository.repository_by_name) {
       this.mmds[mmd.name] = mmd;
-      mmd.hashCode = this.computeMmdHash(mmd);
+      mmd.hash_code = this.computeMmdHash(mmd);
     }
     if (this.repository.alt_names) {
       for (let item of this.repository.alt_names) {
@@ -507,6 +506,7 @@ export default class RepoMan extends Readyable implements RepoManService {
   reset(): void {
     super.reset();
     this.repository = null;
+    this.serializedRepository = null;
     this.options = null;
     this.repository = null;
     this.mmds = null;
@@ -530,6 +530,22 @@ export default class RepoMan extends Readyable implements RepoManService {
   getRepository(options: RepoCallOptions = {}): Promise<Repository> {
     return this.onReadyP().then(() => {
       return this.repository;
+    });
+  }
+
+  /**
+   * Get the serialized form of the repository. The returned value is internally
+   * cached.
+   *
+   * @param {RepoCallOptions} options
+   * @return {Promise<string>}
+   */
+  getSerializedRepository(options?: RepoCallOptions): Promise<string> {
+    return this.onReadyP().then(() => {
+      if (!this.serializedRepository) {
+        this.serializedRepository = simpl.serialize(this.repository);
+      }
+      return this.serializedRepository;
     });
   }
 
@@ -636,3 +652,5 @@ export default class RepoMan extends Readyable implements RepoManService {
     });
   }
 }
+
+export default RepoMan;

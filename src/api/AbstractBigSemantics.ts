@@ -69,4 +69,5 @@ export abstract class AbstractBigSemantics extends Readyable implements BigSeman
   abstract selectMmd(location: string | ParsedURL, options?: BigSemanticsCallOptions): Promise<MetaMetadata>;
   abstract normalizeLocation(location: string | ParsedURL, options?: BigSemanticsCallOptions): Promise<string>;
   abstract getRepository(options?: BigSemanticsCallOptions): Promise<Repository>;
+  abstract getSerializedRepository(options?: BigSemanticsCallOptions): Promise<string>;
 }

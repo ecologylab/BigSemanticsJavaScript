@@ -79,6 +79,7 @@ export interface BigSemantics extends RepoManService {
 
   getBuildInfo(options?: BigSemanticsCallOptions): Promise<BuildInfo>;
   getRepository(options?: BigSemanticsCallOptions): Promise<Repository>;
+  getSerializedRepository(options?: BigSemanticsCallOptions): Promise<string>;
   getUserAgentString(userAgentName: string, options?: BigSemanticsCallOptions): Promise<string>;
   getDomainInterval(domain: string, options?: BigSemanticsCallOptions): Promise<number>;
   loadMmd(name: string, options?: BigSemanticsCallOptions): Promise<MetaMetadata>;

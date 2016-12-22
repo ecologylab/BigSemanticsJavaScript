@@ -25,7 +25,7 @@ export class IframeExtractionTask extends RemoteExtractionTask {
 /**
  * A remote extractor using a <iframe> element.
  */
-export default class IframeExtractor extends RemoteExtractor {
+export class IframeExtractor extends RemoteExtractor {
   name = 'iframe';
 
   protected newTask(
@@ -60,3 +60,5 @@ export default class IframeExtractor extends RemoteExtractor {
     }
   }
 }
+
+export default IframeExtractor;

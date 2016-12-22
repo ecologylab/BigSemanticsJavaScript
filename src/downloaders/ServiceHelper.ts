@@ -22,7 +22,7 @@ export interface ServiceHelperOptions {
 /**
  * Helper for calling BigSemantics web service.
  */
-export default class ServiceHelper {
+export class ServiceHelper {
   private options: ServiceHelperOptions;
   private serviceBase: ParsedURL;
 
@@ -59,3 +59,5 @@ export default class ServiceHelper {
     });
   }
 }
+
+export default ServiceHelper;

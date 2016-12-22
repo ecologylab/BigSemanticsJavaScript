@@ -47,7 +47,7 @@ export class PopUnderExtractionTask extends RemoteExtractionTask {
 /**
  *
  */
-export default class PopUnderExtractor extends RemoteExtractor {
+export class PopUnderExtractor extends RemoteExtractor {
   name = 'popUnder';
 
   private tasksById: { [id: number]: PopUnderExtractionTask } = {};
@@ -137,3 +137,5 @@ export default class PopUnderExtractor extends RemoteExtractor {
     };
   }
 }
+
+export default PopUnderExtractor;

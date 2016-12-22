@@ -24,7 +24,7 @@ export interface ServiceExtractionOptions extends ExtractionOptions {
 /**
  * An extractor that delegates to BigSemantics web service.
  */
-export default class ServiceExtractor implements Extractor {
+export class ServiceExtractor implements Extractor {
   name = 'service';
 
   private serviceHelper: ServiceHelper = new ServiceHelper();
@@ -68,3 +68,5 @@ export default class ServiceExtractor implements Extractor {
       });
   }
 }
+
+export default ServiceExtractor;

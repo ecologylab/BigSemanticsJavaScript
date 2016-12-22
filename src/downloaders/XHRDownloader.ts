@@ -14,7 +14,7 @@ import {
 /**
  * A Downloader implementation using XMLHttpRequest.
  */
-export default class XHRDownloader extends BaseDownloader {
+export class XHRDownloader extends BaseDownloader {
   name = 'xhr';
 
   /**
@@ -195,3 +195,5 @@ export default class XHRDownloader extends BaseDownloader {
     });
   }
 }
+
+export default XHRDownloader;

@@ -14,7 +14,7 @@ export interface Callback<Value> {
 /**
  * An object that can take time to get ready.
  */
-export default class Readyable {
+export class Readyable {
   private ready: boolean = false;
   private callbackQueue: Callback<this>[] = [];
   private error: Error = null;
@@ -106,3 +106,5 @@ export default class Readyable {
     }
   }
 }
+
+export default Readyable;

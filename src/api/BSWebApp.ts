@@ -41,7 +41,7 @@ export interface BSWebAppOptions extends BigSemanticsOptions {
  * It uses JSONP to work around CORS limitations (and therefore inherently
  * lacking in error reporting).
  */
-export default class BSWebApp extends AbstractBigSemantics {
+export class BSWebApp extends AbstractBigSemantics {
   private options: BSWebAppOptions;
   private repoLoader: ServiceRepoLoader;
 
@@ -108,6 +108,10 @@ export default class BSWebApp extends AbstractBigSemantics {
     return this.repoLoader.getRepoMan().then(repoMan => repoMan.getRepository(options));
   }
 
+  getSerializedRepository(options: BigSemanticsCallOptions = {}): Promise<string> {
+    return this.repoLoader.getRepoMan().then(repoMan => repoMan.getSerializedRepository(options));
+  }
+
   getUserAgentString(userAgentName: string, options: BigSemanticsCallOptions = {}): Promise<string> {
     return this.repoLoader.getRepoMan().then(repoMan => repoMan.getUserAgentString(userAgentName, options));
   }
@@ -154,3 +158,5 @@ export default class BSWebApp extends AbstractBigSemantics {
     });
   }
 }
+
+export default BSWebApp;

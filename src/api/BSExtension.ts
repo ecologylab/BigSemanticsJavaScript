@@ -52,7 +52,7 @@ export interface BSExtensionOptions extends BigSemanticsOptions {
 /**
  * A BigSemantics implementation that talks to a Chrome extension to do its job.
  */
-export default class BSExtension extends BaseBigSemantics {
+export class BSExtension extends BaseBigSemantics {
   private options: BSExtensionOptions;
   private activeExtId: string;
   private extractors: { [name: string]: Extractor } = {};
@@ -220,6 +220,17 @@ export default class BSExtension extends BaseBigSemantics {
     });
   }
 
+  getSerializedRepository(options: BigSemanticsCallOptions = {}): Promise<string> {
+    return this.onReadyP().then(() => {
+      return this.sendMsg(this.activeExtId, {
+        method: 'getSerializedRepository',
+        params: {
+          options: options,
+        },
+      });
+    });
+  }
+
   getUserAgentString(userAgentName: string, options: BigSemanticsCallOptions = {}): Promise<string> {
     return this.onReadyP().then(() => {
       return this.sendMsg(this.activeExtId, {
@@ -280,3 +291,5 @@ export default class BSExtension extends BaseBigSemantics {
     });
   }
 }
+
+export default BSExtension;

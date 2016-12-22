@@ -45,7 +45,7 @@ export interface BSAutoSwitchOptions extends BigSemanticsOptions {
 /**
  * First try BSExtension, then try BSWebApp.
  */
-export default class BSAutoSwitch extends Readyable implements BigSemantics {
+export class BSAutoSwitch extends Readyable implements BigSemantics {
   private bsExt: BSExtension;
   private bsWebApp: BSWebApp;
   bsImpl: BSExtension | BSWebApp = undefined;
@@ -132,6 +132,10 @@ export default class BSAutoSwitch extends Readyable implements BigSemantics {
     return this.bsImpl.getRepository(options);
   }
 
+  getSerializedRepository(options: BigSemanticsCallOptions = {}): Promise<string> {
+    return this.bsImpl.getSerializedRepository(options);
+  }
+
   getUserAgentString(userAgentName: string, options: BigSemanticsCallOptions = {}): Promise<string> {
     return this.bsImpl.getUserAgentString(userAgentName, options);
   }
@@ -152,3 +156,5 @@ export default class BSAutoSwitch extends Readyable implements BigSemantics {
     return this.bsImpl.normalizeLocation(location, options);
   }
 }
+
+export default BSAutoSwitch;

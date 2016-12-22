@@ -211,7 +211,7 @@ export interface FilterLocation {
 export interface MetaMetadata extends MetaMetadataCompositeField {
   name: string;
   extends?: string;
-  hashCode?: number;
+  hash_code?: number;
 
   selectors?: Selector[];
   filter_location?: FilterLocation;
@@ -220,6 +220,9 @@ export interface MetaMetadata extends MetaMetadataCompositeField {
   extract_with?: string;
 
   kids: TypedMetaMetadataField[];
+
+  no_cache?: boolean;
+  cache_life?: string;
 }
 
 /**

@@ -5,7 +5,7 @@
 /**
  * A (nested) scope.
  */
-export default class Scope {
+export class Scope {
   readonly _id: string;
   readonly _parent: Scope;
   _subscopes: Scope[];
@@ -54,3 +54,5 @@ export default class Scope {
     return null;
   }
 }
+
+export default Scope;

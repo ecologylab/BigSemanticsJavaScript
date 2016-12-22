@@ -803,7 +803,7 @@ export class Extraction {
   }
 }
 
-export default class XPathExtractor implements Extractor {
+export class XPathExtractor implements Extractor {
   name = 'xpath';
 
   extractMetadata(response: HttpResponse,
@@ -818,3 +818,5 @@ export default class XPathExtractor implements Extractor {
     }
   }
 }
+
+export default XPathExtractor;

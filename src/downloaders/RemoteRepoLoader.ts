@@ -8,7 +8,7 @@ import ParsedURL from '../core/ParsedURL';
 import { Repository, TypedRepository, BSResult } from '../core/types';
 import RepoMan, { RepoOptions } from '../core/RepoMan';
 import { Downloader } from '../core/Downloader';
-import { RepoLoader, registerFactory } from '../core/RepoLoader';
+import { RepoLoader } from '../core/RepoLoader';
 import XHRDownloader from './XHRDownloader';
 
 /**
@@ -38,7 +38,7 @@ export interface RemoteRepoLoaderOptions {
 /**
  * Helper for caching repository from BigSemantics web service.
  */
-export default class RemoteRepoLoader implements RepoLoader {
+export class RemoteRepoLoader implements RepoLoader {
   private options: RemoteRepoLoaderOptions;
   private repository: Repository;
   private repoMan: RepoMan;
@@ -132,11 +132,4 @@ export default class RemoteRepoLoader implements RepoLoader {
   }
 }
 
-registerFactory(options => {
-  if ('repositoryUrl' in options) {
-    let result = new RemoteRepoLoader();
-    result.load(options as RemoteRepoLoaderOptions);
-    return result;
-  }
-  return null;
-});
+export default RemoteRepoLoader;

@@ -16,7 +16,7 @@ export interface JSONPCallOptions {
   timeout?: number;
 }
 
-export default class JSONPHelper {
+export class JSONPHelper {
   private static readonly PREFIX = 'jsonp_';
 
   private options: JSONPHelperOptions;
@@ -62,3 +62,5 @@ export default class JSONPHelper {
     return result;
   }
 }
+
+export default JSONPHelper;

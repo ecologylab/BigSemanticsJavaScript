@@ -7,7 +7,7 @@ import ParsedURL from '../core/ParsedURL';
 import { Repository } from '../core/types';
 import RepoMan, { RepoOptions } from '../core/RepoMan';
 import { Downloader } from '../core/Downloader';
-import { RepoLoader, registerFactory } from '../core/RepoLoader';
+import { RepoLoader } from '../core/RepoLoader';
 import ServiceHelper from "./ServiceHelper";
 
 /**
@@ -37,7 +37,7 @@ export interface ServiceRepoLoaderOptions {
 /**
  * Helper for caching repository from BigSemantics web service.
  */
-export default class ServiceRepoLoader implements RepoLoader {
+export class ServiceRepoLoader implements RepoLoader {
   private options: ServiceRepoLoaderOptions;
   private serviceHelper: ServiceHelper;
   private repoMan: RepoMan;
@@ -122,11 +122,4 @@ export default class ServiceRepoLoader implements RepoLoader {
   }
 }
 
-registerFactory(options => {
-  if ('serviceBase' in options) {
-    let result = new ServiceRepoLoader();
-    result.load(options as ServiceRepoLoaderOptions);
-    return result;
-  }
-  return null;
-});
+export default ServiceRepoLoader;

@@ -22,7 +22,7 @@ export interface QueryMap {
 /**
  * A parsed URL representation.
  */
-export default class ParsedURL {
+export class ParsedURL {
   private static readonly noBase = '$NOBASE$';
   static readonly subdomainsToStrip = [ 'www', 'en' ];
 
@@ -349,3 +349,5 @@ export default class ParsedURL {
     return result;
   }
 }
+
+export default ParsedURL;

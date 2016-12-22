@@ -31,10 +31,9 @@ export interface BSDefaultOptions extends BigSemanticsOptions {
   appVer: string;
 
   repository?: Repository | TypedRepository;
-
   repositoryUrl?: string | ParsedURL;
-
   serviceBase?: string | ParsedURL;
+
   repoOptions?: RepoOptions;
   cacheRepoFor?: string;
   disableRepoCaching?: boolean;
@@ -48,7 +47,7 @@ export interface BSDefaultOptions extends BigSemanticsOptions {
  * A BigSemantics implementation using the BigSemantics web service through
  * (potentially cross-origin) XHR.
  */
-export default class BSDefault extends BaseBigSemantics {
+export class BSDefault extends BaseBigSemantics {
   private options: BSDefaultOptions;
 
   private repoLoader: RepoLoader;
@@ -143,6 +142,10 @@ export default class BSDefault extends BaseBigSemantics {
     return this.repoLoader.getRepoMan().then(repoMan => repoMan.getRepository(options));
   }
 
+  getSerializedRepository(options: BigSemanticsCallOptions = {}): Promise<string> {
+    return this.repoLoader.getRepoMan().then(repoMan => repoMan.getSerializedRepository(options));
+  }
+
   getUserAgentString(userAgentName: string, options: BigSemanticsCallOptions = {}): Promise<string> {
     return this.repoLoader.getRepoMan().then(repoMan => repoMan.getUserAgentString(userAgentName, options));
   }
@@ -163,3 +166,5 @@ export default class BSDefault extends BaseBigSemantics {
     return this.repoLoader.getRepoMan().then(repoMan => repoMan.normalizeLocation(location, options));
   }
 }
+
+export default BSDefault;
