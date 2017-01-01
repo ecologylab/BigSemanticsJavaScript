@@ -106,14 +106,26 @@ export class RemoteRepoLoader implements RepoLoader {
       responseType: 'json',
     };
     return requester.httpGet(this.options.repositoryUrl, opts).then(resp => {
-      if (!resp || !resp.entity) {
-        throw new Error("Invalid response");
+      let entity: any = resp.entity;
+      if (!entity) {
+        if (resp.text) {
+          entity = simpl.deserialize(resp.text);
+        }
       }
-      if (!resp.entity) {
+
+      if (!entity) {
         throw new Error("Missing repository in response");
       }
 
-      let repo = resp.entity as Repository | TypedRepository;
+      let repo: Repository | TypedRepository = null;
+      if ('meta_metadata_repository' in entity) {
+        repo = entity['meta_metadata_repository'] as Repository;
+      } else if ('repository' in entity) {
+        repo = entity['repository'] as Repository;
+      } else {
+        repo = entity;
+      }
+
       simpl.graphExpand(repo);
       this.repoMan.load(repo, this.options.repoOptions);
       if (this.repoManLife > 0) {

@@ -61,19 +61,19 @@ export class DefaultRepoLoader implements RepoLoader {
  * @return {RepoLoader}
  */
 export function create(options?: Object): RepoLoader {
-  if ('repository' in options) {
+  if ('repository' in options && options['repository']) {
     let result = new DefaultRepoLoader();
     result.load(options as DefaultRepoLoaderOptions);
     return result;
   }
 
-  if ('repositoryUrl' in options) {
+  if ('repositoryUrl' in options && options['repositoryUrl']) {
     let result = new RemoteRepoLoader();
     result.load(options as RemoteRepoLoaderOptions);
     return result;
   }
 
-  if ('serviceBase' in options) {
+  if ('serviceBase' in options && options['serviceBase']) {
     let result = new ServiceRepoLoader();
     result.load(options as ServiceRepoLoaderOptions);
     return result;

@@ -5,7 +5,6 @@ var gulp = require('gulp');
 var typescript = require('gulp-typescript');
 var sourcemaps = require('gulp-sourcemaps');
 var browserify = require('browserify');
-var babel = require('gulp-babel');
 var uglify = require('gulp-uglify');
 var source = require('vinyl-source-stream');
 var buffer = require('vinyl-buffer');
@@ -32,28 +31,21 @@ gulp.task('compile', function() {
 
 gulp.task('bundle', [ 'compile' ], function() {
   var mainFile = 'build/bigsemantics-core.js';
-  var bundle = browserify({
+  var bundleFileName = 'bigsemantics-core.bundle.js';
+
+  var stream = browserify({
     entries: mainFile,
     standalone: 'bigsemantics',
     debug: isDev,
-  });
-
-  var bundleFileName = 'bigsemantics-core.bundle.js';
-
-  var stream = bundle
-    .bundle()
-    .pipe(source(bundleFileName))
-    .pipe(buffer());
+  }).transform('babelify', {
+    presets: [ 'es2015' ],
+  }).bundle().pipe(source(bundleFileName)).pipe(buffer());
   if (!isDev) {
-    stream = stream
-      .pipe(babel({
-        presets: [ 'es2015' ],
-      }))
-      .pipe(uglify());
+    stream = stream.pipe(sourcemaps.init({
+      loadMaps: true,
+    })).pipe(uglify());
   }
-  return stream
-    .on('error', gutil.log)
-    .pipe(gulp.dest('build'));
+  return stream.on('error', gutil.log).pipe(gulp.dest('build'));
 });
 
 gulp.task('clean', function() {

@@ -2,6 +2,8 @@
  * Index of BigSemantics classes.
  */
 
+import 'babel-polyfill';
+
 export * from 'simpl.js';
 
 export * from './core/ParsedURL';
