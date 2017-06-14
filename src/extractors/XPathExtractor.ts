@@ -5,6 +5,7 @@
 // TODO inherited xpath issue: we need more test cases to actually address this
 // TODO more field ops: predicates, parallels, pattern matchers, etc
 
+import * as url from 'url';
 import * as Promise from 'bluebird';
 import ParsedURL from '../core/ParsedURL';
 import Scope from '../core/Scope';
@@ -202,6 +203,22 @@ export class Extraction {
     return result;
   }
 
+  evaluateText(
+    xpath: string,
+    contextNode: Node,
+    parentScope: ExtractionScope = null
+  ): string {
+    xpath = this.amendXpath(xpath, parentScope);
+    let xres = this.rootNode.evaluate(
+      xpath,
+      contextNode,
+      null,
+      XPathResult.STRING_TYPE,
+      null
+    );
+    return xres ? xres.stringValue : null;
+  }
+
   evaluateFirstNode(
     xpath: string,
     contextNode: Node,
@@ -260,16 +277,19 @@ export class Extraction {
         case 'ParsedURL':
           if (!val || val.length == 0) {
             val = null;
+            break;
           }
-          // TODO use ParsedURL for this case
-          // TODO filter ParsedURL
+          let absoluteUrl = new URL(val, this.location.toString());
+          result = absoluteUrl.toString();
           break;
         case 'Int':
         case 'Integer':
+          result = Number.parseInt(val.replace(/,/g, ''));
+          break;
         case 'Float':
         case 'Double':
         case 'Number':
-          result = Number(val);
+          result = Number.parseFloat(val.replace(/,/g, ''));
           break;
         case 'Bool':
         case 'Boolean':
@@ -303,14 +323,18 @@ export class Extraction {
       // case 2.2: regular xpath extraction
       if (!value && contextNode && field.xpaths instanceof Array) {
         for (let xpath of field.xpaths) {
-          let node = this.evaluateFirstNode(xpath, contextNode, parentScope);
-          if (node) {
-            if (field.extract_as_html && node instanceof Element) {
+          if (field.extract_as_html) {
+            let node = this.evaluateFirstNode(xpath, contextNode, parentScope);
+            if (node && node instanceof Element) {
               value = node.innerHTML;
-            } else {
-              value = node.textContent.trim();
+              break;
             }
-            break;
+          } else {
+            value = this.evaluateText(xpath, contextNode, parentScope);
+            if (value) {
+              value = value.trim();
+              break;
+            }
           }
         }
       }

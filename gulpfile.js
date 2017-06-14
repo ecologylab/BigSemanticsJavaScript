@@ -11,9 +11,9 @@ var buffer = require('vinyl-buffer');
 var gutil = require('gulp-util');
 var del = require('del');
 
-var env = argv.env || 'dev';
+var env = argv.env || process.env.NODE_ENV || 'dev';
 var isDev = env === 'dev';
-console.log("Environment (specify with --env when calling gulp): " + env);
+console.log("Environment (specify with NODE_ENV or --env when calling gulp): " + env);
 
 var tsProject = typescript.createProject('tsconfig.json');
 

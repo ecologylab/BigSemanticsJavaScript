@@ -100,7 +100,7 @@ export class ServiceRepoLoader implements RepoLoader {
       this.repoMan = new RepoMan();
     }
 
-    return this.serviceHelper.callJSONService('repository.json').then(result => {
+    return this.serviceHelper.callJSONService('mmdrepository.json').then(result => {
       if (!result.repository) {
         throw new Error("Missing repository in server response");
       }
@@ -118,6 +118,7 @@ export class ServiceRepoLoader implements RepoLoader {
       return this.repoMan.onReadyP();
     }).catch(err => {
       this.repoMan.setError(err);
+      throw new Error(`Failed to load repository with base ${this.options.serviceBase}`);
     });
   }
 }
