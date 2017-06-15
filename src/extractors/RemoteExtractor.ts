@@ -7,7 +7,7 @@ import {
   HttpResponse,
   MetaMetadata,
   TypedMetadata,
-} from '../core/types.d';
+} from '../core/types';
 import { PreFilter } from '../core/FieldOps';
 import { ExtractionOptions, Extractor } from '../core/Extractor';
 import { BigSemantics } from '../core/BigSemantics';

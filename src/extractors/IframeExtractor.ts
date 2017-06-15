@@ -7,7 +7,7 @@ import {
   HttpResponse,
   MetaMetadata,
   TypedMetadata,
-} from '../core/types.d';
+} from '../core/types';
 import { BigSemantics } from '../core/BigSemantics';
 import {
   RemoteExtractor,

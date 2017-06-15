@@ -8,7 +8,7 @@ import {
   HttpResponse,
   MetaMetadata,
   TypedMetadata,
-} from '../core/types.d';
+} from '../core/types';
 import { RequestOptions } from '../core/Downloader';
 import ServiceHelper from '../downloaders/ServiceHelper';
 import { ExtractionOptions, Extractor } from '../core/Extractor';
