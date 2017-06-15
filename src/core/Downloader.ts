@@ -26,7 +26,7 @@ export interface DownloaderOptions {
  */
 export interface RequestOptions {
   userAgent?: string;
-  responseType?: string;
+  responseType?: XMLHttpRequestResponseType;
   response?: HttpResponse;
   acceptTypes?: string[];
 }

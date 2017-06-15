@@ -7,7 +7,7 @@ import * as simpl from 'simpl.js';
 import ParsedURL from '../core/ParsedURL';
 import { Repository, TypedRepository, BSResult } from '../core/types';
 import RepoMan, { RepoOptions } from '../core/RepoMan';
-import { Downloader } from '../core/Downloader';
+import { Downloader, RequestOptions } from '../core/Downloader';
 import { RepoLoader } from '../core/RepoLoader';
 import XHRDownloader from './XHRDownloader';
 
@@ -102,7 +102,7 @@ export class RemoteRepoLoader implements RepoLoader {
       requester = new XHRDownloader();
     }
 
-    let opts = {
+    let opts: RequestOptions = {
       responseType: 'json',
     };
     return requester.httpGet(this.options.repositoryUrl, opts).then(resp => {
