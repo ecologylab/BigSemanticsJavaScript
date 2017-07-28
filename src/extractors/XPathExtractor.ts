@@ -454,6 +454,20 @@ export class Extraction {
     return true;
   }
 
+  resolveGeneticTypeName(field: MetaMetadataField, origTypeName: string) {
+    if (!field) return origTypeName;
+    let gtvs: any[] = Array.from(field['generic_type_vars'] || []);
+    gtvs.push(...((field['scope'] || {})['resolved_generic_type_vars'] || []));
+    if (gtvs) {
+      for (let gtv of gtvs) {
+        if (origTypeName === gtv.name) {
+          if (gtv.arg) return gtv.arg;
+        }
+      }
+    }
+    return origTypeName;
+  }
+
   /**
    * Extract a composite value.
    *
@@ -519,7 +533,8 @@ export class Extraction {
 
       // step 2: extract nested fields using the newly created local scope
       if (localScope.value) {
-        (localScope.value as Metadata).mm_name = field.type || field.name;
+        let mm_name = this.resolveGeneticTypeName(field, field.type || field.name);
+        (localScope.value as Metadata).mm_name = mm_name;
         let kids = field.kids || [];
         /* FIXME (solution to the inherited xpath issue)
         // if we only allow authored kids to be extracted, filter `kids`.
@@ -605,7 +620,7 @@ export class Extraction {
           localScopei.collectionIndex = i+1;
           localScopei.node = localScope.nodes[i];
           localScopei.value = {
-            mm_name: surrogateComposite.type || surrogateComposite.name,
+            mm_name: this.resolveGeneticTypeName(surrogateComposite, surrogateComposite.type || surrogateComposite.name),
           };
           promises.push(this.extractFields(surrogateComposite.kids, localScopei, localScopei.value as Metadata));
         }
