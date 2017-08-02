@@ -281,6 +281,7 @@ export class Extraction {
           }
           let absoluteUrl = new URL(val, this.location.toString());
           result = absoluteUrl.toString();
+          result = this.bigsemanticsApi.normalizeLocation(result);
           break;
         case 'Int':
         case 'Integer':
@@ -393,11 +394,16 @@ export class Extraction {
       // TODO step 3: apply field ops
 
       if (value && value.length > 0) {
-        let typed = [];
+        let promises = [];
         for (let i in value) {
-          typed.push(this.toTypedScalar(value[i], field.child_scalar_type));
+          let result = this.toTypedScalar(value[i], field.child_scalar_type);
+          if (result.then) {
+            promises.push(result);
+          } else {
+            promises.push(Promise.resolve(result));
+          }
         }
-        return value;
+        return Promise.all(promises);
       }
       return null;
     }).catch(err => {
@@ -417,7 +423,7 @@ export class Extraction {
     if (srcField) {
       let f = targetField;
       while (f) {
-        f = this.unwrapField(f);
+        f = this.unwrapField(f as any);
         if (srcField.name !== f.name) return false;
         if (srcField === f) return true;
         f = f.super_field;
@@ -771,8 +777,8 @@ export class Extraction {
       }
 
       // topological sort
-      let visited: {[fieldName: string]: TypedMetaMetadataField} = {}; // name => boolean; used for DFS
-      let marked: {[fieldName: string]: TypedMetaMetadataField} = {}; // name => boolean; used to detect cyclic dependencies.
+      let visited = {}; // name => boolean; used for DFS
+      let marked = {}; // name => boolean; used to detect cyclic dependencies.
       for (let field of fieldList) {
         let name = this.unwrapField(field).name;
         if (!(name in visited)) {
@@ -796,8 +802,8 @@ export class Extraction {
    */
   visitDependency(fieldMap: {[fieldName: string]: TypedMetaMetadataField},
                   fieldName: string,
-                  visited: {[fieldName: string]: TypedMetaMetadataField},
-                  marked: {[fieldName: string]: TypedMetaMetadataField},
+                  visited: {[fieldName: string]: boolean},
+                  marked: {[fieldName: string]: boolean},
                   result: TypedMetaMetadataField[]): void {
     if (fieldName in marked) {
       // console.warn("Cyclic dependency among fields detected in %O", fieldMap);
