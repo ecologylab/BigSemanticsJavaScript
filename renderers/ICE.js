@@ -592,6 +592,12 @@ else
 	});
 }
 
+function trackUpdateCallback(event)
+{
+	var update = event.detail.update;
+	TwitterRenderer.renderUpdate(update.url, update.mmd, update.metadata);
+}
+
 if (isExtension)
 {
 	chrome.runtime.onMessage.addListener(
@@ -605,6 +611,10 @@ if (isExtension)
 													request.update.metadata);
 		}
 	});
+}
+else
+{
+	document.addEventListener('trackUpdate', trackUpdateCallback);
 }
 
 function updateIconsPath(imgDir)

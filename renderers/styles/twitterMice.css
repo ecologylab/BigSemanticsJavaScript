@@ -1,3 +1,4 @@
+
 .twMetadataContainer {
 
     font-size: 13px;
@@ -6,7 +7,9 @@
 	border-top-right-radius: 8px;
 	border-bottom-right-radius: 8px;
 	border-bottom-left-radius: 8px;
-	width: 550px;
+	width: 600px;
+	max-height: 600px;
+	overflow-y: scroll;
 	
 	line-height: 15px;
 	
@@ -444,6 +447,17 @@
 	width: 16px;
 	height: 16px;
 	padding: 2px 0px 1px 1px;
+}
+
+.twMetadataContainer img.tweetStreamIcon {
+	width: 16px;
+	height: 16px;
+	float: right;
+	display: inline;
+}
+
+.twMetadataContainer img.tweetStreamIcon:hover {
+	cursor: pointer;
 }
 
 /*.semanticsBgDiv {
