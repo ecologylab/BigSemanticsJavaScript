@@ -38,7 +38,16 @@ gulp.task('bundle', [ 'compile' ], function() {
     standalone: 'bigsemantics',
     debug: isDev,
   }).transform('babelify', {
-    presets: [ 'es2015' ],
+    presets: [
+      [
+        'env',
+        {
+          targets: {
+            browsers: 'last 2 Chrome versions'
+          }
+        }
+      ]
+    ],
   }).bundle().pipe(source(bundleFileName)).pipe(buffer());
   if (!isDev) {
     stream = stream.pipe(sourcemaps.init({

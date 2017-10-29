@@ -409,6 +409,7 @@ export class Extraction {
     }).catch(err => {
       console.warn("Failed to extract scalar collection field " + field.name);
       console.warn(err);
+      return null;
     });
   }
 
@@ -570,6 +571,7 @@ export class Extraction {
     }).catch(err => {
       console.warn("Failed to extract composite field " + field.name);
       console.warn(err);
+      return null;
     });
   }
 
@@ -645,6 +647,7 @@ export class Extraction {
     }).catch(err => {
       console.warn("Failed to extract composite collection field " + field.name);
       console.warn(err);
+      return null;
     });
   }
 

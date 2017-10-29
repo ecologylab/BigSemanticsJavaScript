@@ -457,7 +457,6 @@ export class RepoMan extends Readyable implements RepoManService {
 
     while (stack.length > 0) {
       let obj = stack.pop();
-      let visited = [];
 
       // somethings we push in strings and the like
       if (typeof obj !== "object") {

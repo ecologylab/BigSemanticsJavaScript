@@ -140,6 +140,7 @@ export class RemoteRepoLoader implements RepoLoader {
       return this.repoMan.onReadyP();
     }).catch(err => {
       this.repoMan.setError(err);
+      return null;
     });
   }
 }
