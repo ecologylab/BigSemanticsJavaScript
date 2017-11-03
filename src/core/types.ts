@@ -178,6 +178,7 @@ export interface SelectorParam {
   value?: string;
   value_is_not?: string;
   allow_empty_value?: boolean;
+  must_not_valued?: boolean;
 }
 
 export interface Selector {

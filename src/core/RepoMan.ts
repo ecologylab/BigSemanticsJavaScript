@@ -318,6 +318,11 @@ export class RepoMan extends Readyable implements RepoManService {
             return false;
           }
         }
+        if (spec.must_not_valued) {
+          if (valstr.length > 0) {
+            return false;
+          }
+        }
       }
     }
     return true;
