@@ -13,6 +13,8 @@ var RepoMan = (function() {
   // loaded multiple times at first
   var loadInterval;
 
+  var REPO_SOURCE = "http://ecologylab.net/research/metaMetadata/post-inheritance-repository.json";
+
   // Constructor of RepoMan
   // object source: indicating where to load the repo. required.
   // object options: optional configurations.
@@ -41,7 +43,9 @@ var RepoMan = (function() {
       throw new Error("source required!");
     }
 
-    repoman.source = source;
+    //repoman.source = source;
+    repoman.source = REPO_SOURCE;
+
     if (options && options.defaultDocumentType) {
       repoman.defaultDocumentType = options.defaultDocumentType;
     }
