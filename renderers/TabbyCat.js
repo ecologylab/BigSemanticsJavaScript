@@ -156,11 +156,16 @@ var TabbyCat = {
 
 		var row = "<div class='"+styleInfo.row+"'>";
 
-		row += "<div class='"+styleInfo.fieldLabel+"'>"+label+"</div>";
-
-		// if something>???, just render the title of the composite
-		if(true)
+		if((field.name == "main_image" || field.name == "image") && field.value && field.value[0] && field.value[0].value) // do something special for composite images
 		{
+			row += "<img src='"+field.value[0].value+"' class='"+styleInfo.subImage+"'/>";
+
+		}
+		// if something>???, just render the title of the composite
+		else
+		{
+			row += "<div class='"+styleInfo.fieldLabel+"'>"+label+"</div>";
+
 			var title = this.getField("title", field.value);
 			if(title != null)
 			{
@@ -177,6 +182,7 @@ var TabbyCat = {
 				row += "</div>";
 			}
 		}
+		/*
 		else
 		{
 			for(var i = 0; i < field.value.value.length; i++)
@@ -185,6 +191,7 @@ var TabbyCat = {
 				row += this.buildField(field.value.value[i], styleInfo);
 			}
 		}
+		*/
 
 		row += "</div>";
 
