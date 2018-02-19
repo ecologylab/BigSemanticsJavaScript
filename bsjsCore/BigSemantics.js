@@ -91,11 +91,14 @@ var BigSemantics = (function() {
         return;
       }
 
+      // removing service extraction - nic 2/12/18
+      /*
       if (mmd.extract_with == "service"){
         options.useHttps = (window.location.protocol == 'https:'); //use Https if we are on an https page
         that.bss.loadMetadata(location, options, callback);
       }
-      else if (options.page && that.extractor) {
+      else */
+      if (options.page && that.extractor) {
         // we already have the DOM
         var response = {
           location: location,
