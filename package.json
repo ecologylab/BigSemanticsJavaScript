@@ -1,12 +1,14 @@
 {
   "name": "bigsemantics-core.js",
-  "version": "3.0.8",
+  "version": "3.0.9",
   "description": "The core JavaScript library of BigSemantics.",
   "main": "build/bigsemantics-core.js",
   "types": "build/bigsemantics-core.d.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "tsc && webpack"
+    "dev": "tsc && webpack --mode development",
+    "build": "tsc && webpack --mode production",
+    "clean": "rm -rf build"
   },
   "repository": {
     "type": "git",
@@ -28,11 +30,11 @@
     "@types/filesystem": "^0.0.28",
     "@types/filewriter": "^0.0.28",
     "bluebird": "^3.5.1",
-    "simpl.js": "^0.1.5"
+    "simpl.js": "^0.1.6"
   },
   "devDependencies": {
     "source-map-loader": "^0.2.3",
     "typescript": "^2.3.4",
-    "webpack": "^3.8.1"
+    "webpack": "^4.5.0"
   }
 }
