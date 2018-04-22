@@ -1,6 +1,6 @@
 {
   "name": "bigsemantics-core.js",
-  "version": "3.0.9",
+  "version": "3.0.10",
   "description": "The core JavaScript library of BigSemantics.",
   "main": "build/bigsemantics-core.js",
   "types": "build/bigsemantics-core.d.ts",
@@ -25,12 +25,12 @@
   },
   "homepage": "https://github.com/ecologylab/BigSemanticsJavaScript#readme",
   "dependencies": {
-    "@types/bluebird": "^3.5.5",
-    "@types/chrome": "^0.0.51",
+    "@types/bluebird": "^3.5.20",
+    "@types/chrome": "^0.0.64",
     "@types/filesystem": "^0.0.28",
     "@types/filewriter": "^0.0.28",
     "bluebird": "^3.5.1",
-    "simpl.js": "^0.1.9"
+    "simpl.js": "^0.1.10"
   },
   "devDependencies": {
     "source-map-loader": "^0.2.3",
