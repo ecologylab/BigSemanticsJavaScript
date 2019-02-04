@@ -81,6 +81,24 @@ export class RepoMan extends Readyable implements RepoManService {
     }
   }
 
+  private static cloneWithAltProtocol(selector: Selector, field: string): Selector {
+    function clone(selector: Selector): Selector {
+      return JSON.parse(JSON.stringify(selector)) as Selector;
+    }
+    function switchProtocol(selector: Selector): void {
+      if (selector[field]) {
+        if (selector[field].startsWith('http://')) {
+          selector[field] = selector[field].replace(/^http:\/\//, 'https://');
+        } else if (selector[field].startsWith('https://')) {
+          selector[field] = selector[field].replace(/^https:\/\//, 'http://');
+        }
+      }
+    }
+    let altSelector = clone(selector);
+    switchProtocol(altSelector);
+    return altSelector;
+  }
+
   /**
    * Helper function for adding a <url_stripped> selector.
    *
@@ -99,6 +117,8 @@ export class RepoMan extends Readyable implements RepoManService {
     }
     selector.url_stripped = removeLast(selector.url_stripped, '?');
     RepoMan.addToSelectorMap(selectorMap, selector.url_stripped, selector);
+    let altSelector = RepoMan.cloneWithAltProtocol(selector, 'url_stripped');
+    RepoMan.addToSelectorMap(selectorMap, altSelector.url_stripped, altSelector);
   }
 
   /**
@@ -116,6 +136,8 @@ export class RepoMan extends Readyable implements RepoManService {
       console.warn("WARN: Missing domain: ", selector);
     } else {
       RepoMan.addToSelectorMap(selectorMap, domain, selector);
+      let altSelector = RepoMan.cloneWithAltProtocol(selector, 'url_path_tree');
+      RepoMan.addToSelectorMap(selectorMap, domain, altSelector);
     }
   }
 
