@@ -1,6 +1,6 @@
 var TabbyCat = {
 
-	buildMetadataDisplay: function(metadataFields, styleInfo)
+	buildMetadataDisplay: function(metadataFields, styleInfo, type="")
 	{
 		console.log(metadataFields);
 		var html = "<div class='"+styleInfo.metadataContainer+"'>";
@@ -20,6 +20,9 @@ var TabbyCat = {
 			titleRow += "<a href='"+title.navigatesTo+"' target='_blank' class='"+styleInfo.title+"'>";
 			titleRow += title.value;
 			titleRow += "</a>";
+
+			// add metadata-type
+			titleRow += "<div class='tabby-sub-title'>"+type+"</div>";
 
 			titleRow += "</div>";
 

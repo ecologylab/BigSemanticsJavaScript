@@ -7,11 +7,22 @@
 	padding: 12px;
     width: 100%;
     display: table;
-    margin-bottom: 8px;
+    margin-bottom: 0px;
 }
 
 .tabby-title {
 	font-size: 18px;
+}
+
+.tabby-sub-title {
+    font-size: 12px;
+    margin-top: 6px;
+    color: #5a5a5a;
+    background: #efefef;
+    border-radius: 10px;
+    /* padding: 4px; */
+    padding: 4px 9px;
+    width: fit-content;
 }
 
 .tabby-image-row {
