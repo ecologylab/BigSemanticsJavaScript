@@ -18,6 +18,7 @@ export interface ServiceRepoLoaderOptions {
   appVer?: string;
 
   serviceBase: string | ParsedURL;
+  repoFileName?: string;
 
   repoOptions?: RepoOptions;
 
@@ -100,7 +101,15 @@ export class ServiceRepoLoader implements RepoLoader {
       this.repoMan = new RepoMan();
     }
 
-    return this.serviceHelper.callJSONService('mmdrepository.json').then(result => {
+    let filename = 'mmdrepository.json';
+    if (this.options.repoFileName) {
+      filename = this.options.repoFileName;
+    }
+
+    return this.serviceHelper.callJSONService(filename).then(result => {
+      if (result['meta_metadata_repository']) {
+        result.repository = result['meta_metadata_repository']
+      }
       if (!result.repository) {
         throw new Error("Missing repository in server response");
       }
